@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unify — Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --fd:'Playfair Display',serif;--fb:'DM Sans',sans-serif;
+  --bg:#f7f6f2;--surface:#fff;--surface2:#f0efe9;--border:#e4e2da;
+  --text:#0d0d0d;--text2:#4a4a4a;--text3:#999;
+  --green:#4ade80;--gbg:rgba(74,222,128,.1);
+}
+[data-theme="dark"]{
+  --bg:#0e0e0e;--surface:#181818;--surface2:#222;--border:#2c2c2c;
+  --text:#f0efeb;--text2:#aaa;--text3:#555;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:14px;transition:background .25s,color .25s;}
+nav{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100;}
+.nav-logo{font-family:var(--fd);font-weight:900;font-size:20px;letter-spacing:-1px;text-decoration:none;color:var(--text);}
+.nav-links{display:flex;height:100%;}
+.nl{display:flex;align-items:center;padding:0 14px;font-size:13px;font-weight:500;color:var(--text3);text-decoration:none;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;}
+.nl:hover{color:var(--text);}
+.nl.on{color:var(--text);border-bottom-color:var(--text);}
+.nav-r{display:flex;gap:8px;align-items:center;}
+.nbtn{background:none;border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:12px;cursor:pointer;color:var(--text3);font-family:var(--fb);transition:all .15s;}
+.nbtn:hover{border-color:var(--text);color:var(--text);}
+.ld{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:999;}
+.ld-logo{font-family:var(--fd);font-size:28px;font-weight:900;letter-spacing:-1px;}
+.ld-sub{font-size:12px;color:var(--text3);}
+.page{max-width:620px;margin:0 auto;padding:40px 20px 100px;}
+
+/* HEADER */
+.profile-header{display:flex;align-items:flex-start;gap:32px;margin-bottom:28px;}
+.av{width:86px;height:86px;border-radius:50%;background:var(--text);color:var(--bg);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:32px;font-weight:900;flex-shrink:0;transition:background .25s,color .25s;}
+.profile-info{flex:1;min-width:0;}
+.profile-name-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
+.profile-name{font-size:20px;font-weight:600;letter-spacing:-.3px;}
+.btn-edit{padding:6px 14px;border:1px solid var(--border);border-radius:8px;background:none;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--fb);color:var(--text);transition:all .15s;}
+.btn-edit:hover{background:var(--surface2);}
+.profile-stats{display:flex;gap:20px;margin-bottom:12px;}
+.pstat-n{font-size:16px;font-weight:700;}
+.pstat-l{font-size:12px;color:var(--text3);}
+.profile-headline{font-size:13px;font-weight:500;margin-bottom:4px;}
+.profile-bio{font-size:13px;color:var(--text2);line-height:1.65;margin-bottom:6px;}
+.profile-bio.empty{color:var(--text3);font-style:italic;}
+.profile-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.ptag{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);color:var(--text2);}
+.ptag.collab{border-color:var(--green);color:#16a34a;background:var(--gbg);}
+[data-theme="dark"] .ptag.collab{color:var(--green);}
+.hdiv{border:none;border-top:1px solid var(--border);margin-bottom:0;}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:0;}
+.tab{flex:1;display:flex;align-items:center;justify-content:center;padding:12px 0;font-size:12px;font-weight:500;color:var(--text3);border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;font-family:var(--fb);transition:all .15s;letter-spacing:.8px;text-transform:uppercase;}
+.tab:hover{color:var(--text);}
+.tab.on{color:var(--text);border-bottom-color:var(--text);}
+.pane{display:none;padding-top:24px;}
+.pane.on{display:block;animation:fadeUp .2s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* COMPOSER */
+.composer-box{border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px;background:var(--surface);}
+.composer-top{display:flex;gap:12px;margin-bottom:12px;}
+.c-av{width:32px;height:32px;border-radius:50%;background:var(--text);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;font-family:var(--fd);}
+.c-input{flex:1;border:none;background:none;font-family:var(--fb);font-size:14px;color:var(--text);resize:none;outline:none;min-height:52px;line-height:1.6;}
+.c-input::placeholder{color:var(--text3);}
+.composer-foot{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);padding-top:12px;}
+.c-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.c-tag{font-size:11px;background:var(--surface2);color:var(--text3);border-radius:20px;padding:4px 11px;cursor:pointer;border:1px solid transparent;font-family:var(--fb);transition:all .15s;}
+.c-tag:hover{color:var(--text);}
+.c-tag.on{background:var(--text);color:var(--bg);}
+.post-btn{padding:7px 18px;background:var(--text);color:var(--bg);border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--fb);}
+.post-btn:hover{opacity:.75;}
+
+/* POST CARD */
+.post-card{border-bottom:1px solid var(--border);padding:20px 0;}
+.pc-meta{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.pc-av{width:30px;height:30px;border-radius:50%;background:var(--text);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;font-family:var(--fd);}
+.pc-name{font-size:13px;font-weight:600;}
+.pc-info{font-size:11px;color:var(--text3);margin-top:1px;}
+.pc-time{margin-left:auto;font-size:11px;color:var(--text3);}
+.pc-tag{display:inline-block;font-size:10px;letter-spacing:.8px;text-transform:uppercase;background:var(--surface2);color:var(--text3);padding:2px 9px;border-radius:4px;margin-bottom:8px;}
+.pc-content{font-size:14px;line-height:1.7;color:var(--text);margin-bottom:10px;white-space:pre-wrap;}
+.pc-collabs{font-size:12px;color:var(--text3);margin-bottom:10px;}
+.pc-collabs a{color:var(--text3);text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
+.pc-collabs a:hover{color:var(--text);}
+.pc-actions{display:flex;gap:16px;align-items:center;}
+.pc-action{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text3);cursor:pointer;background:none;border:none;font-family:var(--fb);transition:color .15s;padding:0;}
+.pc-action:hover,.pc-action.liked{color:var(--text);}
+.pc-del{margin-left:auto;font-size:11px;color:var(--text3);cursor:pointer;background:none;border:none;font-family:var(--fb);}
+.pc-del:hover{color:#ef4444;}
+
+/* COMMENTS */
+.comments-wrap{margin-top:12px;border-top:1px solid var(--border);padding-top:12px;display:none;}
+.comments-wrap.open{display:block;}
+.comment-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+.comment{display:flex;gap:8px;}
+.cm-av{width:24px;height:24px;border-radius:50%;background:var(--text);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;font-family:var(--fd);}
+.cm-bubble{background:var(--surface2);border-radius:10px;padding:7px 11px;flex:1;}
+.cm-author{font-size:11px;font-weight:600;margin-bottom:2px;}
+.cm-text{font-size:12px;color:var(--text2);line-height:1.5;}
+.cm-composer{display:flex;gap:8px;align-items:center;}
+.cm-input{flex:1;border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-family:var(--fb);font-size:12px;background:var(--bg);color:var(--text);outline:none;transition:border-color .15s;}
+.cm-input:focus{border-color:var(--text);}
+.cm-send{padding:6px 14px;background:#4ade80;color:#0a0a0a;border:none;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--fb);}
+
+/* WORK TAB */
+.work-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.work-header-sub{font-size:13px;color:var(--text3);}
+.add-btn{padding:7px 14px;border:1px solid var(--border);border-radius:8px;background:none;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--fb);color:var(--text2);transition:all .15s;}
+.add-btn:hover{border-color:var(--text);color:var(--text);}
+.work-empty{text-align:center;padding:48px 0;color:var(--text3);font-size:13px;line-height:1.8;}
+.work-form{border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;background:var(--surface);display:none;}
+.work-form.on{display:block;}
+.work-card{border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:12px;background:var(--surface);}
+.wc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px;}
+.wc-title{font-family:var(--fd);font-size:16px;font-weight:700;letter-spacing:-.3px;}
+.wc-status{font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0;}
+.wc-done{background:var(--gbg);color:#16a34a;}
+[data-theme="dark"] .wc-done{color:var(--green);}
+.wc-wip{background:rgba(245,200,66,.1);color:#b45309;}
+[data-theme="dark"] .wc-wip{color:#f5c842;}
+.wc-idea{background:var(--surface2);color:var(--text3);}
+.wc-desc{font-size:13px;color:var(--text2);line-height:1.65;margin-bottom:10px;}
+.wc-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.wc-tag{font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);color:var(--text3);}
+.wc-collabs{font-size:12px;color:var(--text3);margin-bottom:8px;}
+.wc-collabs a{color:var(--text3);text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
+.wc-collabs a:hover{color:var(--text);}
+.wc-del{background:none;border:none;font-size:11px;color:var(--text3);cursor:pointer;font-family:var(--fb);}
+.wc-del:hover{color:#ef4444;}
+
+/* ABOUT TAB */
+.about-section{margin-bottom:24px;}
+.about-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;display:block;}
+.about-bio{font-size:14px;color:var(--text2);line-height:1.75;}
+.about-bio.empty{color:var(--text3);font-style:italic;}
+.interest-list{display:flex;flex-wrap:wrap;gap:8px;}
+.interest{font-size:12px;padding:5px 14px;border-radius:20px;border:1px solid var(--border);color:var(--text2);}
+.about-links{display:flex;flex-direction:column;gap:8px;}
+.about-link{font-size:13px;color:var(--text2);text-decoration:none;}
+.about-link:hover{color:var(--text);}
+.about-divider{height:1px;background:var(--border);margin:20px 0;}
+
+/* DRAWER */
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;}
+.drawer-overlay.on{display:block;}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:400px;background:var(--surface);z-index:201;transform:translateX(100%);transition:transform .3s ease;overflow-y:auto;padding:28px;}
+.drawer.on{transform:translateX(0);}
+.drawer-title{font-family:var(--fd);font-size:18px;font-weight:700;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;}
+.drawer-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--text3);line-height:1;}
+.drawer-close:hover{color:var(--text);}
+.fg{margin-bottom:14px;}
+.fl{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:5px;}
+.fi{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:var(--fb);font-size:13px;outline:none;background:var(--bg);color:var(--text);transition:border-color .15s;}
+.fi:focus{border-color:var(--text);}
+.fta{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:var(--fb);font-size:13px;resize:none;outline:none;min-height:80px;line-height:1.6;color:var(--text);background:var(--bg);transition:border-color .15s;}
+.fta:focus{border-color:var(--text);}
+.fs{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:var(--fb);font-size:13px;outline:none;background:var(--bg);color:var(--text);cursor:pointer;}
+.drawer-actions{display:flex;gap:10px;margin-top:20px;}
+.fsub{padding:9px 22px;background:var(--text);color:var(--bg);border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--fb);}
+.fcan{padding:9px 16px;background:none;border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;font-family:var(--fb);color:var(--text3);}
+
+.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:10px 22px;border-radius:30px;font-size:13px;opacity:0;transition:all .3s;pointer-events:none;z-index:300;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@media(max-width:600px){
+  nav{padding:0 16px;}
+  .page{padding:24px 16px 80px;}
+  .profile-header{gap:20px;}
+  .av{width:68px;height:68px;font-size:26px;}
+  .drawer{width:100%;}
+}
+</style>
+</head>
+<body>
+<div class="ld" id="loadingOverlay">
+  <div class="ld-logo">Unify</div>
+  <div class="ld-sub">Loading…</div>
+</div>
+
+<nav>
+  <a href="dashboard.html" class="nav-logo">Unify</a>
+  <div class="nav-links">
+    <a href="dashboard.html" class="nl">Dashboard</a>
+    <a href="timetable.html" class="nl">Timetable</a>
+    <a href="careers.html" class="nl">Career</a>
+    <a href="profile.html" class="nl on">Profile</a>
+  </div>
+  <div class="nav-r">
+    <button class="nbtn" onclick="toggleTheme()" id="themeToggle">Dark mode</button>
+    <button class="nbtn" id="signOutBtn">Sign out</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="profile-header">
+    <div class="av" id="heroAvatar">U</div>
+    <div class="profile-info">
+      <div class="profile-name-row">
+        <div class="profile-name" id="heroName">—</div>
+        <button class="btn-edit" onclick="openDrawer()">Edit profile</button>
+      </div>
+      <div class="profile-stats">
+        <div class="pstat"><div class="pstat-n" id="statPosts">0</div><div class="pstat-l">posts</div></div>
+        <div class="pstat"><div class="pstat-n" id="statWork">0</div><div class="pstat-l">projects</div></div>
+        <div class="pstat"><div class="pstat-n" id="statCollabs">0</div><div class="pstat-l">collabs</div></div>
+      </div>
+      <div class="profile-headline" id="heroHeadline" style="display:none"></div>
+      <div class="profile-bio empty" id="heroBio">What are you building?</div>
+      <div class="profile-tags" id="heroTags"></div>
+    </div>
+  </div>
+
+  <hr class="hdiv">
+
+  <div class="tabs">
+    <button class="tab on" onclick="switchTab('posts',this)">Posts</button>
+    <button class="tab" onclick="switchTab('work',this)">Work</button>
+    <button class="tab" onclick="switchTab('about',this)">About</button>
+  </div>
+
+  <!-- POSTS -->
+  <div class="pane on" id="pane-posts">
+    <div class="composer-box">
+      <div class="composer-top">
+        <div class="c-av" id="composerAv">U</div>
+        <textarea class="c-input" id="postInput" placeholder="Share what you're working on…" rows="2"></textarea>
+      </div>
+      <div class="composer-foot">
+        <div class="c-tags">
+          <button class="c-tag" onclick="toggleCTag(this,'Project')">Project</button>
+          <button class="c-tag" onclick="toggleCTag(this,'Win')">Win</button>
+          <button class="c-tag" onclick="toggleCTag(this,'Idea')">Idea</button>
+          <button class="c-tag" onclick="toggleCTag(this,'Question')">Question</button>
+        </div>
+        <button class="post-btn" onclick="submitPost()">Post</button>
+      </div>
+    </div>
+    <div id="postsFeed"></div>
+  </div>
+
+  <!-- WORK -->
+  <div class="pane" id="pane-work">
+    <div class="work-header">
+      <span class="work-header-sub">Things you've built or are building.</span>
+      <button class="add-btn" onclick="openWorkForm()">+ Add project</button>
+    </div>
+    <div class="work-form" id="workForm">
+      <div class="fg"><label class="fl">Project name</label><input class="fi" id="wName" placeholder="e.g. Soil Moisture Monitor"></div>
+      <div class="fg"><label class="fl">What is it?</label><textarea class="fta" id="wDesc" rows="3" placeholder="Describe it briefly…"></textarea></div>
+      <div class="fg"><label class="fl">Status</label>
+        <select class="fs" id="wStatus">
+          <option value="wip">In progress</option>
+          <option value="done">Completed</option>
+          <option value="idea">Idea</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Skills / tags (comma separated)</label><input class="fi" id="wTags" placeholder="e.g. Arduino, Python, IoT"></div>
+      <div class="fg"><label class="fl">Collaborators (comma separated)</label><input class="fi" id="wCollabs" placeholder="e.g. Temi A., Kola B."></div>
+      <div class="drawer-actions">
+        <button class="fsub" onclick="saveWork()">Save</button>
+        <button class="fcan" onclick="closeWorkForm()">Cancel</button>
+      </div>
+    </div>
+    <div id="workList"></div>
+  </div>
+
+  <!-- ABOUT -->
+  <div class="pane" id="pane-about">
+    <div class="about-section">
+      <span class="about-label">Bio</span>
+      <p class="about-bio empty" id="aboutBio">No bio yet.</p>
+    </div>
+    <div class="about-divider"></div>
+    <div class="about-section">
+      <span class="about-label">Focus areas</span>
+      <div class="interest-list" id="aboutInterests"><span style="font-size:12px;color:var(--text3)">Nothing added yet.</span></div>
+    </div>
+    <div class="about-divider"></div>
+    <div class="about-section">
+      <span class="about-label">Links</span>
+      <div class="about-links" id="aboutLinks"><span style="font-size:12px;color:var(--text3)">No links added.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-title">Edit profile <button class="drawer-close" onclick="closeDrawer()">×</button></div>
+  <div class="fg"><label class="fl">Name</label><input class="fi" id="dName"></div>
+  <div class="fg"><label class="fl">Headline</label><input class="fi" id="dHeadline" placeholder="e.g. Building in ECE · Open to collab"></div>
+  <div class="fg"><label class="fl">Bio</label><textarea class="fta" id="dBio" rows="4" placeholder="What are you working on?"></textarea></div>
+  <div class="fg"><label class="fl">Focus areas (comma separated)</label><input class="fi" id="dInterests" placeholder="e.g. Embedded Systems, IoT, ML"></div>
+  <div class="fg"><label class="fl">GitHub / Portfolio</label><input class="fi" id="dLink1" placeholder="https://github.com/..."></div>
+  <div class="fg"><label class="fl">LinkedIn (optional)</label><input class="fi" id="dLink2" placeholder="https://linkedin.com/in/..."></div>
+  <div class="fg" style="display:flex;align-items:center;gap:10px;">
+    <input type="checkbox" id="dCollab" style="width:16px;height:16px;cursor:pointer;">
+    <label for="dCollab" style="font-size:13px;cursor:pointer;">Open to collaborate</label>
+  </div>
+  <div class="drawer-actions">
+    <button class="fsub" onclick="saveProfile()">Save</button>
+    <button class="fcan" onclick="closeDrawer()">Cancel</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut, updateProfile as fbUp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, where, orderBy, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig={apiKey:"AIzaSyBjZyfNNpXZFJwB7GKXVeSzLTVknfwCa8I",authDomain:"unify-b4316.firebaseapp.com",projectId:"unify-b4316",storageBucket:"unify-b4316.firebasestorage.app",messagingSenderId:"114594366615",appId:"1:114594366615:web:44ef821b4618f1a24615d2",measurementId:"G-MY2M1R6DJV"};
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
+let currentUser=null,profile={},posts=[],works=[],activePostTag=null;
+
+function initTheme(){const s=localStorage.getItem('unify-theme');applyTheme(s||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));}
+function applyTheme(t){document.documentElement.setAttribute('data-theme',t);const b=document.getElementById('themeToggle');if(b)b.textContent=t==='dark'?'Light mode':'Dark mode';}
+window.toggleTheme=()=>{const c=document.documentElement.getAttribute('data-theme');const n=c==='dark'?'light':'dark';localStorage.setItem('unify-theme',n);applyTheme(n);};
+initTheme();
+
+onAuthStateChanged(auth,async user=>{
+  if(!user){window.location.href='auth.html';return;}
+  currentUser=user;
+  const init=(user.displayName||user.email||'U')[0].toUpperCase();
+  document.getElementById('heroAvatar').textContent=init;
+  document.getElementById('composerAv').textContent=init;
+  await loadProfile();
+  await Promise.all([loadPosts(),loadWorks()]);
+  document.getElementById('loadingOverlay').style.display='none';
+});
+document.getElementById('signOutBtn').addEventListener('click',async()=>{await signOut(auth);window.location.href='auth.html';});
+
+async function loadProfile(){
+  try{const snap=await getDoc(doc(db,'users',currentUser.uid));if(snap.exists())profile=snap.data();}catch(e){profile={};}
+  renderProfile();
+}
+
+function renderProfile(){
+  const name=profile.firstName||currentUser.displayName||currentUser.email?.split('@')[0]||'Builder';
+  document.getElementById('heroName').textContent=name;
+  document.getElementById('heroAvatar').textContent=name[0].toUpperCase();
+  document.getElementById('composerAv').textContent=name[0].toUpperCase();
+
+  const hl=document.getElementById('heroHeadline');
+  if(profile.headline){hl.textContent=profile.headline;hl.style.display='block';}else{hl.style.display='none';}
+
+  const bio=document.getElementById('heroBio');
+  if(profile.bio){bio.textContent=profile.bio;bio.classList.remove('empty');}
+  else{bio.textContent='What are you building?';bio.classList.add('empty');}
+
+  const tags=document.getElementById('heroTags');
+  tags.innerHTML='';
+  if(profile.department){const t=document.createElement('span');t.className='ptag';t.textContent=`${profile.level||''} · ${profile.department}`;tags.appendChild(t);}
+  if(profile.university){const t=document.createElement('span');t.className='ptag';t.textContent=profile.university;tags.appendChild(t);}
+  if(profile.openToCollab){const t=document.createElement('span');t.className='ptag collab';t.textContent='Open to collab';tags.appendChild(t);}
+
+  const ab=document.getElementById('aboutBio');
+  if(profile.bio){ab.textContent=profile.bio;ab.classList.remove('empty');}
+
+  const int=document.getElementById('aboutInterests');
+  if(profile.interests?.length){int.innerHTML=profile.interests.map(i=>`<span class="interest">${i}</span>`).join('');}
+
+  const lnk=document.getElementById('aboutLinks');
+  const links=[];
+  if(profile.link1)links.push(`<a class="about-link" href="${profile.link1}" target="_blank">↗ ${profile.link1.replace(/https?:\/\//,'')}</a>`);
+  if(profile.link2)links.push(`<a class="about-link" href="${profile.link2}" target="_blank">↗ ${profile.link2.replace(/https?:\/\//,'')}</a>`);
+  if(links.length)lnk.innerHTML=links.join('');
+}
+
+async function loadPosts(){
+  try{
+    const q=query(collection(db,'profile_posts'),where('authorId','==',currentUser.uid),orderBy('createdAt','desc'));
+    const snap=await getDocs(q);
+    posts=snap.docs.map(d=>({id:d.id,...d.data()}));
+  }catch(e){
+    posts=JSON.parse(localStorage.getItem('unify-myposts-'+currentUser.uid)||'[]');
+  }
+  renderPosts();updateStats();
+}
+
+function renderPosts(){
+  const feed=document.getElementById('postsFeed');
+  if(!posts.length){feed.innerHTML=`<div style="text-align:center;padding:48px 0;color:var(--text3);font-size:13px;line-height:1.8">Nothing here yet.<br>Share what you're working on.</div>`;return;}
+  feed.innerHTML=posts.map(p=>postCardHTML(p)).join('');
+}
+
+function postCardHTML(p){
+  const init=(p.author||'U')[0].toUpperCase();
+  const ts=p.createdAt?.seconds||p._ts||Date.now()/1000;
+  const collabHTML=p.collaborators?.length?`<div class="pc-collabs">with ${p.collaborators.map(c=>`<a onclick="showToast('${c}')">${c}</a>`).join(', ')}</div>`:'';
+  const liked=p.likes?.includes(currentUser?.uid);
+  return `<div class="post-card" id="pc-${p.id}">
+    <div class="pc-meta">
+      <div class="pc-av">${init}</div>
+      <div><div class="pc-name">${p.author||'You'}</div><div class="pc-info">${[p.dept,p.university].filter(Boolean).join(' · ')}</div></div>
+      <div class="pc-time">${timeAgo(ts)}</div>
+    </div>
+    ${p.tag?`<span class="pc-tag">${p.tag}</span>`:''}
+    <div class="pc-content">${p.content}</div>
+    ${collabHTML}
+    <div class="pc-actions">
+      <button class="pc-action ${liked?'liked':''}" onclick="likePost('${p.id}')">♡ ${p.likes?.length||0}</button>
+      <button class="pc-action" onclick="toggleComments('${p.id}')">${p.comments?.length||0} comments</button>
+      <button class="pc-del" onclick="deletePost('${p.id}')">Delete</button>
+    </div>
+    <div class="comments-wrap" id="cw-${p.id}">
+      <div class="comment-list" id="cl-${p.id}">
+        ${(p.comments||[]).map(c=>`<div class="comment"><div class="cm-av">${(c.author||'?')[0].toUpperCase()}</div><div class="cm-bubble"><div class="cm-author">${c.author}</div><div class="cm-text">${c.text}</div></div></div>`).join('')}
+      </div>
+      <div class="cm-composer">
+        <div class="cm-av">${(currentUser.displayName||'U')[0].toUpperCase()}</div>
+        <input class="cm-input" id="ci-${p.id}" placeholder="Add a comment…" onkeydown="if(event.key==='Enter')addComment('${p.id}')">
+        <button class="cm-send" onclick="addComment('${p.id}')">Post</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function loadWorks(){
+  try{
+    const q=query(collection(db,'works'),where('authorId','==',currentUser.uid),orderBy('createdAt','desc'));
+    const snap=await getDocs(q);
+    works=snap.docs.map(d=>({id:d.id,...d.data()}));
+  }catch(e){
+    works=JSON.parse(localStorage.getItem('unify-works-'+currentUser.uid)||'[]');
+  }
+  renderWorks();updateStats();
+}
+
+function renderWorks(){
+  const list=document.getElementById('workList');
+  if(!works.length){list.innerHTML=`<div class="work-empty">No projects yet.<br>Add what you're building — tag collaborators to give them credit.</div>`;return;}
+  const sc={wip:'wc-wip',done:'wc-done',idea:'wc-idea'};
+  const sl={wip:'In progress',done:'Completed',idea:'Idea'};
+  list.innerHTML=works.map(w=>`<div class="work-card">
+    <div class="wc-top"><div class="wc-title">${w.name}</div><span class="wc-status ${sc[w.status]||'wc-idea'}">${sl[w.status]||w.status}</span></div>
+    <div class="wc-desc">${w.desc}</div>
+    ${w.tags?.length?`<div class="wc-tags">${w.tags.map(t=>`<span class="wc-tag">${t}</span>`).join('')}</div>`:''}
+    ${w.collaborators?.length?`<div class="wc-collabs">with ${w.collaborators.map(c=>`<a onclick="showToast('${c}')">${c}</a>`).join(', ')}</div>`:''}
+    <button class="wc-del" onclick="deleteWork('${w.id}')">Remove ×</button>
+  </div>`).join('');
+}
+
+function updateStats(){
+  document.getElementById('statPosts').textContent=posts.length;
+  document.getElementById('statWork').textContent=works.length;
+  document.getElementById('statCollabs').textContent=works.filter(w=>w.collaborators?.length>0).length;
+}
+
+window.toggleCTag=function(el,tag){
+  document.querySelectorAll('.c-tag').forEach(t=>t.classList.remove('on'));
+  if(activePostTag===tag){activePostTag=null;}else{el.classList.add('on');activePostTag=tag;}
+};
+
+window.submitPost=async function(){
+  const content=document.getElementById('postInput').value.trim();
+  if(!content)return;
+  const name=profile.firstName||currentUser.displayName||currentUser.email?.split('@')[0]||'Builder';
+  const postData={authorId:currentUser.uid,author:name,dept:profile.department||'',university:profile.university||'',content,tag:activePostTag||null,collaborators:[],likes:[],comments:[],createdAt:{seconds:Date.now()/1000}};
+  try{
+    const ref=await addDoc(collection(db,'profile_posts'),{...postData,createdAt:new Date()});
+    posts.unshift({id:ref.id,...postData});
+  }catch(e){posts.unshift({id:'local_'+Date.now(),...postData});}
+  try{const key='unify-myposts-'+currentUser.uid;const ex=JSON.parse(localStorage.getItem(key)||'[]');ex.unshift({...posts[0],_ts:Date.now()/1000,_type:'post'});localStorage.setItem(key,JSON.stringify(ex.slice(0,50)));}catch(e){}
+  document.getElementById('postInput').value='';
+  document.querySelectorAll('.c-tag').forEach(t=>t.classList.remove('on'));
+  activePostTag=null;
+  renderPosts();updateStats();showToast('Posted.');
+};
+
+window.deletePost=async function(id){
+  if(!confirm('Delete this post?'))return;
+  posts=posts.filter(p=>p.id!==id);
+  if(!id.startsWith('local_')){try{await deleteDoc(doc(db,'profile_posts',id));}catch(e){}}
+  renderPosts();updateStats();
+};
+
+window.likePost=function(id){
+  const p=posts.find(x=>x.id===id);if(!p)return;
+  const uid=currentUser.uid;
+  p.likes=p.likes?.includes(uid)?p.likes.filter(x=>x!==uid):[...(p.likes||[]),uid];
+  renderPosts();
+};
+
+window.toggleComments=function(id){const cw=document.getElementById('cw-'+id);if(cw)cw.classList.toggle('open');};
+
+window.addComment=async function(id){
+  const input=document.getElementById('ci-'+id);
+  const text=input?.value.trim();if(!text)return;
+  const name=profile.firstName||currentUser.displayName||'Builder';
+  const p=posts.find(x=>x.id===id);if(!p)return;
+  if(!p.comments)p.comments=[];
+  p.comments.push({author:name,text});
+  input.value='';
+  renderPosts();
+  setTimeout(()=>{const cw=document.getElementById('cw-'+id);if(cw)cw.classList.add('open');},10);
+};
+
+window.openWorkForm=()=>document.getElementById('workForm').classList.add('on');
+window.closeWorkForm=()=>document.getElementById('workForm').classList.remove('on');
+
+window.saveWork=async function(){
+  const name=document.getElementById('wName').value.trim();
+  const desc=document.getElementById('wDesc').value.trim();
+  if(!name||!desc){showToast('Name and description required.');return;}
+  const tags=document.getElementById('wTags').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const collaborators=document.getElementById('wCollabs').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const status=document.getElementById('wStatus').value;
+  const data={authorId:currentUser.uid,name,desc,tags,collaborators,status,createdAt:{seconds:Date.now()/1000}};
+  try{const ref=await addDoc(collection(db,'works'),{...data,createdAt:new Date()});works.unshift({id:ref.id,...data});}
+  catch(e){works.unshift({id:'local_'+Date.now(),...data});}
+  ['wName','wDesc','wTags','wCollabs'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('wStatus').value='wip';
+  closeWorkForm();renderWorks();updateStats();showToast('Project saved.');
+};
+
+window.deleteWork=async function(id){
+  if(!confirm('Remove this project?'))return;
+  works=works.filter(w=>w.id!==id);
+  if(!id.startsWith('local_')){try{await deleteDoc(doc(db,'works',id));}catch(e){}}
+  renderWorks();updateStats();
+};
+
+window.openDrawer=function(){
+  document.getElementById('dName').value=profile.firstName||currentUser.displayName||'';
+  document.getElementById('dHeadline').value=profile.headline||'';
+  document.getElementById('dBio').value=profile.bio||'';
+  document.getElementById('dInterests').value=(profile.interests||[]).join(', ');
+  document.getElementById('dLink1').value=profile.link1||'';
+  document.getElementById('dLink2').value=profile.link2||'';
+  document.getElementById('dCollab').checked=!!profile.openToCollab;
+  document.getElementById('drawer').classList.add('on');
+  document.getElementById('drawerOverlay').classList.add('on');
+};
+window.closeDrawer=function(){
+  document.getElementById('drawer').classList.remove('on');
+  document.getElementById('drawerOverlay').classList.remove('on');
+};
+
+window.saveProfile=async function(){
+  const firstName=document.getElementById('dName').value.trim();
+  const interests=document.getElementById('dInterests').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const updated={...profile,firstName,headline:document.getElementById('dHeadline').value.trim(),bio:document.getElementById('dBio').value.trim(),interests,link1:document.getElementById('dLink1').value.trim(),link2:document.getElementById('dLink2').value.trim(),openToCollab:document.getElementById('dCollab').checked};
+  try{
+    await setDoc(doc(db,'users',currentUser.uid),updated,{merge:true});
+    if(firstName)await fbUp(auth.currentUser,{displayName:firstName});
+    profile=updated;renderProfile();closeDrawer();showToast('Saved.');
+  }catch(e){showToast('Error saving.');}
+};
+
+window.switchTab=function(tab,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('pane-'+tab).classList.add('on');
+};
+
+function timeAgo(ts){
+  const s=Math.floor(Date.now()/1000-ts);
+  if(s<60)return'just now';
+  if(s<3600)return Math.floor(s/60)+'m ago';
+  if(s<86400)return Math.floor(s/3600)+'h ago';
+  return Math.floor(s/86400)+'d ago';
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+window.showToast=showToast;
+</script>
+</body>
+</html>

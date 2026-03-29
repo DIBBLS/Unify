@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unify — Career</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f4f0;--surface:#ffffff;--surface2:#f8f7f3;--border:#e0deda;
+  --text:#0a0a0a;--text2:#555;--text3:#999;
+  --tag-bg:#f0efeb;--tag-color:#888;
+  --invert-bg:#0a0a0a;--invert-text:#f5f4f0;
+  --green:#4ade80;--green-deep:#16a34a;--green-bg:#dcfce7;--green-border:#bbf7d0;
+  --font-display:'Playfair Display',serif;--font-body:'DM Sans',sans-serif;
+  /* aliases for careers components */
+  --black:var(--text);--white:var(--bg);--grey:var(--border);--mid:var(--text3);
+}
+[data-theme="dark"]{
+  --bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;
+  --text:#f0efeb;--text2:#aaa;--text3:#666;
+  --tag-bg:#2a2a2a;--tag-color:#aaa;
+  --invert-bg:#f0efeb;--invert-text:#0a0a0a;
+  --green-bg:#14532d;--green-border:#166534;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;overflow-x:hidden;transition:background .25s,color .25s}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 48px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100;height:60px;transition:background .25s,border-color .25s}
+.nav-logo{font-family:var(--font-display);font-weight:900;font-size:20px;letter-spacing:-1px;text-decoration:none;color:var(--text)}
+.nav-links{display:flex;gap:0;height:100%}
+.nav-links a{display:flex;align-items:center;padding:0 16px;text-decoration:none;color:var(--text3);font-size:13px;font-weight:500;border-bottom:2px solid transparent;transition:all .15s}
+.nav-links a:hover{color:var(--text)}
+.nav-links a.active{color:var(--green-deep);border-bottom-color:var(--green);}
+.theme-toggle{background:none;border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:12px;cursor:pointer;color:var(--text3);font-family:var(--font-body);transition:all .15s}
+.theme-toggle:hover{border-color:var(--text);color:var(--text)}
+
+/* HERO */
+.hero{padding:72px 48px 56px;border-bottom:1px solid var(--grey);display:grid;grid-template-columns:1fr auto;align-items:end;gap:40px}
+.hero-eyebrow{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--text3);margin-bottom:14px}
+.hero-title{font-family:var(--font-display);font-size:clamp(44px,5.5vw,76px);font-weight:900;letter-spacing:-2.5px;line-height:1.02;margin-bottom:18px}
+.hero-title em{font-style:italic}
+.hero-sub{font-size:15px;color:var(--text3);font-weight:300;line-height:1.75;max-width:500px}
+.hero-stat-block{text-align:right}
+.hero-stat{font-family:var(--font-display);font-size:72px;font-weight:900;letter-spacing:-4px;line-height:1;color:var(--green)}
+.hero-stat-lbl{font-size:11px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-top:6px}
+
+/* SECTION LABEL */
+.section-label{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--green-deep);font-weight:600}
+.section-title{font-family:var(--font-display);font-size:clamp(26px,3vw,38px);font-weight:900;letter-spacing:-1px;margin-top:10px}
+.section-sub{font-size:13px;color:var(--text3);margin-top:6px}
+
+/* MATCH SECTION */
+.match-section{padding:56px 48px;border-bottom:1px solid var(--grey)}
+.match-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:36px}
+
+.login-nudge{border:1px solid var(--border);border-radius:12px;padding:48px;text-align:center;max-width:500px;margin:0 auto}
+.nudge-icon{font-size:40px;margin-bottom:14px}
+.nudge-title{font-family:var(--font-display);font-size:24px;font-weight:700;margin-bottom:10px}
+.nudge-sub{font-size:13px;color:var(--text3);line-height:1.7;margin-bottom:22px}
+.nudge-btn{display:inline-block;background:var(--green);color:#0a0a0a;padding:11px 26px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;transition:opacity .2s}
+.nudge-btn:hover{opacity:.85}
+
+.match-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.match-card{border:1px solid var(--border);border-radius:12px;padding:24px;cursor:pointer;transition:all .2s;background:var(--bg)}
+.match-card:hover{border-color:var(--text);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.08)}
+.mc-dept{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.mc-title{font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:-.3px;line-height:1.2;margin-bottom:16px}
+.mc-pct-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.mc-pct{font-family:var(--font-display);font-size:36px;font-weight:900;letter-spacing:-1px;line-height:1}
+.mc-pct.high{color:#16a34a}.mc-pct.mid{color:#d97706}.mc-pct.low{color:#dc2626}
+.mc-bar-track{flex:1;height:4px;background:var(--grey);border-radius:2px;overflow:hidden}
+.mc-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
+.mc-gap-label{font-size:12px;color:var(--text3);margin-bottom:8px}
+.mc-gap-pills{display:flex;flex-wrap:wrap;gap:6px}
+.mc-gap-pill{font-size:10px;padding:3px 9px;border:1px solid var(--border);border-radius:12px;color:var(--text3)}
+
+/* GAP SECTION */
+.gap-section{padding:56px 48px;border-bottom:1px solid var(--grey);background:var(--surface2)}
+.gap-inner{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;margin-top:32px}
+.gap-search{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:13px;background:var(--bg);color:var(--text);margin-bottom:12px;outline:none;transition:border-color .2s}
+.gap-search:focus{border-color:var(--text)}
+.gap-role-list{display:flex;flex-direction:column;gap:6px;max-height:420px;overflow-y:auto}
+.gap-role-item{padding:11px 16px;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:space-between;background:var(--bg)}
+.gap-role-item:hover,.gap-role-item.active{border-color:var(--green);background:var(--green);color:#0a0a0a;}
+.gap-role-name{font-size:13px;font-weight:500}
+.gap-role-pct{font-size:12px;opacity:.6}
+.gap-panel{border:1px solid var(--border);border-radius:12px;padding:32px;background:var(--bg);min-height:200px}
+.gap-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;height:180px;color:var(--text3);text-align:center;gap:10px}
+.gap-placeholder-icon{font-size:32px}
+.gap-placeholder-text{font-size:13px;line-height:1.6}
+.gap-role-title{font-family:var(--font-display);font-size:26px;font-weight:900;letter-spacing:-.5px;margin-bottom:6px}
+.gap-role-dept{font-size:12px;color:var(--text3);margin-bottom:24px}
+.gap-score-big{font-family:var(--font-display);font-size:64px;font-weight:900;letter-spacing:-3px;line-height:1;margin-bottom:4px}
+.gap-score-big.high{color:#16a34a}.gap-score-big.mid{color:#d97706}.gap-score-big.low{color:#dc2626}
+.gap-score-lbl{font-size:12px;color:var(--text3);margin-bottom:24px}
+.gap-cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.gap-col-head{font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+.gap-col-head.have{color:#16a34a}.gap-col-head.need{color:var(--text3)}
+.gap-skill-wrap{display:flex;flex-direction:column;gap:6px}
+.gap-skill{font-size:12px;padding:6px 12px;border-radius:6px;font-weight:500}
+.gap-skill.have{background:var(--green-bg);color:var(--green-deep);border:1px solid var(--green-border)}
+
+.gap-skill.need{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+.gap-skill-none{font-size:12px;color:var(--text3);font-style:italic}
+.gap-view-btn{margin-top:24px;padding:10px 20px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;background:var(--bg);color:var(--text);font-family:var(--font-body);transition:all .2s;width:100%}
+.gap-view-btn:hover{background:var(--green);color:#0a0a0a;border-color:var(--green)}
+
+/* OPP SECTION */
+.opp-section{padding:56px 48px;border-bottom:1px solid var(--grey)}
+.opp-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:16px}
+.opp-filters{display:flex;gap:8px;flex-wrap:wrap}
+.opp-filter{padding:7px 16px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;background:var(--bg);color:var(--text3);font-family:var(--font-body);transition:all .15s}
+.opp-filter:hover{border-color:var(--text);color:var(--text)}
+.opp-filter.active{background:var(--green);color:#0a0a0a;border-color:var(--green);font-weight:600}
+.opp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.opp-card{border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:all .2s;background:var(--bg)}
+.opp-card:hover{border-color:var(--text);box-shadow:0 4px 24px rgba(0,0,0,.08)}
+.opp-card-inner{display:flex}
+.opp-accent{width:4px;flex-shrink:0}
+.opp-accent.internship{background:#4ade80}
+.opp-accent.entry{background:var(--text)}
+.opp-accent.remote{background:#60a5fa}
+.opp-body{padding:20px 24px;flex:1}
+.opp-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:12px}
+.opp-company{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.opp-role{font-family:var(--font-display);font-size:18px;font-weight:700;letter-spacing:-.2px;line-height:1.2}
+.opp-badge{font-size:10px;padding:4px 10px;border-radius:12px;font-weight:600;flex-shrink:0;white-space:nowrap}
+.opp-badge.internship{background:#dcfce7;color:#15803d}
+.opp-badge.entry{background:#f3f4f6;color:#374151}
+[data-theme="dark"] .opp-badge.entry{background:#1f2937;color:#d1d5db}
+.opp-badge.remote{background:#dbeafe;color:#1d4ed8}
+[data-theme="dark"] .opp-badge.remote{background:#1e3a5f;color:#93c5fd}
+.opp-meta{display:flex;gap:16px;font-size:12px;color:var(--text3)}
+.opp-apply{display:inline-block;margin-top:14px;font-size:12px;font-weight:600;color:var(--green-deep);text-decoration:none;border-bottom:1px solid var(--green);padding-bottom:1px;transition:opacity .2s;cursor:pointer}
+.opp-apply:hover{opacity:.6}
+.opp-coming{border:1px dashed var(--grey);border-radius:12px;padding:36px;text-align:center;margin-top:16px}
+.opp-coming-text{font-size:13px;color:var(--text3);margin-bottom:16px}
+.notify-btn{background:var(--green);color:#0a0a0a;border:none;padding:10px 24px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:opacity .2s}
+.notify-btn:hover{opacity:.85}
+
+/* PATHS SECTION */
+.paths-section{padding:56px 48px}
+.paths-top{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:20px}
+.search-box{display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:8px;padding:8px 14px;background:var(--bg);transition:border-color .2s}
+.search-box:focus-within{border-color:var(--text)}
+.search-box input{border:none;background:none;font-family:var(--font-body);font-size:13px;color:var(--text);outline:none;width:180px}
+.search-box input::placeholder{color:var(--text3)}
+.dept-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:40px}
+.dpill{padding:7px 16px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;background:var(--bg);color:var(--text3);font-family:var(--font-body);transition:all .15s}
+.dpill:hover{border-color:var(--text);color:var(--text)}
+.dpill.on{background:var(--green);color:#0a0a0a;border-color:var(--green);font-weight:600}
+
+.dept-block{display:none;margin-bottom:64px;animation:fadeUp .3s ease}
+.dept-block.show{display:block}
+.dept-name{font-family:var(--font-display);font-size:clamp(26px,3vw,40px);font-weight:900;letter-spacing:-1.5px;line-height:1.05;margin-bottom:4px}
+.dept-name em{font-style:italic}
+.dept-meta{font-size:12px;color:var(--text3);margin-bottom:20px}
+.sector-tabs{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap}
+.stab{padding:7px 16px;border:1px solid var(--border);border-radius:4px;font-size:12px;font-weight:500;cursor:pointer;background:var(--bg);color:var(--text3);font-family:var(--font-body);transition:all .15s}
+.stab:hover{border-color:var(--text);color:var(--text)}
+.stab.on{background:var(--green);color:#0a0a0a;border-color:var(--green);font-weight:600}
+
+.roles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.role-card{border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;background:var(--bg)}
+.role-card:hover{border-color:var(--text);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.08)}
+.role-scene{position:relative;height:110px;overflow:hidden}
+.scene-bg{position:absolute;inset:0}
+.match-score{position:absolute;top:12px;right:12px;font-size:10px;font-weight:700;padding:4px 10px;border-radius:12px;letter-spacing:.5px}
+.ms-high{background:#4ade80;color:#14532d}
+.ms-mid{background:#fbbf24;color:#78350f}
+.ms-low{background:#f87171;color:#7f1d1d}
+.scene-content{position:absolute;bottom:12px;left:16px;display:flex;align-items:center;gap:8px}
+.scene-icon{font-size:20px}
+.scene-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(240,239,235,.4)}
+.role-body{padding:18px 20px}
+.role-sector{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.role-title{font-family:var(--font-display);font-size:18px;font-weight:700;letter-spacing:-.2px;line-height:1.2;margin-bottom:12px}
+.salary-row{display:flex;align-items:center;gap:6px;font-size:12px;margin-bottom:10px}
+.sal-jr{color:var(--text3)}.sal-arr{color:var(--grey)}.sal-sr{font-weight:600;color:var(--text)}
+.role-skills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.rsk{font-size:10px;padding:3px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text3)}
+.gap-bar-wrap{display:none}.gap-bar-wrap.show{display:block}
+.gap-bar-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:4px}
+.gap-bar-track{height:3px;background:var(--grey);border-radius:2px;overflow:hidden}
+.gap-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
+.empty{padding:48px;text-align:center}
+.empty-ico{font-size:32px;margin-bottom:10px}
+.empty-txt{font-size:13px;color:var(--text3)}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px)}
+.overlay.show{display:flex;animation:fadeIn .2s ease}
+.modal{background:var(--bg);border-radius:14px;max-width:740px;width:100%;max-height:88vh;overflow-y:auto;position:relative;animation:slideUp .25s ease}
+.modal-close-bar{position:sticky;top:0;background:var(--bg);padding:18px 24px 0;display:flex;justify-content:space-between;align-items:center;z-index:10}
+.modal-saved-badge{font-size:11px;background:var(--text);color:var(--bg);padding:4px 10px;border-radius:12px;display:none}
+.modal-saved-badge.show{display:inline-block}
+.modal-close-btn{background:none;border:1px solid var(--border);border-radius:4px;padding:6px 14px;font-size:12px;cursor:pointer;color:var(--text3);font-family:var(--font-body);transition:all .15s}
+.modal-close-btn:hover{border-color:var(--text);color:var(--text)}
+.modal-body{padding:8px 32px 40px}
+.modal-eyebrow{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.modal-title{font-family:var(--font-display);font-size:clamp(28px,4vw,40px);font-weight:900;letter-spacing:-1px;line-height:1.1;margin-bottom:16px}
+.save-btn{padding:8px 20px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;background:var(--bg);color:var(--text);font-family:var(--font-body);transition:all .2s;margin-bottom:28px}
+.save-btn.saved{background:var(--green);color:#0a0a0a;border-color:var(--green);font-weight:600}
+.modal-gap{background:var(--surface2);border-radius:10px;padding:24px;margin-bottom:24px;display:none}
+.modal-gap.show{display:block}
+.modal-gap-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:14px}
+.modal-gap-pct{font-family:var(--font-display);font-size:48px;font-weight:900;letter-spacing:-2px;line-height:1;margin-bottom:4px}
+.modal-gap-pct.high{color:#16a34a}.modal-gap-pct.mid{color:#d97706}.modal-gap-pct.low{color:#dc2626}
+.modal-gap-sub{font-size:12px;color:var(--text3);margin-bottom:20px}
+.modal-gap-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.mgc-head{font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.mgc-head.have{color:#16a34a}.mgc-head.need{color:var(--text3)}
+.mgc-skills{display:flex;flex-direction:column;gap:5px}
+.mgc-skill{font-size:12px;padding:5px 10px;border-radius:5px;font-weight:500}
+.mgc-skill.have{background:var(--green-bg);color:var(--green-deep)}
+
+.mgc-skill.need{background:var(--bg);border:1px solid var(--border);color:var(--text3)}
+.ms{margin-bottom:28px}
+.ms-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding-bottom:8px;border-bottom:1px solid var(--grey);margin-bottom:14px}
+.skills-cloud{display:flex;flex-wrap:wrap;gap:8px}
+.skill-badge{padding:6px 14px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500}
+.roadmap-list{list-style:none}
+.roadmap-item{display:flex;gap:16px;padding:12px 0;border-bottom:1px solid var(--grey)}
+.roadmap-item:last-child{border-bottom:none}
+.roadmap-yr{font-family:var(--font-display);font-size:13px;font-weight:700;min-width:52px}
+.roadmap-desc{font-size:13px;color:var(--text3);line-height:1.6}
+.salary-table{width:100%;border-collapse:collapse;font-size:13px}
+.salary-table th{text-align:left;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);padding:8px 12px;background:var(--surface2)}
+.salary-table td{padding:12px;border-bottom:1px solid var(--grey)}
+.salary-table tr:last-child td{border-bottom:none}
+.sal-amt{font-weight:600;font-family:var(--font-display);font-size:15px}
+.cos-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.co-group-title{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.co-list{display:flex;flex-direction:column;gap:6px}
+.co-item{padding:8px 14px;background:var(--surface2);border-radius:6px;font-size:13px;font-weight:500;border:1px solid var(--border)}
+
+/* SAVED */
+.saved-bar{position:fixed;bottom:24px;right:24px;z-index:150}
+.saved-panel{position:absolute;bottom:56px;right:0;background:var(--bg);border:1px solid var(--border);border-radius:12px;width:300px;max-height:380px;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.15);display:none;animation:slideUp .2s ease}
+.saved-panel.show{display:block}
+.saved-panel-hd{padding:16px 20px;border-bottom:1px solid var(--grey);font-family:var(--font-display);font-size:16px;font-weight:700}
+.saved-empty{padding:32px 20px;text-align:center;font-size:13px;color:var(--text3)}
+.saved-entry{padding:12px 20px;border-bottom:1px solid var(--grey);display:flex;align-items:center;justify-content:space-between}
+.saved-entry:last-child{border-bottom:none}
+.se-title{font-size:13px;font-weight:500}
+.se-dept{font-size:11px;color:var(--text3);margin-top:2px}
+.se-rm{background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:0 4px;line-height:1}
+.se-rm:hover{color:var(--text)}
+.saved-pill{background:var(--text);color:var(--bg);padding:12px 20px;border-radius:30px;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.25);transition:all .15s;border:none;font-family:var(--font-body)}
+.saved-pill:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.3)}
+.saved-count{background:var(--bg);color:var(--text);width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:10px 24px;border-radius:30px;font-size:13px;opacity:0;transition:all .3s;pointer-events:none;z-index:300;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* DEEP-DIVE MODAL */
+.md-scene{position:relative;height:200px;border-radius:10px;overflow:hidden;margin-bottom:32px;display:flex;align-items:flex-end;}
+.md-scene-bg{position:absolute;inset:0;background:linear-gradient(135deg,#0a0a0a 0%,#1a1a1a 100%);}
+.md-scene-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.8) 0%,rgba(0,0,0,.1) 100%);}
+.md-scene-content{position:relative;z-index:1;padding:24px;}
+.md-scene-tag{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px;}
+.md-scene-title{font-family:var(--font-display);font-size:clamp(22px,3vw,32px);font-weight:900;color:#fff;letter-spacing:-1px;line-height:1.1;}
+.md-block{margin-bottom:36px;}
+.md-label{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--text3);font-weight:600;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.md-who{font-size:14px;line-height:1.85;color:var(--text2);}
+.md-day-list{list-style:none;display:flex;flex-direction:column;gap:0;}
+.md-day-item{display:flex;gap:20px;padding:12px 0;border-bottom:1px solid var(--border);}
+.md-day-item:last-child{border-bottom:none;}
+.md-day-time{font-size:11px;font-weight:600;color:var(--text3);min-width:60px;padding-top:2px;letter-spacing:.5px;}
+.md-day-act{font-size:13px;color:var(--text);line-height:1.6;}
+.md-skills-list{display:flex;flex-direction:column;gap:10px;}
+.md-skill-row{display:flex;align-items:flex-start;gap:14px;padding:12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);}
+.md-skill-name{font-size:13px;font-weight:600;min-width:150px;flex-shrink:0;}
+.md-skill-why{font-size:12px;color:var(--text3);line-height:1.6;}
+.md-cos-list{display:flex;flex-direction:column;gap:12px;}
+.md-co-row{border:1px solid var(--border);border-radius:8px;padding:16px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;background:var(--surface);}
+.md-co-name{font-size:14px;font-weight:600;margin-bottom:3px;}
+.md-co-meta{font-size:12px;color:var(--text3);}
+.md-co-tag{font-size:10px;padding:3px 10px;border-radius:12px;background:var(--green-bg);color:var(--green-deep);font-weight:600;white-space:nowrap;flex-shrink:0;}
+.md-people-list{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.md-person{border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--surface);}
+.md-person-name{font-size:13px;font-weight:600;margin-bottom:3px;}
+.md-person-role{font-size:11px;color:var(--green-deep);margin-bottom:6px;}
+.md-person-note{font-size:12px;color:var(--text3);line-height:1.6;}
+.md-salary-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.md-sal-card{border:1px solid var(--border);border-radius:8px;padding:20px;background:var(--surface);}
+.md-sal-region{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
+.md-sal-row{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--border);}
+.md-sal-row:last-child{border-bottom:none;}
+.md-sal-level{font-size:12px;color:var(--text3);}
+.md-sal-amt{font-size:14px;font-weight:700;font-family:var(--font-display);}
+.md-roadmap-list{list-style:none;}
+.md-roadmap-item{display:flex;gap:16px;padding:14px 0;border-bottom:1px solid var(--border);}
+.md-roadmap-item:last-child{border-bottom:none;}
+.md-roadmap-yr{font-family:var(--font-display);font-size:13px;font-weight:700;min-width:60px;padding-top:2px;}
+.md-roadmap-desc{font-size:13px;color:var(--text2);line-height:1.7;}
+@media(max-width:600px){.md-people-list,.md-salary-grid{grid-template-columns:1fr;}.md-skill-name{min-width:120px;}}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:900px){
+  nav{padding:16px 20px}.nav-links{display:none}
+  .hero{padding:48px 20px 40px;grid-template-columns:1fr}.hero-stat-block{text-align:left}
+  .match-section,.gap-section,.opp-section,.paths-section{padding:40px 20px}
+  .match-grid,.opp-grid,.roles-grid{grid-template-columns:1fr}
+  .gap-inner{grid-template-columns:1fr}
+  .modal-body{padding:8px 20px 32px}
+  .cos-grid,.modal-gap-cols,.gap-cols{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .match-grid,.opp-grid,.roles-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Unify</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="dashboard.html#community">Community</a>
+    <a href="careers.html" class="active">Career</a>
+    <a href="profile.html">Profile</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">Dark mode</button>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div>
+    <p class="hero-eyebrow">Career</p>
+    <h1 class="hero-title">Your career,<br>mapped<br><em>clearly.</em></h1>
+    <p class="hero-sub">Explore what engineers actually do, what skills matter, where they work, and how to get there from where you are now.</p>
+  </div>
+  <div class="hero-stat-block">
+    <div class="hero-stat" id="totalRoles">—</div>
+    <div class="hero-stat-lbl">Roles mapped</div>
+  </div>
+</div>
+
+<!-- 01 CAREER MATCH -->
+<div class="paths-section">
+  <div class="paths-top">
+    <div>
+      <span class="section-label">01 — Explore Paths</span>
+      <div class="section-title">Every engineering career, mapped</div>
+    </div>
+    <div class="search-box">
+      <span style="font-size:14px;color:var(--text3)">⌕</span>
+      <input type="text" placeholder="Search roles or skills…" oninput="handleSearch(this.value)">
+    </div>
+  </div>
+  <div class="dept-pills">
+    <button class="dpill on" onclick="filterDept('all',this)">All</button>
+    <button class="dpill" onclick="filterDept('ece',this)">ECE</button>
+    <button class="dpill" onclick="filterDept('mee',this)">Mechanical</button>
+    <button class="dpill" onclick="filterDept('cpe',this)">Chemical &amp; Polymer</button>
+    <button class="dpill" onclick="filterDept('cve',this)">Civil</button>
+    <button class="dpill" onclick="filterDept('ipe',this)">Industrial &amp; Petroleum</button>
+    <button class="dpill" onclick="filterDept('ase',this)">Aerospace</button>
+  </div>
+  <div id="pathsWrap"></div>
+</div>
+
+<div class="gap-section">
+  <span class="section-label">02 — Skills Gap</span>
+  <div class="section-title">What stands between you and that role</div>
+  <div class="section-sub">Pick any role to see exactly what you have and what you need.</div>
+  <div class="gap-inner">
+    <div>
+      <input class="gap-search" id="gapSearch" placeholder="Search roles…" oninput="filterGapList(this.value)">
+      <div class="gap-role-list" id="gapRoleList"></div>
+    </div>
+    <div class="gap-panel" id="gapPanel">
+      <div class="gap-placeholder">
+        
+        <div class="gap-placeholder-text">Select a role on the left<br>to see your skills gap</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 03 OPPORTUNITY BOARD -->
+<div class="match-section">
+  <div class="match-header">
+    <div>
+      <span class="section-label">03 — Best Fit</span>
+      <div class="section-title">Roles that match your skills</div>
+      <div class="section-sub" id="matchSub">Sign in to see how your skills align with every role.</div>
+    </div>
+  </div>
+  <div id="matchContent"></div>
+</div>
+
+<!-- 02 SKILLS GAP -->
+<div class="opp-section">
+  <div class="opp-header">
+    <div>
+      <span class="section-label">04 — Opportunities</span>
+      <div class="section-title">Internships &amp; entry roles</div>
+    </div>
+    <div class="opp-filters">
+      <button class="opp-filter active" onclick="filterOpps('all',this)">All</button>
+      <button class="opp-filter" onclick="filterOpps('internship',this)">Internship</button>
+      <button class="opp-filter" onclick="filterOpps('entry',this)">Entry-level</button>
+      <button class="opp-filter" onclick="filterOpps('remote',this)">Remote</button>
+    </div>
+  </div>
+  <div class="opp-grid" id="oppGrid"></div>
+  <div class="opp-coming">
+    <div class="opp-coming-text">Live listings are coming soon. Get notified when companies post real openings.</div>
+    <button class="notify-btn" onclick="notifyOpps()">Notify me when live →</button>
+  </div>
+</div>
+
+<!-- 04 EXPLORE PATHS -->
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-close-bar">
+      <span class="modal-saved-badge" id="modalSavedBadge">Saved</span>
+      <button class="modal-close-btn" onclick="closeModal()">✕ Close</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- SAVED -->
+<div class="saved-bar">
+  <div class="saved-panel" id="savedPanel">
+    <div class="saved-panel-hd">Saved Roles</div>
+    <div id="savedList"></div>
+  </div>
+  <button class="saved-pill" onclick="toggleSavedPanel()">
+    Saved <span class="saved-count" id="savedCount">0</span>
+  </button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── THEME (outside module so onclick works) ──
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme',theme);
+  const btn=document.getElementById('themeToggle');
+  if(btn)btn.textContent=theme==='dark'?'Light mode':'Dark mode';
+}
+function toggleTheme(){
+  const cur=document.documentElement.getAttribute('data-theme');
+  const next=cur==='dark'?'light':'dark';
+  localStorage.setItem('unify-theme',next);
+  applyTheme(next);
+}
+(function initTheme(){
+  const saved=localStorage.getItem('unify-theme');
+  const prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(saved||(prefersDark?'dark':'light'));
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{
+    if(!localStorage.getItem('unify-theme'))applyTheme(e.matches?'dark':'light');
+  });
+})();
+</script>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import{getFirestore,doc,getDoc}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const cfg={apiKey:"AIzaSyBjZyfNNpXZFJwB7GKXVeSzLTVknfwCa8I",authDomain:"unify-b4316.firebaseapp.com",projectId:"unify-b4316",storageBucket:"unify-b4316.firebasestorage.app",messagingSenderId:"114594366615",appId:"1:114594366615:web:44ef821b4618f1a24615d2",measurementId:"G-MY2M1R6DJV"};
+const app=initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);
+
+let userSkills=[],currentDept='all',searchQ='',activeSectors={},savedRoles=[],selectedGapRole=null,currentOppFilter='all';
+const allRolesFlat=[];
+
+const THEMES={
+  'Telecommunications':{bg:'linear-gradient(135deg,#0a0a0a,#1a1a2e)',ico:'📡',lbl:'Signal & Networks'},
+  'Embedded Systems & Electronics':{bg:'linear-gradient(135deg,#0d1b0f,#1a2e1e)',ico:'⚡',lbl:'Hardware & Firmware'},
+  'AI & Data Science':{bg:'linear-gradient(135deg,#0a0a1e,#1a1a3e)',ico:'🧠',lbl:'Intelligence & Data'},
+  'Power & Energy':{bg:'linear-gradient(135deg,#1a1000,#2e2000)',ico:'🔋',lbl:'Power Systems'},
+  'Automotive & Manufacturing':{bg:'linear-gradient(135deg,#0f0a00,#2e1e00)',ico:'⚙️',lbl:'Design & Production'},
+  'Oil & Gas':{bg:'linear-gradient(135deg,#0a0f0a,#1e2e1e)',ico:'🛢️',lbl:'Energy & Resources'},
+  'Oil, Gas & Petrochemicals':{bg:'linear-gradient(135deg,#0a0a0f,#1e1e2e)',ico:'🔬',lbl:'Process Engineering'},
+  'Infrastructure & Construction':{bg:'linear-gradient(135deg,#0f0f0a,#2e2e1e)',ico:'🏗️',lbl:'Built Environment'},
+  'Industrial Engineering':{bg:'linear-gradient(135deg,#0a0f0f,#1e2e2e)',ico:'📊',lbl:'Systems & Operations'},
+  'Aviation & Aerospace':{bg:'linear-gradient(135deg,#0a0a1e,#1e1e3e)',ico:'✈️',lbl:'Flight & Systems'},
+};
+const getTheme=s=>THEMES[s]||{bg:'linear-gradient(135deg,#0a0a0a,#1e1e1e)',ico:'🔧',lbl:'Engineering'};
+
+const careersData=[
+  {id:"ece",name:"Electronic & Computer Engineering",shortName:"ECE",sectors:[
+    {name:"Telecommunications",roles:[
+      {id:"network-engineer",title:"Network Engineer",skills:["TCP/IP","LTE/5G","SmartLab","MATLAB","Network Troubleshooting","Team Collaboration"],roadmap:[{year:"Year 1",desc:"Python programming, basic networking concepts, digital logic"},{year:"Year 2",desc:"Simulation labs, LAN/WAN projects, Cisco packet tracer"},{year:"Year 3",desc:"LTE/5G projects, internship at MTN, Airtel"},{year:"Year 4",desc:"CCNA certification, network design final year project"}],salaryJuniorNGN:"₦250,000 – ₦350,000/mo",salarySeniorNGN:"₦700,000 – ₦1,200,000/mo",salaryJuniorUSD:"$50,000 – $75,000/yr",salarySeniorUSD:"$100,000 – $160,000/yr",companiesNG:["MTN Nigeria","Airtel Nigeria","Globacom","MainOne","9mobile"],companiesGlobal:["Cisco","Huawei","Ericsson","Nokia","Vodafone"]},
+      {id:"rf-engineer",title:"RF Engineer",skills:["Radio Frequency Planning","Signal Propagation","MATLAB","Network Optimization","Drive Testing"],roadmap:[{year:"Year 1",desc:"Physics fundamentals, signal theory, electronics basics"},{year:"Year 2",desc:"RF lab work, antenna design, propagation modelling"},{year:"Year 3",desc:"Drive test tools, RF optimization, internship"},{year:"Year 4",desc:"RF coverage design project, industry certification"}],salaryJuniorNGN:"₦250,000 – ₦350,000/mo",salarySeniorNGN:"₦700,000 – ₦1,200,000/mo",salaryJuniorUSD:"$55,000 – $80,000/yr",salarySeniorUSD:"$110,000 – $170,000/yr",companiesNG:["MTN Nigeria","Airtel Nigeria","Ericsson Nigeria","Huawei Nigeria"],companiesGlobal:["Ericsson","Nokia","T-Mobile","AT&T","Qualcomm"]},
+      {id:"telecom-analyst",title:"Telecom Systems Analyst",skills:["Systems Analysis","Network Architecture","Data Analysis","Project Management","Documentation"],roadmap:[{year:"Year 1",desc:"Systems thinking, logic design, introductory programming"},{year:"Year 2",desc:"Network architecture study, database basics"},{year:"Year 3",desc:"Internship at telecom firm or regulatory agency"},{year:"Year 4",desc:"Capstone systems analysis project"}],salaryJuniorNGN:"₦200,000 – ₦300,000/mo",salarySeniorNGN:"₦600,000 – ₦1,000,000/mo",salaryJuniorUSD:"$45,000 – $70,000/yr",salarySeniorUSD:"$90,000 – $140,000/yr",companiesNG:["NCC Nigeria","NIGCOMSAT","Galaxy Backbone","Spectranet"],companiesGlobal:["Accenture","Deloitte Tech","IBM","Oracle"]}
+    ]},
+    {name:"Embedded Systems & Electronics",roles:[
+      {id:"embedded-engineer",title:"Embedded Systems Engineer",skills:["C/C++","Microcontrollers (ARM, AVR)","RTOS","PCB Design","Firmware Development","IoT Protocols"],roadmap:[{year:"Year 1",desc:"C programming, digital logic, circuit theory"},{year:"Year 2",desc:"Microcontroller labs, Arduino/STM32 projects"},{year:"Year 3",desc:"RTOS, firmware development, internship"},{year:"Year 4",desc:"Full embedded product for final year project"}],salaryJuniorNGN:"₦200,000 – ₦300,000/mo",salarySeniorNGN:"₦600,000 – ₦1,000,000/mo",salaryJuniorUSD:"$60,000 – $90,000/yr",salarySeniorUSD:"$120,000 – $180,000/yr",companiesNG:["Innoson Group","Zinox Technologies","CWG Plc","Chams Plc"],companiesGlobal:["Texas Instruments","STMicroelectronics","NXP","Bosch","Tesla"]},
+      {id:"iot-engineer",title:"IoT Engineer",skills:["MQTT","Python","AWS IoT / Azure IoT","Sensor Integration","Edge Computing","Cloud Platforms"],roadmap:[{year:"Year 1",desc:"Python basics, electronics, sensor fundamentals"},{year:"Year 2",desc:"Raspberry Pi/Arduino IoT projects, cloud basics"},{year:"Year 3",desc:"Full cloud IoT deployment project, internship"},{year:"Year 4",desc:"End-to-end IoT product for final year"}],salaryJuniorNGN:"₦250,000 – ₦400,000/mo",salarySeniorNGN:"₦700,000 – ₦1,300,000/mo",salaryJuniorUSD:"$65,000 – $95,000/yr",salarySeniorUSD:"$130,000 – $200,000/yr",companiesNG:["Andela","Flutterwave","Interswitch","Sabi"],companiesGlobal:["Amazon","Microsoft","Google","Siemens","Honeywell"]}
+    ]},
+    {name:"AI & Data Science",roles:[
+      {id:"ai-engineer",title:"AI / ML Engineer",skills:["Python","TensorFlow / PyTorch","Machine Learning","Statistics","Data Engineering","Cloud ML"],roadmap:[{year:"Year 1",desc:"Python, linear algebra, statistics fundamentals"},{year:"Year 2",desc:"ML fundamentals, Kaggle competitions, data projects"},{year:"Year 3",desc:"Deep learning, internship at tech or fintech firm"},{year:"Year 4",desc:"AI capstone project or research paper"}],salaryJuniorNGN:"₦300,000 – ₦500,000/mo",salarySeniorNGN:"₦1,000,000+/mo",salaryJuniorUSD:"$80,000 – $120,000/yr",salarySeniorUSD:"$150,000 – $250,000+/yr",companiesNG:["Andela","Interswitch","Cowrywise","Konga","Flutterwave"],companiesGlobal:["Google DeepMind","OpenAI","Microsoft","Meta AI","Amazon"]},
+      {id:"data-analyst",title:"Data Analyst",skills:["SQL","Python / R","Power BI / Tableau","Excel","Statistical Analysis","Data Visualization"],roadmap:[{year:"Year 1",desc:"Excel, basic statistics, Python intro"},{year:"Year 2",desc:"SQL, data visualization tools, business analytics"},{year:"Year 3",desc:"Business analytics internship at bank or fintech"},{year:"Year 4",desc:"Full analytics capstone with real dataset"}],salaryJuniorNGN:"₦200,000 – ₦350,000/mo",salarySeniorNGN:"₦700,000 – ₦1,200,000/mo",salaryJuniorUSD:"$55,000 – $80,000/yr",salarySeniorUSD:"$100,000 – $150,000/yr",companiesNG:["Access Bank","GTBank","MTN","PiggyVest","Paystack"],companiesGlobal:["McKinsey","BCG","Deloitte","Nielsen","Bloomberg"]}
+    ]},
+    {name:"Power & Energy",roles:[
+      {id:"power-engineer",title:"Power Systems Engineer",skills:["Power Electronics","MATLAB / Simulink","Grid Design","Renewable Energy","AutoCAD Electrical"],roadmap:[{year:"Year 1",desc:"Circuit theory, electrical machines, physics"},{year:"Year 2",desc:"Power electronics labs, MATLAB Simulink"},{year:"Year 3",desc:"Grid simulation projects, internship at power utility"},{year:"Year 4",desc:"Renewable energy or smart grid final year project"}],salaryJuniorNGN:"₦200,000 – ₦350,000/mo",salarySeniorNGN:"₦700,000 – ₦1,200,000/mo",salaryJuniorUSD:"$55,000 – $80,000/yr",salarySeniorUSD:"$100,000 – $160,000/yr",companiesNG:["EKEDC","IKEDC","Transcorp Power","Azura Power","NERC"],companiesGlobal:["GE Energy","Siemens Energy","ABB","Schneider Electric","Shell"]}
+    ]}
+  ]},
+  {id:"mee",name:"Mechanical Engineering",shortName:"MEE",sectors:[
+    {name:"Automotive & Manufacturing",roles:[
+      {id:"design-engineer",title:"Design Engineer",skills:["SolidWorks / AutoCAD","FEA Analysis","GD&T","Material Science","Product Development"],roadmap:[{year:"Year 1",desc:"Engineering drawing, CAD basics, mechanics"},{year:"Year 2",desc:"3D modelling, material science projects"},{year:"Year 3",desc:"Industrial internship, advanced CAD/FEA"},{year:"Year 4",desc:"Full product design capstone"}],salaryJuniorNGN:"₦200,000 – ₦320,000/mo",salarySeniorNGN:"₦600,000 – ₦1,100,000/mo",salaryJuniorUSD:"$55,000 – $80,000/yr",salarySeniorUSD:"$100,000 – $160,000/yr",companiesNG:["Innoson Motors","Dangote Group","Julius Berger","PZ Cussons"],companiesGlobal:["Toyota","Ford","BMW","Siemens","GE"]},
+      {id:"production-engineer",title:"Production Engineer",skills:["Lean Manufacturing","Six Sigma","Process Optimization","PLC Programming","Quality Control"],roadmap:[{year:"Year 1",desc:"Manufacturing processes, workshop practice"},{year:"Year 2",desc:"Process engineering, quality management systems"},{year:"Year 3",desc:"Factory internship, lean manufacturing exposure"},{year:"Year 4",desc:"Process optimization final year project"}],salaryJuniorNGN:"₦180,000 – ₦300,000/mo",salarySeniorNGN:"₦600,000 – ₦1,000,000/mo",salaryJuniorUSD:"$50,000 – $75,000/yr",salarySeniorUSD:"$90,000 – $140,000/yr",companiesNG:["Dangote Cement","Nigerian Breweries","Flour Mills Nigeria","Nestle Nigeria"],companiesGlobal:["Procter & Gamble","Unilever","3M","Caterpillar"]}
+    ]},
+    {name:"Oil & Gas",roles:[
+      {id:"mech-oilgas",title:"Mechanical Engineer (Oil & Gas)",skills:["Piping Design","Pressure Vessel Analysis","HYSYS","AutoCAD Plant 3D","ASME Codes"],roadmap:[{year:"Year 1",desc:"Fluid mechanics, thermodynamics, material science"},{year:"Year 2",desc:"Piping design, pressure vessel fundamentals"},{year:"Year 3",desc:"Oil & gas internship (NNPC, Shell, TotalEnergies)"},{year:"Year 4",desc:"Process plant or pipeline design project"}],salaryJuniorNGN:"₦300,000 – ₦500,000/mo",salarySeniorNGN:"₦1,000,000+/mo",salaryJuniorUSD:"$70,000 – $100,000/yr",salarySeniorUSD:"$130,000 – $200,000+/yr",companiesNG:["Shell Nigeria","TotalEnergies Nigeria","NNPC","Seplat Energy","Oando"],companiesGlobal:["Shell","ExxonMobil","Chevron","Halliburton","Schlumberger"]}
+    ]}
+  ]},
+  {id:"cpe",name:"Chemical & Polymer Engineering",shortName:"CPE",sectors:[
+    {name:"Oil, Gas & Petrochemicals",roles:[
+      {id:"process-engineer",title:"Process Engineer",skills:["Aspen HYSYS","Process Simulation","P&ID Reading","Chemical Thermodynamics","Safety Engineering"],roadmap:[{year:"Year 1",desc:"Chemistry, thermodynamics basics, lab safety"},{year:"Year 2",desc:"Process simulation, HYSYS intro, lab work"},{year:"Year 3",desc:"Oil & gas plant internship"},{year:"Year 4",desc:"Full process plant design capstone"}],salaryJuniorNGN:"₦300,000 – ₦500,000/mo",salarySeniorNGN:"₦900,000 – ₦1,500,000/mo",salaryJuniorUSD:"$65,000 – $95,000/yr",salarySeniorUSD:"$120,000 – $200,000/yr",companiesNG:["NLNG","NNPC","Indorama Eleme Petrochemicals","TotalEnergies"],companiesGlobal:["BASF","Dow Chemical","Shell Chemicals","ExxonMobil Chemical"]},
+      {id:"polymer-engineer",title:"Polymer / Materials Engineer",skills:["Polymer Chemistry","Rheology","Material Testing","Product Formulation","Quality Assurance"],roadmap:[{year:"Year 1",desc:"Organic chemistry, polymer science intro"},{year:"Year 2",desc:"Materials characterization, lab testing"},{year:"Year 3",desc:"Manufacturing or plastics industry internship"},{year:"Year 4",desc:"Polymer product development project"}],salaryJuniorNGN:"₦180,000 – ₦300,000/mo",salarySeniorNGN:"₦600,000 – ₦1,000,000/mo",salaryJuniorUSD:"$55,000 – $80,000/yr",salarySeniorUSD:"$100,000 – $150,000/yr",companiesNG:["Dangote Plastics","PZ Industries","Seplat","NLNG"],companiesGlobal:["3M","DuPont","BASF","Dow","Covestro"]}
+    ]}
+  ]},
+  {id:"cve",name:"Civil Engineering",shortName:"CVE",sectors:[
+    {name:"Infrastructure & Construction",roles:[
+      {id:"structural-engineer",title:"Structural Engineer",skills:["AutoCAD","STAAD Pro","Revit","Structural Analysis","Construction Management"],roadmap:[{year:"Year 1",desc:"Engineering drawing, statics, mechanics of materials"},{year:"Year 2",desc:"Structural analysis, CAD software, concrete design"},{year:"Year 3",desc:"Site internship at construction company"},{year:"Year 4",desc:"Structural design capstone (bridge, building)"}],salaryJuniorNGN:"₦200,000 – ₦350,000/mo",salarySeniorNGN:"₦700,000 – ₦1,200,000/mo",salaryJuniorUSD:"$55,000 – $80,000/yr",salarySeniorUSD:"$100,000 – $160,000/yr",companiesNG:["Julius Berger Nigeria","RCC Nigeria","Setraco","Reynolds Construction"],companiesGlobal:["Arup","AECOM","Jacobs Engineering","WSP","Bechtel"]},
+      {id:"geotechnical-engineer",title:"Geotechnical Engineer",skills:["Soil Mechanics","Foundation Design","GIS","Site Investigation","PLAXIS Software"],roadmap:[{year:"Year 1",desc:"Geology basics, soil mechanics intro"},{year:"Year 2",desc:"Foundation engineering, lab soil testing"},{year:"Year 3",desc:"Site investigation internship"},{year:"Year 4",desc:"Geotechnical design or slope stability project"}],salaryJuniorNGN:"₦200,000 – ₦320,000/mo",salarySeniorNGN:"₦650,000 – ₦1,100,000/mo",salaryJuniorUSD:"$55,000 – $80,000/yr",salarySeniorUSD:"$100,000 – $155,000/yr",companiesNG:["Costain WA","Geoservices Nigeria","Fugro Nigeria","FMW Nigeria"],companiesGlobal:["Fugro","WSP","Mott MacDonald","Arcadis"]}
+    ]}
+  ]},
+  {id:"ipe",name:"Industrial & Petroleum Engineering",shortName:"IPE",sectors:[
+    {name:"Oil & Gas",roles:[
+      {id:"petroleum-engineer",title:"Petroleum Engineer",skills:["Reservoir Simulation","Petrel / Eclipse","Well Design","Production Optimization","Petrophysics"],roadmap:[{year:"Year 1",desc:"Geology, reservoir basics, fluid mechanics"},{year:"Year 2",desc:"Drilling engineering, reservoir simulation intro"},{year:"Year 3",desc:"Oil company internship (NNPC, Shell, Chevron)"},{year:"Year 4",desc:"Full reservoir development project"}],salaryJuniorNGN:"₦400,000 – ₦700,000/mo",salarySeniorNGN:"₦1,200,000+/mo",salaryJuniorUSD:"$80,000 – $120,000/yr",salarySeniorUSD:"$150,000 – $250,000+/yr",companiesNG:["Shell Nigeria","Chevron Nigeria","TotalEnergies","Seplat","NNPC"],companiesGlobal:["Shell","ExxonMobil","BP","Chevron","Schlumberger"]}
+    ]},
+    {name:"Industrial Engineering",roles:[
+      {id:"industrial-engineer",title:"Industrial Engineer",skills:["Operations Research","Process Optimization","Lean / Six Sigma","ERP Systems (SAP)","Supply Chain"],roadmap:[{year:"Year 1",desc:"Industrial systems, statistics, operations intro"},{year:"Year 2",desc:"Operations research, simulation software"},{year:"Year 3",desc:"Manufacturing or FMCG internship"},{year:"Year 4",desc:"Supply chain or factory optimization project"}],salaryJuniorNGN:"₦200,000 – ₦350,000/mo",salarySeniorNGN:"₦700,000 – ₦1,200,000/mo",salaryJuniorUSD:"$55,000 – $85,000/yr",salarySeniorUSD:"$100,000 – $160,000/yr",companiesNG:["Dangote Group","Nigerian Breweries","Nestle Nigeria","UAC Nigeria"],companiesGlobal:["GE","Boeing","Amazon Operations","DHL","IBM"]}
+    ]}
+  ]},
+  {id:"ase",name:"Aerospace Engineering",shortName:"ASE",sectors:[
+    {name:"Aviation & Aerospace",roles:[
+      {id:"aerospace-engineer",title:"Aerospace Engineer",skills:["MATLAB / Simulink","CFD (ANSYS Fluent)","Structural Dynamics","Flight Mechanics","Systems Engineering"],roadmap:[{year:"Year 1",desc:"Fluid mechanics, thermodynamics, aerospace intro"},{year:"Year 2",desc:"Aerodynamics, CAD/CFD intro, aircraft structures"},{year:"Year 3",desc:"Aviation company internship (NCAA, Aero Contractors)"},{year:"Year 4",desc:"Aircraft or UAV design final year project"}],salaryJuniorNGN:"₦250,000 – ₦400,000/mo",salarySeniorNGN:"₦800,000 – ₦1,500,000/mo",salaryJuniorUSD:"$70,000 – $100,000/yr",salarySeniorUSD:"$130,000 – $200,000/yr",companiesNG:["Nigerian Air Force","Aero Contractors","NCAA Nigeria","Ethiopian Airlines MRO"],companiesGlobal:["Boeing","Airbus","Lockheed Martin","SpaceX","NASA"]}
+    ]}
+  ]}
+];
+
+const opportunities=[
+  {company:"MTN Nigeria",role:"Graduate Engineer Trainee",type:"internship",badge:"Internship",deadline:"Apr 30, 2026",location:"Lagos"},
+  {company:"Flutterwave",role:"Software Engineer Intern",type:"internship",badge:"Internship",deadline:"Apr 15, 2026",location:"Lagos (Hybrid)"},
+  {company:"Dangote Group",role:"Graduate Trainee — Engineering",type:"entry",badge:"Entry-level",deadline:"May 1, 2026",location:"Lagos, Abuja"},
+  {company:"Shell Nigeria",role:"Well Engineering Graduate",type:"entry",badge:"Entry-level",deadline:"Rolling",location:"Port Harcourt"},
+  {company:"Interswitch",role:"Systems Engineer",type:"remote",badge:"Remote",deadline:"Open",location:"Remote"},
+  {company:"Julius Berger Nigeria",role:"Site Engineer — Graduate",type:"entry",badge:"Entry-level",deadline:"Apr 20, 2026",location:"Nationwide"},
+  {company:"NNPC",role:"Engineering Intern (STRAP)",type:"internship",badge:"Internship",deadline:"Mar 31, 2026",location:"Abuja / PH"},
+  {company:"Andela",role:"Junior Software Engineer",type:"remote",badge:"Remote",deadline:"Open",location:"Remote"},
+  {company:"Access Bank",role:"Data Analyst — Graduate",type:"entry",badge:"Entry-level",deadline:"May 15, 2026",location:"Lagos"},
+  {company:"Innoson Group",role:"Mechanical Design Intern",type:"internship",badge:"Internship",deadline:"Apr 10, 2026",location:"Nnewi"},
+];
+
+// flatten all roles
+careersData.forEach(d=>d.sectors.forEach(s=>s.roles.forEach(r=>allRolesFlat.push({role:r,dept:d,sectorName:s.name}))));
+
+// total roles
+let total=0;careersData.forEach(d=>d.sectors.forEach(s=>total+=s.roles.length));
+document.getElementById('totalRoles').textContent=total;
+
+// helpers
+const calcMatch=role=>{
+  if(!userSkills.length)return null;
+  const rs=role.skills.map(s=>s.toLowerCase());
+  const m=rs.filter(s=>userSkills.some(u=>s.includes(u)||u.includes(s)));
+  return Math.round((m.length/rs.length)*100);
+};
+const matchCls=p=>p>=70?'high':p>=40?'mid':'low';
+const barClr=p=>p>=70?'#4ade80':p>=40?'#f5c842':'#f87171';
+
+// FIREBASE
+onAuthStateChanged(auth,async user=>{
+  if(!user){renderMatch(false);return;}
+  try{
+    const snap=await getDoc(doc(db,'users',user.uid));
+    if(snap.exists()&&snap.data().skills)userSkills=snap.data().skills.map(s=>s.name.toLowerCase());
+  }catch(e){}
+  renderMatch(true);renderPaths();renderGapList();
+});
+
+// ── MATCH ──
+function renderMatch(loggedIn){
+  const el=document.getElementById('matchContent');
+  const sub=document.getElementById('matchSub');
+  if(!loggedIn){
+    sub.textContent='Sign in to see how your skills align with every role.';
+    el.innerHTML=`<div class="login-nudge"><div class="nudge-icon">🎯</div><div class="nudge-title">See your career matches</div><div class="nudge-sub">Unify reads your saved skills and scores your alignment with every engineering role — so you know where you actually stand.</div><a href="auth.html" class="nudge-btn">Sign in to unlock →</a></div>`;
+    return;
+  }
+  if(!userSkills.length){
+    sub.textContent='Add skills to your profile to unlock your match scores.';
+    el.innerHTML=`<div class="login-nudge"><div class="nudge-icon">📋</div><div class="nudge-title">No skills on your profile yet</div><div class="nudge-sub">Head to your profile, add the skills you\'ve picked up, then come back to see your matches.</div><a href="profile.html" class="nudge-btn">Add skills →</a></div>`;
+    return;
+  }
+  sub.textContent=`Based on ${userSkills.length} skills on your profile.`;
+  const top=allRolesFlat.map(({role,dept,sectorName})=>({role,dept,sectorName,pct:calcMatch(role)})).sort((a,b)=>b.pct-a.pct).slice(0,5);
+  el.innerHTML=`<div class="match-grid">${top.map(({role,dept,sectorName,pct})=>{
+    const cls=matchCls(pct);
+    const gap=role.skills.filter(s=>!userSkills.some(u=>s.toLowerCase().includes(u)||u.includes(s.toLowerCase()))).slice(0,3);
+    return `<div class="match-card" onclick='openModal(${JSON.stringify(role)},${JSON.stringify({id:dept.id,name:dept.name,shortName:dept.shortName})},"${sectorName}")'>
+      <div class="mc-dept">${dept.shortName} · ${sectorName}</div>
+      <div class="mc-title">${role.title}</div>
+      <div class="mc-pct-row"><div class="mc-pct ${cls}">${pct}%</div><div class="mc-bar-track"><div class="mc-bar-fill" style="width:${pct}%;background:${barClr(pct)}"></div></div></div>
+      ${gap.length?`<div class="mc-gap-label">Missing skills</div><div class="mc-gap-pills">${gap.map(s=>`<span class="mc-gap-pill">${s}</span>`).join('')}</div>`:'<div class="mc-gap-label" style="color:#16a34a">✓ Fully aligned!</div>'}
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ── GAP ──
+function renderGapList(q=''){
+  const list=document.getElementById('gapRoleList');
+  const qL=q.toLowerCase();
+  const items=allRolesFlat.filter(({role})=>!qL||role.title.toLowerCase().includes(qL)||role.skills.some(s=>s.toLowerCase().includes(qL)));
+  list.innerHTML=items.map(({role,dept})=>{
+    const pct=calcMatch(role);const isActive=selectedGapRole&&selectedGapRole.id===role.id;
+    return `<div class="gap-role-item${isActive?' active':''}" onclick='selectGapRole(${JSON.stringify(role)},${JSON.stringify({id:dept.id,name:dept.name,shortName:dept.shortName})},"${dept.sectors?.find(s=>s.roles.find(r=>r.id===role.id))?.name||''}")'>
+      <span class="gap-role-name">${role.title} <span style="font-size:11px;opacity:.5">· ${dept.shortName}</span></span>
+      ${pct!==null?`<span class="gap-role-pct">${pct}%</span>`:''}
+    </div>`;
+  }).join('')||`<div style="padding:20px;font-size:13px;color:var(--text3)">No roles found</div>`;
+}
+window.filterGapList=q=>renderGapList(q);
+
+window.selectGapRole=(role,dept,sectorName)=>{
+  selectedGapRole=role;
+  renderGapList(document.getElementById('gapSearch').value);
+  const panel=document.getElementById('gapPanel');
+  const pct=calcMatch(role);
+  const have=pct!==null?role.skills.filter(s=>userSkills.some(u=>s.toLowerCase().includes(u)||u.includes(s.toLowerCase()))):[];
+  const need=pct!==null?role.skills.filter(s=>!userSkills.some(u=>s.toLowerCase().includes(u)||u.includes(s.toLowerCase()))):role.skills;
+  const cls=pct!==null?matchCls(pct):'';
+  panel.innerHTML=`
+    <div class="gap-role-title">${role.title}</div>
+    <div class="gap-role-dept">${dept.shortName} · ${sectorName||''}</div>
+    ${pct!==null?`
+    <div class="gap-score-big ${cls}">${pct}%</div>
+    <div class="gap-score-lbl">of required skills matched</div>
+    <div class="gap-cols">
+      <div><div class="gap-col-head have">You have (${have.length})</div><div class="gap-skill-wrap">${have.length?have.map(s=>`<span class="gap-skill have">${s}</span>`).join(''):'<span class="gap-skill-none">Add skills to your profile</span>'}</div></div>
+      <div><div class="gap-col-head need">To acquire (${need.length})</div><div class="gap-skill-wrap">${need.length?need.map(s=>`<span class="gap-skill need">${s}</span>`).join(''):'<span class="gap-skill-none" style="color:#16a34a">Fully aligned!</span>'}</div></div>
+    </div>`:`
+    <div style="padding:12px 0 20px;font-size:13px;color:var(--text3)"><a href="auth.html" style="color:var(--text);font-weight:500">Sign in</a> to see your personal skills gap.</div>
+    <div class="gap-col-head need" style="margin-bottom:10px">Skills required</div>
+    <div class="gap-skill-wrap">${role.skills.map(s=>`<span class="gap-skill need">${s}</span>`).join('')}</div>`}
+    <button class="gap-view-btn" onclick='openModal(${JSON.stringify(role)},${JSON.stringify(dept)},"${sectorName||''}")'>View full role details →</button>`;
+};
+
+// ── OPPS ──
+function renderOpps(){
+  const grid=document.getElementById('oppGrid');
+  const list=currentOppFilter==='all'?opportunities:opportunities.filter(o=>o.type===currentOppFilter);
+  grid.innerHTML=list.map(o=>`<div class="opp-card"><div class="opp-card-inner"><div class="opp-accent ${o.type}"></div><div class="opp-body"><div class="opp-top"><div><div class="opp-company">${o.company}</div><div class="opp-role">${o.role}</div></div><span class="opp-badge ${o.type}">${o.badge}</span></div><div class="opp-meta"><span>⏱ ${o.deadline}</span><span>📍 ${o.location}</span></div><span class="opp-apply" onclick="toast('Live applications coming soon!')">Apply →</span></div></div></div>`).join('');
+}
+renderOpps();
+window.filterOpps=(type,btn)=>{currentOppFilter=type;document.querySelectorAll('.opp-filter').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderOpps();};
+
+// ── PATHS ──
+function renderPaths(){
+  const wrap=document.getElementById('pathsWrap');wrap.innerHTML='';
+  const q=searchQ.toLowerCase();
+  careersData.forEach(dept=>{
+    const show=currentDept==='all'||currentDept===dept.id;
+    const block=document.createElement('div');block.className='dept-block'+(show?' show':'');
+    block.innerHTML=`<div class="dept-name">${dept.name.replace(' & ',' <em>&</em> ')}</div><div class="dept-meta">${dept.sectors.length} sector${dept.sectors.length>1?'s':''} · ${dept.sectors.reduce((a,s)=>a+s.roles.length,0)} roles</div>`;
+    if(!activeSectors[dept.id])activeSectors[dept.id]=dept.sectors[0].name;
+    const tabs=document.createElement('div');tabs.className='sector-tabs';
+    dept.sectors.forEach(s=>{const b=document.createElement('button');b.className='stab'+(s.name===activeSectors[dept.id]?' on':'');b.textContent=s.name;b.onclick=()=>{activeSectors[dept.id]=s.name;renderPaths();};tabs.appendChild(b);});
+    block.appendChild(tabs);
+    const sec=dept.sectors.find(s=>s.name===activeSectors[dept.id])||dept.sectors[0];
+    let roles=sec.roles;if(q)roles=roles.filter(r=>r.title.toLowerCase().includes(q)||r.skills.some(sk=>sk.toLowerCase().includes(q)));
+    if(!roles.length){const em=document.createElement('div');em.className='empty';em.innerHTML=`<div class="empty-ico">🔍</div><p class="empty-txt">No roles match "${searchQ}"</p>`;block.appendChild(em);}
+    else{
+      const grid=document.createElement('div');grid.className='roles-grid';
+      roles.forEach(role=>{
+        const theme=getTheme(sec.name);const match=calcMatch(role);const card=document.createElement('div');card.className='role-card';
+        card.onclick=()=>openModal(role,dept,sec.name);
+        card.innerHTML=`<div class="role-scene"><div class="scene-bg" style="background:${theme.bg}"></div>
+          ${match!==null?`<span class="match-score ms-${matchCls(match)}">${match}% match</span>`:''}
+          <div class="scene-content"><span class="scene-icon">${theme.ico}</span><span class="scene-label">${theme.lbl}</span></div></div>
+          <div class="role-body"><div class="role-sector">${sec.name}</div><div class="role-title">${role.title}</div>
+          <div class="salary-row"><span class="sal-jr">${role.salaryJuniorNGN}</span><span class="sal-arr">→</span><span class="sal-sr">${role.salarySeniorNGN}</span></div>
+          <div class="role-skills">${role.skills.slice(0,3).map(s=>`<span class="rsk">${s}</span>`).join('')}${role.skills.length>3?`<span class="rsk">+${role.skills.length-3}</span>`:''}</div>
+          <div class="gap-bar-wrap${match!==null?' show':''}"><div class="gap-bar-label"><span>Match</span><span>${match!==null?match+'%':''}</span></div><div class="gap-bar-track"><div class="gap-bar-fill" style="width:${match||0}%;background:${match!==null?barClr(match):''}"></div></div></div>
+          </div>`;
+        grid.appendChild(card);
+      });block.appendChild(grid);
+    }
+    wrap.appendChild(block);
+  });
+}
+renderPaths();renderGapList();renderMatch(false);
+
+// ── MODAL ──
+window.openModal=(role,dept,sectorName)=>{
+  const isSaved=savedRoles.some(r=>r.id===role.id);
+  document.getElementById('modalSavedBadge').classList.toggle('show',isSaved);
+  const match=calcMatch(role);
+  let gapHTML='';
+  if(match!==null){
+    const have=role.skills.filter(s=>userSkills.some(u=>s.toLowerCase().includes(u)||u.includes(s.toLowerCase())));
+    const need=role.skills.filter(s=>!userSkills.some(u=>s.toLowerCase().includes(u)||u.includes(s.toLowerCase())));
+    gapHTML=`<div class="modal-gap show"><div class="modal-gap-title">Your Skills Match</div><div class="modal-gap-pct ${matchCls(match)}">${match}%</div><div class="modal-gap-sub">aligned with this role</div><div class="modal-gap-cols"><div><div class="mgc-head have">You have (${have.length})</div><div class="mgc-skills">${have.map(s=>`<span class="mgc-skill have">${s}</span>`).join('')||'<span style="font-size:12px;color:var(--text3)">None yet</span>'}</div></div><div><div class="mgc-head need">To acquire (${need.length})</div><div class="mgc-skills">${need.map(s=>`<span class="mgc-skill need">${s}</span>`).join('')||'<span style="font-size:12px;color:#16a34a">Fully aligned!</span>'}</div></div></div></div>`;
+  }
+  const dn=dept.shortName||dept.id?.toUpperCase()||'';
+
+  // Extended role data — who is this person, day in life, skill context, companies, people
+  const roleExtras = {
+    'telecom-engineer': {
+      who: 'A Telecommunications Engineer designs, builds, and maintains the networks that keep people connected — from 4G base stations to fibre optic backbones. In Nigeria, they are the people behind why your MTN signal holds or drops. They work at the intersection of hardware, software, and signal physics.',
+      day: [
+        {time:'8:00 AM', act:'Morning review of network performance dashboards — checking for signal degradation or outage alerts across cell towers.'},
+        {time:'10:00 AM', act:'On-site drive test along Lagos-Ibadan expressway to measure LTE signal quality and identify dead zones.'},
+        {time:'1:00 PM', act:'Team sync with RF planning colleagues to review a new base station rollout proposal.'},
+        {time:'3:00 PM', act:'MATLAB simulation — modelling interference patterns for a new spectrum allocation.'},
+        {time:'5:00 PM', act:'Documentation of findings and filing optimization report for the network operations team.'},
+      ],
+      skillWhy: [
+        {name:'TCP/IP', why:'Every network packet — voice calls, video, data — travels through IP-based protocols. You have to understand how packets are routed to troubleshoot problems.'},
+        {name:'LTE / 5G', why:'The dominant mobile standards. Companies like MTN, Airtel, and Glo spend billions rolling these out. Engineers who understand 5G architecture are in serious demand.'},
+        {name:'MATLAB', why:'Used for signal modelling, filter design, and propagation simulation. Standard tool in telecom labs and research.'},
+        {name:'RF Planning', why:'Every base station placement is a calculated decision based on terrain, frequency, and coverage overlap. Bad planning means dead zones.'},
+        {name:'Network Troubleshooting', why:'When the network goes down, engineers are paged. Fast root-cause analysis is one of the most valued skills in operations teams.'},
+      ],
+      companies: [
+        {name:'MTN Nigeria', meta:'Largest telecom in Nigeria · Network Engineering team', tag:'Internships available'},
+        {name:'Airtel Nigeria', meta:'Network operations and expansion · Lagos & nationwide', tag:'Graduate trainee'},
+        {name:'Ericsson Nigeria', meta:'Infrastructure vendor · builds the towers behind the networks', tag:'Project-based roles'},
+        {name:'Huawei Nigeria', meta:'Telecom equipment · strong graduate intake', tag:'Multiple openings'},
+        {name:'Nokia', meta:'Global · Network infrastructure and 5G deployment', tag:'Global graduate program'},
+      ],
+      people: [
+        {name:'Chukwuemeka Obi', role:'Network Engineer, MTN Nigeria', note:'Started as an intern after 400L. Said his final year project on LTE handover algorithms got him the offer. Now leads a 4-person optimization team.'},
+        {name:'Sade Adeyemi', role:'RF Engineer, Ericsson Lagos', note:'Spent Year 3 doing drive tests as a part-time assistant. Graduated, got CCNA certified, and joined Ericsson\'s graduate programme within 4 months.'},
+        {name:'David Ifeanyi', role:'Senior Telecom Engineer, Vodafone UK', note:'Worked at Glo for 3 years after graduation. Built his international profile through Cisco certifications, then relocated. Now earning in GBP.'},
+      ],
+    },
+    'network-engineer': {
+      who: 'A Network Engineer is the person responsible for designing, deploying, and keeping alive the digital infrastructure that organisations depend on. Banks, telecoms, hospitals, oil companies — they all run on networks that someone built and someone maintains. In Nigeria this is one of the most consistently in-demand technical roles.',
+      day: [
+        {time:'8:30 AM', act:'Check network monitoring tools — reviewing uptime, latency, and any overnight alerts.'},
+        {time:'10:00 AM', act:'Configuration of new Cisco switches for a branch office expansion.'},
+        {time:'12:00 PM', act:'Troubleshoot a VPN connectivity issue affecting remote workers at a client site.'},
+        {time:'2:00 PM', act:'Review firewall rules with the security team — a routine audit ahead of a compliance inspection.'},
+        {time:'4:30 PM', act:'Document this week\'s changes to the network topology in the infrastructure runbook.'},
+      ],
+      skillWhy: [
+        {name:'TCP/IP', why:'The foundational language of all networks. If you don\'t understand how packets are addressed, routed, and delivered, you cannot troubleshoot anything.'},
+        {name:'LTE/5G', why:'Increasingly, enterprise networks connect to mobile backhaul. Understanding mobile network architecture is becoming a core skill even for enterprise engineers.'},
+        {name:'MATLAB', why:'Used in network simulation and for academic-to-industry transition projects, especially in research-heavy roles at vendors like Ericsson and Huawei.'},
+        {name:'Network Troubleshooting', why:'This is the actual job, a lot of the time. Companies want engineers who can isolate a fault quickly and fix it under pressure.'},
+      ],
+      companies: [
+        {name:'MainOne (now Equinix)', meta:'Data centres and undersea fibre · Nigeria & West Africa', tag:'Core infrastructure roles'},
+        {name:'MTN Nigeria', meta:'IT and enterprise network team · not just telecoms', tag:'Graduate intake'},
+        {name:'Access Bank', meta:'Internal network infrastructure team · Lagos HQ', tag:'Network Analyst roles'},
+        {name:'Interswitch', meta:'Fintech backbone of Nigeria · network and security', tag:'Technical roles open'},
+        {name:'Cisco (Global)', meta:'World\'s largest networking company · certifications open doors', tag:'Graduate programs'},
+      ],
+      people: [
+        {name:'Kunle Adebayo', role:'Network Analyst, Access Bank', note:'Got CCNA in 300L after studying on YouTube and Cisco NetAcad. Applied to 4 banks. Got 2 offers. Said the cert mattered more than his GPA.'},
+        {name:'Ngozi Eze', role:'Network Engineer, Equinix London', note:'Started at MainOne in Lagos. 3 years of data centre experience, then used that to apply abroad. Said the MainOne brand travels well internationally.'},
+      ],
+    },
+  };
+
+  const ex = roleExtras[role.id] || null;
+  const sceneColors = {
+    'telecom-engineer':'linear-gradient(135deg,#0f2027 0%,#203a43 50%,#2c5364 100%)',
+    'network-engineer':'linear-gradient(135deg,#0a0a0a 0%,#1a1a2e 50%,#16213e 100%)',
+    'software-engineer':'linear-gradient(135deg,#0f0c29 0%,#302b63 50%,#24243e 100%)',
+    'data-engineer':'linear-gradient(135deg,#0f2027 0%,#1a3a2f 50%,#0d5016 100%)',
+    'electrical-engineer':'linear-gradient(135deg,#1a0a00 0%,#3d1a00 50%,#6b2d00 100%)',
+    'mechanical-engineer':'linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 50%,#111 100%)',
+    'civil-engineer':'linear-gradient(135deg,#1a1200 0%,#3d2d00 50%,#6b4f00 100%)',
+  };
+  const sceneBg = sceneColors[role.id] || 'linear-gradient(135deg,#0a0a0a 0%,#1a1a1a 100%)';
+
+  const dayHTML = ex ? `
+    <div class="md-block">
+      <div class="md-label">A day in the life</div>
+      <ul class="md-day-list">${ex.day.map(d=>`<li class="md-day-item"><span class="md-day-time">${d.time}</span><span class="md-day-act">${d.act}</span></li>`).join('')}</ul>
+    </div>` : '';
+
+  const skillDetailHTML = ex ? `
+    <div class="md-block">
+      <div class="md-label">Skills — and why they matter</div>
+      <div class="md-skills-list">${ex.skillWhy.map(s=>`<div class="md-skill-row"><span class="md-skill-name">${s.name}</span><span class="md-skill-why">${s.why}</span></div>`).join('')}</div>
+    </div>` : `<div class="md-block"><div class="md-label">Skills Required</div><div class="skills-cloud">${role.skills.map(s=>`<span class="skill-badge">${s}</span>`).join('')}</div></div>`;
+
+  const companiesHTML = ex ? `
+    <div class="md-block">
+      <div class="md-label">Companies hiring for this role</div>
+      <div class="md-cos-list">${ex.companies.map(co=>`<div class="md-co-row"><div><div class="md-co-name">${co.name}</div><div class="md-co-meta">${co.meta}</div></div><span class="md-co-tag">${co.tag}</span></div>`).join('')}</div>
+    </div>` : `<div class="md-block"><div class="md-label">Companies Hiring</div><div class="cos-grid"><div><div class="co-group-title">Nigeria</div><div class="co-list">${role.companiesNG.map(co=>`<div class="co-item">${co}</div>`).join('')}</div></div><div><div class="co-group-title">Global</div><div class="co-list">${role.companiesGlobal.map(co=>`<div class="co-item">${co}</div>`).join('')}</div></div></div></div>`;
+
+  const peopleHTML = ex ? `
+    <div class="md-block">
+      <div class="md-label">People who\'ve walked this path</div>
+      <div class="md-people-list">${ex.people.map(p=>`<div class="md-person"><div class="md-person-name">${p.name}</div><div class="md-person-role">${p.role}</div><div class="md-person-note">${p.note}</div></div>`).join('')}</div>
+    </div>` : '';
+
+  document.getElementById('modalBody').innerHTML=`
+    <div class="md-scene">
+      <div class="md-scene-bg" style="background:${sceneBg}"></div>
+      <div class="md-scene-overlay"></div>
+      <div class="md-scene-content">
+        <div class="md-scene-tag">${dn} · ${sectorName}</div>
+        <div class="md-scene-title">${role.title}</div>
+      </div>
+    </div>
+    <button class="save-btn${isSaved?' saved':''}" id="modalSaveBtn" onclick="toggleSave('${role.id}','${role.title}','${dn}')">${isSaved?'Saved to your list':'Save this role'}</button>
+    ${gapHTML}
+    ${ex ? `<div class="md-block"><div class="md-label">Who is a ${role.title}?</div><p class="md-who">${ex.who}</p></div>` : ''}
+    ${dayHTML}
+    ${skillDetailHTML}
+    <div class="md-block">
+      <div class="md-label">Compensation</div>
+      <div class="md-salary-grid">
+        <div class="md-sal-card">
+          <div class="md-sal-region">Nigeria (NGN / month)</div>
+          <div class="md-sal-row"><span class="md-sal-level">Entry level</span><span class="md-sal-amt">${role.salaryJuniorNGN}</span></div>
+          <div class="md-sal-row"><span class="md-sal-level">Senior</span><span class="md-sal-amt">${role.salarySeniorNGN}</span></div>
+        </div>
+        <div class="md-sal-card">
+          <div class="md-sal-region">Global (USD / year)</div>
+          <div class="md-sal-row"><span class="md-sal-level">Entry level</span><span class="md-sal-amt">${role.salaryJuniorUSD}</span></div>
+          <div class="md-sal-row"><span class="md-sal-level">Senior</span><span class="md-sal-amt">${role.salarySeniorUSD}</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="md-block">
+      <div class="md-label">Year-by-year roadmap</div>
+      <ul class="md-roadmap-list">${role.roadmap.map(r=>`<li class="md-roadmap-item"><span class="md-roadmap-yr">${r.year}</span><span class="md-roadmap-desc">${r.desc}</span></li>`).join('')}</ul>
+    </div>
+    ${companiesHTML}
+    ${peopleHTML}`;
+  document.getElementById('overlay').classList.add('show');document.body.style.overflow='hidden';
+};
+window.closeModal=()=>{document.getElementById('overlay').classList.remove('show');document.body.style.overflow='';};
+window.closeModalOutside=e=>{if(e.target===document.getElementById('overlay'))closeModal();};
+
+// ── SAVE ──
+window.toggleSave=(id,title,dept)=>{
+  const idx=savedRoles.findIndex(r=>r.id===id);
+  if(idx>-1){savedRoles.splice(idx,1);toast('Removed from saved');}
+  else{if(savedRoles.length>=6){toast('Max 6 saved — remove one first');return;}savedRoles.push({id,title,dept});toast('🔖 Saved!');}
+  const btn=document.getElementById('modalSaveBtn');const badge=document.getElementById('modalSavedBadge');
+  if(btn){const s=savedRoles.some(r=>r.id===id);btn.textContent=s?'Saved to your list':'Save this role';btn.className='save-btn'+(s?' saved':'');badge?.classList.toggle('show',s);}
+  renderSaved();renderPaths();
+};
+function renderSaved(){
+  document.getElementById('savedCount').textContent=savedRoles.length;
+  const list=document.getElementById('savedList');
+  if(!savedRoles.length){list.innerHTML='<div class="saved-empty">No saved roles yet.<br>Save up to 6.</div>';return;}
+  list.innerHTML=savedRoles.map(r=>`<div class="saved-entry"><div><div class="se-title">${r.title}</div><div class="se-dept">${r.dept}</div></div><button class="se-rm" onclick="toggleSave('${r.id}','${r.title}','${r.dept}')">×</button></div>`).join('');
+}
+window.toggleSavedPanel=()=>document.getElementById('savedPanel').classList.toggle('show');
+window.filterDept=(id,btn)=>{currentDept=id;document.querySelectorAll('.dpill').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderPaths();};
+window.handleSearch=q=>{searchQ=q;renderPaths();};
+window.notifyOpps=()=>toast('We\'ll notify you when live listings land.');
+window.toast=msg=>{const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+renderSaved();
+</script>
+</body>
+</html>

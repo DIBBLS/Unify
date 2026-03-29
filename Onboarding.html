@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unify — Set Up Your Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --black: #0a0a0a; --white: #f5f4f0; --grey: #e0deda; --mid: #888;
+  --font-display: 'Playfair Display', serif; --font-body: 'DM Sans', sans-serif;
+}
+body { background: var(--white); color: var(--black); font-family: var(--font-body); min-height: 100vh; display: flex; }
+
+/* LEFT PANEL */
+.left {
+  flex: 1; background: var(--black); color: var(--white);
+  padding: 48px; display: flex; flex-direction: column; justify-content: space-between;
+  min-height: 100vh; position: relative; overflow: hidden;
+}
+.left-bg {
+  position: absolute; bottom: -60px; left: -20px;
+  font-family: var(--font-display); font-size: 28vw; font-weight: 900;
+  color: transparent; -webkit-text-stroke: 1px #1a1a1a;
+  line-height: 1; pointer-events: none; user-select: none;
+}
+.left-logo { font-family: var(--font-display); font-weight: 900; font-size: 24px; letter-spacing: -1px; text-decoration: none; color: var(--white); position: relative; z-index: 1; }
+.left-content { position: relative; z-index: 1; }
+.left-step { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #555; margin-bottom: 16px; }
+.left-title { font-family: var(--font-display); font-size: clamp(32px, 3.5vw, 52px); font-weight: 900; line-height: 1.05; letter-spacing: -2px; margin-bottom: 20px; }
+.left-title em { font-style: italic; }
+.left-sub { font-size: 14px; color: #666; line-height: 1.7; font-weight: 300; max-width: 320px; }
+
+/* STEP INDICATORS */
+.steps { display: flex; gap: 8px; margin-bottom: 48px; position: relative; z-index: 1; }
+.step-dot { width: 28px; height: 4px; border-radius: 2px; background: #222; transition: background 0.3s; }
+.step-dot.active { background: var(--white); }
+.step-dot.done { background: #555; }
+
+.left-footer { font-size: 11px; color: #333; position: relative; z-index: 1; }
+
+/* RIGHT PANEL */
+.right {
+  width: 520px; flex-shrink: 0; padding: 48px;
+  display: flex; flex-direction: column; justify-content: center;
+  border-left: 1px solid var(--grey); min-height: 100vh;
+}
+.right-title { font-family: var(--font-display); font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+.right-sub { font-size: 13px; color: var(--mid); margin-bottom: 32px; line-height: 1.6; }
+
+/* UNIVERSITY CARDS */
+.uni-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 32px; }
+.uni-card {
+  border: 1px solid var(--grey); border-radius: 10px; padding: 20px 16px;
+  cursor: pointer; transition: all 0.15s; position: relative;
+}
+.uni-card:hover { border-color: #999; }
+.uni-card.selected { border-color: var(--black); background: var(--black); color: var(--white); }
+.uni-card.coming-soon { opacity: 0.45; cursor: default; }
+.uni-card.coming-soon:hover { border-color: var(--grey); }
+.uni-name { font-size: 13px; font-weight: 500; line-height: 1.4; margin-bottom: 4px; }
+.uni-short { font-size: 11px; color: var(--mid); }
+.uni-card.selected .uni-short { color: #666; }
+.uni-badge {
+  position: absolute; top: 10px; right: 10px;
+  font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+  background: var(--grey); color: #888; padding: 2px 7px; border-radius: 10px;
+}
+
+/* OPTION LIST — for faculty, dept, level */
+.option-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 32px; }
+.option-item {
+  border: 1px solid var(--grey); border-radius: 8px; padding: 16px 20px;
+  cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: space-between;
+}
+.option-item:hover { border-color: #999; background: #f8f7f3; }
+.option-item.selected { border-color: var(--black); background: var(--black); color: var(--white); }
+.option-name { font-size: 14px; font-weight: 500; }
+.option-sub { font-size: 11px; color: var(--mid); margin-top: 2px; }
+.option-item.selected .option-sub { color: #666; }
+.option-check { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--grey); flex-shrink: 0; transition: all 0.15s; display: flex; align-items: center; justify-content: center; }
+.option-item.selected .option-check { background: var(--white); border-color: var(--white); }
+.option-check-inner { width: 8px; height: 8px; border-radius: 50%; background: var(--black); display: none; }
+.option-item.selected .option-check-inner { display: block; }
+
+/* LEVEL GRID */
+.level-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 32px; }
+.level-card {
+  border: 1px solid var(--grey); border-radius: 8px; padding: 20px 12px;
+  cursor: pointer; transition: all 0.15s; text-align: center;
+}
+.level-card:hover { border-color: #999; }
+.level-card.selected { border-color: var(--black); background: var(--black); color: var(--white); }
+.level-name { font-size: 15px; font-weight: 500; }
+.level-sub { font-size: 11px; color: var(--mid); margin-top: 4px; }
+.level-card.selected .level-sub { color: #666; }
+
+.btn {
+  width: 100%; padding: 14px; background: var(--black); color: var(--white);
+  border: none; border-radius: 6px; font-family: var(--font-body); font-size: 14px;
+  font-weight: 500; cursor: pointer; transition: opacity 0.2s;
+}
+.btn:hover { opacity: 0.8; }
+.btn:disabled { opacity: 0.3; cursor: default; }
+
+.back-btn {
+  background: none; border: none; font-family: var(--font-body); font-size: 13px;
+  color: var(--mid); cursor: pointer; padding: 0; margin-bottom: 32px;
+  display: flex; align-items: center; gap: 6px; transition: color 0.15s;
+}
+.back-btn:hover { color: var(--black); }
+
+/* Name step */
+.name-input-wrap { margin-bottom: 16px; }
+.name-input {
+  width: 100%; padding: 18px 20px; font-size: 26px; font-family: var(--font-display);
+  font-weight: 700; border: 2px solid var(--grey); border-radius: 12px;
+  outline: none; transition: border-color 0.2s; background: white; color: var(--black);
+  letter-spacing: -0.5px;
+}
+.name-input:focus { border-color: var(--black); }
+.name-input::placeholder { color: #ccc; font-weight: 400; font-size: 20px; }
+.name-preview { font-size: 13px; color: var(--mid); margin-bottom: 32px; min-height: 20px; }
+.name-preview strong { color: var(--black); }
+
+/* Loading overlay */
+.loading-overlay { position: fixed; inset: 0; background: var(--white); display: flex; align-items: center; justify-content: center; z-index: 999; flex-direction: column; gap: 16px; }
+.loading-logo { font-family: var(--font-display); font-size: 32px; font-weight: 900; letter-spacing: -1px; }
+.loading-text { font-size: 13px; color: var(--mid); }
+
+@media (max-width: 860px) {
+  body { flex-direction: column; }
+  .left { min-height: auto; padding: 32px 24px 40px; }
+  .left-bg { display: none; }
+  .right { width: 100%; padding: 32px 24px; border-left: none; border-top: 1px solid var(--grey); }
+  .uni-grid { grid-template-columns: 1fr; }
+  .level-grid { grid-template-columns: repeat(3, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-logo">Unify</div>
+  <div class="loading-text">Setting things up...</div>
+</div>
+
+<!-- LEFT -->
+<div class="left">
+  <a href="index.html" class="left-logo">Unify</a>
+  <div class="left-content">
+    <div class="steps">
+      <div class="step-dot active" id="dot0"></div>
+      <div class="step-dot" id="dot1"></div>
+      <div class="step-dot" id="dot2"></div>
+      <div class="step-dot" id="dot3"></div>
+      <div class="step-dot" id="dot4"></div>
+    </div>
+    <p class="left-step" id="leftStep">Step 1 of 4</p>
+    <h1 class="left-title" id="leftTitle">Where are<br>you <em>studying?</em></h1>
+    <p class="left-sub" id="leftSub">Select your university to get a dashboard personalised to your exact courses, resources, and career paths.</p>
+  </div>
+  <p class="left-footer">© 2025 Unify. Own your journey.</p>
+</div>
+
+<!-- RIGHT -->
+<div class="right" id="rightPanel">
+  <!-- Steps injected by JS -->
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBjZyfNNpXZFJwB7GKXVeSzLTVknfwCa8I",
+  authDomain: "unify-b4316.firebaseapp.com",
+  projectId: "unify-b4316",
+  storageBucket: "unify-b4316.firebasestorage.app",
+  messagingSenderId: "114594366615",
+  appId: "1:114594366615:web:44ef821b4618f1a24615d2",
+  measurementId: "G-MY2M1R6DJV"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+let currentUser = null;
+
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const universities = [
+  { name: "Lagos State University", short: "LASU", available: true },
+  { name: "University of Lagos", short: "UNILAG", available: false },
+  { name: "University of Ibadan", short: "UI", available: false },
+  { name: "University of Osun", short: "UNIOSUN", available: false },
+];
+
+const faculties = {
+  "Lagos State University": [
+    { name: "Faculty of Engineering", sub: "6 departments available" },
+  ]
+};
+
+const departments = {
+  "Faculty of Engineering": [
+    { name: "Electronic & Computer Engineering", sub: "ECE" },
+    { name: "Mechanical Engineering", sub: "MEE" },
+    { name: "Industrial & Petroleum Engineering", sub: "IPE" },
+    { name: "Chemical & Polymer Engineering", sub: "CPE" },
+    { name: "Civil Engineering", sub: "CVE" },
+    { name: "Aerospace Engineering", sub: "ASE" },
+  ]
+};
+
+const levels = ["100 Level","200 Level","300 Level","400 Level","500 Level"];
+const levelSubs = {
+  "100 Level": "First year",
+  "200 Level": "Second year",
+  "300 Level": "Third year",
+  "400 Level": "Fourth year",
+  "500 Level": "Final year",
+};
+
+// CPE stops at 400
+const deptMaxLevel = { "Chemical & Polymer Engineering": "400 Level" };
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let step = 0;
+let selected = { firstName: '', university: null, faculty: null, department: null, level: null };
+
+const leftContent = {
+  0: { step: "Step 1 of 5", title: "What's your<br><em>first name?</em>", sub: "This is how Unify will greet you. Just your first name is fine." },
+  1: { step: "Step 2 of 5", title: "Where are<br>you <em>studying?</em>", sub: "Select your university to get a dashboard personalised to your exact courses, resources, and career paths." },
+  2: { step: "Step 3 of 5", title: "What's your<br><em>faculty?</em>", sub: "Choose your faculty so we can show you the right departments and course data." },
+  3: { step: "Step 4 of 5", title: "Which<br><em>department?</em>", sub: "Pick your department and we'll load all your courses, resources, and career paths automatically." },
+  4: { step: "Step 5 of 5", title: "What level<br>are you <em>in?</em>", sub: "Select your current level and your dashboard will be ready with everything you need." },
+};
+
+// ── AUTH ─────────────────────────────────────────────────────────────────────
+onAuthStateChanged(auth, async user => {
+  if (!user) { window.location.href = 'auth.html'; return; }
+  currentUser = user;
+
+  // If user is already onboarded AND didn't come here intentionally, send them back
+  // We use a URL param ?edit=1 or referrer check to allow the change flow
+  const isEditMode = new URLSearchParams(window.location.search).get('edit') === '1';
+
+  try {
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (snap.exists() && snap.data().university && !isEditMode) {
+      window.location.href = 'dashboard.html';
+      return;
+    }
+    // Pre-fill selections if editing
+    if (snap.exists() && snap.data().university) {
+      selected.firstName = snap.data().firstName || currentUser.displayName?.split(' ')[0] || '';
+      selected.university = snap.data().university;
+      selected.faculty = snap.data().faculty;
+      selected.department = snap.data().department;
+    }
+  } catch(e) {}
+  document.getElementById('loadingOverlay').style.display = 'none';
+  renderStep();
+});
+
+// ── RENDER ───────────────────────────────────────────────────────────────────
+function updateLeft() {
+  const c = leftContent[step];
+  document.getElementById('leftStep').textContent = c.step;
+  document.getElementById('leftTitle').innerHTML = c.title;
+  document.getElementById('leftSub').textContent = c.sub;
+  for (let i = 0; i < 5; i++) {
+    const dot = document.getElementById('dot' + i);
+    dot.className = 'step-dot' + (i === step ? ' active' : i < step ? ' done' : '');
+  }
+}
+
+function renderStep() {
+  updateLeft();
+  const panel = document.getElementById('rightPanel');
+  panel.innerHTML = '';
+
+  if (step === 0) renderName(panel);
+  else if (step === 1) renderUniversities(panel);
+  else if (step === 2) renderOptions(panel, faculties[selected.university], 'faculty');
+  else if (step === 3) renderOptions(panel, departments[selected.faculty], 'department');
+  else if (step === 4) renderLevels(panel);
+}
+
+function backBtn(panel) {
+  if (step === 0) return;
+  const btn = document.createElement('button');
+  btn.className = 'back-btn';
+  btn.innerHTML = '← Back';
+  btn.addEventListener('click', () => { step--; renderStep(); });
+  panel.appendChild(btn);
+}
+
+function renderName(panel) {
+  const title = document.createElement('h2');
+  title.className = 'right-title';
+  title.textContent = 'What\'s your first name?';
+  const sub = document.createElement('p');
+  sub.className = 'right-sub';
+  sub.textContent = 'Just your first name — this is how Unify will greet you.';
+  panel.appendChild(title);
+  panel.appendChild(sub);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'name-input-wrap';
+  const input = document.createElement('input');
+  input.className = 'name-input';
+  input.type = 'text';
+  input.placeholder = 'e.g. Joshua';
+  input.autocomplete = 'given-name';
+  input.value = selected.firstName || '';
+  wrap.appendChild(input);
+  panel.appendChild(wrap);
+
+  const preview = document.createElement('p');
+  preview.className = 'name-preview';
+  const updatePreview = () => {
+    const val = input.value.trim();
+    preview.innerHTML = val ? `Good morning, <strong>${val}.</strong> 👋` : '';
+  };
+  input.addEventListener('input', updatePreview);
+  updatePreview();
+  panel.appendChild(preview);
+
+  const btn = document.createElement('button');
+  btn.className = 'next-btn';
+  btn.textContent = 'Continue →';
+  btn.addEventListener('click', () => {
+    const val = input.value.trim();
+    if (!val) { input.focus(); input.style.borderColor = '#ef4444'; return; }
+    selected.firstName = val.charAt(0).toUpperCase() + val.slice(1);
+    step = 1;
+    renderStep();
+  });
+  // Allow Enter key
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') btn.click(); });
+  panel.appendChild(btn);
+}
+
+function renderUniversities(panel) {
+  const title = document.createElement('h2');
+  title.className = 'right-title';
+  title.textContent = 'Select your university';
+  const sub = document.createElement('p');
+  sub.className = 'right-sub';
+  sub.textContent = 'More universities coming soon as we expand across Nigeria.';
+  panel.appendChild(title);
+  panel.appendChild(sub);
+
+  const grid = document.createElement('div');
+  grid.className = 'uni-grid';
+
+  universities.forEach(uni => {
+    const card = document.createElement('div');
+    card.className = 'uni-card' + (!uni.available ? ' coming-soon' : '');
+    card.innerHTML = `
+      <div class="uni-name">${uni.name}</div>
+      <div class="uni-short">${uni.short}</div>
+      ${!uni.available ? '<span class="uni-badge">Soon</span>' : ''}
+    `;
+    if (uni.available) {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.uni-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        selected.university = uni.name;
+        setTimeout(() => { step = 2; renderStep(); }, 300);
+      });
+    }
+    grid.appendChild(card);
+  });
+  panel.appendChild(grid);
+}
+
+function renderOptions(panel, items, key) {
+  backBtn(panel);
+  const labels = { faculty: 'Select your faculty', department: 'Select your department' };
+  const title = document.createElement('h2');
+  title.className = 'right-title';
+  title.textContent = labels[key];
+  panel.appendChild(title);
+
+  const list = document.createElement('div');
+  list.className = 'option-list';
+
+  items.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'option-item';
+    el.innerHTML = `
+      <div>
+        <div class="option-name">${item.name}</div>
+        ${item.sub ? `<div class="option-sub">${item.sub}</div>` : ''}
+      </div>
+      <div class="option-check"><div class="option-check-inner"></div></div>
+    `;
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.option-item').forEach(i => i.classList.remove('selected'));
+      el.classList.add('selected');
+      selected[key] = item.name;
+      setTimeout(() => { step++; renderStep(); }, 300);
+    });
+    list.appendChild(el);
+  });
+  panel.appendChild(list);
+}
+
+function renderLevels(panel) {
+  backBtn(panel);
+  const title = document.createElement('h2');
+  title.className = 'right-title';
+  title.textContent = 'Select your level';
+  panel.appendChild(title);
+
+  const maxLevel = deptMaxLevel[selected.department] || '500 Level';
+  const maxIdx = levels.indexOf(maxLevel);
+
+  const grid = document.createElement('div');
+  grid.className = 'level-grid';
+
+  levels.forEach((lvl, idx) => {
+    if (idx > maxIdx) return;
+    const card = document.createElement('div');
+    card.className = 'level-card';
+    card.innerHTML = `<div class="level-name">${lvl}</div><div class="level-sub">${levelSubs[lvl]}</div>`;
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.level-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selected.level = lvl;
+      setTimeout(() => saveAndGo(), 300);
+    });
+    grid.appendChild(card);
+  });
+  panel.appendChild(grid);
+}
+
+// ── SAVE & REDIRECT ──────────────────────────────────────────────────────────
+async function saveAndGo() {
+  document.getElementById('loadingOverlay').style.display = 'flex';
+  document.querySelector('.loading-text').textContent = 'Setting up your dashboard...';
+  try {
+    // Save firstName as Firebase Auth displayName so it persists everywhere
+    if (selected.firstName && !currentUser.displayName) {
+      try { await updateProfile(currentUser, { displayName: selected.firstName }); } catch(e) {}
+    }
+    await setDoc(doc(db, 'users', currentUser.uid), {
+      firstName: selected.firstName,
+      university: selected.university,
+      faculty: selected.faculty,
+      department: selected.department,
+      level: selected.level,
+      courses: [],
+    }, { merge: true });
+    window.location.href = 'dashboard.html';
+  } catch(e) {
+    console.error(e);
+    document.getElementById('loadingOverlay').style.display = 'none';
+    alert('Something went wrong. Please try again.');
+  }
+}
+</script>
+</body>
+</html>

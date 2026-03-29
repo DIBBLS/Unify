@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEE 212 — Week 4: Flywheel — Theory &amp; Turning Moment Diagram | Unify</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--muted:#555;--muted2:#999;--accent:#4ade80;--accent-deep:#16a34a;--accent-bg:#dcfce7;--diagram-bg:#f8f7f3;--nav-h:60px}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--accent:#4ade80;--accent-deep:#4ade80;--accent-bg:#052e16;--diagram-bg:#1e1e1e}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:16px;transition:background .2s,color .2s}
+nav{position:sticky;top:0;z-index:100;height:var(--nav-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;gap:32px}
+.nav-logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--text);text-decoration:none;flex-shrink:0}
+.nav-links{display:flex;gap:4px;flex:1}
+.nav-links a{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:6px;border-bottom:2px solid transparent;transition:color .15s}
+.nav-links a:hover{color:var(--text)}.nav-links a.active{color:var(--accent-deep);border-bottom-color:var(--accent)}
+.theme-toggle{margin-left:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;flex-shrink:0}
+.theme-toggle:hover{color:var(--text);border-color:var(--muted)}
+.week-page{max-width:900px;margin:0 auto;padding:40px 48px 80px}
+.back-bar{display:flex;align-items:center;gap:12px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.back-btn:hover{color:var(--text);border-color:var(--text)}
+.week-nav{display:flex;gap:8px;margin-left:auto}
+.wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.wnav-btn:hover{color:var(--text);border-color:var(--text)}.wnav-btn.disabled{opacity:.35;pointer-events:none}
+.week-block{border-radius:14px;border:1px solid var(--border);overflow:hidden;background:var(--surface)}
+.week-header{background:var(--text);color:var(--bg);padding:24px 32px;display:flex;align-items:baseline;gap:20px}
+[data-theme="dark"] .week-header{background:var(--surface2);border-bottom:1px solid var(--border);color:var(--text)}
+.week-num{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;opacity:.55;white-space:nowrap}
+.week-title{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;font-style:italic;color:inherit}
+[data-theme="dark"] .week-title{color:var(--text)}
+.week-body{padding:32px}
+.week-summary{font-size:15px;color:var(--muted);line-height:1.75;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--border)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:28px}
+.tag{font-size:11px;font-weight:500;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:3px 12px}
+.exam-box{background:#fffbeb;border-left:3px solid #fcd34d;border-radius:0 10px 10px 0;padding:18px 22px;margin-bottom:32px}
+[data-theme="dark"] .exam-box{background:#1a1500;border-left-color:#b45309}
+.exam-box .box-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#92400e;margin-bottom:12px}
+[data-theme="dark"] .exam-box .box-label{color:#fbbf24}
+.exam-box ol{margin-left:18px;font-size:14px;color:var(--text)}.exam-box li{margin-bottom:8px;line-height:1.6}
+.past-q{display:inline-block;font-size:10px;font-weight:600;background:var(--accent-bg);color:var(--accent-deep);border:1px solid var(--accent);border-radius:4px;padding:1px 7px;margin-left:6px;vertical-align:middle;letter-spacing:.04em}
+.topic-block{border:1px solid var(--border);border-radius:12px;margin-bottom:28px;overflow:hidden}
+.topic-header{background:var(--surface2);padding:16px 24px;border-bottom:1px solid var(--border)}
+.topic-num{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:3px}
+.topic-title{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;color:var(--text)}
+.topic-body{padding:24px}.topic-body p{font-size:15px;line-height:1.8;margin-bottom:16px;color:var(--text)}
+.formula-block{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:18px 22px;margin:18px 0}
+.formula-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:10px}
+.formula-eq{font-family:'Playfair Display',serif;font-size:17px;font-style:italic;color:var(--text);margin-bottom:6px;line-height:1.6}
+.formula-vars{font-size:12px;color:var(--muted2);line-height:1.7;margin-top:8px}
+.realworld-box{background:#f0fdf4;border-left:3px solid #bbf7d0;border-radius:0 10px 10px 0;padding:16px 20px;margin:16px 0;font-size:14px;line-height:1.75;color:var(--text)}
+[data-theme="dark"] .realworld-box{background:#052e16;border-left-color:#166534}
+.realworld-box .box-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px}
+.exam-def{background:var(--surface2);border:1.5px solid var(--accent);border-radius:10px;padding:16px 20px;margin:18px 0}
+.exam-def .def-label{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px}
+.exam-def .def-text{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--text);line-height:1.7}
+.diagram-wrap{border:1px solid var(--border);border-radius:10px;background:var(--diagram-bg);padding:20px;margin:18px 0;overflow:hidden}
+.diagram-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:14px}
+.quick-check{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 24px;margin-top:20px}
+.quick-check .qc-label{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.quick-check .qc-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.qc-list{display:flex;flex-direction:column;gap:10px}
+.qc-item{display:flex;gap:12px;align-items:start;font-size:14px;line-height:1.6;color:var(--text)}
+.qc-badge{font-size:10px;font-weight:600;border-radius:4px;padding:2px 8px;white-space:nowrap;margin-top:2px;flex-shrink:0}
+.qc-badge.normal{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+.qc-badge.hard{background:#fff5f5;color:#dc2626;border:1px solid #fca5a5}
+[data-theme="dark"] .qc-badge.hard{background:#1a0505;border-color:#7f1d1d}
+footer{border-top:1px solid var(--border);padding:32px 48px;text-align:center;font-size:13px;color:var(--muted2);max-width:900px;margin:0 auto}
+footer strong{color:var(--muted);font-weight:500}
+@media(max-width:700px){nav{padding:0 16px;gap:16px}.nav-links{display:none}.week-page{padding:20px 16px 60px}.week-body{padding:20px}.topic-body{padding:18px}footer{padding:24px 20px}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="../../dashboard.html" class="nav-logo">Unify</a>
+  <div class="nav-links">
+    <a href="../../dashboard.html">Dashboard</a>
+    <a href="../../careers.html">Career</a>
+    <a href="../../profile.html">Profile</a>
+    <a href="#" class="active">MEE 212</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">☾ Dark</button>
+</nav>
+
+<div class="week-page">
+  <div class="back-bar">
+    <a href="../../learn.html?course=MEE+212&name=MEE+212" class="back-btn">← Back to MEE 212</a>
+    <div class="week-nav">
+      <a href="W3.html" class="wnav-btn">← Prev</a>
+      <a href="W5.html" class="wnav-btn">Next →</a>
+    </div>
+  </div>
+
+  <div class="week-block">
+    <div class="week-header">
+      <span class="week-num">Week 4 of 12</span>
+      <span class="week-title">Flywheel — Theory &amp; Turning Moment Diagram</span>
+    </div>
+    <div class="week-body">
+      <p class="week-summary">A flywheel is like a rechargeable energy battery for rotating machines. When there's extra energy, it stores it. When energy is needed, it releases it. This week you learn what a flywheel is, what it does, and how to read the turning moment diagram that shows when it stores and releases energy.</p>
+      <div class="tags"><span class="tag">Flywheel</span><span class="tag">Turning moment diagram</span><span class="tag">Rotational energy</span><span class="tag">ICE</span><span class="tag">Jerk</span></div>
+      <div class="exam-box">
+        <div class="box-label">Exam focus</div>
+        <ol>
+          <li>Define a flywheel. State its functions. <span class="past-q">Common exam Q</span></li>
+          <li>Explain what a turning moment diagram shows and how to use it to find maximum fluctuation of energy.</li>
+          <li>What is "jerk" in the context of flywheel theory?</li>
+        </ol>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-header"><div class="topic-num">Topic 4.1</div><div class="topic-title">What is a Flywheel?</div></div>
+        <div class="topic-body">
+          <p>A flywheel is a heavy rotating disc attached to an engine's crankshaft. Its job is to smooth out the engine's operation. In a car engine (ICE), the pistons only produce power during the power stroke — the other strokes (intake, compression, exhaust) need energy to keep going. The flywheel absorbs the extra energy from the power stroke and gives it back during the other strokes.</p>
+          <div class="exam-def">
+            <div class="def-label">Exam-ready definition (from notes)</div>
+            <div class="def-text">A flywheel is a device that serves as a reservoir for rotational energy — e.g. ICE (Internal Combustion Engine). When an ICE is in operation, sometimes the power produced by the engine could be more than sufficient for the operation of the engine. If it is less sufficient, the power is being released.</div>
+          </div>
+          <div class="formula-block">
+            <div class="formula-label">Functions of a flywheel (from notes)</div>
+            <div class="formula-eq">1. Engine balancing — suppresses side-to-side motion</div>
+            <div class="formula-eq">2. Assists in engine start-up</div>
+            <div class="formula-eq">3. Serves as drive / drivetrain / stress reduction</div>
+            <div class="formula-eq">4. Assists in engine speed smoothening (avoids engine jerk)</div>
+            <div class="formula-eq">5. Serves as wave manipulation</div>
+            <div class="formula-vars">NB: Jerk is the rate of change of acceleration with time.</div>
+          </div>
+          <div class="diagram-wrap">
+            <div class="diagram-label">Turning moment diagram — crank angle vs torque</div>
+            <svg viewBox="0 0 600 240" width="100%" xmlns="http://www.w3.org/2000/svg">
+              <defs><marker id="ax" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#0a0a0a"/></marker></defs>
+              <line x1="50" y1="190" x2="570" y2="190" stroke="#0a0a0a" stroke-width="2" marker-end="url(#ax)"/>
+              <line x1="50" y1="210" x2="50" y2="30" stroke="#0a0a0a" stroke-width="2" marker-end="url(#ax)"/>
+              <text x="575" y="194" font-family="DM Sans,sans-serif" font-size="12" fill="#0a0a0a">Crank Angle</text>
+              <text x="55" y="28" font-family="Playfair Display,serif" font-size="13" fill="#0a0a0a" font-style="italic">T</text>
+              <line x1="50" y1="140" x2="570" y2="140" stroke="#999" stroke-width="1.5" stroke-dasharray="8,4"/>
+              <text x="52" y="135" font-family="DM Sans,sans-serif" font-size="11" fill="#999">Mean torque (Tₘ)</text>
+              <path d="M 50 190 Q 100 190 130 80 Q 160 30 190 80 Q 220 140 250 190 Q 280 210 310 190 Q 340 190 370 75 Q 400 30 430 80 Q 460 140 490 190 Q 520 210 540 190" stroke="#16a34a" stroke-width="2.5" fill="none"/>
+              <path d="M 130 80 Q 160 30 190 80 Q 220 140 250 190 L 130 190 Z" fill="#dcfce7" opacity="0.5"/>
+              <path d="M 370 75 Q 400 30 430 80 Q 460 140 490 190 L 370 190 Z" fill="#dcfce7" opacity="0.5"/>
+              <text x="155" y="165" font-family="DM Sans,sans-serif" font-size="11" fill="#16a34a">+a₁</text>
+              <text x="200" y="183" font-family="DM Sans,sans-serif" font-size="11" fill="#dc2626">−a₂</text>
+              <text x="395" y="165" font-family="DM Sans,sans-serif" font-size="11" fill="#16a34a">+a₃</text>
+              <text x="125" y="205" font-family="DM Sans,sans-serif" font-size="11" fill="#999">P</text>
+              <text x="245" y="205" font-family="DM Sans,sans-serif" font-size="11" fill="#999">90°</text>
+              <text x="355" y="205" font-family="DM Sans,sans-serif" font-size="11" fill="#999">180°</text>
+              <text x="475" y="205" font-family="DM Sans,sans-serif" font-size="11" fill="#999">270°</text>
+              <text x="20" y="80" font-family="DM Sans,sans-serif" font-size="10" fill="#999">Above line = storing energy</text>
+              <text x="20" y="95" font-family="DM Sans,sans-serif" font-size="10" fill="#dc2626">Below line = releasing energy</text>
+            </svg>
+          </div>
+          <div class="realworld-box">
+            <div class="box-label">Real-world example</div>
+            Think of a potter's wheel. The potter kicks it with a burst of energy, then the wheel keeps spinning smoothly on its own because of its mass. Without that heavy wheel, the clay would feel every tiny variation in push. The flywheel in an engine does the same thing — it keeps rotation smooth between power pulses.
+          </div>
+          <div class="quick-check">
+            <div class="qc-label">Quick check — Topic 4.1</div>
+            <div class="qc-list">
+              <div class="qc-item"><span class="qc-badge normal">Q1</span><span>Define a flywheel. Give one example of a machine that uses one.</span></div>
+              <div class="qc-item"><span class="qc-badge normal">Q2</span><span>List four functions of a flywheel.</span></div>
+              <div class="qc-item"><span class="qc-badge hard">Hard</span><span>On a turning moment diagram, what do the areas above and below the mean torque line represent? How does the flywheel respond to each?</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:32px;padding-top:24px;border-top:1px solid var(--border);">
+    <a href="W3.html" class="back-btn">← Week 3</a>
+    <a href="W5.html" class="back-btn" style="border-color:var(--accent);color:var(--accent-deep);">Next: Week 5 →</a>
+  </div>
+</div>
+
+<footer>
+  <strong>MEE 212 — Theory of Machines</strong> · Week 4 · Unify Platform · LASU Faculty of Engineering<br>
+  <span style="display:block;margin-top:6px">Lecturer: Prof Raji · Content sourced from lecture notes 2024–2025</span>
+</footer>
+
+<script>
+(function(){const saved=localStorage.getItem('unify-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);const b=document.getElementById('theme-btn');if(b)b.textContent=saved==='dark'?'☀ Light':'☾ Dark';}})();
+function toggleTheme(){const cur=document.documentElement.getAttribute('data-theme');const nxt=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',nxt);localStorage.setItem('unify-theme',nxt);document.getElementById('theme-btn').textContent=nxt==='dark'?'☀ Light':'☾ Dark';}
+</script>
+</body>
+</html>

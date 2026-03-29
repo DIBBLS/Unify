@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unify — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'DM Sans', sans-serif;
+  --bg: #f5f4f0; --surface: #ffffff; --surface2: #f8f7f3;
+  --border: #e0deda; --text: #0a0a0a; --text2: #555; --text3: #999;
+  --invert-bg: #0a0a0a; --invert-text: #f5f4f0; --invert-sub: #888; --invert-border: #222;
+  --green: #4ade80; --green-deep: #16a34a; --green-bg: rgba(74,222,128,0.1); --green-border: rgba(74,222,128,0.3);
+  --red: #ef4444; --red-bg: rgba(239,68,68,0.08); --red-border: rgba(239,68,68,0.25);
+  --amber: #fbbf24; --amber-bg: rgba(251,191,36,0.1); --amber-border: rgba(251,191,36,0.3);
+}
+[data-theme="dark"] {
+  --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #222; --border: #2a2a2a;
+  --text: #f0efeb; --text2: #aaa; --text3: #666;
+  --invert-bg: #f0efeb; --invert-text: #0a0a0a; --invert-sub: #888; --invert-border: #e0deda;
+}
+body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; }
+
+nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px; border-bottom: 1px solid var(--border);
+  background: var(--bg); position: sticky; top: 0; z-index: 100; height: 60px;
+}
+.nav-logo { font-family: var(--font-display); font-weight: 900; font-size: 20px; letter-spacing: -1px; text-decoration: none; color: var(--text); display: flex; align-items: center; gap: 10px; }
+.nav-admin-badge { font-family: var(--font-body); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; background: var(--text); color: var(--bg); padding: 3px 8px; border-radius: 4px; }
+.nav-right { display: flex; gap: 10px; align-items: center; }
+.nav-user { font-size: 12px; color: var(--text3); }
+.btn-nav { font-size: 12px; color: var(--text3); background: none; border: 1px solid var(--border); padding: 6px 14px; border-radius: 4px; cursor: pointer; font-family: var(--font-body); transition: all .15s; }
+.btn-nav:hover { border-color: var(--text); color: var(--text); }
+@media(max-width:768px) { nav { padding: 0 16px; } .nav-user { display:none; } }
+
+.page-header { background: var(--invert-bg); color: var(--invert-text); padding: 32px 48px 28px; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+.page-title { font-family: var(--font-display); font-size: clamp(22px,2.5vw,34px); font-weight: 900; letter-spacing: -1px; margin-bottom: 6px; }
+.page-sub { font-size: 13px; color: var(--invert-sub); }
+.hod-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.35); border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #fbbf24; margin-top: 8px; }
+@media(max-width:768px) { .page-header { padding: 24px 16px 20px; } }
+
+.admin-body { padding: 32px 48px; max-width: 960px; }
+@media(max-width:768px) { .admin-body { padding: 20px 16px; } }
+
+.section { margin-bottom: 44px; }
+.section-label { font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--text3); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+.card-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.card-sub { font-size: 12px; color: var(--text3); margin-bottom: 20px; line-height: 1.6; }
+
+.form-row { display: grid; gap: 12px; margin-bottom: 14px; }
+.form-row.two { grid-template-columns: 1fr 1fr; }
+@media(max-width:600px) { .form-row.two { grid-template-columns: 1fr; } }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); }
+.form-input, .form-select, .form-textarea {
+  background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 14px; font-size: 13px; color: var(--text); font-family: var(--font-body); width: 100%;
+  transition: border-color .15s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--text3); }
+.form-input::placeholder { color: var(--text3); }
+.form-textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; font-family: var(--font-body); cursor: pointer; border: none; transition: all .15s; }
+.btn-primary { background: var(--text); color: var(--bg); }
+.btn-primary:hover { opacity: .82; }
+.btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+.btn-green { background: var(--green-bg); color: var(--green-deep); border: 1px solid var(--green-border); }
+.btn-green:hover { background: var(--green-deep); color: white; }
+.btn-icon { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer; color: var(--text3); transition: all .15s; font-family: var(--font-body); }
+.btn-icon:hover { border-color: var(--red); color: var(--red); }
+.btn-revoke { background: none; border: 1px solid var(--red-border); border-radius: 6px; padding: 5px 12px; font-size: 11px; font-weight: 600; cursor: pointer; color: var(--red); transition: all .15s; font-family: var(--font-body); }
+.btn-revoke:hover { background: var(--red); color: white; }
+
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.chip-confirmed { background: var(--green-bg); color: var(--green-deep); border: 1px solid var(--green-border); }
+.chip-postponed { background: var(--amber-bg); color: #92400e; border: 1px solid var(--amber-border); }
+[data-theme="dark"] .chip-postponed { color: var(--amber); }
+.chip-cancelled { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+.chip-venue_change { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+
+.update-log { display: flex; flex-direction: column; gap: 10px; }
+.update-item { border: 1px solid var(--border); border-radius: 10px; padding: 16px; background: var(--surface); display: grid; grid-template-columns: 64px 1fr auto; gap: 14px; align-items: start; }
+.update-course-code { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); padding-top: 2px; }
+.update-msg { font-size: 13px; color: var(--text2); margin-top: 5px; }
+.update-meta { font-size: 11px; color: var(--text3); margin-top: 5px; }
+.update-detail { font-size: 12px; color: var(--text2); margin-top: 4px; }
+
+.admin-list { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+.admin-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+.admin-item-name { font-size: 13px; font-weight: 600; }
+.admin-item-email { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.super-badge { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--amber); background: var(--amber-bg); border: 1px solid var(--amber-border); padding: 2px 8px; border-radius: 10px; }
+
+.empty-state { text-align: center; padding: 40px 24px; color: var(--text3); }
+.empty-icon { font-size: 28px; margin-bottom: 10px; }
+.empty-text { font-size: 13px; }
+
+.toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(120px); background: var(--text); color: var(--bg); padding: 12px 24px; border-radius: 50px; font-size: 13px; font-weight: 500; transition: transform .4s cubic-bezier(.34,1.56,.64,1); z-index: 999; white-space: nowrap; box-shadow: 0 8px 32px rgba(0,0,0,.2); }
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+.loading-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; gap: 14px; }
+.loading-logo { font-family: var(--font-display); font-weight: 900; font-size: 32px; letter-spacing: -1px; }
+.loading-sub { font-size: 13px; color: var(--text3); }
+
+.denied-wrap { display: none; text-align: center; padding: 100px 24px; }
+.denied-title { font-family: var(--font-display); font-size: 28px; font-weight: 900; margin-bottom: 12px; }
+.denied-sub { font-size: 14px; color: var(--text3); margin-bottom: 24px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">Unify</div>
+  <div class="loading-sub">Verifying access...</div>
+</div>
+
+<div class="denied-wrap" id="accessDenied">
+  <div class="denied-title">Access Restricted</div>
+  <div class="denied-sub">This page is for Faculty Administrators only.<br>If you believe this is an error, contact the Sub Dean's office.</div>
+  <a href="dashboard.html" style="font-size:13px;color:var(--text3);">← Back to Dashboard</a>
+</div>
+
+<div id="mainContent" style="display:none;">
+
+<nav>
+  <a href="dashboard.html" class="nav-logo">
+    Unify
+    <span class="nav-admin-badge">Admin</span>
+  </a>
+  <div class="nav-right">
+    <button class="btn-nav" onclick="toggleTheme()" id="themeBtn">☾ Dark</button>
+    <span class="nav-user" id="navUser"></span>
+    <button class="btn-nav" id="signOutBtn">Sign out</button>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div>
+    <div class="page-title">Faculty Admin Panel</div>
+    <div class="page-sub">LASU Faculty of Engineering · 2025/2026 Second Semester</div>
+    <div class="hod-badge">HOD / Coordinator Access</div>
+  </div>
+  <div style="text-align:right;color:var(--invert-sub);font-size:12px;" id="adminNameDisplay"></div>
+</div>
+
+<div class="admin-body">
+
+  <!-- POST UPDATE -->
+  <div class="section">
+    <div class="section-label">Post a Course Update</div>
+    <div class="card">
+      <div class="card-title">Notify the class</div>
+      <div class="card-sub">Updates are pushed instantly to every student who has this course in their timetable. The course card will reflect your changes and students will see a notification badge.</div>
+
+      <div class="form-row two">
+        <div class="form-group">
+          <label class="form-label">Course Code</label>
+          <input class="form-input" id="upCode" placeholder="e.g. ECE 308" oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-select" id="upStatus">
+            <option value="confirmed">Confirmed — class is holding</option>
+            <option value="postponed">Postponed — rescheduled</option>
+            <option value="cancelled">Cancelled — class won't hold</option>
+            <option value="venue_change">Venue change only</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row two">
+        <div class="form-group">
+          <label class="form-label">Lecturer Name</label>
+          <input class="form-input" id="upLecturer" placeholder="e.g. Dr. Adeyemi">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Venue / Location</label>
+          <input class="form-input" id="upVenue" placeholder="e.g. ECE Block, LT1">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Message to Students <span style="font-size:11px;color:var(--text3);text-transform:none;letter-spacing:0;font-weight:400;">(optional)</span></label>
+          <textarea class="form-textarea" id="upMessage" placeholder="e.g. Venue changed to Main Auditorium due to generator fault in LT1. Bring textbook."></textarea>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:6px;">
+        <div style="font-size:12px;color:var(--text3);">Posting as: <span id="postedAsLabel" style="color:var(--text2);font-weight:500;"></span></div>
+        <button class="btn btn-primary" id="postBtn" onclick="postUpdate()">Post Update →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECENT UPDATES -->
+  <div class="section">
+    <div class="section-label">Recent Updates</div>
+    <div id="updateLog">
+      <div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No updates posted yet.</div></div>
+    </div>
+  </div>
+
+  <!-- GRANT ADMIN -->
+  <div class="section">
+    <div class="section-label">Admin Access</div>
+    <div class="card">
+      <div class="card-title">Grant access to an HOD or Coordinator</div>
+      <div class="card-sub">The person must have already signed into Unify at least once. Enter their registered email and grant access — they'll see this admin panel on their next login.</div>
+      <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+        <div class="form-group" style="flex:1;min-width:200px;">
+          <label class="form-label">Email Address</label>
+          <input class="form-input" id="grantEmail" placeholder="e.g. hod.ece@lasu.edu.ng" type="email">
+        </div>
+        <button class="btn btn-green" onclick="grantAdmin()" style="height:42px;flex-shrink:0;">Grant Access</button>
+      </div>
+      <div id="grantFeedback" style="font-size:12px;margin-top:10px;min-height:16px;"></div>
+    </div>
+
+    <div class="admin-list" id="adminList"></div>
+  </div>
+
+</div>
+</div><!-- /mainContent -->
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc,
+  collection, query, orderBy, onSnapshot, where, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const SUPER_ADMIN_EMAIL = "olotuchjosh@gmail.com";
+
+const app = initializeApp({
+  apiKey: "AIzaSyBjZyfNNpXZFJwB7GKXVeSzLTVknfwCa8I",
+  authDomain: "unify-b4316.firebaseapp.com",
+  projectId: "unify-b4316",
+  storageBucket: "unify-b4316.firebasestorage.app",
+  messagingSenderId: "114594366615",
+  appId: "1:114594366115:web:44ef821b4618f1a24615d2",
+});
+
+const auth = getAuth(app);
+const db = getFirestore(app);
+let me = null, myProfile = null;
+
+// ── AUTH GATE ────────────────────────────────────────────
+onAuthStateChanged(auth, async user => {
+  document.getElementById('loadingScreen').style.display = 'none';
+
+  if (!user) { window.location.href = 'auth.html'; return; }
+  me = user;
+
+  const snap = await getDoc(doc(db, 'users', user.uid));
+  myProfile = snap.exists() ? snap.data() : {};
+
+  const isSuperAdmin = user.email === SUPER_ADMIN_EMAIL;
+  const isAdmin = isSuperAdmin || myProfile.isAdmin === true;
+
+  // Bootstrap: ensure super-admin flag is set
+  if (isSuperAdmin && !myProfile.isAdmin) {
+    await setDoc(doc(db, 'users', user.uid), { isAdmin: true, email: user.email }, { merge: true });
+  }
+
+  if (!isAdmin) {
+    document.getElementById('accessDenied').style.display = 'block';
+    return;
+  }
+
+  const displayName = myProfile.name || user.email;
+  document.getElementById('mainContent').style.display = 'block';
+  document.getElementById('navUser').textContent = user.email;
+  document.getElementById('postedAsLabel').textContent = displayName;
+  document.getElementById('adminNameDisplay').textContent = displayName;
+
+  initTheme();
+  listenToUpdates();
+  loadAdmins();
+});
+
+document.getElementById('signOutBtn').addEventListener('click', async () => {
+  await signOut(auth); window.location.href = 'auth.html';
+});
+
+// ── POST UPDATE ───────────────────────────────────────────
+window.postUpdate = async function() {
+  const code    = document.getElementById('upCode').value.trim().toUpperCase();
+  const status  = document.getElementById('upStatus').value;
+  const lecturer = document.getElementById('upLecturer').value.trim();
+  const venue   = document.getElementById('upVenue').value.trim();
+  const message = document.getElementById('upMessage').value.trim();
+
+  if (!code) { showToast('Enter a course code first'); return; }
+
+  const btn = document.getElementById('postBtn');
+  btn.disabled = true; btn.textContent = 'Posting...';
+
+  try {
+    const ts = Date.now();
+    const updateId = code.replace(/\s+/g, '_') + '_' + ts;
+    const payload = {
+      courseCode: code, status,
+      lecturer: lecturer || null,
+      venue: venue || null,
+      message: message || null,
+      postedBy: myProfile?.name || me.email,
+      postedByEmail: me.email,
+      postedAt: serverTimestamp(),
+    };
+
+    // History log entry
+    await setDoc(doc(db, 'courseUpdates', updateId), payload);
+
+    // Latest canonical state for this course (what students read live)
+    await setDoc(doc(db, 'courseStatus', code.replace(/\s+/g, '_')), {
+      ...payload, updatedAt: serverTimestamp(),
+    });
+
+    ['upCode','upLecturer','upVenue','upMessage'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('upStatus').value = 'confirmed';
+    showToast('Update posted — students notified');
+  } catch(e) {
+    console.error(e); showToast('Error posting update');
+  }
+  btn.disabled = false; btn.textContent = 'Post Update →';
+};
+
+// ── LIVE UPDATE LOG ───────────────────────────────────────
+function listenToUpdates() {
+  const q = query(collection(db, 'courseUpdates'), orderBy('postedAt', 'desc'));
+  onSnapshot(q, snap => {
+    const el = document.getElementById('updateLog');
+    if (snap.empty) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No updates posted yet.</div></div>`;
+      return;
+    }
+    const chips = { confirmed:'chip-confirmed', postponed:'chip-postponed', cancelled:'chip-cancelled', venue_change:'chip-venue_change' };
+    const labels = { confirmed:'Confirmed', postponed:'Postponed', cancelled:'Cancelled', venue_change:'Venue Change' };
+
+    el.innerHTML = `<div class="update-log">` + snap.docs.slice(0,40).map(d => {
+      const u = d.data();
+      const ts = u.postedAt?.toDate();
+      const timeStr = ts ? ts.toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + ' · ' + ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : 'Just now';
+      const chip = `<span class="chip ${chips[u.status]||'chip-venue_change'}">${labels[u.status]||u.status}</span>`;
+      const details = [u.lecturer?`Lecturer: <strong>${u.lecturer}</strong>`:null, u.venue?`Venue: <strong>${u.venue}</strong>`:null].filter(Boolean).join(' · ');
+
+      return `<div class="update-item">
+        <div class="update-course-code">${u.courseCode}</div>
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">${chip}${u.message?`<span style="font-size:13px;color:var(--text2);">${u.message}</span>`:''}</div>
+          ${details?`<div class="update-detail">${details}</div>`:''}
+          <div class="update-meta">Posted by ${u.postedBy} · ${timeStr}</div>
+        </div>
+        <button class="btn-icon" onclick="delUpdate('${d.id}')" title="Delete">✕</button>
+      </div>`;
+    }).join('') + `</div>`;
+  });
+}
+
+window.delUpdate = async function(id) {
+  if (!confirm('Delete this update? Students will no longer see it in their notifications.')) return;
+  try { await deleteDoc(doc(db, 'courseUpdates', id)); showToast('Deleted'); } catch(e) { showToast('Error'); }
+};
+
+// ── GRANT / REVOKE ADMIN ──────────────────────────────────
+window.grantAdmin = async function() {
+  const email = document.getElementById('grantEmail').value.trim().toLowerCase();
+  const fb = document.getElementById('grantFeedback');
+  if (!email) { fb.style.color='var(--red)'; fb.textContent='Enter an email address.'; return; }
+
+  fb.style.color='var(--text3)'; fb.textContent='Looking up account...';
+
+  try {
+    const q = query(collection(db,'users'), where('email','==',email));
+    const snap = await getDocs(q);
+    if (snap.empty) {
+      fb.style.color='var(--red)'; fb.textContent=`No Unify account found for ${email}. They need to sign up first.`; return;
+    }
+    const userSnap = snap.docs[0];
+    if (userSnap.data().isAdmin) {
+      fb.style.color='var(--amber)'; fb.textContent=`${email} already has admin access.`; return;
+    }
+    await updateDoc(userSnap.ref, { isAdmin: true });
+    fb.style.color='var(--green-deep)'; fb.textContent=`Admin access granted to ${email}.`;
+    document.getElementById('grantEmail').value = '';
+    showToast(`${email} is now an admin`);
+    loadAdmins();
+  } catch(e) {
+    console.error(e); fb.style.color='var(--red)'; fb.textContent='Error — check Firestore rules.';
+  }
+};
+
+window.revokeAdmin = async function(uid, email) {
+  if (!confirm(`Revoke admin access for ${email}?`)) return;
+  try {
+    await updateDoc(doc(db,'users',uid), { isAdmin: false });
+    showToast(`Access revoked for ${email}`); loadAdmins();
+  } catch(e) { showToast('Error revoking access'); }
+};
+
+async function loadAdmins() {
+  const container = document.getElementById('adminList');
+  try {
+    const snap = await getDocs(query(collection(db,'users'), where('isAdmin','==',true)));
+    if (snap.empty) { container.innerHTML=''; return; }
+    container.innerHTML = snap.docs.map(d => {
+      const u = d.data();
+      const isSuperAdmin = u.email === SUPER_ADMIN_EMAIL;
+      return `<div class="admin-item">
+        <div>
+          <div class="admin-item-name">${u.name||'—'}</div>
+          <div class="admin-item-email">${u.email||''} ${u.department?'· '+u.department:''}</div>
+        </div>
+        ${isSuperAdmin
+          ? `<span class="super-badge">Super Admin</span>`
+          : `<button class="btn-revoke" onclick="revokeAdmin('${d.id}','${u.email}')">Revoke</button>`
+        }
+      </div>`;
+    }).join('');
+  } catch(e) { console.error(e); }
+}
+
+// ── THEME ─────────────────────────────────────────────────
+function initTheme() {
+  const saved = localStorage.getItem('unify-theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  document.getElementById('themeBtn').textContent = saved === 'dark' ? '☀ Light' : '☾ Dark';
+}
+window.toggleTheme = function() {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const nxt = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', nxt);
+  localStorage.setItem('unify-theme', nxt);
+  document.getElementById('themeBtn').textContent = nxt === 'dark' ? '☀ Light' : '☾ Dark';
+};
+
+// ── TOAST ─────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>

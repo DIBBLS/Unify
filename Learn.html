@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unify — Learn</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --font-display: 'Playfair Display', serif; --font-body: 'DM Sans', sans-serif;
+  --bg: #f5f4f0; --surface: #ffffff; --surface2: #f8f7f3; --border: #e0deda;
+  --text: #0a0a0a; --text2: #555; --text3: #999;
+  --invert-bg: #0a0a0a; --invert-text: #f5f4f0; --invert-sub: #555; --invert-border: #1f1f1f;
+  --green: #4ade80; --green-bg: rgba(74,222,128,0.1); --green-border: rgba(74,222,128,0.25);
+  --yellow: #fbbf24; --yellow-bg: rgba(251,191,36,0.1);
+}
+[data-theme="dark"] {
+  --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #222; --border: #2a2a2a;
+  --text: #f0efeb; --text2: #aaa; --text3: #666;
+  --invert-bg: #f0efeb; --invert-text: #0a0a0a; --invert-sub: #aaa; --invert-border: #e0deda;
+}
+body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; transition: background 0.25s, color 0.25s; }
+
+/* ── NAV ── */
+nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; border-bottom: 1px solid var(--border);
+  background: var(--bg); position: sticky; top: 0; z-index: 100; height: 56px;
+  transition: background 0.25s, border-color 0.25s;
+}
+.nav-logo { font-family: var(--font-display); font-weight: 900; font-size: 18px; letter-spacing: -1px; text-decoration: none; color: var(--text); }
+.nav-course-name { font-size: 13px; font-weight: 500; color: var(--text3); max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav-right { display: flex; align-items: center; gap: 10px; }
+.nav-btn { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 12px; cursor: pointer; color: var(--text3); font-family: var(--font-body); transition: all 0.15s; text-decoration: none; display: flex; align-items: center; }
+.nav-btn:hover { border-color: var(--text); color: var(--text); }
+
+/* ── LAYOUT ── */
+.learn-layout { display: grid; grid-template-columns: 280px 1fr; min-height: calc(100vh - 56px); }
+
+/* ── SIDEBAR ── */
+.learn-sidebar {
+  border-right: 1px solid var(--border); background: var(--bg);
+  position: sticky; top: 56px; height: calc(100vh - 56px);
+  overflow-y: auto; transition: background 0.25s, border-color 0.25s;
+}
+.sidebar-course-header {
+  padding: 20px 20px 16px; border-bottom: 1px solid var(--border);
+}
+.sidebar-course-code { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
+.sidebar-course-name { font-family: var(--font-display); font-size: 16px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.3; margin-bottom: 12px; }
+.course-progress-wrap { display: flex; align-items: center; gap: 8px; }
+.course-progress-bar { flex: 1; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.course-progress-fill { height: 100%; background: var(--green); border-radius: 3px; transition: width 0.6s ease; }
+.course-progress-pct { font-size: 11px; color: var(--text3); min-width: 30px; }
+
+/* WEEK LIST */
+.week-list { padding: 10px 0; }
+.week-item {
+  padding: 0 16px; cursor: pointer;
+}
+.week-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 8px; border-radius: 8px; transition: background 0.15s;
+}
+.week-item:hover .week-header { background: var(--surface2); }
+.week-item.active .week-header { background: var(--surface); border: 1px solid var(--border); }
+.week-check {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid var(--border); display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0; font-size: 10px;
+  transition: all 0.2s;
+}
+.week-item.done .week-check { background: var(--green); border-color: var(--green); color: white; }
+.week-item.active .week-check { border-color: var(--text); }
+.week-label { font-size: 13px; font-weight: 500; flex: 1; }
+.week-topic { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.week-time { font-size: 10px; color: var(--text3); background: var(--surface2); padding: 2px 7px; border-radius: 8px; border: 1px solid var(--border); white-space: nowrap; }
+.week-progress-count { font-size: 10px; color: var(--text3); white-space: nowrap; }
+.week-item.done .week-progress-count { color: var(--green); }
+
+/* Course outline link in sidebar */
+.sidebar-outline-link {
+  display: flex; align-items: center; gap: 10px;
+  margin: 0 16px 4px; padding: 10px 12px; border-radius: 8px;
+  background: var(--surface); border: 1px solid var(--border);
+  text-decoration: none; color: var(--text2); font-size: 13px;
+  font-weight: 500; transition: all 0.15s;
+}
+.sidebar-outline-link:hover { border-color: var(--text); color: var(--text); }
+.sidebar-outline-link .ol-icon { font-size: 14px; }
+.sidebar-outline-link .ol-label { flex: 1; }
+.sidebar-outline-link .ol-arrow { font-size: 11px; color: var(--text3); }
+.sidebar-outline-link.unavailable { opacity: 0.45; cursor: default; }
+.sidebar-outline-link.unavailable:hover { border-color: var(--border); color: var(--text2); }
+
+/* Week landing page */
+.week-landing { padding: 32px 48px; max-width: 820px; }
+.wl-eyebrow { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+.wl-title { font-family: var(--font-display); font-size: clamp(24px,3vw,36px); font-weight: 900; letter-spacing: -1px; margin-bottom: 10px; line-height: 1.2; }
+.wl-summary { font-size: 15px; color: var(--text2); line-height: 1.8; margin-bottom: 28px; max-width: 600px; }
+.wl-meta { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px; }
+.wl-pill { font-size: 12px; padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text3); }
+.wl-topics { display: flex; flex-direction: column; gap: 8px; margin-bottom: 32px; }
+.wl-topic-row {
+  display: flex; align-items: center; gap: 12px; padding: 14px 18px;
+  border: 1px solid var(--border); border-radius: 10px; background: var(--surface);
+  cursor: pointer; transition: all 0.15s;
+}
+.wl-topic-row:hover { border-color: var(--text); }
+.wl-topic-row.done { border-color: var(--green-border); }
+.wl-topic-circle {
+  width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; flex-shrink: 0; transition: all 0.2s;
+}
+.wl-topic-row.done .wl-topic-circle { background: var(--green); border-color: var(--green); color: #0a0a0a; }
+.wl-topic-name { flex: 1; font-size: 14px; font-weight: 500; }
+.wl-topic-status { font-size: 11px; color: var(--text3); }
+.wl-topic-row.done .wl-topic-status { color: var(--green); }
+.wl-ready-badge { font-size: 9px; font-weight: 700; letter-spacing: .04em; padding: 2px 7px; border-radius: 4px; background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.wl-start-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 13px 28px; background: var(--text); color: var(--bg);
+  border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: var(--font-body); transition: opacity 0.15s;
+}
+.wl-start-btn:hover { opacity: 0.8; }
+
+/* SUBTOPIC inside week */
+.week-subtopics { padding: 4px 0 8px 44px; display: none; }
+.week-item.active .week-subtopics { display: block; }
+.subtopic-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 8px; border-radius: 6px; cursor: pointer;
+  transition: background 0.15s; font-size: 12px; color: var(--text2);
+}
+.subtopic-item:hover { background: var(--surface2); }
+.subtopic-item.active { color: var(--text); font-weight: 500; }
+.subtopic-dot {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 1.5px solid var(--border); background: transparent;
+  flex-shrink: 0; transition: all 0.2s; display: flex;
+  align-items: center; justify-content: center; font-size: 8px; color: transparent;
+}
+.subtopic-item.done .subtopic-dot {
+  background: var(--green); border-color: var(--green); color: #0a0a0a;
+}
+.subtopic-item.active .subtopic-dot { border-color: var(--text); }
+
+/* ── MAIN CONTENT ── */
+.learn-main { padding: 0; min-width: 0; }
+
+/* LESSON HEADER */
+.lesson-header {
+  background: var(--invert-bg); color: var(--invert-text);
+  padding: 32px 48px; transition: background 0.25s;
+}
+.lesson-breadcrumb { font-size: 11px; color: var(--invert-sub); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+.lesson-title { font-family: var(--font-display); font-size: clamp(22px, 2.5vw, 32px); font-weight: 900; letter-spacing: -1px; margin-bottom: 8px; line-height: 1.2; }
+.lesson-meta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.lesson-meta-item { font-size: 12px; color: var(--invert-sub); display: flex; align-items: center; gap: 5px; }
+.lesson-meta-badge { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); padding: 3px 10px; border-radius: 10px; font-size: 11px; color: var(--invert-sub); }
+[data-theme="dark"] .lesson-meta-badge { background: rgba(0,0,0,0.15); border-color: rgba(0,0,0,0.2); }
+
+/* LESSON BODY */
+.lesson-body { padding: 32px 48px; max-width: 820px; }
+
+/* SECTIONS */
+.lesson-section { margin-bottom: 36px; }
+.lesson-section-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+}
+.lesson-section-icon { font-size: 18px; }
+.lesson-section-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+.lesson-section-num { font-size: 11px; color: var(--text3); background: var(--surface2); padding: 2px 8px; border-radius: 8px; border: 1px solid var(--border); }
+
+/* EXPLANATION */
+.explanation-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 24px; line-height: 1.8;
+  font-size: 14px; color: var(--text2);
+}
+.explanation-card p { margin-bottom: 12px; }
+.explanation-card p:last-child { margin-bottom: 0; }
+.explanation-highlight {
+  background: var(--invert-bg); color: var(--invert-text);
+  padding: 14px 18px; border-radius: 8px; font-size: 13px;
+  font-weight: 500; line-height: 1.6; margin: 14px 0;
+}
+
+/* MATERIALS */
+.materials-list { display: flex; flex-direction: column; gap: 8px; }
+.material-btn {
+  display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+  border: 1px solid var(--border); border-radius: 10px; background: var(--surface);
+  cursor: pointer; transition: all 0.15s; text-align: left; font-family: var(--font-body);
+  width: 100%; color: var(--text); text-decoration: none;
+}
+.material-btn:hover { border-color: var(--text); box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.material-icon { font-size: 20px; flex-shrink: 0; }
+.material-info { flex: 1; }
+.material-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.material-sub { font-size: 11px; color: var(--text3); }
+.material-arrow { font-size: 14px; color: var(--text3); }
+.material-not-available { opacity: 0.4; cursor: default; }
+.material-not-available:hover { border-color: var(--border); box-shadow: none; }
+
+/* EXAMPLES */
+.example-card {
+  border: 1px solid var(--border); border-radius: 10px;
+  overflow: hidden; margin-bottom: 10px;
+}
+.example-header {
+  background: var(--surface2); padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  border-bottom: 1px solid var(--border);
+}
+.example-body {
+  padding: 16px; background: var(--surface);
+  font-size: 13px; color: var(--text2); line-height: 1.8;
+  display: none;
+}
+.example-body.open { display: block; }
+.example-math {
+  background: var(--invert-bg); color: var(--invert-text);
+  padding: 12px 16px; border-radius: 6px; font-family: monospace;
+  font-size: 14px; margin: 10px 0; overflow-x: auto;
+}
+
+/* QUESTIONS */
+.question-card {
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 18px; background: var(--surface); margin-bottom: 10px;
+}
+.question-type-badge {
+  display: inline-block; font-size: 10px; letter-spacing: 1px;
+  text-transform: uppercase; padding: 2px 9px; border-radius: 4px;
+  margin-bottom: 10px; font-weight: 500;
+}
+.q-practice { background: var(--yellow-bg); color: var(--yellow); border: 1px solid rgba(251,191,36,0.2); }
+.q-exam { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.question-text { font-size: 14px; line-height: 1.7; color: var(--text); margin-bottom: 10px; }
+.question-year { font-size: 11px; color: var(--text3); }
+.question-math {
+  background: var(--surface2); border: 1px solid var(--border);
+  padding: 12px 16px; border-radius: 6px; font-family: monospace;
+  font-size: 13px; margin: 8px 0; overflow-x: auto;
+}
+.show-solution-btn {
+  background: none; border: 1px solid var(--border); border-radius: 6px;
+  padding: 6px 14px; font-size: 12px; cursor: pointer; color: var(--text3);
+  font-family: var(--font-body); transition: all 0.15s; margin-top: 8px;
+}
+.show-solution-btn:hover { border-color: var(--text); color: var(--text); }
+.solution-box {
+  background: var(--green-bg); border: 1px solid var(--green-border);
+  border-radius: 8px; padding: 14px; margin-top: 10px;
+  font-size: 13px; color: var(--text2); line-height: 1.7; display: none;
+}
+.solution-box.open { display: block; }
+/* Practice questions */
+.practice-section { margin-bottom: 36px; }
+.practice-intro { font-size: 13px; color: var(--text3); margin-bottom: 14px; line-height: 1.6; }
+
+/* ── FULL LESSON — native inline rendering ── */
+.full-lesson-section {
+  border: 1.5px solid var(--green-border);
+  border-radius: 14px; overflow: hidden; margin-bottom: 36px;
+  background: var(--surface);
+}
+.fl-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px; background: var(--green-bg);
+  border-bottom: 1.5px solid var(--green-border); gap: 12px; flex-wrap: wrap;
+}
+.fl-header-left { display: flex; align-items: center; gap: 12px; }
+.fl-badge {
+  font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  background: var(--green); color: #0a0a0a; padding: 3px 10px; border-radius: 20px;
+}
+.fl-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.fl-subtitle { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.fl-header-right { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+.fl-expand-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 16px; background: var(--text); color: var(--bg);
+  border: none; border-radius: 7px; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: var(--font-body); transition: opacity .15s;
+  white-space: nowrap;
+}
+.fl-expand-btn:hover { opacity: .8; }
+.fl-expand-btn.open { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+.fl-fullpage-btn {
+  font-size: 12px; color: var(--text3); text-decoration: none;
+  padding: 8px 12px; border: 1px solid var(--border); border-radius: 7px;
+  transition: all .15s; white-space: nowrap;
+}
+.fl-fullpage-btn:hover { color: var(--text); border-color: var(--text); }
+.fl-preview {
+  padding: 16px 24px; font-size: 14px; color: var(--text2);
+  line-height: 1.75; border-bottom: 1px solid var(--border);
+}
+.fl-body {
+  display: none; padding: 0;
+}
+.fl-body.open { display: block; }
+
+/* Week content styles rendered inside fl-body */
+.fl-content { padding: 24px; }
+.fl-week-summary {
+  font-size: 15px; color: var(--text2); line-height: 1.8;
+  margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border);
+}
+.fl-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; }
+.fl-tag {
+  font-size: 11px; font-weight: 500; background: var(--surface2);
+  color: var(--text3); border: 1px solid var(--border); border-radius: 20px; padding: 3px 12px;
+}
+.fl-topic { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 20px; overflow: hidden; }
+.fl-topic-header {
+  background: var(--surface2); padding: 14px 20px;
+  border-bottom: 1px solid var(--border); cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: background .15s;
+}
+.fl-topic-header:hover { background: var(--border); }
+.fl-topic-num { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); margin-bottom: 2px; }
+.fl-topic-title { font-size: 15px; font-weight: 600; color: var(--text); }
+.fl-topic-chevron { font-size: 12px; color: var(--text3); transition: transform .2s; flex-shrink: 0; }
+.fl-topic-header.open .fl-topic-chevron { transform: rotate(180deg); }
+.fl-topic-body { padding: 20px; display: none; }
+.fl-topic-body.open { display: block; }
+.fl-topic-body p { font-size: 14px; line-height: 1.8; margin-bottom: 14px; color: var(--text2); }
+.fl-formula {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px 20px; margin: 14px 0;
+}
+.fl-formula-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--green); margin-bottom: 8px;
+}
+[data-theme="dark"] .fl-formula-label { color: var(--green); }
+.fl-formula-eq {
+  font-family: var(--font-display); font-size: 16px; font-style: italic;
+  color: var(--text); margin-bottom: 4px; line-height: 1.6;
+}
+.fl-formula-vars { font-size: 12px; color: var(--text3); line-height: 1.7; margin-top: 6px; }
+.fl-step {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 16px; margin: 6px 0;
+}
+.fl-step-label {
+  font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--green); margin-bottom: 4px;
+}
+.fl-step p { font-size: 13px; margin-bottom: 0; color: var(--text2); }
+.fl-analogy {
+  background: #f0fdf4; border-left: 3px solid #bbf7d0;
+  border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 12px 0;
+  font-size: 14px; line-height: 1.75; color: var(--text);
+}
+[data-theme="dark"] .fl-analogy { background: #052e16; border-left-color: #166534; }
+.fl-analogy-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #16a34a; margin-bottom: 6px; }
+.fl-mistake {
+  background: #fff5f5; border-left: 3px solid #fca5a5;
+  border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 12px 0;
+  font-size: 14px; line-height: 1.75; color: var(--text);
+}
+[data-theme="dark"] .fl-mistake { background: #1a0505; border-left-color: #7f1d1d; }
+.fl-mistake-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #dc2626; margin-bottom: 6px; }
+.fl-examdef {
+  background: var(--surface2); border: 1.5px solid var(--green-border);
+  border-radius: 10px; padding: 14px 18px; margin: 12px 0;
+}
+.fl-examdef-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--green); margin-bottom: 6px; }
+.fl-examdef-text { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.7; }
+.fl-diagram {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 20px; margin: 14px 0;
+}
+.fl-diagram-label {
+  font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 12px; text-align: center;
+}
+
+.practice-card {
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 18px; background: var(--surface); margin-bottom: 10px;
+}
+.practice-badge { display: inline-block; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 2px 9px; border-radius: 4px; margin-bottom: 10px; font-weight: 600; background: var(--yellow-bg); color: var(--yellow); border: 1px solid rgba(251,191,36,0.2); }
+.reveal-btn { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 12px; cursor: pointer; color: var(--text3); font-family: var(--font-body); transition: all 0.15s; margin-top: 10px; }
+.reveal-btn:hover { border-color: var(--green); color: var(--green); }
+.reveal-answer { background: var(--green-bg); border: 1px solid var(--green-border); border-radius: 8px; padding: 14px; margin-top: 10px; font-size: 13px; color: var(--text2); line-height: 1.7; display: none; }
+.reveal-answer.open { display: block; }
+
+/* VIDEO */
+.video-embed { border-radius: 10px; overflow: hidden; background: var(--surface2); border: 1px solid var(--border); aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; }
+.video-embed iframe { width: 100%; height: 100%; border: none; }
+.video-placeholder { text-align: center; padding: 40px; color: var(--text3); }
+.video-placeholder-icon { font-size: 36px; margin-bottom: 10px; opacity: 0.3; }
+
+/* SUMMARY */
+.summary-card {
+  background: var(--invert-bg); color: var(--invert-text);
+  border-radius: 12px; padding: 24px; transition: background 0.25s;
+}
+.summary-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 16px; }
+.summary-point { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-size: 13px; line-height: 1.6; color: var(--invert-sub); }
+.summary-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--invert-text); flex-shrink: 0; margin-top: 7px; }
+
+/* CONFIDENCE + COMPLETE */
+.lesson-complete-section {
+  border-top: 1px solid var(--border); padding: 28px 48px;
+  background: var(--surface); display: flex; flex-direction: column; gap: 16px;
+}
+/* Sticky complete bar */
+.sticky-complete-bar {
+  position: sticky; bottom: 0; z-index: 50;
+  background: var(--surface); border-top: 1px solid var(--border);
+  padding: 12px 48px; display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+}
+.sticky-conf-label { font-size: 12px; color: var(--text3); white-space: nowrap; }
+.sticky-conf-btns { display: flex; gap: 4px; }
+.sticky-conf-btn {
+  width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--border);
+  background: var(--bg); cursor: pointer; font-size: 13px; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.sticky-conf-btn:hover { border-color: var(--text); transform: scale(1.1); }
+.sticky-conf-btn.selected { border-color: var(--green); background: var(--green-bg); transform: scale(1.1); }
+.sticky-divider { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; }
+.sticky-complete-btn {
+  padding: 8px 20px; background: var(--text); color: var(--bg);
+  border: none; border-radius: 6px; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: var(--font-body); transition: all 0.2s;
+  display: flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.sticky-complete-btn:hover { opacity: 0.8; }
+.sticky-complete-btn.completed { background: var(--green); color: #0a0a0a; }
+.sticky-next-btn {
+  padding: 8px 18px; background: none; color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px; font-size: 13px;
+  font-weight: 500; cursor: pointer; font-family: var(--font-body);
+  transition: all 0.15s; white-space: nowrap;
+}
+.sticky-next-btn:hover { border-color: var(--text); }
+.confidence-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.confidence-label { font-size: 13px; font-weight: 500; }
+.confidence-btns { display: flex; gap: 6px; }
+.conf-btn {
+  width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--border);
+  background: var(--bg); cursor: pointer; font-size: 15px; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; font-family: var(--font-body);
+}
+.conf-btn:hover { border-color: var(--text); transform: scale(1.1); }
+.conf-btn.selected { border-color: var(--green); background: var(--green-bg); transform: scale(1.1); }
+.mark-complete-btn {
+  padding: 12px 28px; background: var(--text); color: var(--bg);
+  border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: var(--font-body); transition: all 0.2s;
+  display: flex; align-items: center; gap: 8px; width: fit-content;
+}
+.mark-complete-btn:hover { opacity: 0.8; }
+.mark-complete-btn.completed { background: var(--green); color: #0a0a0a; }
+.next-lesson-btn {
+  padding: 12px 24px; background: none; color: var(--text);
+  border: 1px solid var(--border); border-radius: 8px; font-size: 14px;
+  font-weight: 500; cursor: pointer; font-family: var(--font-body);
+  transition: all 0.15s; display: flex; align-items: center; gap: 8px;
+}
+.next-lesson-btn:hover { border-color: var(--text); }
+.complete-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+/* SPACED REPETITION REMINDER */
+.review-reminder {
+  background: var(--yellow-bg); border: 1px solid rgba(251,191,36,0.25);
+  border-radius: 10px; padding: 14px 18px; font-size: 13px; line-height: 1.6;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.review-reminder-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.review-reminder-text strong { display: block; margin-bottom: 2px; }
+
+/* COURSE COMPLETE PAGE */
+.course-complete { display: none; padding: 60px 48px; max-width: 820px; }
+.course-complete.show { display: block; }
+.cc-hero { display: flex; align-items: center; gap: 20px; margin-bottom: 10px; }
+.cc-icon { font-size: 52px; }
+.cc-title { font-family: var(--font-display); font-size: 34px; font-weight: 900; letter-spacing: -1px; margin-bottom: 4px; }
+.cc-sub { font-size: 15px; color: var(--text2); line-height: 1.7; margin-bottom: 32px; }
+
+/* CC STATS ROW */
+.cc-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 32px; }
+.cc-stat { border: 1px solid var(--border); border-radius: 12px; padding: 18px 16px; text-align: center; background: var(--surface); }
+.cc-stat-num { font-family: var(--font-display); font-size: 28px; font-weight: 900; letter-spacing: -1px; margin-bottom: 4px; }
+.cc-stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text3); }
+.cc-stat.green .cc-stat-num { color: var(--green); }
+.cc-stat.yellow .cc-stat-num { color: var(--yellow); }
+
+/* CC MASTERY BREAKDOWN */
+.cc-section-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 16px; margin-top: 32px; }
+.cc-week-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.cc-week-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); transition: border-color 0.15s; }
+.cc-week-row:hover { border-color: var(--text3); }
+.cc-week-num { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text3); width: 52px; flex-shrink: 0; }
+.cc-week-name { font-size: 13px; font-weight: 500; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cc-week-topics { font-size: 11px; color: var(--text3); width: 60px; flex-shrink: 0; text-align: right; }
+.cc-week-bar-wrap { width: 100px; flex-shrink: 0; }
+.cc-week-bar-track { height: 5px; background: var(--surface2); border-radius: 99px; overflow: hidden; border: 1px solid var(--border); }
+.cc-week-bar-fill { height: 100%; border-radius: 99px; background: var(--green); transition: width 0.6s; }
+.cc-week-conf { display: flex; gap: 3px; width: 90px; flex-shrink: 0; justify-content: flex-end; }
+.cc-conf-dot { width: 8px; height: 8px; border-radius: 50%; border: 1px solid var(--border); }
+.cc-conf-dot.filled { background: var(--yellow); border-color: var(--yellow); }
+.cc-conf-dot.high { background: var(--green); border-color: var(--green); }
+
+/* CC CONFIDENCE CHART */
+.cc-conf-chart { display: flex; align-items: flex-end; gap: 6px; height: 80px; padding: 0 4px; margin-bottom: 8px; }
+.cc-conf-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+.cc-conf-bar { width: 100%; border-radius: 6px 6px 0 0; min-height: 3px; transition: height 0.5s; }
+.cc-conf-bar-label { font-size: 10px; color: var(--text3); }
+.cc-conf-bar-count { font-size: 11px; font-weight: 600; }
+
+/* CC ACTIONS */
+.cc-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
+.cc-btn { padding: 12px 22px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--font-body); transition: all 0.15s; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+.cc-btn:hover { border-color: var(--text); }
+.cc-btn.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+.cc-btn.primary:hover { opacity: 0.85; }
+.cc-btn.green-btn { background: var(--green); color: #0a0a0a; border-color: var(--green); }
+.cc-btn.green-btn:hover { opacity: 0.85; }
+
+/* EMPTY / LOADING */
+.lesson-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; color: var(--text3); text-align: center; padding: 48px; }
+.placeholder-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.2; }
+.placeholder-text { font-size: 14px; line-height: 1.8; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(120px); background: var(--text); color: var(--bg); padding: 12px 24px; border-radius: 50px; font-size: 13px; font-weight: 500; transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); z-index: 999; white-space: nowrap; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* LOADING */
+.loading-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 999; flex-direction: column; gap: 14px; }
+.loading-logo { font-family: var(--font-display); font-size: 30px; font-weight: 900; letter-spacing: -1px; }
+.loading-sub { font-size: 13px; color: var(--text3); }
+
+/* ── NOTES + VIDEO TWO COL ── */
+.lesson-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+.notes-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.notes-card-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.notes-card-eyebrow {
+  font-size: 10px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--text3); margin-bottom: 6px;
+}
+.notes-card-title {
+  font-family: var(--font-display); font-size: 17px; font-weight: 700;
+  letter-spacing: -0.3px; margin-bottom: 4px; line-height: 1.3;
+}
+.notes-card-meta { font-size: 12px; color: var(--text3); }
+.notes-card-body { padding: 20px 24px; }
+.notes-card-desc {
+  font-size: 14px; color: var(--text2); line-height: 1.75;
+  margin-bottom: 20px;
+}
+.notes-read-btn {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px;
+  background: var(--text); color: var(--bg);
+  border: none; border-radius: 10px;
+  text-decoration: none; width: 100%;
+  transition: opacity .15s; cursor: pointer;
+}
+.notes-read-btn:hover { opacity: 0.85; }
+.notes-read-btn-left { display: flex; align-items: center; gap: 10px; }
+.notes-read-btn-icon { font-size: 18px; }
+.notes-read-btn-text { font-size: 13px; font-weight: 700; font-family: var(--font-body); }
+.notes-read-btn-sub { font-size: 11px; opacity: .6; font-family: var(--font-body); margin-top: 1px; }
+.notes-read-btn-arrow { font-size: 16px; opacity: .7; }
+.notes-unavailable {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px; border: 1px dashed var(--border);
+  border-radius: 10px; color: var(--text3); font-size: 13px;
+}
+.notes-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.notes-tag {
+  font-size: 11px; font-weight: 500; padding: 3px 10px;
+  border-radius: 20px; background: var(--surface2);
+  border: 1px solid var(--border); color: var(--text3);
+}
+.video-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.video-card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.video-card-title { font-size: 13px; font-weight: 600; }
+.video-card-num {
+  font-size: 10px; color: var(--text3); background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px;
+  margin-left: auto;
+}
+.video-card-body { aspect-ratio: 16/9; background: var(--surface2); }
+.video-card-body iframe { width: 100%; height: 100%; border: none; }
+.video-placeholder-inner {
+  width: 100%; height: 100%; min-height: 180px;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 10px; color: var(--text3);
+}
+.video-placeholder-inner .vp-icon { font-size: 32px; opacity: .25; }
+.video-placeholder-inner .vp-text { font-size: 13px; }
+
+@media (max-width: 900px) {
+  .learn-layout { grid-template-columns: 1fr; }
+  .learn-sidebar { position: relative; height: auto; top: 0; border-right: none; border-bottom: 1px solid var(--border); max-height: 320px; }
+  .lesson-header, .lesson-body, .lesson-complete-section { padding: 24px 20px; }
+  .course-complete { padding: 40px 20px; }
+  .lesson-content-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-logo">Unify</div>
+  <div class="loading-sub">Loading your course...</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="dashboard.html" class="nav-logo">← Unify</a>
+  <span class="nav-course-name" id="navCourseName">Loading...</span>
+  <div class="nav-right">
+    <button class="nav-btn" onclick="toggleTheme()" id="themeToggle">🌙</button>
+    <a href="dashboard.html" class="nav-btn">Dashboard</a>
+  </div>
+</nav>
+
+<div class="learn-layout">
+
+  <!-- ── SIDEBAR ── -->
+  <div class="learn-sidebar">
+    <div class="sidebar-course-header">
+      <div class="sidebar-course-code" id="sidebarCode">—</div>
+      <div class="sidebar-course-name" id="sidebarName">Loading...</div>
+      <div class="course-progress-wrap">
+        <div class="course-progress-bar">
+          <div class="course-progress-fill" id="sidebarProgress" style="width:0%"></div>
+        </div>
+        <span class="course-progress-pct" id="sidebarProgressPct">0%</span>
+      </div>
+    </div>
+    <!-- Course Outline — sits above week list, applies to whole course -->
+    <div style="padding: 12px 0 4px;">
+      <a id="courseOutlineLink" href="#" class="sidebar-outline-link unavailable" target="_blank"
+         onclick="if(this.classList.contains('unavailable'))return false;">
+        <span class="ol-icon">📄</span>
+        <span class="ol-label">Course Outline</span>
+        <span class="ol-arrow">↗</span>
+      </a>
+    </div>
+    <div class="week-list" id="weekList"></div>
+  </div>
+
+  <!-- ── MAIN ── -->
+  <div class="learn-main" id="learnMain">
+    <div class="lesson-placeholder" id="lessonPlaceholder">
+      <div class="placeholder-icon">📖</div>
+      <p class="placeholder-text">Select a week from the sidebar<br>to start learning.</p>
+    </div>
+
+    <!-- WEEK LANDING PAGE -->
+    <div id="weekLanding" style="display:none;">
+      <div class="lesson-header">
+        <div class="lesson-breadcrumb" id="wlBreadcrumb">Week 1</div>
+        <div class="lesson-title" id="wlTitle">Week Title</div>
+        <div class="lesson-meta">
+          <span class="lesson-meta-item">⏱ <span id="wlTime">—</span></span>
+          <span class="lesson-meta-badge" id="wlProgress">0 / 0 topics</span>
+        </div>
+      </div>
+      <div class="week-landing">
+        <p class="wl-summary" id="wlSummary"></p>
+        <div class="wl-topics" id="wlTopics"></div>
+        <button class="wl-start-btn" id="wlStartBtn" onclick="startWeek()">
+          Start Week →
+        </button>
+      </div>
+    </div>
+
+    <!-- LESSON VIEW (hidden until selected) -->
+    <div id="lessonView" style="display:none;">
+
+      <!-- HEADER -->
+      <div class="lesson-header">
+        <div class="lesson-breadcrumb" id="lessonBreadcrumb">Week 1</div>
+        <div class="lesson-title" id="lessonTitle">Topic Name</div>
+        <div class="lesson-meta">
+          <span class="lesson-meta-item">⏱ <span id="lessonTime">10 min</span></span>
+          <span class="lesson-meta-badge" id="lessonStatusBadge">Not started</span>
+        </div>
+      </div>
+
+      <!-- BODY -->
+      <div class="lesson-body">
+
+        <!-- MAIN CONTENT GRID: Lecture Notes left, Video right -->
+        <div class="lesson-content-grid">
+
+          <!-- LECTURE NOTES CARD -->
+          <div class="notes-card" id="notesCard">
+            <div class="notes-card-header">
+              <div class="notes-card-eyebrow">Lecture Notes</div>
+              <div class="notes-card-title" id="notesCardTitle">Loading...</div>
+              <div class="notes-card-meta" id="notesCardMeta"></div>
+            </div>
+            <div class="notes-card-body">
+              <p class="notes-card-desc" id="notesCardDesc"></p>
+              <div id="notesCardAction"></div>
+              <div class="notes-tags" id="notesCardTags"></div>
+            </div>
+          </div>
+
+          <!-- VIDEO CARD -->
+          <div class="video-card">
+            <div class="video-card-header">
+              <span class="video-card-title">Video Tutorial</span>
+              <span class="video-card-num">2</span>
+            </div>
+            <div class="video-card-body" id="videoContent">
+              <div class="video-placeholder-inner">
+                <div class="vp-icon">▶</div>
+                <div class="vp-text">No video linked yet for this topic.</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- CONFIDENCE -->
+        <div style="margin:28px 0;padding:20px 0;border-top:1px solid var(--border);">
+          <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-weight:500;letter-spacing:.03em;">HOW CONFIDENT DO YOU FEEL ABOUT THIS TOPIC?</div>
+          <div class="confidence-btns" id="confidenceBtns" style="gap:8px;">
+            <button class="conf-btn" onclick="setConfidence(1)" title="Not at all">😰</button>
+            <button class="conf-btn" onclick="setConfidence(2)" title="A little">😐</button>
+            <button class="conf-btn" onclick="setConfidence(3)" title="Getting there">🙂</button>
+            <button class="conf-btn" onclick="setConfidence(4)" title="Pretty good">😊</button>
+            <button class="conf-btn" onclick="setConfidence(5)" title="Fully got it">🔥</button>
+          </div>
+        </div>
+
+        <!-- SUMMARY -->
+        <div class="lesson-section" id="sectionSummary">
+          <div class="lesson-section-header">
+            <span class="lesson-section-icon">📌</span>
+            <span class="lesson-section-title">Key Takeaways</span>
+            <span class="lesson-section-num">3</span>
+          </div>
+          <div class="summary-card" id="summaryContent"></div>
+        </div>
+
+      </div>
+
+      <!-- REVIEW REMINDER (inline, above sticky bar) -->
+      <div class="review-reminder" id="reviewReminder" style="display:none;margin:0 48px 0;">
+        <div class="review-reminder-icon">🔔</div>
+        <div class="review-reminder-text">
+          <strong>Spaced Repetition Active</strong>
+          Review this topic in <span id="reviewDays">2</span> days to lock it into memory.
+        </div>
+      </div>
+
+      <!-- STICKY COMPLETE BAR -->
+      <div class="sticky-complete-bar">
+        <button class="sticky-complete-btn" id="markCompleteBtn" onclick="markComplete()">
+          <span id="markCompleteBtnText">✓ Mark Complete</span>
+        </button>
+        <div class="sticky-divider"></div>
+        <button class="sticky-next-btn" id="nextLessonBtn" onclick="goToNext()" style="display:none;">
+          Next Topic →
+        </button>
+      </div>
+
+    </div>
+
+    <!-- COURSE COMPLETE PAGE -->
+    <div class="course-complete" id="courseCompletePage">
+      <div class="cc-hero">
+        <div class="cc-icon">🎓</div>
+        <div>
+          <div class="cc-title" id="ccTitle">Course Complete!</div>
+          <div class="cc-sub" id="ccSub" style="margin-bottom:0;">You've finished every topic. Here's how you did.</div>
+        </div>
+      </div>
+
+      <!-- STATS ROW -->
+      <div class="cc-stats" id="ccStats">
+        <div class="cc-stat green">
+          <div class="cc-stat-num" id="ccStatDone">–</div>
+          <div class="cc-stat-label">Topics Done</div>
+        </div>
+        <div class="cc-stat">
+          <div class="cc-stat-num" id="ccStatWeeks">–</div>
+          <div class="cc-stat-label">Weeks Covered</div>
+        </div>
+        <div class="cc-stat yellow">
+          <div class="cc-stat-num" id="ccStatConf">–</div>
+          <div class="cc-stat-label">Avg Confidence</div>
+        </div>
+        <div class="cc-stat">
+          <div class="cc-stat-num" id="ccStatStrong">–</div>
+          <div class="cc-stat-label">Strong Topics</div>
+        </div>
+      </div>
+
+      <!-- WEEK BREAKDOWN -->
+      <div class="cc-section-title">Week-by-Week Mastery</div>
+      <div class="cc-week-grid" id="ccWeekGrid"></div>
+
+      <!-- CONFIDENCE DISTRIBUTION -->
+      <div class="cc-section-title">Confidence Distribution</div>
+      <div class="cc-conf-chart" id="ccConfChart"></div>
+      <div style="display:flex;justify-content:space-between;padding:0 4px;margin-bottom:4px;">
+        <span style="font-size:11px;color:var(--text3);">😟 Not sure</span>
+        <span style="font-size:11px;color:var(--text3);">😐 OK</span>
+        <span style="font-size:11px;color:var(--text3);">🙂 Good</span>
+        <span style="font-size:11px;color:var(--text3);">😊 Solid</span>
+        <span style="font-size:11px;color:var(--text3);">🔥 Mastered</span>
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:8px;" id="ccConfHint"></div>
+
+      <!-- TOPICS TO REVIEW -->
+      <div id="ccReviewSection" style="display:none;">
+        <div class="cc-section-title">📌 Topics to Revisit</div>
+        <div id="ccReviewList" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;"></div>
+        <div style="font-size:12px;color:var(--text3);">These had low confidence ratings — worth one more pass before exams.</div>
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="cc-actions">
+        <button class="cc-btn green-btn" onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
+        <button class="cc-btn primary" onclick="exportCourseSummary()">⬇ Export Summary (.txt)</button>
+        <button class="cc-btn" onclick="reviewWeakTopics()">🔁 Review Weak Topics</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="courses.js"></script>
+<script src="courseContent.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBjZyfNNpXZFJwB7GKXVeSzLTVknfwCa8I",
+  authDomain: "unify-b4316.firebaseapp.com",
+  projectId: "unify-b4316",
+  storageBucket: "unify-b4316.firebasestorage.app",
+  messagingSenderId: "114594366615",
+  appId: "1:114594366615:web:44ef821b4618f1a24615d2",
+  measurementId: "G-MY2M1R6DJV"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentUser = null, userProfile = {};
+let courseCode = '', courseName = '', courseTopics = [];
+
+// Simple XSS sanitiser for rendering coordinator-supplied content
+function sanitise(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+let topicProgress = {}; // { "topicKey": { done: bool, confidence: 1-5, reviewDates: [] } }
+let activeWeekIdx = null, activeTopicIdx = null;
+let selectedConfidence = 0;
+let saveTimeout = null;
+
+// ── DARK MODE ─────────────────────────────────────────
+function initTheme() {
+  const saved = localStorage.getItem('unify-theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+}
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn = document.getElementById('themeToggle');
+  if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+window.toggleTheme = function() {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('unify-theme', next);
+  applyTheme(next);
+}
+initTheme();
+
+// ── AUTH ──────────────────────────────────────────────
+onAuthStateChanged(auth, async user => {
+  if (!user) { window.location.href = 'auth.html'; return; }
+  currentUser = user;
+
+  // Get course from URL params
+  const params = new URLSearchParams(window.location.search);
+  courseCode = params.get('course') || '';
+  courseName = params.get('name') || courseCode;
+
+  document.getElementById('navCourseName').textContent = courseName;
+  document.getElementById('sidebarCode').textContent = courseCode;
+  document.getElementById('sidebarName').textContent = courseName;
+
+  await loadUserData();
+  // Generate stubs for any course not manually defined in courseContent.js
+  if (window.generateCourseStubs) window.generateCourseStubs();
+  buildCurriculum();
+  renderSidebar();
+  document.getElementById('loadingOverlay').style.display = 'none';
+
+  // Auto-open first incomplete topic
+  const firstIncomplete = findFirstIncomplete();
+  if (firstIncomplete) openTopic(firstIncomplete.w, firstIncomplete.t);
+});
+
+// ── LOAD DATA ─────────────────────────────────────────
+async function loadUserData() {
+  try {
+    const snap = await getDoc(doc(db, 'users', currentUser.uid));
+    if (snap.exists()) {
+      const d = snap.data();
+      userProfile = d;
+      topicProgress = d.topicProgress?.[courseCode] || {};
+    }
+  } catch(e) { console.error(e); }
+}
+
+async function saveProgress() {
+  // Save to localStorage for dashboard mastery tracker
+  try { localStorage.setItem('unify-topic-' + courseCode, JSON.stringify(topicProgress)); } catch(e) {}
+  if (!currentUser) return;
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(async () => {
+    try {
+      await setDoc(doc(db, 'users', currentUser.uid),
+        { topicProgress: { [courseCode]: topicProgress } },
+        { merge: true }
+      );
+    } catch(e) { console.error(e); }
+  }, 600);
+}
+
+// ── CURRICULUM BUILDER ───────────────────────────────
+// This builds the week-topic structure for any course.
+// When real content is added per course, this populates from a content DB.
+// ── CURRICULUM — reads from courseContent.js (shared across all departments) ──
+// ECE 203, CHE 206, ECE 351 etc. are defined once in courseContent.js and
+// reused by every department that offers them. No duplication needed.
+function buildCurriculum() {
+  const entry = window.UNIFY_COURSE_CONTENT?.[courseCode];
+  if (entry && entry.weeks) {
+    courseTopics = entry.weeks;
+  } else {
+    // Auto-stub: sensible fallback for any course not yet in courseContent.js
+    const genericTopics = [
+      "Introduction & Fundamentals", "Core Concepts Part 1", "Core Concepts Part 2",
+      "Analysis Methods", "Design Principles", "Applications Part 1",
+      "Applications Part 2", "Advanced Topics", "Case Studies",
+      "Problem Solving Techniques", "Integration & Review", "Exam Preparation"
+    ];
+    courseTopics = genericTopics.map((topic, i) => ({
+      week: i + 1, topic,
+      subtopics: [`${topic} — Theory`, `${topic} — Practice`],
+      time: 12
+    }));
+  }
+}
+
+// Returns the rich HTML file path for a subtopic that has full reviewed content
+function getSubtopicContentFile(subtopicName) {
+  return window.getTopicContentFile?.(courseCode, subtopicName) || null;
+}
+
+// ── SIDEBAR ───────────────────────────────────────────
+function renderSidebar() {
+  const list = document.getElementById('weekList');
+  const doneCount = Object.values(topicProgress).filter(t => t.done).length;
+  const total = courseTopics.reduce((a, w) => a + w.subtopics.length, 0);
+  const pct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
+  document.getElementById('sidebarProgress').style.width = pct + '%';
+  document.getElementById('sidebarProgressPct').textContent = pct + '%';
+
+  list.innerHTML = courseTopics.map((week, wi) => {
+    const totalT = week.subtopics.length;
+    const doneT = week.subtopics.filter((_, ti) => topicProgress[topicKey(wi, ti)]?.done).length;
+    const allDone = doneT === totalT;
+    const isActiveWeek = activeWeekIdx === wi;
+    const someDone = doneT > 0 && !allDone;
+    return `
+      <div class="week-item ${allDone ? 'done' : ''} ${isActiveWeek ? 'active' : ''}" onclick="toggleWeek(${wi})">
+        <div class="week-header">
+          <div class="week-check" style="${someDone ? 'border-color:var(--text3)' : ''}">${allDone ? '✓' : ''}</div>
+          <div style="flex:1;min-width:0;">
+            <div class="week-label">Week ${week.week}</div>
+            <div class="week-topic">${week.topic}</div>
+          </div>
+          <span class="week-progress-count">${doneT}/${totalT}</span>
+        </div>
+        <div class="week-subtopics">
+          ${week.subtopics.map((sub, ti) => {
+            const key = topicKey(wi, ti);
+            const done = topicProgress[key]?.done;
+            const isActive = activeWeekIdx === wi && activeTopicIdx === ti;
+            const hasRich = window.getTopicContentFile?.(courseCode, sub) != null;
+            return `<div class="subtopic-item ${done ? 'done' : ''} ${isActive ? 'active' : ''}" onclick="event.stopPropagation(); openTopic(${wi}, ${ti})">
+              <div class="subtopic-dot">${done ? '✓' : ''}</div>
+              <span style="flex:1;">${sub}</span>
+              ${hasRich ? `<span style="font-size:9px;font-weight:600;letter-spacing:.04em;padding:1px 6px;border-radius:4px;background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);white-space:nowrap;flex-shrink:0;">READY</span>` : ''}
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+window.toggleWeek = function(wi) {
+  if (activeWeekIdx === wi && activeTopicIdx === null) {
+    // Clicking same week header again collapses it
+    activeWeekIdx = null;
+    renderSidebar();
+    showPlaceholder();
+    return;
+  }
+  activeWeekIdx = wi;
+  activeTopicIdx = null;
+  renderSidebar();
+  showWeekLanding(wi);
+}
+
+window.startWeek = function() {
+  if (activeWeekIdx === null) return;
+  // Find first incomplete topic in this week, or just topic 0
+  const week = courseTopics[activeWeekIdx];
+  let startAt = 0;
+  for (let ti = 0; ti < week.subtopics.length; ti++) {
+    if (!topicProgress[topicKey(activeWeekIdx, ti)]?.done) { startAt = ti; break; }
+  }
+  openTopic(activeWeekIdx, startAt);
+}
+
+function showPlaceholder() {
+  document.getElementById('lessonPlaceholder').style.display = '';
+  document.getElementById('weekLanding').style.display = 'none';
+  document.getElementById('lessonView').style.display = 'none';
+  document.getElementById('courseCompletePage').classList.remove('show');
+}
+
+function showWeekLanding(wi) {
+  const week = courseTopics[wi];
+  const totalT = week.subtopics.length;
+  const doneT = week.subtopics.filter((_, ti) => topicProgress[topicKey(wi, ti)]?.done).length;
+
+  document.getElementById('lessonPlaceholder').style.display = 'none';
+  document.getElementById('weekLanding').style.display = 'block';
+  document.getElementById('lessonView').style.display = 'none';
+  document.getElementById('courseCompletePage').classList.remove('show');
+
+  document.getElementById('wlBreadcrumb').textContent = courseCode + ' · Week ' + week.week;
+  document.getElementById('wlTitle').textContent = week.topic;
+  document.getElementById('wlTime').textContent = '~' + week.time + ' min';
+  document.getElementById('wlProgress').textContent = doneT + ' / ' + totalT + ' topics';
+  document.getElementById('wlProgress').style.background = doneT === totalT ? 'rgba(74,222,128,0.15)' : '';
+  document.getElementById('wlProgress').style.color = doneT === totalT ? 'var(--green)' : '';
+
+  // Week summary from courseContent if available
+  const entry = window.UNIFY_COURSE_CONTENT?.[courseCode];
+  const weekEntry = entry?.weeks?.[wi];
+  const summary = weekEntry?.summary || 'Work through each topic below. Mark complete as you go — your progress is saved automatically.';
+  document.getElementById('wlSummary').textContent = summary;
+
+  // Topic list
+  document.getElementById('wlTopics').innerHTML = week.subtopics.map((sub, ti) => {
+    const done = topicProgress[topicKey(wi, ti)]?.done;
+    const hasRich = window.getTopicContentFile?.(courseCode, sub) != null;
+    const conf = topicProgress[topicKey(wi, ti)]?.confidence || 0;
+    const stars = conf > 0 ? '★'.repeat(conf) : '';
+    return `<div class="wl-topic-row ${done ? 'done' : ''}" onclick="openTopic(${wi}, ${ti})">
+      <div class="wl-topic-circle">${done ? '✓' : ''}</div>
+      <span class="wl-topic-name">${sub}</span>
+      ${hasRich ? `<span class="wl-ready-badge">READY</span>` : ''}
+      ${stars ? `<span style="font-size:11px;color:var(--yellow);letter-spacing:1px;">${stars}</span>` : ''}
+      <span class="wl-topic-status">${done ? 'Done' : 'Not started'}</span>
+    </div>`;
+  }).join('');
+
+  // Start button text
+  const allDone = doneT === totalT;
+  document.getElementById('wlStartBtn').textContent = allDone ? 'Review Week →' : (doneT > 0 ? 'Continue →' : 'Start Week →');
+
+  document.getElementById('learnMain').scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function topicKey(wi, ti) { return `w${wi}_t${ti}`; }
+
+function findFirstIncomplete() {
+  for (let wi = 0; wi < courseTopics.length; wi++) {
+    for (let ti = 0; ti < courseTopics[wi].subtopics.length; ti++) {
+      if (!topicProgress[topicKey(wi, ti)]?.done) return { w: wi, t: ti };
+    }
+  }
+  return null;
+}
+
+// ── OPEN TOPIC (LESSON PAGE) ──────────────────────────
+window.openTopic = function(wi, ti) {
+  activeWeekIdx = wi;
+  activeTopicIdx = ti;
+  selectedConfidence = topicProgress[topicKey(wi, ti)]?.confidence || 0;
+
+  const week = courseTopics[wi];
+  if (!week) { console.warn('openTopic: week', wi, 'not found in courseTopics'); return; }
+  const subtopic = week.subtopics[ti];
+  if (!subtopic) { console.warn('openTopic: subtopic', ti, 'not found in week', wi); return; }
+  const key = topicKey(wi, ti);
+  const isDone = topicProgress[key]?.done;
+
+  document.getElementById('lessonPlaceholder').style.display = 'none';
+  document.getElementById('weekLanding').style.display = 'none';
+  document.getElementById('lessonView').style.display = 'block';
+  document.getElementById('courseCompletePage').classList.remove('show');
+
+  // Header
+  document.getElementById('lessonBreadcrumb').textContent = `${courseCode} · Week ${week.week}`;
+  document.getElementById('lessonTitle').textContent = subtopic;
+  document.getElementById('lessonTime').textContent = `${week.time} min`;
+  document.getElementById('lessonStatusBadge').textContent = isDone ? '✓ Completed' : 'In Progress';
+  document.getElementById('lessonStatusBadge').style.background = isDone ? 'rgba(74,222,128,0.15)' : '';
+  document.getElementById('lessonStatusBadge').style.color = isDone ? '#4ade80' : '';
+  // Sync sticky bar
+  const stickyBtn = document.getElementById('markCompleteBtn');
+  if (stickyBtn) {
+    stickyBtn.className = 'sticky-complete-btn' + (isDone ? ' completed' : '');
+    document.getElementById('markCompleteBtnText').textContent = isDone ? '✓ Completed' : '✓ Mark Complete';
+  }
+
+  // Populate content
+  populateLesson(week, subtopic, wi, ti);
+
+  // Complete button state
+  const btn = document.getElementById('markCompleteBtn');
+  const btnText = document.getElementById('markCompleteBtnText');
+  if (isDone) {
+    btn.classList.add('completed');
+    btnText.textContent = '✓ Completed';
+  } else {
+    btn.classList.remove('completed');
+    btnText.textContent = '✓ Mark as Complete';
+  }
+
+  // Confidence buttons
+  document.querySelectorAll('.conf-btn').forEach((b, i) => {
+    b.classList.toggle('selected', i + 1 === selectedConfidence);
+  });
+
+  // Review reminder
+  const reviewReminder = document.getElementById('reviewReminder');
+  if (isDone) {
+    reviewReminder.style.display = 'flex';
+    const days = getNextReviewDays(key);
+    document.getElementById('reviewDays').textContent = days;
+  } else {
+    reviewReminder.style.display = 'none';
+  }
+
+  // Next button
+  const hasNext = getNextTopic(wi, ti) !== null;
+  document.getElementById('nextLessonBtn').style.display = hasNext ? 'flex' : 'none';
+
+  renderSidebar();
+  // Scroll to top of lesson
+  document.getElementById('learnMain').scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── POPULATE LESSON CONTENT ───────────────────────────
+function populateLesson(week, subtopic, wi, ti) {
+  const resources = window.getResources ? window.getResources(courseCode) : {};
+  const weekResources = window.getWeekResources?.(courseCode, wi) || {};
+  const weekEntry = window.UNIFY_COURSE_CONTENT?.[courseCode]?.weeks?.[wi];
+
+  // ── SIDEBAR: course outline link ──
+  const outlineUrl = weekResources.outline || resources['Course Outline'] || '';
+  const outlineEl = document.getElementById('courseOutlineLink');
+  if (outlineEl) {
+    if (outlineUrl) { outlineEl.href = outlineUrl; outlineEl.classList.remove('unavailable'); }
+    else { outlineEl.href = '#'; outlineEl.classList.add('unavailable'); }
+  }
+
+  // ── NOTES CARD ──────────────────────────────────────────────────────────
+  const notesUrl = weekResources.notes || '';
+  const weekSummary = weekEntry?.summary || '';
+  const subtopics = week.subtopics || [];
+
+  // Title and meta
+  document.getElementById('notesCardTitle').textContent = week.topic;
+  document.getElementById('notesCardMeta').textContent =
+    courseCode + ' · Week ' + week.week + ' · ' + subtopic;
+
+  // Description — use week summary if available, else generic
+  document.getElementById('notesCardDesc').textContent = weekSummary ||
+    'Peer-reviewed notes for this week — written by students who sat through this course, reviewed by the departmental coordinator.';
+
+  // Tags
+  document.getElementById('notesCardTags').innerHTML = subtopics
+    .map(s => `<span class="notes-tag">${sanitise(s)}</span>`).join('');
+
+  // Action — Read full notes button or unavailable state
+  const actionEl = document.getElementById('notesCardAction');
+  if (notesUrl) {
+    actionEl.innerHTML = `
+      <a href="${sanitise(notesUrl)}" target="_blank" class="notes-read-btn">
+        <div class="notes-read-btn-left">
+          <span class="notes-read-btn-icon">📖</span>
+          <div>
+            <div class="notes-read-btn-text">Read full notes</div>
+            <div class="notes-read-btn-sub">Week ${week.week} — formulas, diagrams, past questions</div>
+          </div>
+        </div>
+        <span class="notes-read-btn-arrow">↗</span>
+      </a>`;
+  } else {
+    actionEl.innerHTML = `
+      <div class="notes-unavailable">
+        <span style="font-size:20px;opacity:.4;">📄</span>
+        <div>
+          <div style="font-weight:600;margin-bottom:2px;">Notes not uploaded yet</div>
+          <div style="font-size:12px;">Check back soon — coordinator is reviewing.</div>
+        </div>
+      </div>`;
+  }
+
+  // ── VIDEO ──────────────────────────────────────────────────────────────
+  const videoUrl = weekResources.video || resources['Video Courses'] || '';
+  const videoEl = document.getElementById('videoContent');
+  if (videoUrl && (videoUrl.includes('youtube') || videoUrl.includes('youtu.be'))) {
+    const m = videoUrl.match(/(?:youtube[.]com[/]watch[?]v=|youtu[.]be[/])([a-zA-Z0-9_-]{11})/);
+    if (m) {
+      videoEl.innerHTML = `<iframe src="https://www.youtube.com/embed/${m[1]}" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
+    }
+  } else {
+    videoEl.innerHTML = `<div class="video-placeholder-inner"><div class="vp-icon">▶</div><div class="vp-text">No video linked yet for this topic.</div></div>`;
+  }
+
+  // ── SUMMARY ──────────────────────────────────────────────────────────
+  document.getElementById('summaryContent').innerHTML = generateSummary(subtopic);
+}
+
+
+// ── FULL LESSON RENDERER ─────────────────────────────────────────────────────
+// Renders week content natively from courseContent.js data.
+// Each week's topics are collapsible. Supports formulas, analogies,
+// mistake boxes, exam definitions, steps, diagrams, and quick checks.
+
+function renderFullLesson(weekEntry, wi) {
+  if (!weekEntry) return '';
+
+  const tags = weekEntry.subtopics || [];
+  const tagsHtml = tags.length
+    ? `<div class="fl-tags">${tags.map(t => `<span class="fl-tag">${sanitise(t)}</span>`).join('')}</div>`
+    : '';
+
+  // If weekEntry has rich topic data (topicData array), render it
+  // Otherwise render a clean week overview with what we have
+  const topicsHtml = weekEntry.topicData
+    ? weekEntry.topicData.map((topic, i) => renderTopicBlock(topic, wi, i)).join('')
+    : renderWeekOverview(weekEntry, wi);
+
+  return `<div class="fl-content">${tagsHtml}${topicsHtml}</div>`;
+}
+
+function renderWeekOverview(weekEntry, wi) {
+  // Renders a clean overview when full topicData isn't defined yet
+  // Uses what we have: summary, subtopics list, past questions hint
+  const subtopics = weekEntry.subtopics || [];
+
+  const subtopicList = subtopics.map((sub, i) => {
+    const hasContent = weekEntry.content?.[sub]?.hasContent;
+    const fileUrl = weekEntry.content?.[sub]?.htmlFile || '';
+    return `
+      <div class="fl-topic">
+        <div class="fl-topic-header" onclick="toggleFLTopic(this)">
+          <div>
+            <div class="fl-topic-num">Topic ${wi + 1}.${i + 1}</div>
+            <div class="fl-topic-title">${sanitise(sub)}</div>
+          </div>
+          <span class="fl-topic-chevron">▾</span>
+        </div>
+        <div class="fl-topic-body">
+          ${hasContent && fileUrl
+            ? `<p>This topic has a full peer-reviewed breakdown available.
+               <a href="${sanitise(fileUrl)}" target="_blank"
+                 style="color:var(--green);font-weight:600;text-decoration:none;">
+                 Open full lesson ↗</a></p>`
+            : `<p style="color:var(--text3);">Full peer-reviewed content coming soon — written by students
+               who sat through this course and reviewed by the departmental coordinator.</p>`
+          }
+        </div>
+      </div>`;
+  }).join('');
+
+  return subtopicList || '<p style="color:var(--text3);font-size:14px;">Content coming soon.</p>';
+}
+
+function renderTopicBlock(topic, wi, ti) {
+  // Renders a fully specified topic object with all its sections
+  let html = `
+    <div class="fl-topic">
+      <div class="fl-topic-header" onclick="toggleFLTopic(this)">
+        <div>
+          <div class="fl-topic-num">Topic ${wi + 1}.${ti + 1}</div>
+          <div class="fl-topic-title">${sanitise(topic.title || '')}</div>
+        </div>
+        <span class="fl-topic-chevron">▾</span>
+      </div>
+      <div class="fl-topic-body">`;
+
+  if (topic.body) html += `<p>${sanitise(topic.body)}</p>`;
+  if (topic.body2) html += `<p>${sanitise(topic.body2)}</p>`;
+
+  if (topic.formulas) {
+    topic.formulas.forEach(f => {
+      html += `<div class="fl-formula">
+        <div class="fl-formula-label">${sanitise(f.label || '')}</div>
+        ${(f.eqs || []).map(eq => `<div class="fl-formula-eq">${sanitise(eq)}</div>`).join('')}
+        ${f.vars ? `<div class="fl-formula-vars">${sanitise(f.vars)}</div>` : ''}
+        ${(f.steps || []).map(s => `<div class="fl-step"><div class="fl-step-label">${sanitise(s.label)}</div><p>${sanitise(s.text)}</p></div>`).join('')}
+      </div>`;
+    });
+  }
+
+  if (topic.analogy) {
+    html += `<div class="fl-analogy">
+      <div class="fl-analogy-label">Nigerian Analogy</div>
+      ${sanitise(topic.analogy)}
+    </div>`;
+  }
+
+  if (topic.mistake) {
+    html += `<div class="fl-mistake">
+      <div class="fl-mistake-label">Common Mistake</div>
+      ${sanitise(topic.mistake)}
+    </div>`;
+  }
+
+  if (topic.examDef) {
+    html += `<div class="fl-examdef">
+      <div class="fl-examdef-label">${sanitise(topic.examDef.label || 'Exam-Ready Definition')}</div>
+      <div class="fl-examdef-text">${sanitise(topic.examDef.text)}</div>
+    </div>`;
+  }
+
+  html += `</div></div>`;
+  return html;
+}
+
+window.toggleFullLesson = function() {
+  const body = document.getElementById('flBody');
+  const btn = document.getElementById('flExpandBtn');
+  const text = document.getElementById('flExpandText');
+  const icon = document.getElementById('flExpandIcon');
+  const isOpen = body.classList.contains('open');
+
+  body.classList.toggle('open', !isOpen);
+  btn.classList.toggle('open', !isOpen);
+  text.textContent = isOpen ? 'Expand lesson' : 'Collapse';
+  icon.textContent = isOpen ? '▾' : '▴';
+
+  if (!isOpen) {
+    // Smooth scroll to the full lesson section
+    document.getElementById('sectionFullLesson').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+window.toggleFLTopic = function(header) {
+  const body = header.nextElementSibling;
+  const chevron = header.querySelector('.fl-topic-chevron');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  header.classList.toggle('open', !isOpen);
+  if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+function generateExplanation(topic, code) {
+  return `
+    <p>This section covers <strong>${topic}</strong> as taught in ${code}.</p>
+    <div class="explanation-highlight">
+      📖 Peer-reviewed explanation coming soon — written by a student who sat through this course,
+      reviewed by the departmental coordinator before it goes live. Check back after coordinator review.
+    </div>
+    <p>Key concepts, definitions, formulas, and analogies will appear here once reviewed.</p>
+  `;
+}
+
+function generatePastQuestions(topic, code, wi) {
+  const qs = [
+    { year: '2022/23', text: `[Past exam question on ${topic} from ${code} — add via courseContent.js]` },
+    { year: '2019/20', text: `[Past exam question on ${topic} — ${code} LASU examination — add via courseContent.js]` },
+  ];
+  return qs.map(q => `
+    <div class="question-card">
+      <span class="question-type-badge q-exam">📄 Past Exam ${q.year}</span>
+      <div class="question-text">${q.text}</div>
+      <button class="show-solution-btn" onclick="toggleSolution(this)">Reveal Solution</button>
+      <div class="solution-box">Solution will be added here. Walk through each step so students can check their working.</div>
+    </div>`).join('');
+}
+
+function generatePracticeQuestions(topic, code) {
+  const qs = [
+    `Apply the key concept from ${topic}. Show full working.`,
+    `A scenario related to ${topic} is described below. Determine the solution step by step.`,
+    `Without referring to your notes, write down the key formula(s) for ${topic} and explain each term.`,
+  ];
+  return qs.map((q, i) => `
+    <div class="practice-card">
+      <span class="practice-badge">Practice ${i + 1}</span>
+      <div class="question-text" style="margin-bottom:0;">${q}</div>
+      <div class="question-math" style="margin-top:10px;">[Problem to be inserted by coordinator]</div>
+      <button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer</button>
+      <div class="reveal-answer">Answer will be added here.</div>
+    </div>`).join('');
+}
+
+function generateSummary(topic) {
+  const points = [
+    `${topic} is a fundamental concept in this course — make sure you can define it clearly.`,
+    `The key formula or method for ${topic} should be memorised and understood, not just applied.`,
+    `This topic commonly appears in past exam questions — review the examples above before exams.`,
+    `If you struggled with this topic, revisit it after 2 days using the spaced repetition reminder.`,
+  ];
+  return `<div class="summary-title">Key Takeaways — ${topic}</div>
+    ${points.map(p => `<div class="summary-point"><div class="summary-dot"></div><span>${p}</span></div>`).join('')}`;
+}
+
+// ── INTERACTIONS ──────────────────────────────────────
+window.toggleExample = function(header) {
+  const body = header.nextElementSibling;
+  body.classList.toggle('open');
+  header.querySelector('span:last-child').textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+
+window.toggleSolution = function(btn) {
+  const box = btn.nextElementSibling;
+  box.classList.toggle('open');
+  btn.textContent = box.classList.contains('open') ? 'Hide Solution' : 'Reveal Solution';
+}
+
+window.toggleReveal = function(btn) {
+  const box = btn.nextElementSibling;
+  box.classList.toggle('open');
+  btn.textContent = box.classList.contains('open') ? 'Hide Answer' : 'Reveal Answer';
+  if (box.classList.contains('open')) {
+    btn.style.borderColor = 'var(--green)';
+    btn.style.color = 'var(--green)';
+  } else {
+    btn.style.borderColor = '';
+    btn.style.color = '';
+  }
+}
+
+window.setConfidence = function(val) {
+  selectedConfidence = val;
+  document.querySelectorAll('.conf-btn').forEach((b, i) => {
+    b.classList.toggle('selected', i + 1 === val);
+  });
+  // Auto-save confidence
+  const key = topicKey(activeWeekIdx, activeTopicIdx);
+  if (!topicProgress[key]) topicProgress[key] = {};
+  topicProgress[key].confidence = val;
+  saveProgress();
+}
+
+window.markComplete = function() {
+  const key = topicKey(activeWeekIdx, activeTopicIdx);
+  const alreadyDone = topicProgress[key]?.done;
+
+  if (!topicProgress[key]) topicProgress[key] = {};
+  topicProgress[key].done = !alreadyDone;
+
+  if (!alreadyDone) {
+    // Mark complete
+    topicProgress[key].completedAt = Date.now();
+    topicProgress[key].confidence = selectedConfidence;
+    topicProgress[key].reviewDates = getReviewSchedule();
+
+    const btn = document.getElementById('markCompleteBtn');
+    btn.className = 'sticky-complete-btn completed';
+    document.getElementById('markCompleteBtnText').textContent = '✓ Completed';
+    document.getElementById('lessonStatusBadge').textContent = '✓ Completed';
+    document.getElementById('reviewReminder').style.display = 'flex';
+    document.getElementById('reviewDays').textContent = 2;
+
+    showToast('🎉 Topic complete! Review in 2 days.');
+
+    // Check if entire course is done
+    const totalTopics = courseTopics.reduce((a, w) => a + w.subtopics.length, 0);
+    const doneCount = Object.values(topicProgress).filter(t => t.done).length;
+    if (doneCount >= totalTopics) {
+      setTimeout(() => {
+        document.getElementById('lessonView').style.display = 'none';
+        document.getElementById('courseCompletePage').classList.add('show');
+        populateCourseSummary();
+      }, 1500);
+    }
+  } else {
+    // Unmark
+    topicProgress[key].done = false;
+    const btn = document.getElementById('markCompleteBtn');
+    btn.className = 'sticky-complete-btn';
+    document.getElementById('markCompleteBtnText').textContent = '✓ Mark Complete';
+    document.getElementById('lessonStatusBadge').textContent = 'In Progress';
+    document.getElementById('reviewReminder').style.display = 'none';
+  }
+
+  saveProgress();
+  renderSidebar();
+}
+
+window.goToNext = function() {
+  const next = getNextTopic(activeWeekIdx, activeTopicIdx);
+  if (next) openTopic(next.w, next.t);
+}
+
+function getNextTopic(wi, ti) {
+  const week = courseTopics[wi];
+  if (ti + 1 < week.subtopics.length) return { w: wi, t: ti + 1 };
+  if (wi + 1 < courseTopics.length) return { w: wi + 1, t: 0 };
+  return null;
+}
+
+function getReviewSchedule() {
+  const now = Date.now();
+  return [
+    now + 2 * 86400000,
+    now + 5 * 86400000,
+    now + 12 * 86400000,
+  ];
+}
+
+function getNextReviewDays(key) {
+  const dates = topicProgress[key]?.reviewDates || [];
+  const now = Date.now();
+  const next = dates.find(d => d > now);
+  if (!next) return 12;
+  return Math.max(1, Math.round((next - now) / 86400000));
+}
+
+
+// ── COURSE COMPLETE SUMMARY ───────────────────────────
+function populateCourseSummary() {
+  const totalTopics = courseTopics.reduce((a, w) => a + w.subtopics.length, 0);
+  const allProgress = Object.values(topicProgress);
+  const doneTopics = allProgress.filter(t => t.done);
+  const ratedTopics = doneTopics.filter(t => t.confidence > 0);
+  const avgConf = ratedTopics.length
+    ? (ratedTopics.reduce((a, t) => a + t.confidence, 0) / ratedTopics.length).toFixed(1)
+    : '–';
+  const strongCount = ratedTopics.filter(t => t.confidence >= 4).length;
+
+  // Stats row
+  document.getElementById('ccStatDone').textContent = doneTopics.length;
+  document.getElementById('ccStatWeeks').textContent = courseTopics.length;
+  document.getElementById('ccStatConf').textContent = avgConf + (avgConf !== '–' ? '/5' : '');
+  document.getElementById('ccStatStrong').textContent = strongCount;
+  document.getElementById('ccTitle').textContent = courseName + ' — Complete!';
+
+  // Week grid
+  const weekGrid = document.getElementById('ccWeekGrid');
+  weekGrid.innerHTML = courseTopics.map((week, wi) => {
+    const keys = week.subtopics.map((_, ti) => topicKey(wi, ti));
+    const done = keys.filter(k => topicProgress[k]?.done).length;
+    const total = week.subtopics.length;
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    const confs = keys.map(k => topicProgress[k]?.confidence || 0).filter(c => c > 0);
+    const avgW = confs.length ? confs.reduce((a, b) => a + b, 0) / confs.length : 0;
+
+    const dots = Array.from({length: 5}, (_, i) => {
+      const filled = i < Math.round(avgW);
+      const cls = filled ? (avgW >= 4 ? 'filled high' : 'filled') : '';
+      return `<div class="cc-conf-dot ${cls}"></div>`;
+    }).join('');
+
+    return `<div class="cc-week-row">
+      <span class="cc-week-num">Week ${wi + 1}</span>
+      <span class="cc-week-name">${week.title}</span>
+      <span class="cc-week-topics">${done}/${total}</span>
+      <div class="cc-week-bar-wrap">
+        <div class="cc-week-bar-track"><div class="cc-week-bar-fill" style="width:${pct}%"></div></div>
+      </div>
+      <div class="cc-week-conf">${dots}</div>
+    </div>`;
+  }).join('');
+
+  // Confidence distribution chart
+  const confCounts = [0, 0, 0, 0, 0];
+  doneTopics.forEach(t => { if (t.confidence >= 1 && t.confidence <= 5) confCounts[t.confidence - 1]++; });
+  const maxCount = Math.max(...confCounts, 1);
+  const barColors = ['#ef4444','#fbbf24','#60a5fa','#4ade80','#22c55e'];
+  const confChart = document.getElementById('ccConfChart');
+  confChart.innerHTML = confCounts.map((count, i) => {
+    const pct = Math.round((count / maxCount) * 100);
+    return `<div class="cc-conf-bar-wrap">
+      <div class="cc-conf-bar-count">${count || ''}</div>
+      <div class="cc-conf-bar" style="height:${Math.max(pct, count > 0 ? 8 : 3)}%;background:${barColors[i]};opacity:${count > 0 ? 1 : 0.15};"></div>
+      <div class="cc-conf-bar-label">${i + 1}★</div>
+    </div>`;
+  }).join('');
+
+  // Confidence hint
+  const hint = avgConf >= 4 ? '🔥 Strong mastery overall — well done!'
+    : avgConf >= 3 ? '🙂 Good grasp of the material. Review low-confidence topics before exams.'
+    : avgConf !== '–' ? '📚 Some topics need more work. Use the review list below.'
+    : 'Rate topics as you review them to see your confidence score.';
+  document.getElementById('ccConfHint').textContent = hint;
+
+  // Topics to review (confidence ≤ 2)
+  const weakTopics = [];
+  courseTopics.forEach((week, wi) => {
+    week.subtopics.forEach((sub, ti) => {
+      const k = topicKey(wi, ti);
+      if (topicProgress[k]?.done && (topicProgress[k]?.confidence || 0) <= 2) {
+        weakTopics.push({ week: wi + 1, name: sub });
+      }
+    });
+  });
+  if (weakTopics.length > 0) {
+    document.getElementById('ccReviewSection').style.display = 'block';
+    document.getElementById('ccReviewList').innerHTML = weakTopics.map(t =>
+      `<span style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--border);border-radius:20px;font-size:12px;background:var(--surface);">
+        <span style="color:var(--text3);font-size:10px;">Wk${t.week}</span> ${t.name}
+      </span>`
+    ).join('');
+  }
+}
+
+window.exportCourseSummary = function() {
+  const totalTopics = courseTopics.reduce((a, w) => a + w.subtopics.length, 0);
+  const doneTopics = Object.values(topicProgress).filter(t => t.done);
+  const ratedTopics = doneTopics.filter(t => t.confidence > 0);
+  const avgConf = ratedTopics.length
+    ? (ratedTopics.reduce((a, t) => a + t.confidence, 0) / ratedTopics.length).toFixed(1) : 'N/A';
+
+  let text = `UNIFY — COURSE SUMMARY\n`;
+  text += `Course: ${courseName} (${courseCode})\n`;
+  text += `Date: ${new Date().toLocaleDateString('en-GB', {weekday:'long', year:'numeric', month:'long', day:'numeric'})}\n`;
+  text += `${'─'.repeat(50)}\n\n`;
+  text += `OVERVIEW\n`;
+  text += `Topics completed: ${doneTopics.length} / ${totalTopics}\n`;
+  text += `Weeks covered: ${courseTopics.length}\n`;
+  text += `Average confidence: ${avgConf}/5\n`;
+  text += `Strong topics (4-5★): ${ratedTopics.filter(t => t.confidence >= 4).length}\n\n`;
+
+  text += `WEEK-BY-WEEK BREAKDOWN\n${'─'.repeat(50)}\n`;
+  courseTopics.forEach((week, wi) => {
+    const keys = week.subtopics.map((_, ti) => topicKey(wi, ti));
+    const done = keys.filter(k => topicProgress[k]?.done).length;
+    const confs = keys.map(k => topicProgress[k]?.confidence || 0).filter(c => c > 0);
+    const avgW = confs.length ? (confs.reduce((a, b) => a + b, 0) / confs.length).toFixed(1) : 'N/A';
+    text += `\nWeek ${wi + 1}: ${week.title}\n`;
+    text += `  Progress: ${done}/${week.subtopics.length} topics | Avg confidence: ${avgW}\n`;
+    week.subtopics.forEach((sub, ti) => {
+      const k = topicKey(wi, ti);
+      const p = topicProgress[k];
+      const status = p?.done ? `✓ (${p.confidence || 0}★)` : '○';
+      text += `  ${status} ${sub}\n`;
+    });
+  });
+
+  text += `\n${'─'.repeat(50)}\n`;
+  text += `Generated by Unify — unify.netlify.app\n`;
+
+  const blob = new Blob([text], {type: 'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${courseCode}-summary-${new Date().toISOString().split('T')[0]}.txt`;
+  a.click();
+  showToast('📄 Summary exported!');
+}
+
+window.reviewWeakTopics = function() {
+  // Find first weak topic and navigate to it
+  for (let wi = 0; wi < courseTopics.length; wi++) {
+    for (let ti = 0; ti < courseTopics[wi].subtopics.length; ti++) {
+      const k = topicKey(wi, ti);
+      if (topicProgress[k]?.done && (topicProgress[k]?.confidence || 0) <= 2) {
+        document.getElementById('courseCompletePage').classList.remove('show');
+        document.getElementById('lessonView').style.display = '';
+        loadTopic(wi, ti);
+        showToast('📌 Reviewing weak topic — ' + courseTopics[wi].subtopics[ti]);
+        return;
+      }
+    }
+  }
+  showToast('No weak topics found — you\'re solid! 🔥');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>

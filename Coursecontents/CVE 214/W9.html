@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CVE 214 — Week 9: Pan Evaporation, Soil Evaporation & Evapotranspiration | Unify</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--muted:#555;--muted2:#999;--accent:#4ade80;--accent-deep:#16a34a;--accent-bg:#dcfce7;--diagram-bg:#f8f7f3;--nav-h:60px}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--accent:#4ade80;--accent-deep:#4ade80;--accent-bg:#052e16;--diagram-bg:#1e1e1e}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:16px;transition:background .2s,color .2s}
+nav{position:sticky;top:0;z-index:100;height:var(--nav-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;gap:32px}
+.nav-logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--text);text-decoration:none;flex-shrink:0}
+.nav-links{display:flex;gap:4px;flex:1}
+.nav-links a{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:6px;border-bottom:2px solid transparent;transition:color .15s}
+.nav-links a:hover{color:var(--text)}.nav-links a.active{color:var(--accent-deep);border-bottom-color:var(--accent)}
+.theme-toggle{margin-left:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;flex-shrink:0}
+.theme-toggle:hover{color:var(--text);border-color:var(--muted)}
+.week-page{max-width:900px;margin:0 auto;padding:40px 48px 80px}
+.back-bar{display:flex;align-items:center;gap:12px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.back-btn:hover{color:var(--text);border-color:var(--text)}
+.week-nav{display:flex;gap:8px;margin-left:auto}
+.wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.wnav-btn:hover{color:var(--text);border-color:var(--text)}.wnav-btn.disabled{opacity:.35;pointer-events:none}
+.week-block{border-radius:14px;border:1px solid var(--border);overflow:hidden;background:var(--surface)}
+.week-header{background:var(--text);color:var(--bg);padding:24px 32px;display:flex;align-items:baseline;gap:20px}
+[data-theme="dark"] .week-header{background:var(--surface2);border-bottom:1px solid var(--border);color:var(--text)}
+.week-num{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;opacity:.55;white-space:nowrap;font-family:'DM Sans',sans-serif}
+.week-title{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;font-style:italic}
+.week-body{padding:32px}
+.week-summary{font-size:15px;color:var(--muted);line-height:1.75;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:24px}
+.tag{font-size:11px;font-weight:500;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:3px 12px}
+.exam-box{background:#fffbeb;border-left:3px solid #fcd34d;border-radius:0 10px 10px 0;padding:18px 22px;margin-bottom:28px}
+[data-theme="dark"] .exam-box{background:#1a1500;border-left-color:#b45309}
+.exam-box .box-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#92400e;margin-bottom:12px}
+[data-theme="dark"] .exam-box .box-label{color:#fbbf24}
+.exam-box ol{margin-left:18px;font-size:14px;color:var(--text)}.exam-box li{margin-bottom:8px;line-height:1.6}
+.past-q{display:inline-block;font-size:10px;font-weight:600;background:var(--accent-bg);color:var(--accent-deep);border:1px solid var(--accent);border-radius:4px;padding:1px 7px;margin-left:6px;vertical-align:middle}
+.topic-block{border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden}
+.topic-header{background:var(--surface2);padding:16px 24px;border-bottom:1px solid var(--border)}
+.topic-num{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:3px}
+.topic-title{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;color:var(--text)}
+.topic-body{padding:24px}.topic-body p{font-size:15px;line-height:1.8;margin-bottom:16px;color:var(--text)}
+.formula-block{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:18px 22px;margin:18px 0}
+.formula-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:10px}
+.formula-eq{font-family:'Playfair Display',serif;font-size:16px;font-style:italic;color:var(--text);margin-bottom:6px;line-height:1.6}
+.formula-vars{font-size:12px;color:var(--muted2);line-height:1.7;margin-top:8px}
+.realworld-box{background:#f0fdf4;border-left:3px solid #bbf7d0;border-radius:0 10px 10px 0;padding:16px 20px;margin:16px 0;font-size:14px;line-height:1.75;color:var(--text)}
+[data-theme="dark"] .realworld-box{background:#052e16;border-left-color:#166534}
+.realworld-box .box-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px}
+.quick-check{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 24px;margin-top:20px}
+.quick-check .qc-label{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.quick-check .qc-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.qc-list{display:flex;flex-direction:column;gap:10px}
+.qc-item{display:flex;gap:12px;align-items:start;font-size:14px;line-height:1.6;color:var(--text)}
+.qc-badge{font-size:10px;font-weight:600;border-radius:4px;padding:2px 8px;white-space:nowrap;margin-top:2px;flex-shrink:0}
+.qc-badge.normal{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+.qc-badge.hard{background:#fff5f5;color:#dc2626;border:1px solid #fca5a5}
+[data-theme="dark"] .qc-badge.hard{background:#1a0505;border-color:#7f1d1d}
+footer{border-top:1px solid var(--border);padding:32px 48px;text-align:center;font-size:13px;color:var(--muted2);max-width:900px;margin:0 auto}
+footer strong{color:var(--muted);font-weight:500}
+@media(max-width:700px){nav{padding:0 16px;gap:16px}.nav-links{display:none}.week-page{padding:20px 16px 60px}.week-body{padding:20px}.topic-body{padding:18px}footer{padding:24px 20px}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="../../dashboard.html" class="nav-logo">Unify</a>
+  <div class="nav-links">
+    <a href="../../dashboard.html">Dashboard</a>
+    <a href="../../careers.html">Career</a>
+    <a href="../../profile.html">Profile</a>
+    <a href="#" class="active">CVE 214</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">☾ Dark</button>
+</nav>
+
+<div class="week-page">
+  <div class="back-bar">
+    <a href="../../learn.html?course=CVE+214&name=CVE+214" class="back-btn">← Back to CVE 214</a>
+    <div class="week-nav">
+      <a href="W8.html" class="wnav-btn">← Prev</a>
+      <a href="W10.html" class="wnav-btn">Next →</a>
+    </div>
+  </div>
+
+  <div class="week-block">
+    <div class="week-header">
+      <span class="week-num">Week 9 of 12</span>
+      <span class="week-title">Pan Evaporation, Soil Evaporation & Evapotranspiration</span>
+    </div>
+    <div class="week-body">
+      <p class="week-summary">The most practical way to measure evaporation is with a pan. This week covers pan types, the pan coefficient, controlling evaporation, and the combined process of evapotranspiration (ET) — critical for irrigation design.</p>
+      <div class="tags"><span class="tag">Pan evaporation</span><span class="tag">Pan coefficient</span><span class="tag">Sunken pan</span><span class="tag">Floating pan</span><span class="tag">Transpiration</span><span class="tag">Evapotranspiration</span><span class="tag">Lysimeter</span></div>
+      <div class="exam-box">
+        <div class="box-label">Exam focus</div>
+        <ol>
+          <li>List the three types of evaporation pans. What are the advantages and disadvantages of surface pans? <span class="past-q">Exercise 5</span></li>
+          <li>Define the pan coefficient. What is its typical value for a class A pan?</li>
+          <li>Define transpiration and evapotranspiration. How is evapotranspiration estimated?</li>
+        </ol>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-header"><div class="topic-num">Topic 9.1</div><div class="topic-title">Pan Evaporation</div></div>
+        <div class="topic-body">
+          <p>A pan is a simple container of water placed in the open. By measuring how much water evaporates from it each day, you get an approximation of evaporation from larger water bodies like lakes and reservoirs. But pan evaporation is always higher than lake evaporation — that's why you need a correction factor called the pan coefficient.</p>
+          <div class="formula-block">
+            <div class="formula-label">Three types of evaporation pans (from textbook)</div>
+            <div class="formula-eq">1. Sunken Pan — difficult to install, clean, repair; creates observational problems; leaks are not easily detected and the annual lake evaporation (pan coefficient) is quite consistent and does not vary excessively (0.92 in Britain). Also appreciable heat exchange takes place between the pan and the soil.</div>
+            <div class="formula-eq">2. Floating Pan — evaporation from a pan floating in a lake or reservoir more nearly approximates evaporation from the lake or reservoir than other installations. Boundary effects are appreciable. Floating pans are prevalent but from the lake or reservoir the data may be unreliable. Also installation and operational expense is excessive.</div>
+            <div class="formula-eq">3. Surface Pan — pans exposed above ground experience greater evaporation than sunken pans because the radiant energy intercepted by the sidewalls increases of sunken pans. The major advantages of surface pans are economy and ease of installation, operation and maintenance.</div>
+          </div>
+          <div class="formula-block">
+            <div class="formula-label">Pan coefficient (from textbook)</div>
+            <div class="formula-eq">Lake Evaporation = Pan Coefficient × Pan Evaporation</div>
+            <div class="formula-eq">Pan coefficients range from 0.65 to 0.92. The US Weather Bureau class A pan coefficient is 0.75.</div>
+            <div class="formula-vars">In Britain: standard pan 1.83m square and 610mm deep; rim projects 76mm above surrounding ground. In the USA the standard class A pan is circular, 1.22m diameter and 254mm deep, filled to a depth of 180mm, set on a timber grillage about 150mm above ground level.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-header"><div class="topic-num">Topic 9.2</div><div class="topic-title">Control of Evaporation, Soil Evaporation & Evapotranspiration</div></div>
+        <div class="topic-body">
+          <div class="formula-block">
+            <div class="formula-label">Control of evaporation (from textbook)</div>
+            <div class="formula-eq">Small reservoirs are sometimes entirely covered to reduce evaporation losses. The use of floating covers and use of granular materials has also been advocated.</div>
+            <div class="formula-eq">Windbreaks: effective only on very small reservoirs (25% reduction in wind speed will normally reduce evaporation by only about 9% on a sustained basis).</div>
+            <div class="formula-eq">Cetyl alcohol: a small quantity can reduce evaporation from a small pan as much as 40%, but it is seldom possible to maintain more than 10–20% coverage over a reservoir on a continuing basis.</div>
+          </div>
+          <div class="formula-block">
+            <div class="formula-label">5.6 Soil Evaporation (from textbook)</div>
+            <div class="formula-eq">The evaporation from a wet soil surface immediately after rain or escape of water molecules with more resistance when the water table lies within a metre from the ground is called soil evaporation. This expressed as a percentage of evaporation from free water surface is called evaporation opportunity.</div>
+          </div>
+          <div class="formula-block">
+            <div class="formula-label">5.7 Transpiration (from textbook)</div>
+            <div class="formula-eq">Transpiration is the process whereby the moisture that has been absorbed by the roots of the trees and circulated through the plant body, returns back to the atmosphere as water vapour breathed out by the stomata of leaves. The amount of sunlight, available moisture, extent of plant growth and foliage and all the factors influencing evaporation have a bearing on the transpiration rates.</div>
+          </div>
+          <div class="formula-block">
+            <div class="formula-label">5.8 Evapotranspiration (from textbook)</div>
+            <div class="formula-eq">Evapotranspiration (ET) sometimes called consumptive use (U) or total evaporation, describes the total water removed from an area by transpiration by the plants and evaporation from the soil, snow and water surfaces.</div>
+            <div class="formula-eq">Potential evapotranspiration (Ept) is the evapotranspiration from the short green vegetation when the roots of a plant are supplied with unlimited water covering the soil. Usually expressed as depth (mm/interval).</div>
+          </div>
+          <div class="formula-block">
+            <div class="formula-label">Methods of estimating evapotranspiration (from textbook)</div>
+            <div class="formula-eq">(i) Tanks and lysimeter experiments</div>
+            <div class="formula-eq">(ii) Field experimental plots</div>
+            <div class="formula-eq">(iii) Soil moisture studies</div>
+            <div class="formula-eq">(iv) Evapotranspiration equations as developed by Penman, Thornthwaite, Blaney-Criddle etc.</div>
+            <div class="formula-eq">(v) Evaporation index method, i.e. from pan evaporation data.</div>
+          </div>
+          <div class="realworld-box">
+            <div class="box-label">Real-world example</div>
+            In the dry season in northern Nigeria, irrigation engineers must account for evapotranspiration when deciding how much water to supply to crops. If they only account for how much the plant "drinks" (transpiration) and ignore evaporation from the surrounding soil, they will under-supply the field and the crop will wilt.
+          </div>
+          <div class="quick-check">
+            <div class="qc-label">Quick check — Week 9</div>
+            <div class="qc-list">
+              <div class="qc-item"><span class="qc-badge normal">Q1</span><span>A pan records 8mm of evaporation per day. The pan coefficient is 0.75. Estimate the lake evaporation.</span></div>
+              <div class="qc-item"><span class="qc-badge normal">Q2</span><span>Define evapotranspiration. How does it differ from transpiration alone?</span></div>
+              <div class="qc-item"><span class="qc-badge hard">Hard</span><span>Why does a surface pan record higher evaporation than a sunken pan placed in the same location? What does this mean for the pan coefficient?</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:32px;padding-top:24px;border-top:1px solid var(--border);">
+    <span style="font-size:13px;color:var(--muted2);">Week 9 of 12</span>
+    <a href="W10.html" class="back-btn" style="border-color:var(--accent);color:var(--accent-deep);">Next: Week 10 →</a>
+  </div>
+</div>
+
+<footer>
+  <strong>CVE 214 — Engineering Hydrology</strong> · Week 9 · Unify Platform · LASU Faculty of Engineering<br>
+  <span style="display:block;margin-top:6px">Content sourced from Engineering Hydrology textbook · Chapters 1–7</span>
+</footer>
+
+<script>
+(function(){const saved=localStorage.getItem('unify-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);const b=document.getElementById('theme-btn');if(b)b.textContent=saved==='dark'?'☀ Light':'☾ Dark';}})();
+function toggleTheme(){const cur=document.documentElement.getAttribute('data-theme');const nxt=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',nxt);localStorage.setItem('unify-theme',nxt);document.getElementById('theme-btn').textContent=nxt==='dark'?'☀ Light':'☾ Dark';}
+</script>
+</body>
+</html>

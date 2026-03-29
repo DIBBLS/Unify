@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEE 202 — Week 12: Eutectic Systems & Fe-C Diagram | Unify</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--muted:#555;--muted2:#999;--accent:#4ade80;--green-deep:#16a34a;--green-bg:#dcfce7;--diagram-bg:#f8f7f3;--red:#dc2626;--red-bg:#fff5f5;--red-border:#fca5a5}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--diagram-bg:#1e1e1e;--green-bg:#052e16;--red-bg:#1a0505;--red-border:#7f1d1d}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:16px;line-height:1.7;transition:background .3s,color .3s}
+nav{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+.nav-logo{font-family:'Playfair Display',serif;font-weight:900;font-size:20px;color:var(--text);text-decoration:none}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-links a{font-size:14px;color:var(--muted);text-decoration:none;padding-bottom:2px;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-links a.active{color:var(--green-deep);border-bottom:2px solid var(--accent);font-weight:500}
+.theme-toggle{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 14px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .2s}
+.theme-toggle:hover{background:var(--border)}
+.week-page{max-width:900px;margin:0 auto;padding:2rem 2rem 4rem}
+.back-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:1rem}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.back-btn:hover{color:var(--text);border-color:var(--text)}
+.week-nav{display:flex;gap:8px}
+.wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.wnav-btn:hover{color:var(--text);border-color:var(--text)}
+.wnav-btn.disabled{opacity:.35;pointer-events:none}
+.week-block{margin-top:0}
+.week-header{background:var(--text);color:var(--bg);padding:1.2rem 1.8rem;border-radius:8px 8px 0 0;display:flex;align-items:baseline;gap:1rem}
+.week-num-badge{font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.6}
+.week-title-main{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700}
+.week-body{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;padding:2rem}
+.week-summary{color:var(--muted);margin-bottom:1.5rem;font-size:15px;line-height:1.8}
+.key-terms{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:2rem}
+.key-term{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 12px;font-size:12px;color:var(--muted)}
+.exam-box{background:#fffbeb;border-left:3px solid #fcd34d;border-radius:6px;padding:1.2rem 1.5rem;margin-bottom:2.5rem}
+[data-theme="dark"] .exam-box{background:#1a1500;border-left-color:#ca8a04}
+.exam-box-label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#92400e;font-weight:600;margin-bottom:.8rem}
+[data-theme="dark"] .exam-box-label{color:#fcd34d}
+.exam-q{font-size:14px;color:var(--text);margin-bottom:6px;display:flex;align-items:flex-start;gap:8px}
+.past-q-badge{background:var(--green-bg);color:var(--green-deep);border:1px solid var(--accent);border-radius:4px;padding:1px 7px;font-size:10px;font-weight:600;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.topic-block{margin-bottom:3rem;padding-top:2rem;border-top:1px solid var(--border)}
+.topic-header{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1rem}
+.topic-num{font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em}
+.topic-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700}
+.topic-body{font-size:15px;line-height:1.85;color:var(--text);margin-bottom:1.5rem}
+.topic-body p{margin-bottom:1rem}
+.topic-body strong{font-weight:600}
+.formula-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:1.2rem 1.5rem;margin:1.5rem 0}
+.formula-label{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--green-deep);font-weight:600;margin-bottom:.8rem}
+.formula-eq{font-family:'Playfair Display',serif;font-style:italic;font-size:1.15rem;color:var(--text);margin-bottom:.6rem}
+.formula-vars{font-size:12px;color:var(--muted2);line-height:1.8}
+.diagram-container{background:var(--diagram-bg);border:1px solid var(--border);border-radius:8px;padding:1.5rem;margin:1.5rem 0}
+.diagram-label{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted2);margin-bottom:1rem;text-align:center}
+.diagram-container svg{display:block;margin:0 auto}
+.simple-box{border-radius:6px;padding:1rem 1.3rem;margin:1.2rem 0;font-size:14px;line-height:1.75}
+.simple-box .box-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;margin-bottom:.5rem}
+.simple-box.mistake{background:var(--red-bg);border-left:3px solid var(--red-border)}
+.simple-box.mistake .box-label{color:var(--red)}
+.simple-box.matters{background:#f0fdf4;border-left:3px solid var(--accent)}
+[data-theme="dark"] .simple-box.matters{background:#052e16}
+.simple-box.matters .box-label{color:var(--green-deep)}
+.data-table{width:100%;border-collapse:collapse;font-size:13px;margin:1.2rem 0}
+.data-table th{background:var(--surface2);border:1px solid var(--border);padding:8px 12px;text-align:left;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.data-table td{border:1px solid var(--border);padding:8px 12px;color:var(--text);vertical-align:top}
+.data-table tr:nth-child(even) td{background:var(--surface2)}
+footer{background:var(--surface);border-top:1px solid var(--border);padding:2rem;text-align:center;font-size:13px;color:var(--muted2)}
+footer strong{color:var(--text)}
+@media(max-width:700px){nav{padding:0 1rem}.nav-links{display:none}.week-page{padding-left:1rem;padding-right:1rem}.week-header{padding:1rem}.week-body{padding:1.2rem}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="../../Learn.html">Unify</a>
+  <div class="nav-links">
+    <a href="../../dashboard.html">Dashboard</a>
+    <a href="../../careers.html">Career</a>
+    <a href="../../index.html">Profile</a>
+    <a href="../../Learn.html" class="active">Learn</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()">Toggle Dark</button>
+</nav>
+
+<div class="week-page">
+  <div class="back-bar">
+    <a href="../../Learn.html" class="back-btn">← Back to Learn</a>
+    <div class="week-nav">
+      <a href="W11.html" class="wnav-btn">← Prev</a>
+      <span class="wnav-btn disabled">Next →</span>
+    </div>
+  </div>
+
+<div class="week-block" id="week12">
+  <div class="week-header">
+    <span class="week-num-badge">Week 12</span>
+    <span class="week-title-main">Eutectic Systems, Invariant Reactions & Fe-C Diagram</span>
+  </div>
+  <div class="week-body">
+    <p class="week-summary">The eutectic system is the most important binary system in engineering — it's why soldering works, why lead-tin alloys melt at lower temperatures than pure metals. The Fe-C diagram underpins all steel and cast iron production. Know your invariant reactions and how to read cooling curves.</p>
+    <div class="key-terms">
+      <span class="key-term">Eutectic Reaction</span><span class="key-term">Eutectic Point</span>
+      <span class="key-term">Invariant Reaction</span><span class="key-term">Eutectoid</span>
+      <span class="key-term">Peritectic</span><span class="key-term">Fe-C Diagram</span>
+      <span class="key-term">Ferrite</span><span class="key-term">Austenite</span><span class="key-term">Pearlite</span>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-box-label">⚡ Likely Exam Questions</div>
+      <div class="exam-q"><span class="past-q-badge">Past Q</span> Sketch a binary eutectic phase diagram. Label all curves and the equilibrium phases. Sketch cooling curves for: (i) pure component A, (ii) solid solution alloy, (iii) hypo-eutectic alloy, (iv) eutectic alloy, (v) hyper-eutectic alloy. (2019/20)</div>
+      <div class="exam-q"><span class="past-q-badge">Past Q</span> On the diagram given (A-20%B at 550°C): composition of liquid phase; composition of solid phase; fraction of material that is liquid; weight of solid if total alloy = 35Kg. (2011/12)</div>
+      <div class="exam-q"><span class="past-q-badge">Past Q</span> Draw a binary eutectic for alloys with unlimited solubility in liquid and limited in solid. Label all curves and indicate phases present in each zone. Sketch cooling curve for eutectic alloy and hyper-eutectic alloy. (2014/15)</div>
+      <div class="exam-q"><span class="past-q-badge">Past Q</span> Give examples of invariant points in a unary and binary system. Illustrate with sketches. (2022/23)</div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-header"><span class="topic-num">Topic 12.1</span><span class="topic-title">Eutectic Binary Systems</span></div>
+      <div class="topic-body">
+        <p>These binary systems, with <strong>unlimited liquid state miscibility and low or negligible solid state miscibility</strong>, are referred to as <strong>eutectic</strong>.</p>
+        <p><strong>Eutectic reaction:</strong> A transition between liquid and mixture of two solid phases, α + β, at eutectic concentration C<sub>E</sub>. The reaction is written: Liquid → α + β</p>
+        <p>The melting point of the eutectic alloy is lower than that of the components (eutectic = easy to melt in Greek). At most two phases can be in equilibrium within a phase field. Three phases (L, α, β) may be in equilibrium only at a few points along the eutectic isotherm. Single-phase regions are separated by 2-phase regions.</p>
+        <p><strong>Eutectic or invariant point:</strong> Liquid and two solid phases co-exist in equilibrium at the eutectic composition C<sub>E</sub> and the eutectic temperature T<sub>E</sub>. The <strong>eutectic isotherm</strong> is the horizontal solidus line at T<sub>E</sub>.</p>
+      </div>
+
+      <div class="diagram-container">
+        <div class="diagram-label">Binary Eutectic Phase Diagram (e.g., Lead-Tin System)</div>
+        <svg viewBox="0 0 600 360" width="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="ax3" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 Z" fill="#0a0a0a"/>
+            </marker>
+          </defs>
+          <line x1="60" y1="310" x2="60" y2="30" stroke="#0a0a0a" stroke-width="1.5" marker-end="url(#ax3)"/>
+          <line x1="60" y1="310" x2="560" y2="310" stroke="#0a0a0a" stroke-width="1.5" marker-end="url(#ax3)"/>
+          <text x="25" y="175" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" fill="#555" transform="rotate(-90 25 175)">Temperature (°C)</text>
+          <text x="310" y="340" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" fill="#555">Composition (wt% Sn →)</text>
+          <text x="60" y="322" font-family="DM Sans,sans-serif" font-size="11" fill="#555">Pb(A)</text>
+          <text x="530" y="322" font-family="DM Sans,sans-serif" font-size="11" fill="#555">Sn(B)</text>
+          <circle cx="60" cy="60" r="4" fill="#0a0a0a"/>
+          <text x="38" y="58" font-family="DM Sans,sans-serif" font-size="10" fill="#555" text-anchor="end">327°C</text>
+          <circle cx="540" cy="80" r="4" fill="#0a0a0a"/>
+          <text x="555" y="82" font-family="DM Sans,sans-serif" font-size="10" fill="#555">232°C</text>
+          <path d="M60,60 Q140,140 245,215" fill="none" stroke="#16a34a" stroke-width="2.5"/>
+          <path d="M540,80 Q445,140 245,215" fill="none" stroke="#16a34a" stroke-width="2.5"/>
+          <path d="M60,310 Q80,260 105,210" fill="none" stroke="#999" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <path d="M540,310 Q520,260 490,220" fill="none" stroke="#999" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <line x1="105" y1="215" x2="490" y2="215" stroke="#dc2626" stroke-width="2"/>
+          <circle cx="245" cy="215" r="7" fill="#dc2626"/>
+          <text x="245" y="207" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#dc2626" font-weight="600">Eutectic Point E</text>
+          <text x="245" y="198" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#dc2626">T=183°C, C=61.9%Sn</text>
+          <text x="490" y="211" font-family="DM Sans,sans-serif" font-size="10" fill="#dc2626">Eutectic</text>
+          <text x="490" y="223" font-family="DM Sans,sans-serif" font-size="10" fill="#dc2626">Isotherm</text>
+          <text x="155" y="120" text-anchor="middle" font-family="Playfair Display,serif" font-style="italic" font-size="16" fill="#16a34a">Liquid</text>
+          <text x="85" y="270" text-anchor="middle" font-family="Playfair Display,serif" font-style="italic" font-size="14" fill="#0a0a0a">α</text>
+          <text x="520" y="270" text-anchor="middle" font-family="Playfair Display,serif" font-style="italic" font-size="14" fill="#0a0a0a">β</text>
+          <text x="155" y="170" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#555">α + L</text>
+          <text x="370" y="170" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#555">β + L</text>
+          <text x="295" y="270" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="13" fill="#555">α + β</text>
+          <text x="145" y="310" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#999">Hypo-eutectic</text>
+          <text x="390" y="310" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#999">Hyper-eutectic</text>
+          <line x1="105" y1="215" x2="105" y2="312" stroke="#999" stroke-width="1" stroke-dasharray="3,2"/>
+          <line x1="490" y1="215" x2="490" y2="312" stroke="#999" stroke-width="1" stroke-dasharray="3,2"/>
+          <line x1="60" y1="215" x2="100" y2="215" stroke="#999" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="55" y="218" font-family="DM Sans,sans-serif" font-size="10" fill="#999" text-anchor="end">183°C</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-header"><span class="topic-num">Topic 12.2</span><span class="topic-title">Invariant Reactions Summary</span></div>
+      <div class="topic-body">
+        <p>There are 5 invariant reactions (F = 0). At an invariant point, no independent variables can be changed — temperature, pressure, and composition are all fixed.</p>
+      </div>
+
+      <table class="data-table">
+        <thead><tr><th>#</th><th>Reaction Name</th><th>Reaction Equation</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><strong>Eutectic</strong></td><td>Liquid → α + β</td><td>Liquid decomposes to TWO solids on cooling</td></tr>
+          <tr><td>2</td><td><strong>Eutectoid</strong></td><td>α → β + γ</td><td>One solid decomposes to TWO solids. Fe-C: austenite → ferrite + cementite (pearlite)</td></tr>
+          <tr><td>3</td><td><strong>Peritectic</strong></td><td>Liquid + α → β</td><td>Liquid reacts with solid to form new solid</td></tr>
+          <tr><td>4</td><td><strong>Peritectoid</strong></td><td>α + β → γ</td><td>Two solids combine to form one solid</td></tr>
+          <tr><td>5</td><td><strong>Monotectic</strong></td><td>L₁ → α + L₂</td><td>One liquid transforms to solid + different liquid</td></tr>
+        </tbody>
+      </table>
+
+      <div class="diagram-container">
+        <div class="diagram-label">Fe-C Phase Diagram — Key Points & Phases</div>
+        <svg viewBox="0 0 600 360" width="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="ax4" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 Z" fill="#0a0a0a"/>
+            </marker>
+          </defs>
+          <line x1="60" y1="320" x2="60" y2="25" stroke="#0a0a0a" stroke-width="1.5" marker-end="url(#ax4)"/>
+          <line x1="60" y1="320" x2="560" y2="320" stroke="#0a0a0a" stroke-width="1.5" marker-end="url(#ax4)"/>
+          <text x="23" y="175" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#555" transform="rotate(-90 23 175)">Temperature (°C)</text>
+          <text x="310" y="345" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#555">Carbon content (wt%) →</text>
+          <text x="60" y="332" font-family="DM Sans,sans-serif" font-size="10" fill="#555">0</text>
+          <text x="175" y="332" font-family="DM Sans,sans-serif" font-size="10" fill="#555">0.77</text>
+          <text x="280" y="332" font-family="DM Sans,sans-serif" font-size="10" fill="#555">2.11</text>
+          <text x="400" y="332" font-family="DM Sans,sans-serif" font-size="10" fill="#555">4.30</text>
+          <text x="530" y="332" font-family="DM Sans,sans-serif" font-size="10" fill="#555">6.67</text>
+          <text x="55" y="50" font-family="DM Sans,sans-serif" font-size="10" fill="#555" text-anchor="end">1538</text>
+          <text x="55" y="113" font-family="DM Sans,sans-serif" font-size="10" fill="#555" text-anchor="end">1148</text>
+          <text x="55" y="200" font-family="DM Sans,sans-serif" font-size="10" fill="#555" text-anchor="end">727</text>
+          <path d="M60,50 Q120,70 175,100 Q225,130 285,115 Q390,100 540,60" fill="none" stroke="#16a34a" stroke-width="2"/>
+          <path d="M60,200 L175,200 Q240,110 285,115 Q240,130 175,100 Q90,75 60,115 Z" fill="#16a34a" opacity="0.12"/>
+          <text x="130" y="160" text-anchor="middle" font-family="Playfair Display,serif" font-style="italic" font-size="14" fill="#16a34a">γ</text>
+          <text x="130" y="175" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#16a34a">(Austenite)</text>
+          <rect x="60" y="200" width="50" height="120" fill="#0a0a0a" opacity="0.08"/>
+          <text x="85" y="260" text-anchor="middle" font-family="Playfair Display,serif" font-style="italic" font-size="14" fill="#0a0a0a">α</text>
+          <text x="85" y="275" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#555">Ferrite</text>
+          <line x1="60" y1="200" x2="540" y2="200" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="6,3"/>
+          <text x="545" y="198" font-family="DM Sans,sans-serif" font-size="9" fill="#dc2626">Eutectoid</text>
+          <text x="545" y="208" font-family="DM Sans,sans-serif" font-size="9" fill="#dc2626">727°C</text>
+          <line x1="60" y1="113" x2="540" y2="113" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="6,3"/>
+          <text x="545" y="111" font-family="DM Sans,sans-serif" font-size="9" fill="#dc2626">Eutectic</text>
+          <text x="545" y="121" font-family="DM Sans,sans-serif" font-size="9" fill="#dc2626">1148°C</text>
+          <circle cx="175" cy="200" r="5" fill="#dc2626"/>
+          <text x="175" y="192" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#dc2626">Eutectoid</text>
+          <text x="175" y="182" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#dc2626">0.77% C</text>
+          <circle cx="400" cy="113" r="5" fill="#dc2626"/>
+          <text x="400" y="103" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#dc2626">Eutectic 4.30%C</text>
+          <line x1="540" y1="50" x2="540" y2="320" stroke="#0a0a0a" stroke-width="2"/>
+          <text x="545" y="170" font-family="DM Sans,sans-serif" font-size="9" fill="#555" transform="rotate(90 545 170)">Fe₃C (Cementite) 6.67%C</text>
+          <text x="110" y="175" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#555">α+γ</text>
+          <text x="370" y="165" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#555">γ + Fe₃C</text>
+          <text x="200" y="265" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#555">α + Fe₃C</text>
+          <text x="200" y="278" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#999">(Pearlite region)</text>
+          <line x1="280" y1="113" x2="280" y2="320" stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="170" y="340" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#555">← Steel (0–2.11% C)</text>
+          <text x="400" y="340" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#555">Cast Iron (2.11–6.67%) →</text>
+          <text x="310" y="80" text-anchor="middle" font-family="Playfair Display,serif" font-style="italic" font-size="15" fill="#16a34a">Liquid</text>
+          <text x="230" y="95" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#555">γ+L</text>
+        </svg>
+      </div>
+
+      <div class="formula-box">
+        <div class="formula-label">Key Fe-C Phases & Transformations</div>
+        <div class="formula-vars" style="font-size:13px; line-height:2">
+          <strong>Ferrite (α):</strong> BCC iron, max 0.022% C at 727°C. Soft, ductile, magnetic.<br>
+          <strong>Austenite (γ):</strong> FCC iron, max 2.11% C at 1148°C. Non-magnetic, forms at high temperature.<br>
+          <strong>Cementite (Fe₃C):</strong> Iron carbide, 6.67% C. Very hard and brittle.<br>
+          <strong>Pearlite:</strong> Eutectoid mixture of ferrite + cementite (0.77% C, 727°C). Lamellar structure. γ → α + Fe₃C<br>
+          <strong>Ledeburite:</strong> Eutectic mixture at 4.30% C, 1148°C. L → γ + Fe₃C<br><br>
+          <strong>Eutectoid reaction:</strong> γ(0.77%C) → α(0.022%C) + Fe₃C(6.67%C) &nbsp; at 727°C<br>
+          <strong>Eutectic reaction:</strong> L(4.30%C) → γ(2.11%C) + Fe₃C(6.67%C) &nbsp; at 1148°C
+        </div>
+      </div>
+
+      <div class="simple-box matters">
+        <div class="box-label">★ Why This Matters</div>
+        The phase diagram question is worth 25 marks in every paper. The lever rule calculation typically gives 6–10 marks. For alloy A-20%B at 550°C: draw the tie line at 550°C, read off the compositions at the liquidus (C<sub>L</sub>) and solidus (C<sub>α</sub>) intersections, then apply the lever rule formulas to get the weight fractions. Always state your tie-line values explicitly before calculating.
+      </div>
+
+      <div class="simple-box mistake">
+        <div class="box-label">⚠ Common Mistake</div>
+        Students mix up eutectic and eutectoid. <strong>Eutectic:</strong> involves a LIQUID reacting → two solids. <strong>Eutectoid:</strong> involves a SOLID reacting → two other solids. In the Fe-C diagram, ledeburite forms at the eutectic point (1148°C, liquid → γ + Fe₃C). Pearlite forms at the eutectoid point (727°C, austenite → ferrite + cementite). The eutectic and eutectoid reactions are similar — both involve decomposition of a single phase into two solid phases. The "-oid" suffix means "resembling" (resembling the eutectic but in solid state).
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<footer>
+  <strong>MEE 202 — Science of Materials</strong> &nbsp;|&nbsp; Dr Adefuoye & Dr Obasa &nbsp;|&nbsp; LASU Faculty of Engineering<br>
+  <span style="margin-top:8px;display:block">Week 12 · Eutectic Systems, Invariant Reactions & Fe-C Diagram</span>
+  <span style="margin-top:4px;display:block;color:var(--muted2)">Course complete · All 12 weeks covered</span>
+  <span style="margin-top:12px;display:block;font-size:12px">Built on Unify · LASU · Native Learning Library · Best of luck in your exams</span>
+</footer>
+
+<script>
+function toggleTheme(){const html=document.documentElement;const next=html.getAttribute('data-theme')==='dark'?'light':'dark';html.setAttribute('data-theme',next);localStorage.setItem('unify-theme',next);document.querySelector('.theme-toggle').textContent=next==='dark'?'Toggle Light':'Toggle Dark';}
+(function(){const saved=localStorage.getItem('unify-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);if(saved==='dark')document.querySelector('.theme-toggle').textContent='Toggle Light';}})();
+</script>
+</body>
+</html>

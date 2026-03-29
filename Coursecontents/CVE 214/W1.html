@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CVE 214 — Week 1: Definition, Importance & Scope of Hydrology | Unify</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--muted:#555;--muted2:#999;--accent:#4ade80;--accent-deep:#16a34a;--accent-bg:#dcfce7;--diagram-bg:#f8f7f3;--nav-h:60px}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--accent:#4ade80;--accent-deep:#4ade80;--accent-bg:#052e16;--diagram-bg:#1e1e1e}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:16px;transition:background .2s,color .2s}
+nav{position:sticky;top:0;z-index:100;height:var(--nav-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;gap:32px}
+.nav-logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--text);text-decoration:none;flex-shrink:0}
+.nav-links{display:flex;gap:4px;flex:1}
+.nav-links a{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:6px;border-bottom:2px solid transparent;transition:color .15s}
+.nav-links a:hover{color:var(--text)}.nav-links a.active{color:var(--accent-deep);border-bottom-color:var(--accent)}
+.theme-toggle{margin-left:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;flex-shrink:0}
+.theme-toggle:hover{color:var(--text);border-color:var(--muted)}
+.week-page{max-width:900px;margin:0 auto;padding:40px 48px 80px}
+.back-bar{display:flex;align-items:center;gap:12px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.back-btn:hover{color:var(--text);border-color:var(--text)}
+.week-nav{display:flex;gap:8px;margin-left:auto}
+.wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.wnav-btn:hover{color:var(--text);border-color:var(--text)}.wnav-btn.disabled{opacity:.35;pointer-events:none}
+.week-block{border-radius:14px;border:1px solid var(--border);overflow:hidden;background:var(--surface)}
+.week-header{background:var(--text);color:var(--bg);padding:24px 32px;display:flex;align-items:baseline;gap:20px}
+[data-theme="dark"] .week-header{background:var(--surface2);border-bottom:1px solid var(--border);color:var(--text)}
+.week-num{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;opacity:.55;white-space:nowrap;font-family:'DM Sans',sans-serif}
+.week-title{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;font-style:italic}
+.week-body{padding:32px}
+.week-summary{font-size:15px;color:var(--muted);line-height:1.75;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:24px}
+.tag{font-size:11px;font-weight:500;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:3px 12px}
+.exam-box{background:#fffbeb;border-left:3px solid #fcd34d;border-radius:0 10px 10px 0;padding:18px 22px;margin-bottom:28px}
+[data-theme="dark"] .exam-box{background:#1a1500;border-left-color:#b45309}
+.exam-box .box-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#92400e;margin-bottom:12px}
+[data-theme="dark"] .exam-box .box-label{color:#fbbf24}
+.exam-box ol{margin-left:18px;font-size:14px;color:var(--text)}.exam-box li{margin-bottom:8px;line-height:1.6}
+.past-q{display:inline-block;font-size:10px;font-weight:600;background:var(--accent-bg);color:var(--accent-deep);border:1px solid var(--accent);border-radius:4px;padding:1px 7px;margin-left:6px;vertical-align:middle}
+.topic-block{border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden}
+.topic-header{background:var(--surface2);padding:16px 24px;border-bottom:1px solid var(--border)}
+.topic-num{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:3px}
+.topic-title{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;color:var(--text)}
+.topic-body{padding:24px}.topic-body p{font-size:15px;line-height:1.8;margin-bottom:16px;color:var(--text)}
+.formula-block{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:18px 22px;margin:18px 0}
+.formula-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:10px}
+.formula-eq{font-family:'Playfair Display',serif;font-size:16px;font-style:italic;color:var(--text);margin-bottom:6px;line-height:1.6}
+.formula-vars{font-size:12px;color:var(--muted2);line-height:1.7;margin-top:8px}
+.realworld-box{background:#f0fdf4;border-left:3px solid #bbf7d0;border-radius:0 10px 10px 0;padding:16px 20px;margin:16px 0;font-size:14px;line-height:1.75;color:var(--text)}
+[data-theme="dark"] .realworld-box{background:#052e16;border-left-color:#166534}
+.realworld-box .box-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px}
+.mistake-box{background:#fff5f5;border-left:3px solid #fca5a5;border-radius:0 10px 10px 0;padding:16px 20px;margin:16px 0;font-size:14px;line-height:1.75;color:var(--text)}
+[data-theme="dark"] .mistake-box{background:#1a0505;border-left-color:#7f1d1d}
+.mistake-box .box-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#dc2626;margin-bottom:8px}
+.exam-def{background:var(--surface2);border:1.5px solid var(--accent);border-radius:10px;padding:16px 20px;margin:18px 0}
+.exam-def .def-label{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px}
+.exam-def .def-text{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--text);line-height:1.7}
+.diagram-wrap{border:1px solid var(--border);border-radius:10px;background:var(--diagram-bg);padding:20px;margin:18px 0;overflow:hidden}
+.diagram-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:14px}
+.worked-example{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:18px 22px;margin:18px 0}
+.worked-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:12px}
+.worked-step{font-size:14px;line-height:1.8;color:var(--text);margin-bottom:6px}
+.worked-step strong{color:var(--accent-deep)}
+.quick-check{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 24px;margin-top:20px}
+.quick-check .qc-label{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.quick-check .qc-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.qc-list{display:flex;flex-direction:column;gap:10px}
+.qc-item{display:flex;gap:12px;align-items:start;font-size:14px;line-height:1.6;color:var(--text)}
+.qc-badge{font-size:10px;font-weight:600;border-radius:4px;padding:2px 8px;white-space:nowrap;margin-top:2px;flex-shrink:0}
+.qc-badge.normal{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+.qc-badge.hard{background:#fff5f5;color:#dc2626;border:1px solid #fca5a5}
+[data-theme="dark"] .qc-badge.hard{background:#1a0505;border-color:#7f1d1d}
+footer{border-top:1px solid var(--border);padding:32px 48px;text-align:center;font-size:13px;color:var(--muted2);max-width:900px;margin:0 auto}
+footer strong{color:var(--muted);font-weight:500}
+@media(max-width:700px){nav{padding:0 16px;gap:16px}.nav-links{display:none}.week-page{padding:20px 16px 60px}.week-body{padding:20px}.topic-body{padding:18px}footer{padding:24px 20px}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="../../dashboard.html" class="nav-logo">Unify</a>
+  <div class="nav-links">
+    <a href="../../dashboard.html">Dashboard</a>
+    <a href="../../careers.html">Career</a>
+    <a href="../../profile.html">Profile</a>
+    <a href="#" class="active">CVE 214</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">☾ Dark</button>
+</nav>
+
+<div class="week-page">
+  <div class="back-bar">
+    <a href="../../learn.html?course=CVE+214&name=CVE+214" class="back-btn">← Back to CVE 214</a>
+    <div class="week-nav">
+      <span class="wnav-btn disabled">← Prev</span>
+      <a href="W2.html" class="wnav-btn">Next →</a>
+    </div>
+  </div>
+
+  <div class="week-block">
+    <div class="week-header">
+      <span class="week-num">Week 1 of 12</span>
+      <span class="week-title">Definition, Importance & Scope of Hydrology</span>
+    </div>
+    <div class="week-body">
+      <p class="week-summary">This is the foundation week. You need to know what hydrology is, why engineers care about it, what questions it answers, and what its different branches cover. Definition questions from this chapter appear in almost every exam.</p>
+      <div class="tags"><span class="tag">Hydrology</span><span class="tag">Hydrometeorology</span><span class="tag">Hydrogeology</span><span class="tag">Scope</span><span class="tag">Engineering applications</span></div>
+      <div class="exam-box">
+        <div class="box-label">Exam focus</div>
+        <ol>
+          <li>Define hydrology. State its importance in engineering. <span class="past-q">Exercise 1 Q1</span></li>
+          <li>Enumerate the four major branches (areas) of hydrology, stating the significance of each.</li>
+          <li>What is hydrometeorology? List the various components of a hydrometeorological station.</li>
+        </ol>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-header"><div class="topic-num">Topic 1.1</div><div class="topic-title">What is Hydrology?</div></div>
+        <div class="topic-body">
+          <p>Hydrology is the science of water on Earth — where it comes from, where it goes, and how it behaves in every state (liquid, solid, vapour). It doesn't just look at rivers and rain. It tracks water through the air, over land surfaces, and through the underground layers of the earth.</p>
+          <div class="exam-def">
+            <div class="def-label">Exam-ready definition (word-for-word from textbook)</div>
+            <div class="def-text">Hydrology is the science that deals with the process governing the depletion and replenishment of the water resources on the earth i.e. over and within the surface of earth in any state of its existence. It is concerned with the origin, distribution and transportation of water through the air, over the ground surface and through the strata of the earth.</div>
+          </div>
+          <div class="realworld-box">
+            <div class="box-label">Real-world example</div>
+            Every time there's a flood in Lagos and engineers ask "how much water can this drainage channel handle?" — that's hydrology. Every dam, every water treatment plant, every irrigation scheme in Nigeria was designed using hydrological data. Without hydrology, engineers would be guessing.
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-header"><div class="topic-num">Topic 1.2</div><div class="topic-title">Importance of Hydrology in Engineering</div></div>
+        <div class="topic-body">
+          <p>Hydrology is not just a science — it's a tool. Engineers use it to design structures that deal with water. If you get the hydrology wrong, bridges wash away, dams overflow, and cities flood.</p>
+          <div class="formula-block">
+            <div class="formula-label">Engineering applications (from textbook)</div>
+            <div class="formula-eq">1. Design and operation of hydraulic structures</div>
+            <div class="formula-eq">2. Irrigation and flood control works</div>
+            <div class="formula-eq">3. Power projects and hydroelectric schemes</div>
+            <div class="formula-eq">4. Municipal and industrial water supply schemes</div>
+            <div class="formula-eq">5. Navigational works</div>
+            <div class="formula-vars">A knowledge of hydrology is of basic importance in practically all problems that involve the use and supply of water for any purpose whatsoever — including forestry, agriculture and other branches of natural science.</div>
+          </div>
+          <div class="formula-block">
+            <div class="formula-label">Typical questions a hydrologist answers (from textbook)</div>
+            <div class="formula-eq">1. Is the flow of this stream sufficient to meet the needs of a city, industry, irrigation project, or power development?</div>
+            <div class="formula-eq">2. Would a storage reservoir be required and if so, what reservoir capacity is needed?</div>
+            <div class="formula-eq">3. In the design of a flood protection system, bridge, culvert or spillway for a dam — what is the maximum flood that may be expected to occur with any specified frequency?</div>
+            <div class="formula-eq">4. What would be the effect of draining an upland area or a swampy region upon the flow of the stream?</div>
+            <div class="formula-eq">5. How would certain changes in land use or the removal of forest affect the ground water level or stream flow?</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-header"><div class="topic-num">Topic 1.3</div><div class="topic-title">Areas (Branches) of Hydrology & Scope</div></div>
+        <div class="topic-body">
+          <div class="formula-block">
+            <div class="formula-label">Four areas of hydrology (from textbook)</div>
+            <div class="formula-eq">1. Rainfall and other forms of precipitation — their causes, origin, occurrence, magnitude, distribution and variation.</div>
+            <div class="formula-eq">2. Return of moisture to the atmosphere by evaporation, transpiration and sublimation. (Evaporation + transpiration = evapotranspiration)</div>
+            <div class="formula-eq">3. Surface water hydrology — deals with run-off or stream flow and its variations, storage in ponds, lakes and reservoir, physical features of river and lake systems.</div>
+            <div class="formula-eq">4. Sub-surface or ground water hydrology — considers origin, nature and occurrences of sub-surface water, its infiltration into the ground, passage or percolation through open formations and seepage.</div>
+          </div>
+          <div class="formula-block">
+            <div class="formula-label">Scope of hydrology — what it helps us know (from textbook)</div>
+            <div class="formula-eq">(i) The maximum probable flood that may occur at a given site and its frequency — required for safe design of drains, bridges, culverts, dams, reservoirs, channels and other flood control structures.</div>
+            <div class="formula-eq">(ii) The water yield from a basin — its occurrence, quality and frequency — necessary for design of dams, municipal water supply, water power, river navigation.</div>
+            <div class="formula-eq">(iii) The ground water development — knowledge of hydrogeology of the area, formation soil, recharge facilities like streams and reservoirs, rainfall pattern, climate, cropping pattern.</div>
+            <div class="formula-eq">(iv) The maximum intensity of storm and its frequency for the design of a drainage project in the area.</div>
+          </div>
+          <div class="exam-def">
+            <div class="def-label">Hydrometeorology — definition (from textbook)</div>
+            <div class="def-text">Hydrometeorology is the science which deals with the movement of water and water vapour in the atmosphere.</div>
+          </div>
+          <div class="mistake-box">
+            <div class="box-label">Common mistake</div>
+            Students confuse hydrometeorology with hydrogeology. Hydrometeorology = water in the ATMOSPHERE (rain, clouds, humidity). Hydrogeology = water UNDERGROUND (aquifers, groundwater). They are related but different disciplines.
+          </div>
+          <div class="quick-check">
+            <div class="qc-label">Quick check — Week 1</div>
+            <div class="qc-list">
+              <div class="qc-item"><span class="qc-badge normal">Q1</span><span>Define hydrology in your own words, then write the textbook definition.</span></div>
+              <div class="qc-item"><span class="qc-badge normal">Q2</span><span>List four engineering projects where hydrology is essential.</span></div>
+              <div class="qc-item"><span class="qc-badge hard">Hard</span><span>Distinguish between hydrometeorology, hydrogeology and hydrology. What does each study?</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:32px;padding-top:24px;border-top:1px solid var(--border);">
+    <span style="font-size:13px;color:var(--muted2);">Week 1 of 12</span>
+    <a href="W2.html" class="back-btn" style="border-color:var(--accent);color:var(--accent-deep);">Next: Week 2 →</a>
+  </div>
+</div>
+
+<footer>
+  <strong>CVE 214 — Engineering Hydrology</strong> · Week 1 · Unify Platform · LASU Faculty of Engineering<br>
+  <span style="display:block;margin-top:6px">Content sourced from Engineering Hydrology textbook · Chapters 1–7</span>
+</footer>
+
+<script>
+(function(){const saved=localStorage.getItem('unify-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);const b=document.getElementById('theme-btn');if(b)b.textContent=saved==='dark'?'☀ Light':'☾ Dark';}})();
+function toggleTheme(){const cur=document.documentElement.getAttribute('data-theme');const nxt=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',nxt);localStorage.setItem('unify-theme',nxt);document.getElementById('theme-btn').textContent=nxt==='dark'?'☀ Light':'☾ Dark';}
+</script>
+</body>
+</html>

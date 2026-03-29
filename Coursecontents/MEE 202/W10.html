@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEE 202 — Week 10: Cement & Weed as Engineering Materials | Unify</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--muted:#555;--muted2:#999;--accent:#4ade80;--green-deep:#16a34a;--green-bg:#dcfce7;--diagram-bg:#f8f7f3;--red:#dc2626;--red-bg:#fff5f5;--red-border:#fca5a5}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--diagram-bg:#1e1e1e;--green-bg:#052e16;--red-bg:#1a0505;--red-border:#7f1d1d}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:16px;line-height:1.7;transition:background .3s,color .3s}
+nav{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+.nav-logo{font-family:'Playfair Display',serif;font-weight:900;font-size:20px;color:var(--text);text-decoration:none}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-links a{font-size:14px;color:var(--muted);text-decoration:none;padding-bottom:2px;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-links a.active{color:var(--green-deep);border-bottom:2px solid var(--accent);font-weight:500}
+.theme-toggle{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 14px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .2s}
+.theme-toggle:hover{background:var(--border)}
+.week-page{max-width:900px;margin:0 auto;padding:2rem 2rem 4rem}
+.back-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:1rem}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.back-btn:hover{color:var(--text);border-color:var(--text)}
+.week-nav{display:flex;gap:8px}
+.wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.wnav-btn:hover{color:var(--text);border-color:var(--text)}
+.wnav-btn.disabled{opacity:.35;pointer-events:none}
+.week-block{margin-top:0}
+.week-header{background:var(--text);color:var(--bg);padding:1.2rem 1.8rem;border-radius:8px 8px 0 0;display:flex;align-items:baseline;gap:1rem}
+.week-num-badge{font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.6}
+.week-title-main{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700}
+.week-body{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;padding:2rem}
+.week-summary{color:var(--muted);margin-bottom:1.5rem;font-size:15px;line-height:1.8}
+.key-terms{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:2rem}
+.key-term{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 12px;font-size:12px;color:var(--muted)}
+.topic-block{margin-bottom:3rem;padding-top:2rem;border-top:1px solid var(--border)}
+.topic-header{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1rem}
+.topic-num{font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em}
+.topic-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700}
+.topic-body{font-size:15px;line-height:1.85;color:var(--text);margin-bottom:1.5rem}
+.topic-body p{margin-bottom:1rem}
+.topic-body strong{font-weight:600}
+.data-table{width:100%;border-collapse:collapse;font-size:13px;margin:1.2rem 0}
+.data-table th{background:var(--surface2);border:1px solid var(--border);padding:8px 12px;text-align:left;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.data-table td{border:1px solid var(--border);padding:8px 12px;color:var(--text);vertical-align:top}
+.data-table tr:nth-child(even) td{background:var(--surface2)}
+footer{background:var(--surface);border-top:1px solid var(--border);padding:2rem;text-align:center;font-size:13px;color:var(--muted2)}
+footer strong{color:var(--text)}
+@media(max-width:700px){nav{padding:0 1rem}.nav-links{display:none}.week-page{padding-left:1rem;padding-right:1rem}.week-header{padding:1rem}.week-body{padding:1.2rem}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="../../Learn.html">Unify</a>
+  <div class="nav-links">
+    <a href="../../dashboard.html">Dashboard</a>
+    <a href="../../careers.html">Career</a>
+    <a href="../../index.html">Profile</a>
+    <a href="../../Learn.html" class="active">Learn</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()">Toggle Dark</button>
+</nav>
+
+<div class="week-page">
+  <div class="back-bar">
+    <a href="../../Learn.html" class="back-btn">← Back to Learn</a>
+    <div class="week-nav">
+      <a href="W9.html" class="wnav-btn">← Prev</a>
+      <a href="W11.html" class="wnav-btn">Next →</a>
+    </div>
+  </div>
+
+<div class="week-block" id="week10">
+  <div class="week-header">
+    <span class="week-num-badge">Week 10</span>
+    <span class="week-title-main">Cement & Weed as Engineering Materials</span>
+  </div>
+  <div class="week-body">
+    <p class="week-summary">Two non-traditional engineering materials that Dr Obasa covers. Cement is one of the most important construction materials ever. Weed (fibrous plants) is an emerging sustainable engineering material. Know the definitions, properties, types, and applications.</p>
+    <div class="key-terms">
+      <span class="key-term">Cement</span><span class="key-term">Hydration</span><span class="key-term">OPC</span>
+      <span class="key-term">Concrete</span><span class="key-term">Weed</span><span class="key-term">Bio-composite</span>
+      <span class="key-term">Pozzolanic</span><span class="key-term">Sustainability</span>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-header"><span class="topic-num">Topic 10.1</span><span class="topic-title">Cement as an Engineering Material</span></div>
+      <div class="topic-body">
+        <p><strong>Definition:</strong> Cement is a finely ground inorganic substance that, when mixed with water, forms a paste which sets and hardens by chemical reaction (hydration). It binds aggregates like sand and gravel into a solid mass to form concrete or mortar.</p>
+        <p>Cement is one of the most important and widely used engineering materials in the construction industry. It serves as a key binding material that sets, hardens, and adheres to other materials, making it vital for creating strong and durable structures.</p>
+      </div>
+
+      <table class="data-table">
+        <thead><tr><th>Type of Cement</th><th>Key Property</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td>Ordinary Portland Cement (OPC)</td><td>Most common, general-purpose</td><td>Buildings, slabs, columns</td></tr>
+          <tr><td>Portland Pozzolana Cement (PPC)</td><td>Improved durability, sulfate resistance</td><td>Marine structures, sewage</td></tr>
+          <tr><td>Rapid Hardening Cement</td><td>Gains strength quickly</td><td>Early completion projects</td></tr>
+          <tr><td>Sulphate Resisting Cement</td><td>Resistant to aggressive soils</td><td>Foundations in sulfate soils</td></tr>
+          <tr><td>White Cement</td><td>Decorative</td><td>Architectural finishes</td></tr>
+          <tr><td>Hydrophobic Cement</td><td>Moisture-resistant</td><td>Humid environments</td></tr>
+        </tbody>
+      </table>
+
+      <div class="topic-body">
+        <p><strong>Properties of Cement:</strong> Strength (high compressive strength), Workability (workable paste), Durability (resistant to weathering, chemical attack, mechanical wear), Setting Time (initial and final setting times), Heat of Hydration (releases controlled heat, affects large pours).</p>
+        <p><strong>Sustainability consideration:</strong> Although essential, cement production is energy-intensive and a significant source of CO₂ emissions. Modern engineering is shifting towards blended cements (using fly ash, slag), green cement innovations, and recycling and reuse of concrete as aggregate.</p>
+      </div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-header"><span class="topic-num">Topic 10.2</span><span class="topic-title">Weed as an Engineering Material</span></div>
+      <div class="topic-body">
+        <p>While "weed" typically refers to unwanted plants or vegetation, in engineering and materials science, certain types of fast-growing plants or fibrous weeds are gaining attention for their sustainable, biodegradable, and low-cost properties.</p>
+        <p><strong>Definition:</strong> In this context, "weed" refers to fast-growing, fibrous plants (e.g., water hyacinth, hemp, bamboo grass, cogon grass) that are abundant, invasive (often considered waste), and rich in cellulose, lignin, and natural fibres. These properties make them potential eco-friendly reinforcements or fillers in construction and engineering materials.</p>
+        <p><strong>Engineering Applications:</strong></p>
+        <p><strong>a. Natural Fiber Composites:</strong> Weeds can be processed into fibers and mixed with polymers (e.g., PLA, epoxy) to produce bio-composites. Used in automotive panels, insulation boards, and interior building panels.</p>
+        <p><strong>b. Concrete Additives:</strong> Ashes or fibers from weeds (e.g., water hyacinth, elephant grass) can be added to cement as pozzolanic materials (for partial cement replacement) or lightweight aggregate/filler. Enhances thermal insulation, reduces density, and supports sustainability.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<footer>
+  <strong>MEE 202 — Science of Materials</strong> &nbsp;|&nbsp; Dr Adefuoye & Dr Obasa &nbsp;|&nbsp; LASU Faculty of Engineering<br>
+  <span style="margin-top:8px;display:block">Week 10 · Cement & Weed as Engineering Materials</span>
+  <span style="margin-top:12px;display:block;font-size:12px">Built on Unify · LASU · Native Learning Library</span>
+</footer>
+
+<script>
+function toggleTheme(){const html=document.documentElement;const next=html.getAttribute('data-theme')==='dark'?'light':'dark';html.setAttribute('data-theme',next);localStorage.setItem('unify-theme',next);document.querySelector('.theme-toggle').textContent=next==='dark'?'Toggle Light':'Toggle Dark';}
+(function(){const saved=localStorage.getItem('unify-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);if(saved==='dark')document.querySelector('.theme-toggle').textContent='Toggle Light';}})();
+</script>
+</body>
+</html>

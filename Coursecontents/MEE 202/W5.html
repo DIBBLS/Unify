@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEE 202 — Week 5: Ionic, Hydrogen & Van der Waals Bonds | Unify</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--muted:#555;--muted2:#999;--accent:#4ade80;--green-deep:#16a34a;--green-bg:#dcfce7;--diagram-bg:#f8f7f3;--red:#dc2626;--red-bg:#fff5f5;--red-border:#fca5a5}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--diagram-bg:#1e1e1e;--green-bg:#052e16;--red-bg:#1a0505;--red-border:#7f1d1d}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:16px;line-height:1.7;transition:background .3s,color .3s}
+nav{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+.nav-logo{font-family:'Playfair Display',serif;font-weight:900;font-size:20px;color:var(--text);text-decoration:none}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-links a{font-size:14px;color:var(--muted);text-decoration:none;padding-bottom:2px;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-links a.active{color:var(--green-deep);border-bottom:2px solid var(--accent);font-weight:500}
+.theme-toggle{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 14px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .2s}
+.theme-toggle:hover{background:var(--border)}
+.week-page{max-width:900px;margin:0 auto;padding:2rem 2rem 4rem}
+.back-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:1rem}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.back-btn:hover{color:var(--text);border-color:var(--text)}
+.week-nav{display:flex;gap:8px}
+.wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.wnav-btn:hover{color:var(--text);border-color:var(--text)}
+.wnav-btn.disabled{opacity:.35;pointer-events:none}
+.week-block{margin-top:0}
+.week-header{background:var(--text);color:var(--bg);padding:1.2rem 1.8rem;border-radius:8px 8px 0 0;display:flex;align-items:baseline;gap:1rem}
+.week-num-badge{font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.6}
+.week-title-main{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700}
+.week-body{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;padding:2rem}
+.week-summary{color:var(--muted);margin-bottom:1.5rem;font-size:15px;line-height:1.8}
+.key-terms{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:2rem}
+.key-term{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 12px;font-size:12px;color:var(--muted)}
+.exam-box{background:#fffbeb;border-left:3px solid #fcd34d;border-radius:6px;padding:1.2rem 1.5rem;margin-bottom:2.5rem}
+[data-theme="dark"] .exam-box{background:#1a1500;border-left-color:#ca8a04}
+.exam-box-label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#92400e;font-weight:600;margin-bottom:.8rem}
+[data-theme="dark"] .exam-box-label{color:#fcd34d}
+.exam-q{font-size:14px;color:var(--text);margin-bottom:6px;display:flex;align-items:flex-start;gap:8px}
+.past-q-badge{background:var(--green-bg);color:var(--green-deep);border:1px solid var(--accent);border-radius:4px;padding:1px 7px;font-size:10px;font-weight:600;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.topic-block{margin-bottom:3rem;padding-top:2rem;border-top:1px solid var(--border)}
+.topic-header{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1rem}
+.topic-num{font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em}
+.topic-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700}
+.topic-body{font-size:15px;line-height:1.85;color:var(--text);margin-bottom:1.5rem}
+.topic-body p{margin-bottom:1rem}
+.topic-body strong{font-weight:600}
+.formula-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:1.2rem 1.5rem;margin:1.5rem 0}
+.formula-label{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--green-deep);font-weight:600;margin-bottom:.8rem}
+.formula-eq{font-family:'Playfair Display',serif;font-style:italic;font-size:1.15rem;color:var(--text);margin-bottom:.6rem}
+.formula-vars{font-size:12px;color:var(--muted2);line-height:1.8}
+.diagram-container{background:var(--diagram-bg);border:1px solid var(--border);border-radius:8px;padding:1.5rem;margin:1.5rem 0}
+.diagram-label{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted2);margin-bottom:1rem;text-align:center}
+.diagram-container svg{display:block;margin:0 auto}
+.simple-box{border-radius:6px;padding:1rem 1.3rem;margin:1.2rem 0;font-size:14px;line-height:1.75}
+.simple-box .box-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;margin-bottom:.5rem}
+.simple-box.analogy{background:#f0fdf4;border-left:3px solid #bbf7d0}
+[data-theme="dark"] .simple-box.analogy{background:#052e16;border-left-color:#166534}
+.simple-box.analogy .box-label{color:var(--green-deep)}
+.simple-box.mistake{background:var(--red-bg);border-left:3px solid var(--red-border)}
+.simple-box.mistake .box-label{color:var(--red)}
+.simple-box.matters{background:#f0fdf4;border-left:3px solid var(--accent)}
+[data-theme="dark"] .simple-box.matters{background:#052e16}
+.simple-box.matters .box-label{color:var(--green-deep)}
+footer{background:var(--surface);border-top:1px solid var(--border);padding:2rem;text-align:center;font-size:13px;color:var(--muted2)}
+footer strong{color:var(--text)}
+@media(max-width:700px){nav{padding:0 1rem}.nav-links{display:none}.week-page{padding-left:1rem;padding-right:1rem}.week-header{padding:1rem}.week-body{padding:1.2rem}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="../../Learn.html">Unify</a>
+  <div class="nav-links">
+    <a href="../../dashboard.html">Dashboard</a>
+    <a href="../../careers.html">Career</a>
+    <a href="../../index.html">Profile</a>
+    <a href="../../Learn.html" class="active">Learn</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()">Toggle Dark</button>
+</nav>
+
+<div class="week-page">
+  <div class="back-bar">
+    <a href="../../Learn.html" class="back-btn">← Back to Learn</a>
+    <div class="week-nav">
+      <a href="W4.html" class="wnav-btn">← Prev</a>
+      <a href="W6.html" class="wnav-btn">Next →</a>
+    </div>
+  </div>
+
+<div class="week-block" id="week5">
+  <div class="week-header">
+    <span class="week-num-badge">Week 5</span>
+    <span class="week-title-main">Ionic, Hydrogen & Van der Waals Bonds</span>
+  </div>
+  <div class="week-body">
+    <p class="week-summary">This week completes the bonding picture. Ionic bonds form between metals and non-metals. Hydrogen bond is the strongest secondary bond. Van der Waals is the weakest — but it's responsible for how noble gases liquify and how geckos stick to walls.</p>
+    <div class="key-terms">
+      <span class="key-term">Ionic Bond</span>
+      <span class="key-term">Ionization Energy</span>
+      <span class="key-term">Electron Affinity</span>
+      <span class="key-term">Cohesive Energy</span>
+      <span class="key-term">Hydrogen Bond</span>
+      <span class="key-term">Van der Waals</span>
+      <span class="key-term">Electric Dipole</span>
+      <span class="key-term">London Dispersion</span>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-box-label">⚡ Likely Exam Questions</div>
+      <div class="exam-q"><span class="past-q-badge">Past Q</span> Compare and contrast: ionic bond, metallic bond and covalent bond. (2014/15)</div>
+      <div class="exam-q"><span class="past-q-badge">Past Q</span> Compare and contrast: Hydrogen bond and Van der Waals bond. (2014/15)</div>
+      <div class="exam-q"><span class="past-q-badge">Past Q</span> Describe the Van der Waals forces. Why is the hydrogen bond in a class of its own when it comes to the strength of secondary bonds? (2014/15)</div>
+      <div class="exam-q"><span class="past-q-badge">Past Q</span> Given ionization energy of sodium is -5.14eV and bond energy of NaCl is 6.37eV, determine the cohesive energy. (2011/12)</div>
+      <div class="exam-q">Define molecules in terms of atomic bonds. (2014/15)</div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-header">
+        <span class="topic-num">Topic 5.1</span>
+        <span class="topic-title">Ionic Bond</span>
+      </div>
+      <div class="topic-body">
+        <p>Of the primary bonds, the ionic bond is the only one that does not occur amongst elements to a considerable extent. This is because <strong>the ionic bond is essentially an electrostatic force between ions of opposite charge.</strong></p>
+        <p>The ionic bond is usually formed between elements of low ionization energy (metallic elements) and elements of high electron affinity (non-metallic elements). Like other types of bonds, the ionic bond is formed due to the decrease in the energy of the valence electrons that results from the bonding.</p>
+        <p>The formation of NaCl from free atoms of Na and Cl can be understood through energy steps:</p>
+      </div>
+      <div class="formula-box">
+        <div class="formula-label">NaCl Formation — Energy Analysis</div>
+        <div class="formula-vars" style="font-size:13px; line-height:2">
+          Na(gas) → Na⁺(gas) + e⁻ &nbsp;&nbsp; ΔE = +5.14 eV &nbsp;&nbsp; (Ionization Energy — costs energy)<br>
+          Cl(gas) + e⁻ → Cl⁻(gas) &nbsp;&nbsp; ΔE = −3.61 eV &nbsp;&nbsp; (Electron Affinity — releases energy)<br>
+          Na⁺(gas) + Cl⁻(gas) → NaCl(crystal) &nbsp;&nbsp; ΔE = −7.9 eV &nbsp;&nbsp; (Cohesive Energy — releases energy)<br><br>
+          <strong>ΔE total = −5.14 + 3.61 + 7.9 = −6.37 eV</strong> (net energy decrease = driving force)
+        </div>
+      </div>
+
+      <div class="diagram-container">
+        <div class="diagram-label">NaCl Formation — Energy Steps from Free Atoms to Crystal</div>
+        <svg viewBox="0 0 600 200" width="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr2" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 Z" fill="#16a34a"/></marker>
+            <marker id="arr3" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 Z" fill="#dc2626"/></marker>
+          </defs>
+          <line x1="30" y1="80" x2="130" y2="80" stroke="#0a0a0a" stroke-width="2"/>
+          <text x="80" y="70" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#555">Na + Cl</text>
+          <text x="80" y="98" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#999">(free atoms)</text>
+          <line x1="170" y1="40" x2="270" y2="40" stroke="#dc2626" stroke-width="2"/>
+          <text x="220" y="30" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#dc2626">Na⁺ + Cl + e⁻</text>
+          <text x="220" y="58" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#dc2626">+5.14 eV ↑</text>
+          <line x1="310" y1="65" x2="410" y2="65" stroke="#16a34a" stroke-width="2"/>
+          <text x="360" y="56" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#16a34a">Na⁺ + Cl⁻</text>
+          <text x="360" y="83" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#16a34a">−3.61 eV ↓</text>
+          <line x1="450" y1="155" x2="570" y2="155" stroke="#16a34a" stroke-width="2.5"/>
+          <text x="510" y="146" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#16a34a" font-weight="600">NaCl Crystal</text>
+          <text x="510" y="173" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#16a34a">−7.9 eV (cohesive)</text>
+          <line x1="130" y1="80" x2="165" y2="43" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr3)"/>
+          <line x1="270" y1="43" x2="305" y2="63" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr2)"/>
+          <line x1="410" y1="68" x2="445" y2="150" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr2)"/>
+          <text x="300" y="195" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#999">Net ΔE = −6.37 eV (decrease in energy = driving force)</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-header">
+        <span class="topic-num">Topic 5.2</span>
+        <span class="topic-title">Secondary Bonds: Hydrogen Bond & Van der Waals</span>
+      </div>
+      <div class="topic-body">
+        <p>Apart from the primary bonds, there is another group of bonds called the secondary bonds. They are so called because they are weak compared to the primary bonds. Secondary bonds are essentially electrostatic forces between electric dipoles. It is an order stronger when hydrogen is involved.</p>
+        <p><strong>An electric dipole is formed when the center of the positive charge distribution and the center of the negative charge distribution do not coincide.</strong></p>
+        <p>Secondary bonds are of two types: the hydrogen bonds and the Van der Waals bond.</p>
+        <p><strong>Hydrogen bonds</strong> are permanent dipolar bonds and they are an order stronger than other dipolar bonds. The hydrogen bond must involve the participation of a hydrogen atom. The hydrogen atom is always the positive end of the dipole — because when a hydrogen atom has an electron removed from it, only a nucleus is left. A nucleus is so much smaller than an atom that the charge distribution density is much higher.</p>
+        <p><strong>Van der Waals forces</strong> arise from atomic or molecular dipoles when there is a Coulombic attraction between the (+) end of an atom and the negative region of an adjacent one. The Van der Waals bond arises from: fluctuating induced dipole bonds (London dispersion), polar molecule-induced dipole bonds, and permanent dipole bonds.</p>
+        <p><strong>Dipolar bonds that do not involve hydrogen bonds are not permanent</strong> — they fluctuate and are non-directional. This force dominates in inert and noble gases, and is responsible for the liquefaction and solidification of some inert and noble gases.</p>
+      </div>
+
+      <div class="diagram-container">
+        <div class="diagram-label">Electric Dipole — H₂O Hydrogen Bonding</div>
+        <svg viewBox="0 0 600 200" width="100%" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="120" cy="100" r="28" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+          <text x="120" y="105" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="14" fill="#555" font-weight="600">O²⁻</text>
+          <circle cx="70" cy="70" r="14" fill="#f5f4f0" stroke="#16a34a" stroke-width="1.5"/>
+          <text x="70" y="75" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" fill="#16a34a">H⁺</text>
+          <circle cx="70" cy="130" r="14" fill="#f5f4f0" stroke="#16a34a" stroke-width="1.5"/>
+          <text x="70" y="135" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" fill="#16a34a">H⁺</text>
+          <line x1="84" y1="78" x2="100" y2="88" stroke="#0a0a0a" stroke-width="2"/>
+          <line x1="84" y1="122" x2="100" y2="112" stroke="#0a0a0a" stroke-width="2"/>
+          <text x="120" y="155" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#555">δ⁻ (Oxygen)</text>
+          <circle cx="380" cy="100" r="28" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+          <text x="380" y="105" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="14" fill="#555" font-weight="600">O²⁻</text>
+          <circle cx="430" cy="70" r="14" fill="#f5f4f0" stroke="#16a34a" stroke-width="1.5"/>
+          <text x="430" y="75" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" fill="#16a34a">H⁺</text>
+          <circle cx="430" cy="130" r="14" fill="#f5f4f0" stroke="#16a34a" stroke-width="1.5"/>
+          <text x="430" y="135" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" fill="#16a34a">H⁺</text>
+          <line x1="416" y1="88" x2="400" y2="92" stroke="#0a0a0a" stroke-width="2"/>
+          <line x1="416" y1="112" x2="400" y2="108" stroke="#0a0a0a" stroke-width="2"/>
+          <line x1="148" y1="100" x2="350" y2="100" stroke="#4ade80" stroke-width="2" stroke-dasharray="6,4"/>
+          <text x="250" y="90" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#16a34a" font-weight="600">H-bond</text>
+          <text x="250" y="125" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#999">(permanent dipolar)</text>
+          <text x="380" y="155" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#555">δ⁻ (Oxygen)</text>
+        </svg>
+      </div>
+
+      <div class="simple-box matters">
+        <div class="box-label">★ Why This Matters</div>
+        2014/15 asks specifically: "Why is the hydrogen bond in a class of its own?" Answer: because hydrogen, after losing its electron, is just a bare nucleus — extremely small with very high charge density. This makes its bond much stronger (~10×) than other dipolar bonds. Hydrogen bonds hold water molecules together, give proteins their shape, and hold DNA strands together.
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<footer>
+  <strong>MEE 202 — Science of Materials</strong> &nbsp;|&nbsp; Dr Adefuoye & Dr Obasa &nbsp;|&nbsp; LASU Faculty of Engineering<br>
+  <span style="margin-top:8px;display:block">Week 5 · Ionic, Hydrogen & Van der Waals Bonds</span>
+  <span style="margin-top:12px;display:block;font-size:12px">Built on Unify · LASU · Native Learning Library</span>
+</footer>
+
+<script>
+function toggleTheme(){const html=document.documentElement;const next=html.getAttribute('data-theme')==='dark'?'light':'dark';html.setAttribute('data-theme',next);localStorage.setItem('unify-theme',next);document.querySelector('.theme-toggle').textContent=next==='dark'?'Toggle Light':'Toggle Dark';}
+(function(){const saved=localStorage.getItem('unify-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);if(saved==='dark')document.querySelector('.theme-toggle').textContent='Toggle Light';}})();
+</script>
+</body>
+</html>

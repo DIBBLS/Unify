@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHE 206 — Week 4: Four Fundamental Property Relations | Unify</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--muted:#555;--muted2:#999;--accent:#4ade80;--accent-deep:#16a34a;--accent-bg:#dcfce7;--diagram-bg:#f8f7f3;--nav-h:60px}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--accent:#4ade80;--accent-deep:#4ade80;--accent-bg:#052e16;--diagram-bg:#1e1e1e}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:16px;transition:background .2s,color .2s}
+nav{position:sticky;top:0;z-index:100;height:var(--nav-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;gap:32px}
+.nav-logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--text);text-decoration:none;flex-shrink:0}
+.nav-links{display:flex;gap:4px;flex:1}
+.nav-links a{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:6px;border-bottom:2px solid transparent;transition:color .15s}
+.nav-links a:hover{color:var(--text)}.nav-links a.active{color:var(--accent-deep);border-bottom-color:var(--accent)}
+.theme-toggle{margin-left:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;flex-shrink:0}
+.theme-toggle:hover{color:var(--text);border-color:var(--muted)}
+.week-page{max-width:900px;margin:0 auto;padding:40px 48px 80px}
+.back-bar{display:flex;align-items:center;gap:12px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.back-btn:hover{color:var(--text);border-color:var(--text)}
+.week-nav{display:flex;gap:8px;margin-left:auto}
+.wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.wnav-btn:hover{color:var(--text);border-color:var(--text)}.wnav-btn.disabled{opacity:.35;pointer-events:none}
+.week-block{border-radius:14px;border:1px solid var(--border);overflow:hidden;background:var(--surface)}
+.week-header{background:var(--text);color:var(--bg);padding:24px 32px;display:flex;align-items:baseline;gap:20px}
+[data-theme="dark"] .week-header{background:var(--surface2);border-bottom:1px solid var(--border);color:var(--text)}
+.week-num{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;opacity:.55;white-space:nowrap}
+.week-title{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;font-style:italic;color:inherit}
+[data-theme="dark"] .week-title{color:var(--text)}
+.week-body{padding:32px}
+.week-summary{font-size:15px;color:var(--muted);line-height:1.75;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--border)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:28px}
+.tag{font-size:11px;font-weight:500;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:3px 12px}
+.exam-box{background:#fffbeb;border-left:3px solid #fcd34d;border-radius:0 10px 10px 0;padding:18px 22px;margin-bottom:32px}
+[data-theme="dark"] .exam-box{background:#1a1500;border-left-color:#b45309}
+.exam-box .box-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#92400e;margin-bottom:12px}
+[data-theme="dark"] .exam-box .box-label{color:#fbbf24}
+.exam-box ol{margin-left:18px;font-size:14px;color:var(--text)}.exam-box li{margin-bottom:8px;line-height:1.6}
+.past-q{display:inline-block;font-size:10px;font-weight:600;background:var(--accent-bg);color:var(--accent-deep);border:1px solid var(--accent);border-radius:4px;padding:1px 7px;margin-left:6px;vertical-align:middle;letter-spacing:.04em}
+.topic-block{border:1px solid var(--border);border-radius:12px;margin-bottom:28px;overflow:hidden}
+.topic-header{background:var(--surface2);padding:16px 24px;border-bottom:1px solid var(--border)}
+.topic-num{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:3px}
+.topic-title{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;color:var(--text)}
+.topic-body{padding:24px}.topic-body p{font-size:15px;line-height:1.8;margin-bottom:16px;color:var(--text)}
+.formula-block{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:18px 22px;margin:18px 0}
+.formula-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:10px}
+.formula-eq{font-family:'Playfair Display',serif;font-size:17px;font-style:italic;color:var(--text);margin-bottom:6px;line-height:1.6}
+.formula-vars{font-size:12px;color:var(--muted2);line-height:1.7;margin-top:8px}
+.analogy-box{background:#f0fdf4;border-left:3px solid #bbf7d0;border-radius:0 10px 10px 0;padding:16px 20px;margin:16px 0;font-size:14px;line-height:1.75;color:var(--text)}
+[data-theme="dark"] .analogy-box{background:#052e16;border-left-color:#166534}
+.analogy-box .box-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px}
+.mistake-box{background:#fff5f5;border-left:3px solid #fca5a5;border-radius:0 10px 10px 0;padding:16px 20px;margin:16px 0;font-size:14px;line-height:1.75;color:var(--text)}
+[data-theme="dark"] .mistake-box{background:#1a0505;border-left-color:#7f1d1d}
+.mistake-box .box-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#dc2626;margin-bottom:8px}
+.exam-def{background:var(--surface2);border:1.5px solid var(--accent);border-radius:10px;padding:16px 20px;margin:18px 0}
+.exam-def .def-label{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px}
+.exam-def .def-text{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--text);line-height:1.7}
+.quick-check{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 24px;margin-top:24px}
+.quick-check .qc-label{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.quick-check .qc-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.qc-list{display:flex;flex-direction:column;gap:10px}
+.qc-item{display:flex;gap:12px;align-items:start;font-size:14px;line-height:1.6;color:var(--text)}
+.qc-badge{font-size:10px;font-weight:600;border-radius:4px;padding:2px 8px;white-space:nowrap;margin-top:2px;flex-shrink:0}
+.qc-badge.normal{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+.qc-badge.hard{background:#fff5f5;color:#dc2626;border:1px solid #fca5a5}
+[data-theme="dark"] .qc-badge.hard{background:#1a0505;border-color:#7f1d1d}
+.sec-eye{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2)}
+footer{border-top:1px solid var(--border);padding:32px 48px;text-align:center;font-size:13px;color:var(--muted2);max-width:900px;margin:0 auto}
+footer strong{color:var(--muted);font-weight:500}
+@media(max-width:700px){nav{padding:0 16px;gap:16px}.nav-links{display:none}.week-page{padding:20px 16px 60px}.week-body{padding:20px}.topic-body{padding:18px}footer{padding:24px 20px}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="dashboard.html" class="nav-logo">Unify</a>
+  <div class="nav-links">
+    <a href="dashboard.html">Dashboard</a><a href="careers.html">Career</a>
+    <a href="profile.html">Profile</a><a href="#" class="active">CHE 206</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">☾ Dark</button>
+</nav>
+<div class="week-page">
+  <div class="back-bar">
+    <a href="learn.html?course=CHE+206&name=CHE+206" class="back-btn">← Back to CHE 206</a>
+    <div class="week-nav"><a href="che206-week3.html" class="wnav-btn">← Prev</a><a href="che206-week5.html" class="wnav-btn">Next →</a></div>
+  </div>
+  <div class="week-block">
+    <div class="week-header">
+      <span class="week-num">Week 4 of 12</span>
+      <span class="week-title">Four Fundamental Property Relations — U, H, A, G</span>
+    </div>
+    <div class="week-body">
+      <p class="week-summary">These four equations are the mathematical heart of thermodynamics. Every derivation in this course — Maxwell's equations, Clapeyron equation, property relations — starts from these four. Deriving them from scratch is a core exam skill.</p>
+      <div class="tags"><span class="tag">Internal energy (U)</span><span class="tag">Enthalpy (H)</span><span class="tag">Helmholtz energy (A)</span><span class="tag">Gibbs energy (G)</span><span class="tag">dU = TdS − PdV</span><span class="tag">dH = TdS + VdP</span><span class="tag">dA = −PdV − SdT</span><span class="tag">dG = VdP − SdT</span></div>
+      <div class="sec-eye" style="margin-bottom:12px">Likely exam questions</div>
+      <div class="exam-box"><div class="box-label">Exam focus</div><ol>
+        <li>The fundamental property relations are given. Derive them from the first and second laws. <span class="past-q">Past Q 2022/23 · 2015/16</span></li>
+        <li>State the four Maxwell's equations derived from the fundamental property relations and explain the parameters. <span class="past-q">Past Q 2017/18</span></li>
+        <li>Show how d(nU) = Td(nS) − Pd(nV) is derived from the first and second laws. <span class="past-q">Past Q 2016/17</span></li>
+      </ol></div>
+      <div class="topic-block">
+        <div class="topic-header"><div class="topic-num">Topic 4.1</div><div class="topic-title">Deriving the Four Property Relations</div></div>
+        <div class="topic-body">
+          <p>Everything starts from two places: the First Law (ΔU = Q − W) and the Second Law (dS = dQrev/T). Combine them and you get the master equation for internal energy. Then define three more thermodynamic functions — enthalpy H, Helmholtz energy A, and Gibbs energy G — and differentiate each to get the four fundamental relations.</p>
+          <div class="formula-block"><div class="formula-label">Step-by-step derivation</div>
+            <div class="step-box"><div class="step-num">Start — Combine First and Second Laws</div><p>From 1st Law: dU = dQ − PdV. From 2nd Law (reversible): dQ = TdS.<br>Therefore: <strong>dU = TdS − PdV</strong></p></div>
+            <div class="step-box"><div class="step-num">Enthalpy H = U + PV</div><p>dH = dU + PdV + VdP = TdS − PdV + PdV + VdP → <strong>dH = TdS + VdP</strong></p></div>
+            <div class="step-box"><div class="step-num">Helmholtz Energy A = U − TS</div><p>dA = dU − TdS − SdT = TdS − PdV − TdS − SdT → <strong>dA = −PdV − SdT</strong></p></div>
+            <div class="step-box"><div class="step-num">Gibbs Energy G = H − TS</div><p>dG = dH − TdS − SdT = TdS + VdP − TdS − SdT → <strong>dG = VdP − SdT</strong></p></div>
+          </div>
+          <div class="formula-block"><div class="formula-label">Summary — four fundamental relations</div>
+            <div class="formula-eq">dU = TdS − PdV</div><div class="formula-eq">dH = TdS + VdP</div>
+            <div class="formula-eq">dA = −PdV − SdT</div><div class="formula-eq">dG = VdP − SdT</div>
+          </div>
+          <div class="exam-def"><div class="def-label">Exam-ready — what each function represents</div><div class="def-text">Internal energy U: total energy stored in a system (kinetic + potential of molecules)<br>Enthalpy H = U + PV: useful for constant-pressure processes — heat added at constant P equals ΔH<br>Helmholtz energy A = U − TS: maximum work obtainable from a system at constant T and V<br>Gibbs energy G = H − TS: maximum non-expansion work at constant T and P; criterion for phase and chemical equilibrium</div></div>
+          <div class="mistake-box"><div class="box-label">Common mistake</div>When deriving, students often substitute the wrong sign. dW = PdV for work done BY the system. If work is done ON the system, the sign flips. Track signs carefully at each step. Also: these relations assume a reversible process.</div>
+          <div class="quick-check"><div class="qc-label">Quick check — Topic 4.1</div><div class="qc-list">
+            <div class="qc-item"><span class="qc-badge normal">Q1</span><span>Starting from the first and second laws, derive dU = TdS − PdV. State all assumptions made.</span></div>
+            <div class="qc-item"><span class="qc-badge normal">Q2</span><span>Define Gibbs energy G and derive its fundamental property relation dG = VdP − SdT from dH = TdS + VdP.</span></div>
+            <div class="qc-item"><span class="qc-badge hard">Hard</span><span>For dG = VdP − SdT, identify the natural variables and write expressions for V and S as partial derivatives of G. Explain why G is the most useful function for phase equilibrium calculations.</span></div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:32px;padding-top:24px;border-top:1px solid var(--border);">
+    <a href="che206-week3.html" class="back-btn">← Week 3</a><span style="font-size:13px;color:var(--muted2);">Week 4 of 12</span><a href="che206-week5.html" class="back-btn" style="border-color:var(--accent);color:var(--accent-deep);">Next: Week 5 →</a>
+  </div>
+</div>
+<footer>
+  <strong>CHE 206 — Fundamental of Thermodynamics</strong> · Week 4 · Unify Platform · LASU Faculty of Engineering<br>
+  <span style="display:block;margin-top:6px">Lecturers: Dr J.G. Akinbomi · K.F.K. Oyedeko</span>
+</footer>
+<script>
+(function(){const saved=localStorage.getItem('unify-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);const b=document.getElementById('theme-btn');if(b)b.textContent=saved==='dark'?'☀ Light':'☾ Dark';}})();
+function toggleTheme(){const cur=document.documentElement.getAttribute('data-theme');const nxt=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',nxt);localStorage.setItem('unify-theme',nxt);document.getElementById('theme-btn').textContent=nxt==='dark'?'☀ Light':'☾ Dark';}
+</script>
+</body>
+</html>

@@ -1,0 +1,2348 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unify — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── THEME TOKENS ── */
+:root {
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'DM Sans', sans-serif;
+  --bg:       #f5f4f0;
+  --surface:  #ffffff;
+  --surface2: #f8f7f3;
+  --border:   #e0deda;
+  --text:     #0a0a0a;
+  --text2:    #555;
+  --text3:    #999;
+  --invert-bg:     #0a0a0a;
+  --invert-text:   #f5f4f0;
+  --invert-sub:    #555;
+  --invert-border: #1f1f1f;
+  --tag-bg:   #f0efeb;
+  --tag-color:#888;
+}
+[data-theme="dark"] {
+  --bg:       #0f0f0f;
+  --surface:  #1a1a1a;
+  --surface2: #222222;
+  --border:   #2a2a2a;
+  --text:     #f0efeb;
+  --text2:    #aaa;
+  --text3:    #666;
+  --invert-bg:     #f0efeb;
+  --invert-text:   #0a0a0a;
+  --invert-sub:    #aaa;
+  --invert-border: #e0deda;
+  --tag-bg:   #2a2a2a;
+  --tag-color:#aaa;
+}
+
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--font-body); font-size: 15px;
+  overflow-x: hidden; transition: background 0.25s, color 0.25s;
+}
+
+/* ═══════════════════════════
+   DESKTOP NAV
+═══════════════════════════ */
+nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px; border-bottom: 1px solid var(--border);
+  background: var(--bg); position: sticky; top: 0; z-index: 100; height: 60px;
+  transition: background 0.25s, border-color 0.25s;
+}
+.nav-logo { font-family: var(--font-display); font-weight: 900; font-size: 20px; letter-spacing: -1px; text-decoration: none; color: var(--text); }
+.nav-tabs { display: flex; gap: 0; height: 100%; }
+.nav-tab {
+  display: flex; align-items: center; padding: 0 16px;
+  font-size: 13px; font-weight: 500; color: var(--text3); cursor: pointer;
+  border-bottom: 2px solid transparent; transition: all 0.15s; text-decoration: none;
+  background: none; border-top: none; border-left: none; border-right: none;
+  font-family: var(--font-body); height: 100%;
+}
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active { color: var(--text); border-bottom-color: var(--text); }
+.nav-right { display: flex; align-items: center; gap: 10px; }
+.nav-user-name { font-size: 13px; font-weight: 500; }
+.theme-toggle {
+  background: none; border: 1px solid var(--border); border-radius: 20px;
+  padding: 5px 14px; font-size: 12px; cursor: pointer; color: var(--text3);
+  font-family: var(--font-body); transition: all 0.15s;
+}
+.theme-toggle:hover { border-color: var(--text); color: var(--text); }
+.nav-signout {
+  font-size: 12px; color: var(--text3); background: none;
+  border: 1px solid var(--border); padding: 6px 14px; border-radius: 4px;
+  cursor: pointer; font-family: var(--font-body); transition: all 0.15s;
+}
+.nav-signout:hover { border-color: var(--text); color: var(--text); }
+
+/* ═══════════════════════════
+   MOBILE BOTTOM NAV
+═══════════════════════════ */
+.mobile-nav {
+  display: none; position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--bg); border-top: 1px solid var(--border);
+  z-index: 200; padding: 6px 0 calc(6px + env(safe-area-inset-bottom));
+  transition: background 0.25s, border-color 0.25s;
+}
+.mobile-nav-inner { display: flex; justify-content: space-around; }
+.mobile-nav-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: none; border: none; cursor: pointer; font-family: var(--font-body);
+  color: var(--text3); padding: 6px 10px; border-radius: 10px;
+  transition: all 0.15s; text-decoration: none; min-width: 52px;
+}
+.mobile-nav-btn.active { color: var(--text); }
+.mobile-nav-icon { font-size: 22px; line-height: 1; }
+.mobile-nav-label { font-size: 10px; font-weight: 500; }
+.mobile-nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text); margin-top: 2px; opacity: 0; transition: opacity 0.15s; }
+.mobile-nav-btn.active .mobile-nav-dot { opacity: 1; }
+
+@media (max-width: 768px) {
+  nav { padding: 0 16px; }
+  .nav-tabs { display: none; }
+  .nav-user-name { display: none; }
+  .mobile-nav { display: block; }
+  body { padding-bottom: 76px; }
+}
+
+/* ═══════════════════════════
+   SPACES
+═══════════════════════════ */
+.space { display: none; }
+.space.active { display: block; }
+
+/* ═══════════════════════════
+   PERSONAL HERO
+═══════════════════════════ */
+.personal-hero {
+  background: var(--invert-bg); color: var(--invert-text);
+  padding: 36px 48px; display: grid;
+  grid-template-columns: 1fr auto; gap: 40px; align-items: center;
+  transition: background 0.25s;
+}
+.hero-greeting { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--invert-sub); margin-bottom: 10px; }
+.hero-name { font-family: var(--font-display); font-size: clamp(24px, 2.5vw, 38px); font-weight: 900; letter-spacing: -1px; margin-bottom: 6px; }
+.hero-name em { font-style: italic; }
+.hero-dept { font-size: 13px; color: var(--invert-sub); }
+.save-indicator { font-size: 11px; color: #555; margin-top: 8px; display: none; }
+.save-indicator.visible { display: block; }
+
+.hero-stats { display: flex; gap: 0; flex-shrink: 0; border: 1px solid var(--invert-border); border-radius: 10px; overflow: hidden; }
+.hero-stat { text-align: center; padding: 20px 28px; }
+.hero-stat + .hero-stat { border-left: 1px solid var(--invert-border); }
+.hero-stat-val { font-family: var(--font-display); font-size: 30px; font-weight: 900; letter-spacing: -1px; line-height: 1; }
+.hero-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--invert-sub); margin-top: 4px; }
+
+/* SEMESTER PROGRESS */
+.progress-bar-wrap {
+  padding: 14px 48px; background: var(--invert-bg);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: flex; align-items: center; gap: 16px;
+}
+.progress-label { font-size: 11px; color: var(--invert-sub); letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+.progress-bar { flex: 1; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--invert-text); border-radius: 2px; transition: width 0.8s ease; width: 0%; }
+.progress-pct { font-size: 11px; color: var(--invert-sub); white-space: nowrap; }
+
+/* BODY LAYOUT */
+.personal-body { display: grid; grid-template-columns: 260px 1fr; min-height: calc(100vh - 200px); }
+
+/* SIDEBAR */
+.sidebar { border-right: 1px solid var(--border); padding: 28px 22px; overflow-y: auto; background: var(--bg); transition: background 0.25s, border-color 0.25s; }
+.sidebar-section { margin-bottom: 28px; }
+.sidebar-title { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); margin-bottom: 12px; display: block; }
+select, input[type="text"], input[type="number"], input:not([type]) {
+  width: 100%; padding: 9px 12px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 6px;
+  font-family: var(--font-body); font-size: 13px; color: var(--text);
+  outline: none; transition: border-color 0.15s, background 0.25s; margin-bottom: 8px; display: block;
+}
+select:focus, input:focus { border-color: var(--text); }
+input::placeholder { color: var(--text3); }
+.btn { width: 100%; padding: 10px; background: var(--text); color: var(--bg); border: none; border-radius: 6px; font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity 0.2s; margin-top: 2px; display: block; }
+.btn:hover { opacity: 0.75; }
+.btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); margin-top: 8px; }
+.btn-outline:hover { border-color: var(--text); opacity: 1; }
+.achievement-badge { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); margin-bottom: 7px; }
+.badge-icon { font-size: 20px; flex-shrink: 0; }
+.badge-name { font-size: 12px; font-weight: 500; }
+.badge-desc { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.sidebar-link { font-size: 12px; color: var(--text3); text-decoration: none; border-bottom: 1px solid var(--border); padding-bottom: 1px; display: inline-block; transition: color 0.15s; margin-bottom: 10px; }
+.sidebar-link:hover { color: var(--text); border-color: var(--text); }
+
+/* MAIN */
+.main-content { padding: 28px 32px; min-width: 0; background: var(--bg); transition: background 0.25s; }
+.content-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.content-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+.content-count { font-size: 12px; color: var(--text3); background: var(--surface2); padding: 3px 10px; border-radius: 10px; border: 1px solid var(--border); }
+.empty-state { text-align: center; padding: 60px 24px; color: var(--text3); }
+.empty-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.3; }
+.empty-text { font-size: 13px; line-height: 1.7; }
+
+/* ═══════════════════════════
+   COURSE GRID
+═══════════════════════════ */
+#courses { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+.course-item {
+  border-radius: 16px; overflow: hidden; cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: cardPop 0.35s ease both; position: relative;
+}
+.course-item:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.1); }
+.course-item.active-card { transform: translateY(-2px); }
+
+.course-item:nth-child(1)  { animation-delay: 0.03s; }
+.course-item:nth-child(2)  { animation-delay: 0.06s; }
+.course-item:nth-child(3)  { animation-delay: 0.09s; }
+.course-item:nth-child(4)  { animation-delay: 0.12s; }
+.course-item:nth-child(5)  { animation-delay: 0.15s; }
+.course-item:nth-child(6)  { animation-delay: 0.18s; }
+.course-item:nth-child(7)  { animation-delay: 0.21s; }
+.course-item:nth-child(8)  { animation-delay: 0.24s; }
+.course-item:nth-child(9)  { animation-delay: 0.27s; }
+.course-item:nth-child(10) { animation-delay: 0.30s; }
+.course-item:nth-child(n+11) { animation-delay: 0.33s; }
+
+@keyframes cardPop {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.course-card-inner {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 18px 16px 14px;
+  height: 100%; display: flex; flex-direction: column; gap: 9px;
+  transition: background 0.2s, border-color 0.2s;
+}
+.course-item.active-card .course-card-inner {
+  background: var(--invert-bg); border-color: var(--invert-bg); color: var(--invert-text);
+}
+
+.course-accent { height: 3px; border-radius: 2px; }
+.accent-0 { background: #0a0a0a; }
+.accent-1 { background: #3b3b3b; }
+.accent-2 { background: #666; }
+.accent-3 { background: #999; }
+.accent-4 { background: #bbb; }
+.accent-5 { background: #0a0a0a; }
+[data-theme="dark"] .accent-0 { background: #f0efeb; }
+[data-theme="dark"] .accent-1 { background: #bbb; }
+[data-theme="dark"] .accent-2 { background: #888; }
+[data-theme="dark"] .accent-3 { background: #555; }
+[data-theme="dark"] .accent-4 { background: #333; }
+[data-theme="dark"] .accent-5 { background: #f0efeb; }
+
+.course-card-code { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); font-weight: 500; }
+.course-item.active-card .course-card-code { color: #666; }
+.course-card-name { font-size: 13px; font-weight: 600; line-height: 1.35; flex: 1; }
+.course-item.active-card .course-card-name { color: var(--invert-text); }
+
+/* PROGRESS BAR ON EACH CARD */
+.course-progress-wrap { display: flex; align-items: center; gap: 7px; }
+.course-progress-track { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.course-progress-fill { height: 100%; border-radius: 2px; background: var(--text); transition: width 0.6s ease; }
+.course-item.active-card .course-progress-track { background: rgba(255,255,255,0.1); }
+.course-item.active-card .course-progress-fill { background: var(--invert-text); }
+.course-progress-pct { font-size: 10px; color: var(--text3); min-width: 28px; text-align: right; }
+.course-item.active-card .course-progress-pct { color: #666; }
+
+.course-card-footer { display: flex; align-items: center; justify-content: space-between; }
+.course-card-grade { font-family: var(--font-display); font-size: 22px; font-weight: 900; letter-spacing: -0.5px; line-height: 1; }
+.grade-A { color: var(--text); }
+.grade-B { color: #444; } [data-theme="dark"] .grade-B { color: #bbb; }
+.grade-C { color: #777; }
+.grade-D { color: #aaa; }
+.grade-E { color: #ccc; }
+.grade-F { color: #ef4444; }
+.grade-none { color: var(--border); font-size: 16px; }
+.course-item.active-card .course-card-grade { color: var(--invert-text) !important; }
+.course-item.active-card .grade-F { color: #fca5a5 !important; }
+.course-card-units { font-size: 11px; color: var(--text3); background: var(--surface2); padding: 3px 9px; border-radius: 8px; border: 1px solid var(--border); }
+.course-item.active-card .course-card-units { background: rgba(255,255,255,0.08); color: #777; border-color: rgba(255,255,255,0.08); }
+.course-card-tap { font-size: 10px; color: var(--text3); text-align: center; opacity: 0.5; }
+.course-item.active-card .course-card-tap { color: #555; opacity: 1; }
+
+/* ═══════════════════════════
+   RESOURCE PANEL
+═══════════════════════════ */
+.resource-panel {
+  position: fixed; right: 0; top: 60px; bottom: 0; width: 0;
+  background: var(--bg); border-left: 0 solid var(--border);
+  overflow: hidden; transition: width 0.3s ease, border 0.3s ease, background 0.25s;
+  z-index: 40;
+}
+.resource-panel.open { width: 460px; border-left: 1px solid var(--border); box-shadow: -4px 0 24px rgba(0,0,0,0.1); }
+.resource-panel-inner { width: 460px; padding: 24px; height: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+.resource-panel-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.resource-panel-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.3; }
+.resource-panel-close { background: none; border: 1px solid var(--border); border-radius: 4px; padding: 5px 10px; font-size: 11px; cursor: pointer; color: var(--text3); font-family: var(--font-body); flex-shrink: 0; transition: all 0.15s; }
+.resource-panel-close:hover { border-color: var(--text); color: var(--text); }
+.resource-viewer { background: var(--surface2); border-radius: 8px; overflow: hidden; min-height: 180px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
+.viewer-placeholder { text-align: center; padding: 32px 20px; color: var(--text3); }
+.viewer-placeholder-icon { font-size: 28px; margin-bottom: 10px; opacity: 0.3; }
+.viewer-placeholder-text { font-size: 12px; line-height: 1.6; }
+.viewer-iframe { width: 100%; min-height: 220px; border: none; }
+.resource-list { display: flex; flex-direction: column; gap: 6px; }
+.resource-btn { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); cursor: pointer; transition: all 0.15s; text-align: left; font-family: var(--font-body); width: 100%; color: var(--text); }
+.resource-btn:hover { border-color: var(--text); }
+.resource-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+.resource-btn-icon { font-size: 15px; flex-shrink: 0; }
+.resource-btn-name { font-size: 13px; font-weight: 500; flex: 1; }
+.resource-btn-status { font-size: 11px; color: var(--text3); font-style: italic; }
+.resource-open-link { font-size: 11px; color: var(--text3); text-decoration: none; flex-shrink: 0; border-bottom: 1px solid var(--border); padding-bottom: 1px; }
+.resource-open-link:hover { color: var(--text); }
+
+/* WEEK CHECKLIST */
+.week-checklist-section { border-top: 1px solid var(--border); padding-top: 16px; }
+.week-checklist-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.week-checklist-label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); }
+.week-checklist-count { font-size: 12px; color: var(--text3); }
+.week-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+.week-chip {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 10px 4px; border: 1px solid var(--border); border-radius: 10px;
+  cursor: pointer; transition: all 0.18s; background: var(--surface);
+  font-family: var(--font-body); position: relative; overflow: hidden;
+}
+.week-chip:hover { border-color: var(--text); transform: translateY(-1px); }
+.week-chip.done { background: var(--text); border-color: var(--text); }
+.week-chip-num { font-size: 12px; font-weight: 700; color: var(--text3); line-height: 1; }
+.week-chip.done .week-chip-num { color: var(--bg); }
+.week-chip-check { font-size: 14px; line-height: 1; }
+
+/* Week-topic panel (inside resource panel) */
+.panel-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin: 0 -24px 16px; padding: 0 24px; }
+.panel-tab { padding: 10px 16px; font-size: 12px; font-weight: 500; color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; background: none; border-top: none; border-left: none; border-right: none; font-family: var(--font-body); }
+.panel-tab.active { color: var(--text); border-bottom-color: var(--text); }
+.panel-tab-content { display: none; }
+.panel-tab-content.active { display: block; }
+.week-accordion { display: flex; flex-direction: column; gap: 4px; }
+.week-acc-header {
+  display: flex; align-items: center; gap: 10px; padding: 16px 18px;
+  border: 1px solid var(--border); border-radius: 12px; cursor: pointer;
+  background: var(--surface); transition: border-color 0.15s, background 0.15s; user-select: none;
+}
+.week-acc-header:hover { border-color: var(--text3); background: var(--surface2); }
+.week-acc-header.open { border-color: var(--text); border-bottom-left-radius: 0; border-bottom-right-radius: 0; background: var(--surface); }
+.week-acc-num { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); width: 40px; flex-shrink: 0; }
+.week-acc-title { font-size: 14px; font-weight: 600; flex: 1; }
+.week-acc-done { font-size: 11px; color: var(--text3); background: var(--surface2); border: 1px solid var(--border); padding: 2px 8px; border-radius: 20px; }
+.week-acc-check { font-size: 12px; transition: transform 0.2s; margin-left: 4px; color: var(--text3); }
+.week-acc-header.open .week-acc-check { transform: rotate(180deg); }
+.week-acc-body { display: none; border: 1px solid var(--text); border-top: none; border-radius: 0 0 12px 12px; padding: 6px 8px 10px; background: var(--surface); }
+.week-acc-body.open { display: block; }
+.topic-row {
+  display: flex; align-items: center; gap: 12px; padding: 12px 10px;
+  border-radius: 10px; cursor: pointer; transition: background 0.15s;
+  text-decoration: none; color: var(--text); margin-bottom: 2px;
+}
+.topic-row:hover { background: var(--surface2); }
+.topic-check { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; transition: all 0.15s; }
+.topic-check.done { background: var(--green); border-color: var(--green); color: #0a0a0a; }
+.topic-name { font-size: 13px; flex: 1; line-height: 1.4; }
+.topic-conf { font-size: 11px; color: var(--yellow); flex-shrink: 0; }
+.panel-learn-cta { margin-top: 16px; padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface2); text-align: center; }
+.panel-learn-cta-title { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.panel-learn-cta-sub { font-size: 12px; color: var(--text3); margin-bottom: 12px; line-height: 1.5; }
+.panel-learn-btn { display: inline-block; padding: 10px 24px; background: var(--text); color: var(--bg); border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; transition: opacity 0.15s; font-family: var(--font-body); border: none; cursor: pointer; }
+.panel-learn-btn:hover { opacity: 0.8; }
+
+/* ═══════════════════════════
+   EXPLORE CAMPUS
+═══════════════════════════ */
+.community-wrap { max-width: 600px; margin: 0 auto; padding: 32px 24px; }
+
+.campus-hero { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.campus-title { font-family: var(--font-display); font-size: 32px; font-weight: 900; letter-spacing: -1px; margin-bottom: 3px; }
+.campus-slogan { font-size: 13px; color: var(--text3); font-style: italic; }
+.campus-hero-actions { display: flex; gap: 8px; }
+
+.comm-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
+.comm-tab { padding: 10px 20px; font-size: 13px; font-weight: 500; color: var(--text3); cursor: pointer; border: none; background: none; font-family: var(--font-body); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all .15s; }
+.comm-tab:hover { color: var(--text); }
+.comm-tab.active { color: var(--text); border-bottom-color: #4ade80; font-weight: 600; }
+
+.composer { border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 20px; background: var(--surface); }
+.composer-row { display: flex; gap: 12px; margin-bottom: 14px; }
+.composer-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--text); color: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; font-family: var(--font-display); }
+.composer-main { flex: 1; min-width: 0; }
+.composer-input { width: 100%; border: none; background: none; font-family: var(--font-body); font-size: 14px; color: var(--text); resize: none; outline: none; min-height: 64px; line-height: 1.6; }
+.composer-input::placeholder { color: var(--text3); }
+.composer-img-preview { position: relative; margin-top: 10px; }
+.composer-img-preview img { width: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block; }
+.remove-img-btn { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: rgba(0,0,0,.6); color: #fff; border: none; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.composer-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 14px; flex-wrap: wrap; gap: 10px; }
+.composer-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag-pill { font-size: 11px; background: var(--tag-bg); color: var(--tag-color); border-radius: 20px; padding: 4px 12px; cursor: pointer; border: 1px solid transparent; font-family: var(--font-body); transition: all 0.15s; }
+.tag-pill:hover { background: var(--border); color: var(--text); }
+.tag-pill.active { background: var(--text); color: var(--bg); }
+.img-upload-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; color: var(--text3); transition: all .15s; }
+.img-upload-btn:hover { border-color: var(--text); color: var(--text); }
+.post-btn { padding: 8px 22px; background: var(--text); color: var(--bg); border: none; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: var(--font-body); transition: opacity 0.15s; }
+.post-btn:hover { opacity: 0.75; }
+.post-btn:disabled { opacity: 0.3; cursor: default; }
+
+.post-event-btn { padding: 8px 18px; background: var(--text); color: var(--bg); border: none; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: var(--font-body); transition: opacity .15s; white-space: nowrap; }
+.post-event-btn:hover { opacity: .75; }
+
+/* Post cards — image-first */
+.post-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 20px; }
+.post-img { width: 100%; max-height: 480px; object-fit: cover; display: block; }
+.post-body { padding: 14px 16px 0; }
+.post-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.post-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--text); color: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; font-family: var(--font-display); }
+.post-author-name { font-size: 13px; font-weight: 700; }
+.post-author-info { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.post-time { margin-left: auto; font-size: 11px; color: var(--text3); }
+.post-tag-badge { display: inline-block; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; background: var(--tag-bg); color: var(--tag-color); padding: 2px 9px; border-radius: 4px; margin-bottom: 8px; }
+.post-content { font-size: 14px; line-height: 1.65; color: var(--text); margin-bottom: 10px; white-space: pre-wrap; }
+.post-actions { display: flex; gap: 16px; border-top: 1px solid var(--border); padding: 8px 16px; }
+.post-action { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text3); cursor: pointer; background: none; border: none; font-family: var(--font-body); transition: color 0.15s; padding: 4px 0; }
+.post-action:hover, .post-action.liked { color: var(--text); }
+.post-action.liked { font-weight: 600; }
+
+/* Comments */
+.comments-section { border-top: 1px solid var(--border); padding: 12px 20px 16px; }
+.comment-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.comment { display: flex; gap: 10px; }
+.comment-av { width: 26px; height: 26px; border-radius: 50%; background: var(--text); color: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; font-family: var(--font-display); }
+.comment-bubble { background: var(--surface2); border-radius: 10px; padding: 8px 12px; flex: 1; }
+.comment-author { font-size: 11px; font-weight: 600; margin-bottom: 3px; }
+.comment-text { font-size: 12px; color: var(--text2); line-height: 1.5; }
+.comment-composer { display: flex; gap: 8px; align-items: center; }
+.comment-input { flex: 1; border: 1px solid var(--border); border-radius: 20px; padding: 7px 14px; font-family: var(--font-body); font-size: 12px; background: var(--bg); color: var(--text); outline: none; transition: border-color .15s; }
+.comment-input:focus { border-color: #4ade80; }
+.comment-send { padding: 7px 14px; background: #4ade80; color: #0a0a0a; border: none; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--font-body); transition: opacity .15s; }
+.comment-send:hover { opacity: .85; }
+.comments-toggle { font-size: 12px; color: var(--text3); cursor: pointer; background: none; border: none; font-family: var(--font-body); padding: 0 0 10px; transition: color .15s; display: block; }
+.comments-toggle:hover { color: var(--text); }
+
+/* Event & Quest cards */
+.event-card { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 12px; background: var(--surface); transition: border-color .2s; }
+.event-card:hover { border-color: #4ade80; }
+.event-card-inner { display: flex; }
+.event-accent { width: 4px; flex-shrink: 0; }
+.event-accent.conference { background: #60a5fa; }
+.event-accent.workshop { background: #4ade80; }
+.event-accent.hackathon { background: #f59e0b; }
+.event-accent.social { background: #a78bfa; }
+.event-accent.internship { background: #4ade80; }
+.event-accent.talk { background: #f87171; }
+.event-body { padding: 18px 20px; flex: 1; }
+.event-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.event-category { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
+.event-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; letter-spacing: -.2px; line-height: 1.2; }
+.event-badge { font-size: 10px; padding: 4px 10px; border-radius: 12px; font-weight: 600; flex-shrink: 0; white-space: nowrap; }
+.event-badge.conference { background: #dbeafe; color: #1d4ed8; }
+.event-badge.workshop { background: #dcfce7; color: #15803d; }
+.event-badge.hackathon { background: #fef3c7; color: #92400e; }
+.event-badge.social { background: #ede9fe; color: #6d28d9; }
+.event-badge.internship { background: #dcfce7; color: #15803d; }
+.event-badge.talk { background: #fee2e2; color: #991b1b; }
+[data-theme="dark"] .event-badge.conference { background: #1e3a5f; color: #93c5fd; }
+[data-theme="dark"] .event-badge.workshop { background: #14532d; color: #86efac; }
+[data-theme="dark"] .event-badge.hackathon { background: #451a03; color: #fcd34d; }
+[data-theme="dark"] .event-badge.social { background: #2e1065; color: #c4b5fd; }
+[data-theme="dark"] .event-badge.talk { background: #450a0a; color: #fca5a5; }
+.event-meta { display: flex; gap: 16px; font-size: 12px; color: var(--text3); flex-wrap: wrap; margin-bottom: 10px; }
+.event-desc { font-size: 13px; color: var(--text3); line-height: 1.6; margin-bottom: 14px; }
+.event-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 12px; flex-wrap: wrap; gap: 10px; }
+.event-organizer { font-size: 11px; color: var(--text3); }
+.event-register-btn { padding: 7px 18px; background: #4ade80; color: #0a0a0a; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--font-body); transition: opacity .15s; }
+.event-register-btn:hover { opacity: .85; }
+
+.quest-card { border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 12px; background: var(--surface); transition: border-color .2s; }
+.quest-card:hover { border-color: #4ade80; }
+.quest-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.quest-category { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
+.quest-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: -.3px; }
+.quest-meta { display: flex; gap: 16px; font-size: 12px; color: var(--text3); margin-bottom: 12px; flex-wrap: wrap; }
+.quest-desc { font-size: 13px; color: var(--text3); line-height: 1.6; margin-bottom: 14px; }
+.quest-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.quest-participants { display: flex; align-items: center; gap: 8px; }
+.quest-avatars { display: flex; }
+.quest-av { width: 26px; height: 26px; border-radius: 50%; background: var(--text); color: var(--bg); border: 2px solid var(--surface); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; margin-left: -6px; font-family: var(--font-display); }
+.quest-av:first-child { margin-left: 0; }
+.quest-count { font-size: 12px; color: var(--text3); }
+.quest-join-btn { padding: 8px 20px; background: #4ade80; color: #0a0a0a; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--font-body); transition: opacity .15s; }
+.quest-join-btn.joined { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+.quest-join-btn.joined:hover { border-color: #f87171; color: #ef4444; }
+
+/* Forms */
+.post-event-form, .post-quest-form { border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; background: var(--surface); display: none; }
+.post-event-form.open, .post-quest-form.open { display: block; animation: fadeUp .2s ease; }
+.form-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.form-field { display: flex; flex-direction: column; gap: 5px; }
+.form-field.full { grid-column: 1/-1; }
+.form-label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); font-weight: 500; }
+.form-input { padding: 9px 12px; border: 1px solid var(--border); border-radius: 6px; font-family: var(--font-body); font-size: 13px; background: var(--bg); color: var(--text); outline: none; transition: border-color .15s; }
+.form-input:focus { border-color: #4ade80; }
+.form-select { padding: 9px 12px; border: 1px solid var(--border); border-radius: 6px; font-family: var(--font-body); font-size: 13px; background: var(--bg); color: var(--text); outline: none; transition: border-color .15s; appearance: none; cursor: pointer; }
+.form-select:focus { border-color: #4ade80; }
+.form-actions { display: flex; gap: 10px; margin-top: 16px; }
+.form-submit { padding: 9px 22px; background: #4ade80; color: #0a0a0a; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--font-body); transition: opacity .15s; }
+.form-submit:hover { opacity: .85; }
+.form-cancel { padding: 9px 18px; background: none; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; cursor: pointer; font-family: var(--font-body); color: var(--text3); transition: all .15s; }
+.form-cancel:hover { border-color: var(--text); color: var(--text); }
+/* ═══════════════════════════
+   CAREER
+═══════════════════════════ */
+.career-wrap { padding: 40px 48px; max-width: 900px; }
+.career-cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 40px; }
+.career-card { border: 1px solid var(--border); border-radius: 12px; padding: 24px; transition: all 0.15s; cursor: pointer; background: var(--surface); }
+.career-card:hover { border-color: var(--text); box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+.career-card-icon { font-size: 26px; margin-bottom: 14px; }
+.career-card-title { font-family: var(--font-display); font-size: 17px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 6px; }
+.career-card-desc { font-size: 13px; color: var(--text3); line-height: 1.6; margin-bottom: 14px; }
+.career-card-cta { font-size: 12px; font-weight: 500; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 1px; }
+.section-heading { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); margin-bottom: 16px; }
+.aspiration-input-row { display: flex; gap: 10px; margin-bottom: 12px; }
+.aspiration-input { flex: 1; padding: 11px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: var(--font-body); font-size: 13px; outline: none; background: var(--surface); color: var(--text); margin: 0; }
+.aspiration-input:focus { border-color: var(--text); }
+.aspiration-add { padding: 11px 20px; background: var(--text); color: var(--bg); border: none; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: var(--font-body); white-space: nowrap; }
+.aspiration-list { display: flex; flex-direction: column; gap: 8px; }
+.aspiration-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.aspiration-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text); flex-shrink: 0; }
+.aspiration-text { font-size: 14px; flex: 1; line-height: 1.5; }
+.aspiration-del { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 18px; padding: 0; line-height: 1; transition: color 0.15s; }
+.aspiration-del:hover { color: var(--text); }
+
+/* ═══════════════════════════
+   TOAST & LOADING
+═══════════════════════════ */
+.milestone-toast {
+  position: fixed; bottom: 90px; left: 50%;
+  transform: translateX(-50%) translateY(140px);
+  background: var(--text); color: var(--bg);
+  padding: 13px 24px; border-radius: 50px; font-size: 13px; font-weight: 500;
+  display: flex; align-items: center; gap: 10px;
+  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  z-index: 999; white-space: nowrap; box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+.milestone-toast.show { transform: translateX(-50%) translateY(0); }
+.toast-icon { font-size: 16px; }
+@media (min-width: 769px) { .milestone-toast { bottom: 32px; } }
+
+.loading-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 999; flex-direction: column; gap: 14px; transition: background 0.25s; }
+.loading-logo { font-family: var(--font-display); font-size: 30px; font-weight: 900; letter-spacing: -1px; }
+.loading-sub { font-size: 13px; color: var(--text3); }
+
+/* ═══════════════════════════
+   RESPONSIVE
+═══════════════════════════ */
+@media (max-width: 900px) {
+  .personal-hero { padding: 28px 20px; grid-template-columns: 1fr; }
+  .hero-stats { display: none; }
+  .progress-bar-wrap { padding: 14px 20px; }
+  .personal-body { grid-template-columns: 1fr; }
+  .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+  .main-content { padding: 20px; }
+  .community-wrap { padding: 24px 16px; }
+  .career-wrap { padding: 28px 20px; }
+  .career-cards-grid { grid-template-columns: 1fr; }
+  .resource-panel.open { width: 100%; top: 0; z-index: 150; }
+  .resource-panel-inner { width: 100%; }
+}
+@media (max-width: 480px) {
+  #courses { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+}
+
+/* ═══════════════════════════
+   MASTERY TRACKER
+═══════════════════════════ */
+.mastery-wrap {
+  padding: 20px 32px; background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.25s, border-color 0.25s;
+}
+.mastery-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.mastery-title { font-family: var(--font-display); font-size: 17px; font-weight: 700; letter-spacing: -0.5px; }
+.mastery-subtitle { font-size: 12px; color: var(--text3); }
+.mastery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.mastery-card {
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px 16px; background: var(--surface);
+  transition: border-color 0.15s, transform 0.15s;
+  cursor: pointer;
+}
+.mastery-card:hover { border-color: var(--text3); transform: translateY(-1px); }
+.mastery-card-code { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
+.mastery-card-name { font-size: 12px; font-weight: 600; margin-bottom: 12px; line-height: 1.35; }
+.mastery-score-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.mastery-score { font-family: var(--font-display); font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
+.mastery-score.high { color: var(--green); }
+.mastery-score.mid { color: var(--yellow); }
+.mastery-score.low { color: #ef4444; }
+.mastery-score.none { color: var(--text3); }
+.mastery-progress-wrap { height: 4px; background: var(--surface2); border-radius: 99px; overflow: hidden; border: 1px solid var(--border); }
+.mastery-progress-fill { height: 100%; border-radius: 99px; transition: width 0.5s; }
+.mastery-meta { display: flex; justify-content: space-between; margin-top: 8px; font-size: 10px; color: var(--text3); }
+.mastery-empty { font-size: 13px; color: var(--text3); padding: 12px 0; line-height: 1.7; }
+.mastery-empty a { color: var(--text); text-underline-offset: 3px; }
+@media (max-width: 768px) {
+  .mastery-wrap { padding: 16px 16px; }
+  .mastery-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ═══════════════════════════
+   STUDY PLANNER
+═══════════════════════════ */
+.planner-wrap {
+  padding: 20px 32px; background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.25s, border-color 0.25s;
+}
+.planner-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.planner-title { font-family: var(--font-display); font-size: 17px; font-weight: 700; letter-spacing: -0.5px; }
+.planner-setup-link { font-size: 12px; color: var(--text3); background: none; border: 1px solid var(--border); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-family: var(--font-body); transition: all 0.15s; }
+.planner-setup-link:hover { border-color: var(--text); color: var(--text); }
+.planner-sessions { display: flex; gap: 8px; flex-wrap: wrap; }
+.planner-session {
+  border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px;
+  background: var(--surface); min-width: 160px; flex: 1; max-width: 220px;
+  transition: all 0.2s; cursor: pointer; position: relative;
+}
+.planner-session:hover { border-color: var(--text); }
+.planner-session.done { border-color: var(--green-border, rgba(74,222,128,0.25)); background: var(--green-bg, rgba(74,222,128,0.06)); }
+.planner-session.skipped { opacity: 0.5; }
+.planner-session-time { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
+.planner-session-topic { font-size: 13px; font-weight: 600; line-height: 1.3; margin-bottom: 6px; }
+.planner-session-course { font-size: 11px; color: var(--text3); margin-bottom: 8px; }
+.planner-session-duration { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 6px; background: var(--surface2); border: 1px solid var(--border); color: var(--text3); }
+.planner-session.done .planner-session-duration { background: var(--green-bg, rgba(74,222,128,0.08)); border-color: var(--green-border, rgba(74,222,128,0.2)); color: var(--green); }
+.planner-session-check { position: absolute; top: 10px; right: 12px; font-size: 14px; opacity: 0; transition: opacity 0.15s; }
+.planner-session.done .planner-session-check { opacity: 1; }
+.planner-empty { font-size: 13px; color: var(--text3); padding: 12px 0; line-height: 1.7; }
+.planner-empty a { color: var(--text); text-underline-offset: 3px; }
+
+/* PLANNER SETUP MODAL */
+.planner-modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 400;
+  display: flex; align-items: flex-end; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.planner-modal-overlay.open { opacity: 1; pointer-events: all; }
+.planner-modal {
+  background: var(--surface); border-radius: 20px 20px 0 0; padding: 28px 28px 40px;
+  width: 100%; max-width: 500px; transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.34,1.2,0.64,1);
+}
+.planner-modal-overlay.open .planner-modal { transform: translateY(0); }
+.planner-modal-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.planner-modal-sub { font-size: 13px; color: var(--text3); margin-bottom: 24px; }
+.planner-modal-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
+.planner-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.planner-chip {
+  padding: 8px 16px; border-radius: 50px; border: 1px solid var(--border);
+  font-size: 13px; cursor: pointer; background: var(--bg); color: var(--text2);
+  transition: all 0.15s; font-family: var(--font-body);
+}
+.planner-chip.selected { background: var(--text); color: var(--bg); border-color: var(--text); }
+.planner-modal-save { width: 100%; padding: 14px; background: var(--text); color: var(--bg); border: none; border-radius: 10px; font-family: var(--font-body); font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 8px; transition: opacity 0.15s; }
+.planner-modal-save:hover { opacity: 0.8; }
+.planner-modal-close { float: right; background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--text3); font-family: var(--font-body); }
+
+/* ═══════════════════════════
+   STREAK + DAILY NUDGE
+═══════════════════════════ */
+.streak-nudge-wrap {
+  padding: 16px 32px; background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.25s, border-color 0.25s;
+}
+.streak-nudge {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 16px 20px;
+  transition: all 0.2s; cursor: pointer; max-width: 100%;
+}
+.streak-nudge:hover { border-color: var(--text); box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+.streak-nudge.completed { border-color: var(--green); background: var(--green-bg, rgba(74,222,128,0.06)); cursor: default; }
+.streak-nudge.completed:hover { box-shadow: none; }
+.streak-fire {
+  font-size: 32px; flex-shrink: 0; line-height: 1;
+  animation: fireWiggle 2.5s ease-in-out infinite;
+}
+@keyframes fireWiggle {
+  0%,100% { transform: rotate(-4deg) scale(1); }
+  50% { transform: rotate(4deg) scale(1.08); }
+}
+.streak-nudge.completed .streak-fire { animation: none; }
+.streak-info { flex: 1; min-width: 0; }
+.streak-count {
+  font-family: var(--font-display); font-size: 13px; font-weight: 700;
+  color: var(--text3); letter-spacing: 0.5px; margin-bottom: 3px;
+  display: flex; align-items: center; gap: 8px;
+}
+.streak-days-val { font-size: 18px; color: var(--text); }
+.streak-message { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px; line-height: 1.4; }
+.streak-sub { font-size: 12px; color: var(--text3); line-height: 1.5; }
+.streak-action {
+  flex-shrink: 0; padding: 9px 20px; background: var(--text); color: var(--bg);
+  border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: var(--font-body); transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.streak-action:hover { opacity: 0.8; }
+.streak-nudge.completed .streak-action {
+  background: var(--green, #4ade80); color: #0a0a0a;
+}
+.streak-dots { display: flex; gap: 5px; margin-top: 8px; }
+.streak-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--border); transition: background 0.3s;
+}
+.streak-dot.active { background: #f97316; }
+.streak-dot.done { background: #4ade80; }
+
+/* QUICK REVIEW MODAL */
+.review-modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 300; display: flex; align-items: center; justify-content: center;
+  padding: 20px; backdrop-filter: blur(4px);
+  opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.review-modal-overlay.open { opacity: 1; pointer-events: all; }
+.review-modal {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 20px;
+  padding: 32px; max-width: 480px; width: 100%;
+  transform: translateY(20px) scale(0.97);
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.15);
+}
+.review-modal-overlay.open .review-modal { transform: translateY(0) scale(1); }
+.review-modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.review-modal-badge {
+  font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--text3); background: var(--surface2); padding: 3px 10px;
+  border-radius: 10px; border: 1px solid var(--border);
+}
+.review-modal-close {
+  background: none; border: 1px solid var(--border); border-radius: 6px;
+  padding: 4px 10px; font-size: 12px; cursor: pointer; color: var(--text3);
+  font-family: var(--font-body); transition: all 0.15s;
+}
+.review-modal-close:hover { border-color: var(--text); color: var(--text); }
+.review-modal-topic {
+  font-family: var(--font-display); font-size: 20px; font-weight: 700;
+  letter-spacing: -0.5px; margin-bottom: 6px; line-height: 1.3;
+}
+.review-modal-course { font-size: 12px; color: var(--text3); margin-bottom: 20px; }
+.review-question {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 18px; margin-bottom: 16px;
+  font-size: 14px; line-height: 1.7; color: var(--text2);
+}
+.review-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.review-option {
+  padding: 12px 16px; border: 2px solid var(--border); border-radius: 10px;
+  background: var(--surface); cursor: pointer; font-size: 13px; font-weight: 500;
+  transition: all 0.15s; text-align: left; font-family: var(--font-body); color: var(--text);
+}
+.review-option:hover { border-color: var(--text); }
+.review-option.correct { border-color: #4ade80; background: rgba(74,222,128,0.08); color: #4ade80; }
+.review-option.wrong { border-color: #ef4444; background: rgba(239,68,68,0.06); color: #ef4444; }
+.review-result { display: none; border-radius: 10px; padding: 16px; margin-bottom: 16px; font-size: 13px; line-height: 1.7; }
+.review-result.show { display: block; }
+.review-result.win { background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.25); color: var(--text2); }
+.review-result.lose { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.2); color: var(--text2); }
+.review-result-title { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+.review-modal-actions { display: flex; gap: 10px; }
+.review-done-btn {
+  flex: 1; padding: 12px; background: var(--text); color: var(--bg);
+  border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: var(--font-body); transition: opacity 0.15s;
+}
+.review-done-btn:hover { opacity: 0.8; }
+.review-skip-btn {
+  padding: 12px 18px; background: none; color: var(--text3);
+  border: 1px solid var(--border); border-radius: 8px; font-size: 13px;
+  cursor: pointer; font-family: var(--font-body); transition: all 0.15s;
+}
+.review-skip-btn:hover { border-color: var(--text); color: var(--text); }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-logo">Unify</div>
+  <div class="loading-sub">Loading your dashboard...</div>
+</div>
+
+<!-- TOAST -->
+<div class="milestone-toast" id="milestoneToast">
+  <span class="toast-icon">🎉</span>
+  <span id="milestoneText">Milestone reached!</span>
+</div>
+
+<!-- ── DESKTOP NAV ── -->
+<nav>
+  <a href="index.html" class="nav-logo">Unify</a>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchSpace('personal')" id="tab-personal">Dashboard</button>
+    <button class="nav-tab" onclick="switchSpace('community')" id="tab-community">Explore Campus</button>
+    <a href="timetable.html" class="nav-tab">Timetable</a>
+    <a href="careers.html" class="nav-tab">Career</a>
+    <a href="profile.html" class="nav-tab">Profile</a>
+  </div>
+  <div class="nav-right">
+    <span class="nav-user-name" id="navUserName"></span>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">🌙 Dark</button>
+    <button class="nav-signout" id="signOutBtn">Sign out</button>
+  </div>
+</nav>
+
+<!-- ── SPACE 1: PERSONAL ── -->
+<div class="space active" id="space-personal">
+
+  <!-- NAME NUDGE BANNER -->
+  <div id="nameNudge" style="display:none;padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--border);align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+    <span style="font-size:13px;color:var(--text2);">👋 We never got your name — your profile might look off.</span>
+    <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
+      <a href="onboarding.html?edit=1" style="font-size:12px;font-weight:600;padding:6px 14px;background:var(--text);color:var(--bg);border-radius:6px;text-decoration:none;">Set my name →</a>
+      <button onclick="document.getElementById('nameNudge').style.display='none'" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text3);line-height:1;">×</button>
+    </div>
+  </div>
+
+  <div class="personal-hero">
+    <div>
+      <p class="hero-greeting" id="heroTag">Your Dashboard</p>
+      <h1 class="hero-name" id="heroName">Good to have you, <em id="heroFirstName">Builder.</em></h1>
+      <p class="hero-dept" id="heroDept"></p>
+      <div class="save-indicator" id="saveIndicator">✓ Saved</div>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-val" id="statCGPA">—</div>
+        <div class="hero-stat-label">CGPA</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val" id="statCourses">0</div>
+        <div class="hero-stat-label">Courses</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val" id="statGraded">0</div>
+        <div class="hero-stat-label">Graded</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <span class="progress-label">Semester Progress</span>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="progress-pct" id="progressPct">0%</span>
+  </div>
+
+
+  <!-- ── STREAK + DAILY NUDGE ── -->
+  <div class="streak-nudge-wrap">
+    <div class="streak-nudge" id="streakNudge" onclick="openReview()">
+      <div class="streak-fire" id="streakFire">🔥</div>
+      <div class="streak-info">
+        <div class="streak-count">
+          <span class="streak-days-val" id="streakDaysVal">0</span>
+          <span>day streak</span>
+        </div>
+        <div class="streak-message" id="streakMessage">Start your streak today</div>
+        <div class="streak-sub" id="streakSub">One quick question. 2 minutes max.</div>
+        <div class="streak-dots" id="streakDots"></div>
+      </div>
+      <button class="streak-action" id="streakActionBtn">Let's go →</button>
+    </div>
+  </div>
+
+  <!-- ── STUDY PLANNER ── -->
+  <div class="planner-wrap" id="plannerWrap">
+    <div class="planner-header">
+      <div class="planner-title">📚 Today's Study Plan</div>
+      <button class="planner-setup-link" onclick="openPlannerSetup()">⚙ Customise</button>
+    </div>
+    <div class="planner-sessions" id="plannerSessions">
+      <div class="planner-empty" id="plannerEmpty">
+        Set up your study preferences and we'll build a personalised daily plan.
+        <br><a href="#" onclick="openPlannerSetup();return false;">Get started →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLANNER SETUP MODAL -->
+  <div class="planner-modal-overlay" id="plannerModalOverlay">
+    <div class="planner-modal">
+      <button class="planner-modal-close" onclick="closePlannerSetup()">✕ Close</button>
+      <div class="planner-modal-title">Build Your Study Plan</div>
+      <div class="planner-modal-sub">We'll generate a daily schedule around your courses.</div>
+
+      <label class="planner-modal-label">How long can you study per session?</label>
+      <div class="planner-chips" id="durationChips">
+        <button class="planner-chip" data-val="20" onclick="selectChip(this,'duration')">20 min</button>
+        <button class="planner-chip" data-val="30" onclick="selectChip(this,'duration')">30 min</button>
+        <button class="planner-chip selected" data-val="60" onclick="selectChip(this,'duration')">1 hour</button>
+        <button class="planner-chip" data-val="90" onclick="selectChip(this,'duration')">1.5 hrs</button>
+      </div>
+
+      <label class="planner-modal-label">How many sessions per day?</label>
+      <div class="planner-chips" id="sessionsChips">
+        <button class="planner-chip" data-val="1" onclick="selectChip(this,'sessions')">1</button>
+        <button class="planner-chip selected" data-val="2" onclick="selectChip(this,'sessions')">2</button>
+        <button class="planner-chip" data-val="3" onclick="selectChip(this,'sessions')">3</button>
+      </div>
+
+      <label class="planner-modal-label">Preferred study time?</label>
+      <div class="planner-chips" id="timeChips">
+        <button class="planner-chip" data-val="morning" onclick="selectChip(this,'time')">🌅 Morning</button>
+        <button class="planner-chip selected" data-val="afternoon" onclick="selectChip(this,'time')">☀️ Afternoon</button>
+        <button class="planner-chip" data-val="night" onclick="selectChip(this,'time')">🌙 Night</button>
+      </div>
+
+      <button class="planner-modal-save" onclick="savePlannerSetup()">Generate My Plan →</button>
+    </div>
+  </div>
+
+  <!-- ── REVIEW MODAL ── -->
+  <div class="review-modal-overlay" id="reviewModalOverlay" onclick="closeReviewOnOverlay(event)">
+    <div class="review-modal">
+      <div class="review-modal-header">
+        <span class="review-modal-badge" id="reviewModalBadge">Quick Review</span>
+        <button class="review-modal-close" onclick="closeReview()">✕</button>
+      </div>
+      <div class="review-modal-topic" id="reviewModalTopic">Topic Name</div>
+      <div class="review-modal-course" id="reviewModalCourse">Course · Week</div>
+      <div class="review-question" id="reviewQuestion">Loading question...</div>
+      <div class="review-options" id="reviewOptions"></div>
+      <div class="review-result" id="reviewResult">
+        <div class="review-result-title" id="reviewResultTitle"></div>
+        <div id="reviewResultBody"></div>
+      </div>
+      <div class="review-modal-actions">
+        <button class="review-done-btn" id="reviewDoneBtn" onclick="finishReview()">Done ✓</button>
+        <button class="review-skip-btn" onclick="closeReview()">Later</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="personal-body">
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <span class="sidebar-title">Semester</span>
+        <select id="semester">
+          <option>First Semester</option>
+          <option>Second Semester</option>
+        </select>
+        <button class="btn" onclick="switchSemester()">Load Semester</button>
+      </div>
+      <div class="sidebar-section">
+        <span class="sidebar-title">Add Course Manually</span>
+        <input id="courseInput" placeholder="Course code (e.g. ECE 301)">
+        <input id="gradeInput" placeholder="Grade (A, B, C, D, E, F)">
+        <input id="unitsInput" type="number" min="1" max="6" placeholder="Credit units">
+        <button class="btn" onclick="addCourse()">Add Course</button>
+        <button class="btn btn-outline" onclick="clearCourses()">Clear All</button>
+      </div>
+      <div class="sidebar-section">
+        <span class="sidebar-title">Achievements</span>
+        <div id="achievementsList"><div style="font-size:12px;color:var(--text3);">Complete courses to earn badges.</div></div>
+      </div>
+      <div class="sidebar-section">
+        <a href="predictor.html" class="sidebar-link">Grade Planner →</a>
+        <a href="onboarding.html?edit=1" class="sidebar-link">Change university / level →</a>
+      </div>
+    </div>
+
+    <div style="display:flex;min-width:0;position:relative;">
+      <div class="main-content" style="flex:1;min-width:0;">
+        <div class="content-header">
+          <h2 class="content-title">Your Courses</h2>
+          <span class="content-count" id="coursesCount">0 courses</span>
+        </div>
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">📚</div>
+          <p class="empty-text">No courses loaded yet.<br>Select a semester and tap "Load Semester",<br>or add courses manually.</p>
+        </div>
+        <ul id="courses"></ul>
+      </div>
+
+      <!-- RESOURCE PANEL -->
+      <div class="resource-panel" id="resourcePanel">
+        <div class="resource-panel-inner">
+          <div class="resource-panel-header">
+            <div>
+              <h3 class="resource-panel-title" id="resourcePanelTitle">Course</h3>
+              <div style="font-size:11px;color:var(--text3);margin-top:3px;" id="resourcePanelMeta"></div>
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0;align-items:center;">
+              <a class="panel-learn-btn" id="learnPageBtn" href="#" style="padding:8px 16px;font-size:12px;">Open in Learn →</a>
+              <button class="resource-panel-close" onclick="closeResourcePanel()">✕</button>
+            </div>
+          </div>
+          <!-- WEEK ACCORDION (full panel) -->
+          <div class="week-accordion" id="weekAccordion"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden aspiration store — keeps renderAspirations working -->
+  <div style="display:none">
+    <input id="aspirationInput">
+    <div id="aspirationList"></div>
+  </div>
+</div>
+
+<!-- ── SPACE 2: EXPLORE CAMPUS ── -->
+<div class="space" id="space-community">
+  <div class="community-wrap">
+
+    <div class="campus-hero">
+      <div class="campus-hero-text">
+        <h2 class="campus-title">Explore Campus</h2>
+        <p class="campus-slogan">Say no to a boring campus life.</p>
+      </div>
+      <div class="campus-hero-actions">
+        <button class="post-event-btn" onclick="openEventForm()">+ Event</button>
+        <button class="post-event-btn" onclick="openQuestForm()">+ Quest</button>
+      </div>
+    </div>
+
+    <!-- COMPOSER -->
+    <div class="composer">
+      <div class="composer-row">
+        <div class="composer-avatar" id="composerAvatar">U</div>
+        <div class="composer-main">
+          <textarea class="composer-input" id="postInput" placeholder="What's happening on campus?"></textarea>
+          <div class="composer-img-preview" id="imgPreview" style="display:none">
+            <img id="previewImg" src="" alt="preview">
+            <button class="remove-img-btn" onclick="removeImage()">×</button>
+          </div>
+        </div>
+      </div>
+      <div class="composer-footer">
+        <div class="composer-tags">
+          <button class="tag-pill" onclick="toggleTag(this,'Project')">Project</button>
+          <button class="tag-pill" onclick="toggleTag(this,'Achievement')">Win</button>
+          <button class="tag-pill" onclick="toggleTag(this,'Event')">Event</button>
+          <button class="tag-pill" onclick="toggleTag(this,'Quest')">Quest</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <label class="img-upload-btn" for="imgUpload" title="Add photo">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </label>
+          <input type="file" id="imgUpload" accept="image/*" style="display:none" onchange="handleImageSelect(event)">
+          <button class="post-btn" id="postBtn" onclick="submitPost()">Post</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB FILTER -->
+    <div class="comm-tabs">
+      <button class="comm-tab active" onclick="switchFeedTab('all',this)">All</button>
+      <button class="comm-tab" onclick="switchFeedTab('posts',this)">Posts</button>
+      <button class="comm-tab" onclick="switchFeedTab('events',this)">Events</button>
+      <button class="comm-tab" onclick="switchFeedTab('quests',this)">Side Quests</button>
+    </div>
+
+    <!-- EVENT FORM -->
+    <div class="post-event-form" id="eventForm">
+      <div class="form-title">Post a Campus Event</div>
+      <div class="form-grid">
+        <div class="form-field full">
+          <label class="form-label">Event Title</label>
+          <input class="form-input" id="evTitle" placeholder="e.g. AI & Robotics Conference 2026">
+        </div>
+        <div class="form-field">
+          <label class="form-label">Date & Time</label>
+          <input class="form-input" id="evDate" placeholder="e.g. Saturday, Apr 26 · 10 AM">
+        </div>
+        <div class="form-field">
+          <label class="form-label">Location</label>
+          <input class="form-input" id="evLocation" placeholder="e.g. Engineering Hall / Virtual">
+        </div>
+        <div class="form-field">
+          <label class="form-label">Category</label>
+          <select class="form-select" id="evCategory">
+            <option value="conference">Conference</option>
+            <option value="workshop">Workshop</option>
+            <option value="hackathon">Hackathon</option>
+            <option value="talk">Talk / Seminar</option>
+            <option value="internship">Internship Info</option>
+            <option value="social">Social</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Register Link (optional)</label>
+          <input class="form-input" id="evLink" placeholder="https://...">
+        </div>
+        <div class="form-field full">
+          <label class="form-label">Description</label>
+          <textarea class="form-input" id="evDesc" rows="3" placeholder="What's this event about? Who should attend?"></textarea>
+        </div>
+        <div class="form-field full">
+          <label class="form-label">Organizer</label>
+          <input class="form-input" id="evOrganizer" placeholder="e.g. LASU Tech Club, MTN Nigeria...">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="form-submit" onclick="submitEvent()">Post Event →</button>
+        <button class="form-cancel" onclick="closeEventForm()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- QUEST FORM -->
+    <div class="post-quest-form" id="questForm">
+      <div class="form-title">Create a Side Quest</div>
+      <div class="form-grid">
+        <div class="form-field full">
+          <label class="form-label">Quest Name</label>
+          <input class="form-input" id="qTitle" placeholder="e.g. Morning Hill Walk, Gym Day, Night Ride...">
+        </div>
+        <div class="form-field">
+          <label class="form-label">Day & Time</label>
+          <input class="form-input" id="qDate" placeholder="e.g. Saturday · 6:30 AM">
+        </div>
+        <div class="form-field">
+          <label class="form-label">Meet Point</label>
+          <input class="form-input" id="qLocation" placeholder="e.g. Engineering Gate">
+        </div>
+        <div class="form-field full">
+          <label class="form-label">What's the vibe? (optional)</label>
+          <input class="form-input" id="qDesc" placeholder="e.g. Easy 45-min walk, all levels welcome. Bring water.">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="form-submit" onclick="submitQuest()">Create Quest →</button>
+        <button class="form-cancel" onclick="closeQuestForm()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- UNIFIED FEED -->
+    <div id="unifiedFeed"></div>
+
+  </div>
+</div>
+
+
+
+<!-- ── MOBILE BOTTOM NAV ── -->
+<nav class="mobile-nav">
+  <div class="mobile-nav-inner">
+    <button class="mobile-nav-btn active" onclick="switchSpace('personal')" id="mob-tab-personal">
+      <span class="mobile-nav-label">Dashboard</span>
+      <div class="mobile-nav-dot"></div>
+    </button>
+    <button class="mobile-nav-btn" onclick="switchSpace('community')" id="mob-tab-community">
+      <span class="mobile-nav-icon">🌍</span>
+      <span class="mobile-nav-label">Explore Campus</span>
+      <div class="mobile-nav-dot"></div>
+    </button>
+    <button class="mobile-nav-btn" onclick="window.location.href='careers.html'" id="mob-tab-career">
+      <span class="mobile-nav-icon">🚀</span>
+      <span class="mobile-nav-label">Career</span>
+      <div class="mobile-nav-dot"></div>
+    </button>
+    <a href="careers.html" class="mobile-nav-btn">
+      <span class="mobile-nav-label">Career</span>
+      <div class="mobile-nav-dot"></div>
+    </a>
+    <a href="profile.html" class="mobile-nav-btn">
+      <span class="mobile-nav-icon">👤</span>
+      <span class="mobile-nav-label">Profile</span>
+      <div class="mobile-nav-dot"></div>
+    </a>
+  </div>
+</nav>
+
+<script src="courses.js"></script>
+<script src="courseContent.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, limit, getDocs, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBjZyfNNpXZFJwB7GKXVeSzLTVknfwCa8I",
+  authDomain: "unify-b4316.firebaseapp.com",
+  projectId: "unify-b4316",
+  storageBucket: "unify-b4316.firebasestorage.app",
+  messagingSenderId: "114594366515",
+  appId: "1:114594366615:web:44ef821b4618f1a24615d2",
+  measurementId: "G-MY2M1R6DJV"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentUser = null, saveTimeout = null, activeCourseId = null;
+let activeTag = null, currentFilter = 'all';
+let userProfile = {}, aspirations = [], feedPosts = [];
+let earnedBadges = new Set();
+let weekProgress = {};
+// ── SECURITY ──────────────────────────────────────────
+function sanitise(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/[/]/g, '&#x2F;');
+}
+
+// Rate limiter — max N actions per window
+const rateLimits = {};
+function rateLimit(key, max = 5, windowMs = 60000) {
+  const now = Date.now();
+  if (!rateLimits[key]) rateLimits[key] = [];
+  rateLimits[key] = rateLimits[key].filter(t => now - t < windowMs);
+  if (rateLimits[key].length >= max) return false;
+  rateLimits[key].push(now);
+  return true;
+}
+
+
+
+// ── DARK MODE ─────────────────────────────────────────
+function initTheme() {
+  const saved = localStorage.getItem('unify-theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+    if (!localStorage.getItem('unify-theme')) applyTheme(e.matches ? 'dark' : 'light');
+  });
+}
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn = document.getElementById('themeToggle');
+  if (btn) btn.textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
+}
+window.toggleTheme = function() {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('unify-theme', next);
+  applyTheme(next);
+}
+initTheme();
+
+// ── AUTH ──────────────────────────────────────────────
+onAuthStateChanged(auth, async user => {
+  if (!user) { window.location.href = 'auth.html'; return; }
+  currentUser = user;
+  // Best first name: Firebase Auth displayName > Firestore firstName (loaded after) > cleaned email
+  let first = 'Builder';
+  if (user.displayName && user.displayName.trim()) {
+    first = user.displayName.trim().split(/\s+/)[0];
+  } else if (user.email) {
+    const raw = user.email.split('@')[0].replace(/[._\-0-9]/g, ' ').trim();
+    const words = raw.split(/\s+/).filter(Boolean);
+    first = words.length > 1 ? words[0] : raw.charAt(0).toUpperCase() + raw.slice(1, 9);
+  }
+  window._dashFirst = first; // will be overwritten by Firestore firstName once loaded
+  const hr = new Date().getHours();
+  const greet = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('heroName').innerHTML = `${greet},<br><em id="heroFirstName">${first}.</em>`;
+  document.getElementById('navUserName').textContent = first;
+  document.getElementById('composerAvatar').textContent = first[0].toUpperCase();
+  await loadUserData();
+  await loadFeed();
+  initStreak();
+  document.getElementById('loadingOverlay').style.display = 'none';
+});
+
+// Refresh course card progress when returning from learn.html
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && window.courses?.length) displayCourses();
+});
+
+document.getElementById('signOutBtn').addEventListener('click', async () => {
+  await signOut(auth); window.location.href = 'auth.html';
+});
+
+// ── SPACE SWITCH ──────────────────────────────────────
+window.switchSpace = function(space) {
+  document.querySelectorAll('.space').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab[id], .mobile-nav-btn[id]').forEach(t => t.classList.remove('active'));
+  document.getElementById('space-' + space).classList.add('active');
+  document.getElementById('tab-' + space)?.classList.add('active');
+  document.getElementById('mob-tab-' + space)?.classList.add('active');
+  if (space !== 'personal') closeResourcePanel();
+}
+
+// ── LOAD DATA ─────────────────────────────────────────
+async function loadUserData() {
+  try {
+    const snap = await getDoc(doc(db, 'users', currentUser.uid));
+    if (!snap.exists() || !snap.data().university) { window.location.href = 'onboarding.html'; return; }
+    const d = snap.data();
+    userProfile = { university: d.university, faculty: d.faculty, department: d.department, level: d.level };
+    // Use firstName from Firestore if available — overrides email-parsed guess
+    if (!d.firstName) {
+      // Old account — nudge them to set their name
+      const nudge = document.getElementById('nameNudge');
+      if (nudge) nudge.style.display = 'flex';
+    }
+
+    if (d.firstName) {
+      const first = d.firstName;
+      const hr = new Date().getHours();
+      const greet = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
+      document.getElementById('heroName').innerHTML = `${greet},<br><em id="heroFirstName">${first}.</em>`;
+      document.getElementById('navUserName').textContent = first;
+      document.getElementById('composerAvatar').textContent = first[0].toUpperCase();
+    }
+    window.courses = d.courses || [];
+    aspirations = d.aspirations || [];
+    weekProgress = d.weekProgress || {};
+    document.getElementById('heroTag').textContent = `${d.university} · ${d.level}`;
+    document.getElementById('heroDept').textContent = d.department;
+
+    // Always reload from coursesDatabase if:
+    // 1. courses array is empty, OR
+    // 2. courses don't match current dept (e.g. after changing department)
+    const firstCourse = window.courses[0]?.course || '';
+    const deptPrefix = { 
+      'Electronic & Computer Engineering': 'ECE',
+      'Mechanical Engineering': 'MEE',
+      'Chemical & Polymer Engineering': 'CHE',
+      'Civil Engineering': 'CVE',
+      'Industrial & Petroleum Engineering': 'IPE',
+      'Aerospace Engineering': 'ASE'
+    }[d.department] || '';
+    const coursesMatchDept = !deptPrefix || firstCourse.startsWith(deptPrefix) || firstCourse.startsWith('MAT') || firstCourse.startsWith('GNS') || firstCourse.startsWith('PHY') || firstCourse.startsWith('CHM') || firstCourse.startsWith('ENT');
+    if (!window.courses.length || !coursesMatchDept) {
+      autoLoadCourses(d.department, d.level);
+    }
+    renderAspirations();
+  } catch(e) { window.courses = []; }
+  displayCourses();
+  updateStats();
+  renderPlanner();
+}
+
+function autoLoadCourses(dept, level) {
+  const db_data = window.coursesDatabase?.["Faculty of Engineering"]?.[dept]?.[level];
+  if (!db_data) {
+    console.warn('coursesDatabase not ready or dept/level not found:', dept, level);
+    return;
+  }
+  // Only load the currently selected semester, not both
+  const semEl = document.getElementById('semester');
+  const sem = semEl ? semEl.value : 'First Semester';
+  const courses = db_data[sem] || [];
+  window.courses = courses.filter(Boolean).map(c => ({ course: c, grade: '-', units: 3 }));
+  if (currentUser) {
+    setDoc(doc(db, 'users', currentUser.uid), { courses: window.courses }, { merge: true }).catch(() => {});
+  }
+  showMilestone('Courses loaded.');
+}
+
+// ── SAVE ──────────────────────────────────────────────
+window.saveUserData = function() {
+  if (!currentUser) return;
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(async () => {
+    try {
+      await setDoc(doc(db, 'users', currentUser.uid), { courses: window.courses, aspirations, weekProgress }, { merge: true });
+      const ind = document.getElementById('saveIndicator');
+      ind.classList.add('visible');
+      setTimeout(() => ind.classList.remove('visible'), 2000);
+    } catch(e) { console.error(e); }
+  }, 800);
+}
+
+// ── STATS ─────────────────────────────────────────────
+window.updateStats = function() {
+  const count = window.courses.length;
+  const graded = window.courses.filter(c => c.grade && c.grade !== '-').length;
+  document.getElementById('coursesCount').textContent = count + ' course' + (count !== 1 ? 's' : '');
+  document.getElementById('statCourses').textContent = count;
+  document.getElementById('statGraded').textContent = graded;
+  document.getElementById('emptyState').style.display = count === 0 ? 'block' : 'none';
+  let pts = 0, units = 0;
+  window.courses.forEach(c => {
+    const p = gradeToPoint(c.grade);
+    if (p !== null && c.units) { pts += p * Number(c.units); units += Number(c.units); }
+  });
+  document.getElementById('statCGPA').textContent = units > 0 ? (pts/units).toFixed(2) : '—';
+  const pct = count > 0 ? Math.round((graded/count)*100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+  checkAchievements(count, graded);
+}
+
+function gradeToPoint(g) {
+  return ({ A:5, B:4, C:3, D:2, E:1, F:0 })[g?.toUpperCase()] ?? null;
+}
+
+// ── ACHIEVEMENTS ──────────────────────────────────────
+const BADGES = [
+  { id:'first', icon:'📚', name:'First Course', desc:'Added your first course', check:(c,g)=>c>=1 },
+  { id:'five',  icon:'🎯', name:'Getting Serious', desc:'Added 5+ courses', check:(c,g)=>c>=5 },
+  { id:'grade1',icon:'✅', name:'First Grade', desc:'Recorded your first grade', check:(c,g)=>g>=1 },
+  { id:'full',  icon:'🏆', name:'Full Semester', desc:'All courses graded', check:(c,g)=>c>0&&c===g },
+];
+function checkAchievements(c, g) {
+  const list = document.getElementById('achievementsList');
+  const earned = BADGES.filter(b => b.check(c, g));
+  if (!earned.length) { list.innerHTML = '<div style="font-size:12px;color:var(--text3);">Complete courses to earn badges.</div>'; return; }
+  earned.forEach(b => { if (!earnedBadges.has(b.id)) { earnedBadges.add(b.id); showMilestone(`${b.icon} ${b.name} unlocked!`); } });
+  list.innerHTML = earned.map(b => `
+    <div class="achievement-badge">
+      <div class="badge-icon">${b.icon}</div>
+      <div><div class="badge-name">${b.name}</div><div class="badge-desc">${b.desc}</div></div>
+    </div>`).join('');
+}
+
+// ── COURSE GRID ───────────────────────────────────────
+window.displayCourses = function() {
+  const ul = document.getElementById('courses');
+  ul.innerHTML = '';
+  window.courses.forEach((c, idx) => {
+    const isActive = activeCourseId === idx;
+    const li = document.createElement('li');
+    li.className = 'course-item' + (isActive ? ' active-card' : '');
+    const parts = c.course.match(/^([A-Z]{2,4}\s*\d{3}[A-Z]?)\s*(.*)$/);
+    const code = parts ? parts[1] : c.course;
+    const name = parts && parts[2] ? parts[2] : '';
+    const grade = c.grade && c.grade !== '-' ? c.grade.toUpperCase() : null;
+    const weeks = weekProgress[c.course] || [];
+    const weekPct = Math.round((weeks.length / 12) * 100);
+
+    // Topic-based progress from learn.html (overrides old week chips if available)
+    let progressPct = weekPct;
+    let progressColor = 'var(--text)';
+    try {
+      const stored = localStorage.getItem('unify-topic-' + c.course);
+      if (stored) {
+        const tp = JSON.parse(stored);
+        const curriculum = generateWeekStructure(code);
+        const total = curriculum.reduce((a, w) => a + w.subtopics.length, 0);
+        const done = Object.values(tp).filter(t => t.done).length;
+        if (total > 0) {
+          progressPct = Math.round((done / total) * 100);
+          progressColor = progressPct >= 70 ? 'var(--green)' : progressPct >= 30 ? 'var(--yellow)' : 'var(--text)';
+        }
+      }
+    } catch(e) {}
+
+    li.innerHTML = `
+      <div class="course-card-inner">
+        <div class="course-accent accent-${idx % 6}"></div>
+        <div class="course-card-code">${code}</div>
+        ${name ? `<div class="course-card-name">${name}</div>` : ''}
+        <div class="course-progress-wrap">
+          <div class="course-progress-track">
+            <div class="course-progress-fill" style="width:${progressPct}%;background:${progressColor};"></div>
+          </div>
+          <span class="course-progress-pct">${progressPct}%</span>
+        </div>
+        <div class="course-card-footer">
+          <div class="course-card-grade ${grade ? 'grade-'+grade : 'grade-none'}">${grade || '—'}</div>
+          <div class="course-card-units">${c.units}u</div>
+        </div>
+        <div class="course-card-tap">${isActive ? '✕ close' : 'tap for resources'}</div>
+      </div>`;
+    li.addEventListener('click', () => {
+      if (activeCourseId === idx) { closeResourcePanel(); }
+      else { activeCourseId = idx; openResourcePanel(c.course); displayCourses(); }
+    });
+    ul.appendChild(li);
+  });
+  updateStats();
+}
+
+// ── RESOURCE PANEL ────────────────────────────────────
+const RES_ICONS = { "Course Outline":"📄","Lecture Material PDF":"📚","Video Courses":"🎬","Past Questions":"📝","Continuous Assessment":"✅" };
+
+window.closeResourcePanel = function() {
+  document.getElementById('resourcePanel')?.classList.remove('open');
+  activeCourseId = null;
+  document.querySelectorAll('.course-item').forEach(el => el.classList.remove('active-card'));
+};
+
+window.openResourcePanel = function(courseName) {
+  const parts = courseName.match(/^([A-Z]{2,4}\s*\d{3}[A-Z]?)\s*(.*)$/);
+  const code = parts ? parts[1] : courseName;
+  const name = parts && parts[2] ? parts[2] : courseName;
+
+  document.getElementById('resourcePanelTitle').textContent = code + (name && name !== code ? ' — ' + name : '');
+  document.getElementById('resourcePanelMeta').textContent = (userProfile.level || '') + (userProfile.department ? ' · ' + userProfile.department : '');
+  document.getElementById('resourcePanel').classList.add('open');
+
+  const enc = encodeURIComponent(courseName);
+  document.getElementById('learnPageBtn').href = 'learn.html?course=' + enc + '&name=' + enc;
+
+  // Build week-topic accordion
+  buildWeekAccordion(courseName, code);
+}
+
+function buildWeekAccordion(courseName, code) {
+  const accordion = document.getElementById('weekAccordion');
+
+  // Get topic progress from localStorage
+  let topicProgress = {};
+  try {
+    const stored = localStorage.getItem('unify-topic-' + courseName);
+    if (stored) topicProgress = JSON.parse(stored);
+  } catch(e) {}
+
+  // Generate 12-week structure (matches learn.html logic)
+  const weeks = generateWeekStructure(code);
+
+  accordion.innerHTML = weeks.map((week, wi) => {
+    const topics = week.subtopics || [];
+    const doneCnt = topics.filter((_, ti) => topicProgress[`w${wi}_t${ti}`]?.done).length;
+    const isFirst = wi === 0;
+
+    const topicsHtml = topics.map((topic, ti) => {
+      const key = `w${wi}_t${ti}`;
+      const p = topicProgress[key];
+      const done = p?.done;
+      const conf = p?.confidence || 0;
+      const enc = encodeURIComponent(courseName);
+      const stars = conf > 0 ? '★'.repeat(conf) : '';
+      return `<a class="topic-row" href="learn.html?course=${enc}&name=${enc}&week=${wi}&topic=${ti}">
+        <div class="topic-check ${done ? 'done' : ''}">✓</div>
+        <span class="topic-name">${topic}</span>
+        ${stars ? `<span class="topic-conf">${stars}</span>` : ''}
+      </a>`;
+    }).join('');
+
+    return `<div class="week-acc-item">
+      <div class="week-acc-header ${isFirst ? 'open' : ''}" onclick="toggleWeekAcc(this)">
+        <span class="week-acc-num">Wk ${wi+1}</span>
+        <span class="week-acc-title">${week.title}</span>
+        <span class="week-acc-done">${doneCnt}/${topics.length}</span>
+        <span class="week-acc-check">▼</span>
+      </div>
+      <div class="week-acc-body ${isFirst ? 'open' : ''}">${topicsHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+window.toggleWeekAcc = function(header) {
+  const body = header.nextElementSibling;
+  const isOpen = header.classList.contains('open');
+  header.classList.toggle('open', !isOpen);
+  body.classList.toggle('open', !isOpen);
+}
+
+function generateWeekStructure(code) {
+  // Single source of truth — reads from courseContent.js
+  // generateCourseStubs() fills in any course not manually defined
+  if (window.generateCourseStubs) window.generateCourseStubs();
+  const entry = window.UNIFY_COURSE_CONTENT?.[code];
+  if (entry && entry.weeks) {
+    return entry.weeks.map(w => ({
+      title: w.topic,
+      subtopics: w.subtopics
+    }));
+  }
+  // Absolute fallback (should never reach here after stubs generated)
+  const topics = [
+    'Introduction & Fundamentals', 'Core Principles I', 'Core Principles II',
+    'Methods & Techniques I', 'Methods & Techniques II', 'Analysis & Problem Solving',
+    'Applications I', 'Applications II', 'Advanced Topics I',
+    'Advanced Topics II', 'Integration & Design', 'Revision & Past Questions'
+  ];
+  return topics.map(title => ({
+    title,
+    subtopics: [title + ' — Theory', title + ' — Practice']
+  }));
+}
+
+
+// ── COURSE ACTIONS ────────────────────────────────────
+window.switchSemester = function() {
+  const sem = document.getElementById('semester').value;
+  const data = window.coursesDatabase?.["Faculty of Engineering"]?.[userProfile.department]?.[userProfile.level]?.[sem];
+  if (!data) { alert('No courses found for this semester.'); return; }
+  window.courses = data.map(c => ({ course: c, grade: '-', units: 3 }));
+  activeCourseId = null; closeResourcePanel(); displayCourses(); saveUserData(); renderPlanner();
+}
+
+window.addCourse = function() {
+  const name = document.getElementById('courseInput').value.trim();
+  const grade = document.getElementById('gradeInput').value.toUpperCase().trim();
+  const units = parseInt(document.getElementById('unitsInput').value) || 3;
+  if (!name) { alert('Please enter a course code.'); return; }
+  window.courses.push({ course: name, grade: grade || '-', units });
+  displayCourses(); saveUserData();
+  ['courseInput','gradeInput','unitsInput'].forEach(id => document.getElementById(id).value = '');
+  if (window.courses.length === 1) showMilestone('📚 First course added!');
+}
+
+window.clearCourses = function() {
+  if (!window.courses.length || !confirm('Reset courses for this semester?')) return;
+  window.courses = [];
+  activeCourseId = null;
+  closeResourcePanel();
+  autoLoadCourses(userProfile.department, userProfile.level);
+  displayCourses();
+}
+
+// ── TOAST ─────────────────────────────────────────────
+window.showMilestone = function(msg) {
+  const t = document.getElementById('milestoneToast');
+  document.getElementById('milestoneText').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ── CAMPUS LIFE ─────────────────────────────────────────
+window.toggleTag = function(el, tag) {
+  document.querySelectorAll('.tag-pill').forEach(t => t.classList.remove('active'));
+  activeTag = activeTag === tag ? null : tag;
+  if (activeTag) el.classList.add('active');
+}
+
+// Feed tab state
+let feedTab = 'all';
+
+window.switchFeedTab = function(tab, btn) {
+  feedTab = tab;
+  document.querySelectorAll('.comm-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderUnifiedFeed();
+};
+
+// ── DATA ─────────────────────────────────────────────
+const samplePosts = [
+  { id:'s1', _type:'post', author:'Temi A.', dept:'Electronic & Computer Engineering', university:'LASU', tag:'Project', content:'Just finished building a soil moisture sensor with Arduino and GSM module — sends an SMS alert when crops need water.', likes:[], _ts: Date.now()/1000 - 1800 },
+  { id:'s2', _type:'post', author:'Kola B.', dept:'Mechanical Engineering', university:'LASU', tag:'Achievement', content:'Passed Heat Transfer with an A! The past questions on Unify genuinely helped. Check the resources tab for your courses.', likes:['x'], _ts: Date.now()/1000 - 5400 },
+  { id:'s3', _type:'post', author:'Amaka O.', dept:'Civil Engineering', university:'LASU', tag:'Idea', content:'Thinking about a structural analysis tool for design projects. Would anyone find that useful? Looking for collaborators.', likes:['x','y'], _ts: Date.now()/1000 - 90000 },
+];
+
+const sampleEvents = [
+  { id:'e1', _type:'event', title:'AI & Robotics Conference', category:'conference', badge:'Conference', date:'Saturday, Apr 26 · 10 AM', location:'Engineering Hall, LASU', desc:'A full-day deep-dive into AI, robotics, and embedded systems. Open to all engineering students.', organizer:'LASU Tech Club', link:'#', _ts: Date.now()/1000 - 3600 },
+  { id:'e2', _type:'event', title:'MTN Graduate Internship Info Session', category:'internship', badge:'Internship', date:'Tuesday, Apr 15 · 2 PM', location:'Virtual (Google Meet)', desc:'MTN Nigeria walks through their 2026 graduate trainee programme. Application tips, role overview, Q&A with HR.', organizer:'MTN Nigeria', link:'#', _ts: Date.now()/1000 - 7200 },
+  { id:'e3', _type:'event', title:'Build For Africa Hackathon', category:'hackathon', badge:'Hackathon', date:'May 2–4 · 3-Day Event', location:'Innovation Hub, LASU', desc:'72-hour hackathon. Teams of 3–5. Prizes worth ₦500,000.', organizer:'GDG LASU', link:'#', _ts: Date.now()/1000 - 86400 },
+  { id:'e4', _type:'event', title:'Public Speaking Night', category:'talk', badge:'Talk', date:'Friday, Apr 18 · 6 PM', location:'LT2, Main Campus', desc:'Open mic-style speaking night. 5 minutes each. Any topic. Perfect for building confidence.', organizer:'Unify Public Speaking Club', link:'#', _ts: Date.now()/1000 - 172800 },
+  { id:'e5', _type:'event', title:'Product Design Workshop', category:'workshop', badge:'Workshop', date:'Saturday, Apr 19 · 11 AM', location:'Computer Lab 3', desc:'Hands-on Figma workshop. Learn to design a mobile app from scratch. No experience needed.', organizer:'Design Circle LASU', link:'#', _ts: Date.now()/1000 - 259200 },
+];
+
+const sampleQuests = [
+  { id:'q1', _type:'quest', title:'Morning Hill Walk', category:'Fitness', icon:'🥾', date:'Saturday · 6:30 AM', location:'Engineering Gate', desc:'Easy 45-min walk around the campus hills. All levels welcome. Bring water.', participants:['Temi','Kola','Amaka','Sola'], _ts: Date.now()/1000 - 900 },
+  { id:'q2', _type:'quest', title:'Gym Day', category:'Fitness', icon:'💪', date:'Wednesday · 5 PM', location:'Campus Gym', desc:'Group workout session. Beginners welcome — we all start somewhere.', participants:['Bayo','Chidi'], _ts: Date.now()/1000 - 3600 },
+  { id:'q3', _type:'quest', title:'Night Bicycle Ride', category:'Adventure', icon:'🚴', date:'Friday · 7 PM', location:'Main Campus Road', desc:'Chill evening ride around campus. Bring your bike or borrow one from a friend.', participants:['Ife','Dami','Kunle'], _ts: Date.now()/1000 - 86400 },
+  { id:'q4', _type:'quest', title:'Campus Picnic', category:'Social', icon:'🧺', date:'Sunday · 4 PM', location:'Faculty Garden', desc:'Bring food, bring friends. Just good vibes and a break from the books.', participants:['Tobi','Ngozi','Ahmed','Precious','Emeka'], _ts: Date.now()/1000 - 172800 },
+  { id:'q5', _type:'quest', title:'Open Mic Night', category:'Arts', icon:'🎤', date:'Sunday · 6 PM', location:'Lecture Theatre 1', desc:'Share a song, a poem, a spoken word, or just come watch. No judgment zone.', participants:['Yemi','Sade'], _ts: Date.now()/1000 - 259200 },
+];
+
+let customEvents = [], customQuests = [];
+const joinedQuests = new Set();
+
+// ── LOAD FEED FROM FIREBASE ──────────────────────────
+async function loadFeed() {
+  try {
+    const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(20));
+    const snap = await getDocs(q);
+    feedPosts = snap.docs.map(d => ({ _type:'post', id: d.id, ...d.data(), _ts: d.data().createdAt?.seconds || Date.now()/1000 }));
+  } catch(e) { feedPosts = [...samplePosts]; }
+  if (!feedPosts.length) feedPosts = [...samplePosts];
+  renderUnifiedFeed();
+}
+
+// ── UNIFIED FEED RENDERER ────────────────────────────
+function getAllItems() {
+  const posts = feedPosts.length ? feedPosts : samplePosts;
+  const events = [...customEvents, ...sampleEvents];
+  const quests = [...customQuests, ...sampleQuests];
+  const all = [...posts, ...events, ...quests].sort((a,b) => b._ts - a._ts);
+  if (feedTab === 'all') return all;
+  if (feedTab === 'posts') return all.filter(i => i._type === 'post');
+  if (feedTab === 'events') return all.filter(i => i._type === 'event');
+  if (feedTab === 'quests') return all.filter(i => i._type === 'quest');
+  return all;
+}
+
+function timeAgo(ts) {
+  const s = Math.floor(Date.now()/1000 - ts);
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s/60) + 'm ago';
+  if (s < 86400) return Math.floor(s/3600) + 'h ago';
+  return Math.floor(s/86400) + 'd ago';
+}
+
+function renderUnifiedFeed() {
+  const container = document.getElementById('unifiedFeed');
+  const items = getAllItems();
+  if (!items.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">✨</div><p class="empty-text">Nothing here yet. Post something!</p></div>';
+    return;
+  }
+  container.innerHTML = items.map(item => {
+    if (item._type === 'post') return renderPostCard(item);
+    if (item._type === 'event') return renderEventCard(item);
+    if (item._type === 'quest') return renderQuestCard(item);
+    return '';
+  }).join('');
+}
+
+// ── POST CARD ────────────────────────────────────────
+// posts store: { id, _type, author, uid, dept, university, tag, content, imageDataUrl, likes[], comments[], _ts }
+function renderPostCard(p) {
+  const liked = p.likes?.includes(currentUser?.uid);
+  const initials = sanitise((p.author||'U').split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase());
+  const commentCount = p.comments?.length || 0;
+
+  const commentsHTML = (p._commentsOpen && commentCount > 0) ? `
+    <div class="comment-list">
+      ${(p.comments||[]).map(cm => `
+        <div class="comment">
+          <div class="comment-av">${sanitise((cm.author||'?')[0].toUpperCase())}</div>
+          <div class="comment-bubble">
+            <div class="comment-author">${sanitise(cm.author)}</div>
+            <div class="comment-text">${sanitise(cm.text)}</div>
+          </div>
+        </div>`).join('')}
+    </div>` : '';
+
+  return `
+    <div class="post-card" id="pc-${p.id}">
+      <div class="post-body">
+        <div class="post-meta">
+          <div class="post-avatar">${initials}</div>
+          <div>
+            <div class="post-author-name">${sanitise(p.author)||'Anonymous'}</div>
+            <div class="post-author-info">${[sanitise(p.dept), sanitise(p.university)].filter(Boolean).join(' · ')}</div>
+          </div>
+          <div class="post-time">${timeAgo(p._ts)}</div>
+        </div>
+        ${p.content ? `<div class="post-content">${sanitise(p.content)}</div>` : ''}
+        ${p.tag ? `<span class="post-tag-badge">${sanitise(p.tag)}</span>` : ''}
+      </div>
+      ${p.imageDataUrl ? `<img class="post-img" src="${p.imageDataUrl}" alt="">` : ''}
+      <div class="post-actions">
+        <button class="post-action ${liked?'liked':''}" onclick="likePost('${p.id}')">
+          ${liked?'♥':'♡'} ${p.likes?.length||0}
+        </button>
+        <button class="post-action" onclick="toggleComments('${p.id}')">
+          ${commentCount > 0 ? commentCount + ' comment' + (commentCount===1?'':'s') : 'Comment'}
+        </button>
+      </div>
+      <div class="comments-section" id="cs-${p.id}" style="${p._commentsOpen?'':'display:none'}">
+        ${commentsHTML}
+        <div class="comment-composer">
+          <div class="comment-av">${(currentUser?.displayName||'U')[0].toUpperCase()}</div>
+          <input class="comment-input" id="ci-${p.id}" placeholder="Add a comment…" onkeydown="if(event.key==='Enter')addComment('${p.id}')">
+          <button class="comment-send" onclick="addComment('${p.id}')">Post</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── COMMENT LOGIC ────────────────────────────────────
+function renderEventCard(e) {
+  return `
+    <div class="event-card">
+      <div class="event-card-inner">
+        <div class="event-accent ${e.category}"></div>
+        <div class="event-body">
+          <div class="event-top">
+            <div>
+              <div class="event-category">${e.badge}</div>
+              <div class="event-title">${sanitise(e.title)}</div>
+            </div>
+            <span class="event-badge ${e.category}">${e.badge}</span>
+          </div>
+          <div class="event-meta">
+            <span>${e.date}</span>
+            <span>${e.location}</span>
+          </div>
+          <div class="event-desc">${sanitise(e.desc)}</div>
+          <div class="event-footer">
+            <span class="event-organizer">Posted by ${e.organizer}</span>
+            <button class="event-register-btn" onclick="showMilestone('Opening registration…')">Register →</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderQuestCard(q) {
+  const joined = joinedQuests.has(q.id);
+  const avatars = q.participants.slice(0,4).map((name,i) =>
+    `<div class="quest-av" style="background:${['#4ade80','#60a5fa','#f59e0b','#a78bfa'][i%4]};color:#0a0a0a">${name[0]}</div>`
+  ).join('');
+  return `
+    <div class="quest-card">
+      <div class="quest-top">
+        <div>
+          <div class="quest-category">${sanitise(q.category)} · Side Quest</div>
+          <div class="quest-title">${sanitise(q.title)}</div>
+        </div>
+      </div>
+      <div class="quest-meta">
+        <span>${q.date}</span>
+        <span>${q.location}</span>
+      </div>
+      ${q.desc ? `<div class="quest-desc">${sanitise(q.desc)}</div>` : ''}
+      <div class="quest-footer">
+        <div class="quest-participants">
+          <div class="quest-avatars">${avatars}</div>
+          <span class="quest-count">${q.participants.length} going</span>
+        </div>
+        <button class="quest-join-btn ${joined ? 'joined' : ''}" onclick="joinQuest('${q.id}')">
+          ${joined ? 'Joined' : 'Join Quest'}
+        </button>
+      </div>
+    </div>`;
+}
+
+window.toggleComments = function(id) {
+  const post = feedPosts.find(p => p.id === id);
+  if (!post) return;
+  post._commentsOpen = !post._commentsOpen;
+  renderUnifiedFeed();
+  if (post._commentsOpen) {
+    setTimeout(() => document.getElementById('ci-'+id)?.focus(), 50);
+  }
+};
+
+window.addComment = async function(id) {
+  const input = document.getElementById('ci-'+id);
+  const text = input?.value.trim();
+  if (!text || !currentUser) return;
+  if (!rateLimit('comment-' + currentUser.uid, 10, 60000)) {
+    showMilestone('Slow down — max 10 comments per minute.');
+    return;
+  }
+  const name = currentUser.displayName?.split(' ')[0] || currentUser.email?.split('@')[0] || 'Student';
+  const post = feedPosts.find(p => p.id === id);
+  if (!post) return;
+  if (!post.comments) post.comments = [];
+  const cm = { author: name, text, ts: Date.now()/1000 };
+  post.comments.push(cm);
+  post._commentsOpen = true;
+  if (!id.startsWith('local_') && !id.startsWith('s')) {
+    try { await updateDoc(doc(db,'posts',id), { comments: arrayUnion(cm) }); } catch(e) {}
+  }
+  // Save post to user profile posts list
+  savePostToProfile(post);
+  renderUnifiedFeed();
+};
+
+function savePostToProfile(post) {
+  if (!currentUser) return;
+  try {
+    const key = 'unify-myposts-' + currentUser.uid;
+    const existing = JSON.parse(localStorage.getItem(key)||'[]');
+    const idx = existing.findIndex(p => p.id === post.id);
+    if (idx > -1) existing[idx] = post;
+    else existing.unshift(post);
+    localStorage.setItem(key, JSON.stringify(existing.slice(0,50)));
+  } catch(e) {}
+}
+
+window.likePost = async function(id) {
+  const post = feedPosts.find(p => p.id === id);
+  if (!post || !currentUser) return;
+  const uid = currentUser.uid;
+  const liked = post.likes?.includes(uid);
+  post.likes = liked ? post.likes.filter(x=>x!==uid) : [...(post.likes||[]), uid];
+  if (!id.startsWith('local_') && !id.startsWith('s')) {
+    try { await updateDoc(doc(db,'posts',id), { likes: liked ? arrayRemove(uid) : arrayUnion(uid) }); } catch(e){}
+  }
+  renderUnifiedFeed();
+};
+
+// ── POST SUBMIT + IMAGE ──────────────────────────────
+let pendingImageDataUrl = null;
+
+window.handleImageSelect = function(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    pendingImageDataUrl = ev.target.result;
+    const preview = document.getElementById('imgPreview');
+    const img = document.getElementById('previewImg');
+    if (preview && img) { img.src = pendingImageDataUrl; preview.style.display = 'block'; }
+  };
+  reader.readAsDataURL(file);
+};
+
+window.removeImage = function() {
+  pendingImageDataUrl = null;
+  const preview = document.getElementById('imgPreview');
+  if (preview) preview.style.display = 'none';
+  const input = document.getElementById('imgUpload');
+  if (input) input.value = '';
+};
+
+window.submitPost = async function() {
+  const content = document.getElementById('postInput').value.trim();
+  if (!content && !pendingImageDataUrl) return;
+  if (!rateLimit('post-' + (currentUser?.uid||'anon'), 5, 60000)) {
+    showMilestone('Slow down — max 5 posts per minute.');
+    return;
+  }
+  const btn = document.getElementById('postBtn');
+  btn.disabled = true; btn.textContent = 'Posting...';
+  try {
+    const name = currentUser?.displayName?.trim().split(/\s+/)[0] || currentUser?.email?.split('@')[0] || 'Student';
+    const postData = {
+      _type: 'post',
+      author: name,
+      uid: currentUser?.uid,
+      dept: userProfile.department||'',
+      university: userProfile.university||'',
+      tag: activeTag||null,
+      content,
+      imageDataUrl: pendingImageDataUrl || null,
+      likes: [],
+      comments: [],
+      _ts: Date.now()/1000
+    };
+    let newPost;
+    try {
+      const firestoreData = { ...postData, createdAt: new Date() };
+      if (pendingImageDataUrl && pendingImageDataUrl.length > 500000) delete firestoreData.imageDataUrl;
+      const ref = await addDoc(collection(db, 'posts'), firestoreData);
+      newPost = { id: ref.id, ...postData };
+    } catch(e) {
+      newPost = { id: 'local_'+Date.now(), ...postData };
+    }
+    feedPosts.unshift(newPost);
+    savePostToProfile(newPost);
+    document.getElementById('postInput').value = '';
+    document.querySelectorAll('.tag-pill').forEach(t => t.classList.remove('active'));
+    activeTag = null;
+    removeImage();
+    renderUnifiedFeed();
+    showMilestone('Post is live.');
+  } finally { btn.disabled = false; btn.textContent = 'Post'; }
+};
+
+// ── EVENTS ───────────────────────────────────────────
+window.openEventForm = function() {
+  document.getElementById('eventForm').classList.add('open');
+  document.getElementById('questForm').classList.remove('open');
+};
+window.closeEventForm = function() {
+  document.getElementById('eventForm').classList.remove('open');
+};
+
+window.submitEvent = function() {
+  const title = document.getElementById('evTitle').value.trim();
+  const date = document.getElementById('evDate').value.trim();
+  const location = document.getElementById('evLocation').value.trim();
+  const desc = document.getElementById('evDesc').value.trim();
+  const category = document.getElementById('evCategory').value;
+  const link = document.getElementById('evLink').value.trim();
+  const organizer = document.getElementById('evOrganizer').value.trim();
+  if (!title || !date || !location) { showMilestone('Fill in title, date and location'); return; }
+  const badgeMap = { conference:'Conference', workshop:'Workshop', hackathon:'Hackathon', talk:'Talk', internship:'Internship', social:'Social' };
+  customEvents.unshift({ _type:'event', id:'ev_'+Date.now(), title, date, location, desc: desc||'Come through!', category, badge: badgeMap[category]||category, link: link||'#', organizer: organizer||'A student', _ts: Date.now()/1000 });
+  renderUnifiedFeed();
+  closeEventForm();
+  ['evTitle','evDate','evLocation','evDesc','evLink','evOrganizer'].forEach(id => { document.getElementById(id).value = ''; });
+  showMilestone('📅 Event posted!');
+};
+
+// ── QUESTS ───────────────────────────────────────────
+window.openQuestForm = function() {
+  document.getElementById('questForm').classList.add('open');
+  document.getElementById('eventForm').classList.remove('open');
+};
+window.closeQuestForm = function() {
+  document.getElementById('questForm').classList.remove('open');
+};
+
+window.submitQuest = function() {
+  const title = document.getElementById('qTitle').value.trim();
+  const date = document.getElementById('qDate').value.trim();
+  const location = document.getElementById('qLocation').value.trim();
+  const desc = document.getElementById('qDesc').value.trim();
+  if (!title || !date || !location) { showMilestone('Fill in name, time and meet point'); return; }
+  const icons = { walk:'🥾', gym:'💪', bike:'🚴', ride:'🚴', picnic:'🧺', swim:'🏊', run:'🏃', jog:'🏃', hike:'⛰️', night:'🌙', music:'🎵', art:'🎨', game:'🎮' };
+  const icon = Object.entries(icons).find(([k]) => title.toLowerCase().includes(k))?.[1] || '⚡';
+  const name = currentUser?.displayName?.split(' ')[0] || 'You';
+  customQuests.unshift({ _type:'quest', id:'q_'+Date.now(), title, category:'Quest', icon, date, location, desc: desc||'', participants:[name], _ts: Date.now()/1000 });
+  renderUnifiedFeed();
+  closeQuestForm();
+  ['qTitle','qDate','qLocation','qDesc'].forEach(id => { document.getElementById(id).value = ''; });
+  showMilestone('⚡ Quest created!');
+};
+
+window.joinQuest = function(id) {
+  if (joinedQuests.has(id)) {
+    joinedQuests.delete(id);
+  } else {
+    joinedQuests.add(id);
+    showMilestone("⚡ You're in!");
+  }
+  renderUnifiedFeed();
+};
+
+// ── INIT ─────────────────────────────────────────────
+renderUnifiedFeed();
+
+// ── STREAK + REVIEW SYSTEM ────────────────────────────
+const REVIEW_QUESTIONS = [
+  {
+    topic: 'Laplace Transform',
+    course: 'ECE 301',
+    question: 'What does the Laplace Transform do to a differential equation?',
+    options: [
+      'Makes it harder to solve',
+      'Converts it into an algebraic equation',
+      'Removes all variables',
+      'Converts it to a graph'
+    ],
+    answer: 1,
+    explanation: 'Exactly right. Laplace acts like a translator — it turns the messy differential equation into a simpler algebraic one you can solve normally, then translate back.'
+  },
+  {
+    topic: 'Superposition Theorem',
+    course: 'ECE 301',
+    question: 'When using Superposition, what do you do with sources you are NOT currently analysing?',
+    options: [
+      'Leave them as they are',
+      'Double their value',
+      'Replace voltage sources with short circuits, current sources with open circuits',
+      'Remove them from the circuit entirely'
+    ],
+    answer: 2,
+    explanation: 'Correct! You deactivate the other sources — voltage sources become wires (short circuit), current sources become gaps (open circuit). Then you analyse one source at a time.'
+  },
+  {
+    topic: 'Fourier Series',
+    course: 'ECE 301',
+    question: 'What kind of signal can be represented using a Fourier Series?',
+    options: [
+      'Any random signal',
+      'Only DC signals',
+      'Periodic signals',
+      'Only sine waves'
+    ],
+    answer: 2,
+    explanation: 'Fourier Series works on periodic signals — signals that repeat. It breaks them down into a sum of simple sine and cosine waves.'
+  },
+  {
+    topic: "Thevenin's Theorem",
+    course: 'ECE 301',
+    question: "What does Thevenin's theorem let you replace a complex circuit with?",
+    options: [
+      'A single resistor',
+      'A voltage source and series resistor',
+      'A current source and parallel resistor',
+      'An open circuit'
+    ],
+    answer: 1,
+    explanation: "Right! Thevenin says any linear circuit can be simplified to just one voltage source (Vth) in series with one resistor (Rth). Makes analysis so much easier."
+  },
+  {
+    topic: 'Network Analysis',
+    course: 'ECE 301',
+    question: 'In mesh analysis, what do you assign to each independent loop?',
+    options: [
+      'A node voltage',
+      'A mesh current',
+      'A power value',
+      'A frequency'
+    ],
+    answer: 1,
+    explanation: 'Mesh analysis assigns a loop current (mesh current) to each independent loop. You then apply KVL around each mesh to build equations and solve.'
+  },
+];
+
+let streakData = { count: 0, lastStudied: null, todayDone: false, weekDays: [] };
+let currentQuestion = null;
+let reviewAnswered = false;
+
+function initStreak() {
+  const saved = localStorage.getItem('unify-streak');
+  if (saved) streakData = JSON.parse(saved);
+
+  // Check if today already done
+  const today = new Date().toDateString();
+  streakData.todayDone = streakData.lastStudied === today;
+
+  // Check if streak broken (missed yesterday)
+  if (streakData.lastStudied) {
+    const last = new Date(streakData.lastStudied);
+    const now = new Date();
+    const diffDays = Math.floor((now - last) / 86400000);
+    if (diffDays > 1) {
+      streakData.count = 0;
+      streakData.weekDays = [];
+      saveStreak();
+    }
+  }
+
+  renderStreak();
+}
+
+function saveStreak() {
+  localStorage.setItem('unify-streak', JSON.stringify(streakData));
+}
+
+function renderStreak() {
+  const nudge = document.getElementById('streakNudge');
+  const fire = document.getElementById('streakFire');
+  const daysVal = document.getElementById('streakDaysVal');
+  const message = document.getElementById('streakMessage');
+  const sub = document.getElementById('streakSub');
+  const btn = document.getElementById('streakActionBtn');
+  const dots = document.getElementById('streakDots');
+
+  daysVal.textContent = streakData.count;
+
+  // Week dots (last 7 days)
+  const week = streakData.weekDays || [];
+  dots.innerHTML = Array.from({length: 7}, (_, i) => {
+    const cls = i < week.length ? 'done' : (i === week.length ? 'active' : '');
+    return '<div class="streak-dot ' + cls + '"></div>';
+  }).join('');
+
+  if (streakData.todayDone) {
+    nudge.classList.add('completed');
+    nudge.style.cursor = 'default';
+    fire.textContent = '✅';
+    message.textContent = 'Done for today!';
+    sub.textContent = streakData.count > 0
+      ? streakData.count + '-day streak. Come back tomorrow to keep it going. 💪'
+      : 'You studied today. Come back tomorrow!';
+    btn.textContent = 'See you tomorrow';
+    btn.style.background = '#4ade80';
+    btn.style.color = '#0a0a0a';
+  } else {
+    nudge.classList.remove('completed');
+    fire.textContent = streakData.count >= 7 ? '🔥' : streakData.count >= 3 ? '⚡' : '💡';
+
+    const hr = new Date().getHours();
+    const greet = hr < 12 ? 'Morning check-in' : hr < 17 ? 'Afternoon nudge' : 'Evening review';
+
+    if (streakData.count === 0) {
+      message.textContent = 'Start your streak today 🚀';
+      sub.textContent = "One question. 2 minutes. That's all it takes.";
+    } else if (streakData.count === 1) {
+      message.textContent = 'Day 2 — keep it going!';
+      sub.textContent = 'You showed up yesterday. Show up today.';
+    } else {
+      message.textContent = greet + ' — ' + streakData.count + ' days strong 🔥';
+      sub.textContent = 'Quick question from your last topic. 2 minutes max.';
+    }
+    btn.textContent = "Let's go →";
+    btn.style.background = '';
+    btn.style.color = '';
+  }
+}
+
+window.openReview = function() {
+  if (streakData.todayDone) return;
+  reviewAnswered = false;
+
+  // Pick a random question
+  currentQuestion = REVIEW_QUESTIONS[Math.floor(Math.random() * REVIEW_QUESTIONS.length)];
+
+  document.getElementById('reviewModalTopic').textContent = currentQuestion.topic;
+  document.getElementById('reviewModalCourse').textContent = currentQuestion.course;
+  document.getElementById('reviewQuestion').textContent = currentQuestion.question;
+  document.getElementById('reviewResult').classList.remove('show', 'win', 'lose');
+  document.getElementById('reviewDoneBtn').textContent = 'Done ✓';
+  document.getElementById('reviewDoneBtn').disabled = false;
+
+  const opts = document.getElementById('reviewOptions');
+  opts.innerHTML = currentQuestion.options.map((opt, i) =>
+    '<button class="review-option" onclick="answerQuestion(' + i + ')">' + opt + '</button>'
+  ).join('');
+
+  document.getElementById('reviewModalOverlay').classList.add('open');
+}
+
+window.answerQuestion = function(idx) {
+  if (reviewAnswered) return;
+  reviewAnswered = true;
+
+  const opts = document.querySelectorAll('.review-option');
+  const correct = currentQuestion.answer;
+  const isCorrect = idx === correct;
+
+  opts.forEach((opt, i) => {
+    if (i === correct) opt.classList.add('correct');
+    else if (i === idx && !isCorrect) opt.classList.add('wrong');
+    opt.style.pointerEvents = 'none';
+  });
+
+  const result = document.getElementById('reviewResult');
+  const title = document.getElementById('reviewResultTitle');
+  const body = document.getElementById('reviewResultBody');
+
+  result.classList.add('show');
+  if (isCorrect) {
+    result.classList.add('win');
+    title.textContent = '🔥 Correct!';
+    body.textContent = currentQuestion.explanation;
+    document.getElementById('reviewDoneBtn').textContent = 'Keep the streak! ✓';
+  } else {
+    result.classList.add('lose');
+    title.textContent = "😅 Not quite — here's why:";
+    body.textContent = currentQuestion.explanation;
+    document.getElementById('reviewDoneBtn').textContent = 'Got it ✓';
+  }
+}
+
+window.finishReview = function() {
+  const today = new Date().toDateString();
+  if (streakData.lastStudied !== today) {
+    streakData.count += 1;
+    streakData.weekDays = [...(streakData.weekDays || []).slice(-6), today];
+  }
+  streakData.lastStudied = today;
+  streakData.todayDone = true;
+  saveStreak();
+  renderStreak();
+  closeReview();
+  showMilestone('🔥 ' + streakData.count + '-day streak! Keep going.');
+}
+
+window.closeReview = function() {
+  document.getElementById('reviewModalOverlay').classList.remove('open');
+}
+
+window.closeReviewOnOverlay = function(e) {
+  if (e.target === document.getElementById('reviewModalOverlay')) closeReview();
+}
+
+// ── STUDY PLANNER ─────────────────────────────────────
+var plannerPrefs = JSON.parse(localStorage.getItem('unify-planner') || 'null');
+var plannerDoneToday = JSON.parse(localStorage.getItem('unify-planner-done-' + new Date().toDateString()) || '[]');
+
+const TIME_SLOTS = {
+  morning:   [['7:00 AM','8:00 AM'],['8:00 AM','9:00 AM'],['9:00 AM','10:00 AM']],
+  afternoon: [['2:00 PM','3:00 PM'],['3:00 PM','4:00 PM'],['4:00 PM','5:00 PM']],
+  night:     [['8:00 PM','9:00 PM'],['9:00 PM','10:00 PM'],['10:00 PM','11:00 PM']],
+};
+
+function renderPlanner() {
+  const sessions = document.getElementById('plannerSessions');
+  const empty = document.getElementById('plannerEmpty');
+  if (!plannerPrefs || !window.courses?.length) {
+    if (empty) empty.style.display = 'block'; return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  const { duration, sessionsPerDay, timeOfDay } = plannerPrefs;
+  const slots = TIME_SLOTS[timeOfDay] || TIME_SLOTS.afternoon;
+  const count = Math.min(parseInt(sessionsPerDay), slots.length, window.courses.length);
+
+  // Rotate courses each day so you don't study the same course every day
+  const dayIndex = new Date().getDate();
+  // Normalise to strings for sorting
+  const rotated = [...window.courses].sort((a,b) => {
+    const sa = typeof a === 'string' ? a : (a.course || '');
+    const sb = typeof b === 'string' ? b : (b.course || '');
+    return sa.localeCompare(sb);
+  });
+  const todayCourses = [];
+  for (let i = 0; i < count; i++) todayCourses.push(rotated[(dayIndex + i) % rotated.length]);
+
+  const durationLabel = duration >= 60
+    ? Math.floor(duration/60) + 'h' + (duration%60 ? (duration%60)+'m' : '')
+    : duration + ' min';
+
+  sessions.innerHTML = todayCourses.map((c, i) => {
+    const slot = slots[i];
+    const isDone = plannerDoneToday.includes(i);
+    const courseStr = typeof c === 'string' ? c : (c.course || c.name || c.code || 'Course');
+    // Try to split "ECE 301" into code + friendly name
+    const parts = courseStr.split(' ');
+    const codeDisplay = parts.slice(0,2).join(' ');
+    return `<div class="planner-session ${isDone ? 'done' : ''}" onclick="togglePlannerSession(${i}, this)">
+      <div class="planner-session-check">✅</div>
+      <div class="planner-session-time">${slot[0]} – ${slot[1]}</div>
+      <div class="planner-session-topic">${courseStr}</div>
+      <div class="planner-session-course">${codeDisplay}</div>
+      <span class="planner-session-duration">${durationLabel}</span>
+    </div>`;
+  }).join('');
+}
+
+window.togglePlannerSession = function(idx, el) {
+  if (plannerDoneToday.includes(idx)) {
+    plannerDoneToday = plannerDoneToday.filter(i => i !== idx);
+    el.classList.remove('done');
+  } else {
+    plannerDoneToday.push(idx);
+    el.classList.add('done');
+    const allCards = document.querySelectorAll('.planner-session');
+    if (plannerDoneToday.length === allCards.length) showMilestone('📚 All sessions done today! Incredible.');
+  }
+  localStorage.setItem('unify-planner-done-' + new Date().toDateString(), JSON.stringify(plannerDoneToday));
+}
+
+window.openPlannerSetup = function() {
+  const overlay = document.getElementById('plannerModalOverlay');
+  overlay.classList.add('open');
+  if (plannerPrefs) {
+    selectChipByVal('duration', plannerPrefs.duration);
+    selectChipByVal('sessions', plannerPrefs.sessionsPerDay);
+    selectChipByVal('time', plannerPrefs.timeOfDay);
+  }
+}
+window.closePlannerSetup = function() {
+  document.getElementById('plannerModalOverlay').classList.remove('open');
+}
+window.selectChip = function(el, group) {
+  document.querySelectorAll(`#${group}Chips .planner-chip`).forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function selectChipByVal(group, val) {
+  document.querySelectorAll(`#${group}Chips .planner-chip`).forEach(c => {
+    c.classList.toggle('selected', c.dataset.val == val);
+  });
+}
+window.savePlannerSetup = function() {
+  const duration = parseInt(document.querySelector('#durationChips .planner-chip.selected')?.dataset.val || '60');
+  const sessionsPerDay = parseInt(document.querySelector('#sessionsChips .planner-chip.selected')?.dataset.val || '2');
+  const timeOfDay = document.querySelector('#timeChips .planner-chip.selected')?.dataset.val || 'afternoon';
+  plannerPrefs = { duration, sessionsPerDay, timeOfDay };
+  localStorage.setItem('unify-planner', JSON.stringify(plannerPrefs));
+  closePlannerSetup();
+  renderPlanner();
+  showMilestone('📅 Study plan updated!');
+}
+
+// ── ASPIRATIONS ───────────────────────────────────────
+window.addAspiration = function() {
+  const input = document.getElementById('aspirationInput');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  aspirations.push(text); input.value = '';
+  renderAspirations(); saveUserData();
+  showMilestone('🎯 Aspiration added — go build it!');
+}
+
+window.removeAspiration = function(idx) {
+  aspirations.splice(idx, 1);
+  renderAspirations(); saveUserData();
+}
+
+function renderAspirations() {
+  const list = document.getElementById('aspirationList');
+  if (!list) return;
+  list.innerHTML = aspirations.length === 0
+    ? '<div style="font-size:13px;color:var(--text3);padding:8px 0;">No aspirations yet — add what you\'re working towards.</div>'
+    : aspirations.map((a, i) => `
+        <div class="aspiration-item">
+          <div class="aspiration-dot"></div>
+          <div class="aspiration-text">${a}</div>
+          <button class="aspiration-del" onclick="removeAspiration(${i})">×</button>
+        </div>`).join('');
+}
+</script>
+</body>
+</html>

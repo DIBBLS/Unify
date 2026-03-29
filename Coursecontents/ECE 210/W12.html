@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECE 210 — Week 12: Revision & Exam Prep | Unify</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--muted:#555;--muted2:#999;--accent:#4ade80;--accent-deep:#16a34a;--accent-bg:#dcfce7;--diagram-bg:#f8f7f3;--nav-h:60px}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--accent:#4ade80;--accent-deep:#4ade80;--accent-bg:#052e16;--diagram-bg:#1e1e1e}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:16px;transition:background .2s,color .2s}
+nav{position:sticky;top:0;z-index:100;height:var(--nav-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;gap:32px}
+.nav-logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--text);text-decoration:none;flex-shrink:0}
+.nav-links{display:flex;gap:4px;flex:1}
+.nav-links a{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:6px;border-bottom:2px solid transparent;transition:color .15s}
+.nav-links a:hover{color:var(--text)}.nav-links a.active{color:var(--accent-deep);border-bottom-color:var(--accent)}
+.theme-toggle{margin-left:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;flex-shrink:0}
+.theme-toggle:hover{color:var(--text);border-color:var(--muted)}
+.week-page{max-width:900px;margin:0 auto;padding:40px 48px 80px}
+.back-bar{display:flex;align-items:center;gap:12px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.back-btn:hover{color:var(--text);border-color:var(--text)}
+.week-nav{display:flex;gap:8px;margin-left:auto}
+.wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.wnav-btn:hover{color:var(--text);border-color:var(--text)}.wnav-btn.disabled{opacity:.35;pointer-events:none}
+.week-block{border-radius:14px;border:1px solid var(--border);overflow:hidden;background:var(--surface)}
+.week-header{background:var(--text);color:var(--bg);padding:24px 32px;display:flex;align-items:baseline;gap:20px}
+[data-theme="dark"] .week-header{background:var(--surface2);border-bottom:1px solid var(--border);color:var(--text)}
+.week-num{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;opacity:.55;white-space:nowrap}
+.week-title{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;font-style:italic;color:inherit}
+[data-theme="dark"] .week-title{color:var(--text)}
+.week-body{padding:32px}
+.week-summary{font-size:15px;color:var(--muted);line-height:1.75;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--border)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:28px}
+.tag{font-size:11px;font-weight:500;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:3px 12px}
+.topic-block{border:1px solid var(--border);border-radius:12px;margin-bottom:28px;overflow:hidden}
+.topic-header{background:var(--surface2);padding:16px 24px;border-bottom:1px solid var(--border)}
+.topic-num{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:3px}
+.topic-title{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;color:var(--text)}
+.topic-body{padding:24px}.topic-body p{font-size:15px;line-height:1.8;margin-bottom:16px;color:var(--text)}
+.formula-block{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:18px 22px;margin:18px 0}
+.formula-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:10px}
+.formula-eq{font-family:'Playfair Display',serif;font-size:15px;font-style:italic;color:var(--text);margin-bottom:4px;line-height:1.7}
+.formula-vars{font-size:12px;color:var(--muted2);line-height:1.7;margin-top:8px}
+.mistake-box{background:#fff5f5;border-left:3px solid #fca5a5;border-radius:0 10px 10px 0;padding:16px 20px;margin:16px 0;font-size:14px;line-height:1.75;color:var(--text)}
+[data-theme="dark"] .mistake-box{background:#1a0505;border-left-color:#7f1d1d}
+.mistake-box .box-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#dc2626;margin-bottom:8px}
+.exam-def{background:var(--surface2);border:1.5px solid var(--accent);border-radius:10px;padding:16px 20px;margin:18px 0}
+.exam-def .def-label{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px}
+.exam-def .def-text{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text);line-height:1.9}
+.past-q{display:inline-block;font-size:10px;font-weight:600;background:var(--accent-bg);color:var(--accent-deep);border:1px solid var(--accent);border-radius:4px;padding:1px 7px;margin-right:6px;vertical-align:middle;letter-spacing:.04em}
+.sec-eye{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2)}
+.pq-list{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.pq-item{font-size:14px;line-height:1.6;color:var(--text);padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface)}
+footer{border-top:1px solid var(--border);padding:32px 48px;text-align:center;font-size:13px;color:var(--muted2);max-width:900px;margin:0 auto}
+footer strong{color:var(--muted);font-weight:500}
+@media(max-width:700px){nav{padding:0 16px;gap:16px}.nav-links{display:none}.week-page{padding:20px 16px 60px}.week-body{padding:20px}.topic-body{padding:18px}footer{padding:24px 20px}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="../../dashboard.html" class="nav-logo">Unify</a>
+  <div class="nav-links">
+    <a href="../../dashboard.html">Dashboard</a><a href="../../careers.html">Career</a>
+    <a href="../../profile.html">Profile</a><a href="#" class="active">ECE 210</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">☾ Dark</button>
+</nav>
+<div class="week-page">
+  <div class="back-bar">
+    <a href="../../learn.html?course=ECE+210&name=ECE+210" class="back-btn">← Back to ECE 210</a>
+    <div class="week-nav"><a href="W11.html" class="wnav-btn">← Prev</a><a class="wnav-btn disabled">Next →</a></div>
+  </div>
+  <div class="week-block">
+    <div class="week-header">
+      <span class="week-num">Week 12 of 12</span>
+      <span class="week-title">Revision & Exam Prep</span>
+    </div>
+    <div class="week-body">
+      <p class="week-summary">Every formula, every common mistake, every past question pattern from ECE 210 in one place. Magnetic circuits → DC machines → transformers → AC circuits → induction machines → rectifiers. Use this as your final-week checklist.</p>
+      <div class="tags"><span class="tag">Formula Sheet</span><span class="tag">Past Questions</span><span class="tag">Common Mistakes</span><span class="tag">Exam Strategy</span></div>
+
+      <div class="topic-block">
+        <div class="topic-header"><div class="topic-num">Section A</div><div class="topic-title">Complete Formula Sheet — Weeks 1–11</div></div>
+        <div class="topic-body">
+          <div class="formula-block"><div class="formula-label">Weeks 1–2 · Magnetic Circuits</div>
+            <div class="formula-eq">B = φ/A &nbsp;&nbsp; (flux density, T)</div>
+            <div class="formula-eq">H = NI/L &nbsp;&nbsp; (magnetising force, A/m)</div>
+            <div class="formula-eq">B = μ₀μᵣH &nbsp;&nbsp; (B-H relationship)</div>
+            <div class="formula-eq">ℛ = L/(μ₀μᵣA) &nbsp;&nbsp; (reluctance, A·t/Wb)</div>
+            <div class="formula-eq">F = φℛ = NI &nbsp;&nbsp; (Ohm's Law for magnetics)</div>
+            <div class="formula-vars">Air gap: H_gap = B/μ₀ = 7.96×10⁵ × B &nbsp;·&nbsp; μ₀ = 4π×10⁻⁷ H/m</div>
+          </div>
+          <div class="formula-block"><div class="formula-label">Weeks 3–6 · DC Machines</div>
+            <div class="formula-eq">E = (φZNP) / (60A) &nbsp;&nbsp; (EMF equation)</div>
+            <div class="formula-eq">T = (φZI_a × P) / (2πA) &nbsp;&nbsp; (torque)</div>
+            <div class="formula-eq">Motor: V = E + I_aR_a &nbsp;&nbsp; Generator: V = E − I_aR_a</div>
+            <div class="formula-eq">N ∝ (V − I_aR_a) / φ &nbsp;&nbsp; (speed equation)</div>
+            <div class="formula-vars">Z = armature conductors · P = poles · A = parallel paths · N = speed (rpm)<br>Lap winding: A = P &nbsp;·&nbsp; Wave winding: A = 2</div>
+          </div>
+          <div class="formula-block"><div class="formula-label">Weeks 7–8 · Transformers</div>
+            <div class="formula-eq">k = N₁/N₂ = V₁/V₂ = I₂/I₁ &nbsp;&nbsp; (turns ratio)</div>
+            <div class="formula-eq">Z₂' = k²Z₂ &nbsp;&nbsp; (refer secondary → primary)</div>
+            <div class="formula-eq">Z₁' = Z₁/k² &nbsp;&nbsp; (refer primary → secondary)</div>
+            <div class="formula-eq">η = V₂I₂cosφ / (V₂I₂cosφ + W_i + I₂²R_eq)</div>
+            <div class="formula-eq">Max η when W_i = I²R_eq &nbsp;&nbsp; x_maxη = √(W_i / W_cu(FL))</div>
+            <div class="formula-vars">OC test → iron loss W_i (LV side excited, HV open)<br>SC test → copper loss W_cu (HV side excited, LV shorted)</div>
+          </div>
+          <div class="formula-block"><div class="formula-label">Week 9 · AC Circuits</div>
+            <div class="formula-eq">V_rms = V_m/√2 = 0.707 V_m &nbsp;&nbsp;&nbsp; V_avg = 0.637 V_m</div>
+            <div class="formula-eq">X_L = 2πfL &nbsp;&nbsp; X_C = 1/(2πfC) &nbsp;&nbsp; Z = √(R²+X²)</div>
+            <div class="formula-eq">cosφ = R/Z &nbsp;&nbsp; P = VIcosφ &nbsp;&nbsp; Q = VIsinφ &nbsp;&nbsp; S = VI</div>
+            <div class="formula-vars">Phasors: V = √(V_R²+V_L²) — do NOT add arithmetically</div>
+          </div>
+          <div class="formula-block"><div class="formula-label">Week 10 · Induction Motors</div>
+            <div class="formula-eq">Ns = 120f/P &nbsp;&nbsp; s = (Ns−N)/Ns &nbsp;&nbsp; N = Ns(1−s)</div>
+            <div class="formula-eq">f_r = s×f &nbsp;&nbsp; Rotor copper loss = s × P_ag</div>
+            <div class="formula-eq">P_mech = (1−s) × P_ag &nbsp;&nbsp; Rotor η = N/Ns</div>
+            <div class="formula-vars">P = total poles · f = 50Hz · s = 0 at synchronous, s = 1 at standstill</div>
+          </div>
+          <div class="formula-block"><div class="formula-label">Week 11 · Rectifiers</div>
+            <div class="formula-eq">Half-wave: V_dc = 0.318 V_m &nbsp;&nbsp; V_rms = 0.5 V_m &nbsp;&nbsp; r ≈ 1.21</div>
+            <div class="formula-eq">Full-wave: V_dc = 0.637 V_m &nbsp;&nbsp; V_rms = 0.707 V_m &nbsp;&nbsp; r ≈ 0.48</div>
+            <div class="formula-eq">r = √[(V_rms/V_dc)² − 1] &nbsp;&nbsp; (ripple factor)</div>
+            <div class="formula-vars">Full-wave ripple frequency = 2f = 100Hz &nbsp;·&nbsp; Lower r = smoother DC</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-header"><div class="topic-num">Section B</div><div class="topic-title">Top Mistakes That Lose Exam Marks</div></div>
+        <div class="topic-body">
+          <div class="mistake-box"><div class="box-label">Magnetic circuits</div>① Confusing φ (Wb) with B (T). ② Using μᵣ alone instead of μ₀μᵣ in reluctance. ③ Using B-H curve for air — always use H_gap = B/μ₀. ④ P in Ns=120f/P is total poles, not pole pairs.</div>
+          <div class="mistake-box"><div class="box-label">DC machines</div>① Back EMF sign: motor V = E + I_aR_a (back EMF opposes supply). Generator V = E − I_aR_a. ② Parallel paths A: lap → A=P, wave → A=2.</div>
+          <div class="mistake-box"><div class="box-label">Transformers</div>① LV→HV: multiply by k². HV→LV: divide by k². Never multiply in both directions. ② OC test on LV (iron loss). SC test on HV (copper loss). ③ Transformer never works on DC — Faraday's Law: dφ/dt=0 for DC → zero EMF.</div>
+          <div class="mistake-box"><div class="box-label">AC circuits</div>① Power calculations always use V_rms, never V_m. ② V_R + V_L ≠ V_total. They are 90° apart — use V = √(V_R²+V_L²).</div>
+          <div class="mistake-box"><div class="box-label">Induction motors</div>① Rotor never reaches Ns during motoring. ② Rotor copper loss = s×P_ag (not (1−s)×P_ag). ③ WRIM is not more efficient than SCIM during normal running.</div>
+          <div class="mistake-box"><div class="box-label">Rectifiers</div>① Output is pulsating DC, not smooth — capacitor filter needed. ② Ripple factor uses output V_rms, not mains V_rms. ③ Full-wave ripple frequency = 100Hz, not 50Hz.</div>
+        </div>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-header"><div class="topic-num">Section C</div><div class="topic-title">High-Frequency Past Question Patterns</div></div>
+        <div class="topic-body">
+          <div class="sec-eye" style="margin-bottom:12px">These question types appear almost every year</div>
+          <div class="pq-list">
+            <div class="pq-item"><span class="past-q">Magnetic</span>Core with air gap: find current for a given flux. Method: B=φ/A → H from curve → H_gap=B/μ₀ → NI=ΣHL → I=NI/N</div>
+            <div class="pq-item"><span class="past-q">Magnetic</span>Sketch hysteresis loop. Label Bₘ, Bᵣ, Hc. Distinguish eddy current loss from hysteresis loss — cause and remedy for each.</div>
+            <div class="pq-item"><span class="past-q">Transformer</span>Given kVA rating and winding resistances, find equivalent resistance referred to each side. Verify: R_eq(HV)/R_eq(LV) = k².</div>
+            <div class="pq-item"><span class="past-q">Transformer</span>State condition for maximum efficiency. Find load fraction at which it occurs given W_i and W_cu(FL).</div>
+            <div class="pq-item"><span class="past-q">Transformer</span>Why does a transformer not work on DC? Explain using Faraday's Law (dφ/dt=0 → e=0).</div>
+            <div class="pq-item"><span class="past-q">AC</span>RL series circuit: find Z, I, power factor, V_R and V_L. Verify: √(V_R²+V_L²) = V_supply.</div>
+            <div class="pq-item"><span class="past-q">Induction</span>3-phase IM: find synchronous speed, rotor speed at given slip, rotor frequency at given rpm.</div>
+            <div class="pq-item"><span class="past-q">Induction</span>Why can an induction motor never reach synchronous speed? Define slip and state its extreme values.</div>
+            <div class="pq-item"><span class="past-q">Rectifier</span>Derive ripple factor r = √[(V_rms/V_dc)²−1]. Calculate r for full-wave rectifier with given V_m.</div>
+            <div class="pq-item"><span class="past-q">Rectifier</span>Draw full-wave bridge rectifier. Trace current through each half-cycle. Identify which diodes conduct.</div>
+          </div>
+          <div class="exam-def" style="margin-top:24px"><div class="def-label">Exam strategy</div>
+            <div class="def-text">
+              1. Read all questions first — do what you know cold first, then return to harder ones.<br>
+              2. Show every step. Partial marks are awarded for correct method even if the final answer is wrong.<br>
+              3. State your formula before substituting numbers — examiners reward structured working.<br>
+              4. For definitions: be precise and concise. One correct sentence beats a vague paragraph.<br>
+              5. Always write units on every answer. A number without a unit is incomplete.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:32px;padding-top:24px;border-top:1px solid var(--border);">
+    <a href="W11.html" class="back-btn">← Week 11</a>
+    <span style="font-size:13px;color:var(--muted2);">Week 12 of 12</span>
+    <span class="back-btn" style="opacity:.35;pointer-events:none">Next →</span>
+  </div>
+</div>
+<footer>
+  <strong>ECE 210 — Electrical Machines &amp; Circuits</strong> · Week 12 · Unify Platform · LASU Faculty of Engineering<br>
+  <span style="display:block;margin-top:6px">Lecturers: Engr Mumuni · Prof Yussuf · Dr Mary · Dr Ogundare</span>
+</footer>
+<script>
+(function(){const saved=localStorage.getItem('unify-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);const b=document.getElementById('theme-btn');if(b)b.textContent=saved==='dark'?'☀ Light':'☾ Dark';}})();
+function toggleTheme(){const cur=document.documentElement.getAttribute('data-theme');const nxt=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',nxt);localStorage.setItem('unify-theme',nxt);document.getElementById('theme-btn').textContent=nxt==='dark'?'☀ Light':'☾ Dark';}
+</script>
+</body>
+</html>

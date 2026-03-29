@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEE 202 — Week 8: Miller Indices & Crystal Defects | Unify</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--muted:#555;--muted2:#999;--accent:#4ade80;--green-deep:#16a34a;--green-bg:#dcfce7;--diagram-bg:#f8f7f3;--red:#dc2626;--red-bg:#fff5f5;--red-border:#fca5a5}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--diagram-bg:#1e1e1e;--green-bg:#052e16;--red-bg:#1a0505;--red-border:#7f1d1d}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:16px;line-height:1.7;transition:background .3s,color .3s}
+nav{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+.nav-logo{font-family:'Playfair Display',serif;font-weight:900;font-size:20px;color:var(--text);text-decoration:none}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-links a{font-size:14px;color:var(--muted);text-decoration:none;padding-bottom:2px;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-links a.active{color:var(--green-deep);border-bottom:2px solid var(--accent);font-weight:500}
+.theme-toggle{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 14px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .2s}
+.theme-toggle:hover{background:var(--border)}
+.week-page{max-width:900px;margin:0 auto;padding:2rem 2rem 4rem}
+.back-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:1rem}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.back-btn:hover{color:var(--text);border-color:var(--text)}
+.week-nav{display:flex;gap:8px}
+.wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.wnav-btn:hover{color:var(--text);border-color:var(--text)}
+.wnav-btn.disabled{opacity:.35;pointer-events:none}
+.week-block{margin-top:0}
+.week-header{background:var(--text);color:var(--bg);padding:1.2rem 1.8rem;border-radius:8px 8px 0 0;display:flex;align-items:baseline;gap:1rem}
+.week-num-badge{font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.6}
+.week-title-main{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700}
+.week-body{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;padding:2rem}
+.week-summary{color:var(--muted);margin-bottom:1.5rem;font-size:15px;line-height:1.8}
+.key-terms{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:2rem}
+.key-term{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 12px;font-size:12px;color:var(--muted)}
+.exam-box{background:#fffbeb;border-left:3px solid #fcd34d;border-radius:6px;padding:1.2rem 1.5rem;margin-bottom:2.5rem}
+[data-theme="dark"] .exam-box{background:#1a1500;border-left-color:#ca8a04}
+.exam-box-label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#92400e;font-weight:600;margin-bottom:.8rem}
+[data-theme="dark"] .exam-box-label{color:#fcd34d}
+.exam-q{font-size:14px;color:var(--text);margin-bottom:6px;display:flex;align-items:flex-start;gap:8px}
+.past-q-badge{background:var(--green-bg);color:var(--green-deep);border:1px solid var(--accent);border-radius:4px;padding:1px 7px;font-size:10px;font-weight:600;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.topic-block{margin-bottom:3rem;padding-top:2rem;border-top:1px solid var(--border)}
+.topic-header{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1rem}
+.topic-num{font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em}
+.topic-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700}
+.topic-body{font-size:15px;line-height:1.85;color:var(--text);margin-bottom:1.5rem}
+.topic-body p{margin-bottom:1rem}
+.topic-body strong{font-weight:600}
+.formula-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:1.2rem 1.5rem;margin:1.5rem 0}
+.formula-label{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--green-deep);font-weight:600;margin-bottom:.8rem}
+.formula-eq{font-family:'Playfair Display',serif;font-style:italic;font-size:1.15rem;color:var(--text);margin-bottom:.6rem}
+.formula-vars{font-size:12px;color:var(--muted2);line-height:1.8}
+.diagram-container{background:var(--diagram-bg);border:1px solid var(--border);border-radius:8px;padding:1.5rem;margin:1.5rem 0}
+.diagram-label{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted2);margin-bottom:1rem;text-align:center}
+.diagram-container svg{display:block;margin:0 auto}
+.simple-box{border-radius:6px;padding:1rem 1.3rem;margin:1.2rem 0;font-size:14px;line-height:1.75}
+.simple-box .box-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;margin-bottom:.5rem}
+.simple-box.analogy{background:#f0fdf4;border-left:3px solid #bbf7d0}
+[data-theme="dark"] .simple-box.analogy{background:#052e16;border-left-color:#166534}
+.simple-box.analogy .box-label{color:var(--green-deep)}
+.simple-box.mistake{background:var(--red-bg);border-left:3px solid var(--red-border)}
+.simple-box.mistake .box-label{color:var(--red)}
+.simple-box.matters{background:#f0fdf4;border-left:3px solid var(--accent)}
+[data-theme="dark"] .simple-box.matters{background:#052e16}
+.simple-box.matters .box-label{color:var(--green-deep)}
+.data-table{width:100%;border-collapse:collapse;font-size:13px;margin:1.2rem 0}
+.data-table th{background:var(--surface2);border:1px solid var(--border);padding:8px 12px;text-align:left;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.data-table td{border:1px solid var(--border);padding:8px 12px;color:var(--text);vertical-align:top}
+.data-table tr:nth-child(even) td{background:var(--surface2)}
+footer{background:var(--surface);border-top:1px solid var(--border);padding:2rem;text-align:center;font-size:13px;color:var(--muted2)}
+footer strong{color:var(--text)}
+@media(max-width:700px){nav{padding:0 1rem}.nav-links{display:none}.week-page{padding-left:1rem;padding-right:1rem}.week-header{padding:1rem}.week-body{padding:1.2rem}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="../../Learn.html">Unify</a>
+  <div class="nav-links">
+    <a href="../../dashboard.html">Dashboard</a>
+    <a href="../../careers.html">Career</a>
+    <a href="../../index.html">Profile</a>
+    <a href="../../Learn.html" class="active">Learn</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()">Toggle Dark</button>
+</nav>
+
+<div class="week-page">
+  <div class="back-bar">
+    <a href="../../Learn.html" class="back-btn">← Back to Learn</a>
+    <div class="week-nav">
+      <a href="W7.html" class="wnav-btn">← Prev</a>
+      <a href="W9.html" class="wnav-btn">Next →</a>
+    </div>
+  </div>
+
+<div class="week-block" id="week8">
+  <div class="week-header">
+    <span class="week-num-badge">Week 8</span>
+    <span class="week-title-main">Miller Indices & Crystal Defects</span>
+  </div>
+  <div class="week-body">
+    <p class="week-summary">Miller indices are the coordinate system of crystals — how we name planes and directions. Crystal defects are the imperfections that make materials interesting (and sometimes weak). Both are high-yield exam topics.</p>
+    <div class="key-terms">
+      <span class="key-term">Miller Indices (hkl)</span><span class="key-term">Crystallographic Planes</span>
+      <span class="key-term">Directions [uvw]</span><span class="key-term">Point Defects</span>
+      <span class="key-term">Vacancy</span><span class="key-term">Dislocation</span>
+      <span class="key-term">Schottky Defect</span><span class="key-term">Frenkel Defect</span>
+    </div>
+
+    <div class="exam-box">
+      <div class="exam-box-label">⚡ Likely Exam Questions</div>
+      <div class="exam-q"><span class="past-q-badge">Past Q</span> Sketch (100),(101),(111),[100] and 011. Determine the atomic packing density of an FCC cell. (2022/23, 2019/20, 2015/16)</div>
+      <div class="exam-q"><span class="past-q-badge">Past Q</span> Write down 2 members of {101} and 2 members of &lt;101&gt;. In one sentence give why icosahedra are not packing polyhedral. (2021/22)</div>
+      <div class="exam-q"><span class="past-q-badge">Past Q</span> Define crystal defects. List all 4 types with their dimensions and an example of each. (2021/22, 2019/20, 2015/16)</div>
+      <div class="exam-q"><span class="past-q-badge">Past Q</span> Sketch a Schottky and a Frenkel defect. Which is more common and why? (2014/15)</div>
+      <div class="exam-q"><span class="past-q-badge">Past Q</span> Determine whether [123] and [2 0 1] will interact to produce another dislocation. (2021/22, 2019/20)</div>
+      <div class="exam-q"><span class="past-q-badge">Past Q</span> Discuss dislocations in detail — list 4 properties of an edge dislocation. (2021/22, 2019/20)</div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-header"><span class="topic-num">Topic 8.1</span><span class="topic-title">Miller Indices — Planes</span></div>
+      <div class="topic-body">
+        <p>The numerical system used to describe the points, planes and directions in a crystal are called <strong>crystallographic indices</strong>. The indices l, m, and n are called <strong>Miller indices</strong>.</p>
+        <p><strong>6-Step procedure to find Miller indices of a plane:</strong></p>
+        <ol style="margin-left:1.5rem; margin-top:0.5rem; margin-bottom:0.5rem; line-height:2.2">
+          <li>Set up a right-handed x-y-z coordinate system. If the plane passes through the origin, take a new origin at an adjacent corner.</li>
+          <li>Find where the plane intersects each axis (in units of a, b, c). If parallel to an axis, intercept = ∞.</li>
+          <li>Take the reciprocals of these intercepts.</li>
+          <li>Multiply by the lowest common factor to get the smallest integers.</li>
+          <li>Enclose in parentheses (hkl) — no commas. Negative values get a bar over the number.</li>
+          <li>For a family of equivalent planes, use curly braces {hkl}.</li>
+        </ol>
+      </div>
+
+      <div class="diagram-container">
+        <div class="diagram-label">Key Crystallographic Planes in a Cubic Cell</div>
+        <svg viewBox="0 0 600 220" width="100%" xmlns="http://www.w3.org/2000/svg">
+          <!-- (100) plane -->
+          <g transform="translate(10,10)">
+            <text x="65" y="12" text-anchor="middle" font-family="Playfair Display,serif" font-style="italic" font-size="14" fill="#16a34a">(100)</text>
+            <rect x="20" y="20" width="80" height="80" fill="none" stroke="#0a0a0a" stroke-width="1.5"/>
+            <line x1="20" y1="20" x2="45" y2="8" stroke="#0a0a0a" stroke-width="1.5"/>
+            <line x1="100" y1="20" x2="125" y2="8" stroke="#0a0a0a" stroke-width="1.5"/>
+            <line x1="100" y1="100" x2="125" y2="88" stroke="#0a0a0a" stroke-width="1.5"/>
+            <line x1="45" y1="8" x2="125" y2="8" stroke="#0a0a0a" stroke-width="1.5"/>
+            <line x1="125" y1="8" x2="125" y2="88" stroke="#0a0a0a" stroke-width="1.5"/>
+            <rect x="20" y="20" width="80" height="80" fill="#16a34a" opacity="0.3"/>
+            <text x="65" y="200" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#555">x=1, y=∞, z=∞</text>
+            <text x="65" y="213" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#999">→ (1/1,1/∞,1/∞) = (100)</text>
+          </g>
+          <!-- (110) plane -->
+          <g transform="translate(160,10)">
+            <text x="65" y="12" text-anchor="middle" font-family="Playfair Display,serif" font-style="italic" font-size="14" fill="#16a34a">(110)</text>
+            <rect x="20" y="20" width="80" height="80" fill="none" stroke="#0a0a0a" stroke-width="1.5"/>
+            <line x1="20" y1="20" x2="45" y2="8" stroke="#0a0a0a" stroke-width="1.5"/>
+            <line x1="100" y1="20" x2="125" y2="8" stroke="#0a0a0a" stroke-width="1.5"/>
+            <line x1="100" y1="100" x2="125" y2="88" stroke="#0a0a0a" stroke-width="1.5"/>
+            <line x1="45" y1="8" x2="125" y2="8" stroke="#0a0a0a" stroke-width="1.5"/>
+            <line x1="125" y1="8" x2="125" y2="88" stroke="#0a0a0a" stroke-width="1.5"/>
+            <polygon points="100,20 125,8 125,88 100,100" fill="#16a34a" opacity="0.3"/>
+            <polygon points="20,20 100,20 100,100 20,100" fill="#16a34a" opacity="0.15"/>
+            <line x1="20" y1="20" x2="125" y2="8" stroke="#16a34a" stroke-width="2"/>
+            <line x1="20" y1="100" x2="125" y2="88" stroke="#16a34a" stroke-width="2"/>
+            <text x="65" y="200" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#555">x=1, y=1, z=∞</text>
+            <text x="65" y="213" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#999">→ (1,1,0)</text>
+          </g>
+          <!-- (111) plane -->
+          <g transform="translate(310,10)">
+            <text x="65" y="12" text-anchor="middle" font-family="Playfair Display,serif" font-style="italic" font-size="14" fill="#16a34a">(111)</text>
+            <rect x="20" y="20" width="80" height="80" fill="none" stroke="#0a0a0a" stroke-width="1.5"/>
+            <line x1="20" y1="20" x2="45" y2="8" stroke="#0a0a0a" stroke-width="1.5"/>
+            <line x1="100" y1="20" x2="125" y2="8" stroke="#0a0a0a" stroke-width="1.5"/>
+            <line x1="100" y1="100" x2="125" y2="88" stroke="#0a0a0a" stroke-width="1.5"/>
+            <line x1="45" y1="8" x2="125" y2="8" stroke="#0a0a0a" stroke-width="1.5"/>
+            <line x1="125" y1="8" x2="125" y2="88" stroke="#0a0a0a" stroke-width="1.5"/>
+            <polygon points="100,20 20,100 125,88" fill="#16a34a" opacity="0.35" stroke="#16a34a" stroke-width="2"/>
+            <text x="65" y="200" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#555">x=1, y=1, z=1</text>
+            <text x="65" y="213" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#999">→ (1,1,1)</text>
+          </g>
+          <!-- [100] direction -->
+          <g transform="translate(455,10)">
+            <text x="65" y="12" text-anchor="middle" font-family="Playfair Display,serif" font-style="italic" font-size="14" fill="#dc2626">[100]</text>
+            <rect x="20" y="20" width="80" height="80" fill="none" stroke="#0a0a0a" stroke-width="1.5"/>
+            <line x1="20" y1="20" x2="45" y2="8" stroke="#0a0a0a" stroke-width="1.5"/>
+            <line x1="100" y1="20" x2="125" y2="8" stroke="#0a0a0a" stroke-width="1.5"/>
+            <line x1="100" y1="100" x2="125" y2="88" stroke="#0a0a0a" stroke-width="1.5"/>
+            <line x1="45" y1="8" x2="125" y2="8" stroke="#0a0a0a" stroke-width="1.5"/>
+            <line x1="125" y1="8" x2="125" y2="88" stroke="#0a0a0a" stroke-width="1.5"/>
+            <line x1="20" y1="60" x2="110" y2="60" stroke="#dc2626" stroke-width="2.5" marker-end="url(#darr)"/>
+            <defs><marker id="darr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 Z" fill="#dc2626"/></marker></defs>
+            <text x="65" y="200" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#dc2626">Direction along x-axis</text>
+            <text x="65" y="213" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#999">enclosed in [ ]</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="formula-box">
+        <div class="formula-label">Families of Planes & Directions</div>
+        <div class="formula-vars" style="font-size:13px; line-height:2">
+          <strong>Family of planes</strong> {hkl} — all crystallographically equivalent planes.<br>
+          {100} includes: (100), (010), (001), (1̄00), (01̄0), (001̄) — the six faces of a cube.<br><br>
+          <strong>Family of directions</strong> &lt;uvw&gt; — all equivalent directions.<br>
+          &lt;110&gt; includes: [110],[101],[011],[1̄10],[1̄01],[01̄1],[11̄0],[101̄],[011̄] — 12 directions<br><br>
+          <strong>Planar density</strong> = number of atoms centred on plane / area of plane in unit cell<br>
+          <strong>Linear density</strong> = number of atoms centred on direction / length of direction
+        </div>
+      </div>
+
+      <div class="simple-box mistake">
+        <div class="box-label">⚠ Common Mistake</div>
+        Planes use ( ) parentheses. Directions use [ ] square brackets. Families of planes use { } curly braces. Families of directions use &lt; &gt; angle brackets. Mixing these up costs marks. Also — a negative intercept is written as a bar OVER the number, not as a minus sign before it. You cannot write (-1,0,0); you write (1̄00).
+      </div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-header"><span class="topic-num">Topic 8.2</span><span class="topic-title">Crystal Defects</span></div>
+      <div class="topic-body">
+        <p>A <strong>crystalline defect</strong> is the lattice irregularity having one or more of its dimensions on the order of an atomic diameter. The imperfection or irregularity of the geometrical arrangement of atoms in a crystalline solid is called a crystalline defect.</p>
+      </div>
+
+      <table class="data-table">
+        <thead><tr><th>Type</th><th>Dimensions</th><th>Definition</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Point Defect</strong></td><td>0D (a point)</td><td>Interruption in the regularity of a crystal lattice at a point</td><td>Vacancy, Interstitial, Impurity</td></tr>
+          <tr><td><strong>Line Defect</strong></td><td>1D (a line)</td><td>Interruption in the regularity of a crystal lattice along a line</td><td>Edge dislocation, Screw dislocation</td></tr>
+          <tr><td><strong>Surface Defect</strong></td><td>2D (a surface)</td><td>Interruption in the regularity over an area</td><td>Grain boundary, Twin boundary</td></tr>
+          <tr><td><strong>Volume Defect</strong></td><td>3D (a volume)</td><td>Interruption in the regularity in some volume</td><td>Voids, Cracks, Inclusions</td></tr>
+        </tbody>
+      </table>
+
+      <div class="topic-body">
+        <p><strong>Vacancy:</strong> The simplest form of point defect. It refers to an empty, unoccupied site in a crystal lattice. It can arise from imperfect arrangement of atoms during crystallisation and also from thermal vibration of atoms at high temperature. Hence vacancy is thermally dependent and increases with temperature.</p>
+      </div>
+
+      <div class="formula-box">
+        <div class="formula-label">Number of Vacancies — Equilibrium</div>
+        <div class="formula-eq">N<sub>v</sub> = N · e<sup>−Q<sub>v</sub>/kT</sup></div>
+        <div class="formula-vars">
+          N = total number of atomic sites (atoms/m³) · Q<sub>v</sub> = energy required for vacancy formation (eV) · k = Boltzmann's constant = 1.38 × 10⁻²³ J/(atom·K) or 8.62 × 10⁻⁵ eV/atom·K · T = temperature in Kelvin
+          <br><br><strong>Example:</strong> Find equilibrium vacancies for copper at 1000°C<br>
+          T = 1273 K, Q<sub>v</sub> = 0.9 eV/atom, atomic weight = 63.5 g/mol, density = 8.4 g/cm³<br>
+          N = (density × N<sub>A</sub>) / atomic weight = (8.4 × 6.02×10²³) / 63.5 = 7.96 × 10²² atoms/cm³<br>
+          N<sub>v</sub> = 7.96×10²² × e^(−0.9/8.62×10⁻⁵×1273) = <strong>2.2 × 10¹⁸ vacancies/cm³</strong>
+        </div>
+      </div>
+
+      <div class="diagram-container">
+        <div class="diagram-label">Point Defects — Vacancy, Interstitial, Schottky & Frenkel</div>
+        <svg viewBox="0 0 600 200" width="100%" xmlns="http://www.w3.org/2000/svg">
+          <!-- Vacancy -->
+          <g transform="translate(10,20)">
+            <text x="65" y="12" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#555" font-weight="600">Vacancy</text>
+            <circle cx="20" cy="40" r="14" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <circle cx="55" cy="40" r="14" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <circle cx="90" cy="40" r="14" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <circle cx="20" cy="75" r="14" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <circle cx="55" cy="75" r="8" fill="none" stroke="#dc2626" stroke-width="2" stroke-dasharray="3,2"/>
+            <text x="55" y="79" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#dc2626">empty</text>
+            <circle cx="90" cy="75" r="14" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <circle cx="20" cy="110" r="14" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <circle cx="55" cy="110" r="14" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <circle cx="90" cy="110" r="14" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+          </g>
+          <!-- Interstitial -->
+          <g transform="translate(155,20)">
+            <text x="65" y="12" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#555" font-weight="600">Interstitial</text>
+            <circle cx="20" cy="40" r="14" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <circle cx="55" cy="40" r="14" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <circle cx="90" cy="40" r="14" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <circle cx="20" cy="75" r="14" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <circle cx="55" cy="75" r="14" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <circle cx="90" cy="75" r="14" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <circle cx="37" cy="57" r="8" fill="#16a34a" stroke="white" stroke-width="1.5"/>
+            <circle cx="20" cy="110" r="14" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <circle cx="55" cy="110" r="14" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <circle cx="90" cy="110" r="14" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+          </g>
+          <!-- Schottky -->
+          <g transform="translate(300,20)">
+            <text x="70" y="12" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#555" font-weight="600">Schottky (ionic)</text>
+            <circle cx="20" cy="40" r="16" fill="#4ade80" opacity="0.6" stroke="#16a34a" stroke-width="1.5"/>
+            <text x="20" y="44" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#166534">+</text>
+            <circle cx="58" cy="40" r="12" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <text x="58" y="44" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#555">−</text>
+            <circle cx="96" cy="40" r="16" fill="#4ade80" opacity="0.6" stroke="#16a34a" stroke-width="1.5"/>
+            <text x="96" y="44" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#166534">+</text>
+            <circle cx="20" cy="80" r="12" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <text x="20" y="84" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#555">−</text>
+            <circle cx="58" cy="80" r="8" fill="none" stroke="#dc2626" stroke-width="2" stroke-dasharray="3,2"/>
+            <circle cx="96" cy="80" r="12" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <text x="96" y="84" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#555">−</text>
+            <circle cx="20" cy="115" r="16" fill="#4ade80" opacity="0.6" stroke="#16a34a" stroke-width="1.5"/>
+            <text x="20" y="119" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#166534">+</text>
+            <circle cx="58" cy="115" r="12" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <text x="58" y="119" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#555">−</text>
+            <circle cx="96" cy="115" r="8" fill="none" stroke="#dc2626" stroke-width="2" stroke-dasharray="3,2"/>
+            <text x="70" y="150" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#dc2626">Both + and − vacancies</text>
+          </g>
+          <!-- Frenkel -->
+          <g transform="translate(455,20)">
+            <text x="65" y="12" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#555" font-weight="600">Frenkel (ionic)</text>
+            <circle cx="20" cy="40" r="16" fill="#4ade80" opacity="0.6" stroke="#16a34a" stroke-width="1.5"/>
+            <text x="20" y="44" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#166534">+</text>
+            <circle cx="58" cy="40" r="12" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <text x="58" y="44" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#555">−</text>
+            <circle cx="96" cy="40" r="16" fill="#4ade80" opacity="0.6" stroke="#16a34a" stroke-width="1.5"/>
+            <text x="96" y="44" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#166534">+</text>
+            <circle cx="20" cy="80" r="12" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <text x="20" y="84" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#555">−</text>
+            <circle cx="58" cy="80" r="8" fill="none" stroke="#dc2626" stroke-width="2" stroke-dasharray="3,2"/>
+            <circle cx="80" cy="62" r="10" fill="#4ade80" opacity="0.8" stroke="#16a34a" stroke-width="1.5"/>
+            <text x="80" y="66" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="8" fill="#166534">+</text>
+            <circle cx="96" cy="80" r="12" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <text x="96" y="84" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#555">−</text>
+            <circle cx="20" cy="115" r="16" fill="#4ade80" opacity="0.6" stroke="#16a34a" stroke-width="1.5"/>
+            <circle cx="58" cy="115" r="12" fill="#e0deda" stroke="#999" stroke-width="1.5"/>
+            <circle cx="96" cy="115" r="16" fill="#4ade80" opacity="0.6" stroke="#16a34a" stroke-width="1.5"/>
+            <text x="65" y="150" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#dc2626">Cat-ion moves to interstitial</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="topic-body" style="margin-top:1.5rem">
+        <p><strong>Schottky vs Frenkel:</strong> The Schottky imperfection is associated with the vacancy of both an-ion and cat-ion. The Schottky imperfection is more likely to occur than Frenkel defects because it is favoured by electrical neutrality — and only few ionic solid cat-ions have the space to dissolve cat-ions without considerable strain.</p>
+        <p><strong>Dislocations (Line Defects):</strong> A linear disturbance in one dimension of the geometry. There are two types: Edge dislocation (an extra half-plane of atoms inserted in the crystal) and Screw dislocation (lattice displaced in shear). Properties of edge dislocation: (1) has a Burgers vector perpendicular to the dislocation line; (2) moves parallel to the applied stress; (3) can climb by absorption/emission of vacancies; (4) two edge dislocations of opposite sign on same slip plane will attract and annihilate each other.</p>
+      </div>
+
+      <div class="formula-box">
+        <div class="formula-label">Dislocation Interaction Rule</div>
+        <div class="formula-vars" style="font-size:13px; line-height:2">
+          Two dislocations can interact to form a third if the reaction LOWERS energy.<br>
+          Criterion: |b₃|² &lt; |b₁|² + |b₂|² (energy of resultant &lt; energy of reactants)<br><br>
+          <strong>Example:</strong> Can [123] and [2 0 1] interact?<br>
+          b₃ = [123] + [201] = [3 2 4]<br>
+          |b₁|² = 1²+2²+3² = 14 · |b₂|² = 2²+0²+1² = 5 · |b₁|²+|b₂|² = 19<br>
+          |b₃|² = 3²+2²+4² = 9+4+16 = 29<br>
+          Since 29 &gt; 19, <strong>interaction is NOT possible</strong> (would increase energy).<br><br>
+          <strong>Example:</strong> Can [1̄35] and [134] interact?<br>
+          b₃ = [-1+1, 3+3, 5+4] = [0 6 9] — check: 0+36+81=117 &gt; (1+9+25)+(1+9+16)=61 → NOT possible.
+        </div>
+      </div>
+
+      <div class="simple-box matters">
+        <div class="box-label">★ Why This Matters</div>
+        Dislocation interaction questions have appeared in 2011, 2015, 2019 and 2021 papers. Always: (1) add the Burgers vectors to get b₃; (2) calculate |b|² for each; (3) compare sum of reactants to product. If product energy &gt; sum of reactants → NOT possible. State what reaction IS possible if asked.
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<footer>
+  <strong>MEE 202 — Science of Materials</strong> &nbsp;|&nbsp; Dr Adefuoye & Dr Obasa &nbsp;|&nbsp; LASU Faculty of Engineering<br>
+  <span style="margin-top:8px;display:block">Week 8 · Miller Indices & Crystal Defects</span>
+  <span style="margin-top:12px;display:block;font-size:12px">Built on Unify · LASU · Native Learning Library</span>
+</footer>
+
+<script>
+function toggleTheme(){const html=document.documentElement;const next=html.getAttribute('data-theme')==='dark'?'light':'dark';html.setAttribute('data-theme',next);localStorage.setItem('unify-theme',next);document.querySelector('.theme-toggle').textContent=next==='dark'?'Toggle Light':'Toggle Dark';}
+(function(){const saved=localStorage.getItem('unify-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);if(saved==='dark')document.querySelector('.theme-toggle').textContent='Toggle Light';}})();
+</script>
+</body>
+</html>

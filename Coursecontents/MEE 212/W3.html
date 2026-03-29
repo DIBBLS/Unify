@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEE 212 — Week 3: Acceleration in Mechanisms | Unify</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--muted:#555;--muted2:#999;--accent:#4ade80;--accent-deep:#16a34a;--accent-bg:#dcfce7;--diagram-bg:#f8f7f3;--nav-h:60px}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--accent:#4ade80;--accent-deep:#4ade80;--accent-bg:#052e16;--diagram-bg:#1e1e1e}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:16px;transition:background .2s,color .2s}
+nav{position:sticky;top:0;z-index:100;height:var(--nav-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;gap:32px}
+.nav-logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--text);text-decoration:none;flex-shrink:0}
+.nav-links{display:flex;gap:4px;flex:1}
+.nav-links a{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:6px;border-bottom:2px solid transparent;transition:color .15s}
+.nav-links a:hover{color:var(--text)}.nav-links a.active{color:var(--accent-deep);border-bottom-color:var(--accent)}
+.theme-toggle{margin-left:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;flex-shrink:0}
+.theme-toggle:hover{color:var(--text);border-color:var(--muted)}
+.week-page{max-width:900px;margin:0 auto;padding:40px 48px 80px}
+.back-bar{display:flex;align-items:center;gap:12px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.back-btn:hover{color:var(--text);border-color:var(--text)}
+.week-nav{display:flex;gap:8px;margin-left:auto}
+.wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.wnav-btn:hover{color:var(--text);border-color:var(--text)}.wnav-btn.disabled{opacity:.35;pointer-events:none}
+.week-block{border-radius:14px;border:1px solid var(--border);overflow:hidden;background:var(--surface)}
+.week-header{background:var(--text);color:var(--bg);padding:24px 32px;display:flex;align-items:baseline;gap:20px}
+[data-theme="dark"] .week-header{background:var(--surface2);border-bottom:1px solid var(--border);color:var(--text)}
+.week-num{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;opacity:.55;white-space:nowrap}
+.week-title{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;font-style:italic;color:inherit}
+[data-theme="dark"] .week-title{color:var(--text)}
+.week-body{padding:32px}
+.week-summary{font-size:15px;color:var(--muted);line-height:1.75;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--border)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:28px}
+.tag{font-size:11px;font-weight:500;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:3px 12px}
+.exam-box{background:#fffbeb;border-left:3px solid #fcd34d;border-radius:0 10px 10px 0;padding:18px 22px;margin-bottom:32px}
+[data-theme="dark"] .exam-box{background:#1a1500;border-left-color:#b45309}
+.exam-box .box-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#92400e;margin-bottom:12px}
+[data-theme="dark"] .exam-box .box-label{color:#fbbf24}
+.exam-box ol{margin-left:18px;font-size:14px;color:var(--text)}.exam-box li{margin-bottom:8px;line-height:1.6}
+.past-q{display:inline-block;font-size:10px;font-weight:600;background:var(--accent-bg);color:var(--accent-deep);border:1px solid var(--accent);border-radius:4px;padding:1px 7px;margin-left:6px;vertical-align:middle;letter-spacing:.04em}
+.topic-block{border:1px solid var(--border);border-radius:12px;margin-bottom:28px;overflow:hidden}
+.topic-header{background:var(--surface2);padding:16px 24px;border-bottom:1px solid var(--border)}
+.topic-num{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:3px}
+.topic-title{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;color:var(--text)}
+.topic-body{padding:24px}.topic-body p{font-size:15px;line-height:1.8;margin-bottom:16px;color:var(--text)}
+.formula-block{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:18px 22px;margin:18px 0}
+.formula-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:10px}
+.formula-eq{font-family:'Playfair Display',serif;font-size:17px;font-style:italic;color:var(--text);margin-bottom:6px;line-height:1.6}
+.formula-vars{font-size:12px;color:var(--muted2);line-height:1.7;margin-top:8px}
+.mistake-box{background:#fff5f5;border-left:3px solid #fca5a5;border-radius:0 10px 10px 0;padding:16px 20px;margin:16px 0;font-size:14px;line-height:1.75;color:var(--text)}
+[data-theme="dark"] .mistake-box{background:#1a0505;border-left-color:#7f1d1d}
+.mistake-box .box-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#dc2626;margin-bottom:8px}
+.diagram-wrap{border:1px solid var(--border);border-radius:10px;background:var(--diagram-bg);padding:20px;margin:18px 0;overflow:hidden}
+.diagram-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:14px}
+.quick-check{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 24px;margin-top:20px}
+.quick-check .qc-label{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.quick-check .qc-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.qc-list{display:flex;flex-direction:column;gap:10px}
+.qc-item{display:flex;gap:12px;align-items:start;font-size:14px;line-height:1.6;color:var(--text)}
+.qc-badge{font-size:10px;font-weight:600;border-radius:4px;padding:2px 8px;white-space:nowrap;margin-top:2px;flex-shrink:0}
+.qc-badge.normal{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+.qc-badge.hard{background:#fff5f5;color:#dc2626;border:1px solid #fca5a5}
+[data-theme="dark"] .qc-badge.hard{background:#1a0505;border-color:#7f1d1d}
+.worked-example{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:18px 22px;margin:18px 0}
+.worked-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:12px}
+.worked-step{font-size:14px;line-height:1.8;color:var(--text);margin-bottom:6px;padding-left:4px}
+.worked-step strong{color:var(--accent-deep)}
+footer{border-top:1px solid var(--border);padding:32px 48px;text-align:center;font-size:13px;color:var(--muted2);max-width:900px;margin:0 auto}
+footer strong{color:var(--muted);font-weight:500}
+@media(max-width:700px){nav{padding:0 16px;gap:16px}.nav-links{display:none}.week-page{padding:20px 16px 60px}.week-body{padding:20px}.topic-body{padding:18px}footer{padding:24px 20px}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="../../dashboard.html" class="nav-logo">Unify</a>
+  <div class="nav-links">
+    <a href="../../dashboard.html">Dashboard</a>
+    <a href="../../careers.html">Career</a>
+    <a href="../../profile.html">Profile</a>
+    <a href="#" class="active">MEE 212</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">☾ Dark</button>
+</nav>
+
+<div class="week-page">
+  <div class="back-bar">
+    <a href="../../learn.html?course=MEE+212&name=MEE+212" class="back-btn">← Back to MEE 212</a>
+    <div class="week-nav">
+      <a href="W2.html" class="wnav-btn">← Prev</a>
+      <a href="W4.html" class="wnav-btn">Next →</a>
+    </div>
+  </div>
+
+  <div class="week-block">
+    <div class="week-header">
+      <span class="week-num">Week 3 of 12</span>
+      <span class="week-title">Acceleration in Mechanisms</span>
+    </div>
+    <div class="week-body">
+      <p class="week-summary">Velocity was one thing. Now we go one step further — acceleration. Every point on a moving link has two components of acceleration: one pointing toward the centre (normal/centripetal) and one along the rotation direction (tangential). You'll learn to find both and use them in 4-bar problems.</p>
+      <div class="tags"><span class="tag">Acceleration</span><span class="tag">Normal acceleration</span><span class="tag">Tangential acceleration</span><span class="tag">4-bar mechanism</span><span class="tag">Acceleration diagram</span></div>
+      <div class="exam-box">
+        <div class="box-label">Exam focus</div>
+        <ol>
+          <li>Given a 4-bar mechanism with ω and α, find the acceleration of points on all links. <span class="past-q">Common exam Q</span></li>
+          <li>Distinguish between normal and tangential acceleration and write their formulas.</li>
+          <li>Find the angular acceleration of a link from an acceleration diagram.</li>
+        </ol>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-header"><div class="topic-num">Topic 3.1</div><div class="topic-title">Normal and Tangential Acceleration</div></div>
+        <div class="topic-body">
+          <p>When a link rotates, a point on it accelerates in two ways at the same time. Imagine you're on a roundabout: you feel pushed outward (that's the normal/centripetal part) and if the roundabout is speeding up, you also feel pushed backward (that's the tangential part).</p>
+          <div class="formula-block">
+            <div class="formula-label">The two acceleration components</div>
+            <div class="formula-eq">aⁿ = rω² (normal — points toward centre, always exists if ω ≠ 0)</div>
+            <div class="formula-eq">aᵗ = rα (tangential — perpendicular to link, only if α ≠ 0)</div>
+            <div class="formula-vars">r = length of link (m) · ω = angular velocity (rad/s) · α = angular acceleration (rad/s²)</div>
+          </div>
+          <div class="formula-block">
+            <div class="formula-label">Acceleration of B relative to A (vector equation)</div>
+            <div class="formula-eq">a_B = a_A + a_B/A</div>
+            <div class="formula-eq">a_Bⁿ + a_Bᵗ = a_Aⁿ + a_Aᵗ + a_B/Aⁿ + a_B/Aᵗ</div>
+            <div class="formula-vars">aⁿ = normal (centripetal) component pointing inward · aᵗ = tangential component perpendicular to link</div>
+          </div>
+          <div class="diagram-wrap">
+            <div class="diagram-label">Normal vs tangential acceleration components on a link</div>
+            <svg viewBox="0 0 600 230" width="100%" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <marker id="an" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#dc2626"/></marker>
+                <marker id="at" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#16a34a"/></marker>
+              </defs>
+              <circle cx="150" cy="150" r="8" fill="#0a0a0a"/>
+              <text x="130" y="175" font-family="DM Sans,sans-serif" font-size="12" fill="#999">O (pivot)</text>
+              <line x1="150" y1="150" x2="370" y2="90" stroke="#0a0a0a" stroke-width="3.5"/>
+              <circle cx="370" cy="90" r="7" fill="#16a34a"/>
+              <text x="378" y="87" font-family="DM Sans,sans-serif" font-size="12" fill="#16a34a" font-weight="600">A</text>
+              <line x1="370" y1="90" x2="230" y2="127" stroke="#dc2626" stroke-width="2.5" marker-end="url(#an)"/>
+              <text x="270" y="95" font-family="Playfair Display,serif" font-size="13" fill="#dc2626" font-style="italic">aⁿ = rω²</text>
+              <text x="258" y="110" font-family="DM Sans,sans-serif" font-size="11" fill="#dc2626">(toward centre)</text>
+              <line x1="370" y1="90" x2="420" y2="35" stroke="#16a34a" stroke-width="2.5" marker-end="url(#at)"/>
+              <text x="425" y="33" font-family="Playfair Display,serif" font-size="13" fill="#16a34a" font-style="italic">aᵗ = rα</text>
+              <text x="420" y="48" font-family="DM Sans,sans-serif" font-size="11" fill="#16a34a">(⊥ to link)</text>
+              <path d="M 150 120 A 32 32 0 0 0 178 138" stroke="#0a0a0a" fill="none" stroke-width="1.5" marker-end="url(#an)"/>
+              <text x="184" y="130" font-family="Playfair Display,serif" font-size="12" fill="#0a0a0a" font-style="italic">ω, α</text>
+            </svg>
+          </div>
+          <div class="worked-example">
+            <div class="worked-label">Worked Example — 4-bar mechanism (from notes 28-05-2025)</div>
+            <p style="font-size:13px;color:var(--muted);margin-bottom:10px">AB = 170mm, BC = OD = 280mm, AD = 500mm, ∠BAD = 55°. Crank AB rotates at 100 rad/s clockwise. Find acceleration of links BC &amp; OD, and angular acceleration of BC &amp; CD.</p>
+            <div class="worked-step"><strong>Given:</strong> ω_AB = 100 rad/s, α_AB = 0 (constant speed)</div>
+            <div class="worked-step"><strong>Step 1 — Normal accel of A:</strong> a_Aⁿ = r × ω² = 0.17 × 100² = <strong>1700 m/s²</strong> (toward O)</div>
+            <div class="worked-step"><strong>Step 2 — a_B/A normal:</strong> a_B/Aⁿ = AB × ω_AB² = 0.17 × 10000 = 1700 m/s²</div>
+            <div class="worked-step"><strong>Step 3 — a_B/A tangential:</strong> a_B/Aᵗ = AB × α = unknown (draw perpendicular to AB)</div>
+            <div class="worked-step"><strong>Step 4:</strong> Draw acceleration diagram. Measure unknowns from diagram. Find α_BC = b'b / BC</div>
+          </div>
+          <div class="worked-example">
+            <div class="worked-label">Worked Example — Classwork 26-05-2024</div>
+            <p style="font-size:13px;color:var(--muted);margin-bottom:10px">AB=75mm, BC=80mm, AD=125mm, BE=28mm. ω=100 rad/s, α=4400 rad/s²</p>
+            <div class="worked-step"><strong>V_A</strong> = (AB)ω = 0.075 × 100 = <strong>7.5 m/s</strong></div>
+            <div class="worked-step"><strong>aⁿ_AB</strong> = r × ω² = 0.075 × 100² = <strong>750 m/s²</strong></div>
+            <div class="worked-step"><strong>aᵗ_AB</strong> = r × α = 0.075 × 4400 = <strong>330 m/s²</strong></div>
+            <div class="worked-step"><strong>aⁿ_BC</strong> = V²_BC / BC = (10.75)² / 0.075 = <strong>1540 m/s²</strong> (approx)</div>
+          </div>
+          <div class="mistake-box">
+            <div class="box-label">Common mistake</div>
+            Forgetting that aⁿ_B/A acts <strong>from B toward A</strong> (inward), while aᵗ_B/A acts <strong>perpendicular to link BA</strong>. Drawing them in the wrong direction ruins your entire acceleration diagram.
+          </div>
+          <div class="quick-check">
+            <div class="qc-label">Quick check — Topic 3.1</div>
+            <div class="qc-list">
+              <div class="qc-item"><span class="qc-badge normal">Q1</span><span>A link is 0.08m long, ω = 100 rad/s. Find its normal acceleration.</span></div>
+              <div class="qc-item"><span class="qc-badge normal">Q2</span><span>What is the direction of normal acceleration? What is the direction of tangential acceleration?</span></div>
+              <div class="qc-item"><span class="qc-badge hard">Hard</span><span>If α = 0 (constant angular velocity), which acceleration component vanishes? Explain why physically.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:32px;padding-top:24px;border-top:1px solid var(--border);">
+    <a href="W2.html" class="back-btn">← Week 2</a>
+    <a href="W4.html" class="back-btn" style="border-color:var(--accent);color:var(--accent-deep);">Next: Week 4 →</a>
+  </div>
+</div>
+
+<footer>
+  <strong>MEE 212 — Theory of Machines</strong> · Week 3 · Unify Platform · LASU Faculty of Engineering<br>
+  <span style="display:block;margin-top:6px">Lecturer: Prof Raji · Content sourced from lecture notes 2024–2025</span>
+</footer>
+
+<script>
+(function(){const saved=localStorage.getItem('unify-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);const b=document.getElementById('theme-btn');if(b)b.textContent=saved==='dark'?'☀ Light':'☾ Dark';}})();
+function toggleTheme(){const cur=document.documentElement.getAttribute('data-theme');const nxt=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',nxt);localStorage.setItem('unify-theme',nxt);document.getElementById('theme-btn').textContent=nxt==='dark'?'☀ Light':'☾ Dark';}
+</script>
+</body>
+</html>

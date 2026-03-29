@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unify — CGPA Predictor</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --black: #0a0a0a;
+  --white: #f5f4f0;
+  --grey: #e0deda;
+  --mid: #888;
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+body { background: var(--white); color: var(--black); font-family: var(--font-body); font-size: 15px; }
+
+nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22px 48px; border-bottom: 1px solid var(--grey);
+  background: var(--white); position: sticky; top: 0; z-index: 10;
+}
+.nav-logo { font-family: var(--font-display); font-weight: 900; font-size: 22px; letter-spacing: -1px; text-decoration: none; color: var(--black); }
+.nav-links { display: flex; gap: 28px; align-items: center; }
+.nav-links a { text-decoration: none; color: var(--mid); font-size: 13px; font-weight: 500; transition: color 0.2s; }
+.nav-links a:hover, .nav-links a.active { color: var(--black); }
+
+.page-wrap { max-width: 860px; margin: 0 auto; padding: 80px 24px 120px; }
+
+.page-tag { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--mid); margin-bottom: 16px; }
+.page-title { font-family: var(--font-display); font-size: clamp(36px, 5vw, 64px); font-weight: 900; letter-spacing: -2px; line-height: 1.05; margin-bottom: 16px; }
+.page-title em { font-style: italic; }
+.page-sub { font-size: 15px; color: #555; font-weight: 300; margin-bottom: 56px; max-width: 520px; line-height: 1.7; }
+
+/* CLASS TARGETS */
+.targets-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 48px; }
+.target-card {
+  border: 2px solid var(--grey); border-radius: 8px; padding: 20px 16px;
+  cursor: pointer; text-align: center; transition: all 0.15s; background: var(--white);
+}
+.target-card:hover { border-color: #aaa; }
+.target-card.selected { border-color: var(--black); background: var(--black); color: var(--white); }
+.target-class { font-family: var(--font-display); font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.target-range { font-size: 12px; color: var(--mid); }
+.target-card.selected .target-range { color: #aaa; }
+
+/* INPUTS */
+.input-section { margin-bottom: 40px; }
+.input-label { font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--mid); margin-bottom: 10px; display: block; }
+.input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.input-field {
+  width: 100%; padding: 14px 16px; background: var(--white);
+  border: 1px solid var(--grey); border-radius: 6px;
+  font-family: var(--font-body); font-size: 14px; color: var(--black);
+  outline: none; transition: border-color 0.15s;
+}
+.input-field:focus { border-color: var(--black); }
+.input-field::placeholder { color: #bbb; }
+
+.btn-predict {
+  width: 100%; padding: 16px; background: var(--black); color: var(--white);
+  border: none; border-radius: 6px; font-family: var(--font-display);
+  font-size: 16px; font-weight: 700; cursor: pointer; transition: opacity 0.2s;
+  margin-top: 8px; letter-spacing: 0.3px;
+}
+.btn-predict:hover { opacity: 0.8; }
+
+/* RESULT */
+.result-box {
+  margin-top: 48px; border: 1px solid var(--grey); border-radius: 10px;
+  overflow: hidden; display: none;
+}
+.result-box.visible { display: block; animation: fadeUp 0.4s ease; }
+.result-header { background: var(--black); color: var(--white); padding: 28px 32px; }
+.result-verdict { font-family: var(--font-display); font-size: 28px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 6px; }
+.result-sub { font-size: 13px; color: #888; font-weight: 300; }
+.result-body { padding: 32px; }
+.result-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 32px; }
+.stat-card { text-align: center; padding: 20px; background: #f9f8f5; border-radius: 8px; }
+.stat-value { font-family: var(--font-display); font-size: 32px; font-weight: 900; letter-spacing: -1px; }
+.stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--mid); margin-top: 4px; }
+
+.needed-title { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--mid); margin-bottom: 16px; }
+.grade-breakdown { display: flex; gap: 8px; flex-wrap: wrap; }
+.grade-pill {
+  padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 500;
+  background: var(--black); color: var(--white);
+}
+.grade-pill.impossible { background: #eee; color: #999; }
+
+.result-note {
+  margin-top: 24px; padding: 16px 20px; background: #f9f8f5;
+  border-radius: 6px; font-size: 13px; color: #555; line-height: 1.6;
+  border-left: 3px solid var(--black);
+}
+
+/* GRADE SCALE */
+.scale-section { margin-top: 64px; }
+.scale-title { font-family: var(--font-display); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 20px; }
+.scale-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.scale-table th { text-align: left; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--mid); padding: 10px 16px; border-bottom: 2px solid var(--grey); }
+.scale-table td { padding: 14px 16px; border-bottom: 1px solid var(--grey); }
+.scale-table tr:last-child td { border-bottom: none; }
+.class-badge { font-weight: 500; font-family: var(--font-display); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 640px) {
+  nav { padding: 18px 20px; }
+  .targets-row { grid-template-columns: repeat(2, 1fr); }
+  .input-row { grid-template-columns: 1fr; }
+  .result-stats { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Unify</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="predictor.html" class="active">Predictor</a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+  <p class="page-tag">CGPA Predictor</p>
+  <h1 class="page-title">What grades do you<br><em>need this semester?</em></h1>
+  <p class="page-sub">Enter your current CGPA, total credit units so far, and your target class. Unify will tell you exactly what you need to achieve it.</p>
+
+  <!-- TARGET CLASS SELECTOR -->
+  <div class="targets-row">
+    <div class="target-card selected" data-min="4.50" data-max="5.00" data-label="First Class" onclick="selectTarget(this)">
+      <div class="target-class">First Class</div>
+      <div class="target-range">4.50 – 5.00</div>
+    </div>
+    <div class="target-card" data-min="3.50" data-max="4.49" data-label="Second Class Upper" onclick="selectTarget(this)">
+      <div class="target-class">2.1</div>
+      <div class="target-range">3.50 – 4.49</div>
+    </div>
+    <div class="target-card" data-min="2.40" data-max="3.49" data-label="Second Class Lower" onclick="selectTarget(this)">
+      <div class="target-class">2.2</div>
+      <div class="target-range">2.40 – 3.49</div>
+    </div>
+    <div class="target-card" data-min="1.50" data-max="2.39" data-label="Third Class" onclick="selectTarget(this)">
+      <div class="target-class">Third Class</div>
+      <div class="target-range">1.50 – 2.39</div>
+    </div>
+  </div>
+
+  <!-- INPUTS -->
+  <div class="input-section">
+    <div class="input-row">
+      <div>
+        <label class="input-label">Current CGPA</label>
+        <input class="input-field" id="currentCGPA" type="number" min="0" max="5" step="0.01" placeholder="e.g. 3.20">
+      </div>
+      <div>
+        <label class="input-label">Total Credit Units So Far</label>
+        <input class="input-field" id="totalUnits" type="number" min="0" placeholder="e.g. 84">
+      </div>
+    </div>
+  </div>
+  <div class="input-section">
+    <div class="input-row">
+      <div>
+        <label class="input-label">Credit Units This Semester</label>
+        <input class="input-field" id="semesterUnits" type="number" min="1" placeholder="e.g. 18">
+      </div>
+      <div>
+        <label class="input-label">Target CGPA (within range)</label>
+        <input class="input-field" id="targetCGPA" type="number" min="0" max="5" step="0.01" placeholder="e.g. 4.50">
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-predict" onclick="predict()">Calculate What I Need →</button>
+
+  <!-- RESULT -->
+  <div class="result-box" id="resultBox">
+    <div class="result-header">
+      <div class="result-verdict" id="resultVerdict"></div>
+      <div class="result-sub" id="resultSub"></div>
+    </div>
+    <div class="result-body">
+      <div class="result-stats">
+        <div class="stat-card">
+          <div class="stat-value" id="statCurrent"></div>
+          <div class="stat-label">Current CGPA</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statTarget"></div>
+          <div class="stat-label">Target CGPA</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statNeeded"></div>
+          <div class="stat-label">Avg Needed This Sem</div>
+        </div>
+      </div>
+      <p class="needed-title">Grade breakdown to hit your target</p>
+      <div class="grade-breakdown" id="gradeBreakdown"></div>
+      <div class="result-note" id="resultNote"></div>
+    </div>
+  </div>
+
+  <!-- GRADE SCALE -->
+  <div class="scale-section">
+    <h2 class="scale-title">Grading Scale Reference</h2>
+    <table class="scale-table">
+      <thead>
+        <tr>
+          <th>Grade</th>
+          <th>Points</th>
+          <th>Classification</th>
+          <th>CGPA Range</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>A</td><td>5.0</td><td><span class="class-badge">First Class</span></td><td>4.50 – 5.00</td></tr>
+        <tr><td>B</td><td>4.0</td><td><span class="class-badge">Second Class Upper (2.1)</span></td><td>3.50 – 4.49</td></tr>
+        <tr><td>C</td><td>3.0</td><td><span class="class="class-badge">Second Class Lower (2.2)</span></td><td>2.40 – 3.49</td></tr>
+        <tr><td>D</td><td>2.0</td><td><span class="class-badge">Third Class</span></td><td>1.50 – 2.39</td></tr>
+        <tr><td>E</td><td>1.0</td><td><span class="class-badge">Pass</span></td><td>1.00 – 1.49</td></tr>
+        <tr><td>F</td><td>0.0</td><td><span class="class-badge">Fail</span></td><td>0.00 – 0.99</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+let selectedTarget = { min: 4.50, max: 5.00, label: "First Class" };
+
+function selectTarget(el) {
+  document.querySelectorAll('.target-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedTarget = {
+    min: parseFloat(el.dataset.min),
+    max: parseFloat(el.dataset.max),
+    label: el.dataset.label
+  };
+  // Auto-fill target CGPA with minimum of that class
+  document.getElementById('targetCGPA').value = el.dataset.min;
+}
+
+function gradeForPoint(point) {
+  if (point >= 5) return 'A';
+  if (point >= 4) return 'B';
+  if (point >= 3) return 'C';
+  if (point >= 2) return 'D';
+  if (point >= 1) return 'E';
+  return 'F';
+}
+
+function predict() {
+  const currentCGPA = parseFloat(document.getElementById('currentCGPA').value);
+  const totalUnits = parseFloat(document.getElementById('totalUnits').value);
+  const semesterUnits = parseFloat(document.getElementById('semesterUnits').value);
+  const targetCGPA = parseFloat(document.getElementById('targetCGPA').value);
+
+  if (isNaN(currentCGPA) || isNaN(totalUnits) || isNaN(semesterUnits) || isNaN(targetCGPA)) {
+    alert('Please fill in all fields.');
+    return;
+  }
+  if (targetCGPA > 5 || targetCGPA < 0) {
+    alert('Target CGPA must be between 0 and 5.');
+    return;
+  }
+
+  // Formula: neededGPA = (targetCGPA * (totalUnits + semesterUnits) - currentCGPA * totalUnits) / semesterUnits
+  const totalFutureUnits = totalUnits + semesterUnits;
+  const neededTotal = targetCGPA * totalFutureUnits;
+  const currentTotal = currentCGPA * totalUnits;
+  const neededThisSem = (neededTotal - currentTotal) / semesterUnits;
+
+  const resultBox = document.getElementById('resultBox');
+  resultBox.classList.add('visible');
+
+  document.getElementById('statCurrent').textContent = currentCGPA.toFixed(2);
+  document.getElementById('statTarget').textContent = targetCGPA.toFixed(2);
+
+  const gradeBreakdown = document.getElementById('gradeBreakdown');
+  const resultNote = document.getElementById('resultNote');
+  const resultVerdict = document.getElementById('resultVerdict');
+  const resultSub = document.getElementById('resultSub');
+
+  gradeBreakdown.innerHTML = '';
+
+  if (neededThisSem > 5.0) {
+    document.getElementById('statNeeded').textContent = '—';
+    resultVerdict.textContent = 'Not achievable this semester';
+    resultSub.textContent = 'The target is too high given your current standing and remaining units.';
+    const pill = document.createElement('span');
+    pill.className = 'grade-pill impossible';
+    pill.textContent = 'Mathematically impossible';
+    gradeBreakdown.appendChild(pill);
+    resultNote.textContent = `You would need an average of ${neededThisSem.toFixed(2)} GP this semester — which exceeds the maximum of 5.0. Consider targeting a ${selectedTarget.label === 'First Class' ? '2.1' : 'lower'} classification for now, and pushing for ${selectedTarget.label} in future semesters.`;
+  } else if (neededThisSem <= 0) {
+    document.getElementById('statNeeded').textContent = '0.00';
+    resultVerdict.textContent = "You've already achieved it! 🎉";
+    resultSub.textContent = `Your current CGPA already meets the ${selectedTarget.label} threshold.`;
+    const pill = document.createElement('span');
+    pill.className = 'grade-pill';
+    pill.textContent = 'Any grade maintains it';
+    gradeBreakdown.appendChild(pill);
+    resultNote.textContent = `Your current CGPA of ${currentCGPA.toFixed(2)} already qualifies for ${selectedTarget.label}. Keep it up — don't let your grades slip this semester.`;
+  } else {
+    document.getElementById('statNeeded').textContent = neededThisSem.toFixed(2);
+    const neededGrade = gradeForPoint(neededThisSem);
+    resultVerdict.textContent = `You need an average of ${neededGrade} this semester`;
+    resultSub.textContent = `That's a grade point average of ${neededThisSem.toFixed(2)} across all ${semesterUnits} units.`;
+
+    // Show what grades would get you there
+    const gradePoints = [
+      { grade: 'All A', gp: 5.0 },
+      { grade: 'All B', gp: 4.0 },
+      { grade: 'Mix A/B', gp: 4.5 },
+      { grade: 'Mix B/C', gp: 3.5 },
+      { grade: 'All C', gp: 3.0 },
+    ];
+
+    gradePoints.forEach(g => {
+      if (g.gp >= neededThisSem) {
+        const pill = document.createElement('span');
+        pill.className = 'grade-pill';
+        pill.textContent = `${g.grade} (${g.gp.toFixed(1)} GP)`;
+        gradeBreakdown.appendChild(pill);
+      }
+    });
+
+    resultNote.textContent = `To reach a CGPA of ${targetCGPA.toFixed(2)} (${selectedTarget.label}), you need to earn at least ${neededThisSem.toFixed(2)} grade points per unit this semester. That means scoring mostly ${neededGrade}s across your ${semesterUnits} credit units.`;
+  }
+
+  resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Auto-fill target on load
+document.getElementById('targetCGPA').value = '4.50';
+</script>
+</body>
+</html>

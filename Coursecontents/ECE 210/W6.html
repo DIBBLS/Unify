@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECE 210 — Week 6: DC Motors | Unify</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--muted:#555;--muted2:#999;--accent:#4ade80;--accent-deep:#16a34a;--accent-bg:#dcfce7;--diagram-bg:#f8f7f3;--nav-h:60px}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--accent:#4ade80;--accent-deep:#4ade80;--accent-bg:#052e16;--diagram-bg:#1e1e1e}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:16px;transition:background .2s,color .2s}
+nav{position:sticky;top:0;z-index:100;height:var(--nav-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;gap:32px}
+.nav-logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--text);text-decoration:none;flex-shrink:0}
+.nav-links{display:flex;gap:4px;flex:1}
+.nav-links a{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:6px;border-bottom:2px solid transparent;transition:color .15s}
+.nav-links a:hover{color:var(--text)}.nav-links a.active{color:var(--accent-deep);border-bottom-color:var(--accent)}
+.theme-toggle{margin-left:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;flex-shrink:0}
+.theme-toggle:hover{color:var(--text);border-color:var(--muted)}
+.week-page{max-width:900px;margin:0 auto;padding:40px 48px 80px}
+.back-bar{display:flex;align-items:center;gap:12px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.back-btn:hover{color:var(--text);border-color:var(--text)}
+.week-nav{display:flex;gap:8px;margin-left:auto}
+.wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.wnav-btn:hover{color:var(--text);border-color:var(--text)}.wnav-btn.disabled{opacity:.35;pointer-events:none}
+.week-block{border-radius:14px;border:1px solid var(--border);overflow:hidden;background:var(--surface)}
+.week-header{background:var(--text);color:var(--bg);padding:24px 32px;display:flex;align-items:baseline;gap:20px}
+[data-theme="dark"] .week-header{background:var(--surface2);border-bottom:1px solid var(--border);color:var(--text)}
+.week-num{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;opacity:.55;white-space:nowrap}
+.week-title{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;font-style:italic;color:inherit}
+[data-theme="dark"] .week-title{color:var(--text)}
+.week-body{padding:32px}
+.week-summary{font-size:15px;color:var(--muted);line-height:1.75;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--border)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:28px}
+.tag{font-size:11px;font-weight:500;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:3px 12px}
+.exam-box{background:#fffbeb;border-left:3px solid #fcd34d;border-radius:0 10px 10px 0;padding:18px 22px;margin-bottom:32px}
+[data-theme="dark"] .exam-box{background:#1a1500;border-left-color:#b45309}
+.exam-box .box-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#92400e;margin-bottom:12px}
+[data-theme="dark"] .exam-box .box-label{color:#fbbf24}
+.exam-box ol{margin-left:18px;font-size:14px;color:var(--text)}.exam-box li{margin-bottom:8px;line-height:1.6}
+.past-q{display:inline-block;font-size:10px;font-weight:600;background:var(--accent-bg);color:var(--accent-deep);border:1px solid var(--accent);border-radius:4px;padding:1px 7px;margin-left:6px;vertical-align:middle;letter-spacing:.04em}
+.topic-block{border:1px solid var(--border);border-radius:12px;margin-bottom:28px;overflow:hidden}
+.topic-header{background:var(--surface2);padding:16px 24px;border-bottom:1px solid var(--border)}
+.topic-num{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:3px}
+.topic-title{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;color:var(--text)}
+.topic-body{padding:24px}.topic-body p{font-size:15px;line-height:1.8;margin-bottom:16px;color:var(--text)}
+.formula-block{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:18px 22px;margin:18px 0}
+.formula-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:10px}
+.formula-eq{font-family:'Playfair Display',serif;font-size:17px;font-style:italic;color:var(--text);margin-bottom:6px;line-height:1.6}
+.formula-vars{font-size:12px;color:var(--muted2);line-height:1.7;margin-top:8px}
+.analogy-box{background:#f0fdf4;border-left:3px solid #bbf7d0;border-radius:0 10px 10px 0;padding:16px 20px;margin:16px 0;font-size:14px;line-height:1.75;color:var(--text)}
+[data-theme="dark"] .analogy-box{background:#052e16;border-left-color:#166534}
+.analogy-box .box-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px}
+.mistake-box{background:#fff5f5;border-left:3px solid #fca5a5;border-radius:0 10px 10px 0;padding:16px 20px;margin:16px 0;font-size:14px;line-height:1.75;color:var(--text)}
+[data-theme="dark"] .mistake-box{background:#1a0505;border-left-color:#7f1d1d}
+.mistake-box .box-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#dc2626;margin-bottom:8px}
+.exam-def{background:var(--surface2);border:1.5px solid var(--accent);border-radius:10px;padding:16px 20px;margin:18px 0}
+.exam-def .def-label{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px}
+.exam-def .def-text{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--text);line-height:1.7}
+.quick-check{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 24px;margin-top:24px}
+.quick-check .qc-label{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.quick-check .qc-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.qc-list{display:flex;flex-direction:column;gap:10px}
+.qc-item{display:flex;gap:12px;align-items:start;font-size:14px;line-height:1.6;color:var(--text)}
+.qc-badge{font-size:10px;font-weight:600;border-radius:4px;padding:2px 8px;white-space:nowrap;margin-top:2px;flex-shrink:0}
+.qc-badge.normal{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+.qc-badge.hard{background:#fff5f5;color:#dc2626;border:1px solid #fca5a5}
+[data-theme="dark"] .qc-badge.hard{background:#1a0505;border-color:#7f1d1d}
+.sec-eye{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2)}
+footer{border-top:1px solid var(--border);padding:32px 48px;text-align:center;font-size:13px;color:var(--muted2);max-width:900px;margin:0 auto}
+footer strong{color:var(--muted);font-weight:500}
+@media(max-width:700px){nav{padding:0 16px;gap:16px}.nav-links{display:none}.week-page{padding:20px 16px 60px}.week-body{padding:20px}.topic-body{padding:18px}footer{padding:24px 20px}}
+</style>
+.step-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin:8px 0}
+.step-box .step-num{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:4px}
+.step-box p{font-size:14px;margin-bottom:0}
+.result-box{background:var(--accent-bg);border:1.5px solid var(--accent);border-radius:8px;padding:12px 18px;margin:10px 0;font-size:14px;font-weight:700;color:var(--accent-deep)}
+.why-box{background:#f0fdf4;border-left:3px solid #4ade80;border-radius:0 10px 10px 0;padding:16px 20px;margin:16px 0;font-size:14px;line-height:1.75}
+[data-theme="dark"] .why-box{background:#052e16;border-left-color:#4ade80}
+.why-box .box-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px}
+</style>
+</head>
+<body>
+<nav>
+  <a href="../../dashboard.html" class="nav-logo">Unify</a>
+  <div class="nav-links">
+    <a href="../../dashboard.html">Dashboard</a>
+    <a href="../../careers.html">Career</a>
+    <a href="../../profile.html">Profile</a>
+    <a href="#" class="active">ECE 210</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">☾ Dark</button>
+</nav>
+<div class="week-page">
+  <div class="back-bar">
+    <a href="../../learn.html?course=ECE+210&name=ECE+210" class="back-btn">← Back to ECE 210</a>
+    <div class="week-nav"><a href="W5.html" class="wnav-btn">← Prev</a><a href="W7.html" class="wnav-btn">Next →</a></div>
+  </div>
+  <div class="week-block">
+    <div class="week-header">
+      <span class="week-num">Week 6 of 11</span>
+      <span class="week-title">DC Motors — Back EMF, Torque & Speed Control</span>
+    </div>
+    <div class="week-body">
+      <p class="week-summary">DC motors convert electrical energy into mechanical rotation. Back EMF is the self-regulating mechanism. Torque and speed are deeply connected through flux and armature current. These are the most examined topics in ECE 210.</p>
+      <div class="tags"><span class="tag">Back EMF Eb</span><span class="tag">Torque T ∝ φIa</span><span class="tag">Speed N ∝ Eb/φ</span><span class="tag">Shunt Motor</span><span class="tag">Series Motor</span><span class="tag">Max Power Eb=V/2</span></div>
+      <div class="sec-eye" style="margin-bottom:12px">Likely exam questions</div>
+      <div class="exam-box"><div class="box-label">Exam focus</div><ol>
+        <li>15kW, 230V, 1150rpm shunt motor: Z=882, Ra=0.2Ω, Ia=73A. Find torque. If φ reduced to 80%, find new speed for same torque. <span class="past-q">Past Q</span></li>
+        <li>220V shunt motor: no-load Ia=2.5A at 1400rpm. Full-load Ia=60A, flux weakened 3%. Find new speed. <span class="past-q">Past Q</span></li>
+        <li>State the condition for maximum power in a DC motor.</li>
+        <li>Why should a series motor never run on no-load?</li>
+      </ol></div>
+      <div class="topic-block">
+        <div class="topic-header"><div class="topic-num">Topic 6.1</div><div class="topic-title">Back EMF, Torque, Speed & Maximum Power</div></div>
+        <div class="topic-body">
+          <p>A rotating armature generates back EMF <strong>Eb = kNφ</strong> opposing supply voltage V. Motor equation: <strong>V = Eb + IaRa</strong>. At start-up Eb=0 → huge Ia=V/Ra — need starting resistors. As speed builds, Eb rises, Ia falls to normal operating level.</p>
+          <p><strong>Torque</strong>: T = 0.159×Z×φ×P×(Ia/a). So <strong>T ∝ φIa</strong>. Shunt: φ constant → T ∝ Ia. Series: φ ∝ Ia → T ∝ Ia² (huge starting torque).</p>
+          <p><strong>Speed</strong>: N ∝ Eb/φ = (V−IaRa)/φ. Reduce φ → speed increases (used in speed control).</p>
+          <p><strong>Maximum power condition</strong>: P = Eb×Ia = (V−IaRa)×Ia. Differentiate: dP/dIa = V−2IaRa = 0 → <strong>Eb = V/2</strong>. Maximum power when back EMF = half supply voltage. (Efficiency only 50% at this point — not the efficient operating point.)</p>
+          <div class="formula-block"><div class="formula-label">DC Motor equations</div>
+            <div class="formula-eq">V = Eb + IaRa &nbsp;&nbsp; Ia = (V−Eb)/Ra</div>
+            <div class="formula-eq">T = 0.159×Z×φ×P×(Ia/a) &nbsp;&nbsp; T ∝ φIa</div>
+            <div class="formula-eq">N ∝ Eb/φ &nbsp;&nbsp; N₂ = N₁×(Eb₂/Eb₁)×(φ₁/φ₂)</div>
+            <div class="formula-eq">Max power: Eb = V/2 &nbsp;&nbsp; Pmax = V²/(4Ra)</div>
+          </div>
+          <div class="worked-example" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:20px;margin:16px 0">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">Worked Example — Torque + Speed (from lecture notes)</div>
+            <p style="font-size:14px;font-weight:600;margin-bottom:12px">15kW, 230V, 1150rpm, 4-pole, Z=882, a=4, Ra=0.2Ω, Ia=73A. Find torque. Then new speed if φ₂=0.8φ₁ at same torque.</p>
+            <div class="step-box"><div class="step-num">Eb₁ = V−IaRa = 230−(73×0.2) = 215.4V</div><p></p></div>
+            <div class="step-box"><div class="step-num">φ₁ = (Eb×60×a)/(Z×N×P) = (215.4×60×4)/(882×1150×4) = 0.01274 Wb</div><p></p></div>
+            <div class="step-box"><div class="step-num">T = 0.159×882×0.01274×4×(73/4) = 0.159×882×0.01274×73</div><p></p></div>
+            <div class="result-box">T = 130.4 Nm</div>
+            <div class="step-box" style="margin-top:12px"><div class="step-num">Same torque: φ₁Ia₁ = φ₂Ia₂ → Ia₂ = 73/0.8 = 91.25A</div><p></p></div>
+            <div class="step-box"><div class="step-num">Eb₂ = 230−(91.25×0.2) = 211.75V</div><p></p></div>
+            <div class="step-box"><div class="step-num">N₂ = 1150×(211.75/215.4)×(1/0.8) = 1150×0.983×1.25</div><p></p></div>
+            <div class="result-box">N₂ ≈ 1413 rpm &nbsp;·&nbsp; Reducing flux increases speed</div>
+          </div>
+          <div class="mistake-box"><div class="box-label">Common mistake</div>Generator: V = E−IaRa. Motor: V = Eb+IaRa. These are opposite signs — do not swap them. Also: when comparing two operating points, Eb changes at each point (because Ia changed). Always recalculate Eb separately at each operating condition.</div>
+          <div class="exam-def"><div class="def-label">Exam-ready — series motor no-load danger</div>
+            <div class="def-text">A series motor must never run on no-load because at no load Ia → 0 → φ → 0. Since N ∝ Eb/φ and φ approaches zero, speed increases without limit — the motor runs away and can reach destructive speeds causing mechanical failure. Series motors must always be permanently coupled to their load.</div>
+          </div>
+          <div class="quick-check"><div class="qc-label">Quick check — Week 6</div><div class="qc-list">
+            <div class="qc-item"><span class="qc-badge normal">Q1</span><span>A 220V shunt motor: Ra=0.4Ω, Ia=40A. Find: (i) back EMF (ii) gross power developed (iii) torque at 1200rpm.</span></div>
+            <div class="qc-item"><span class="qc-badge normal">Q2</span><span>Derive the condition Eb=V/2 for maximum power in a DC motor. Why is this NOT the condition for maximum efficiency?</span></div>
+            <div class="qc-item"><span class="qc-badge hard">Hard</span><span>A 220V shunt motor: no-load Ia=2.5A, N=1400rpm, Ra=0.3Ω. At full load Ia=60A and armature reaction weakens flux by 3%. Find the full-load speed.</span></div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:32px;padding-top:24px;border-top:1px solid var(--border);">
+    <a href="W5.html" class="back-btn">← Week 5</a>
+    <span style="font-size:13px;color:var(--muted2);">Week 6 of 11</span>
+    <a href="W7.html" class="back-btn" style="border-color:var(--accent);color:var(--accent-deep);">Next: Week 7 →</a>
+  </div>
+</div>
+<footer>
+  <strong>ECE 210 — Electrical Machines &amp; Circuits</strong> · Week 6 · Unify Platform · LASU Faculty of Engineering<br>
+  <span style="display:block;margin-top:6px">Lecturers: Engr Mumuni · Prof Yussuf · Dr Mary · Dr Ogundare</span>
+</footer>
+<script>
+(function(){const saved=localStorage.getItem('unify-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);const b=document.getElementById('theme-btn');if(b)b.textContent=saved==='dark'?'☀ Light':'☾ Dark';}})();
+function toggleTheme(){const cur=document.documentElement.getAttribute('data-theme');const nxt=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',nxt);localStorage.setItem('unify-theme',nxt);document.getElementById('theme-btn').textContent=nxt==='dark'?'☀ Light':'☾ Dark';}
+</script>
+</body>
+</html>
