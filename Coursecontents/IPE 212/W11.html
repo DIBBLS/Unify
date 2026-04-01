@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPE 212 — Week 11: Suspension & Transmission Systems | Unify</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--muted:#555;--muted2:#999;--accent:#4ade80;--accent-deep:#16a34a;--font-heading:'Playfair Display',serif;--font-body:'DM Sans',sans-serif;--nav-h:60px}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--accent:#4ade80;--accent-deep:#4ade80}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.7;transition:background .3s,color .3s}
+nav{position:sticky;top:0;z-index:100;height:var(--nav-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px}
+.nav-logo{font-family:var(--font-heading);font-size:1.3rem;color:var(--text);text-decoration:none}
+.nav-links{display:flex;gap:24px;align-items:center}
+.nav-links a{text-decoration:none;color:var(--muted);font-size:.9rem;font-weight:500}
+.nav-links a.active{color:var(--text);font-weight:600}
+.theme-toggle{background:none;border:1px solid var(--border);border-radius:20px;padding:6px 14px;cursor:pointer;font-family:var(--font-body);font-size:.85rem;color:var(--text)}
+.back-bar{background:var(--surface2);border-bottom:1px solid var(--border);padding:12px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.back-link{text-decoration:none;color:var(--muted);font-size:.85rem;font-weight:500}
+.back-link:hover{color:var(--text)}
+.week-nav{display:flex;gap:8px}
+.week-nav a{text-decoration:none;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-size:.8rem;color:var(--muted);font-weight:500}
+.week-nav a:hover{color:var(--text);border-color:var(--accent)}
+main{max-width:860px;margin:0 auto;padding:40px 24px 80px}
+.week-block{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:32px}
+.week-header{background:var(--surface2);border-bottom:1px solid var(--border);padding:24px 32px}
+.week-number{font-size:.8rem;font-weight:600;color:var(--accent-deep);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:4px}
+.week-title{font-family:var(--font-heading);font-size:1.6rem;color:var(--text)}
+.week-body{padding:32px}
+.week-summary{color:var(--muted);font-size:.95rem;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.key-terms{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.key-term{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:.8rem;font-weight:500;color:var(--muted)}
+.exam-box{background:#fff8e7;border:1px solid #f5d97a;border-radius:8px;padding:16px 20px;margin-bottom:24px}
+[data-theme="dark"] .exam-box{background:#1a1700;border-color:#3a3000}
+.exam-box-label{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#b45309;margin-bottom:10px}
+[data-theme="dark"] .exam-box-label{color:#f59e0b}
+.exam-q{font-size:.875rem;color:var(--text);padding:6px 0;border-bottom:1px solid rgba(0,0,0,.06)}
+.exam-q:last-child{border-bottom:none}
+.past-q{display:inline-block;background:#4ade80;color:#000;font-size:.65rem;font-weight:700;text-transform:uppercase;border-radius:4px;padding:1px 6px;margin-right:6px}
+.topic-block{margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid var(--border)}
+.topic-block:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.topic-num,.topic-number{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-deep);margin-bottom:4px}
+.topic-title{font-family:var(--font-heading);font-size:1.2rem;margin-bottom:12px}
+.topic-body,.topic-explain{font-size:.9rem;color:var(--muted);margin-bottom:12px}
+.def-box{background:var(--surface2);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:14px 16px;margin:12px 0;font-size:.875rem;line-height:1.7}
+.formula-block{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin:12px 0}
+.formula-label{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-deep);margin-bottom:8px}
+.formula{font-family:monospace;font-size:1rem;color:var(--text);background:var(--surface);padding:10px 14px;border-radius:6px;border:1px solid var(--border)}
+.formula-vars{font-size:.85rem;color:var(--muted);padding-left:20px}
+.mistake-box{background:#fff1f1;border:1px solid #fca5a5;border-radius:8px;padding:14px 18px;margin:12px 0;font-size:.875rem}
+[data-theme="dark"] .mistake-box{background:#1a0a0a;border-color:#7f1d1d}
+.mistake-label{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#dc2626;margin-bottom:8px}
+.quick-check{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin-top:16px;font-size:.875rem}
+.quick-check-label{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-deep);margin-bottom:8px}
+.quick-check ol{padding-left:20px;color:var(--muted)}
+.week-nav-bottom{display:flex;justify-content:space-between;margin-top:32px;gap:16px}
+.week-nav-bottom a{flex:1;text-align:center;text-decoration:none;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:.875rem;color:var(--muted);font-weight:500}
+.week-nav-bottom a:hover{color:var(--text);border-color:var(--accent)}
+footer{background:var(--surface);border-top:1px solid var(--border);padding:24px 32px;text-align:center;font-size:.8rem;color:var(--muted2)}
+</style>
+<script>
+(function(){const saved=localStorage.getItem('unify-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);const b=document.getElementById('theme-btn');if(b)b.textContent=saved==='dark'?'☀ Light':'☾ Dark';}})();
+</script>
+</head>
+<body>
+<nav>
+  <a href="../../dashboard.html" class="nav-logo">Unify</a>
+  <div class="nav-links">
+    <a href="../../dashboard.html">Dashboard</a>
+    <a href="../../Learn.html">Learn</a>
+    <a href="../../careers.html">Career</a>
+    <a href="../../profile.html">Profile</a>
+    <a href="#" class="active">IPE 212</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">☾ Dark</button>
+</nav>
+
+<div class="back-bar">
+  <a href="../../Learn.html?course=IPE+212&name=IPE+212" class="back-link">← Back to IPE 212</a>
+  <div class="week-nav">
+    <a href="W10.html">← Week 10</a>
+    <a href="W12.html">Week 12 →</a>
+  </div>
+</div>
+
+<main>
+  <div class="week-block">
+    <div class="week-header">
+      <span class="week-number">Week 11</span>
+      <span class="week-title">Suspension &amp; Transmission Systems</span>
+    </div>
+    <div class="week-body">
+      <p class="week-summary">The suspension system isolates the vehicle body from road impacts while maintaining tyre contact. The transmission system transfers engine power to the drive wheels at the appropriate speed and torque. This week covers both systems, including IFS, IRS, springs, gearbox types, and how gears work.</p>
+
+      <div class="key-terms">
+        <span class="key-term">Suspension</span>
+        <span class="key-term">IFS</span>
+        <span class="key-term">IRS</span>
+        <span class="key-term">Coil spring</span>
+        <span class="key-term">Leaf spring</span>
+        <span class="key-term">Transmission</span>
+        <span class="key-term">Manual / Automatic</span>
+        <span class="key-term">CVT</span>
+        <span class="key-term">Synchronizer</span>
+      </div>
+
+      <div class="exam-box">
+        <div class="exam-box-label">⚑ Likely Exam Questions</div>
+        <div class="exam-q"><span class="past-q">Past Q</span>Define the suspension system. List FIVE objectives of the suspension system.</div>
+        <div class="exam-q"><span class="past-q">Past Q</span>What are the THREE principles underlying the satisfactory springing of motor vehicles?</div>
+        <div class="exam-q">Compare Independent Front Suspension (IFS) and Independent Rear Suspension (IRS). State two advantages and two disadvantages of each.</div>
+        <div class="exam-q">Distinguish between manual, automatic, and CVT transmissions. List the components of a typical gearbox.</div>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-number">Topic 11.1</div>
+        <div class="topic-title">The Suspension System</div>
+        <p class="topic-explain">Imagine driving over a speed bump without a suspension system. All of that impact would go straight into the vehicle's frame and into you. The suspension is a set of springs and dampers that absorb bumps before they reach the frame, keeping the ride smooth and keeping the tyres in contact with the road.</p>
+        <div class="def-box">
+          <strong>Suspension systems</strong> are used in vehicles to insulate the wheel and axles from the frame in order to avoid transmission of road effects to the passengers while travelling on uneven roads. It provides a comfortable ride to the passengers and avoids additional stresses in the motor car frame.<br><br>
+          Your car's suspension absorbs the impact of bumps before they strike the frame, giving you a smooth ride. Furthermore, modern suspension systems can react to the type of terrain and automatically adjust to smooth or bumpy roads.
+        </div>
+        <div class="def-box">
+          <strong>Objectives of the Suspension System:</strong><br>
+          1. To safeguard the occupants against shocks and provide riding comfort.<br>
+          2. To minimize the rolling, pitching or vertical movement tendency of motor vehicle while travelling over a rough road or when turning.<br>
+          3. To minimise the effects of stresses due to road shocks on the mechanism of the motor vehicle and provide a cushioning effect.<br>
+          4. To isolate the structure of the vehicle from shock loading and vibration due to irregularities of the road surface without impairing its stability.<br>
+          5. To provide the requisite height to body structure as well as to bear the torque and braking reactions.
+        </div>
+        <div class="def-box">
+          <strong>Three Principles of Suspension Springing:</strong><br>
+          (a) Reduction of the weight of the wheels and other components receiving the road shocks to minimum or reduction of un-sprung weight.<br>
+          (b) Reduction of rolling or pitching of the body to a minimum with suitable design and attachment of springs.<br>
+          (c) To absorb satisfactorily the large as well as the smaller road impacts with the help of a single springing device.
+        </div>
+        <div class="quick-check">
+          <div class="quick-check-label">Quick Check</div>
+          <ol>
+            <li>State THREE objectives of the suspension system.</li>
+            <li>What is the difference between "sprung weight" and "un-sprung weight"?</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-number">Topic 11.2</div>
+        <div class="topic-title">Independent Front Suspension (IFS) and Independent Rear Suspension (IRS)</div>
+        <div class="def-box">
+          <strong>Independent Front Suspension (IFS):</strong> A vehicle suspension system where each front wheel can move vertically without affecting the other. Here each of the front wheels is independently supported by a coil or leaf spring.<br><br>
+          <strong>Advantages of IFS:</strong> Improved ride quality; better handling; enhanced traction; reduced body roll; reduced steering input affected by wheel movement; low inertia — resistance to change of state of chassis body and wheel tenderness to move instead of chassis body; large wheel movement possible with softer suspension; considerable reduction or elimination of tilting tendency.<br><br>
+          <strong>Disadvantages of IFS:</strong> More complex design; potentially less durable in rugged off-road conditions; higher cost due to more complex design.<br><br>
+          <strong>Independent Rear Suspension (IRS):</strong> Each rear wheel can move up and down independently of the other. Contrasts with a solid axle or beam axle system where both wheels are linked together.<br><br>
+          <strong>Advantages of IRS:</strong> Improved traction (each wheel maintains better contact); smoother ride; better handling in cornering. Example: Chevrolet Corvette uses IRS.<br><br>
+          <strong>Disadvantages of IRS:</strong> Higher cost; increased complexity and maintenance; reduced load capacity; space considerations (may encroach on cabin or cargo space).
+        </div>
+        <div class="def-box">
+          <strong>Springs in the Suspension System:</strong><br>
+          Springs are fitted between the frame and the wheel to prevent the upward movement of the frame along with the up and down movement of the wheel. A spring is a reservoir of energy stored in steel springs by bending them or by twining them.<br><br>
+          Types: (i) Steel-laminated, helical coil type, leaf type and torsion bar; (ii) Rubber suspension spring; (iii) Air or pneumatic suspension bags.<br><br>
+          <strong>Laminated/Leaf Springs:</strong> Preferably for the rear suspension of passenger cars, front and rear spring of commercial vehicles, and in certain types of independent front suspension in transverse situation. Provide even stress distribution and a varying frequency of spring vibration.
+        </div>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-number">Topic 11.3</div>
+        <div class="topic-title">Transmission and Gearing Systems</div>
+        <p class="topic-explain">Transmission is like a bicycle's gear system. When you're starting from a stop or going uphill, you need a low gear — lots of force but slow speed. When you're cruising at high speed, you need a high gear — less force but high speed. The transmission does this automatically (or manually) for your car engine.</p>
+        <div class="def-box">
+          <strong>Transmission:</strong> The mechanism through which the driving torque of the engine is transmitted to the driving wheel of the vehicle through sets of gear. It is a sort of speed and power changing device needed between the engine of the automobile and its driving wheels.<br><br>
+          <strong>Gearing systems</strong> in automobiles are crucial for transferring power from the engine to the wheels, enabling various speeds and torque outputs. They achieve this by utilising a series of gears of different sizes that mesh together, allowing the driver to select the optimal gear ratio for different driving conditions.
+        </div>
+        <div class="def-box">
+          <strong>Types of Gearing Systems:</strong><br>
+          — <strong>Manual Transmission:</strong> Requires the driver to manually select gears using a clutch pedal and gearshift lever.<br>
+          — <strong>Automatic Transmission:</strong> Automatically shifts gears based on driving conditions, eliminating the need for manual gear selection.<br>
+          — <strong>Continuously Variable Transmission (CVT):</strong> Offers a virtually infinite number of gear ratios, providing smooth and efficient power delivery.<br><br>
+          <strong>Components of a Typical Gearbox:</strong><br>
+          — Input Shaft: Receives power from the engine.<br>
+          — Output Shaft: Transmits power to the wheels.<br>
+          — Gears: Various sizes arranged on shafts to create different gear ratios.<br>
+          — Synchronizers (in manual transmissions): Used to synchronize the speed of the gear and shaft before engagement, ensuring smooth gear changes.<br>
+          — Clutch (in manual transmissions): Disconnects the engine from the transmission during gear changes.
+        </div>
+        <div class="def-box">
+          <strong>How Gears Work:</strong><br>
+          Gears of different sizes are arranged on shafts. When a gear on one shaft meshes with a gear on another shaft, the rotation of the first shaft is transferred to the second, but at a different speed and torque depending on the gear sizes.<br><br>
+          A smaller gear driving a larger gear will result in a <strong>lower speed but higher torque</strong>, while the opposite is true for a larger gear driving a smaller one.
+        </div>
+        <div class="formula-block">
+          <div class="formula-label">Gear Ratio Formula</div>
+          <div class="formula">Gear Ratio = Number of teeth on driven gear / Number of teeth on driving gear</div>
+          <ul class="formula-vars" style="margin-top:8px;">
+            <li>If ratio &gt; 1: Output shaft is slower but more torque (low gear)</li>
+            <li>If ratio &lt; 1: Output shaft is faster but less torque (high gear/overdrive)</li>
+          </ul>
+        </div>
+        <div class="mistake-box">
+          <div class="mistake-label">Common Mistake</div>
+          Students think "a higher gear always means more power." Wrong — a higher gear means higher SPEED but LOWER torque. Torque (turning force) is what actually moves the vehicle from rest or up a hill. In a high gear at low speed, the engine struggles because there isn't enough torque — that's why you downshift when climbing a steep slope.
+        </div>
+        <div class="quick-check">
+          <div class="quick-check-label">Quick Check</div>
+          <ol>
+            <li>What is the function of the synchronizer in a manual gearbox?</li>
+            <li>A driving gear has 20 teeth and the driven gear has 60 teeth. Calculate the gear ratio and state what this means for speed and torque.</li>
+            <li>What is the key advantage of a CVT over a conventional automatic transmission?</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="week-nav-bottom">
+        <a href="W10.html">← Week 10: Valve Train &amp; Bearings</a>
+        <a href="W12.html">Week 12: Aerodynamics &amp; Maintenance →</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <strong>IPE 212 — Automotive Engineering &amp; Workshop</strong> · Week 11 · Unify Platform · LASU Faculty of Engineering<br>
+  <span style="display:block;margin-top:6px">Lecturer: Dr Mrs. V.D. Obasa</span>
+</footer>
+
+<script>
+function toggleTheme(){const cur=document.documentElement.getAttribute('data-theme');const nxt=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',nxt);localStorage.setItem('unify-theme',nxt);document.getElementById('theme-btn').textContent=nxt==='dark'?'☀ Light':'☾ Dark';}
+</script>
+</body>
+</html>

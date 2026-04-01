@@ -629,12 +629,27 @@ nav {
 .video-placeholder-inner .vp-icon { font-size: 32px; opacity: .25; }
 .video-placeholder-inner .vp-text { font-size: 13px; }
 
+.mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg); border-top: 1px solid var(--border); z-index: 200; padding: 6px 0 calc(6px + env(safe-area-inset-bottom)); transition: background 0.25s, border-color 0.25s; }
+.mobile-nav-inner { display: flex; justify-content: space-around; }
+.mobile-nav-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; background: none; border: none; cursor: pointer; font-family: var(--font-body); color: var(--text3); padding: 6px 10px; border-radius: 10px; transition: all 0.15s; text-decoration: none; min-width: 52px; }
+.mobile-nav-btn.active { color: var(--text); }
+.mobile-nav-icon { font-size: 22px; line-height: 1; }
+.mobile-nav-label { font-size: 10px; font-weight: 500; }
+.mobile-nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text); margin-top: 2px; opacity: 0; transition: opacity 0.15s; }
+.mobile-nav-btn.active .mobile-nav-dot { opacity: 1; }
+
 @media (max-width: 900px) {
   .learn-layout { grid-template-columns: 1fr; }
-  .learn-sidebar { position: relative; height: auto; top: 0; border-right: none; border-bottom: 1px solid var(--border); max-height: 320px; }
+  .learn-sidebar { position: relative; height: auto; top: 0; border-right: none; border-bottom: 1px solid var(--border); max-height: 360px; overflow-y: auto; }
   .lesson-header, .lesson-body, .lesson-complete-section { padding: 24px 20px; }
+  .week-landing { padding: 24px 20px; }
   .course-complete { padding: 40px 20px; }
   .lesson-content-grid { grid-template-columns: 1fr; }
+  .sticky-complete-bar { padding: 12px 16px; }
+  .cc-stats { grid-template-columns: repeat(2, 1fr); }
+  .cc-week-bar-wrap, .cc-week-conf, .cc-week-topics { display: none; }
+  .mobile-nav { display: block; }
+  body { padding-bottom: 76px; }
 }
 </style>
 </head>
@@ -651,8 +666,25 @@ nav {
   <a href="dashboard.html" class="nav-logo">← Unify</a>
   <span class="nav-course-name" id="navCourseName">Loading...</span>
   <div class="nav-right">
-    <button class="nav-btn" onclick="toggleTheme()" id="themeToggle">🌙</button>
+    <button class="nav-btn" onclick="toggleTheme()" id="themeToggle">Dark</button>
     <a href="dashboard.html" class="nav-btn">Dashboard</a>
+  </div>
+</nav>
+
+<nav class="mobile-nav">
+  <div class="mobile-nav-inner">
+    <a href="dashboard.html" class="mobile-nav-btn">
+      <span class="mobile-nav-label">Dashboard</span>
+      <div class="mobile-nav-dot"></div>
+    </a>
+    <a href="timetable.html" class="mobile-nav-btn">
+      <span class="mobile-nav-label">Timetable</span>
+      <div class="mobile-nav-dot"></div>
+    </a>
+    <a href="profile.html" class="mobile-nav-btn">
+      <span class="mobile-nav-label">Profile</span>
+      <div class="mobile-nav-dot"></div>
+    </a>
   </div>
 </nav>
 
@@ -915,7 +947,7 @@ function initTheme() {
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   const btn = document.getElementById('themeToggle');
-  if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+  if (btn) btn.textContent = theme === 'dark' ? 'Light' : 'Dark';
 }
 window.toggleTheme = function() {
   const cur = document.documentElement.getAttribute('data-theme');

@@ -109,22 +109,58 @@ nav {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
 }
+.mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--white); border-top: 1px solid var(--grey); z-index: 200; padding: 6px 0 calc(6px + env(safe-area-inset-bottom)); }
+.mobile-nav-inner { display: flex; justify-content: space-around; }
+.mobile-nav-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; background: none; border: none; cursor: pointer; font-family: var(--font-body); color: var(--mid); padding: 6px 10px; border-radius: 10px; transition: all 0.15s; text-decoration: none; min-width: 52px; }
+.mobile-nav-btn.active { color: var(--black); }
+.mobile-nav-icon { font-size: 22px; line-height: 1; }
+.mobile-nav-label { font-size: 10px; font-weight: 500; }
+.mobile-nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--black); margin-top: 2px; opacity: 0; transition: opacity 0.15s; }
+.mobile-nav-btn.active .mobile-nav-dot { opacity: 1; }
+
 @media (max-width: 640px) {
   nav { padding: 18px 20px; }
+  .nav-links { display: none; }
+  .mobile-nav { display: block; }
+  body { padding-bottom: 76px; }
+  .page-wrap { padding: 40px 20px 80px; }
+  .page-sub { margin-bottom: 32px; }
   .targets-row { grid-template-columns: repeat(2, 1fr); }
   .input-row { grid-template-columns: 1fr; }
+  .result-header { padding: 20px; }
+  .result-verdict { font-size: 22px; }
+  .result-body { padding: 20px; }
   .result-stats { grid-template-columns: 1fr 1fr; }
+  .scale-section { overflow-x: auto; }
+  .scale-table { min-width: 480px; }
 }
 </style>
 </head>
 <body>
 
 <nav>
-  <a href="index.html" class="nav-logo">Unify</a>
+  <a href="dashboard.html" class="nav-logo">Unify</a>
   <div class="nav-links">
-    <a href="index.html">Home</a>
     <a href="dashboard.html">Dashboard</a>
-    <a href="predictor.html" class="active">Predictor</a>
+    <a href="timetable.html">Timetable</a>
+    <a href="profile.html">Profile</a>
+  </div>
+</nav>
+
+<nav class="mobile-nav">
+  <div class="mobile-nav-inner">
+    <a href="dashboard.html" class="mobile-nav-btn">
+      <span class="mobile-nav-label">Dashboard</span>
+      <div class="mobile-nav-dot"></div>
+    </a>
+    <a href="timetable.html" class="mobile-nav-btn">
+      <span class="mobile-nav-label">Timetable</span>
+      <div class="mobile-nav-dot"></div>
+    </a>
+    <a href="profile.html" class="mobile-nav-btn">
+      <span class="mobile-nav-label">Profile</span>
+      <div class="mobile-nav-dot"></div>
+    </a>
   </div>
 </nav>
 

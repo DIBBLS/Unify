@@ -91,7 +91,6 @@ nav {
 .mobile-nav-inner { display: flex; justify-content: space-around; }
 .mobile-nav-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; background: none; border: none; cursor: pointer; font-family: var(--font-body); color: var(--text3); padding: 6px 10px; border-radius: 10px; transition: all 0.15s; text-decoration: none; min-width: 52px; }
 .mobile-nav-btn.active { color: var(--text); }
-.mobile-nav-icon { font-size: 22px; line-height: 1; }
 .mobile-nav-label { font-size: 10px; font-weight: 500; }
 .mobile-nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text); margin-top: 2px; opacity: 0; transition: opacity 0.15s; }
 .mobile-nav-btn.active .mobile-nav-dot { opacity: 1; }
@@ -290,8 +289,6 @@ nav {
   <div class="nav-links">
     <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
     <a href="timetable.html" class="nav-link active">📅 Timetable</a>
-    <a href="dashboard.html#community" class="nav-link">🌍 Community</a>
-    <a href="careers.html" class="nav-link">🗺 Explore</a>
     <a href="profile.html" class="nav-link">👤 Profile</a>
   </div>
   <div class="nav-right">
@@ -407,27 +404,14 @@ nav {
 <nav class="mobile-nav">
   <div class="mobile-nav-inner">
     <a href="dashboard.html" class="mobile-nav-btn">
-      <span class="mobile-nav-icon">🏠</span>
       <span class="mobile-nav-label">Dashboard</span>
       <div class="mobile-nav-dot"></div>
     </a>
     <a href="timetable.html" class="mobile-nav-btn active">
-      <span class="mobile-nav-icon">📅</span>
       <span class="mobile-nav-label">Timetable</span>
       <div class="mobile-nav-dot"></div>
     </a>
-    <a href="dashboard.html" class="mobile-nav-btn">
-      <span class="mobile-nav-icon">🌍</span>
-      <span class="mobile-nav-label">Community</span>
-      <div class="mobile-nav-dot"></div>
-    </a>
-    <a href="careers.html" class="mobile-nav-btn">
-      <span class="mobile-nav-icon">🗺</span>
-      <span class="mobile-nav-label">Explore</span>
-      <div class="mobile-nav-dot"></div>
-    </a>
     <a href="profile.html" class="mobile-nav-btn">
-      <span class="mobile-nav-icon">👤</span>
       <span class="mobile-nav-label">Profile</span>
       <div class="mobile-nav-dot"></div>
     </a>

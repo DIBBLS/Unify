@@ -1,0 +1,46 @@
+Here's the exact prompt to paste in your new chat:
+I'm building a native online learning library for a student platform called Unify, designed for engineering students at Lagos State University (LASU). I need you to take course material and produce a styled HTML file that matches the Unify design system exactly.
+Design system — copy this exactly:
+* Fonts: `Playfair Display` (headings, italic titles, formulas) + `DM Sans` (body, labels, nav) — both from Google Fonts
+* Background: `#f5f4f0` (warm off-white)
+* Surface: `#ffffff`
+* Surface 2: `#f8f7f3`
+* Border: `#e0deda`
+* Text: `#0a0a0a`
+* Text muted: `#555` and `#999`
+* Accent green: `#4ade80` (the ONLY color accent — no blue, no purple, nothing else)
+* Green deep: `#16a34a`
+* Green background: `#dcfce7`
+* Dark mode variables: `--bg:#0f0f0f` `--surface:#1a1a1a` `--surface2:#222` `--border:#2a2a2a` `--text:#f0efeb`
+* Dark mode is mandatory — every color must work in both modes via `data-theme="dark"` on the html element
+Page structure — follow this exactly:
+1. Nav — sticky top nav with Unify logo (Playfair Display, 20px, 900 weight), links to Dashboard / Career / Profile / current course (marked active with green bottom border), and a Dark mode toggle button that saves to `localStorage` under the key `unify-theme`
+2. Hero — course code + name in large Playfair Display italic title, eyebrow label saying "Unify · LASU Faculty of Engineering · Native Learning Library", one-line description, and tag pills for level / semester / peer reviewed status
+3. Table of contents — week navigation grid (3 columns), each item is a bordered link card that jumps to that week's section
+4. Week blocks — for each week: dark header bar, week summary, key term tags, likely exam questions in amber box with Past Q badges, topic blocks
+5. Topic blocks — topic number + title, explanation written simply (like a 5-year-old could understand), formula block, SVG diagram, real-world example box (green left border), common mistakes box (red left border), quick-check questions
+Semantic box colors:
+* Formula block: `#f8f7f3` background, `#e0deda` border, green uppercase label
+* Real-world example box: `#f0fdf4` background, `#bbf7d0` left border (3px)
+* Mistake box: `#fff5f5` background, `#fca5a5` left border (3px), red label
+* Exam questions box: `#fffbeb` background, `#fcd34d` left border (3px)
+* Exam-ready definition box: `var(--surface2)` background, `1.5px solid var(--accent)` border
+Content quality standard:
+* Definitions must be word-for-word from the material
+* Explanations broken down so simply a 5-year-old could understand
+* Every worked example from the notes must be included with full step-by-step solution
+* Common mistakes must be specific — exactly what the wrong answer looks like and why
+* SVG diagrams for every concept that has a visual component
+* No Nigerian analogies — use real-world examples instead
+File output:
+* One complete standalone HTML file
+* Dark mode toggle script using `localStorage` key `unify-theme`
+* Mobile responsive — nav collapses, single column grid below 700px
+* Footer with course details
+* No external dependencies except the two Google Fonts
+How to work with me:
+* I will send course material images in batches of ~20
+* After all batches, confirm the week 1–12 structure with me before building
+* Always 12 weeks
+* Wait for me to provide the material before you begin
+Just paste that, then start sending your images! 🎓

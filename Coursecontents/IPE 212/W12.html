@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPE 212 — Week 12: Aerodynamics & Vehicle Maintenance | Unify</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--muted:#555;--muted2:#999;--accent:#4ade80;--accent-deep:#16a34a;--font-heading:'Playfair Display',serif;--font-body:'DM Sans',sans-serif;--nav-h:60px}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--accent:#4ade80;--accent-deep:#4ade80}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.7;transition:background .3s,color .3s}
+nav{position:sticky;top:0;z-index:100;height:var(--nav-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px}
+.nav-logo{font-family:var(--font-heading);font-size:1.3rem;color:var(--text);text-decoration:none}
+.nav-links{display:flex;gap:24px;align-items:center}
+.nav-links a{text-decoration:none;color:var(--muted);font-size:.9rem;font-weight:500}
+.nav-links a.active{color:var(--text);font-weight:600}
+.theme-toggle{background:none;border:1px solid var(--border);border-radius:20px;padding:6px 14px;cursor:pointer;font-family:var(--font-body);font-size:.85rem;color:var(--text)}
+.back-bar{background:var(--surface2);border-bottom:1px solid var(--border);padding:12px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.back-link{text-decoration:none;color:var(--muted);font-size:.85rem;font-weight:500}
+.back-link:hover{color:var(--text)}
+.week-nav{display:flex;gap:8px}
+.week-nav a{text-decoration:none;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-size:.8rem;color:var(--muted);font-weight:500}
+.week-nav a:hover{color:var(--text);border-color:var(--accent)}
+main{max-width:860px;margin:0 auto;padding:40px 24px 80px}
+.week-block{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:32px}
+.week-header{background:var(--surface2);border-bottom:1px solid var(--border);padding:24px 32px}
+.week-number{font-size:.8rem;font-weight:600;color:var(--accent-deep);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:4px}
+.week-title{font-family:var(--font-heading);font-size:1.6rem;color:var(--text)}
+.week-body{padding:32px}
+.week-summary{color:var(--muted);font-size:.95rem;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.key-terms{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.key-term{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:.8rem;font-weight:500;color:var(--muted)}
+.exam-box{background:#fff8e7;border:1px solid #f5d97a;border-radius:8px;padding:16px 20px;margin-bottom:24px}
+[data-theme="dark"] .exam-box{background:#1a1700;border-color:#3a3000}
+.exam-box-label{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#b45309;margin-bottom:10px}
+[data-theme="dark"] .exam-box-label{color:#f59e0b}
+.exam-q{font-size:.875rem;color:var(--text);padding:6px 0;border-bottom:1px solid rgba(0,0,0,.06)}
+.exam-q:last-child{border-bottom:none}
+.past-q{display:inline-block;background:#4ade80;color:#000;font-size:.65rem;font-weight:700;text-transform:uppercase;border-radius:4px;padding:1px 6px;margin-right:6px}
+.topic-block{margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid var(--border)}
+.topic-block:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.topic-num,.topic-number{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-deep);margin-bottom:4px}
+.topic-title{font-family:var(--font-heading);font-size:1.2rem;margin-bottom:12px}
+.topic-body,.topic-explain{font-size:.9rem;color:var(--muted);margin-bottom:12px}
+.def-box{background:var(--surface2);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:14px 16px;margin:12px 0;font-size:.875rem;line-height:1.7}
+.rw-box{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:14px 18px;margin:12px 0;font-size:.875rem}
+[data-theme="dark"] .rw-box{background:#0a1f0e;border-color:#166534}
+.rw-label{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-deep);margin-bottom:8px}
+.mistake-box{background:#fff1f1;border:1px solid #fca5a5;border-radius:8px;padding:14px 18px;margin:12px 0;font-size:.875rem}
+[data-theme="dark"] .mistake-box{background:#1a0a0a;border-color:#7f1d1d}
+.mistake-label{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#dc2626;margin-bottom:8px}
+.diagram-wrap{margin:16px 0;text-align:center}
+.diagram-caption{font-size:.8rem;color:var(--muted2);margin-top:8px;font-style:italic}
+.quick-check{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin-top:16px;font-size:.875rem}
+.quick-check-label{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-deep);margin-bottom:8px}
+.quick-check ol{padding-left:20px;color:var(--muted)}
+.week-nav-bottom{display:flex;justify-content:space-between;margin-top:32px;gap:16px}
+.week-nav-bottom a{flex:1;text-align:center;text-decoration:none;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:.875rem;color:var(--muted);font-weight:500}
+.week-nav-bottom a:hover{color:var(--text);border-color:var(--accent)}
+footer{background:var(--surface);border-top:1px solid var(--border);padding:24px 32px;text-align:center;font-size:.8rem;color:var(--muted2)}
+</style>
+<script>
+(function(){const saved=localStorage.getItem('unify-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);const b=document.getElementById('theme-btn');if(b)b.textContent=saved==='dark'?'☀ Light':'☾ Dark';}})();
+</script>
+</head>
+<body>
+<nav>
+  <a href="../../dashboard.html" class="nav-logo">Unify</a>
+  <div class="nav-links">
+    <a href="../../dashboard.html">Dashboard</a>
+    <a href="../../Learn.html">Learn</a>
+    <a href="../../careers.html">Career</a>
+    <a href="../../profile.html">Profile</a>
+    <a href="#" class="active">IPE 212</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">☾ Dark</button>
+</nav>
+
+<div class="back-bar">
+  <a href="../../Learn.html?course=IPE+212&name=IPE+212" class="back-link">← Back to IPE 212</a>
+  <div class="week-nav">
+    <a href="W11.html">← Week 11</a>
+    <span style="padding:5px 12px;font-size:.8rem;color:var(--muted2)">Final Week</span>
+  </div>
+</div>
+
+<main>
+  <div class="week-block">
+    <div class="week-header">
+      <span class="week-number">Week 12</span>
+      <span class="week-title">Aerodynamics &amp; Vehicle Maintenance</span>
+    </div>
+    <div class="week-body">
+      <p class="week-summary">Aerodynamics explains how air interacts with moving vehicles, affecting drag, lift, and fuel efficiency. Vehicle maintenance covers the eight types of maintenance strategies used in engineering to keep vehicles and equipment running reliably.</p>
+
+      <div class="key-terms">
+        <span class="key-term">Aerodynamics</span>
+        <span class="key-term">Drag</span>
+        <span class="key-term">Lift</span>
+        <span class="key-term">Preventive maintenance</span>
+        <span class="key-term">Corrective maintenance</span>
+        <span class="key-term">Predictive maintenance</span>
+        <span class="key-term">CBM</span>
+        <span class="key-term">TPM</span>
+      </div>
+
+      <div class="exam-box">
+        <div class="exam-box-label">⚑ Likely Exam Questions</div>
+        <div class="exam-q"><span class="past-q">Past Q</span>Define aerodynamics. What are the four fundamental forces acting on an airfoil / vehicle in motion?</div>
+        <div class="exam-q"><span class="past-q">Past Q</span>List and explain FOUR types of maintenance in engineering. Give an example of each.</div>
+        <div class="exam-q">Distinguish between Preventive Maintenance and Corrective Maintenance. When is each appropriate?</div>
+        <div class="exam-q">What is Total Productive Maintenance (TPM)? State its three pillars.</div>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-number">Topic 12.1</div>
+        <div class="topic-title">Aerodynamics and Resistances to Vehicle Motion</div>
+        <p class="topic-explain">When a car moves, it has to push air out of the way. The air pushes back — this is drag. Good aerodynamic design reduces drag so the engine doesn't have to work as hard to maintain speed. It's why sports cars are shaped like teardrops and not like boxes — a box shape creates much more drag than a curved shape.</p>
+        <div class="def-box">
+          <strong>Aerodynamics:</strong> From Greek — aer (air) + dynamike (dynamics). It is a branch of dynamics concerned with studying the motion of air, particularly when it interacts with a solid object, such as an airplane wing.<br><br>
+          Aerodynamics is a sub-field of fluid dynamics and gas dynamics. The term aerodynamics is often used synonymously with gas dynamics.<br><br>
+          <strong>Fundamental Concept:</strong> Understanding the motion of air around an object (a flow field) enables the calculation of forces and moments acting on the object. The fundamental forces of flight (and vehicle motion): <strong>lift, drag, thrust, and weight</strong>. Of these, lift and drag are aerodynamic forces — forces due to air flow over a solid body.
+        </div>
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:500px;display:block;margin:0 auto;">
+            <defs><style>.aero-t{font-family:'DM Sans',sans-serif;font-size:12px;fill:#0a0a0a;text-anchor:middle;}</style>
+            <marker id="aarr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4ade80"/></marker>
+            <marker id="aarr-r" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#dc2626"/></marker>
+            <marker id="aarr-b" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#555"/></marker></defs>
+            <!-- Airfoil shape -->
+            <path d="M120,100 Q200,60 380,95 Q300,140 120,100 Z" fill="#f8f7f3" stroke="#e0deda" stroke-width="2"/>
+            <!-- Lift arrow (up) -->
+            <line x1="250" y1="88" x2="250" y2="35" stroke="#4ade80" stroke-width="2.5" marker-end="url(#aarr)"/>
+            <text x="250" y="28" class="aero-t" fill="#16a34a" font-weight="600">LIFT ↑</text>
+            <!-- Weight arrow (down) -->
+            <line x1="250" y1="115" x2="250" y2="168" stroke="#555" stroke-width="2.5" marker-end="url(#aarr-b)"/>
+            <text x="250" y="182" class="aero-t" fill="#555" font-weight="600">WEIGHT ↓</text>
+            <!-- Thrust arrow (right) -->
+            <line x1="380" y1="100" x2="450" y2="100" stroke="#4ade80" stroke-width="2.5" marker-end="url(#aarr)"/>
+            <text x="460" y="104" class="aero-t" fill="#16a34a" font-weight="600" text-anchor="start">THRUST →</text>
+            <!-- Drag arrow (left) -->
+            <line x1="120" y1="100" x2="50" y2="100" stroke="#dc2626" stroke-width="2.5" marker-end="url(#aarr-r)"/>
+            <text x="40" y="104" class="aero-t" fill="#dc2626" font-weight="600" text-anchor="end">← DRAG</text>
+          </svg>
+          <p class="diagram-caption">The four aerodynamic forces acting on a vehicle/airfoil</p>
+        </div>
+        <div class="rw-box">
+          <div class="rw-label">Real-World Example</div>
+          Formula 1 cars have large rear wings that create downforce (negative lift) to push the car into the track, improving tyre grip and cornering. This increases drag but the benefit — much faster cornering speeds — outweighs the cost in straight-line speed.
+        </div>
+        <div class="quick-check">
+          <div class="quick-check-label">Quick Check</div>
+          <ol>
+            <li>What are the four fundamental aerodynamic forces? Which two are aerodynamic forces?</li>
+            <li>Why do sports cars have low, sloping hoods rather than vertical front faces?</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-number">Topic 12.2</div>
+        <div class="topic-title">Types of Maintenance in Engineering</div>
+        <p class="topic-explain">Maintenance is how you keep machines running reliably. Different situations call for different strategies — sometimes you schedule regular check-ups (preventive), sometimes you fix things after they break (corrective), and sometimes technology tells you when something is about to fail before it actually does (predictive).</p>
+        <div class="def-box">
+          <strong>1. Preventive Maintenance (PM):</strong> Scheduled maintenance performed to prevent breakdowns or failures. Examples: Lubrication, inspections, cleaning, part replacement on a schedule. Advantage: Reduces the likelihood of equipment failure.<br><br>
+          <strong>2. Corrective Maintenance (CM):</strong> Carried out after a fault is detected and is aimed at restoring equipment to proper working condition. Two types:<br>
+          — Planned Corrective: When the issue is known and scheduled for repair.<br>
+          — Unplanned Corrective (Breakdown Maintenance): After equipment has failed unexpectedly.<br><br>
+          <strong>3. Predictive Maintenance (PdM):</strong> Uses data and condition monitoring tools to predict failure before they occur. Examples: Vibration analysis, thermography, oil analysis. Advantage: Perform maintenance only when needed, based on actual equipment condition.<br><br>
+          <strong>4. Condition Based Maintenance (CBM):</strong> Performed when certain indicators show signs of decreasing performance or upcoming failure. Tools used: Sensors, diagnostic software. Difference from PdM: CBM reacts to current conditions; PdM predicts future failure.<br><br>
+          <strong>5. Reliability Centred Maintenance (RCM):</strong> A strategy focused on identifying the most effective maintenance approach based on risk and reliability. Advantage: Optimize safety, performance, and cost-effectiveness.<br><br>
+          <strong>6. Emergency Maintenance:</strong> Urgent repairs to prevent serious consequences or safety hazards. Example: Fixing a gas leak or electrical short.<br><br>
+          <strong>7. Deferred Maintenance:</strong> Maintenance that has been delayed due to budget or resource constraints. Risk: Can lead to larger issues or failures later.<br><br>
+          <strong>8. Total Productive Maintenance (TPM):</strong> Involves all employees in maintaining equipment with the goal of zero breakdowns and zero defects. Pillars: Autonomous Maintenance, Focused Improvement, Training.
+        </div>
+        <div class="mistake-box">
+          <div class="mistake-label">Common Mistake</div>
+          Students confuse Predictive (PdM) and Condition Based (CBM) maintenance. Key distinction: PdM uses historical data and trends to PREDICT future failure — it acts BEFORE any symptom appears. CBM responds to current condition indicators already showing signs of decline. PdM is proactive; CBM is reactive to early warning signs.
+        </div>
+        <div class="rw-box">
+          <div class="rw-label">Real-World Example</div>
+          Airlines use Predictive Maintenance extensively. Jet engines transmit thousands of data points per second to ground teams. Algorithms detect subtle changes in vibration patterns that indicate a bearing is starting to wear — and the engine is serviced during the next scheduled stop, before any failure occurs. This prevents mid-flight emergencies.
+        </div>
+        <div class="quick-check">
+          <div class="quick-check-label">Quick Check</div>
+          <ol>
+            <li>List all eight types of maintenance.</li>
+            <li>A technician replaces engine oil every 5,000 km regardless of its condition. What type of maintenance is this?</li>
+            <li>What are the three pillars of Total Productive Maintenance (TPM)?</li>
+            <li>Distinguish between planned corrective maintenance and unplanned corrective maintenance.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="week-nav-bottom">
+        <a href="W11.html">← Week 11: Suspension &amp; Transmission</a>
+        <a href="../../Learn.html?course=IPE+212&name=IPE+212" style="background:var(--accent);color:#000;border-color:var(--accent);font-weight:600">Course Complete ✓</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <strong>IPE 212 — Automotive Engineering &amp; Workshop</strong> · Week 12 · Unify Platform · LASU Faculty of Engineering<br>
+  <span style="display:block;margin-top:6px">Lecturer: Dr Mrs. V.D. Obasa</span>
+</footer>
+
+<script>
+function toggleTheme(){const cur=document.documentElement.getAttribute('data-theme');const nxt=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',nxt);localStorage.setItem('unify-theme',nxt);document.getElementById('theme-btn').textContent=nxt==='dark'?'☀ Light':'☾ Dark';}
+</script>
+</body>
+</html>
