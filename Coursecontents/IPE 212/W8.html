@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPE 212 — Week 8: Piston Operations &amp; Engine Classification | Unify</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--muted:#555;--muted2:#999;--accent:#4ade80;--accent-deep:#16a34a;--font-heading:'Playfair Display',serif;--font-body:'DM Sans',sans-serif;--nav-h:60px}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--accent:#4ade80;--accent-deep:#4ade80}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.7;font-size:15px;transition:background .2s,color .2s}
+nav{position:sticky;top:0;z-index:100;height:var(--nav-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;gap:32px}
+.nav-logo{font-family:var(--font-heading);font-size:20px;font-weight:900;color:var(--text);text-decoration:none;flex-shrink:0}
+.nav-links{display:flex;gap:4px;flex:1}
+.nav-links a{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:6px;border-bottom:2px solid transparent;transition:color .15s}
+.nav-links a:hover{color:var(--text)}.nav-links a.active{color:var(--accent-deep);border-bottom-color:var(--accent)}
+.theme-toggle{margin-left:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-family:var(--font-body);font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;flex-shrink:0}
+.theme-toggle:hover{color:var(--text);border-color:var(--muted)}
+.week-page{max-width:900px;margin:0 auto;padding:40px 48px 80px}
+.back-bar{display:flex;align-items:center;gap:12px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.back-btn:hover{color:var(--text);border-color:var(--text)}
+.week-nav{display:flex;gap:8px;margin-left:auto}
+.wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.wnav-btn:hover{color:var(--text);border-color:var(--text)}.wnav-btn.disabled{opacity:.35;pointer-events:none}
+.week-block{border-radius:14px;border:1px solid var(--border);overflow:hidden;background:var(--surface)}
+.week-header{background:var(--text);color:var(--bg);padding:24px 32px;display:flex;align-items:baseline;gap:20px}
+[data-theme="dark"] .week-header{background:var(--surface2);border-bottom:1px solid var(--border);color:var(--text)}
+.week-num{font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;opacity:.55;white-space:nowrap}
+.week-title{font-family:var(--font-heading);font-size:21px;font-weight:700;font-style:italic;color:inherit}
+[data-theme="dark"] .week-title{color:var(--text)}
+.week-body{padding:28px 32px}
+.week-summary{font-size:14px;color:var(--muted);margin-bottom:1.2rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border);line-height:1.75}
+.key-terms{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.5rem}
+.key-term{background:var(--surface2);border:1px solid var(--border);font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;color:var(--muted)}
+.exam-box{background:#fffbeb;border-left:3px solid #fcd34d;border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:1.5rem}
+[data-theme="dark"] .exam-box{background:#1c1a0f}
+.exam-box-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#92400e;margin-bottom:10px}
+[data-theme="dark"] .exam-box-label{color:#fbbf24}
+.exam-q{font-size:13.5px;color:var(--text);margin-bottom:6px;display:flex;align-items:flex-start;gap:8px}
+.past-q{background:#fcd34d;color:#78350f;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap;flex-shrink:0;margin-top:3px}
+.topic-block{margin-bottom:2rem;padding-bottom:2rem;border-bottom:1px solid var(--border)}
+.topic-block:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.topic-number{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:4px}
+.topic-title{font-family:var(--font-heading);font-size:1.2rem;font-weight:700;margin-bottom:.8rem;color:var(--text)}
+.topic-explain{font-size:14px;color:var(--muted);margin-bottom:1rem;line-height:1.75}
+.def-box{background:var(--surface2);border:1.5px solid var(--accent);border-radius:8px;padding:14px 18px;margin-bottom:1rem;font-size:14px;line-height:1.7}
+.def-box strong{color:var(--accent-deep)}
+.mistake-box{background:#fff5f5;border-left:3px solid #fca5a5;border-radius:0 8px 8px 0;padding:14px 18px;margin-bottom:1rem;font-size:13.5px}
+[data-theme="dark"] .mistake-box{background:#1f0d0d}
+.mistake-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#dc2626;margin-bottom:6px}
+.quick-check{margin-top:1rem}
+.quick-check-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px}
+.quick-check ol{padding-left:1.2rem;font-size:13.5px;color:var(--muted)}
+.quick-check ol li{margin-bottom:4px}
+.diagram-wrap{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:1rem;overflow-x:auto}
+.diagram-caption{font-size:11px;color:var(--muted2);text-align:center;margin-top:8px;font-style:italic}
+footer{border-top:1px solid var(--border);padding:32px 48px;text-align:center;font-size:13px;color:var(--muted2);max-width:900px;margin:0 auto}
+footer strong{color:var(--muted);font-weight:500}
+p{margin-bottom:.7rem}
+@media(max-width:700px){nav{padding:0 16px;gap:16px}.nav-links{display:none}.week-page{padding:20px 16px 60px}.week-body{padding:20px}footer{padding:24px 20px}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="../../dashboard.html" class="nav-logo">Unify</a>
+  <div class="nav-links">
+    <a href="../../dashboard.html">Dashboard</a>
+    <a href="../../Learn.html">Learn</a>
+    <a href="../../careers.html">Career</a>
+    <a href="../../profile.html">Profile</a>
+    <a href="#" class="active">IPE 212</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">☾ Dark</button>
+</nav>
+
+<div class="week-page">
+  <div class="back-bar">
+    <a href="../../Learn.html?course=IPE+212&name=IPE+212" class="back-btn">← Back to IPE 212</a>
+    <div class="week-nav">
+      <a href="W7.html" class="wnav-btn">← Prev</a>
+      <a href="W9.html" class="wnav-btn">Next →</a>
+    </div>
+  </div>
+
+  <div class="week-block">
+    <div class="week-header">
+      <span class="week-num">Week 8 of 12</span>
+      <span class="week-title">Piston Engine Operations &amp; Engine Classification</span>
+    </div>
+    <div class="week-body">
+      <p class="week-summary">The four-stroke cycle is the fundamental operating sequence of most automobile engines. This week explains each stroke in detail, followed by a comprehensive classification of engines by fuel type, cylinder number, arrangement, operating cycle, and ignition type.</p>
+      <div class="key-terms">
+        <span class="key-term">Intake stroke</span><span class="key-term">Compression stroke</span><span class="key-term">Power stroke</span><span class="key-term">Exhaust stroke</span><span class="key-term">SI engine</span><span class="key-term">CI engine</span><span class="key-term">Inline engine</span><span class="key-term">V-engine</span>
+      </div>
+      <div class="exam-box">
+        <div class="exam-box-label">⚑ Likely Exam Questions</div>
+        <div class="exam-q"><span class="past-q">Past Q</span>With the aid of a diagram, describe the four strokes of a four-stroke internal combustion engine.</div>
+        <div class="exam-q"><span class="past-q">Past Q</span>Distinguish between Spark Ignition (SI) and Compression Ignition (CI) engines.</div>
+        <div class="exam-q">Classify engines based on cylinder arrangement. What are the advantages of a V-engine over an inline engine?</div>
+        <div class="exam-q">What is the difference between a naturally aspirated engine and a turbocharged engine?</div>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-number">Topic 8.1</div>
+        <div class="topic-title">The Four-Stroke Engine Cycle</div>
+        <p class="topic-explain">A four-stroke engine is like a pump that goes through 4 steps to make power. Breathe in (intake) → squeeze (compression) → explode (power) → blow out (exhaust). The piston goes up and down twice (two complete up-down cycles = four strokes) to complete one full power cycle.</p>
+        <div class="def-box">A four-stroke engine must undergo <strong>four different strokes to complete one cycle to produce power</strong>. The four strokes are: <strong>Intake, Compression, Power, Exhaust</strong>.<br><br><strong>Intake Stroke:</strong> The cam motion triggers the opening of the inlet valve creating a suction; hence the air-fuel mixture is entered the cylinder giving room for the second stroke as the inlet valve closes.<br><br><strong>Compression Stroke:</strong> Both the inlet valve and the compression valve remain closed. The air-fuel is further compressed to build up more pressure within the cylinder. At the end of this stroke, compressed air-fuel is ignited by the spark plug.<br><br><strong>Power Stroke:</strong> The explosion exerts pressure and pushes the piston down, giving power to the crank.<br><br><strong>Exhaust Stroke:</strong> The outlet valve opens and pushes out the burnt gas. This marks the end of a cycle and the whole process is repeated over and over again keeping the engine running and producing power.</div>
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 680 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:680px;display:block;margin:0 auto;">
+            <defs><style>.st{font-family:'DM Sans',sans-serif;font-size:11px;fill:#0a0a0a;text-anchor:middle;font-weight:600}.ss{font-family:'DM Sans',sans-serif;font-size:9.5px;fill:#555;text-anchor:middle}</style></defs>
+            <rect x="10" y="20" width="150" height="110" rx="6" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+            <text x="85" y="40" class="st">1. INTAKE</text>
+            <rect x="50" y="50" width="70" height="55" rx="3" fill="#dcfce7" stroke="#4ade80" stroke-width="1"/>
+            <rect x="55" y="95" width="60" height="14" rx="2" fill="#4ade80"/>
+            <text x="85" y="105" class="ss" fill="white">Piston ↓</text>
+            <text x="85" y="142" class="ss">Inlet valve open</text>
+            <text x="172" y="82" style="font-size:18px;fill:#4ade80">→</text>
+            <rect x="185" y="20" width="150" height="110" rx="6" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5"/>
+            <text x="260" y="40" class="st">2. COMPRESSION</text>
+            <rect x="220" y="50" width="70" height="55" rx="3" fill="#fef9c3" stroke="#fcd34d" stroke-width="1"/>
+            <rect x="225" y="50" width="60" height="14" rx="2" fill="#fbbf24"/>
+            <text x="260" y="60" class="ss" fill="white">Piston ↑</text>
+            <text x="260" y="142" class="ss">Both valves closed</text>
+            <text x="347" y="82" style="font-size:18px;fill:#4ade80">→</text>
+            <rect x="360" y="20" width="150" height="110" rx="6" fill="#fff5f5" stroke="#fca5a5" stroke-width="1.5"/>
+            <text x="435" y="40" class="st" fill="#dc2626">3. POWER</text>
+            <rect x="395" y="50" width="70" height="55" rx="3" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+            <rect x="400" y="95" width="60" height="14" rx="2" fill="#dc2626"/>
+            <text x="435" y="105" class="ss" fill="white">Piston ↓</text>
+            <text x="435" y="142" class="ss">Spark ignites fuel</text>
+            <text x="522" y="82" style="font-size:18px;fill:#4ade80">→</text>
+            <rect x="535" y="20" width="135" height="110" rx="6" fill="#f8f7f3" stroke="#e0deda" stroke-width="1.5"/>
+            <text x="602" y="40" class="st">4. EXHAUST</text>
+            <rect x="566" y="50" width="70" height="55" rx="3" fill="#f5f4f0" stroke="#e0deda" stroke-width="1"/>
+            <rect x="571" y="50" width="60" height="14" rx="2" fill="#555"/>
+            <text x="602" y="60" class="ss" fill="white">Piston ↑</text>
+            <text x="602" y="142" class="ss">Exhaust valve open</text>
+          </svg>
+          <p class="diagram-caption">The four strokes of a four-stroke internal combustion engine</p>
+        </div>
+        <div class="quick-check">
+          <div class="quick-check-label">Quick Check</div>
+          <ol><li>Which stroke is the ONLY one that produces power?</li><li>During which stroke are BOTH valves closed?</li><li>How many times does the piston move up and down in one complete power cycle?</li></ol>
+        </div>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-number">Topic 8.2</div>
+        <div class="topic-title">Classification of Automobile Engines</div>
+        <div class="def-box"><strong>1. Based on Fuel Type:</strong><br>— Internal Combustion Engines (ICE): Petrol Engines (use gasoline and spark ignition); Diesel Engines (use diesel fuel and compression ignition); Alternative Fuel Engines (CNG, LPG, other fuels).<br>— Electric Motors: Electric vehicles (EVs) use batteries to power electric motors.<br>— Hybrid Engines: Combine an ICE with an electric motor. Mild Hybrid (MHEV), Hybrid Electric Vehicle (HEV), Plug-in Hybrid (PHEV).<br><br><strong>2. Based on Number of Cylinders:</strong><br>Single-cylinder (motorcycles); Twin-cylinder; Three-cylinder (fuel-efficient cars); Four-cylinder (most common); Six-cylinder; Eight-cylinder (V8); Ten-cylinder (V10); Twelve-cylinder (V12) (high-performance and luxury).<br><br><strong>3. Based on Cylinder Arrangement:</strong><br>— Straight/Inline: Cylinders in a single line.<br>— V-engine: Cylinders in two banks forming a "V" shape.<br>— Flat or Boxer Engine: Cylinders arranged horizontally opposite each other.<br>— W-engine: Combines two V-engines, creating a "W" shape.<br><br><strong>4. Based on Operating Cycle:</strong><br>— Two-stroke engine: Completes the combustion cycle in two strokes of the piston.<br>— Four-stroke engine: Completes the combustion cycle in four strokes of the piston.<br><br><strong>5. Based on Ignition Type:</strong><br>— Spark Ignition (SI) engine: Uses a spark plug to ignite the air-fuel mixture (gasoline engines).<br>— Compression Ignition (CI) engine: Compresses the air-fuel mixture to a high temperature, causing it to ignite (diesel engines).<br><br><strong>6. Other Classifications:</strong><br>— Naturally Aspirated: Relies on atmospheric pressure to fill the cylinders.<br>— Turbocharged: Uses an exhaust-driven turbine to force more air into the cylinders.<br>— Supercharged: Uses a mechanical compressor to force more air in.<br>— Air-cooled vs. Water-cooled: Refers to the method of cooling the engine.</div>
+        <div class="mistake-box"><div class="mistake-label">Common Mistake</div>Students confuse SI and CI engines by saying "diesel engines use spark plugs." Wrong — diesel (CI) engines do NOT have spark plugs. They ignite fuel by compressing air to such a high temperature that injected diesel spontaneously combusts. Spark plugs are only in petrol (SI) engines.</div>
+        <div class="quick-check">
+          <div class="quick-check-label">Quick Check</div>
+          <ol><li>What is the difference between a turbocharged and a supercharged engine?</li><li>A V8 engine — what does V8 tell you about the engine?</li><li>Why don't diesel engines need spark plugs?</li></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:32px;padding-top:24px;border-top:1px solid var(--border);">
+    <a href="W7.html" class="back-btn">← Week 7</a>
+    <a href="W9.html" class="back-btn" style="border-color:var(--accent);color:var(--accent-deep);">Next: Week 9 →</a>
+  </div>
+</div>
+
+<footer>
+  <strong>IPE 212 — Automotive Engineering &amp; Workshop</strong> · Week 8 · Unify Platform · LASU Faculty of Engineering<br>
+  <span style="display:block;margin-top:6px">Lecturer: Dr Mrs. V.D. Obasa</span>
+</footer>
+<script>
+(function(){const saved=localStorage.getItem('unify-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);const b=document.getElementById('theme-btn');if(b)b.textContent=saved==='dark'?'☀ Light':'☾ Dark';}})();
+function toggleTheme(){const cur=document.documentElement.getAttribute('data-theme');const nxt=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',nxt);localStorage.setItem('unify-theme',nxt);document.getElementById('theme-btn').textContent=nxt==='dark'?'☀ Light':'☾ Dark';}
+</script>
+</body>
+</html>

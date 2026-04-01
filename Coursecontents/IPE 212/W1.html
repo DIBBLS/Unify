@@ -7,16 +7,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--muted:#555;--muted2:#999;--accent:#4ade80;--accent-deep:#16a34a;--accent-bg:#dcfce7;--diagram-bg:#f8f7f3;--nav-h:60px}
-[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--accent:#4ade80;--accent-deep:#4ade80;--accent-bg:#052e16;--diagram-bg:#1e1e1e}
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--muted:#555;--muted2:#999;--accent:#4ade80;--accent-deep:#16a34a;--accent-bg:#dcfce7;--font-heading:'Playfair Display',serif;--font-body:'DM Sans',sans-serif;--nav-h:60px}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--accent:#4ade80;--accent-deep:#4ade80;--accent-bg:#052e16}
 *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:16px;transition:background .2s,color .2s}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.7;font-size:15px;transition:background .2s,color .2s}
 nav{position:sticky;top:0;z-index:100;height:var(--nav-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;gap:32px}
-.nav-logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--text);text-decoration:none;flex-shrink:0}
+.nav-logo{font-family:var(--font-heading);font-size:20px;font-weight:900;color:var(--text);text-decoration:none;flex-shrink:0}
 .nav-links{display:flex;gap:4px;flex:1}
 .nav-links a{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:6px;border-bottom:2px solid transparent;transition:color .15s}
 .nav-links a:hover{color:var(--text)}.nav-links a.active{color:var(--accent-deep);border-bottom-color:var(--accent)}
-.theme-toggle{margin-left:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;flex-shrink:0}
+.theme-toggle{margin-left:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-family:var(--font-body);font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;flex-shrink:0}
 .theme-toggle:hover{color:var(--text);border-color:var(--muted)}
 .week-page{max-width:900px;margin:0 auto;padding:40px 48px 80px}
 .back-bar{display:flex;align-items:center;gap:12px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap}
@@ -28,50 +28,53 @@ nav{position:sticky;top:0;z-index:100;height:var(--nav-h);background:var(--surfa
 .week-block{border-radius:14px;border:1px solid var(--border);overflow:hidden;background:var(--surface)}
 .week-header{background:var(--text);color:var(--bg);padding:24px 32px;display:flex;align-items:baseline;gap:20px}
 [data-theme="dark"] .week-header{background:var(--surface2);border-bottom:1px solid var(--border);color:var(--text)}
-.week-num{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;opacity:.55;white-space:nowrap}
-.week-title{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;font-style:italic;color:inherit}
+.week-num{font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;opacity:.55;white-space:nowrap}
+.week-title{font-family:var(--font-heading);font-size:21px;font-weight:700;font-style:italic;color:inherit}
 [data-theme="dark"] .week-title{color:var(--text)}
-.week-body{padding:32px}
-.week-summary{font-size:15px;color:var(--muted);line-height:1.75;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--border)}
-.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:28px}
-.tag{font-size:11px;font-weight:500;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:3px 12px}
-.exam-box{background:#fffbeb;border-left:3px solid #fcd34d;border-radius:0 10px 10px 0;padding:18px 22px;margin-bottom:32px}
-[data-theme="dark"] .exam-box{background:#1a1500;border-left-color:#b45309}
-.exam-box .box-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#92400e;margin-bottom:12px}
-[data-theme="dark"] .exam-box .box-label{color:#fbbf24}
-.exam-box ol{margin-left:18px;font-size:14px;color:var(--text)}.exam-box li{margin-bottom:8px;line-height:1.6}
-.past-q{display:inline-block;font-size:10px;font-weight:600;background:var(--accent-bg);color:var(--accent-deep);border:1px solid var(--accent);border-radius:4px;padding:1px 7px;margin-left:6px;vertical-align:middle;letter-spacing:.04em}
-.topic-block{border:1px solid var(--border);border-radius:12px;margin-bottom:28px;overflow:hidden}
-.topic-header{background:var(--surface2);padding:16px 24px;border-bottom:1px solid var(--border)}
-.topic-num{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:3px}
-.topic-title{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;color:var(--text)}
-.topic-body{padding:24px}.topic-body p{font-size:15px;line-height:1.8;margin-bottom:16px;color:var(--text)}
-.formula-block{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:18px 22px;margin:18px 0}
-.formula-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:10px}
-.formula-eq{font-family:'Playfair Display',serif;font-size:17px;font-style:italic;color:var(--text);margin-bottom:6px;line-height:1.6}
-.formula-vars{font-size:12px;color:var(--muted2);line-height:1.7;margin-top:8px}
-.analogy-box{background:#f0fdf4;border-left:3px solid #bbf7d0;border-radius:0 10px 10px 0;padding:16px 20px;margin:16px 0;font-size:14px;line-height:1.75;color:var(--text)}
-[data-theme="dark"] .analogy-box{background:#052e16;border-left-color:#166534}
-.analogy-box .box-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px}
-.mistake-box{background:#fff5f5;border-left:3px solid #fca5a5;border-radius:0 10px 10px 0;padding:16px 20px;margin:16px 0;font-size:14px;line-height:1.75;color:var(--text)}
-[data-theme="dark"] .mistake-box{background:#1a0505;border-left-color:#7f1d1d}
-.mistake-box .box-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#dc2626;margin-bottom:8px}
-.exam-def{background:var(--surface2);border:1.5px solid var(--accent);border-radius:10px;padding:16px 20px;margin:18px 0}
-.exam-def .def-label{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px}
-.exam-def .def-text{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--text);line-height:1.7}
-.quick-check{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 24px;margin-top:24px}
-.quick-check .qc-label{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.quick-check .qc-label::after{content:'';flex:1;height:1px;background:var(--border)}
-.qc-list{display:flex;flex-direction:column;gap:10px}
-.qc-item{display:flex;gap:12px;align-items:start;font-size:14px;line-height:1.6;color:var(--text)}
-.qc-badge{font-size:10px;font-weight:600;border-radius:4px;padding:2px 8px;white-space:nowrap;margin-top:2px;flex-shrink:0}
-.qc-badge.normal{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
-.qc-badge.hard{background:#fff5f5;color:#dc2626;border:1px solid #fca5a5}
-[data-theme="dark"] .qc-badge.hard{background:#1a0505;border-color:#7f1d1d}
-.sec-eye{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2)}
+.week-body{padding:28px 32px}
+.week-summary{font-size:14px;color:var(--muted);margin-bottom:1.2rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border);line-height:1.75}
+.key-terms{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.5rem}
+.key-term{background:var(--surface2);border:1px solid var(--border);font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;color:var(--muted)}
+.exam-box{background:#fffbeb;border-left:3px solid #fcd34d;border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:1.5rem}
+[data-theme="dark"] .exam-box{background:#1c1a0f}
+.exam-box-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#92400e;margin-bottom:10px}
+[data-theme="dark"] .exam-box-label{color:#fbbf24}
+.exam-q{font-size:13.5px;color:var(--text);margin-bottom:6px;display:flex;align-items:flex-start;gap:8px}
+.past-q{background:#fcd34d;color:#78350f;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap;flex-shrink:0;margin-top:3px}
+.topic-block{margin-bottom:2rem;padding-bottom:2rem;border-bottom:1px solid var(--border)}
+.topic-block:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.topic-number{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:4px}
+.topic-title{font-family:var(--font-heading);font-size:1.2rem;font-weight:700;margin-bottom:.8rem;color:var(--text)}
+.topic-explain{font-size:14px;color:var(--muted);margin-bottom:1rem;line-height:1.75}
+.def-box{background:var(--surface2);border:1.5px solid var(--accent);border-radius:8px;padding:14px 18px;margin-bottom:1rem;font-size:14px;line-height:1.7}
+.def-box strong{color:var(--accent-deep)}
+.formula-block{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:1rem}
+[data-theme="dark"] .formula-block{background:#1a1a1a;border-color:#2a2a2a}
+.formula-label{font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px}
+.formula{font-family:var(--font-heading);font-style:italic;font-size:1.1rem;color:var(--text);margin-bottom:8px}
+.formula-vars{font-size:12.5px;color:var(--muted)}
+.formula-vars li{margin-bottom:3px;list-style:none;padding-left:0}
+.formula-vars li::before{content:"— ";color:var(--accent)}
+.rw-box{background:#f0fdf4;border-left:3px solid #bbf7d0;border-radius:0 8px 8px 0;padding:14px 18px;margin-bottom:1rem;font-size:13.5px}
+[data-theme="dark"] .rw-box{background:#0d1f12}
+.rw-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:6px}
+.mistake-box{background:#fff5f5;border-left:3px solid #fca5a5;border-radius:0 8px 8px 0;padding:14px 18px;margin-bottom:1rem;font-size:13.5px}
+[data-theme="dark"] .mistake-box{background:#1f0d0d}
+.mistake-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#dc2626;margin-bottom:6px}
+.worked-example{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:1rem;font-size:13.5px}
+.worked-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px}
+.worked-step{margin-bottom:6px;padding-left:1rem;position:relative}
+.worked-step::before{content:"→";position:absolute;left:0;color:var(--accent)}
+.quick-check{margin-top:1rem}
+.quick-check-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px}
+.quick-check ol{padding-left:1.2rem;font-size:13.5px;color:var(--muted)}
+.quick-check ol li{margin-bottom:4px}
+.diagram-wrap{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:1rem;overflow-x:auto}
+.diagram-caption{font-size:11px;color:var(--muted2);text-align:center;margin-top:8px;font-style:italic}
 footer{border-top:1px solid var(--border);padding:32px 48px;text-align:center;font-size:13px;color:var(--muted2);max-width:900px;margin:0 auto}
 footer strong{color:var(--muted);font-weight:500}
-@media(max-width:700px){nav{padding:0 16px;gap:16px}.nav-links{display:none}.week-page{padding:20px 16px 60px}.week-body{padding:20px}.topic-body{padding:18px}footer{padding:24px 20px}}
+p{margin-bottom:.7rem}
+@media(max-width:700px){nav{padding:0 16px;gap:16px}.nav-links{display:none}.week-page{padding:20px 16px 60px}.week-body{padding:20px}footer{padding:24px 20px}}
 </style>
 </head>
 <body>
@@ -79,16 +82,17 @@ footer strong{color:var(--muted);font-weight:500}
   <a href="../../dashboard.html" class="nav-logo">Unify</a>
   <div class="nav-links">
     <a href="../../dashboard.html">Dashboard</a>
+    <a href="../../Learn.html">Learn</a>
     <a href="../../careers.html">Career</a>
     <a href="../../profile.html">Profile</a>
-    <a href="../../learn.html?course=IPE+212&name=IPE+212" class="active">IPE 212</a>
+    <a href="#" class="active">IPE 212</a>
   </div>
   <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">☾ Dark</button>
 </nav>
 
 <div class="week-page">
   <div class="back-bar">
-    <a href="../../learn.html?course=IPE+212&name=IPE+212" class="back-btn">← Back to IPE 212</a>
+    <a href="../../Learn.html?course=IPE+212&name=IPE+212" class="back-btn">← Back to IPE 212</a>
     <div class="week-nav">
       <span class="wnav-btn disabled">← Prev</span>
       <a href="W2.html" class="wnav-btn">Next →</a>
@@ -102,124 +106,72 @@ footer strong{color:var(--muted);font-weight:500}
     </div>
     <div class="week-body">
       <p class="week-summary">This week introduces the automobile as a self-propelled vehicle, covering its definition, key components, the basis of its motion, and its physical construction — from frame to chassis to body.</p>
-      <div class="tags">
-        <span class="tag">Automobile</span><span class="tag">Self-propelled vehicle</span><span class="tag">Frame</span>
-        <span class="tag">Chassis</span><span class="tag">Body</span><span class="tag">Frictional contact</span><span class="tag">Propulsion</span>
+      <div class="key-terms">
+        <span class="key-term">Automobile</span><span class="key-term">Self-propelled vehicle</span><span class="key-term">Frame</span><span class="key-term">Chassis</span><span class="key-term">Body</span><span class="key-term">Frictional contact</span><span class="key-term">Propulsion</span>
       </div>
-      <div class="sec-eye" style="margin-bottom:12px">Likely exam questions</div>
       <div class="exam-box">
-        <div class="box-label">Exam focus</div>
-        <ol>
-          <li>Define the term "automobile" and explain the basis of its motion. <span class="past-q">Past Q</span></li>
-          <li>Distinguish between frame, chassis, and body. How are they related? <span class="past-q">Past Q</span></li>
-          <li>List the five main components of an automobile and state the function of each.</li>
-          <li>What is the difference between an automobile and an aeronautical vehicle?</li>
-        </ol>
+        <div class="exam-box-label">⚑ Likely Exam Questions</div>
+        <div class="exam-q"><span class="past-q">Past Q</span>Define the term "automobile" and explain the basis of its motion.</div>
+        <div class="exam-q"><span class="past-q">Past Q</span>Distinguish between frame, chassis, and body. How are they related?</div>
+        <div class="exam-q">List the five main components of an automobile and state the function of each.</div>
+        <div class="exam-q">What is the difference between an automobile and an aeronautical vehicle?</div>
       </div>
 
       <div class="topic-block">
-        <div class="topic-header"><div class="topic-num">Topic 1.1</div><div class="topic-title">Definition of an Automobile</div></div>
-        <div class="topic-body">
-          <p>Imagine a box that can move on its own without being pushed or pulled. That's basically what an automobile is — a machine with its own engine that moves itself. "Auto" means self and "mobile" means movable, so automobile literally means "self-movable." It's different from a boat (marine vehicle) or a plane (aeronautical vehicle) because it moves on the ground.</p>
-          <div class="exam-def">
-            <div class="def-label">Exam-ready definition — Automobile</div>
-            <div class="def-text">A self-propelled vehicle which contains the power source for its propulsion and is used for carrying passengers and goods on the ground, such as car, bus, trucks, etc. The word "automotive" means a vehicle which can move by itself.</div>
-          </div>
-          <div class="analogy-box">
-            <div class="box-label">Real-World Example</div>
-            A Toyota Camry, a Mack truck, and a delivery van are all automobiles — each has its own engine providing the power to move itself. They differ from aircraft (which fly) and boats (which sail on water).
-          </div>
-          <div class="mistake-box">
-            <div class="box-label">Common Mistake</div>
-            Students often confuse "automobile" with any vehicle. Remember: an automobile specifically uses a self-contained power source and moves on the ground. A bicycle is not an automobile (no engine). A ship is not an automobile (water-borne).
-          </div>
-          <div class="quick-check">
-            <div class="qc-label">Quick check — Topic 1.1</div>
-            <div class="qc-list">
-              <div class="qc-item"><span class="qc-badge normal">Q1</span><span>What does "auto" and "mobile" each mean?</span></div>
-              <div class="qc-item"><span class="qc-badge normal">Q2</span><span>Name two types of vehicles that are NOT automobiles and explain why.</span></div>
-            </div>
-          </div>
+        <div class="topic-number">Topic 1.1</div>
+        <div class="topic-title">Definition of an Automobile</div>
+        <p class="topic-explain">Imagine a box that can move on its own without being pushed or pulled. That's basically what an automobile is — a machine with its own engine that moves itself. "Auto" means self and "mobile" means movable, so automobile literally means "self-movable." It's different from a boat (marine vehicle) or a plane (aeronautical vehicle) because it moves on the ground.</p>
+        <div class="def-box"><strong>Automobile:</strong> A self-propelled vehicle which contains the power source for its propulsion and is used for carrying passengers and goods on the ground, such as car, bus, trucks, etc.</div>
+        <div class="def-box"><strong>Automobile (Module 1 Definition):</strong> A <strong>self-propelled vehicle</strong> used for transportation of goods and passengers on the ground. Automobiles or Automotive means a vehicle which can move by itself.</div>
+        <div class="rw-box"><div class="rw-label">Real-World Example</div>A Toyota Camry, a Mack truck, and a delivery van are all automobiles — each has its own engine providing the power to move itself. They differ from aircraft (which fly) and boats (which sail on water).</div>
+        <div class="mistake-box"><div class="mistake-label">Common Mistake</div>Students often confuse "automobile" with any vehicle. Remember: an automobile specifically uses a self-contained power source and moves on the ground. A bicycle is not an automobile (no engine). A ship is not an automobile (water-borne).</div>
+        <div class="quick-check">
+          <div class="quick-check-label">Quick Check</div>
+          <ol><li>What does "auto" and "mobile" each mean?</li><li>Name two types of vehicles that are NOT automobiles and explain why.</li></ol>
         </div>
       </div>
 
       <div class="topic-block">
-        <div class="topic-header"><div class="topic-num">Topic 1.2</div><div class="topic-title">Components of an Automobile</div></div>
-        <div class="topic-body">
-          <p>Think of an automobile like a team where every player has a specific job. The frame is the skeleton, the engine is the heart, the transmission passes the power to the wheels, and the body is the outer skin everyone sees.</p>
-          <div class="exam-def">
-            <div class="def-label">Five main components</div>
-            <div class="def-text">The main components of an automobile are: <strong>Frame</strong> (supporting the body), <strong>Engine</strong> (supplies the power), <strong>Power transmitting units</strong>, <strong>Tyres and wheels</strong> (through the springs and axles), and <strong>Body</strong>.</div>
-          </div>
-          <div class="formula-block">
-            <div class="formula-label">Component Diagram</div>
-            <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;display:block;margin:0 auto;">
-              <defs>
-                <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-                  <path d="M0,0 L0,6 L8,3 z" fill="#4ade80"/>
-                </marker>
-              </defs>
-              <rect x="10" y="70" width="120" height="60" rx="6" fill="#f8f7f3" stroke="#e0deda" stroke-width="1.5"/>
-              <text x="70" y="96" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" font-weight="600" fill="#0a0a0a">Frame</text>
-              <text x="70" y="112" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#555">Skeleton / Support</text>
-              <line x1="130" y1="100" x2="158" y2="100" stroke="#4ade80" stroke-width="1.5" marker-end="url(#arr)"/>
-              <rect x="160" y="70" width="120" height="60" rx="6" fill="#dcfce7" stroke="#bbf7d0" stroke-width="1.5"/>
-              <text x="220" y="96" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" font-weight="600" fill="#0a0a0a">Engine</text>
-              <text x="220" y="112" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#555">Power Source</text>
-              <line x1="280" y1="100" x2="308" y2="100" stroke="#4ade80" stroke-width="1.5" marker-end="url(#arr)"/>
-              <rect x="310" y="70" width="130" height="60" rx="6" fill="#f8f7f3" stroke="#e0deda" stroke-width="1.5"/>
-              <text x="375" y="96" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" font-weight="600" fill="#0a0a0a">Transmission</text>
-              <text x="375" y="112" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#555">Power Transfer Units</text>
-              <line x1="440" y1="100" x2="468" y2="100" stroke="#4ade80" stroke-width="1.5" marker-end="url(#arr)"/>
-              <rect x="470" y="70" width="110" height="60" rx="6" fill="#f8f7f3" stroke="#e0deda" stroke-width="1.5"/>
-              <text x="525" y="96" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" font-weight="600" fill="#0a0a0a">Wheels/Tyres</text>
-              <text x="525" y="112" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#555">Via springs &amp; axles</text>
-              <line x1="580" y1="100" x2="608" y2="100" stroke="#4ade80" stroke-width="1.5" marker-end="url(#arr)"/>
-              <rect x="610" y="70" width="100" height="60" rx="6" fill="#f8f7f3" stroke="#e0deda" stroke-width="1.5"/>
-              <text x="660" y="96" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" font-weight="600" fill="#0a0a0a">Body</text>
-              <text x="660" y="112" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#555">Outer structure</text>
-            </svg>
-            <div class="formula-vars">The five main functional components of an automobile</div>
-          </div>
-          <div class="quick-check">
-            <div class="qc-label">Quick check — Topic 1.2</div>
-            <div class="qc-list">
-              <div class="qc-item"><span class="qc-badge normal">Q1</span><span>What is the function of the frame in an automobile?</span></div>
-              <div class="qc-item"><span class="qc-badge normal">Q2</span><span>What equation shows the relationship between Frame, Chassis, and Vehicle?</span></div>
-            </div>
-          </div>
+        <div class="topic-number">Topic 1.2</div>
+        <div class="topic-title">Components of an Automobile</div>
+        <p class="topic-explain">Think of an automobile like a team where every player has a specific job. The frame is the skeleton, the engine is the heart, the transmission passes the power to the wheels, and the body is the outer skin everyone sees.</p>
+        <div class="def-box">The main components of an automobile are: <strong>Frame</strong> (supporting the body), <strong>Engine</strong> (supplies the power), <strong>Power transmitting units</strong>, <strong>Tyres and wheels</strong> (through the springs and axles), and <strong>Body</strong>.</div>
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;display:block;margin:0 auto;">
+            <defs><style>.ct{font-family:'DM Sans',sans-serif;font-size:12px;fill:#0a0a0a}.cs{font-family:'DM Sans',sans-serif;font-size:10px;fill:#555}</style><marker id="ar1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4ade80"/></marker></defs>
+            <rect x="10" y="70" width="120" height="60" rx="6" fill="#f8f7f3" stroke="#e0deda" stroke-width="1.5"/><text x="70" y="96" text-anchor="middle" class="ct" font-weight="600">Frame</text><text x="70" y="112" text-anchor="middle" class="cs">Skeleton / Support</text>
+            <line x1="130" y1="100" x2="158" y2="100" stroke="#4ade80" stroke-width="1.5" marker-end="url(#ar1)"/>
+            <rect x="160" y="70" width="120" height="60" rx="6" fill="#dcfce7" stroke="#bbf7d0" stroke-width="1.5"/><text x="220" y="96" text-anchor="middle" class="ct" font-weight="600">Engine</text><text x="220" y="112" text-anchor="middle" class="cs">Power Source</text>
+            <line x1="280" y1="100" x2="308" y2="100" stroke="#4ade80" stroke-width="1.5" marker-end="url(#ar1)"/>
+            <rect x="310" y="70" width="130" height="60" rx="6" fill="#f8f7f3" stroke="#e0deda" stroke-width="1.5"/><text x="375" y="96" text-anchor="middle" class="ct" font-weight="600">Transmission</text><text x="375" y="112" text-anchor="middle" class="cs">Power Transfer Units</text>
+            <line x1="440" y1="100" x2="468" y2="100" stroke="#4ade80" stroke-width="1.5" marker-end="url(#ar1)"/>
+            <rect x="470" y="70" width="110" height="60" rx="6" fill="#f8f7f3" stroke="#e0deda" stroke-width="1.5"/><text x="525" y="96" text-anchor="middle" class="ct" font-weight="600">Wheels/Tyres</text><text x="525" y="112" text-anchor="middle" class="cs">Via springs &amp; axles</text>
+            <line x1="580" y1="100" x2="608" y2="100" stroke="#4ade80" stroke-width="1.5" marker-end="url(#ar1)"/>
+            <rect x="610" y="70" width="100" height="60" rx="6" fill="#f8f7f3" stroke="#e0deda" stroke-width="1.5"/><text x="660" y="96" text-anchor="middle" class="ct" font-weight="600">Body</text><text x="660" y="112" text-anchor="middle" class="cs">Outer structure</text>
+          </svg>
+          <p class="diagram-caption">The five main functional components of an automobile</p>
+        </div>
+        <div class="quick-check">
+          <div class="quick-check-label">Quick Check</div>
+          <ol><li>What is the function of the frame in an automobile?</li><li>What equation shows the relationship between Frame, Chassis, and Vehicle?</li></ol>
         </div>
       </div>
 
       <div class="topic-block">
-        <div class="topic-header"><div class="topic-num">Topic 1.3</div><div class="topic-title">Basis of Motion & Vehicle Construction</div></div>
-        <div class="topic-body">
-          <p>How does a car actually move? The engine creates power, but it's the friction between the tyres and the road that actually pushes the car forward. If there were no friction (like on perfectly smooth ice), the wheels would just spin in place. The vehicle's structure goes from the inside out: Frame + Base components = Chassis. Chassis + Body = Vehicle.</p>
-          <div class="exam-def">
-            <div class="def-label">Basis of motion</div>
-            <div class="def-text">The automobile is propelled through the frictional contact between the road and the wheels. The various units are held together in proper arrangement on the frame. The protection and comfort is provided by the body of the vehicle.</div>
-          </div>
-          <div class="formula-block">
-            <div class="formula-label">Construction Equation</div>
-            <div class="formula-eq">"Frame" + "Base components" = "Chassis"</div>
-            <div class="formula-eq">"Chassis" + "Body" = "Vehicle"</div>
-            <div class="formula-vars">
-              Frame: The skeleton of the vehicle — the main foundation and base for alignment. Types: Conventional frame, Semi-integral frame, Integral frame.<br>
-              Chassis: Frame + base components (engine, radiator, clutch, gearbox, silencer, road wheels, fuel tank, wiring, differential units, etc.)<br>
-              Body: The superstructure of the vehicle bolted to the chassis. Types: Car, Truck, Tractor, Delivery van, Jeep, Bus.
-            </div>
-          </div>
-          <div class="mistake-box">
-            <div class="box-label">Common Mistake</div>
-            Students say "the chassis IS the frame." Wrong — the frame is just the skeleton. The chassis includes the frame PLUS all base mechanical components (engine, gearbox, wheels, etc.). Think of the frame as the bones and the chassis as the bones plus all the organs.
-          </div>
-          <div class="quick-check">
-            <div class="qc-label">Quick check — Topic 1.3</div>
-            <div class="qc-list">
-              <div class="qc-item"><span class="qc-badge normal">Q1</span><span>What physical phenomenon is responsible for propelling an automobile?</span></div>
-              <div class="qc-item"><span class="qc-badge hard">Hard</span><span>A vehicle has its frame, engine, gearbox, and wheels assembled together. Is this a chassis or a vehicle? Explain.</span></div>
-            </div>
-          </div>
+        <div class="topic-number">Topic 1.3</div>
+        <div class="topic-title">Basis of Motion &amp; Vehicle Construction</div>
+        <p class="topic-explain">How does a car actually move? The engine creates power, but it's the friction between the tyres and the road that actually pushes the car forward. If there were no friction (like on perfectly smooth ice), the wheels would just spin in place. The vehicle's structure goes from the inside out: Frame + Base components = Chassis. Chassis + Body = Vehicle.</p>
+        <div class="def-box">The automobile is <strong>propelled through the frictional contact between the road and the wheels</strong>. The various units are held together in proper arrangement on the frame. The protection and comfort is provided by the body of the vehicle.</div>
+        <div class="def-box"><strong>Frame:</strong> The skeleton of the vehicle. It serves as the main foundation and base for alignment for the chassis. Types: Conventional frame, Semi integral frame, Integral or unitised frame.<br><br><strong>Chassis:</strong> If the frame contains the base components it is called the chassis. Components include engine, radiator, clutch, gearbox, silencer, road wheels, fuel tank, wirings, differential units, etc.<br><br><strong>Body:</strong> The superstructure of the vehicle bolted to the chassis. Types: Car, Truck, Tractor, Delivery van, Jeep, Bus.</div>
+        <div class="formula-block">
+          <div class="formula-label">Construction Equation</div>
+          <div class="formula">"Frame" + "Base components" = "Chassis"</div>
+          <div class="formula" style="margin-top:6px;">"Chassis" + "Body" = "Vehicle"</div>
+        </div>
+        <div class="mistake-box"><div class="mistake-label">Common Mistake</div>Students say "the chassis IS the frame." Wrong — the frame is just the skeleton. The chassis includes the frame PLUS all base mechanical components (engine, gearbox, wheels, etc.). Think of the frame as the bones and the chassis as the bones plus all the organs.</div>
+        <div class="quick-check">
+          <div class="quick-check-label">Quick Check</div>
+          <ol><li>What physical phenomenon is responsible for propelling an automobile?</li><li>A vehicle has its frame, engine, gearbox, and wheels assembled together. Is this a chassis or a vehicle? Explain.</li></ol>
         </div>
       </div>
     </div>
@@ -235,7 +187,6 @@ footer strong{color:var(--muted);font-weight:500}
   <strong>IPE 212 — Automotive Engineering &amp; Workshop</strong> · Week 1 · Unify Platform · LASU Faculty of Engineering<br>
   <span style="display:block;margin-top:6px">Lecturer: Dr Mrs. V.D. Obasa</span>
 </footer>
-
 <script>
 (function(){const saved=localStorage.getItem('unify-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);const b=document.getElementById('theme-btn');if(b)b.textContent=saved==='dark'?'☀ Light':'☾ Dark';}})();
 function toggleTheme(){const cur=document.documentElement.getAttribute('data-theme');const nxt=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',nxt);localStorage.setItem('unify-theme',nxt);document.getElementById('theme-btn').textContent=nxt==='dark'?'☀ Light':'☾ Dark';}

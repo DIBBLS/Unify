@@ -100,7 +100,6 @@ nav {
   transition: all 0.15s; text-decoration: none; min-width: 52px;
 }
 .mobile-nav-btn.active { color: var(--text); }
-.mobile-nav-icon { font-size: 22px; line-height: 1; }
 .mobile-nav-label { font-size: 10px; font-weight: 500; }
 .mobile-nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text); margin-top: 2px; opacity: 0; transition: opacity 0.15s; }
 .mobile-nav-btn.active .mobile-nav-dot { opacity: 1; }
@@ -355,155 +354,6 @@ input::placeholder { color: var(--text3); }
 .panel-learn-btn { display: inline-block; padding: 10px 24px; background: var(--text); color: var(--bg); border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; transition: opacity 0.15s; font-family: var(--font-body); border: none; cursor: pointer; }
 .panel-learn-btn:hover { opacity: 0.8; }
 
-/* ═══════════════════════════
-   EXPLORE CAMPUS
-═══════════════════════════ */
-.community-wrap { max-width: 600px; margin: 0 auto; padding: 32px 24px; }
-
-.campus-hero { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-.campus-title { font-family: var(--font-display); font-size: 32px; font-weight: 900; letter-spacing: -1px; margin-bottom: 3px; }
-.campus-slogan { font-size: 13px; color: var(--text3); font-style: italic; }
-.campus-hero-actions { display: flex; gap: 8px; }
-
-.comm-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
-.comm-tab { padding: 10px 20px; font-size: 13px; font-weight: 500; color: var(--text3); cursor: pointer; border: none; background: none; font-family: var(--font-body); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all .15s; }
-.comm-tab:hover { color: var(--text); }
-.comm-tab.active { color: var(--text); border-bottom-color: #4ade80; font-weight: 600; }
-
-.composer { border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 20px; background: var(--surface); }
-.composer-row { display: flex; gap: 12px; margin-bottom: 14px; }
-.composer-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--text); color: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; font-family: var(--font-display); }
-.composer-main { flex: 1; min-width: 0; }
-.composer-input { width: 100%; border: none; background: none; font-family: var(--font-body); font-size: 14px; color: var(--text); resize: none; outline: none; min-height: 64px; line-height: 1.6; }
-.composer-input::placeholder { color: var(--text3); }
-.composer-img-preview { position: relative; margin-top: 10px; }
-.composer-img-preview img { width: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block; }
-.remove-img-btn { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: rgba(0,0,0,.6); color: #fff; border: none; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.composer-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 14px; flex-wrap: wrap; gap: 10px; }
-.composer-tags { display: flex; gap: 6px; flex-wrap: wrap; }
-.tag-pill { font-size: 11px; background: var(--tag-bg); color: var(--tag-color); border-radius: 20px; padding: 4px 12px; cursor: pointer; border: 1px solid transparent; font-family: var(--font-body); transition: all 0.15s; }
-.tag-pill:hover { background: var(--border); color: var(--text); }
-.tag-pill.active { background: var(--text); color: var(--bg); }
-.img-upload-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; color: var(--text3); transition: all .15s; }
-.img-upload-btn:hover { border-color: var(--text); color: var(--text); }
-.post-btn { padding: 8px 22px; background: var(--text); color: var(--bg); border: none; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: var(--font-body); transition: opacity 0.15s; }
-.post-btn:hover { opacity: 0.75; }
-.post-btn:disabled { opacity: 0.3; cursor: default; }
-
-.post-event-btn { padding: 8px 18px; background: var(--text); color: var(--bg); border: none; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: var(--font-body); transition: opacity .15s; white-space: nowrap; }
-.post-event-btn:hover { opacity: .75; }
-
-/* Post cards — image-first */
-.post-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 20px; }
-.post-img { width: 100%; max-height: 480px; object-fit: cover; display: block; }
-.post-body { padding: 14px 16px 0; }
-.post-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.post-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--text); color: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; font-family: var(--font-display); }
-.post-author-name { font-size: 13px; font-weight: 700; }
-.post-author-info { font-size: 11px; color: var(--text3); margin-top: 1px; }
-.post-time { margin-left: auto; font-size: 11px; color: var(--text3); }
-.post-tag-badge { display: inline-block; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; background: var(--tag-bg); color: var(--tag-color); padding: 2px 9px; border-radius: 4px; margin-bottom: 8px; }
-.post-content { font-size: 14px; line-height: 1.65; color: var(--text); margin-bottom: 10px; white-space: pre-wrap; }
-.post-actions { display: flex; gap: 16px; border-top: 1px solid var(--border); padding: 8px 16px; }
-.post-action { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text3); cursor: pointer; background: none; border: none; font-family: var(--font-body); transition: color 0.15s; padding: 4px 0; }
-.post-action:hover, .post-action.liked { color: var(--text); }
-.post-action.liked { font-weight: 600; }
-
-/* Comments */
-.comments-section { border-top: 1px solid var(--border); padding: 12px 20px 16px; }
-.comment-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
-.comment { display: flex; gap: 10px; }
-.comment-av { width: 26px; height: 26px; border-radius: 50%; background: var(--text); color: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; font-family: var(--font-display); }
-.comment-bubble { background: var(--surface2); border-radius: 10px; padding: 8px 12px; flex: 1; }
-.comment-author { font-size: 11px; font-weight: 600; margin-bottom: 3px; }
-.comment-text { font-size: 12px; color: var(--text2); line-height: 1.5; }
-.comment-composer { display: flex; gap: 8px; align-items: center; }
-.comment-input { flex: 1; border: 1px solid var(--border); border-radius: 20px; padding: 7px 14px; font-family: var(--font-body); font-size: 12px; background: var(--bg); color: var(--text); outline: none; transition: border-color .15s; }
-.comment-input:focus { border-color: #4ade80; }
-.comment-send { padding: 7px 14px; background: #4ade80; color: #0a0a0a; border: none; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--font-body); transition: opacity .15s; }
-.comment-send:hover { opacity: .85; }
-.comments-toggle { font-size: 12px; color: var(--text3); cursor: pointer; background: none; border: none; font-family: var(--font-body); padding: 0 0 10px; transition: color .15s; display: block; }
-.comments-toggle:hover { color: var(--text); }
-
-/* Event & Quest cards */
-.event-card { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 12px; background: var(--surface); transition: border-color .2s; }
-.event-card:hover { border-color: #4ade80; }
-.event-card-inner { display: flex; }
-.event-accent { width: 4px; flex-shrink: 0; }
-.event-accent.conference { background: #60a5fa; }
-.event-accent.workshop { background: #4ade80; }
-.event-accent.hackathon { background: #f59e0b; }
-.event-accent.social { background: #a78bfa; }
-.event-accent.internship { background: #4ade80; }
-.event-accent.talk { background: #f87171; }
-.event-body { padding: 18px 20px; flex: 1; }
-.event-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
-.event-category { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
-.event-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; letter-spacing: -.2px; line-height: 1.2; }
-.event-badge { font-size: 10px; padding: 4px 10px; border-radius: 12px; font-weight: 600; flex-shrink: 0; white-space: nowrap; }
-.event-badge.conference { background: #dbeafe; color: #1d4ed8; }
-.event-badge.workshop { background: #dcfce7; color: #15803d; }
-.event-badge.hackathon { background: #fef3c7; color: #92400e; }
-.event-badge.social { background: #ede9fe; color: #6d28d9; }
-.event-badge.internship { background: #dcfce7; color: #15803d; }
-.event-badge.talk { background: #fee2e2; color: #991b1b; }
-[data-theme="dark"] .event-badge.conference { background: #1e3a5f; color: #93c5fd; }
-[data-theme="dark"] .event-badge.workshop { background: #14532d; color: #86efac; }
-[data-theme="dark"] .event-badge.hackathon { background: #451a03; color: #fcd34d; }
-[data-theme="dark"] .event-badge.social { background: #2e1065; color: #c4b5fd; }
-[data-theme="dark"] .event-badge.talk { background: #450a0a; color: #fca5a5; }
-.event-meta { display: flex; gap: 16px; font-size: 12px; color: var(--text3); flex-wrap: wrap; margin-bottom: 10px; }
-.event-desc { font-size: 13px; color: var(--text3); line-height: 1.6; margin-bottom: 14px; }
-.event-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 12px; flex-wrap: wrap; gap: 10px; }
-.event-organizer { font-size: 11px; color: var(--text3); }
-.event-register-btn { padding: 7px 18px; background: #4ade80; color: #0a0a0a; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--font-body); transition: opacity .15s; }
-.event-register-btn:hover { opacity: .85; }
-
-.quest-card { border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 12px; background: var(--surface); transition: border-color .2s; }
-.quest-card:hover { border-color: #4ade80; }
-.quest-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
-.quest-category { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
-.quest-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: -.3px; }
-.quest-meta { display: flex; gap: 16px; font-size: 12px; color: var(--text3); margin-bottom: 12px; flex-wrap: wrap; }
-.quest-desc { font-size: 13px; color: var(--text3); line-height: 1.6; margin-bottom: 14px; }
-.quest-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
-.quest-participants { display: flex; align-items: center; gap: 8px; }
-.quest-avatars { display: flex; }
-.quest-av { width: 26px; height: 26px; border-radius: 50%; background: var(--text); color: var(--bg); border: 2px solid var(--surface); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; margin-left: -6px; font-family: var(--font-display); }
-.quest-av:first-child { margin-left: 0; }
-.quest-count { font-size: 12px; color: var(--text3); }
-.quest-join-btn { padding: 8px 20px; background: #4ade80; color: #0a0a0a; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--font-body); transition: opacity .15s; }
-.quest-join-btn.joined { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
-.quest-join-btn.joined:hover { border-color: #f87171; color: #ef4444; }
-
-/* Forms */
-.post-event-form, .post-quest-form { border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; background: var(--surface); display: none; }
-.post-event-form.open, .post-quest-form.open { display: block; animation: fadeUp .2s ease; }
-.form-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin-bottom: 16px; }
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-.form-field { display: flex; flex-direction: column; gap: 5px; }
-.form-field.full { grid-column: 1/-1; }
-.form-label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); font-weight: 500; }
-.form-input { padding: 9px 12px; border: 1px solid var(--border); border-radius: 6px; font-family: var(--font-body); font-size: 13px; background: var(--bg); color: var(--text); outline: none; transition: border-color .15s; }
-.form-input:focus { border-color: #4ade80; }
-.form-select { padding: 9px 12px; border: 1px solid var(--border); border-radius: 6px; font-family: var(--font-body); font-size: 13px; background: var(--bg); color: var(--text); outline: none; transition: border-color .15s; appearance: none; cursor: pointer; }
-.form-select:focus { border-color: #4ade80; }
-.form-actions { display: flex; gap: 10px; margin-top: 16px; }
-.form-submit { padding: 9px 22px; background: #4ade80; color: #0a0a0a; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--font-body); transition: opacity .15s; }
-.form-submit:hover { opacity: .85; }
-.form-cancel { padding: 9px 18px; background: none; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; cursor: pointer; font-family: var(--font-body); color: var(--text3); transition: all .15s; }
-.form-cancel:hover { border-color: var(--text); color: var(--text); }
-/* ═══════════════════════════
-   CAREER
-═══════════════════════════ */
-.career-wrap { padding: 40px 48px; max-width: 900px; }
-.career-cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 40px; }
-.career-card { border: 1px solid var(--border); border-radius: 12px; padding: 24px; transition: all 0.15s; cursor: pointer; background: var(--surface); }
-.career-card:hover { border-color: var(--text); box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-.career-card-icon { font-size: 26px; margin-bottom: 14px; }
-.career-card-title { font-family: var(--font-display); font-size: 17px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 6px; }
-.career-card-desc { font-size: 13px; color: var(--text3); line-height: 1.6; margin-bottom: 14px; }
-.career-card-cta { font-size: 12px; font-weight: 500; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 1px; }
 .section-heading { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); margin-bottom: 16px; }
 .aspiration-input-row { display: flex; gap: 10px; margin-bottom: 12px; }
 .aspiration-input { flex: 1; padding: 11px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: var(--font-body); font-size: 13px; outline: none; background: var(--surface); color: var(--text); margin: 0; }
@@ -546,9 +396,6 @@ input::placeholder { color: var(--text3); }
   .personal-body { grid-template-columns: 1fr; }
   .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
   .main-content { padding: 20px; }
-  .community-wrap { padding: 24px 16px; }
-  .career-wrap { padding: 28px 20px; }
-  .career-cards-grid { grid-template-columns: 1fr; }
   .resource-panel.open { width: 100%; top: 0; z-index: 150; }
   .resource-panel-inner { width: 100%; }
 }
@@ -789,10 +636,8 @@ input::placeholder { color: var(--text3); }
 <nav>
   <a href="index.html" class="nav-logo">Unify</a>
   <div class="nav-tabs">
-    <button class="nav-tab active" onclick="switchSpace('personal')" id="tab-personal">Dashboard</button>
-    <button class="nav-tab" onclick="switchSpace('community')" id="tab-community">Explore Campus</button>
+    <button class="nav-tab active" id="tab-personal">Dashboard</button>
     <a href="timetable.html" class="nav-tab">Timetable</a>
-    <a href="careers.html" class="nav-tab">Career</a>
     <a href="profile.html" class="nav-tab">Profile</a>
   </div>
   <div class="nav-right">
@@ -998,162 +843,21 @@ input::placeholder { color: var(--text3); }
   </div>
 </div>
 
-<!-- ── SPACE 2: EXPLORE CAMPUS ── -->
-<div class="space" id="space-community">
-  <div class="community-wrap">
-
-    <div class="campus-hero">
-      <div class="campus-hero-text">
-        <h2 class="campus-title">Explore Campus</h2>
-        <p class="campus-slogan">Say no to a boring campus life.</p>
-      </div>
-      <div class="campus-hero-actions">
-        <button class="post-event-btn" onclick="openEventForm()">+ Event</button>
-        <button class="post-event-btn" onclick="openQuestForm()">+ Quest</button>
-      </div>
-    </div>
-
-    <!-- COMPOSER -->
-    <div class="composer">
-      <div class="composer-row">
-        <div class="composer-avatar" id="composerAvatar">U</div>
-        <div class="composer-main">
-          <textarea class="composer-input" id="postInput" placeholder="What's happening on campus?"></textarea>
-          <div class="composer-img-preview" id="imgPreview" style="display:none">
-            <img id="previewImg" src="" alt="preview">
-            <button class="remove-img-btn" onclick="removeImage()">×</button>
-          </div>
-        </div>
-      </div>
-      <div class="composer-footer">
-        <div class="composer-tags">
-          <button class="tag-pill" onclick="toggleTag(this,'Project')">Project</button>
-          <button class="tag-pill" onclick="toggleTag(this,'Achievement')">Win</button>
-          <button class="tag-pill" onclick="toggleTag(this,'Event')">Event</button>
-          <button class="tag-pill" onclick="toggleTag(this,'Quest')">Quest</button>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <label class="img-upload-btn" for="imgUpload" title="Add photo">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          </label>
-          <input type="file" id="imgUpload" accept="image/*" style="display:none" onchange="handleImageSelect(event)">
-          <button class="post-btn" id="postBtn" onclick="submitPost()">Post</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB FILTER -->
-    <div class="comm-tabs">
-      <button class="comm-tab active" onclick="switchFeedTab('all',this)">All</button>
-      <button class="comm-tab" onclick="switchFeedTab('posts',this)">Posts</button>
-      <button class="comm-tab" onclick="switchFeedTab('events',this)">Events</button>
-      <button class="comm-tab" onclick="switchFeedTab('quests',this)">Side Quests</button>
-    </div>
-
-    <!-- EVENT FORM -->
-    <div class="post-event-form" id="eventForm">
-      <div class="form-title">Post a Campus Event</div>
-      <div class="form-grid">
-        <div class="form-field full">
-          <label class="form-label">Event Title</label>
-          <input class="form-input" id="evTitle" placeholder="e.g. AI & Robotics Conference 2026">
-        </div>
-        <div class="form-field">
-          <label class="form-label">Date & Time</label>
-          <input class="form-input" id="evDate" placeholder="e.g. Saturday, Apr 26 · 10 AM">
-        </div>
-        <div class="form-field">
-          <label class="form-label">Location</label>
-          <input class="form-input" id="evLocation" placeholder="e.g. Engineering Hall / Virtual">
-        </div>
-        <div class="form-field">
-          <label class="form-label">Category</label>
-          <select class="form-select" id="evCategory">
-            <option value="conference">Conference</option>
-            <option value="workshop">Workshop</option>
-            <option value="hackathon">Hackathon</option>
-            <option value="talk">Talk / Seminar</option>
-            <option value="internship">Internship Info</option>
-            <option value="social">Social</option>
-          </select>
-        </div>
-        <div class="form-field">
-          <label class="form-label">Register Link (optional)</label>
-          <input class="form-input" id="evLink" placeholder="https://...">
-        </div>
-        <div class="form-field full">
-          <label class="form-label">Description</label>
-          <textarea class="form-input" id="evDesc" rows="3" placeholder="What's this event about? Who should attend?"></textarea>
-        </div>
-        <div class="form-field full">
-          <label class="form-label">Organizer</label>
-          <input class="form-input" id="evOrganizer" placeholder="e.g. LASU Tech Club, MTN Nigeria...">
-        </div>
-      </div>
-      <div class="form-actions">
-        <button class="form-submit" onclick="submitEvent()">Post Event →</button>
-        <button class="form-cancel" onclick="closeEventForm()">Cancel</button>
-      </div>
-    </div>
-
-    <!-- QUEST FORM -->
-    <div class="post-quest-form" id="questForm">
-      <div class="form-title">Create a Side Quest</div>
-      <div class="form-grid">
-        <div class="form-field full">
-          <label class="form-label">Quest Name</label>
-          <input class="form-input" id="qTitle" placeholder="e.g. Morning Hill Walk, Gym Day, Night Ride...">
-        </div>
-        <div class="form-field">
-          <label class="form-label">Day & Time</label>
-          <input class="form-input" id="qDate" placeholder="e.g. Saturday · 6:30 AM">
-        </div>
-        <div class="form-field">
-          <label class="form-label">Meet Point</label>
-          <input class="form-input" id="qLocation" placeholder="e.g. Engineering Gate">
-        </div>
-        <div class="form-field full">
-          <label class="form-label">What's the vibe? (optional)</label>
-          <input class="form-input" id="qDesc" placeholder="e.g. Easy 45-min walk, all levels welcome. Bring water.">
-        </div>
-      </div>
-      <div class="form-actions">
-        <button class="form-submit" onclick="submitQuest()">Create Quest →</button>
-        <button class="form-cancel" onclick="closeQuestForm()">Cancel</button>
-      </div>
-    </div>
-
-    <!-- UNIFIED FEED -->
-    <div id="unifiedFeed"></div>
-
-  </div>
-</div>
 
 
 
 <!-- ── MOBILE BOTTOM NAV ── -->
 <nav class="mobile-nav">
   <div class="mobile-nav-inner">
-    <button class="mobile-nav-btn active" onclick="switchSpace('personal')" id="mob-tab-personal">
+    <button class="mobile-nav-btn active" id="mob-tab-personal">
       <span class="mobile-nav-label">Dashboard</span>
       <div class="mobile-nav-dot"></div>
     </button>
-    <button class="mobile-nav-btn" onclick="switchSpace('community')" id="mob-tab-community">
-      <span class="mobile-nav-icon">🌍</span>
-      <span class="mobile-nav-label">Explore Campus</span>
-      <div class="mobile-nav-dot"></div>
-    </button>
-    <button class="mobile-nav-btn" onclick="window.location.href='careers.html'" id="mob-tab-career">
-      <span class="mobile-nav-icon">🚀</span>
-      <span class="mobile-nav-label">Career</span>
-      <div class="mobile-nav-dot"></div>
-    </button>
-    <a href="careers.html" class="mobile-nav-btn">
-      <span class="mobile-nav-label">Career</span>
+    <a href="timetable.html" class="mobile-nav-btn">
+      <span class="mobile-nav-label">Timetable</span>
       <div class="mobile-nav-dot"></div>
     </a>
     <a href="profile.html" class="mobile-nav-btn">
-      <span class="mobile-nav-icon">👤</span>
       <span class="mobile-nav-label">Profile</span>
       <div class="mobile-nav-dot"></div>
     </a>
@@ -1165,7 +869,7 @@ input::placeholder { color: var(--text3); }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, limit, getDocs, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBjZyfNNpXZFJwB7GKXVeSzLTVknfwCa8I",
@@ -1182,8 +886,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 let currentUser = null, saveTimeout = null, activeCourseId = null;
-let activeTag = null, currentFilter = 'all';
-let userProfile = {}, aspirations = [], feedPosts = [];
+let userProfile = {}, aspirations = [];
 let earnedBadges = new Set();
 let weekProgress = {};
 // ── SECURITY ──────────────────────────────────────────
@@ -1251,9 +954,7 @@ onAuthStateChanged(auth, async user => {
   const greet = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
   document.getElementById('heroName').innerHTML = `${greet},<br><em id="heroFirstName">${first}.</em>`;
   document.getElementById('navUserName').textContent = first;
-  document.getElementById('composerAvatar').textContent = first[0].toUpperCase();
   await loadUserData();
-  await loadFeed();
   initStreak();
   document.getElementById('loadingOverlay').style.display = 'none';
 });
@@ -1266,16 +967,6 @@ document.addEventListener('visibilitychange', () => {
 document.getElementById('signOutBtn').addEventListener('click', async () => {
   await signOut(auth); window.location.href = 'auth.html';
 });
-
-// ── SPACE SWITCH ──────────────────────────────────────
-window.switchSpace = function(space) {
-  document.querySelectorAll('.space').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-tab[id], .mobile-nav-btn[id]').forEach(t => t.classList.remove('active'));
-  document.getElementById('space-' + space).classList.add('active');
-  document.getElementById('tab-' + space)?.classList.add('active');
-  document.getElementById('mob-tab-' + space)?.classList.add('active');
-  if (space !== 'personal') closeResourcePanel();
-}
 
 // ── LOAD DATA ─────────────────────────────────────────
 async function loadUserData() {
@@ -1297,7 +988,6 @@ async function loadUserData() {
       const greet = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
       document.getElementById('heroName').innerHTML = `${greet},<br><em id="heroFirstName">${first}.</em>`;
       document.getElementById('navUserName').textContent = first;
-      document.getElementById('composerAvatar').textContent = first[0].toUpperCase();
     }
     window.courses = d.courses || [];
     aspirations = d.aspirations || [];
@@ -1597,396 +1287,6 @@ window.showMilestone = function(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3500);
 }
-
-// ── CAMPUS LIFE ─────────────────────────────────────────
-window.toggleTag = function(el, tag) {
-  document.querySelectorAll('.tag-pill').forEach(t => t.classList.remove('active'));
-  activeTag = activeTag === tag ? null : tag;
-  if (activeTag) el.classList.add('active');
-}
-
-// Feed tab state
-let feedTab = 'all';
-
-window.switchFeedTab = function(tab, btn) {
-  feedTab = tab;
-  document.querySelectorAll('.comm-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderUnifiedFeed();
-};
-
-// ── DATA ─────────────────────────────────────────────
-const samplePosts = [
-  { id:'s1', _type:'post', author:'Temi A.', dept:'Electronic & Computer Engineering', university:'LASU', tag:'Project', content:'Just finished building a soil moisture sensor with Arduino and GSM module — sends an SMS alert when crops need water.', likes:[], _ts: Date.now()/1000 - 1800 },
-  { id:'s2', _type:'post', author:'Kola B.', dept:'Mechanical Engineering', university:'LASU', tag:'Achievement', content:'Passed Heat Transfer with an A! The past questions on Unify genuinely helped. Check the resources tab for your courses.', likes:['x'], _ts: Date.now()/1000 - 5400 },
-  { id:'s3', _type:'post', author:'Amaka O.', dept:'Civil Engineering', university:'LASU', tag:'Idea', content:'Thinking about a structural analysis tool for design projects. Would anyone find that useful? Looking for collaborators.', likes:['x','y'], _ts: Date.now()/1000 - 90000 },
-];
-
-const sampleEvents = [
-  { id:'e1', _type:'event', title:'AI & Robotics Conference', category:'conference', badge:'Conference', date:'Saturday, Apr 26 · 10 AM', location:'Engineering Hall, LASU', desc:'A full-day deep-dive into AI, robotics, and embedded systems. Open to all engineering students.', organizer:'LASU Tech Club', link:'#', _ts: Date.now()/1000 - 3600 },
-  { id:'e2', _type:'event', title:'MTN Graduate Internship Info Session', category:'internship', badge:'Internship', date:'Tuesday, Apr 15 · 2 PM', location:'Virtual (Google Meet)', desc:'MTN Nigeria walks through their 2026 graduate trainee programme. Application tips, role overview, Q&A with HR.', organizer:'MTN Nigeria', link:'#', _ts: Date.now()/1000 - 7200 },
-  { id:'e3', _type:'event', title:'Build For Africa Hackathon', category:'hackathon', badge:'Hackathon', date:'May 2–4 · 3-Day Event', location:'Innovation Hub, LASU', desc:'72-hour hackathon. Teams of 3–5. Prizes worth ₦500,000.', organizer:'GDG LASU', link:'#', _ts: Date.now()/1000 - 86400 },
-  { id:'e4', _type:'event', title:'Public Speaking Night', category:'talk', badge:'Talk', date:'Friday, Apr 18 · 6 PM', location:'LT2, Main Campus', desc:'Open mic-style speaking night. 5 minutes each. Any topic. Perfect for building confidence.', organizer:'Unify Public Speaking Club', link:'#', _ts: Date.now()/1000 - 172800 },
-  { id:'e5', _type:'event', title:'Product Design Workshop', category:'workshop', badge:'Workshop', date:'Saturday, Apr 19 · 11 AM', location:'Computer Lab 3', desc:'Hands-on Figma workshop. Learn to design a mobile app from scratch. No experience needed.', organizer:'Design Circle LASU', link:'#', _ts: Date.now()/1000 - 259200 },
-];
-
-const sampleQuests = [
-  { id:'q1', _type:'quest', title:'Morning Hill Walk', category:'Fitness', icon:'🥾', date:'Saturday · 6:30 AM', location:'Engineering Gate', desc:'Easy 45-min walk around the campus hills. All levels welcome. Bring water.', participants:['Temi','Kola','Amaka','Sola'], _ts: Date.now()/1000 - 900 },
-  { id:'q2', _type:'quest', title:'Gym Day', category:'Fitness', icon:'💪', date:'Wednesday · 5 PM', location:'Campus Gym', desc:'Group workout session. Beginners welcome — we all start somewhere.', participants:['Bayo','Chidi'], _ts: Date.now()/1000 - 3600 },
-  { id:'q3', _type:'quest', title:'Night Bicycle Ride', category:'Adventure', icon:'🚴', date:'Friday · 7 PM', location:'Main Campus Road', desc:'Chill evening ride around campus. Bring your bike or borrow one from a friend.', participants:['Ife','Dami','Kunle'], _ts: Date.now()/1000 - 86400 },
-  { id:'q4', _type:'quest', title:'Campus Picnic', category:'Social', icon:'🧺', date:'Sunday · 4 PM', location:'Faculty Garden', desc:'Bring food, bring friends. Just good vibes and a break from the books.', participants:['Tobi','Ngozi','Ahmed','Precious','Emeka'], _ts: Date.now()/1000 - 172800 },
-  { id:'q5', _type:'quest', title:'Open Mic Night', category:'Arts', icon:'🎤', date:'Sunday · 6 PM', location:'Lecture Theatre 1', desc:'Share a song, a poem, a spoken word, or just come watch. No judgment zone.', participants:['Yemi','Sade'], _ts: Date.now()/1000 - 259200 },
-];
-
-let customEvents = [], customQuests = [];
-const joinedQuests = new Set();
-
-// ── LOAD FEED FROM FIREBASE ──────────────────────────
-async function loadFeed() {
-  try {
-    const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(20));
-    const snap = await getDocs(q);
-    feedPosts = snap.docs.map(d => ({ _type:'post', id: d.id, ...d.data(), _ts: d.data().createdAt?.seconds || Date.now()/1000 }));
-  } catch(e) { feedPosts = [...samplePosts]; }
-  if (!feedPosts.length) feedPosts = [...samplePosts];
-  renderUnifiedFeed();
-}
-
-// ── UNIFIED FEED RENDERER ────────────────────────────
-function getAllItems() {
-  const posts = feedPosts.length ? feedPosts : samplePosts;
-  const events = [...customEvents, ...sampleEvents];
-  const quests = [...customQuests, ...sampleQuests];
-  const all = [...posts, ...events, ...quests].sort((a,b) => b._ts - a._ts);
-  if (feedTab === 'all') return all;
-  if (feedTab === 'posts') return all.filter(i => i._type === 'post');
-  if (feedTab === 'events') return all.filter(i => i._type === 'event');
-  if (feedTab === 'quests') return all.filter(i => i._type === 'quest');
-  return all;
-}
-
-function timeAgo(ts) {
-  const s = Math.floor(Date.now()/1000 - ts);
-  if (s < 60) return 'just now';
-  if (s < 3600) return Math.floor(s/60) + 'm ago';
-  if (s < 86400) return Math.floor(s/3600) + 'h ago';
-  return Math.floor(s/86400) + 'd ago';
-}
-
-function renderUnifiedFeed() {
-  const container = document.getElementById('unifiedFeed');
-  const items = getAllItems();
-  if (!items.length) {
-    container.innerHTML = '<div class="empty-state"><div class="empty-icon">✨</div><p class="empty-text">Nothing here yet. Post something!</p></div>';
-    return;
-  }
-  container.innerHTML = items.map(item => {
-    if (item._type === 'post') return renderPostCard(item);
-    if (item._type === 'event') return renderEventCard(item);
-    if (item._type === 'quest') return renderQuestCard(item);
-    return '';
-  }).join('');
-}
-
-// ── POST CARD ────────────────────────────────────────
-// posts store: { id, _type, author, uid, dept, university, tag, content, imageDataUrl, likes[], comments[], _ts }
-function renderPostCard(p) {
-  const liked = p.likes?.includes(currentUser?.uid);
-  const initials = sanitise((p.author||'U').split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase());
-  const commentCount = p.comments?.length || 0;
-
-  const commentsHTML = (p._commentsOpen && commentCount > 0) ? `
-    <div class="comment-list">
-      ${(p.comments||[]).map(cm => `
-        <div class="comment">
-          <div class="comment-av">${sanitise((cm.author||'?')[0].toUpperCase())}</div>
-          <div class="comment-bubble">
-            <div class="comment-author">${sanitise(cm.author)}</div>
-            <div class="comment-text">${sanitise(cm.text)}</div>
-          </div>
-        </div>`).join('')}
-    </div>` : '';
-
-  return `
-    <div class="post-card" id="pc-${p.id}">
-      <div class="post-body">
-        <div class="post-meta">
-          <div class="post-avatar">${initials}</div>
-          <div>
-            <div class="post-author-name">${sanitise(p.author)||'Anonymous'}</div>
-            <div class="post-author-info">${[sanitise(p.dept), sanitise(p.university)].filter(Boolean).join(' · ')}</div>
-          </div>
-          <div class="post-time">${timeAgo(p._ts)}</div>
-        </div>
-        ${p.content ? `<div class="post-content">${sanitise(p.content)}</div>` : ''}
-        ${p.tag ? `<span class="post-tag-badge">${sanitise(p.tag)}</span>` : ''}
-      </div>
-      ${p.imageDataUrl ? `<img class="post-img" src="${p.imageDataUrl}" alt="">` : ''}
-      <div class="post-actions">
-        <button class="post-action ${liked?'liked':''}" onclick="likePost('${p.id}')">
-          ${liked?'♥':'♡'} ${p.likes?.length||0}
-        </button>
-        <button class="post-action" onclick="toggleComments('${p.id}')">
-          ${commentCount > 0 ? commentCount + ' comment' + (commentCount===1?'':'s') : 'Comment'}
-        </button>
-      </div>
-      <div class="comments-section" id="cs-${p.id}" style="${p._commentsOpen?'':'display:none'}">
-        ${commentsHTML}
-        <div class="comment-composer">
-          <div class="comment-av">${(currentUser?.displayName||'U')[0].toUpperCase()}</div>
-          <input class="comment-input" id="ci-${p.id}" placeholder="Add a comment…" onkeydown="if(event.key==='Enter')addComment('${p.id}')">
-          <button class="comment-send" onclick="addComment('${p.id}')">Post</button>
-        </div>
-      </div>
-    </div>`;
-}
-
-// ── COMMENT LOGIC ────────────────────────────────────
-function renderEventCard(e) {
-  return `
-    <div class="event-card">
-      <div class="event-card-inner">
-        <div class="event-accent ${e.category}"></div>
-        <div class="event-body">
-          <div class="event-top">
-            <div>
-              <div class="event-category">${e.badge}</div>
-              <div class="event-title">${sanitise(e.title)}</div>
-            </div>
-            <span class="event-badge ${e.category}">${e.badge}</span>
-          </div>
-          <div class="event-meta">
-            <span>${e.date}</span>
-            <span>${e.location}</span>
-          </div>
-          <div class="event-desc">${sanitise(e.desc)}</div>
-          <div class="event-footer">
-            <span class="event-organizer">Posted by ${e.organizer}</span>
-            <button class="event-register-btn" onclick="showMilestone('Opening registration…')">Register →</button>
-          </div>
-        </div>
-      </div>
-    </div>`;
-}
-
-function renderQuestCard(q) {
-  const joined = joinedQuests.has(q.id);
-  const avatars = q.participants.slice(0,4).map((name,i) =>
-    `<div class="quest-av" style="background:${['#4ade80','#60a5fa','#f59e0b','#a78bfa'][i%4]};color:#0a0a0a">${name[0]}</div>`
-  ).join('');
-  return `
-    <div class="quest-card">
-      <div class="quest-top">
-        <div>
-          <div class="quest-category">${sanitise(q.category)} · Side Quest</div>
-          <div class="quest-title">${sanitise(q.title)}</div>
-        </div>
-      </div>
-      <div class="quest-meta">
-        <span>${q.date}</span>
-        <span>${q.location}</span>
-      </div>
-      ${q.desc ? `<div class="quest-desc">${sanitise(q.desc)}</div>` : ''}
-      <div class="quest-footer">
-        <div class="quest-participants">
-          <div class="quest-avatars">${avatars}</div>
-          <span class="quest-count">${q.participants.length} going</span>
-        </div>
-        <button class="quest-join-btn ${joined ? 'joined' : ''}" onclick="joinQuest('${q.id}')">
-          ${joined ? 'Joined' : 'Join Quest'}
-        </button>
-      </div>
-    </div>`;
-}
-
-window.toggleComments = function(id) {
-  const post = feedPosts.find(p => p.id === id);
-  if (!post) return;
-  post._commentsOpen = !post._commentsOpen;
-  renderUnifiedFeed();
-  if (post._commentsOpen) {
-    setTimeout(() => document.getElementById('ci-'+id)?.focus(), 50);
-  }
-};
-
-window.addComment = async function(id) {
-  const input = document.getElementById('ci-'+id);
-  const text = input?.value.trim();
-  if (!text || !currentUser) return;
-  if (!rateLimit('comment-' + currentUser.uid, 10, 60000)) {
-    showMilestone('Slow down — max 10 comments per minute.');
-    return;
-  }
-  const name = currentUser.displayName?.split(' ')[0] || currentUser.email?.split('@')[0] || 'Student';
-  const post = feedPosts.find(p => p.id === id);
-  if (!post) return;
-  if (!post.comments) post.comments = [];
-  const cm = { author: name, text, ts: Date.now()/1000 };
-  post.comments.push(cm);
-  post._commentsOpen = true;
-  if (!id.startsWith('local_') && !id.startsWith('s')) {
-    try { await updateDoc(doc(db,'posts',id), { comments: arrayUnion(cm) }); } catch(e) {}
-  }
-  // Save post to user profile posts list
-  savePostToProfile(post);
-  renderUnifiedFeed();
-};
-
-function savePostToProfile(post) {
-  if (!currentUser) return;
-  try {
-    const key = 'unify-myposts-' + currentUser.uid;
-    const existing = JSON.parse(localStorage.getItem(key)||'[]');
-    const idx = existing.findIndex(p => p.id === post.id);
-    if (idx > -1) existing[idx] = post;
-    else existing.unshift(post);
-    localStorage.setItem(key, JSON.stringify(existing.slice(0,50)));
-  } catch(e) {}
-}
-
-window.likePost = async function(id) {
-  const post = feedPosts.find(p => p.id === id);
-  if (!post || !currentUser) return;
-  const uid = currentUser.uid;
-  const liked = post.likes?.includes(uid);
-  post.likes = liked ? post.likes.filter(x=>x!==uid) : [...(post.likes||[]), uid];
-  if (!id.startsWith('local_') && !id.startsWith('s')) {
-    try { await updateDoc(doc(db,'posts',id), { likes: liked ? arrayRemove(uid) : arrayUnion(uid) }); } catch(e){}
-  }
-  renderUnifiedFeed();
-};
-
-// ── POST SUBMIT + IMAGE ──────────────────────────────
-let pendingImageDataUrl = null;
-
-window.handleImageSelect = function(e) {
-  const file = e.target.files?.[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    pendingImageDataUrl = ev.target.result;
-    const preview = document.getElementById('imgPreview');
-    const img = document.getElementById('previewImg');
-    if (preview && img) { img.src = pendingImageDataUrl; preview.style.display = 'block'; }
-  };
-  reader.readAsDataURL(file);
-};
-
-window.removeImage = function() {
-  pendingImageDataUrl = null;
-  const preview = document.getElementById('imgPreview');
-  if (preview) preview.style.display = 'none';
-  const input = document.getElementById('imgUpload');
-  if (input) input.value = '';
-};
-
-window.submitPost = async function() {
-  const content = document.getElementById('postInput').value.trim();
-  if (!content && !pendingImageDataUrl) return;
-  if (!rateLimit('post-' + (currentUser?.uid||'anon'), 5, 60000)) {
-    showMilestone('Slow down — max 5 posts per minute.');
-    return;
-  }
-  const btn = document.getElementById('postBtn');
-  btn.disabled = true; btn.textContent = 'Posting...';
-  try {
-    const name = currentUser?.displayName?.trim().split(/\s+/)[0] || currentUser?.email?.split('@')[0] || 'Student';
-    const postData = {
-      _type: 'post',
-      author: name,
-      uid: currentUser?.uid,
-      dept: userProfile.department||'',
-      university: userProfile.university||'',
-      tag: activeTag||null,
-      content,
-      imageDataUrl: pendingImageDataUrl || null,
-      likes: [],
-      comments: [],
-      _ts: Date.now()/1000
-    };
-    let newPost;
-    try {
-      const firestoreData = { ...postData, createdAt: new Date() };
-      if (pendingImageDataUrl && pendingImageDataUrl.length > 500000) delete firestoreData.imageDataUrl;
-      const ref = await addDoc(collection(db, 'posts'), firestoreData);
-      newPost = { id: ref.id, ...postData };
-    } catch(e) {
-      newPost = { id: 'local_'+Date.now(), ...postData };
-    }
-    feedPosts.unshift(newPost);
-    savePostToProfile(newPost);
-    document.getElementById('postInput').value = '';
-    document.querySelectorAll('.tag-pill').forEach(t => t.classList.remove('active'));
-    activeTag = null;
-    removeImage();
-    renderUnifiedFeed();
-    showMilestone('Post is live.');
-  } finally { btn.disabled = false; btn.textContent = 'Post'; }
-};
-
-// ── EVENTS ───────────────────────────────────────────
-window.openEventForm = function() {
-  document.getElementById('eventForm').classList.add('open');
-  document.getElementById('questForm').classList.remove('open');
-};
-window.closeEventForm = function() {
-  document.getElementById('eventForm').classList.remove('open');
-};
-
-window.submitEvent = function() {
-  const title = document.getElementById('evTitle').value.trim();
-  const date = document.getElementById('evDate').value.trim();
-  const location = document.getElementById('evLocation').value.trim();
-  const desc = document.getElementById('evDesc').value.trim();
-  const category = document.getElementById('evCategory').value;
-  const link = document.getElementById('evLink').value.trim();
-  const organizer = document.getElementById('evOrganizer').value.trim();
-  if (!title || !date || !location) { showMilestone('Fill in title, date and location'); return; }
-  const badgeMap = { conference:'Conference', workshop:'Workshop', hackathon:'Hackathon', talk:'Talk', internship:'Internship', social:'Social' };
-  customEvents.unshift({ _type:'event', id:'ev_'+Date.now(), title, date, location, desc: desc||'Come through!', category, badge: badgeMap[category]||category, link: link||'#', organizer: organizer||'A student', _ts: Date.now()/1000 });
-  renderUnifiedFeed();
-  closeEventForm();
-  ['evTitle','evDate','evLocation','evDesc','evLink','evOrganizer'].forEach(id => { document.getElementById(id).value = ''; });
-  showMilestone('📅 Event posted!');
-};
-
-// ── QUESTS ───────────────────────────────────────────
-window.openQuestForm = function() {
-  document.getElementById('questForm').classList.add('open');
-  document.getElementById('eventForm').classList.remove('open');
-};
-window.closeQuestForm = function() {
-  document.getElementById('questForm').classList.remove('open');
-};
-
-window.submitQuest = function() {
-  const title = document.getElementById('qTitle').value.trim();
-  const date = document.getElementById('qDate').value.trim();
-  const location = document.getElementById('qLocation').value.trim();
-  const desc = document.getElementById('qDesc').value.trim();
-  if (!title || !date || !location) { showMilestone('Fill in name, time and meet point'); return; }
-  const icons = { walk:'🥾', gym:'💪', bike:'🚴', ride:'🚴', picnic:'🧺', swim:'🏊', run:'🏃', jog:'🏃', hike:'⛰️', night:'🌙', music:'🎵', art:'🎨', game:'🎮' };
-  const icon = Object.entries(icons).find(([k]) => title.toLowerCase().includes(k))?.[1] || '⚡';
-  const name = currentUser?.displayName?.split(' ')[0] || 'You';
-  customQuests.unshift({ _type:'quest', id:'q_'+Date.now(), title, category:'Quest', icon, date, location, desc: desc||'', participants:[name], _ts: Date.now()/1000 });
-  renderUnifiedFeed();
-  closeQuestForm();
-  ['qTitle','qDate','qLocation','qDesc'].forEach(id => { document.getElementById(id).value = ''; });
-  showMilestone('⚡ Quest created!');
-};
-
-window.joinQuest = function(id) {
-  if (joinedQuests.has(id)) {
-    joinedQuests.delete(id);
-  } else {
-    joinedQuests.add(id);
-    showMilestone("⚡ You're in!");
-  }
-  renderUnifiedFeed();
-};
-
-// ── INIT ─────────────────────────────────────────────
-renderUnifiedFeed();
 
 // ── STREAK + REVIEW SYSTEM ────────────────────────────
 const REVIEW_QUESTIONS = [

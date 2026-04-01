@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPE 212 — Week 5: The Automobile Engine | Unify</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--muted:#555;--muted2:#999;--accent:#4ade80;--accent-deep:#16a34a;--font-heading:'Playfair Display',serif;--font-body:'DM Sans',sans-serif;--nav-h:60px}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--accent:#4ade80;--accent-deep:#4ade80}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.7;font-size:15px;transition:background .2s,color .2s}
+nav{position:sticky;top:0;z-index:100;height:var(--nav-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;gap:32px}
+.nav-logo{font-family:var(--font-heading);font-size:20px;font-weight:900;color:var(--text);text-decoration:none;flex-shrink:0}
+.nav-links{display:flex;gap:4px;flex:1}
+.nav-links a{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:6px;border-bottom:2px solid transparent;transition:color .15s}
+.nav-links a:hover{color:var(--text)}.nav-links a.active{color:var(--accent-deep);border-bottom-color:var(--accent)}
+.theme-toggle{margin-left:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-family:var(--font-body);font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;flex-shrink:0}
+.theme-toggle:hover{color:var(--text);border-color:var(--muted)}
+.week-page{max-width:900px;margin:0 auto;padding:40px 48px 80px}
+.back-bar{display:flex;align-items:center;gap:12px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.back-btn:hover{color:var(--text);border-color:var(--text)}
+.week-nav{display:flex;gap:8px;margin-left:auto}
+.wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.wnav-btn:hover{color:var(--text);border-color:var(--text)}.wnav-btn.disabled{opacity:.35;pointer-events:none}
+.week-block{border-radius:14px;border:1px solid var(--border);overflow:hidden;background:var(--surface)}
+.week-header{background:var(--text);color:var(--bg);padding:24px 32px;display:flex;align-items:baseline;gap:20px}
+[data-theme="dark"] .week-header{background:var(--surface2);border-bottom:1px solid var(--border);color:var(--text)}
+.week-num{font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;opacity:.55;white-space:nowrap}
+.week-title{font-family:var(--font-heading);font-size:21px;font-weight:700;font-style:italic;color:inherit}
+[data-theme="dark"] .week-title{color:var(--text)}
+.week-body{padding:28px 32px}
+.week-summary{font-size:14px;color:var(--muted);margin-bottom:1.2rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border);line-height:1.75}
+.key-terms{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.5rem}
+.key-term{background:var(--surface2);border:1px solid var(--border);font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;color:var(--muted)}
+.exam-box{background:#fffbeb;border-left:3px solid #fcd34d;border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:1.5rem}
+[data-theme="dark"] .exam-box{background:#1c1a0f}
+.exam-box-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#92400e;margin-bottom:10px}
+[data-theme="dark"] .exam-box-label{color:#fbbf24}
+.exam-q{font-size:13.5px;color:var(--text);margin-bottom:6px;display:flex;align-items:flex-start;gap:8px}
+.past-q{background:#fcd34d;color:#78350f;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap;flex-shrink:0;margin-top:3px}
+.topic-block{margin-bottom:2rem;padding-bottom:2rem;border-bottom:1px solid var(--border)}
+.topic-block:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.topic-number{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:4px}
+.topic-title{font-family:var(--font-heading);font-size:1.2rem;font-weight:700;margin-bottom:.8rem;color:var(--text)}
+.topic-explain{font-size:14px;color:var(--muted);margin-bottom:1rem;line-height:1.75}
+.def-box{background:var(--surface2);border:1.5px solid var(--accent);border-radius:8px;padding:14px 18px;margin-bottom:1rem;font-size:14px;line-height:1.7}
+.def-box strong{color:var(--accent-deep)}
+.formula-block{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:1rem}
+[data-theme="dark"] .formula-block{background:#1a1a1a;border-color:#2a2a2a}
+.formula-label{font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px}
+.formula{font-family:var(--font-heading);font-style:italic;font-size:1.1rem;color:var(--text);margin-bottom:8px}
+.formula-vars{font-size:12.5px;color:var(--muted)}
+.formula-vars li{margin-bottom:3px;list-style:none;padding-left:0}
+.formula-vars li::before{content:"— ";color:var(--accent)}
+.worked-example{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:1rem;font-size:13.5px}
+.worked-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px}
+.worked-step{margin-bottom:6px;padding-left:1rem;position:relative}
+.worked-step::before{content:"→";position:absolute;left:0;color:var(--accent)}
+.mistake-box{background:#fff5f5;border-left:3px solid #fca5a5;border-radius:0 8px 8px 0;padding:14px 18px;margin-bottom:1rem;font-size:13.5px}
+[data-theme="dark"] .mistake-box{background:#1f0d0d}
+.mistake-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#dc2626;margin-bottom:6px}
+.quick-check{margin-top:1rem}
+.quick-check-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px}
+.quick-check ol{padding-left:1.2rem;font-size:13.5px;color:var(--muted)}
+.quick-check ol li{margin-bottom:4px}
+.diagram-wrap{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:1rem;overflow-x:auto}
+.diagram-caption{font-size:11px;color:var(--muted2);text-align:center;margin-top:8px;font-style:italic}
+footer{border-top:1px solid var(--border);padding:32px 48px;text-align:center;font-size:13px;color:var(--muted2);max-width:900px;margin:0 auto}
+footer strong{color:var(--muted);font-weight:500}
+p{margin-bottom:.7rem}
+@media(max-width:700px){nav{padding:0 16px;gap:16px}.nav-links{display:none}.week-page{padding:20px 16px 60px}.week-body{padding:20px}footer{padding:24px 20px}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="../../dashboard.html" class="nav-logo">Unify</a>
+  <div class="nav-links">
+    <a href="../../dashboard.html">Dashboard</a>
+    <a href="../../Learn.html">Learn</a>
+    <a href="../../careers.html">Career</a>
+    <a href="../../profile.html">Profile</a>
+    <a href="#" class="active">IPE 212</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">☾ Dark</button>
+</nav>
+
+<div class="week-page">
+  <div class="back-bar">
+    <a href="../../Learn.html?course=IPE+212&name=IPE+212" class="back-btn">← Back to IPE 212</a>
+    <div class="week-nav">
+      <a href="W4.html" class="wnav-btn">← Prev</a>
+      <a href="W6.html" class="wnav-btn">Next →</a>
+    </div>
+  </div>
+
+  <div class="week-block">
+    <div class="week-header">
+      <span class="week-num">Week 5 of 12</span>
+      <span class="week-title">The Automobile Engine</span>
+    </div>
+    <div class="week-body">
+      <p class="week-summary">The engine is the heart of the car. This week covers engine overview, major components, the division of the engine into cylinder block and cylinder head, and critical engine terminology including bore, stroke, TDC, BDC, and compression ratio.</p>
+      <div class="key-terms">
+        <span class="key-term">Bore</span><span class="key-term">Stroke</span><span class="key-term">TDC</span><span class="key-term">BDC</span><span class="key-term">Compression ratio</span><span class="key-term">Clearance volume</span><span class="key-term">Swept volume</span>
+      </div>
+      <div class="exam-box">
+        <div class="exam-box-label">⚑ Likely Exam Questions</div>
+        <div class="exam-q"><span class="past-q">Past Q</span>Define the following terms: Bore, Stroke, TDC, BDC, Clearance Volume, Swept Volume, Compression Ratio.</div>
+        <div class="exam-q"><span class="past-q">Past Q</span>Distinguish between the cylinder block and the cylinder head. State the function of each.</div>
+        <div class="exam-q">An engine has a total cylinder volume of 600 cc and a clearance volume of 50 cc. Calculate the compression ratio.</div>
+        <div class="exam-q">What is the engine? Describe its primary function in an automobile.</div>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-number">Topic 5.1</div>
+        <div class="topic-title">The Automobile Engine — Overview</div>
+        <p class="topic-explain">Imagine you have a box. You light a small explosion inside the box. The explosion pushes a plunger (piston) down very hard. That plunger is connected to a rod, which turns a spinning shaft. That spinning motion eventually turns your car's wheels. That's essentially what an engine does — it converts burning fuel into rotation.</p>
+        <div class="def-box">The <strong>engine</strong> is the heart of your car. It is a complex machine built to <strong>convert heat from burning gas into the force that turns the road wheels</strong>.</div>
+        <div class="def-box"><strong>How engine works — fundamentals of engine operations:</strong><br>a. The automobile engine<br>b. Electricity and electronic engine controls<br>c. Piston–engine operations<br>d. Engine types and classifications<br>e. Engine construction<br>f. Valves and trains<br>g. Engine measurement and performance</div>
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 600 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;display:block;margin:0 auto;">
+            <defs><style>.et{font-family:'DM Sans',sans-serif;font-size:12px;fill:#0a0a0a;text-anchor:middle}.es{font-family:'DM Sans',sans-serif;font-size:10px;fill:#555;text-anchor:middle}</style>
+            <marker id="ar2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#4ade80"/></marker></defs>
+            <rect x="240" y="30" width="120" height="100" rx="4" fill="#f8f7f3" stroke="#e0deda" stroke-width="2"/>
+            <rect x="255" y="70" width="90" height="30" rx="3" fill="#4ade80" opacity="0.7"/>
+            <text x="300" y="90" class="et" fill="white" font-weight="700">PISTON</text>
+            <rect x="293" y="100" width="14" height="45" rx="3" fill="#16a34a" opacity="0.8"/>
+            <ellipse cx="300" cy="155" rx="30" ry="18" fill="none" stroke="#0a0a0a" stroke-width="2"/>
+            <circle cx="300" cy="155" r="6" fill="#0a0a0a"/>
+            <text x="300" y="175" class="es">Crankshaft</text>
+            <text x="300" y="22" class="et" font-weight="600">Cylinder</text>
+            <line x1="190" y1="40" x2="240" y2="40" stroke="#e0deda" stroke-width="1" stroke-dasharray="4"/>
+            <text x="160" y="44" class="es" text-anchor="end">Cylinder Head</text>
+            <line x1="190" y1="130" x2="240" y2="130" stroke="#e0deda" stroke-width="1" stroke-dasharray="4"/>
+            <text x="160" y="134" class="es" text-anchor="end">Cylinder Block</text>
+            <text x="395" y="40" class="es" fill="#16a34a">TDC</text>
+            <line x1="380" y1="45" x2="380" y2="70" stroke="#4ade80" stroke-width="1.5" marker-end="url(#ar2)"/>
+            <text x="395" y="135" class="es" fill="#555">BDC</text>
+            <line x1="380" y1="105" x2="380" y2="128" stroke="#999" stroke-width="1.5" marker-end="url(#ar2)"/>
+          </svg>
+          <p class="diagram-caption">Basic engine diagram showing piston, connecting rod, crankshaft, TDC and BDC positions</p>
+        </div>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-number">Topic 5.2</div>
+        <div class="topic-title">Engine Nomenclature — Key Terms</div>
+        <p class="topic-explain">Before you can understand engine performance, you need to know its vocabulary. These terms are like coordinates on a map — without them, you can't describe where things are or what's happening inside the engine.</p>
+        <div class="def-box"><strong>1. Bore:</strong> The inside diameter of the cylinder is called bore.<br><br><strong>2. Stroke:</strong> The linear distance along the cylinder axis between two limiting positions is called the stroke.<br><br><strong>3. Top Dead Centre (T.D.C.):</strong> The topmost position of the piston towards the cover end side of the cylinder is called T.D.C.<br><br><strong>4. Bottom Dead Centre (B.D.C.):</strong> The lowest position of the piston towards the crank end side of the cylinder is called B.D.C.<br><br><strong>5. Clearance Volume:</strong> The volume contained in the cylinder above the top of the piston, when the piston is at top dead centre, is called the clearance volume.<br><br><strong>6. Swept Volume:</strong> The volume swept by the piston while moving between T.D.C. to B.D.C. is called swept volume or piston displacement.<br><br><strong>7. Compression Ratio:</strong> It is the ratio of Total cylinder volume to clearance volume.</div>
+        <div class="formula-block">
+          <div class="formula-label">Compression Ratio Formula</div>
+          <div class="formula">CR = Total Cylinder Volume / Clearance Volume</div>
+          <div class="formula" style="margin-top:6px;">CR = (Swept Volume + Clearance Volume) / Clearance Volume</div>
+          <ul class="formula-vars" style="margin-top:8px;">
+            <li>CR = Compression Ratio (dimensionless)</li>
+            <li>Swept Volume = Volume displaced by piston from BDC to TDC</li>
+            <li>Clearance Volume = Volume above piston when at TDC</li>
+          </ul>
+        </div>
+        <div class="worked-example">
+          <div class="worked-label">Worked Example</div>
+          <p><strong>Problem:</strong> An engine has a total cylinder volume of 600 cc and a clearance volume of 50 cc. Calculate the compression ratio.</p>
+          <div class="worked-step">Total cylinder volume = 600 cc; Clearance volume = 50 cc</div>
+          <div class="worked-step">Swept Volume = Total – Clearance = 600 – 50 = 550 cc</div>
+          <div class="worked-step">CR = Total / Clearance = 600 / 50 = <strong>12:1</strong></div>
+          <p style="margin-top:8px;font-size:13px;color:var(--muted);">A CR of 12:1 is typical for a diesel engine (diesel engines have higher CR than petrol engines, typically 14:1 to 25:1, vs. petrol at 8:1 to 12:1).</p>
+        </div>
+        <div class="mistake-box"><div class="mistake-label">Common Mistake</div>Students calculate CR as Swept Volume / Clearance Volume. This gives the WRONG answer. The correct numerator is TOTAL cylinder volume (swept + clearance), not just swept volume. CR = (Swept Volume + Clearance Volume) / Clearance Volume.</div>
+        <div class="quick-check">
+          <div class="quick-check-label">Quick Check</div>
+          <ol><li>Define TDC and BDC in your own words.</li><li>An engine has a swept volume of 400 cc and a clearance volume of 40 cc. Calculate the compression ratio.</li><li>What is the difference between swept volume and clearance volume?</li></ol>
+        </div>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-number">Topic 5.3</div>
+        <div class="topic-title">Cylinder Block and Cylinder Head</div>
+        <p class="topic-explain">The engine is divided into two main housing sections. The cylinder block is the lower, heavy part that contains the pistons and crankshaft. The cylinder head sits on top and contains the valves and combustion chambers. Think of a pot (block) with a lid (head) — combustion happens in the space between them.</p>
+        <div class="def-box"><strong>Cylinder Block:</strong> A cast structure with cylindrical holes bored to guide and support the pistons and to harness the working gases. It also provides a jacket to contain a liquid coolant. The block houses the <strong>crankshaft</strong>, which converts the reciprocating motion of the pistons into rotary motion at the crankshaft flywheel interface. Often also houses the <strong>camshaft</strong>.<br><br><strong>Cylinder Head:</strong> This casting encloses the combustion end of the cylinder block and houses both the inlet and exhaust poppet-valves and their ports to admit air–fuel mixture and to exhaust the combustion products. Contains valve-controlled passages through which the air and fuel mixture enters the cylinders, and others through which the gases produced by their combustion are expelled.</div>
+        <div class="quick-check">
+          <div class="quick-check-label">Quick Check</div>
+          <ol><li>What is the primary function of the cylinder block?</li><li>What components does the cylinder head house?</li><li>Where is the combustion chamber located in relation to the block and head?</li></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:32px;padding-top:24px;border-top:1px solid var(--border);">
+    <a href="W4.html" class="back-btn">← Week 4</a>
+    <a href="W6.html" class="back-btn" style="border-color:var(--accent);color:var(--accent-deep);">Next: Week 6 →</a>
+  </div>
+</div>
+
+<footer>
+  <strong>IPE 212 — Automotive Engineering &amp; Workshop</strong> · Week 5 · Unify Platform · LASU Faculty of Engineering<br>
+  <span style="display:block;margin-top:6px">Lecturer: Dr Mrs. V.D. Obasa</span>
+</footer>
+<script>
+(function(){const saved=localStorage.getItem('unify-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);const b=document.getElementById('theme-btn');if(b)b.textContent=saved==='dark'?'☀ Light':'☾ Dark';}})();
+function toggleTheme(){const cur=document.documentElement.getAttribute('data-theme');const nxt=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',nxt);localStorage.setItem('unify-theme',nxt);document.getElementById('theme-btn').textContent=nxt==='dark'?'☀ Light':'☾ Dark';}
+</script>
+</body>
+</html>

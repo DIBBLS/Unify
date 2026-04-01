@@ -533,6 +533,197 @@ const UNIFY_COURSE_CONTENT = {
     ]
   },
 
+  // ── MEE 212: Theory of Machines ──────────────────────────────
+  "MEE 212": {
+    title: "Theory of Machines",
+    weeks: [
+      {
+        week:1, topic:"Velocity of Points on Rigid Links",
+        subtopics:["What is Kinematics? Velocity basics"],
+        time:13,
+        resources:{ notes:"Coursecontents/MEE 212/W1.html" },
+        content:{
+          "What is Kinematics? Velocity basics": { hasContent: true, htmlFile: "Coursecontents/MEE 212/W1.html" }
+        }
+      },
+      {
+        week:2, topic:"Relative Velocity Method",
+        subtopics:["The Relative Velocity Principle"],
+        time:13,
+        resources:{ notes:"Coursecontents/MEE 212/W2.html" },
+        content:{
+          "The Relative Velocity Principle": { hasContent: true, htmlFile: "Coursecontents/MEE 212/W2.html" }
+        }
+      },
+      {
+        week:3, topic:"Acceleration in Mechanisms",
+        subtopics:["Normal and Tangential Acceleration"],
+        time:14,
+        resources:{ notes:"Coursecontents/MEE 212/W3.html" },
+        content:{
+          "Normal and Tangential Acceleration": { hasContent: true, htmlFile: "Coursecontents/MEE 212/W3.html" }
+        }
+      },
+      {
+        week:4, topic:"Flywheel — Theory & Turning Moment Diagram",
+        subtopics:["What is a Flywheel?"],
+        time:13,
+        resources:{ notes:"Coursecontents/MEE 212/W4.html" },
+        content:{
+          "What is a Flywheel?": { hasContent: true, htmlFile: "Coursecontents/MEE 212/W4.html" }
+        }
+      },
+      {
+        week:5, topic:"Flywheel — Fluctuation of Energy & Speed",
+        subtopics:["Maximum Fluctuation of Energy (ΔE)"],
+        time:13,
+        resources:{ notes:"Coursecontents/MEE 212/W5.html" },
+        content:{
+          "Maximum Fluctuation of Energy (ΔE)": { hasContent: true, htmlFile: "Coursecontents/MEE 212/W5.html" }
+        }
+      },
+      {
+        week:6, topic:"Governors — Types & Simple Governor Analysis",
+        subtopics:["What is a Governor? Types"],
+        time:12,
+        resources:{ notes:"Coursecontents/MEE 212/W6.html" },
+        content:{
+          "What is a Governor? Types": { hasContent: true, htmlFile: "Coursecontents/MEE 212/W6.html" }
+        }
+      },
+      {
+        week:7, topic:"Proell Governor & Performance Parameters",
+        subtopics:["6 Performance Parameters of a Governor"],
+        time:13,
+        resources:{ notes:"Coursecontents/MEE 212/W7.html" },
+        content:{
+          "6 Performance Parameters of a Governor": { hasContent: true, htmlFile: "Coursecontents/MEE 212/W7.html" }
+        }
+      },
+      {
+        week:8, topic:"Gear Trains — Types & Speed Ratio",
+        subtopics:["Gear Trains — Definition & Types"],
+        time:13,
+        resources:{ notes:"Coursecontents/MEE 212/W8.html" },
+        content:{
+          "Gear Trains — Definition & Types": { hasContent: true, htmlFile: "Coursecontents/MEE 212/W8.html" }
+        }
+      },
+      {
+        week:9, topic:"Epicyclic Gear System — Tabular Method",
+        subtopics:["The Tabular Method — 3 Steps"],
+        time:14,
+        resources:{ notes:"Coursecontents/MEE 212/W9.html" },
+        content:{
+          "The Tabular Method — 3 Steps": { hasContent: true, htmlFile: "Coursecontents/MEE 212/W9.html" }
+        }
+      },
+      {
+        week:10, topic:"Clutches",
+        subtopics:["Clutch — Definition, Components & Pressure Analysis"],
+        time:12,
+        resources:{ notes:"Coursecontents/MEE 212/W10.html" },
+        content:{
+          "Clutch — Definition, Components & Pressure Analysis": { hasContent: true, htmlFile: "Coursecontents/MEE 212/W10.html" }
+        }
+      },
+      {
+        week:11, topic:"Power Transmission & Belt Drives — Theory",
+        subtopics:["Power Transmission & Belt Drive Theory"],
+        time:13,
+        resources:{ notes:"Coursecontents/MEE 212/W11.html" },
+        content:{
+          "Power Transmission & Belt Drive Theory": { hasContent: true, htmlFile: "Coursecontents/MEE 212/W11.html" }
+        }
+      },
+      {
+        week:12, topic:"Belt Drive Analysis & Full Worked Examples",
+        subtopics:["Full Belt Drive Problem — Step by Step"],
+        time:13,
+        resources:{ notes:"Coursecontents/MEE 212/W12.html" },
+        content:{
+          "Full Belt Drive Problem — Step by Step": { hasContent: true, htmlFile: "Coursecontents/MEE 212/W12.html" }
+        }
+      },
+    ]
+  },
+
+  // ── ECE 220: Introduction to Programming ─────────────────────
+  "ECE 220": {
+    title: "Introduction to Programming",
+    weeks: [
+      { week:1,  topic:"Variables & Naming Rules",                                  subtopics:["What Is a Variable?"],                             time:11, resources:{ notes:"Coursecontents/ECE 220/W1.html" },  content:{ "What Is a Variable?":                             { hasContent:true, htmlFile:"Coursecontents/ECE 220/W1.html"  } } },
+      { week:2,  topic:"Operators & Expressions",                                   subtopics:["Arithmetic Operators"],                            time:12, resources:{ notes:"Coursecontents/ECE 220/W2.html" },  content:{ "Arithmetic Operators":                            { hasContent:true, htmlFile:"Coursecontents/ECE 220/W2.html"  } } },
+      { week:3,  topic:"Input, Output & Programs",                                  subtopics:["The print() Function"],                            time:11, resources:{ notes:"Coursecontents/ECE 220/W3.html" },  content:{ "The print() Function":                            { hasContent:true, htmlFile:"Coursecontents/ECE 220/W3.html"  } } },
+      { week:4,  topic:"Control Structures",                                        subtopics:["if / elif / else"],                                time:12, resources:{ notes:"Coursecontents/ECE 220/W4.html" },  content:{ "if / elif / else":                                { hasContent:true, htmlFile:"Coursecontents/ECE 220/W4.html"  } } },
+      { week:5,  topic:"Lists, Tuples & Nested Expressions",                        subtopics:["Lists"],                                           time:13, resources:{ notes:"Coursecontents/ECE 220/W5.html" },  content:{ "Lists":                                           { hasContent:true, htmlFile:"Coursecontents/ECE 220/W5.html"  } } },
+      { week:6,  topic:"Functions & Libraries",                                     subtopics:["Defining Functions with def"],                     time:12, resources:{ notes:"Coursecontents/ECE 220/W6.html" },  content:{ "Defining Functions with def":                     { hasContent:true, htmlFile:"Coursecontents/ECE 220/W6.html"  } } },
+      { week:7,  topic:"Program Planning / SDLC",                                   subtopics:["The 6 Steps of the SDLC"],                         time:11, resources:{ notes:"Coursecontents/ECE 220/W7.html" },  content:{ "The 6 Steps of the SDLC":                         { hasContent:true, htmlFile:"Coursecontents/ECE 220/W7.html"  } } },
+      { week:8,  topic:"Advanced Topics — Nested Loops, String Methods & Patterns", subtopics:["Nested Loops"],                                    time:13, resources:{ notes:"Coursecontents/ECE 220/W8.html" },  content:{ "Nested Loops":                                    { hasContent:true, htmlFile:"Coursecontents/ECE 220/W8.html"  } } },
+      { week:9,  topic:"Dictionaries & Sets",                                       subtopics:["Dictionaries — Key-Value Pairs"],                  time:12, resources:{ notes:"Coursecontents/ECE 220/W9.html" },  content:{ "Dictionaries — Key-Value Pairs":                  { hasContent:true, htmlFile:"Coursecontents/ECE 220/W9.html"  } } },
+      { week:10, topic:"Functions — def, Parameters & Return Values",               subtopics:["Defining and Calling Functions"],                  time:12, resources:{ notes:"Coursecontents/ECE 220/W10.html" }, content:{ "Defining and Calling Functions":                  { hasContent:true, htmlFile:"Coursecontents/ECE 220/W10.html" } } },
+      { week:11, topic:"Algorithms, Searching & Sorting",                           subtopics:["Linear Search"],                                   time:13, resources:{ notes:"Coursecontents/ECE 220/W11.html" }, content:{ "Linear Search":                                   { hasContent:true, htmlFile:"Coursecontents/ECE 220/W11.html" } } },
+      { week:12, topic:"Past Questions — 2024/2025 Exam Paper",                     subtopics:["Past Questions Walkthrough"],                      time:10, resources:{ notes:"Coursecontents/ECE 220/W12.html" }, content:{ "Past Questions Walkthrough":                      { hasContent:true, htmlFile:"Coursecontents/ECE 220/W12.html" } } },
+    ]
+  },
+
+  // ── MEE 202: Science of Materials ────────────────────────────
+  "MEE 202": {
+    title: "Science of Materials",
+    weeks: [
+      { week:1,  topic:"Atomic Structure",                           subtopics:["The Atom — What It Is"],                  time:12, resources:{ notes:"Coursecontents/MEE 202/W1.html" },  content:{ "The Atom — What It Is":                  { hasContent:true, htmlFile:"Coursecontents/MEE 202/W1.html"  } } },
+      { week:2,  topic:"Quantum Mechanics & The Three Principles",   subtopics:["Quantization of Energy"],                 time:13, resources:{ notes:"Coursecontents/MEE 202/W2.html" },  content:{ "Quantization of Energy":                 { hasContent:true, htmlFile:"Coursecontents/MEE 202/W2.html"  } } },
+      { week:3,  topic:"Quantum Numbers & Electron Configuration",   subtopics:["The Four Quantum Numbers"],               time:13, resources:{ notes:"Coursecontents/MEE 202/W3.html" },  content:{ "The Four Quantum Numbers":               { hasContent:true, htmlFile:"Coursecontents/MEE 202/W3.html"  } } },
+      { week:4,  topic:"Atomic Bonding: Covalent & Metallic Bonds",  subtopics:["Introduction to Bonding"],                time:12, resources:{ notes:"Coursecontents/MEE 202/W4.html" },  content:{ "Introduction to Bonding":                { hasContent:true, htmlFile:"Coursecontents/MEE 202/W4.html"  } } },
+      { week:5,  topic:"Ionic, Hydrogen & Van der Waals Bonds",      subtopics:["Ionic Bond"],                             time:12, resources:{ notes:"Coursecontents/MEE 202/W5.html" },  content:{ "Ionic Bond":                             { hasContent:true, htmlFile:"Coursecontents/MEE 202/W5.html"  } } },
+      { week:6,  topic:"Short Range Structure",                      subtopics:["Equilibrium Interatomic Distance"],        time:12, resources:{ notes:"Coursecontents/MEE 202/W6.html" },  content:{ "Equilibrium Interatomic Distance":        { hasContent:true, htmlFile:"Coursecontents/MEE 202/W6.html"  } } },
+      { week:7,  topic:"Crystal Structure",                          subtopics:["Space Lattice, Unit Cell & Basis"],        time:13, resources:{ notes:"Coursecontents/MEE 202/W7.html" },  content:{ "Space Lattice, Unit Cell & Basis":        { hasContent:true, htmlFile:"Coursecontents/MEE 202/W7.html"  } } },
+      { week:8,  topic:"Miller Indices & Crystal Defects",           subtopics:["Miller Indices — Planes"],                time:14, resources:{ notes:"Coursecontents/MEE 202/W8.html" },  content:{ "Miller Indices — Planes":                { hasContent:true, htmlFile:"Coursecontents/MEE 202/W8.html"  } } },
+      { week:9,  topic:"Polymers & Composites",                      subtopics:["Polymers — Classification"],              time:12, resources:{ notes:"Coursecontents/MEE 202/W9.html" },  content:{ "Polymers — Classification":              { hasContent:true, htmlFile:"Coursecontents/MEE 202/W9.html"  } } },
+      { week:10, topic:"Cement & Wood as Engineering Materials",      subtopics:["Cement as an Engineering Material"],      time:12, resources:{ notes:"Coursecontents/MEE 202/W10.html" }, content:{ "Cement as an Engineering Material":      { hasContent:true, htmlFile:"Coursecontents/MEE 202/W10.html" } } },
+      { week:11, topic:"Phase Diagrams",                             subtopics:["Definitions & Gibbs Phase Rule"],          time:13, resources:{ notes:"Coursecontents/MEE 202/W11.html" }, content:{ "Definitions & Gibbs Phase Rule":          { hasContent:true, htmlFile:"Coursecontents/MEE 202/W11.html" } } },
+      { week:12, topic:"Eutectic Systems & Fe-C Diagram",            subtopics:["Eutectic Binary Systems"],                time:14, resources:{ notes:"Coursecontents/MEE 202/W12.html" }, content:{ "Eutectic Binary Systems":                { hasContent:true, htmlFile:"Coursecontents/MEE 202/W12.html" } } },
+    ]
+  },
+
+  // ── ECE 210: Electrical Machines ─────────────────────────────
+  "ECE 210": {
+    title: "Electrical Machines",
+    weeks: [
+      { week:1,  topic:"Magnetic Circuits — Fundamentals",                       subtopics:["What Is a Magnetic Field?"],                             time:13, resources:{ notes:"Coursecontents/ECE 210/W1.html" },  content:{ "What Is a Magnetic Field?":                             { hasContent:true, htmlFile:"Coursecontents/ECE 210/W1.html"  } } },
+      { week:2,  topic:"Series, Parallel, Air Gaps & The B-H Curve",             subtopics:["Series Circuits, Air Gaps & Ampere's Circuital Law"],    time:14, resources:{ notes:"Coursecontents/ECE 210/W2.html" },  content:{ "Series Circuits, Air Gaps & Ampere's Circuital Law":    { hasContent:true, htmlFile:"Coursecontents/ECE 210/W2.html"  } } },
+      { week:3,  topic:"DC Machine Construction — Parts & Functions",            subtopics:["The Eight Main Parts & What Each Does"],                 time:13, resources:{ notes:"Coursecontents/ECE 210/W3.html" },  content:{ "The Eight Main Parts & What Each Does":                 { hasContent:true, htmlFile:"Coursecontents/ECE 210/W3.html"  } } },
+      { week:4,  topic:"Armature Windings, Pitches & The EMF Equation",          subtopics:["Lap vs Wave & The EMF Equation"],                        time:14, resources:{ notes:"Coursecontents/ECE 210/W4.html" },  content:{ "Lap vs Wave & The EMF Equation":                        { hasContent:true, htmlFile:"Coursecontents/ECE 210/W4.html"  } } },
+      { week:5,  topic:"DC Generators — Types, Equations & Parallel Operation",  subtopics:["Generator Types, Equations & Parallel Operation"],       time:14, resources:{ notes:"Coursecontents/ECE 210/W5.html" },  content:{ "Generator Types, Equations & Parallel Operation":       { hasContent:true, htmlFile:"Coursecontents/ECE 210/W5.html"  } } },
+      { week:6,  topic:"DC Motors — Back EMF, Torque & Speed Control",           subtopics:["Back EMF, Torque, Speed & Maximum Power"],               time:14, resources:{ notes:"Coursecontents/ECE 210/W6.html" },  content:{ "Back EMF, Torque, Speed & Maximum Power":               { hasContent:true, htmlFile:"Coursecontents/ECE 210/W6.html"  } } },
+      { week:7,  topic:"Transformers — Working Principle & Turns Ratio",         subtopics:["Working Principle, Turns Ratio & Referred Impedance"],   time:13, resources:{ notes:"Coursecontents/ECE 210/W7.html" },  content:{ "Working Principle, Turns Ratio & Referred Impedance":   { hasContent:true, htmlFile:"Coursecontents/ECE 210/W7.html"  } } },
+      { week:8,  topic:"Transformer Equivalent Circuit, Tests & Efficiency",     subtopics:["OC Test, SC Test & Maximum Efficiency"],                 time:14, resources:{ notes:"Coursecontents/ECE 210/W8.html" },  content:{ "OC Test, SC Test & Maximum Efficiency":                 { hasContent:true, htmlFile:"Coursecontents/ECE 210/W8.html"  } } },
+      { week:9,  topic:"AC Circuits — RMS, Impedance & Power Factor",            subtopics:["AC Parameters, Impedance & Power Factor"],               time:13, resources:{ notes:"Coursecontents/ECE 210/W9.html" },  content:{ "AC Parameters, Impedance & Power Factor":               { hasContent:true, htmlFile:"Coursecontents/ECE 210/W9.html"  } } },
+      { week:10, topic:"Induction Motors — Slip, Speed & Power Flow",            subtopics:["Slip, Speed, Power Flow & Motor Types"],                 time:14, resources:{ notes:"Coursecontents/ECE 210/W10.html" }, content:{ "Slip, Speed, Power Flow & Motor Types":                 { hasContent:true, htmlFile:"Coursecontents/ECE 210/W10.html" } } },
+      { week:11, topic:"Diodes & Rectification — Half-Wave, Full-Wave & Ripple", subtopics:["Diodes, Rectification & Ripple Factor"],                 time:13, resources:{ notes:"Coursecontents/ECE 210/W11.html" }, content:{ "Diodes, Rectification & Ripple Factor":                 { hasContent:true, htmlFile:"Coursecontents/ECE 210/W11.html" } } },
+      { week:12, topic:"Revision & Exam Prep",                                   subtopics:["Complete Formula Sheet — Weeks 1–11"],                   time:10, resources:{ notes:"Coursecontents/ECE 210/W12.html" }, content:{ "Complete Formula Sheet — Weeks 1–11":                   { hasContent:true, htmlFile:"Coursecontents/ECE 210/W12.html" } } },
+    ]
+  },
+
+  // ── IPE 212: Automotive Engineering & Workshop ───────────────
+  "IPE 212": {
+    title: "Automotive Engineering & Workshop",
+    weeks: [
+      { week:1,  topic:"Introduction to Automotive Engineering",              subtopics:["Definition of an Automobile"],                      time:11, resources:{ notes:"Coursecontents/IPE 212/W1.html" },  content:{ "Definition of an Automobile":                      { hasContent:true, htmlFile:"Coursecontents/IPE 212/W1.html"  } } },
+      { week:2,  topic:"Classification of Vehicles",                          subtopics:["Classification on the Basis of Structure"],         time:11, resources:{ notes:"Coursecontents/IPE 212/W2.html" },  content:{ "Classification on the Basis of Structure":         { hasContent:true, htmlFile:"Coursecontents/IPE 212/W2.html"  } } },
+      { week:3,  topic:"Automotive Shop Safety",                              subtopics:["Definition and Types of Safety"],                   time:10, resources:{ notes:"Coursecontents/IPE 212/W3.html" },  content:{ "Definition and Types of Safety":                   { hasContent:true, htmlFile:"Coursecontents/IPE 212/W3.html"  } } },
+      { week:4,  topic:"Safety Signs, Measuring Systems & Tools",             subtopics:["Types of Safety Signs"],                           time:11, resources:{ notes:"Coursecontents/IPE 212/W4.html" },  content:{ "Types of Safety Signs":                           { hasContent:true, htmlFile:"Coursecontents/IPE 212/W4.html"  } } },
+      { week:5,  topic:"The Automobile Engine",                               subtopics:["The Automobile Engine — Overview"],                 time:12, resources:{ notes:"Coursecontents/IPE 212/W5.html" },  content:{ "The Automobile Engine — Overview":                 { hasContent:true, htmlFile:"Coursecontents/IPE 212/W5.html"  } } },
+      { week:6,  topic:"Engine Construction",                                 subtopics:["Cylinder Sleeve (Dry and Wet)"],                    time:13, resources:{ notes:"Coursecontents/IPE 212/W6.html" },  content:{ "Cylinder Sleeve (Dry and Wet)":                    { hasContent:true, htmlFile:"Coursecontents/IPE 212/W6.html"  } } },
+      { week:7,  topic:"Fueling Supply Systems & Electronic Engine Controls", subtopics:["The Carburetor"],                                  time:13, resources:{ notes:"Coursecontents/IPE 212/W7.html" },  content:{ "The Carburetor":                                  { hasContent:true, htmlFile:"Coursecontents/IPE 212/W7.html"  } } },
+      { week:8,  topic:"Piston Engine Operations & Engine Classification",    subtopics:["The Four-Stroke Engine Cycle"],                    time:13, resources:{ notes:"Coursecontents/IPE 212/W8.html" },  content:{ "The Four-Stroke Engine Cycle":                    { hasContent:true, htmlFile:"Coursecontents/IPE 212/W8.html"  } } },
+      { week:9,  topic:"Moving Parts of the Engine",                          subtopics:["Piston and Piston Rings"],                         time:12, resources:{ notes:"Coursecontents/IPE 212/W9.html" },  content:{ "Piston and Piston Rings":                         { hasContent:true, htmlFile:"Coursecontents/IPE 212/W9.html"  } } },
+      { week:10, topic:"Valve Train & Engine Bearings",                       subtopics:["Valve and Valve Mechanisms — Camshaft"],           time:12, resources:{ notes:"Coursecontents/IPE 212/W10.html" }, content:{ "Valve and Valve Mechanisms — Camshaft":           { hasContent:true, htmlFile:"Coursecontents/IPE 212/W10.html" } } },
+      { week:11, topic:"Suspension & Transmission Systems",                   subtopics:["The Suspension System"],                           time:12, resources:{ notes:"Coursecontents/IPE 212/W11.html" }, content:{ "The Suspension System":                           { hasContent:true, htmlFile:"Coursecontents/IPE 212/W11.html" } } },
+      { week:12, topic:"Aerodynamics & Vehicle Maintenance",                  subtopics:["Aerodynamics and Resistances to Vehicle Motion"],  time:12, resources:{ notes:"Coursecontents/IPE 212/W12.html" }, content:{ "Aerodynamics and Resistances to Vehicle Motion":  { hasContent:true, htmlFile:"Coursecontents/IPE 212/W12.html" } } },
+    ]
+  },
+
   // ── GENERATE STUBS FOR REMAINING COURSES ────────────────────
   // These are auto-generated 12-week structures.
   // Replace with real content as coordinators review each course.

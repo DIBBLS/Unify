@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPE 212 — Week 9: Moving Parts of the Engine | Unify</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--muted:#555;--muted2:#999;--accent:#4ade80;--accent-deep:#16a34a;--font-heading:'Playfair Display',serif;--font-body:'DM Sans',sans-serif;--nav-h:60px}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--accent:#4ade80;--accent-deep:#4ade80}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.7;font-size:15px;transition:background .2s,color .2s}
+nav{position:sticky;top:0;z-index:100;height:var(--nav-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;gap:32px}
+.nav-logo{font-family:var(--font-heading);font-size:20px;font-weight:900;color:var(--text);text-decoration:none;flex-shrink:0}
+.nav-links{display:flex;gap:4px;flex:1}
+.nav-links a{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:6px;border-bottom:2px solid transparent;transition:color .15s}
+.nav-links a:hover{color:var(--text)}.nav-links a.active{color:var(--accent-deep);border-bottom-color:var(--accent)}
+.theme-toggle{margin-left:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-family:var(--font-body);font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;flex-shrink:0}
+.theme-toggle:hover{color:var(--text);border-color:var(--muted)}
+.week-page{max-width:900px;margin:0 auto;padding:40px 48px 80px}
+.back-bar{display:flex;align-items:center;gap:12px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.back-btn:hover{color:var(--text);border-color:var(--text)}
+.week-nav{display:flex;gap:8px;margin-left:auto}
+.wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.wnav-btn:hover{color:var(--text);border-color:var(--text)}.wnav-btn.disabled{opacity:.35;pointer-events:none}
+.week-block{border-radius:14px;border:1px solid var(--border);overflow:hidden;background:var(--surface)}
+.week-header{background:var(--text);color:var(--bg);padding:24px 32px;display:flex;align-items:baseline;gap:20px}
+[data-theme="dark"] .week-header{background:var(--surface2);border-bottom:1px solid var(--border);color:var(--text)}
+.week-num{font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;opacity:.55;white-space:nowrap}
+.week-title{font-family:var(--font-heading);font-size:21px;font-weight:700;font-style:italic;color:inherit}
+[data-theme="dark"] .week-title{color:var(--text)}
+.week-body{padding:28px 32px}
+.week-summary{font-size:14px;color:var(--muted);margin-bottom:1.2rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border);line-height:1.75}
+.key-terms{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.5rem}
+.key-term{background:var(--surface2);border:1px solid var(--border);font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;color:var(--muted)}
+.exam-box{background:#fffbeb;border-left:3px solid #fcd34d;border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:1.5rem}
+[data-theme="dark"] .exam-box{background:#1c1a0f}
+.exam-box-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#92400e;margin-bottom:10px}
+[data-theme="dark"] .exam-box-label{color:#fbbf24}
+.exam-q{font-size:13.5px;color:var(--text);margin-bottom:6px;display:flex;align-items:flex-start;gap:8px}
+.past-q{background:#fcd34d;color:#78350f;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap;flex-shrink:0;margin-top:3px}
+.topic-block{margin-bottom:2rem;padding-bottom:2rem;border-bottom:1px solid var(--border)}
+.topic-block:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.topic-number{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:4px}
+.topic-title{font-family:var(--font-heading);font-size:1.2rem;font-weight:700;margin-bottom:.8rem;color:var(--text)}
+.topic-explain{font-size:14px;color:var(--muted);margin-bottom:1rem;line-height:1.75}
+.def-box{background:var(--surface2);border:1.5px solid var(--accent);border-radius:8px;padding:14px 18px;margin-bottom:1rem;font-size:14px;line-height:1.7}
+.def-box strong{color:var(--accent-deep)}
+.mistake-box{background:#fff5f5;border-left:3px solid #fca5a5;border-radius:0 8px 8px 0;padding:14px 18px;margin-bottom:1rem;font-size:13.5px}
+[data-theme="dark"] .mistake-box{background:#1f0d0d}
+.mistake-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#dc2626;margin-bottom:6px}
+.quick-check{margin-top:1rem}
+.quick-check-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px}
+.quick-check ol{padding-left:1.2rem;font-size:13.5px;color:var(--muted)}
+.quick-check ol li{margin-bottom:4px}
+footer{border-top:1px solid var(--border);padding:32px 48px;text-align:center;font-size:13px;color:var(--muted2);max-width:900px;margin:0 auto}
+footer strong{color:var(--muted);font-weight:500}
+p{margin-bottom:.7rem}
+@media(max-width:700px){nav{padding:0 16px;gap:16px}.nav-links{display:none}.week-page{padding:20px 16px 60px}.week-body{padding:20px}footer{padding:24px 20px}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="../../dashboard.html" class="nav-logo">Unify</a>
+  <div class="nav-links">
+    <a href="../../dashboard.html">Dashboard</a>
+    <a href="../../Learn.html">Learn</a>
+    <a href="../../careers.html">Career</a>
+    <a href="../../profile.html">Profile</a>
+    <a href="#" class="active">IPE 212</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">☾ Dark</button>
+</nav>
+
+<div class="week-page">
+  <div class="back-bar">
+    <a href="../../Learn.html?course=IPE+212&name=IPE+212" class="back-btn">← Back to IPE 212</a>
+    <div class="week-nav">
+      <a href="W8.html" class="wnav-btn">← Prev</a>
+      <a href="W10.html" class="wnav-btn">Next →</a>
+    </div>
+  </div>
+
+  <div class="week-block">
+    <div class="week-header">
+      <span class="week-num">Week 9 of 12</span>
+      <span class="week-title">Moving Parts of the Engine</span>
+    </div>
+    <div class="week-body">
+      <p class="week-summary">The moving parts of the engine convert the linear explosion force into useful rotary motion. This week covers the piston assembly, piston rings, connecting rod, crankshaft, flywheel, and vibration damper in detail.</p>
+      <div class="key-terms">
+        <span class="key-term">Piston</span><span class="key-term">Piston rings</span><span class="key-term">Connecting rod</span><span class="key-term">Crankshaft</span><span class="key-term">Flywheel</span><span class="key-term">Vibration damper</span><span class="key-term">Gudgeon pin</span><span class="key-term">Big-end / Small-end</span>
+      </div>
+      <div class="exam-box">
+        <div class="exam-box-label">⚑ Likely Exam Questions</div>
+        <div class="exam-q"><span class="past-q">Past Q</span>Describe the functions of the following engine components: piston, connecting rod, crankshaft, flywheel.</div>
+        <div class="exam-q"><span class="past-q">Past Q</span>What are piston rings? State the two types and the function of each.</div>
+        <div class="exam-q">Explain the terms: gudgeon pin, small-end, big-end, main-ends, as they relate to the connecting rod and crankshaft.</div>
+        <div class="exam-q">What is a vibration damper and why is it necessary on an engine crankshaft?</div>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-number">Topic 9.1</div>
+        <div class="topic-title">Piston and Piston Rings</div>
+        <p class="topic-explain">The piston is like the head of a syringe inside the cylinder. When the fuel explodes, it pushes the piston down with enormous force. Piston rings are like rubber seals on the syringe — they keep the explosion pressure from leaking past the piston and keep oil from getting into the combustion area.</p>
+        <div class="def-box"><strong>Piston:</strong> A pressure-tight cylindrical plunger which is subjected to the expanding gas pressure. Its function is to convert the gas pressure from combustion into a concentrated driving thrust along the connecting rod. It must therefore also act as a guide for the small-end of the connecting-rod.<br><br><strong>Piston Rings:</strong> Circular rings which seal the gaps made between the piston and the cylinder. Their object being to prevent gas escaping and to control the amount of lubricant which is allowed to reach the top of the cylinder.<br><br>Most pistons use three rings: two upper <strong>compression rings</strong> and one <strong>oil ring</strong> on the bottom. The compression rings prevent blow-by (combustion pressure leaking into the engine crankcase). The oil rings prevent oil from entering the combustion chamber.</div>
+        <div class="def-box"><strong>Piston Skirt:</strong> The side of the piston below the last ring. Without a skirt, the piston could tip and jam in the cylinder. A slipper skirt is produced when portions of the piston skirt below the piston ends are removed — allows the piston to slide farther down without hitting the crankshaft.<br><br><strong>Cam-Ground Piston:</strong> Machined slightly out-of-round when viewed from the top. When hot and expanded, it becomes perfectly round, providing proper cylinder clearance across operating temperatures.</div>
+        <div class="mistake-box"><div class="mistake-label">Common Mistake</div>Students say all piston rings do the same job. Wrong — compression rings (upper two) seal combustion pressure. The oil ring (bottom) controls lubrication. Mixing them up or installing them in the wrong order causes engine failure: too much oil burns in the chamber (blue smoke) or compression is lost.</div>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-number">Topic 9.2</div>
+        <div class="topic-title">Connecting Rod</div>
+        <p class="topic-explain">The connecting rod is the link between the piston (moving up and down) and the crankshaft (spinning in circles). It converts straight-line motion into rotational motion — like a bicycle pedal arm converts your up-down leg push into circular wheel motion.</p>
+        <div class="def-box"><strong>Connecting Rod:</strong> Acts as both a strut and a tie link-rod. It transmits the linear pressure impulses acting on the piston to the crankshaft big-end journal, where they are converted into turning effort.<br><br><strong>Gudgeon-pin:</strong> Transfers the thrust from the piston to the connecting-rod small-end while permitting the rod to rock to and fro as the crankshaft rotates.<br><br><strong>Small-end:</strong> Refers to the hinged joint made by the gudgeon-pin between the piston and the connecting-rod so that the connecting-rod is free to oscillate relative to the cylinder axis as it moves to and fro in the cylinder.<br><br><strong>Big-end:</strong> Refers to the joint between the connecting-rod and the crankshaft big-end journal which provides the relative angular movement between the two components as the engine rotates.<br><br><strong>Main-ends:</strong> Refers to the rubbing parts formed between the crankshaft main journals and their respective plain bearings mounted in the crankcase.</div>
+        <div class="quick-check">
+          <div class="quick-check-label">Quick Check</div>
+          <ol><li>What is the function of the gudgeon pin?</li><li>Which end of the connecting rod connects to the crankshaft?</li><li>What force does the connecting rod transmit from the piston to the crankshaft?</li></ol>
+        </div>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-number">Topic 9.3</div>
+        <div class="topic-title">Crankshaft</div>
+        <p class="topic-explain">The crankshaft is the spine of the engine's power output. It's a shaft with offset bends (cranks) that receive the push from the connecting rods and convert it into smooth rotation — like the crankset on a bicycle converts pedal pushes into wheel spinning.</p>
+        <div class="def-box"><strong>Crankshaft:</strong> A simple crankshaft consists of a circular-sectioned shaft which is bent or cranked to form two perpendicular crank-arms and an offset big-end journal. The unbent part of the shaft provides the main journals.<br><br>The crankshaft is indirectly linked by the connecting-rod to the piston — this enables the straight-line motion of the piston to be transformed into a rotary motion at the crankshaft about the main-journal axis.<br><br><strong>Counterweights:</strong> Weights placed opposite the crank throws (180° away from each throw). They reduce vibration caused by the offset throws trying to make the crankshaft rotate elliptically.<br><br><strong>Vibration Damper (Harmonic Balancer):</strong> A high frequency movement resulting from twisting and untwisting of the crankshaft is called harmonic vibration. A vibration damper or harmonic balancer controls this vibration. It consists of two metal rings separated by rubber — the inertia ring and the inner sleeve.</div>
+        <div class="def-box"><strong>Crankshaft Journals:</strong><br>— Highly finished cylindrical pins machined parallel on both the centre axes and the offset axes of the crankshaft.<br>— Rotate in plain bush-type bearings mounted in the crankcase (the main journals) and at one end of the connecting rod.</div>
+      </div>
+
+      <div class="topic-block">
+        <div class="topic-number">Topic 9.4</div>
+        <div class="topic-title">Flywheel</div>
+        <p class="topic-explain">The flywheel is a heavy spinning disc that stores energy between power strokes. Think of a spinning top — once it's spinning fast, it resists changes in speed. The flywheel does the same for the engine: it absorbs the surge of energy from the power stroke and releases it smoothly during the non-power strokes, keeping the engine spinning evenly.</p>
+        <div class="def-box"><strong>Flywheel:</strong> Stores energy from the power strokes and smoothly delivers it to the drive train of the vehicle between the engine and the transmission. It keeps greater fluctuations in speed and smoother engine operation.<br><br>The flywheel is mounted at the rear of the crankshaft near the rear main bearing. It is usually the longest and heaviest main bearing in the engine, as it must support the weight of the flywheel.<br><br>On large, low-speed engines — usually cast iron. On small, high-speed engines — forged steel or forged aluminum (cast iron is too heavy and would pull itself apart at high speeds due to centrifugal force).<br><br>The outer edge of the flywheel carries the <strong>ring gear</strong>, used to engage the drive gear on the starter motor for cranking the engine.</div>
+        <div class="mistake-box"><div class="mistake-label">Common Mistake</div>Students think the flywheel generates power. It does NOT. The flywheel only STORES and SMOOTHS power already generated. Power comes from the combustion strokes; the flywheel just carries the engine through the non-power strokes.</div>
+        <div class="quick-check">
+          <div class="quick-check-label">Quick Check</div>
+          <ol><li>What is the function of the flywheel?</li><li>Why must high-speed engines use forged steel rather than cast iron flywheels?</li><li>What component on the flywheel allows the starter motor to crank the engine?</li></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:32px;padding-top:24px;border-top:1px solid var(--border);">
+    <a href="W8.html" class="back-btn">← Week 8</a>
+    <a href="W10.html" class="back-btn" style="border-color:var(--accent);color:var(--accent-deep);">Next: Week 10 →</a>
+  </div>
+</div>
+
+<footer>
+  <strong>IPE 212 — Automotive Engineering &amp; Workshop</strong> · Week 9 · Unify Platform · LASU Faculty of Engineering<br>
+  <span style="display:block;margin-top:6px">Lecturer: Dr Mrs. V.D. Obasa</span>
+</footer>
+<script>
+(function(){const saved=localStorage.getItem('unify-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);const b=document.getElementById('theme-btn');if(b)b.textContent=saved==='dark'?'☀ Light':'☾ Dark';}})();
+function toggleTheme(){const cur=document.documentElement.getAttribute('data-theme');const nxt=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',nxt);localStorage.setItem('unify-theme',nxt);document.getElementById('theme-btn').textContent=nxt==='dark'?'☀ Light':'☾ Dark';}
+</script>
+</body>
+</html>

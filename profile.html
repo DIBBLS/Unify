@@ -167,12 +167,24 @@ nav{height:56px;display:flex;align-items:center;justify-content:space-between;pa
 .toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:10px 22px;border-radius:30px;font-size:13px;opacity:0;transition:all .3s;pointer-events:none;z-index:300;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);z-index:200;padding:6px 0 calc(6px + env(safe-area-inset-bottom));transition:background .25s,border-color .25s;}
+.mobile-nav-inner{display:flex;justify-content:space-around;}
+.mobile-nav-btn{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;cursor:pointer;font-family:var(--fb);color:var(--text3);padding:6px 10px;border-radius:10px;transition:all .15s;text-decoration:none;min-width:52px;}
+.mobile-nav-btn.active{color:var(--text);}
+.mobile-nav-icon{font-size:22px;line-height:1;}
+.mobile-nav-label{font-size:10px;font-weight:500;}
+.mobile-nav-dot{width:4px;height:4px;border-radius:50%;background:var(--text);margin-top:2px;opacity:0;transition:opacity .15s;}
+.mobile-nav-btn.active .mobile-nav-dot{opacity:1;}
+
 @media(max-width:600px){
   nav{padding:0 16px;}
+  .nav-links{display:none;}
   .page{padding:24px 16px 80px;}
   .profile-header{gap:20px;}
   .av{width:68px;height:68px;font-size:26px;}
   .drawer{width:100%;}
+  .mobile-nav{display:block;}
+  body{padding-bottom:76px;}
 }
 </style>
 </head>
@@ -187,12 +199,28 @@ nav{height:56px;display:flex;align-items:center;justify-content:space-between;pa
   <div class="nav-links">
     <a href="dashboard.html" class="nl">Dashboard</a>
     <a href="timetable.html" class="nl">Timetable</a>
-    <a href="careers.html" class="nl">Career</a>
     <a href="profile.html" class="nl on">Profile</a>
   </div>
   <div class="nav-r">
     <button class="nbtn" onclick="toggleTheme()" id="themeToggle">Dark mode</button>
     <button class="nbtn" id="signOutBtn">Sign out</button>
+  </div>
+</nav>
+
+<nav class="mobile-nav">
+  <div class="mobile-nav-inner">
+    <a href="dashboard.html" class="mobile-nav-btn">
+      <span class="mobile-nav-label">Dashboard</span>
+      <div class="mobile-nav-dot"></div>
+    </a>
+    <a href="timetable.html" class="mobile-nav-btn">
+      <span class="mobile-nav-label">Timetable</span>
+      <div class="mobile-nav-dot"></div>
+    </a>
+    <a href="profile.html" class="mobile-nav-btn active">
+      <span class="mobile-nav-label">Profile</span>
+      <div class="mobile-nav-dot"></div>
+    </a>
   </div>
 </nav>
 

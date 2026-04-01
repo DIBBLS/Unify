@@ -61,7 +61,7 @@ var coursesDatabase = {
       },
       "200 Level": {
         "First Semester": ["MEE 201","MEE 203","MEE 205","MEE 207","MEE 209","MEE 211","ENT 211"],
-        "Second Semester": ["MEE 202","MEE 204","MEE 206","MEE 208","MEE 210","CHE 206","GNS 212"]
+        "Second Semester": ["MEE 202","MEE 204","MEE 206","MEE 208","MEE 210","MEE 212","CHE 206","GNS 212"]
       },
       "300 Level": {
         "First Semester": ["ECE 351","MEE 301","MEE 305","MEE 351","MEE 353","MEE 355","MEE 357"],
