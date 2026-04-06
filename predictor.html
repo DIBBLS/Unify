@@ -1,381 +1,1373 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="auto">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Unify — CGPA Predictor</title>
+<title>Grade Planner — Unify</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 :root {
-  --black: #0a0a0a;
-  --white: #f5f4f0;
-  --grey: #e0deda;
-  --mid: #888;
-  --font-display: 'Playfair Display', serif;
-  --font-body: 'DM Sans', sans-serif;
+  --fd: 'Playfair Display', serif;
+  --fb: 'DM Sans', sans-serif;
+  --bg:       #f5f4f0;
+  --surface:  #ffffff;
+  --surface2: #f8f7f3;
+  --border:   #e0deda;
+  --text:     #0a0a0a;
+  --text2:    #555;
+  --text3:    #999;
+  --green:    #4ade80;
+  --green-bg: rgba(74,222,128,0.08);
+  --yellow:   #fbbf24;
+  --red:      #f87171;
+  --blue:     #93c5fd;
 }
-body { background: var(--white); color: var(--black); font-family: var(--font-body); font-size: 15px; }
+[data-theme="dark"] {
+  --bg:       #0f0f0f;
+  --surface:  #1a1a1a;
+  --surface2: #222222;
+  --border:   #2a2a2a;
+  --text:     #f0efeb;
+  --text2:    #aaa;
+  --text3:    #666;
+}
 
-nav {
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--fb); font-size: 15px;
+  overflow-x: hidden; transition: background 0.25s, color 0.25s;
+  min-height: 100vh;
+}
+
+/* ── TOP NAV ── */
+nav.top-nav {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 22px 48px; border-bottom: 1px solid var(--grey);
-  background: var(--white); position: sticky; top: 0; z-index: 10;
+  padding: 0 48px; border-bottom: 1px solid var(--border);
+  background: var(--bg); position: sticky; top: 0; z-index: 100; height: 60px;
+  transition: background 0.25s, border-color 0.25s;
 }
-.nav-logo { font-family: var(--font-display); font-weight: 900; font-size: 22px; letter-spacing: -1px; text-decoration: none; color: var(--black); }
-.nav-links { display: flex; gap: 28px; align-items: center; }
-.nav-links a { text-decoration: none; color: var(--mid); font-size: 13px; font-weight: 500; transition: color 0.2s; }
-.nav-links a:hover, .nav-links a.active { color: var(--black); }
-
-.page-wrap { max-width: 860px; margin: 0 auto; padding: 80px 24px 120px; }
-
-.page-tag { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--mid); margin-bottom: 16px; }
-.page-title { font-family: var(--font-display); font-size: clamp(36px, 5vw, 64px); font-weight: 900; letter-spacing: -2px; line-height: 1.05; margin-bottom: 16px; }
-.page-title em { font-style: italic; }
-.page-sub { font-size: 15px; color: #555; font-weight: 300; margin-bottom: 56px; max-width: 520px; line-height: 1.7; }
-
-/* CLASS TARGETS */
-.targets-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 48px; }
-.target-card {
-  border: 2px solid var(--grey); border-radius: 8px; padding: 20px 16px;
-  cursor: pointer; text-align: center; transition: all 0.15s; background: var(--white);
+.nav-logo { font-family: var(--fd); font-weight: 900; font-size: 20px; letter-spacing: -1px; text-decoration: none; color: var(--text); }
+.nav-links { display: flex; gap: 0; height: 100%; }
+.nav-link {
+  display: flex; align-items: center; padding: 0 16px;
+  font-size: 13px; font-weight: 500; color: var(--text3); cursor: pointer;
+  border-bottom: 2px solid transparent; transition: all 0.15s; text-decoration: none; height: 100%;
 }
-.target-card:hover { border-color: #aaa; }
-.target-card.selected { border-color: var(--black); background: var(--black); color: var(--white); }
-.target-class { font-family: var(--font-display); font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-.target-range { font-size: 12px; color: var(--mid); }
-.target-card.selected .target-range { color: #aaa; }
-
-/* INPUTS */
-.input-section { margin-bottom: 40px; }
-.input-label { font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--mid); margin-bottom: 10px; display: block; }
-.input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.input-field {
-  width: 100%; padding: 14px 16px; background: var(--white);
-  border: 1px solid var(--grey); border-radius: 6px;
-  font-family: var(--font-body); font-size: 14px; color: var(--black);
-  outline: none; transition: border-color 0.15s;
+.nav-link:hover { color: var(--text); }
+.nav-link.active { color: var(--text); border-bottom-color: var(--text); }
+.nav-right { display: flex; align-items: center; gap: 10px; }
+.theme-btn {
+  background: none; border: 1px solid var(--border); border-radius: 20px;
+  padding: 5px 14px; font-size: 12px; cursor: pointer; color: var(--text3);
+  font-family: var(--fb); transition: all 0.15s;
 }
-.input-field:focus { border-color: var(--black); }
-.input-field::placeholder { color: #bbb; }
-
-.btn-predict {
-  width: 100%; padding: 16px; background: var(--black); color: var(--white);
-  border: none; border-radius: 6px; font-family: var(--font-display);
-  font-size: 16px; font-weight: 700; cursor: pointer; transition: opacity 0.2s;
-  margin-top: 8px; letter-spacing: 0.3px;
+.theme-btn:hover { border-color: var(--text); color: var(--text); }
+.signout-btn {
+  font-size: 12px; color: var(--text3); background: none;
+  border: 1px solid var(--border); padding: 6px 14px; border-radius: 4px;
+  cursor: pointer; font-family: var(--fb); transition: all 0.15s;
 }
-.btn-predict:hover { opacity: 0.8; }
+.signout-btn:hover { border-color: var(--text); color: var(--text); }
 
-/* RESULT */
-.result-box {
-  margin-top: 48px; border: 1px solid var(--grey); border-radius: 10px;
-  overflow: hidden; display: none;
+/* ── MOBILE NAV ── */
+.mobile-nav {
+  display: none; position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--bg); border-top: 1px solid var(--border);
+  z-index: 200; padding: 6px 0 calc(6px + env(safe-area-inset-bottom));
+  transition: background 0.25s, border-color 0.25s;
 }
-.result-box.visible { display: block; animation: fadeUp 0.4s ease; }
-.result-header { background: var(--black); color: var(--white); padding: 28px 32px; }
-.result-verdict { font-family: var(--font-display); font-size: 28px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 6px; }
-.result-sub { font-size: 13px; color: #888; font-weight: 300; }
-.result-body { padding: 32px; }
-.result-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 32px; }
-.stat-card { text-align: center; padding: 20px; background: #f9f8f5; border-radius: 8px; }
-.stat-value { font-family: var(--font-display); font-size: 32px; font-weight: 900; letter-spacing: -1px; }
-.stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--mid); margin-top: 4px; }
-
-.needed-title { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--mid); margin-bottom: 16px; }
-.grade-breakdown { display: flex; gap: 8px; flex-wrap: wrap; }
-.grade-pill {
-  padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 500;
-  background: var(--black); color: var(--white);
+.mob-inner { display: flex; justify-content: space-around; }
+.mob-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: none; border: none; cursor: pointer; font-family: var(--fb);
+  color: var(--text3); padding: 6px 10px; border-radius: 10px;
+  transition: all 0.15s; text-decoration: none; min-width: 52px;
 }
-.grade-pill.impossible { background: #eee; color: #999; }
+.mob-btn.active { color: var(--text); }
+.mob-label { font-size: 10px; font-weight: 500; }
+.mob-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text); margin-top: 2px; opacity: 0; transition: opacity 0.15s; }
+.mob-btn.active .mob-dot { opacity: 1; }
 
-.result-note {
-  margin-top: 24px; padding: 16px 20px; background: #f9f8f5;
-  border-radius: 6px; font-size: 13px; color: #555; line-height: 1.6;
-  border-left: 3px solid var(--black);
-}
-
-/* GRADE SCALE */
-.scale-section { margin-top: 64px; }
-.scale-title { font-family: var(--font-display); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 20px; }
-.scale-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.scale-table th { text-align: left; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--mid); padding: 10px 16px; border-bottom: 2px solid var(--grey); }
-.scale-table td { padding: 14px 16px; border-bottom: 1px solid var(--grey); }
-.scale-table tr:last-child td { border-bottom: none; }
-.class-badge { font-weight: 500; font-family: var(--font-display); }
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--white); border-top: 1px solid var(--grey); z-index: 200; padding: 6px 0 calc(6px + env(safe-area-inset-bottom)); }
-.mobile-nav-inner { display: flex; justify-content: space-around; }
-.mobile-nav-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; background: none; border: none; cursor: pointer; font-family: var(--font-body); color: var(--mid); padding: 6px 10px; border-radius: 10px; transition: all 0.15s; text-decoration: none; min-width: 52px; }
-.mobile-nav-btn.active { color: var(--black); }
-.mobile-nav-icon { font-size: 22px; line-height: 1; }
-.mobile-nav-label { font-size: 10px; font-weight: 500; }
-.mobile-nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--black); margin-top: 2px; opacity: 0; transition: opacity 0.15s; }
-.mobile-nav-btn.active .mobile-nav-dot { opacity: 1; }
-
-@media (max-width: 640px) {
-  nav { padding: 18px 20px; }
+@media (max-width: 768px) {
+  nav.top-nav { padding: 0 16px; }
   .nav-links { display: none; }
   .mobile-nav { display: block; }
   body { padding-bottom: 76px; }
-  .page-wrap { padding: 40px 20px 80px; }
-  .page-sub { margin-bottom: 32px; }
-  .targets-row { grid-template-columns: repeat(2, 1fr); }
-  .input-row { grid-template-columns: 1fr; }
-  .result-header { padding: 20px; }
-  .result-verdict { font-size: 22px; }
-  .result-body { padding: 20px; }
-  .result-stats { grid-template-columns: 1fr 1fr; }
-  .scale-section { overflow-x: auto; }
-  .scale-table { min-width: 480px; }
 }
+
+/* ── PAGE ── */
+.page-wrap { max-width: 720px; margin: 0 auto; padding: 40px 24px 80px; }
+.page-title { font-family: var(--fd); font-size: clamp(26px, 3vw, 38px); font-weight: 900; letter-spacing: -1.5px; margin-bottom: 6px; }
+.page-sub { font-size: 13px; color: var(--text3); margin-bottom: 36px; }
+
+/* ── STEP BAR ── */
+.steps-bar { display: flex; align-items: flex-start; margin-bottom: 44px; }
+.step-node { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; position: relative; }
+.step-node:not(:last-child)::after {
+  content: ''; position: absolute; top: 13px; left: calc(50% + 16px);
+  right: calc(-50% + 16px); height: 1px; background: var(--border); transition: background 0.35s;
+}
+.step-node.done:not(:last-child)::after { background: var(--green); }
+.step-circle {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1.5px solid var(--border); background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; color: var(--text3);
+  transition: all 0.25s; z-index: 1; position: relative;
+}
+.step-node.active .step-circle { border-color: var(--green); color: var(--green); background: var(--green-bg); }
+.step-node.done .step-circle { border-color: var(--green); background: var(--green); color: #000; font-size: 13px; }
+.step-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; text-align: center; transition: color 0.2s; }
+.step-node.active .step-label { color: var(--text); }
+
+/* ── STEP PANELS ── */
+.step-panel { display: none; }
+.step-panel.active { display: block; animation: fadeUp 0.3s ease both; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── SECTION LABEL ── */
+.sec-lbl { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 14px; margin-top: 28px; display: block; }
+.sec-lbl:first-child { margin-top: 0; }
+
+/* ── FORM ── */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+@media (max-width: 520px) { .form-row { grid-template-columns: 1fr; } }
+.field-lbl { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; display: block; }
+.field-select, .field-input {
+  width: 100%; padding: 10px 14px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 8px;
+  font-family: var(--fb); font-size: 14px; color: var(--text);
+  outline: none; transition: border-color 0.15s, background 0.25s;
+  appearance: none; -webkit-appearance: none;
+}
+.field-select:focus, .field-input:focus { border-color: var(--text); }
+.field-input::placeholder { color: var(--text3); }
+.sel-wrap { position: relative; }
+.sel-wrap::after { content: '▾'; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; font-size: 12px; color: var(--text3); }
+
+/* ── UNIT BAR ── */
+.unit-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px 20px; margin-bottom: 24px; gap: 12px; flex-wrap: wrap;
+}
+.unit-grp { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 60px; }
+.unit-num { font-family: var(--fd); font-size: 20px; font-weight: 700; letter-spacing: -0.5px; line-height: 1; }
+.unit-num .hi { color: var(--green); }
+.unit-lbl { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
+.unit-div { width: 1px; align-self: stretch; background: var(--border); flex-shrink: 0; }
+
+/* ── ACCORDION ── */
+.acc-section { margin-bottom: 8px; }
+.acc-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 16px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; cursor: pointer; transition: border-color 0.15s; user-select: none;
+}
+.acc-hd:hover { border-color: var(--text3); }
+.acc-hd.open { border-radius: 8px 8px 0 0; border-bottom-color: transparent; }
+.acc-hd-title { font-size: 13px; font-weight: 500; }
+.acc-meta { display: flex; align-items: center; gap: 8px; }
+.acc-badge { font-size: 10px; color: var(--text3); background: var(--surface2); padding: 2px 7px; border-radius: 10px; border: 1px solid var(--border); }
+.acc-chevron { font-size: 10px; color: var(--text3); transition: transform 0.2s; flex-shrink: 0; }
+.acc-hd.open .acc-chevron { transform: rotate(180deg); }
+.acc-body {
+  background: var(--surface); border: 1px solid var(--border); border-top: none;
+  border-radius: 0 0 8px 8px; max-height: 0; overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.2s; padding: 0 16px;
+}
+.acc-body.open { max-height: 3000px; padding: 8px 16px 14px; }
+
+.course-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 0; border-bottom: 1px solid var(--border); gap: 8px;
+}
+.course-row:last-child { border-bottom: none; }
+.course-code { font-size: 13px; font-weight: 500; flex: 1; min-width: 0; }
+.course-u { font-size: 11px; color: var(--text3); white-space: nowrap; margin-right: 6px; flex-shrink: 0; }
+.state-btns { display: flex; gap: 4px; flex-shrink: 0; }
+.st-btn {
+  padding: 4px 9px; border-radius: 20px; border: 1px solid var(--border);
+  font-size: 11px; font-weight: 500; cursor: pointer; background: transparent;
+  color: var(--text3); font-family: var(--fb); transition: all 0.15s; white-space: nowrap;
+}
+.st-btn:hover { border-color: var(--text3); color: var(--text2); }
+.st-btn.on[data-st="graded"]  { background: rgba(74,222,128,0.12); border-color: var(--green); color: var(--green); }
+.st-btn.on[data-st="pending"] { background: rgba(251,191,36,0.1);  border-color: var(--yellow); color: var(--yellow); }
+.st-btn.on[data-st="missing"] { background: rgba(248,113,113,0.1); border-color: var(--red);    color: var(--red); }
+@media (max-width: 480px) {
+  .st-text { display: none; }
+  .st-btn { padding: 4px 7px; }
+}
+
+/* ── BUTTONS ── */
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px; border-radius: 8px; border: none; cursor: pointer; font-family: var(--fb); font-size: 14px; font-weight: 500; transition: all 0.2s; }
+.btn.primary { background: var(--text); color: var(--bg); }
+.btn.primary:hover { opacity: 0.8; }
+.btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.btn.ghost:hover { border-color: var(--text); }
+.btn.green { background: var(--green); color: #000; }
+.btn.green:hover { opacity: 0.85; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-row { display: flex; gap: 10px; margin-top: 28px; justify-content: flex-end; flex-wrap: wrap; }
+
+/* ── TARGET GRID ── */
+.target-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+@media (max-width: 400px) { .target-grid { grid-template-columns: 1fr; } }
+.tgt-btn {
+  padding: 14px 14px; border-radius: 10px; border: 1.5px solid var(--border);
+  background: var(--surface); cursor: pointer; font-family: var(--fb);
+  text-align: left; transition: all 0.2s; color: var(--text);
+}
+.tgt-btn:hover { border-color: var(--text3); }
+.tgt-btn.on { border-color: var(--green); background: var(--green-bg); }
+.tgt-name { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+.tgt-range { font-size: 11px; color: var(--text3); }
+.tgt-btn.on .tgt-range { color: var(--green); }
+.specific-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.specific-row label { font-size: 13px; color: var(--text2); white-space: nowrap; flex-shrink: 0; }
+.specific-row .field-input { max-width: 130px; margin: 0; }
+
+/* ── PROFILE CARD ── */
+.profile-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  padding: 20px; margin-top: 22px; display: none;
+}
+.profile-card.vis { display: block; animation: fadeUp 0.3s ease; }
+.pc-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.pc-row:last-child { padding-bottom: 0; border-bottom: none; }
+.pc-key { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1.2px; padding-top: 2px; }
+.pc-val { font-size: 14px; font-weight: 500; text-align: right; max-width: 60%; }
+.pc-val.green { color: var(--green); }
+.pc-val.yellow { color: var(--yellow); }
+.pc-val.red { color: var(--red); }
+.pc-val.note { font-size: 12px; font-weight: 400; color: var(--text2); line-height: 1.5; }
+.mode-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; letter-spacing: 0.5px; }
+.mode-badge.recovery { background: rgba(248,113,113,0.12); color: var(--red); }
+.mode-badge.stability { background: rgba(251,191,36,0.1); color: var(--yellow); }
+.mode-badge.push { background: rgba(147,197,253,0.12); color: var(--blue); }
+.mode-badge.elite { background: rgba(74,222,128,0.12); color: var(--green); }
+
+/* ── REFLECTION ── */
+.reflect-wrap {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  padding: 20px; margin-top: 22px; display: none;
+}
+.reflect-wrap.vis { display: block; animation: fadeUp 0.3s ease; }
+.reflect-q { font-size: 14px; font-weight: 500; margin-bottom: 14px; }
+.radio-opt {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  border: 1px solid var(--border); border-radius: 8px; cursor: pointer;
+  margin-bottom: 6px; transition: all 0.15s; font-size: 13px; color: var(--text2);
+  user-select: none;
+}
+.radio-opt:last-child { margin-bottom: 0; }
+.radio-opt:hover { border-color: var(--text3); color: var(--text); }
+.radio-opt.on { border-color: var(--green); color: var(--text); background: var(--green-bg); }
+.radio-dot {
+  width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--border);
+  flex-shrink: 0; transition: all 0.15s;
+}
+.radio-opt.on .radio-dot { border-color: var(--green); background: var(--green); }
+
+/* ── STEP 3 ── */
+.feas-banner {
+  padding: 14px 18px; border-radius: 10px; margin-bottom: 28px;
+  border: 1.5px solid; font-size: 14px; font-weight: 500;
+  display: flex; align-items: center; gap: 10px;
+}
+.feas-banner.go   { background: rgba(74,222,128,0.07); border-color: var(--green); color: var(--green); }
+.feas-banner.warn { background: rgba(251,191,36,0.07); border-color: var(--yellow); color: var(--yellow); }
+.feas-banner.hard { background: rgba(248,113,113,0.07); border-color: var(--red); color: var(--red); }
+
+.avg-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  padding: 20px 22px; margin-bottom: 28px;
+  display: flex; align-items: center; gap: 20px;
+}
+.avg-num { font-family: var(--fd); font-size: 44px; font-weight: 900; letter-spacing: -2px; line-height: 1; flex-shrink: 0; }
+.avg-right { min-width: 0; }
+.avg-title { font-size: 13px; font-weight: 500; margin-bottom: 5px; }
+.avg-desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+/* ── ROADMAP ── */
+.roadmap { margin-bottom: 32px; }
+.rm-item { display: flex; align-items: flex-start; gap: 14px; padding: 12px 0; position: relative; }
+.rm-item:not(:last-child)::before {
+  content: ''; position: absolute; left: 11px; top: 38px; bottom: -12px;
+  width: 1px; background: var(--border);
+}
+.rm-dot {
+  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+  border: 2px solid var(--border); background: var(--bg); margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; position: relative; z-index: 1;
+  transition: all 0.25s;
+}
+.rm-item.done   .rm-dot { background: var(--green); border-color: var(--green); color: #000; }
+.rm-item.cur    .rm-dot { background: var(--text);  border-color: var(--text);  color: var(--bg); }
+.rm-item.est    .rm-dot { border-style: dashed; }
+.rm-content { flex: 1; min-width: 0; }
+.rm-sem { font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.rm-item.done .rm-sem { color: var(--text3); }
+.rm-status { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.rm-status.hi { color: var(--green); font-weight: 500; }
+.est-tag { font-size: 10px; color: var(--text3); background: var(--surface2); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--border); }
+
+/* ── WHAT-IF ── */
+.tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 22px; }
+.tab-btn {
+  padding: 10px 16px; font-size: 13px; font-weight: 500; color: var(--text3);
+  background: none; border: none; border-bottom: 2px solid transparent;
+  cursor: pointer; font-family: var(--fb); transition: all 0.15s; margin-bottom: -1px;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.on { color: var(--text); border-bottom-color: var(--text); }
+.tab-pane { display: none; }
+.tab-pane.on { display: block; }
+.info-note { font-size: 12px; color: var(--text3); line-height: 1.6; padding: 10px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; }
+
+.wi-course { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); gap: 10px; }
+.wi-course:last-child { border-bottom: none; }
+.wi-code { font-size: 13px; font-weight: 500; }
+.wi-u { font-size: 11px; color: var(--text3); }
+.grade-sel {
+  padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text); font-family: var(--fb);
+  font-size: 13px; cursor: pointer; outline: none; flex-shrink: 0;
+}
+.grade-sel:focus { border-color: var(--text); }
+.proj-box {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 16px 20px; margin-top: 18px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+}
+.proj-grp { display: flex; flex-direction: column; gap: 3px; }
+.proj-lbl { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 1.2px; }
+.proj-num { font-family: var(--fd); font-size: 26px; font-weight: 700; letter-spacing: -1px; }
+.ceil-num { font-size: 20px; font-weight: 600; color: var(--text2); }
+
+.lev-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); gap: 10px; }
+.lev-row:last-child { border-bottom: none; }
+.lev-code { font-size: 13px; font-weight: 500; }
+.lev-u { font-size: 11px; color: var(--text3); }
+.lev-gain { font-size: 13px; color: var(--green); font-weight: 500; white-space: nowrap; }
+
+/* ── SAVE AREA ── */
+.save-area { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px; margin-top: 32px; text-align: center; }
+.save-note { font-size: 12px; color: var(--text3); margin-top: 8px; }
+.save-ok { font-size: 12px; color: var(--green); margin-top: 8px; display: none; }
+.save-ok.vis { display: block; }
+
+/* ── LOADING ── */
+#loadingOverlay {
+  position: fixed; inset: 0; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 16px; z-index: 1000; transition: background 0.25s;
+}
+.loader-logo { font-family: var(--fd); font-size: 28px; font-weight: 900; letter-spacing: -1px; }
+.loader-spin { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--text); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+hr.divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
 </style>
 </head>
 <body>
 
-<nav>
-  <a href="dashboard.html" class="nav-logo">Unify</a>
-  <div class="nav-links">
-    <a href="dashboard.html">Dashboard</a>
-    <a href="timetable.html">Timetable</a>
-    <a href="profile.html">Profile</a>
-  </div>
-</nav>
-
-<nav class="mobile-nav">
-  <div class="mobile-nav-inner">
-    <a href="dashboard.html" class="mobile-nav-btn">
-      <span class="mobile-nav-label">Dashboard</span>
-      <div class="mobile-nav-dot"></div>
-    </a>
-    <a href="timetable.html" class="mobile-nav-btn">
-      <span class="mobile-nav-label">Timetable</span>
-      <div class="mobile-nav-dot"></div>
-    </a>
-    <a href="profile.html" class="mobile-nav-btn">
-      <span class="mobile-nav-label">Profile</span>
-      <div class="mobile-nav-dot"></div>
-    </a>
-  </div>
-</nav>
-
-<div class="page-wrap">
-  <p class="page-tag">CGPA Predictor</p>
-  <h1 class="page-title">What grades do you<br><em>need this semester?</em></h1>
-  <p class="page-sub">Enter your current CGPA, total credit units so far, and your target class. Unify will tell you exactly what you need to achieve it.</p>
-
-  <!-- TARGET CLASS SELECTOR -->
-  <div class="targets-row">
-    <div class="target-card selected" data-min="4.50" data-max="5.00" data-label="First Class" onclick="selectTarget(this)">
-      <div class="target-class">First Class</div>
-      <div class="target-range">4.50 – 5.00</div>
-    </div>
-    <div class="target-card" data-min="3.50" data-max="4.49" data-label="Second Class Upper" onclick="selectTarget(this)">
-      <div class="target-class">2.1</div>
-      <div class="target-range">3.50 – 4.49</div>
-    </div>
-    <div class="target-card" data-min="2.40" data-max="3.49" data-label="Second Class Lower" onclick="selectTarget(this)">
-      <div class="target-class">2.2</div>
-      <div class="target-range">2.40 – 3.49</div>
-    </div>
-    <div class="target-card" data-min="1.50" data-max="2.39" data-label="Third Class" onclick="selectTarget(this)">
-      <div class="target-class">Third Class</div>
-      <div class="target-range">1.50 – 2.39</div>
-    </div>
-  </div>
-
-  <!-- INPUTS -->
-  <div class="input-section">
-    <div class="input-row">
-      <div>
-        <label class="input-label">Current CGPA</label>
-        <input class="input-field" id="currentCGPA" type="number" min="0" max="5" step="0.01" placeholder="e.g. 3.20">
-      </div>
-      <div>
-        <label class="input-label">Total Credit Units So Far</label>
-        <input class="input-field" id="totalUnits" type="number" min="0" placeholder="e.g. 84">
-      </div>
-    </div>
-  </div>
-  <div class="input-section">
-    <div class="input-row">
-      <div>
-        <label class="input-label">Credit Units This Semester</label>
-        <input class="input-field" id="semesterUnits" type="number" min="1" placeholder="e.g. 18">
-      </div>
-      <div>
-        <label class="input-label">Target CGPA (within range)</label>
-        <input class="input-field" id="targetCGPA" type="number" min="0" max="5" step="0.01" placeholder="e.g. 4.50">
-      </div>
-    </div>
-  </div>
-
-  <button class="btn-predict" onclick="predict()">Calculate What I Need →</button>
-
-  <!-- RESULT -->
-  <div class="result-box" id="resultBox">
-    <div class="result-header">
-      <div class="result-verdict" id="resultVerdict"></div>
-      <div class="result-sub" id="resultSub"></div>
-    </div>
-    <div class="result-body">
-      <div class="result-stats">
-        <div class="stat-card">
-          <div class="stat-value" id="statCurrent"></div>
-          <div class="stat-label">Current CGPA</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="statTarget"></div>
-          <div class="stat-label">Target CGPA</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="statNeeded"></div>
-          <div class="stat-label">Avg Needed This Sem</div>
-        </div>
-      </div>
-      <p class="needed-title">Grade breakdown to hit your target</p>
-      <div class="grade-breakdown" id="gradeBreakdown"></div>
-      <div class="result-note" id="resultNote"></div>
-    </div>
-  </div>
-
-  <!-- GRADE SCALE -->
-  <div class="scale-section">
-    <h2 class="scale-title">Grading Scale Reference</h2>
-    <table class="scale-table">
-      <thead>
-        <tr>
-          <th>Grade</th>
-          <th>Points</th>
-          <th>Classification</th>
-          <th>CGPA Range</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>A</td><td>5.0</td><td><span class="class-badge">First Class</span></td><td>4.50 – 5.00</td></tr>
-        <tr><td>B</td><td>4.0</td><td><span class="class-badge">Second Class Upper (2.1)</span></td><td>3.50 – 4.49</td></tr>
-        <tr><td>C</td><td>3.0</td><td><span class="class="class-badge">Second Class Lower (2.2)</span></td><td>2.40 – 3.49</td></tr>
-        <tr><td>D</td><td>2.0</td><td><span class="class-badge">Third Class</span></td><td>1.50 – 2.39</td></tr>
-        <tr><td>E</td><td>1.0</td><td><span class="class-badge">Pass</span></td><td>1.00 – 1.49</td></tr>
-        <tr><td>F</td><td>0.0</td><td><span class="class-badge">Fail</span></td><td>0.00 – 0.99</td></tr>
-      </tbody>
-    </table>
-  </div>
+<div id="loadingOverlay">
+  <span class="loader-logo">Unify</span>
+  <div class="loader-spin"></div>
 </div>
 
+<!-- ── TOP NAV ── -->
+<nav class="top-nav">
+  <a href="dashboard.html" class="nav-logo">Unify</a>
+  <div class="nav-links">
+    <a href="dashboard.html" class="nav-link">Dashboard</a>
+    <a href="timetable.html" class="nav-link">Timetable</a>
+    <a href="profile.html" class="nav-link">Profile</a>
+  </div>
+  <div class="nav-right">
+    <button class="theme-btn" id="themeToggle" onclick="toggleTheme()">🌙 Dark</button>
+    <button class="signout-btn" id="signOutBtn">Sign out</button>
+  </div>
+</nav>
+
+<!-- ── MOBILE NAV ── -->
+<nav class="mobile-nav">
+  <div class="mob-inner">
+    <a href="dashboard.html" class="mob-btn">
+      <span class="mob-label">Dashboard</span>
+      <div class="mob-dot"></div>
+    </a>
+    <a href="timetable.html" class="mob-btn">
+      <span class="mob-label">Timetable</span>
+      <div class="mob-dot"></div>
+    </a>
+    <a href="profile.html" class="mob-btn">
+      <span class="mob-label">Profile</span>
+      <div class="mob-dot"></div>
+    </a>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<main class="page-wrap">
+  <h1 class="page-title">Grade Planner</h1>
+  <p class="page-sub">Map your academic trajectory — from today to graduation.</p>
+
+  <!-- Step indicator -->
+  <div class="steps-bar" id="stepsBar">
+    <div class="step-node active" id="snode-1">
+      <div class="step-circle" id="sc-1">1</div>
+      <span class="step-label">Setup</span>
+    </div>
+    <div class="step-node" id="snode-2">
+      <div class="step-circle" id="sc-2">2</div>
+      <span class="step-label">Numbers</span>
+    </div>
+    <div class="step-node" id="snode-3">
+      <div class="step-circle" id="sc-3">3</div>
+      <span class="step-label">Plan</span>
+    </div>
+  </div>
+
+  <!-- ═══════ STEP 1 ═══════ -->
+  <div class="step-panel active" id="step-1">
+    <span class="sec-lbl">Department &amp; History</span>
+
+    <div class="form-row">
+      <div>
+        <label class="field-lbl" for="deptSel">Department</label>
+        <div class="sel-wrap">
+          <select class="field-select" id="deptSel">
+            <option value="">Select department</option>
+            <option value="ECE">Electronic &amp; Computer Eng.</option>
+            <option value="MEE">Mechanical Engineering</option>
+            <option value="CPE">Chemical &amp; Polymer Eng.</option>
+            <option value="CVE">Civil Engineering</option>
+            <option value="ASE">Aerospace Engineering</option>
+            <option value="IPE">Industrial &amp; Petroleum Eng.</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="field-lbl" for="lastSemSel">Results are out for</label>
+        <div class="sel-wrap">
+          <select class="field-select" id="lastSemSel" disabled>
+            <option value="">Pick department first</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live unit bar -->
+    <div class="unit-bar" id="unitBar" style="display:none">
+      <div class="unit-grp">
+        <div class="unit-num"><span id="uGraded">0</span> <span class="hi">units</span></div>
+        <div class="unit-lbl">Graded ✓</div>
+      </div>
+      <div class="unit-div"></div>
+      <div class="unit-grp">
+        <div class="unit-num" id="uPending">0</div>
+        <div class="unit-lbl">Pending ⏳</div>
+      </div>
+      <div class="unit-div"></div>
+      <div class="unit-grp">
+        <div class="unit-num" id="uMissing">0</div>
+        <div class="unit-lbl">Missing ✗</div>
+      </div>
+      <div class="unit-div"></div>
+      <div class="unit-grp">
+        <div class="unit-num" id="uTotal">0</div>
+        <div class="unit-lbl">Total</div>
+      </div>
+    </div>
+
+    <div id="accordions"></div>
+
+    <div class="btn-row">
+      <button class="btn primary" id="step1Next" onclick="goStep(2)" style="display:none">
+        Your Numbers →
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════ STEP 2 ═══════ -->
+  <div class="step-panel" id="step-2">
+    <span class="sec-lbl">Your Current Standing</span>
+
+    <div class="form-row">
+      <div>
+        <label class="field-lbl">Completed units (graded)</label>
+        <input class="field-input" id="unitsDisplay" type="number" readonly placeholder="0" style="opacity:0.6;cursor:default">
+      </div>
+      <div>
+        <label class="field-lbl" for="cgpaIn">Current CGPA</label>
+        <input class="field-input" id="cgpaIn" type="number" min="0" max="5" step="0.01" placeholder="e.g. 3.42">
+      </div>
+    </div>
+
+    <hr class="divider">
+    <span class="sec-lbl">Graduation Target</span>
+
+    <div class="target-grid">
+      <button class="tgt-btn" data-cls="first"  data-cgpa="4.50" onclick="pickTarget(this)">
+        <div class="tgt-name">First Class</div>
+        <div class="tgt-range">CGPA ≥ 4.50</div>
+      </button>
+      <button class="tgt-btn" data-cls="upper"  data-cgpa="3.50" onclick="pickTarget(this)">
+        <div class="tgt-name">2nd Class Upper</div>
+        <div class="tgt-range">CGPA ≥ 3.50</div>
+      </button>
+      <button class="tgt-btn" data-cls="lower"  data-cgpa="2.40" onclick="pickTarget(this)">
+        <div class="tgt-name">2nd Class Lower</div>
+        <div class="tgt-range">CGPA ≥ 2.40</div>
+      </button>
+      <button class="tgt-btn" data-cls="pass"   data-cgpa="1.50" onclick="pickTarget(this)">
+        <div class="tgt-name">Pass</div>
+        <div class="tgt-range">CGPA ≥ 1.50</div>
+      </button>
+    </div>
+
+    <div class="specific-row">
+      <label for="specIn">Or specific target:</label>
+      <input class="field-input" id="specIn" type="number" min="0" max="5" step="0.01" placeholder="0.00 – 5.00">
+    </div>
+
+    <!-- Target profile card -->
+    <div class="profile-card" id="profileCard">
+      <div class="pc-row">
+        <span class="pc-key">Your target</span>
+        <span class="pc-val" id="pc-target">—</span>
+      </div>
+      <div class="pc-row">
+        <span class="pc-key">Current CGPA</span>
+        <span class="pc-val" id="pc-current">—</span>
+      </div>
+      <div class="pc-row">
+        <span class="pc-key">Gap to close</span>
+        <span class="pc-val" id="pc-gap">—</span>
+      </div>
+      <div class="pc-row">
+        <span class="pc-key">What this requires</span>
+        <span class="pc-val note" id="pc-req">—</span>
+      </div>
+      <div class="pc-row">
+        <span class="pc-key">Academic mode</span>
+        <span class="pc-val" id="pc-mode">—</span>
+      </div>
+    </div>
+
+    <!-- Reflection -->
+    <div class="reflect-wrap" id="reflectWrap">
+      <p class="reflect-q">What's driving this target?</p>
+      <div class="radio-opt" data-why="career"      onclick="pickWhy(this)"><div class="radio-dot"></div>I want a strong career start</div>
+      <div class="radio-opt" data-why="scholarship" onclick="pickWhy(this)"><div class="radio-dot"></div>I'm aiming for a scholarship or postgrad</div>
+      <div class="radio-opt" data-why="prove"       onclick="pickWhy(this)"><div class="radio-dot"></div>I want to prove something to myself</div>
+      <div class="radio-opt" data-why="family"      onclick="pickWhy(this)"><div class="radio-dot"></div>Family or personal expectations</div>
+      <div class="radio-opt" data-why="habit"       onclick="pickWhy(this)"><div class="radio-dot"></div>I just want to build a good habit</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn ghost" onclick="goStep(1)">← Back</button>
+      <button class="btn primary" id="step2Next" onclick="goStep(3)" style="display:none">See My Plan →</button>
+    </div>
+  </div>
+
+  <!-- ═══════ STEP 3 ═══════ -->
+  <div class="step-panel" id="step-3">
+
+    <div class="feas-banner" id="feasBanner">
+      <span id="feasIcon">🎯</span>
+      <span id="feasText">Calculating…</span>
+    </div>
+
+    <div class="avg-card">
+      <div class="avg-num" id="avgNum">—</div>
+      <div class="avg-right">
+        <div class="avg-title">Required average GP / semester</div>
+        <div class="avg-desc" id="avgDesc">—</div>
+      </div>
+    </div>
+
+    <span class="sec-lbl">Semester Roadmap</span>
+    <div class="roadmap" id="roadmap"></div>
+
+    <span class="sec-lbl" style="margin-top:36px;">What-If Analysis</span>
+    <div class="tabs">
+      <button class="tab-btn on" id="tbn-this" onclick="switchTab('this',this)">This Semester</button>
+      <button class="tab-btn"    id="tbn-long" onclick="switchTab('long',this)">Long Term</button>
+    </div>
+
+    <div class="tab-pane on" id="tab-this">
+      <p class="info-note">Adjust grades for your next semester — see projected CGPA update live.</p>
+      <div id="thisCourses"></div>
+      <div class="proj-box">
+        <div class="proj-grp">
+          <div class="proj-lbl">Projected CGPA</div>
+          <div class="proj-num" id="projNum">—</div>
+        </div>
+        <div class="proj-grp" style="text-align:right">
+          <div class="proj-lbl">Ceiling this semester</div>
+          <div class="ceil-num" id="ceilNum">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="tab-long">
+      <p class="info-note">Remaining courses sorted by unit weight — your highest-leverage opportunities.</p>
+      <div id="levList"></div>
+    </div>
+
+    <div class="save-area">
+      <button class="btn green" id="saveBtn" onclick="savePlan()">Save My Plan</button>
+      <p class="save-note">Saves to your Unify profile for next time.</p>
+      <p class="save-ok" id="saveOk">✓ Saved successfully</p>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn ghost" onclick="goStep(2)">← Adjust Numbers</button>
+    </div>
+  </div>
+</main>
+
+<!-- ── PLAIN SCRIPT: runs even if module fails ── -->
 <script>
-let selectedTarget = { min: 4.50, max: 5.00, label: "First Class" };
+(function() {
+  // Apply theme before anything renders
+  var t = localStorage.getItem('unify-theme') ||
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  document.documentElement.setAttribute('data-theme', t);
+  var btn = document.getElementById('themeToggle');
+  if (btn) btn.textContent = t === 'dark' ? '☀️ Light' : '🌙 Dark';
 
-function selectTarget(el) {
-  document.querySelectorAll('.target-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedTarget = {
-    min: parseFloat(el.dataset.min),
-    max: parseFloat(el.dataset.max),
-    label: el.dataset.label
+  // Global theme toggle — available even if module errors
+  window.toggleTheme = function() {
+    var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('unify-theme', next);
+    document.documentElement.setAttribute('data-theme', next);
+    var b = document.getElementById('themeToggle');
+    if (b) b.textContent = next === 'dark' ? '☀️ Light' : '🌙 Dark';
   };
-  // Auto-fill target CGPA with minimum of that class
-  document.getElementById('targetCGPA').value = el.dataset.min;
+
+  // Hard failsafe — hide overlay after 5s regardless of module state
+  setTimeout(function() {
+    var overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }, 5000);
+})();
+</script>
+
+<!-- ── FIREBASE MODULE ── -->
+<script type="module">
+import { initializeApp }       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:            "AIzaSyBjZyfNNpXZFJwB7GKXVeSzLTVknfwCa8I",
+  authDomain:        "unify-b4316.firebaseapp.com",
+  databaseURL:       "https://unify-b4316-default-rtdb.firebaseio.com",
+  projectId:         "unify-b4316",
+  storageBucket:     "unify-b4316.firebasestorage.app",
+  messagingSenderId: "114594366615",
+  appId:             "1:114594366615:web:44ef821b4618f1a24615d2",
+  measurementId:     "G-MY2M1R6DJV"
+};
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+let currentUser = null;
+
+// Listen for system dark-mode changes within the module
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+  if (!localStorage.getItem('unify-theme')) {
+    const t = e.matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', t);
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.textContent = t === 'dark' ? '☀️ Light' : '🌙 Dark';
+  }
+});
+
+document.getElementById('signOutBtn').addEventListener('click', async () => {
+  await signOut(auth);
+  window.location.href = 'auth.html';
+});
+
+/* ════════════════════════════════════════
+   COURSE DATABASE
+════════════════════════════════════════ */
+const ALL_SEMS = [
+  '100L Sem 1','100L Sem 2',
+  '200L Sem 1','200L Sem 2',
+  '300L Sem 1','300L Sem 2',
+  '400L Sem 1','400L Sem 2',
+  '500L Sem 1','500L Sem 2',
+];
+
+const COURSES = {
+  ECE: {
+    '100L Sem 1': ['MAT 101','MAT 161','ECE 101','PHY 101','CHM 101','PHY 107','ECE 105','CSC 101','GNS 101'],
+    '100L Sem 2': ['MAT 102','MAT 108','ECE 102','ECE 104','CHM 102','CHM 108','PHY 102','PHY 108','GNS 104','GNS 112'],
+    '200L Sem 1': ['ECE 201','ECE 203','ECE 207','ECE 211','MEE 203','MEE 205','MEE 207','MEE 209','ENT 211'],
+    '200L Sem 2': ['ECE 202','ECE 206','ECE 208','ECE 210','ECE 220','MEE 202','MEE 204','CHE 206','GNS 212'],
+    '300L Sem 1': ['ECE 301','ECE 303','ECE 305','ECE 307','ECE 309','ECE 319','ECE 321','ECE 351','MEE 301'],
+    '300L Sem 2': ['ECE 302','ECE 306','ECE 308','ECE 310','ECE 312','ECE 314','ECE 316','ECE 320','ECE 322','ECE 350','ECE 352'],
+    '400L Sem 1': ['ECE 401','ECE 403','ECE 405','ECE 407','ECE 409','ECE 411','ECE 413'],
+    '400L Sem 2': ['ECE 402','ECE 404','ECE 406','ECE 408','ECE 410','ECE 412','ECE 414'],
+    '500L Sem 1': ['ECE 501','ECE 503','ECE 505','ECE 507','ECE 509','ECE 511'],
+    '500L Sem 2': ['ECE 502','ECE 504','ECE 506','ECE 508','ECE 510','ECE 512'],
+  },
+  MEE: {
+    '100L Sem 1': ['MAT 101','MAT 161','MEE 101','PHY 101','CHM 101','PHY 107','MEE 105','CSC 101','GNS 101'],
+    '100L Sem 2': ['MAT 102','MAT 108','MEE 102','MEE 104','CHM 102','CHM 108','PHY 102','PHY 108','GNS 104','GNS 112'],
+    '200L Sem 1': ['MEE 201','MEE 203','MEE 205','MEE 207','MEE 209','MEE 211','ENT 211'],
+    '200L Sem 2': ['MEE 202','MEE 204','MEE 206','MEE 208','MEE 210','MEE 212','CHE 206','GNS 212'],
+    '300L Sem 1': ['ECE 351','MEE 301','MEE 305','MEE 351','MEE 353','MEE 355','MEE 357'],
+    '300L Sem 2': ['MEE 304','MEE 306','MEE 308','MEE 310','MEE 322','MEE 352','ENT 312','GNS 312'],
+    '400L Sem 1': ['MEE 401','MEE 403','MEE 405','MEE 407','MEE 409','MEE 411','MEE 413'],
+    '400L Sem 2': ['MEE 402','MEE 404','MEE 406','MEE 408','MEE 410','MEE 412','MEE 414'],
+    '500L Sem 1': ['MEE 501','MEE 503','MEE 505','MEE 507','MEE 509','MEE 511'],
+    '500L Sem 2': ['MEE 502','MEE 504','MEE 506','MEE 508','MEE 510','MEE 512'],
+  },
+  CPE: {
+    '100L Sem 1': ['MAT 101','MAT 161','CPE 101','PHY 101','CHM 101','PHY 107','CPE 105','CSC 101','GNS 101'],
+    '100L Sem 2': ['MAT 102','MAT 108','CPE 102','CPE 104','CHM 102','CHM 108','PHY 102','PHY 108','GNS 104','GNS 112'],
+    '200L Sem 1': ['CHE 201','CHE 203','ECE 203','ECE 211','MEE 203','MEE 205','MEE 209','ENT 211'],
+    '200L Sem 2': ['CHE 202','CHE 204','CHE 206','CHE 208','MEE 202','MEE 204','GNS 212'],
+    '300L Sem 1': ['CHE 301','CHE 303','CHE 305','CHE 307','CHE 309','CHE 311','CHE 313','CHE 315','ECE 351'],
+    '300L Sem 2': ['CPE 302','CPE 304','CPE 306','CPE 308','CPE 310','CPE 312','CPE 314','ENT 312','GNS 312'],
+    '400L Sem 1': ['CPE 401','CPE 403','CPE 405','CPE 407','CPE 409','CPE 411','CPE 413'],
+    '400L Sem 2': ['CPE 402','CPE 404','CPE 406','CPE 408','CPE 410','CPE 412','CPE 414'],
+  },
+  CVE: {
+    '100L Sem 1': ['MAT 101','MAT 161','CVE 101','PHY 101','CHM 101','PHY 107','CVE 105','CSC 101','GNS 101'],
+    '100L Sem 2': ['MAT 102','MAT 108','CVE 102','CVE 104','CHM 102','CHM 108','PHY 102','PHY 108','GNS 104','GNS 112'],
+    '200L Sem 1': ['CVE 201','CVE 203','CVE 205','CVE 207','MEE 203','MEE 205','MEE 209','ENT 211'],
+    '200L Sem 2': ['CVE 202','CVE 204','CVE 206','CVE 208','MEE 202','MEE 204','CHE 206','GNS 212'],
+    '300L Sem 1': ['CVE 301','CVE 303','CVE 305','CVE 307','CVE 309','ECE 351','MEE 301','MEE 351'],
+    '300L Sem 2': ['CVE 302','CVE 304','CVE 306','CVE 308','CVE 310','CVE 322','CVE 352','ENT 312','GNS 312'],
+    '400L Sem 1': ['CVE 401','CVE 403','CVE 405','CVE 407','CVE 409','CVE 411','CVE 413'],
+    '400L Sem 2': ['CVE 402','CVE 404','CVE 406','CVE 408','CVE 410','CVE 412','CVE 414'],
+    '500L Sem 1': ['CVE 501','CVE 503','CVE 505','CVE 507','CVE 509','CVE 511'],
+    '500L Sem 2': ['CVE 502','CVE 504','CVE 506','CVE 508','CVE 510','CVE 512'],
+  },
+  ASE: {
+    '100L Sem 1': ['MAT 101','MAT 161','PHY 101','CHM 101','PHY 107','PHY 103','CSC 101','GNS 111','MEE 101'],
+    '100L Sem 2': ['MAT 102','MAT 108','AAE 102','CHM 102','CHM 108','PHY 102','PHY 108','GNS 104','GNS 112'],
+    '200L Sem 1': ['ASE 201','ECE 203','ECE 211','ASE 207','MEE 203','MEE 205','MEE 207','MEE 209','ENT 211'],
+    '200L Sem 2': ['ASE 202','ASE 204','MEE 202','MEE 204','MEE 208','ECE 202','ECE 210','CHE 206','GNS 212'],
+    '300L Sem 1': ['ASE 351','ASE 353','ASE 355','ASE 357','MEE 301','MEE 351','ECE 351'],
+    '300L Sem 2': ['ASE 302','ASE 304','ASE 306','ASE 308','ASE 310','ASE 322','ASE 352','ENT 312','GNS 312'],
+    '400L Sem 1': ['ASE 401','ASE 403','ASE 405','ASE 407','ASE 409','ASE 411','ASE 413'],
+    '400L Sem 2': ['ASE 402','ASE 404','ASE 406','ASE 408','ASE 410','ASE 412','ASE 414'],
+    '500L Sem 1': ['ASE 501','ASE 503','ASE 505','ASE 507','ASE 509','ASE 511'],
+    '500L Sem 2': ['ASE 502','ASE 504','ASE 506','ASE 508','ASE 510','ASE 512'],
+  },
+  IPE: {
+    '100L Sem 1': ['MAT 101','MAT 161','IPE 101','PHY 101','CHM 101','PHY 107','IPE 105','CSC 101','GNS 101'],
+    '100L Sem 2': ['MAT 102','MAT 108','IPE 102','IPE 104','CHM 102','CHM 108','PHY 102','PHY 108','GNS 104','GNS 112'],
+    '200L Sem 1': ['IPE 201','IPE 203','IPE 205','IPE 207','IPE 209','MEE 203','MEE 205','ENT 211'],
+    '200L Sem 2': ['IPE 202','IPE 204','IPE 206','IPE 208','MEE 202','CHE 206','GNS 212'],
+    '300L Sem 1': ['IPE 301','IPE 303','IPE 309','IPE 311','IPE 315','ECE 351','MEE 301','MEE 351'],
+    '300L Sem 2': ['IPE 302','IPE 304','IPE 306','IPE 308','IPE 310','IPE 322','IPE 352','ENT 312','GNS 312'],
+    '400L Sem 1': ['IPE 401','IPE 403','IPE 405','IPE 407','IPE 409','IPE 411','IPE 413'],
+    '400L Sem 2': ['IPE 402','IPE 404','IPE 406','IPE 408','IPE 410','IPE 412','IPE 414'],
+    '500L Sem 1': ['IPE 501','IPE 503','IPE 505','IPE 507','IPE 509','IPE 511'],
+    '500L Sem 2': ['IPE 502','IPE 504','IPE 506','IPE 508','IPE 510','IPE 512'],
+  },
+};
+
+// Unit assignments — GNS/ENT = 2, labs (x07/x08/MAT 108/161) = 1, rest = 3
+const UNIT_OVERRIDE = {
+  'GNS 101':2,'GNS 104':2,'GNS 111':2,'GNS 112':2,'GNS 212':2,'GNS 312':2,
+  'ENT 211':2,'ENT 312':2,
+  'MAT 161':1,'MAT 108':1,
+  'PHY 107':1,'PHY 108':1,'CHM 108':1,
+};
+const unitOf = code => UNIT_OVERRIDE[code] ?? 3;
+
+/* ════════════════════════════════════════
+   STATE
+════════════════════════════════════════ */
+let S = {
+  dept: '', lastIdx: -1,
+  states: {},       // { 'semKey': { code: 'graded'|'pending'|'missing' } }
+  cgpa: null, targetCgpa: null, targetCls: '',
+  why: '', mode: '', neededAvg: null,
+};
+
+function ensureStates(dept, maxIdx) {
+  for (let i = 0; i <= maxIdx; i++) {
+    const sem = ALL_SEMS[i];
+    if (!S.states[sem]) S.states[sem] = {};
+    for (const code of ((COURSES[dept] || {})[sem] || [])) {
+      if (!S.states[sem][code]) S.states[sem][code] = 'pending';
+    }
+  }
 }
 
-function gradeForPoint(point) {
-  if (point >= 5) return 'A';
-  if (point >= 4) return 'B';
-  if (point >= 3) return 'C';
-  if (point >= 2) return 'D';
-  if (point >= 1) return 'E';
-  return 'F';
+/* ════════════════════════════════════════
+   UNIT CALCULATION
+════════════════════════════════════════ */
+function calcUnits() {
+  let g = 0, p = 0, m = 0, t = 0;
+  for (let i = 0; i <= S.lastIdx; i++) {
+    const sem = ALL_SEMS[i];
+    for (const code of ((COURSES[S.dept] || {})[sem] || [])) {
+      const u  = unitOf(code);
+      const st = (S.states[sem] || {})[code] || 'pending';
+      t += u;
+      if (st === 'graded')  g += u;
+      else if (st === 'pending') p += u;
+      else m += u;
+    }
+  }
+  return { g, p, m, t };
 }
 
-function predict() {
-  const currentCGPA = parseFloat(document.getElementById('currentCGPA').value);
-  const totalUnits = parseFloat(document.getElementById('totalUnits').value);
-  const semesterUnits = parseFloat(document.getElementById('semesterUnits').value);
-  const targetCGPA = parseFloat(document.getElementById('targetCGPA').value);
+function refreshUnitBar() {
+  const { g, p, m, t } = calcUnits();
+  document.getElementById('uGraded').textContent  = g;
+  document.getElementById('uPending').textContent = p;
+  document.getElementById('uMissing').textContent = m;
+  document.getElementById('uTotal').textContent   = t;
+  document.getElementById('unitsDisplay').value   = g;
+}
 
-  if (isNaN(currentCGPA) || isNaN(totalUnits) || isNaN(semesterUnits) || isNaN(targetCGPA)) {
-    alert('Please fill in all fields.');
-    return;
-  }
-  if (targetCGPA > 5 || targetCGPA < 0) {
-    alert('Target CGPA must be between 0 and 5.');
-    return;
-  }
+/* ════════════════════════════════════════
+   STEP 1 — SELECTS
+════════════════════════════════════════ */
+const deptSel    = document.getElementById('deptSel');
+const lastSemSel = document.getElementById('lastSemSel');
 
-  // Formula: neededGPA = (targetCGPA * (totalUnits + semesterUnits) - currentCGPA * totalUnits) / semesterUnits
-  const totalFutureUnits = totalUnits + semesterUnits;
-  const neededTotal = targetCGPA * totalFutureUnits;
-  const currentTotal = currentCGPA * totalUnits;
-  const neededThisSem = (neededTotal - currentTotal) / semesterUnits;
+deptSel.addEventListener('change', () => {
+  const dept = deptSel.value;
+  S.dept = dept; S.states = {}; S.lastIdx = -1;
+  lastSemSel.innerHTML = '';
+  if (!dept) { lastSemSel.disabled = true; lastSemSel.innerHTML = '<option value="">Pick department first</option>'; return; }
+  lastSemSel.disabled = false;
+  lastSemSel.innerHTML = '<option value="">Select semester</option>';
+  ALL_SEMS.forEach((sem, i) => {
+    if ((COURSES[dept] || {})[sem]) {
+      const o = document.createElement('option');
+      o.value = i; o.textContent = sem;
+      lastSemSel.appendChild(o);
+    }
+  });
+  document.getElementById('unitBar').style.display = 'none';
+  document.getElementById('accordions').innerHTML  = '';
+  document.getElementById('step1Next').style.display = 'none';
+});
 
-  const resultBox = document.getElementById('resultBox');
-  resultBox.classList.add('visible');
+lastSemSel.addEventListener('change', () => {
+  const idx = parseInt(lastSemSel.value);
+  if (isNaN(idx)) return;
+  S.lastIdx = idx;
+  ensureStates(S.dept, idx);
+  document.getElementById('unitBar').style.display = 'flex';
+  refreshUnitBar();
+  buildAccordions();
+  document.getElementById('step1Next').style.display = 'inline-flex';
+});
 
-  document.getElementById('statCurrent').textContent = currentCGPA.toFixed(2);
-  document.getElementById('statTarget').textContent = targetCGPA.toFixed(2);
+/* ════════════════════════════════════════
+   ACCORDIONS
+════════════════════════════════════════ */
+function buildAccordions() {
+  const wrap = document.getElementById('accordions');
+  wrap.innerHTML = '';
+  for (let i = 0; i <= S.lastIdx; i++) {
+    const sem     = ALL_SEMS[i];
+    const courses = (COURSES[S.dept] || {})[sem] || [];
+    if (!courses.length) continue;
+    const semUnits = courses.reduce((s, c) => s + unitOf(c), 0);
 
-  const gradeBreakdown = document.getElementById('gradeBreakdown');
-  const resultNote = document.getElementById('resultNote');
-  const resultVerdict = document.getElementById('resultVerdict');
-  const resultSub = document.getElementById('resultSub');
+    const section = document.createElement('div');
+    section.className = 'acc-section';
 
-  gradeBreakdown.innerHTML = '';
+    const hd = document.createElement('div');
+    hd.className = 'acc-hd' + (i === S.lastIdx ? ' open' : '');
+    hd.innerHTML = `
+      <span class="acc-hd-title">${sem}</span>
+      <div class="acc-meta">
+        <span class="acc-badge">${semUnits} units</span>
+        <span class="acc-chevron">▾</span>
+      </div>`;
 
-  if (neededThisSem > 5.0) {
-    document.getElementById('statNeeded').textContent = '—';
-    resultVerdict.textContent = 'Not achievable this semester';
-    resultSub.textContent = 'The target is too high given your current standing and remaining units.';
-    const pill = document.createElement('span');
-    pill.className = 'grade-pill impossible';
-    pill.textContent = 'Mathematically impossible';
-    gradeBreakdown.appendChild(pill);
-    resultNote.textContent = `You would need an average of ${neededThisSem.toFixed(2)} GP this semester — which exceeds the maximum of 5.0. Consider targeting a ${selectedTarget.label === 'First Class' ? '2.1' : 'lower'} classification for now, and pushing for ${selectedTarget.label} in future semesters.`;
-  } else if (neededThisSem <= 0) {
-    document.getElementById('statNeeded').textContent = '0.00';
-    resultVerdict.textContent = "You've already achieved it! 🎉";
-    resultSub.textContent = `Your current CGPA already meets the ${selectedTarget.label} threshold.`;
-    const pill = document.createElement('span');
-    pill.className = 'grade-pill';
-    pill.textContent = 'Any grade maintains it';
-    gradeBreakdown.appendChild(pill);
-    resultNote.textContent = `Your current CGPA of ${currentCGPA.toFixed(2)} already qualifies for ${selectedTarget.label}. Keep it up — don't let your grades slip this semester.`;
-  } else {
-    document.getElementById('statNeeded').textContent = neededThisSem.toFixed(2);
-    const neededGrade = gradeForPoint(neededThisSem);
-    resultVerdict.textContent = `You need an average of ${neededGrade} this semester`;
-    resultSub.textContent = `That's a grade point average of ${neededThisSem.toFixed(2)} across all ${semesterUnits} units.`;
+    const body = document.createElement('div');
+    body.className = 'acc-body' + (i === S.lastIdx ? ' open' : '');
 
-    // Show what grades would get you there
-    const gradePoints = [
-      { grade: 'All A', gp: 5.0 },
-      { grade: 'All B', gp: 4.0 },
-      { grade: 'Mix A/B', gp: 4.5 },
-      { grade: 'Mix B/C', gp: 3.5 },
-      { grade: 'All C', gp: 3.0 },
-    ];
+    for (const code of courses) {
+      const u  = unitOf(code);
+      const st = (S.states[sem] || {})[code] || 'pending';
+      const row = document.createElement('div');
+      row.className = 'course-row';
+      row.innerHTML = `
+        <span class="course-code">${code}</span>
+        <span class="course-u">${u}u</span>
+        <div class="state-btns">
+          <button class="st-btn ${st==='graded'?'on':''}"  data-sem="${sem}" data-code="${code}" data-st="graded"  onclick="setCS(this)">✓ <span class="st-text">Graded</span></button>
+          <button class="st-btn ${st==='pending'?'on':''}" data-sem="${sem}" data-code="${code}" data-st="pending" onclick="setCS(this)">⏳ <span class="st-text">Pending</span></button>
+          <button class="st-btn ${st==='missing'?'on':''}" data-sem="${sem}" data-code="${code}" data-st="missing" onclick="setCS(this)">✗ <span class="st-text">Missing</span></button>
+        </div>`;
+      body.appendChild(row);
+    }
 
-    gradePoints.forEach(g => {
-      if (g.gp >= neededThisSem) {
-        const pill = document.createElement('span');
-        pill.className = 'grade-pill';
-        pill.textContent = `${g.grade} (${g.gp.toFixed(1)} GP)`;
-        gradeBreakdown.appendChild(pill);
-      }
+    hd.addEventListener('click', () => {
+      const open = hd.classList.toggle('open');
+      body.classList.toggle('open', open);
     });
-
-    resultNote.textContent = `To reach a CGPA of ${targetCGPA.toFixed(2)} (${selectedTarget.label}), you need to earn at least ${neededThisSem.toFixed(2)} grade points per unit this semester. That means scoring mostly ${neededGrade}s across your ${semesterUnits} credit units.`;
+    section.appendChild(hd);
+    section.appendChild(body);
+    wrap.appendChild(section);
   }
-
-  resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-// Auto-fill target on load
-document.getElementById('targetCGPA').value = '4.50';
+window.setCS = function(btn) {
+  const { sem, code, st } = btn.dataset;
+  if (!S.states[sem]) S.states[sem] = {};
+  S.states[sem][code] = st;
+  btn.closest('.state-btns').querySelectorAll('.st-btn').forEach(b => {
+    b.classList.toggle('on', b.dataset.st === st);
+  });
+  refreshUnitBar();
+};
+
+/* ════════════════════════════════════════
+   STEP NAVIGATION
+════════════════════════════════════════ */
+window.goStep = function(n) {
+  if (n === 2) {
+    if (!S.dept || S.lastIdx < 0) return;
+    document.getElementById('unitsDisplay').value = calcUnits().g;
+  }
+  if (n === 3) {
+    const c = parseFloat(document.getElementById('cgpaIn').value);
+    if (isNaN(c) || c < 0 || c > 5) { alert('Please enter a valid CGPA (0–5).'); return; }
+    if (!S.targetCgpa)               { alert('Please select a graduation target.');  return; }
+    if (!S.why)                      { alert('Please answer the reflection question.'); return; }
+    S.cgpa = c;
+    buildStep3();
+  }
+  document.querySelectorAll('.step-panel').forEach((p, i) => p.classList.toggle('active', i + 1 === n));
+  for (let i = 1; i <= 3; i++) {
+    const node = document.getElementById(`snode-${i}`);
+    node.classList.remove('active','done');
+    if (i < n) node.classList.add('done');
+    else if (i === n) node.classList.add('active');
+    if (i < n) document.getElementById(`sc-${i}`).textContent = '✓';
+    else if (i > n) document.getElementById(`sc-${i}`).textContent = i;
+    else document.getElementById(`sc-${i}`).textContent = i;
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+/* ════════════════════════════════════════
+   STEP 2 — TARGET & REFLECTION
+════════════════════════════════════════ */
+window.pickTarget = function(btn) {
+  document.querySelectorAll('.tgt-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  S.targetCls  = btn.dataset.cls;
+  S.targetCgpa = parseFloat(btn.dataset.cgpa);
+  document.getElementById('specIn').value = '';
+  refreshCard();
+};
+
+document.getElementById('specIn').addEventListener('input', function() {
+  const v = parseFloat(this.value);
+  if (isNaN(v) || v < 0 || v > 5) return;
+  document.querySelectorAll('.tgt-btn').forEach(b => b.classList.remove('on'));
+  S.targetCls  = 'custom';
+  S.targetCgpa = v;
+  refreshCard();
+});
+
+document.getElementById('cgpaIn').addEventListener('input', () => {
+  if (S.targetCgpa != null) refreshCard();
+  checkStep2();
+});
+
+function refreshCard() {
+  const cgpa = parseFloat(document.getElementById('cgpaIn').value);
+  const tgt  = S.targetCgpa;
+  if (!tgt) return;
+
+  document.getElementById('profileCard').classList.add('vis');
+  document.getElementById('reflectWrap').classList.add('vis');
+
+  const gap = tgt - (isNaN(cgpa) ? 0 : cgpa);
+
+  const lblMap = { first:'First Class (≥4.50)', upper:'2nd Class Upper (≥3.50)', lower:'2nd Class Lower (≥2.40)', pass:'Pass (≥1.50)', custom: tgt.toFixed(2) };
+  document.getElementById('pc-target').textContent  = lblMap[S.targetCls] || tgt.toFixed(2);
+  document.getElementById('pc-current').textContent = isNaN(cgpa) ? '—' : cgpa.toFixed(2);
+
+  const gapEl = document.getElementById('pc-gap');
+  gapEl.textContent = isNaN(cgpa) ? '—' : (gap > 0 ? `+${gap.toFixed(2)}` : gap.toFixed(2));
+  gapEl.className   = 'pc-val ' + (gap > 0.5 ? 'red' : gap > 0 ? 'yellow' : 'green');
+
+  let req;
+  if (isNaN(cgpa))  req = 'Enter your CGPA above to see guidance here.';
+  else if (gap <= 0) req = "You're already at or above target — protect your average.";
+  else if (gap < 0.2) req = 'Tiny gap — steady B+ performance closes it.';
+  else if (gap < 0.5) req = 'Moderate gap — aim for B+ to A range in most courses.';
+  else if (gap < 1.0) req = 'Significant gap — near-A performance in most courses from here.';
+  else req = 'Large gap — exceptional performance every semester is essential.';
+  document.getElementById('pc-req').textContent = req;
+
+  const c = isNaN(cgpa) ? 0 : cgpa;
+  let mode, modeCls;
+  if (c < 2.5 || gap > 1.0)   { mode='Recovery'; modeCls='recovery'; }
+  else if (gap <= 0.1)          { mode='Stability'; modeCls='stability'; }
+  else if (gap < 0.6)           { mode='Push'; modeCls='push'; }
+  else                          { mode='Elite'; modeCls='elite'; }
+  S.mode = mode;
+  document.getElementById('pc-mode').innerHTML = `<span class="mode-badge ${modeCls}">${mode}</span>`;
+
+  checkStep2();
+}
+
+function checkStep2() {
+  const c = parseFloat(document.getElementById('cgpaIn').value);
+  const ok = !isNaN(c) && c >= 0 && c <= 5 && S.targetCgpa != null && S.why;
+  document.getElementById('step2Next').style.display = ok ? 'inline-flex' : 'none';
+}
+
+window.pickWhy = function(el) {
+  document.querySelectorAll('.radio-opt').forEach(e => e.classList.remove('on'));
+  el.classList.add('on');
+  S.why = el.dataset.why;
+  checkStep2();
+};
+
+/* ════════════════════════════════════════
+   STEP 3 — BUILD PLAN
+════════════════════════════════════════ */
+function buildStep3() {
+  const dept      = S.dept;
+  const lastIdx   = S.lastIdx;
+  const cgpa      = S.cgpa;
+  const tgt       = S.targetCgpa;
+  const { g: compUnits } = calcUnits();
+
+  // Collect future semesters
+  const futureSems = [];
+  let futureUnits  = 0;
+  for (let i = lastIdx + 1; i < ALL_SEMS.length; i++) {
+    const sem     = ALL_SEMS[i];
+    const courses = (COURSES[dept] || {})[sem];
+    if (!courses) continue;
+    const u = courses.reduce((s, c) => s + unitOf(c), 0);
+    futureUnits += u;
+    futureSems.push({ sem, idx: i, units: u, courses });
+  }
+
+  const totalUnits = compUnits + futureUnits;
+  const currentQP  = cgpa * compUnits;
+  const targetQP   = tgt * totalUnits;
+  const neededQP   = targetQP - currentQP;
+  const neededAvg  = futureUnits > 0 ? neededQP / futureUnits : 0;
+  S.neededAvg      = neededAvg;
+
+  // Feasibility
+  let fCls, fIcon, fText;
+  if (neededAvg <= 0) {
+    fCls='go';   fIcon='✅'; fText="You've already secured your target class — just keep it up.";
+  } else if (neededAvg <= 3.5) {
+    fCls='go';   fIcon='🎯'; fText='Achievable — consistent work from here gets you there.';
+  } else if (neededAvg <= 4.5) {
+    fCls='warn'; fIcon='⚠️'; fText='Stretch goal — requires strong, sustained performance every semester.';
+  } else {
+    fCls='hard'; fIcon='⚡'; fText='Very Difficult — near-perfect grades in every remaining course needed.';
+  }
+  const banner = document.getElementById('feasBanner');
+  banner.className = `feas-banner ${fCls}`;
+  document.getElementById('feasIcon').textContent = fIcon;
+  document.getElementById('feasText').textContent = fText;
+
+  // Required average card
+  const clamped = Math.max(0, Math.min(5, neededAvg));
+  document.getElementById('avgNum').textContent  = neededAvg <= 0 ? 'On Track' : clamped.toFixed(2);
+  document.getElementById('avgDesc').textContent = neededAvg <= 0
+    ? "You're already on pace for your graduation target."
+    : gpToWords(neededAvg);
+
+  // Roadmap
+  buildRoadmap(lastIdx, futureSems, neededAvg);
+
+  // What-If: This Semester
+  buildThisSem(lastIdx, compUnits, cgpa, dept);
+
+  // What-If: Long Term
+  buildLeverage(futureSems, compUnits, futureUnits, neededAvg);
+}
+
+function gpToWords(gp) {
+  if (gp >= 4.7) return 'A in virtually every course — near-perfect performance is essential';
+  if (gp >= 4.3) return 'Mostly A grades, very few Bs allowed across all remaining courses';
+  if (gp >= 3.7) return 'Strong A–B range consistently across all remaining courses';
+  if (gp >= 3.0) return 'Solid B average — reliable, consistent effort every semester';
+  if (gp >= 2.0) return 'C to B range — pass all courses and avoid failures';
+  return 'Stay consistent and pass your courses each semester';
+}
+
+function buildRoadmap(lastIdx, futureSems, neededAvg) {
+  const wrap = document.getElementById('roadmap');
+  wrap.innerHTML = '';
+
+  for (let i = 0; i <= lastIdx; i++) {
+    const d = document.createElement('div');
+    d.className = 'rm-item done';
+    d.innerHTML = `<div class="rm-dot">✓</div><div class="rm-content"><div class="rm-sem">${ALL_SEMS[i]}</div><div class="rm-status">Done</div></div>`;
+    wrap.appendChild(d);
+  }
+
+  futureSems.forEach(({ sem, idx, units }, fi) {
+    const isCur  = fi === 0;
+    const isEst  = idx >= 6;   // 400L+ = estimated
+    const avgStr = neededAvg <= 0 ? 'Already on track' : `Aim for GP ≥ ${Math.min(5, neededAvg).toFixed(2)}`;
+    const d = document.createElement('div');
+    d.className = `rm-item${isCur ? ' cur' : ''}${isEst ? ' est' : ''}`;
+    d.innerHTML = `
+      <div class="rm-dot">${isCur ? '→' : ''}</div>
+      <div class="rm-content">
+        <div class="rm-sem">${sem}${isEst ? '<span class="est-tag">est.</span>' : ''}</div>
+        <div class="rm-status${isCur ? ' hi' : ''}">${isCur ? 'Next up · ' : ''}${avgStr} · ${units} units</div>
+      </div>`;
+    wrap.appendChild(d);
+  });
+}
+
+/* ── WHAT-IF: THIS SEMESTER ── */
+function buildThisSem(lastIdx, compUnits, cgpa, dept) {
+  const nextIdx = lastIdx + 1;
+  const wrap    = document.getElementById('thisCourses');
+  wrap.innerHTML = '';
+
+  if (nextIdx >= ALL_SEMS.length || !COURSES[dept]?.[ALL_SEMS[nextIdx]]) {
+    wrap.innerHTML = '<p style="color:var(--text3);font-size:13px;padding:8px 0">No remaining semesters — congratulations!</p>';
+    document.getElementById('projNum').textContent = cgpa.toFixed(2);
+    document.getElementById('ceilNum').textContent = cgpa.toFixed(2);
+    return;
+  }
+
+  const sem     = ALL_SEMS[nextIdx];
+  const courses = COURSES[dept][sem];
+  const gradeMap = {};
+  courses.forEach(c => { gradeMap[c] = 4; }); // default B
+
+  function recalc() {
+    let semQP = 0, maxQP = 0, semU = 0;
+    courses.forEach(c => { const u = unitOf(c); semQP += (gradeMap[c] ?? 4) * u; maxQP += 5 * u; semU += u; });
+    const totU  = compUnits + semU;
+    const proj  = totU > 0 ? (cgpa * compUnits + semQP) / totU : cgpa;
+    const ceil  = totU > 0 ? (cgpa * compUnits + maxQP) / totU : cgpa;
+    document.getElementById('projNum').textContent = proj.toFixed(2);
+    document.getElementById('ceilNum').textContent = ceil.toFixed(2);
+  }
+
+  courses.forEach(code => {
+    const u   = unitOf(code);
+    const row = document.createElement('div');
+    row.className = 'wi-course';
+
+    const info = document.createElement('div');
+    info.innerHTML = `<div class="wi-code">${code}</div><div class="wi-u">${u} unit${u!==1?'s':''}</div>`;
+
+    const sel = document.createElement('select');
+    sel.className = 'grade-sel';
+    [['A — 5.0',5],['B — 4.0',4],['C — 3.0',3],['D — 2.0',2],['E — 1.0',1],['F — 0.0',0]].forEach(([lbl, v]) => {
+      const o = document.createElement('option');
+      o.value = v; o.textContent = lbl;
+      if (v === 4) o.selected = true;
+      sel.appendChild(o);
+    });
+    sel.addEventListener('change', () => { gradeMap[code] = parseInt(sel.value); recalc(); });
+
+    row.appendChild(info);
+    row.appendChild(sel);
+    wrap.appendChild(row);
+  });
+
+  recalc();
+}
+
+/* ── WHAT-IF: LONG TERM ── */
+function buildLeverage(futureSems, compUnits, futureUnits, neededAvg) {
+  const wrap = document.getElementById('levList');
+  wrap.innerHTML = '';
+
+  const all = [];
+  futureSems.forEach(({ courses }) => courses.forEach(c => all.push({ code: c, units: unitOf(c) })));
+  all.sort((a, b) => b.units - a.units);
+
+  const totalAfter = compUnits + futureUnits;
+  all.slice(0, 24).forEach(({ code, units }) => {
+    const gain = totalAfter > 0 ? Math.max(0, (5.0 - Math.max(0, neededAvg)) * units / totalAfter) : 0;
+    const row  = document.createElement('div');
+    row.className = 'lev-row';
+    row.innerHTML = `
+      <div>
+        <div class="lev-code">${code}</div>
+        <div class="lev-u">${units} unit${units!==1?'s':''}</div>
+      </div>
+      <div class="lev-gain">+${gain.toFixed(3)} per A</div>`;
+    wrap.appendChild(row);
+  });
+}
+
+window.switchTab = function(id, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById(`tab-${id}`).classList.add('on');
+};
+
+/* ════════════════════════════════════════
+   FIREBASE SAVE / LOAD
+════════════════════════════════════════ */
+window.savePlan = async function() {
+  if (!currentUser) return;
+  const btn = document.getElementById('saveBtn');
+  btn.textContent = 'Saving…'; btn.disabled = true;
+  try {
+    const { g: completedUnits } = calcUnits();
+    await setDoc(doc(db, 'users', currentUser.uid), {
+      gradePlanner: {
+        dept:           S.dept,
+        lastSem:        ALL_SEMS[S.lastIdx] || '',
+        completedUnits,
+        cgpa:           S.cgpa,
+        target:         S.targetCgpa,
+        targetClass:    S.targetCls,
+        whyChoice:      S.why,
+        academicMode:   S.mode,
+        neededAvg:      S.neededAvg,
+        courseStates:   S.states,
+        updatedAt:      serverTimestamp(),
+      }
+    }, { merge: true });
+    document.getElementById('saveOk').classList.add('vis');
+    btn.textContent = '✓ Saved';
+    setTimeout(() => { btn.textContent = 'Save My Plan'; btn.disabled = false; }, 3000);
+  } catch (e) {
+    console.error('Save error', e);
+    btn.textContent = 'Save My Plan'; btn.disabled = false;
+    alert('Save failed — please try again.');
+  }
+};
+
+// Maps full department name (stored in Firestore profile) → short code
+const DEPT_NAME_TO_CODE = {
+  'Electronic & Computer Engineering':  'ECE',
+  'Mechanical Engineering':             'MEE',
+  'Chemical & Polymer Engineering':     'CPE',
+  'Civil Engineering':                  'CVE',
+  'Aerospace Engineering':              'ASE',
+  'Industrial & Petroleum Engineering': 'IPE',
+};
+
+// Maps "200 Level" → last completed semester index (end of prior year)
+const LEVEL_TO_LAST_SEM_IDX = {
+  '100 Level': -1,   // just starting — no completed semesters
+  '200 Level':  1,   // completed 100L Sem 2
+  '300 Level':  3,   // completed 200L Sem 2
+  '400 Level':  5,   // completed 300L Sem 2
+  '500 Level':  7,   // completed 400L Sem 2
+};
+
+async function loadSaved() {
+  if (!currentUser) return;
+  try {
+    const snap = await getDoc(doc(db, 'users', currentUser.uid));
+    if (!snap.exists()) return;
+    const data = snap.data();
+    const gp   = data.gradePlanner;
+
+    if (gp && gp.dept && COURSES[gp.dept]) {
+      // ── Restore saved grade planner ──────────────────
+
+      deptSel.value = gp.dept;
+      deptSel.dispatchEvent(new Event('change'));
+      S.dept = gp.dept;
+
+      if (gp.lastSem && ALL_SEMS.includes(gp.lastSem) && (COURSES[gp.dept] || {})[gp.lastSem]) {
+        const idx = ALL_SEMS.indexOf(gp.lastSem);
+        lastSemSel.value = String(idx);
+        S.lastIdx = idx;
+        ensureStates(gp.dept, idx);
+        if (gp.courseStates && typeof gp.courseStates === 'object') S.states = gp.courseStates;
+        document.getElementById('unitBar').style.display = 'flex';
+        refreshUnitBar();
+        buildAccordions();
+        document.getElementById('step1Next').style.display = 'inline-flex';
+      }
+
+      if (gp.cgpa != null) { document.getElementById('cgpaIn').value = gp.cgpa; S.cgpa = gp.cgpa; }
+
+      if (gp.target != null) {
+        S.targetCgpa = gp.target; S.targetCls = gp.targetClass || 'custom';
+        document.querySelectorAll('.tgt-btn').forEach(b => {
+          if (parseFloat(b.dataset.cgpa) === gp.target) b.classList.add('on');
+        });
+        if (gp.cgpa != null) refreshCard();
+      }
+
+      if (gp.whyChoice) {
+        S.why = gp.whyChoice;
+        document.querySelectorAll('.radio-opt').forEach(el => {
+          if (el.dataset.why === gp.whyChoice) el.classList.add('on');
+        });
+      }
+
+      if (gp.cgpa != null && gp.target != null && gp.whyChoice) checkStep2();
+
+    } else if (data.department) {
+      // ── No grade planner data yet — pre-fill from profile ──
+      const code = DEPT_NAME_TO_CODE[data.department];
+      if (code) {
+        deptSel.value = code;
+        deptSel.dispatchEvent(new Event('change'));
+        S.dept = code;
+
+        // Pre-select last semester based on their current level
+        const levelIdx = LEVEL_TO_LAST_SEM_IDX[data.level];
+        if (levelIdx != null && levelIdx >= 0) {
+          // Verify this semester exists for the dept
+          const sem = ALL_SEMS[levelIdx];
+          if ((COURSES[code] || {})[sem]) {
+            lastSemSel.value = String(levelIdx);
+            S.lastIdx = levelIdx;
+            ensureStates(code, levelIdx);
+            document.getElementById('unitBar').style.display = 'flex';
+            refreshUnitBar();
+            buildAccordions();
+            document.getElementById('step1Next').style.display = 'inline-flex';
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Grade planner load error:', e);
+  }
+}
+
+// Register auth listener LAST — after all constants and functions are defined
+onAuthStateChanged(auth, async user => {
+  if (!user) { window.location.href = 'auth.html'; return; }
+  currentUser = user;
+  try {
+    await loadSaved();
+  } catch (e) {
+    console.error('Auth setup error:', e);
+  } finally {
+    document.getElementById('loadingOverlay').style.display = 'none';
+  }
+});
 </script>
 </body>
 </html>

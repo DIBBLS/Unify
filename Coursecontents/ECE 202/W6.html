@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECE 202 &mdash; Week 6: Nullity, Basis & Dimension | Unify</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --surface2: #f8f7f3;
+  --border: #e0deda;
+  --text: #0a0a0a;
+  --muted: #555;
+  --muted2: #999;
+  --green: #4ade80;
+  --green-deep: #16a34a;
+  --green-bg: #dcfce7;
+  --diagram-bg: #f8f7f3;
+  --red: #dc2626;
+  --amber: #d97706;
+  --math-bg: #fafaf8;
+}
+[data-theme="dark"] {
+  --bg: #0f0f0f;
+  --surface: #1a1a1a;
+  --surface2: #222;
+  --border: #2a2a2a;
+  --text: #f0efeb;
+  --muted: #aaa;
+  --muted2: #666;
+  --diagram-bg: #1e1e1e;
+  --math-bg: #1c1c1a;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; transition: background 0.3s, color 0.3s; }
+
+nav { position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; gap: 2rem; height: 56px; }
+.nav-logo { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 20px; color: var(--text); text-decoration: none; flex-shrink: 0; }
+.nav-links { display: flex; gap: 0; margin-left: auto; }
+.nav-links a { font-size: 13px; font-weight: 500; color: var(--muted); text-decoration: none; padding: 0 1rem; height: 56px; display: flex; align-items: center; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+.nav-links a.active { color: var(--text); border-bottom-color: var(--green-deep); }
+.theme-toggle { margin-left: 1rem; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 6px 12px; font-size: 12px; font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+.theme-toggle:hover { background: var(--border); }
+
+.hero { padding: 4rem 2rem 3rem; max-width: 900px; margin: 0 auto; border-bottom: 1px solid var(--border); }
+.hero-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 1rem; }
+.hero-title { font-family: 'Playfair Display', serif; font-style: italic; font-weight: 700; font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.2; margin-bottom: 1rem; }
+.hero-desc { font-size: 16px; color: var(--muted); margin-bottom: 1.5rem; max-width: 640px; }
+.hero-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.tag { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; padding: 4px 10px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); }
+.tag.green { background: var(--green-bg); border-color: #bbf7d0; color: var(--green-deep); }
+
+.toc { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+.toc h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 1.5rem; }
+.toc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+.toc-card { display: block; text-decoration: none; padding: 1rem 1.2rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; transition: border-color 0.2s, transform 0.2s; }
+.toc-card:hover { border-color: var(--green-deep); transform: translateY(-2px); }
+.toc-week { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 4px; }
+.toc-title { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.4; }
+
+.content { max-width: 900px; margin: 0 auto; padding: 0 2rem 4rem; }
+
+.week-block { margin-bottom: 4rem; }
+.week-header { background: var(--text); color: var(--bg); padding: 1.2rem 1.8rem; border-radius: 8px 8px 0 0; display: flex; align-items: baseline; gap: 1rem; }
+.week-number { font-size: 11px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.6; }
+.week-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; }
+.week-body { background: var(--surface); border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; padding: 2rem; }
+.week-summary { color: var(--muted); margin-bottom: 1.5rem; font-size: 15px; }
+
+.key-terms { margin-bottom: 1.5rem; }
+.key-terms-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted2); margin-bottom: 0.6rem; }
+.terms-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.term-pill { font-size: 12px; padding: 3px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; color: var(--muted); }
+
+.exam-box { background: #fffbeb; border-left: 3px solid #fcd34d; padding: 1.2rem 1.4rem; border-radius: 0 6px 6px 0; margin-bottom: 2rem; }
+[data-theme="dark"] .exam-box { background: #1a1700; }
+.exam-box-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); margin-bottom: 0.8rem; }
+.exam-item { font-size: 14px; color: var(--text); margin-bottom: 0.5rem; display: flex; align-items: flex-start; gap: 0.6rem; }
+.exam-item:last-child { margin-bottom: 0; }
+.past-q { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; background: var(--green-bg); color: var(--green-deep); border: 1px solid #bbf7d0; border-radius: 4px; padding: 2px 6px; flex-shrink: 0; margin-top: 2px; }
+
+.topic-block { margin-bottom: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); }
+.topic-block:first-of-type { border-top: none; padding-top: 0; }
+.topic-number { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 4px; }
+.topic-title { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; }
+.topic-body { font-size: 15px; color: var(--muted); line-height: 1.75; margin-bottom: 1.5rem; }
+.topic-body p { margin-bottom: 0.8rem; }
+
+/* STEP-BY-STEP EXAMPLES */
+.example-block { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 1.5rem 0; }
+.example-header { background: var(--surface2); padding: 0.9rem 1.4rem; display: flex; align-items: center; gap: 0.8rem; border-bottom: 1px solid var(--border); }
+.example-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.step { border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 52px 1fr; }
+.step:last-child { border-bottom: none; }
+.step-num { background: var(--surface2); border-right: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: center; padding: 1.4rem 0.5rem; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--green-deep); flex-shrink: 0; }
+.step-content { padding: 1.2rem 1.6rem; }
+.step-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted2); margin-bottom: 0.5rem; }
+.step-desc { font-size: 14px; color: var(--text); line-height: 1.6; margin-bottom: 0.7rem; }
+.step-math { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--text); background: var(--math-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem 1.4rem; line-height: 2.1; white-space: pre; overflow-x: auto; margin-top: 0.6rem; }
+.step-math .hi { color: var(--green-deep); font-weight: 600; }
+.step-math .zero { color: var(--muted2); }
+.step-math .op { color: var(--amber); }
+.step-note { font-size: 12px; color: var(--muted); margin-top: 0.5rem; font-style: italic; }
+.step-result { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600; color: var(--green-deep); background: var(--green-bg); border: 1px solid #bbf7d0; border-radius: 6px; padding: 0.8rem 1.2rem; margin-top: 0.7rem; display: block; }
+
+.formula-block { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem 1.4rem; margin-bottom: 1.5rem; }
+.formula-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 0.8rem; }
+.formula-eq { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--text); line-height: 1.9; }
+.formula-vars { font-size: 12px; color: var(--muted2); line-height: 1.6; margin-top: 0.5rem; }
+
+.diagram-container { background: var(--diagram-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; overflow: hidden; }
+.diagram-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted2); margin-bottom: 1rem; }
+.diagram-container svg { width: 100%; height: auto; display: block; }
+
+.analogy-box { background: #f0fdf4; border-left: 3px solid #bbf7d0; padding: 1rem 1.4rem; border-radius: 0 6px 6px 0; margin-bottom: 1rem; }
+[data-theme="dark"] .analogy-box { background: #0a1f0f; border-left-color: #16a34a; }
+.analogy-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 0.4rem; }
+.analogy-box p { font-size: 14px; color: var(--text); line-height: 1.65; }
+
+.mistake-box { background: #fff5f5; border-left: 3px solid #fca5a5; padding: 1rem 1.4rem; border-radius: 0 6px 6px 0; margin-bottom: 1rem; }
+[data-theme="dark"] .mistake-box { background: #1f0a0a; border-left-color: #dc2626; }
+.mistake-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); margin-bottom: 0.4rem; }
+.mistake-box p { font-size: 14px; color: var(--text); line-height: 1.65; }
+
+.why-box { background: #f0fdf4; border-left: 3px solid var(--green); padding: 0.9rem 1.4rem; border-radius: 0 6px 6px 0; margin-bottom: 1rem; }
+[data-theme="dark"] .why-box { background: #0a1f0f; }
+.why-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 0.3rem; }
+.why-box p { font-size: 14px; font-weight: 500; color: var(--text); }
+
+.def-box { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 1.5rem; }
+.def-box-header { background: var(--surface2); padding: 0.7rem 1.2rem; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted2); border-bottom: 1px solid var(--border); }
+.def-box-body { padding: 0.5rem 0; }
+.def-row { display: grid; grid-template-columns: 180px 1fr; gap: 1rem; padding: 0.75rem 1.2rem; border-bottom: 1px solid var(--border); align-items: start; }
+.def-row:last-child { border-bottom: none; }
+.def-term { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--green-deep); }
+.def-meaning { font-size: 14px; color: var(--text); line-height: 1.6; }
+
+code { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; color: var(--text); }
+
+footer { background: var(--surface); border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--muted2); font-size: 13px; }
+footer strong { color: var(--text); }
+
+@media (max-width: 700px) {
+  .toc-grid { grid-template-columns: 1fr; }
+  .nav-links a { padding: 0 0.5rem; font-size: 11px; }
+  .hero, .content, .toc { padding-left: 1.2rem; padding-right: 1.2rem; }
+  .step { grid-template-columns: 36px 1fr; }
+  .step-math { font-size: 12px; }
+  .def-row { grid-template-columns: 1fr; gap: 0.2rem; }
+}
+.week-page{max-width:900px;margin:0 auto;padding:40px 48px 80px}
+.back-bar{display:flex;align-items:center;gap:12px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.back-btn:hover{color:var(--text);border-color:var(--text)}
+.week-nav{display:flex;gap:8px;margin-left:auto}
+.wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.wnav-btn:hover{color:var(--text);border-color:var(--text)}.wnav-btn.disabled{opacity:.35;pointer-events:none}
+@media(max-width:700px){nav{padding:0 16px}.nav-links{display:none}.week-page{padding:20px 16px 60px}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="../../dashboard.html" class="nav-logo">Unify</a>
+  <div class="nav-links">
+    <a href="../../dashboard.html">Dashboard</a>
+    <a href="../../careers.html">Career</a>
+    <a href="../../profile.html">Profile</a>
+    <a href="#" class="active">ECE 202</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">&#9790; Dark</button>
+</nav>
+<div class="week-page">
+  <div class="back-bar">
+    <a href="../../learn.html?course=ECE+202&name=ECE+202" class="back-btn">&#8592; Back to ECE 202</a>
+    <div class="week-nav"><a href="W5.html" class="wnav-btn">&#8592; Prev</a><a href="W7.html" class="wnav-btn">Next &#8594;</a></div>
+  </div>
+  <div class="week-block">
+    <div class="week-header"><span class="week-number">Week 6</span><span class="week-title">Nullity, Basis & Dimension</span></div>
+  <div class="week-body">
+    <p class="week-summary">Nullity measures how many free variables a homogeneous system has. Rank + Nullity = number of columns — this is the rank-nullity theorem. Basis and dimension describe the structure of vector spaces: a basis is the minimal set of independent vectors that generates the whole space, and dimension is how many you need.</p>
+
+    <div class="key-terms"><div class="key-terms-label">Key Terms</div><div class="terms-pills"><span class="term-pill">Nullity = cols − rank</span><span class="term-pill">Rank + Nullity = n columns</span><span class="term-pill">Basis vectors</span><span class="term-pill">Dimension</span><span class="term-pill">Span</span><span class="term-pill">Linear independence</span></div></div>
+
+    <div class="exam-box">
+      <div class="exam-box-label">Likely Exam Questions</div>
+      <div class="exam-item">Find rank and nullity of A = [[1,3,4,3],[3,9,12,9],[−1,3,4,1]].</div>
+      <div class="exam-item">State the standard basis of R³ and its dimension.</div>
+      <div class="exam-item">What is the dimension of the solution space of AX = 0 for a matrix with rank 2 and 5 columns?</div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 6.1</div>
+      <div class="topic-title">Nullity and the Rank-Nullity Theorem</div>
+      <div class="topic-body"><p>After row reduction, zero rows = free variables. Nullity counts exactly those free variables. The rank-nullity theorem: rank + nullity = number of columns (not rows — columns).</p></div>
+
+      <div class="formula-block">
+        <div class="formula-label">Rank-Nullity Theorem</div>
+        <div class="formula-eq">Rank(A) + Nullity(A) = n     where n = number of COLUMNS
+
+Nullity(A) = n - Rank(A)</div>
+        <div class="formula-vars">Critical: n is the column count. Using row count instead is the most common error on this topic.</div>
+      </div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Example</span><span class="example-title">Rank and Nullity — 3×4 matrix</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">Matrix has 3 rows but 4 columns — n = 4</div>
+            <div class="step-math">  A = [ 1   3   4   3 ]   ← 3 rows
+      [ 3   9  12   9 ]   ← 4 columns ← this is n
+      [-1   3   4   1 ]
+
+  n = 4  (we use this in rank-nullity)</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Row reduce to find rank</div>
+            <div class="step-math">  R₂' = R₂ - 3·R₁:
+  [3-3, 9-9, 12-12, 9-9] = [<span class="hi">0</span>, 0, 0, 0]  → entire zero row
+
+  R₃' = R₃ + R₁:
+  [-1+1, 3+3, 4+4, 1+3] = [<span class="hi">0</span>, 6, 8, 4]
+
+  After reduction:
+  [ 1   3   4   3 ]
+  [ <span class="zero">0   0   0   0</span> ]  ← zero row
+  [ 0   6   8   4 ]
+
+  Swap R₂ and R₃:
+  [ 1   3   4   3 ]
+  [ 0   6   8   4 ]
+  [ <span class="zero">0   0   0   0</span> ]  ← zero row
+
+  Non-zero rows = 2  →  Rank = 2</div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Apply rank-nullity theorem</div>
+            <div class="step-math">  Rank + Nullity = n
+  2    + Nullity = 4
+  Nullity = <span class="hi">2</span>
+
+  This means: AX = 0 has 2 free variables.
+  The homogeneous solution space has dimension 2.</div>
+            <div class="step-result">Rank = 2,   Nullity = 2</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="mistake-box"><div class="mistake-label">Common Mistake</div><p>Using rows instead of columns: students write nullity = 3 − 2 = 1. Wrong. The theorem uses columns: nullity = 4 − 2 = 2. The matrix has 3 rows, 4 columns. Always count columns for n.</p></div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 6.2</div>
+      <div class="topic-title">Basis and Dimension</div>
+      <div class="topic-body"><p>A basis is any set of vectors that is (1) linearly independent — none can be built from the others — and (2) spans the space — every vector can be built from them. Dimension = number of vectors in any basis (always the same regardless of which basis you pick).</p></div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Example</span><span class="example-title">Standard basis of R², R³ — decomposing any vector</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">Standard basis of R² — dimension 2</div>
+            <div class="step-math">  e₁ = (1, 0)     e₂ = (0, 1)
+
+  Any vector in R² = a·e₁ + b·e₂
+
+  Example: (5, -3) = 5·(1,0) + (-3)·(0,1)
+                   = (5,0) + (0,-3)
+                   = <span class="hi">(5, -3) ✓</span></div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Standard basis of R³ — dimension 3</div>
+            <div class="step-math">  e₁ = (1,0,0)    e₂ = (0,1,0)    e₃ = (0,0,1)
+
+  Any vector in R³ = a·e₁ + b·e₂ + c·e₃
+
+  Example: (4, -2, 7) = 4·(1,0,0) + (-2)·(0,1,0) + 7·(0,0,1)
+                      = (4,0,0) + (0,-2,0) + (0,0,7)
+                      = <span class="hi">(4, -2, 7) ✓</span></div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Why this is a valid basis — checking both conditions</div>
+            <div class="step-math">  Condition 1 (Independent): Can e₁ be built from e₂ and e₃?
+  a·(0,1,0) + b·(0,0,1) = (0, a, b)
+  For this to equal (1,0,0): need first entry = 1, impossible.
+  → e₁, e₂, e₃ are independent ✓
+
+  Condition 2 (Spans R³): any (x,y,z) = x·e₁ + y·e₂ + z·e₃ ✓</div>
+            <div class="step-result">dim(R²) = 2,   dim(R³) = 3,   dim(Rⁿ) = n</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="diagram-container">
+        <div class="diagram-label">Standard Basis Vectors in R³</div>
+        <svg viewBox="0 0 600 210" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="va" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#16a34a"/></marker>
+            <marker id="vb" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#0a0a0a"/></marker>
+            <marker id="vc" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#dc2626"/></marker>
+          </defs>
+          <g transform="translate(148,162)">
+            <line x1="0" y1="0" x2="115" y2="0" stroke="#e0deda" stroke-width="1.5"/>
+            <line x1="0" y1="0" x2="0" y2="-120" stroke="#e0deda" stroke-width="1.5"/>
+            <line x1="0" y1="0" x2="-68" y2="37" stroke="#e0deda" stroke-width="1.5"/>
+            <line x1="0" y1="0" x2="75" y2="0" stroke="#16a34a" stroke-width="2.5" marker-end="url(#va)"/>
+            <text x="82" y="5" font-family="JetBrains Mono" font-size="14" fill="#16a34a" font-weight="600">e₁ = (1,0,0)</text>
+            <line x1="0" y1="0" x2="-45" y2="24" stroke="#0a0a0a" stroke-width="2.5" marker-end="url(#vb)"/>
+            <text x="-92" y="48" font-family="JetBrains Mono" font-size="14" fill="#0a0a0a" font-weight="600">e₂ = (0,1,0)</text>
+            <line x1="0" y1="0" x2="0" y2="-78" stroke="#dc2626" stroke-width="2.5" marker-end="url(#vc)"/>
+            <text x="8" y="-82" font-family="JetBrains Mono" font-size="14" fill="#dc2626" font-weight="600">e₃ = (0,0,1)</text>
+            <circle cx="0" cy="0" r="3" fill="#0a0a0a"/>
+            <text x="8" y="16" font-family="DM Sans" font-size="11" fill="#999">origin</text>
+          </g>
+          <rect x="320" y="20" width="265" height="170" rx="8" fill="var(--surface2)" stroke="var(--border)"/>
+          <text x="338" y="48" font-family="DM Sans" font-size="13" fill="#0a0a0a" font-weight="600">Decompose  (4, −2, 7):</text>
+          <text x="338" y="78" font-family="JetBrains Mono" font-size="13" fill="#16a34a"> 4·e₁ = (4,  0, 0)</text>
+          <text x="338" y="103" font-family="JetBrains Mono" font-size="13" fill="#0a0a0a">−2·e₂ = (0, −2, 0)</text>
+          <text x="338" y="128" font-family="JetBrains Mono" font-size="13" fill="#dc2626"> 7·e₃ = (0,  0, 7)</text>
+          <line x1="335" y1="140" x2="572" y2="140" stroke="var(--border)"/>
+          <text x="338" y="163" font-family="JetBrains Mono" font-size="13" fill="#16a34a" font-weight="600"> sum  = (4, −2, 7) ✓</text>
+        </svg>
+      </div>
+
+      <div class="mistake-box"><div class="mistake-label">Common Mistake</div><p>Thinking there's only one basis for a vector space. Any 3 linearly independent vectors in R³ form a valid basis — not just e₁, e₂, e₃. What is fixed is the dimension (3). Examiners may ask you to find "a basis", not "the basis".</p></div>
+      <div class="why-box"><div class="why-label">Why This Matters</div><p>Connects directly to Week 10: eigenvectors form a basis for eigenspaces, and the dimension of each eigenspace determines whether a matrix is diagonalisable.</p></div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<footer>
+  <strong>ECE 202 — Engineering Mathematics</strong><br>
+  LASU Faculty of Engineering · Department of Electronic &amp; Computer Engineering<br>
+  Weeks 1–6 complete · <em>Weeks 7–12 coming soon</em><br><br>
+  <span style="color:var(--muted2)">Built on Unify · Native Learning Library</span>
+</footer>
+
+<script>
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  localStorage.setItem('unify-theme', isDark ? 'light' : 'dark');
+  document.querySelector('.theme-toggle').textContent = isDark ? 'Dark mode' : 'Light mode';
+}
+(function() {
+  const saved = localStorage.getItem('unify-theme');
+  if (saved === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.querySelector('.theme-toggle').textContent = 'Light mode';
+  }
+})();
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECE 202 — Engineering Mathematics | Weeks 7–12 | Unify</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f4f0; --surface: #ffffff; --surface2: #f8f7f3; --border: #e0deda;
+  --text: #0a0a0a; --muted: #555; --muted2: #999;
+  --green: #4ade80; --green-deep: #16a34a; --green-bg: #dcfce7;
+  --diagram-bg: #f8f7f3; --red: #dc2626; --amber: #d97706; --math-bg: #fafaf8;
+}
+[data-theme="dark"] {
+  --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #222; --border: #2a2a2a;
+  --text: #f0efeb; --muted: #aaa; --muted2: #666;
+  --diagram-bg: #1e1e1e; --math-bg: #1c1c1a;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; transition: background 0.3s, color 0.3s; }
+
+nav { position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; gap: 2rem; height: 56px; }
+.nav-logo { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 20px; color: var(--text); text-decoration: none; flex-shrink: 0; }
+.nav-links { display: flex; gap: 0; margin-left: auto; }
+.nav-links a { font-size: 13px; font-weight: 500; color: var(--muted); text-decoration: none; padding: 0 1rem; height: 56px; display: flex; align-items: center; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+.nav-links a.active { color: var(--text); border-bottom-color: var(--green-deep); }
+.theme-toggle { margin-left: 1rem; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 6px 12px; font-size: 12px; font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+.theme-toggle:hover { background: var(--border); }
+
+.hero { padding: 4rem 2rem 3rem; max-width: 900px; margin: 0 auto; border-bottom: 1px solid var(--border); }
+.hero-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 1rem; }
+.hero-title { font-family: 'Playfair Display', serif; font-style: italic; font-weight: 700; font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.2; margin-bottom: 1rem; }
+.hero-desc { font-size: 16px; color: var(--muted); margin-bottom: 1.5rem; max-width: 640px; }
+.hero-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.tag { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; padding: 4px 10px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); }
+.tag.green { background: var(--green-bg); border-color: #bbf7d0; color: var(--green-deep); }
+
+.toc { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+.toc h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 1.5rem; }
+.toc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+.toc-card { display: block; text-decoration: none; padding: 1rem 1.2rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; transition: border-color 0.2s, transform 0.2s; }
+.toc-card:hover { border-color: var(--green-deep); transform: translateY(-2px); }
+.toc-week { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 4px; }
+.toc-title { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.4; }
+
+.content { max-width: 900px; margin: 0 auto; padding: 0 2rem 4rem; }
+.week-block { margin-bottom: 4rem; }
+.week-header { background: var(--text); color: var(--bg); padding: 1.2rem 1.8rem; border-radius: 8px 8px 0 0; display: flex; align-items: baseline; gap: 1rem; }
+.week-number { font-size: 11px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.6; }
+.week-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; }
+.week-body { background: var(--surface); border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; padding: 2rem; }
+.week-summary { color: var(--muted); margin-bottom: 1.5rem; font-size: 15px; }
+
+.key-terms { margin-bottom: 1.5rem; }
+.key-terms-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted2); margin-bottom: 0.6rem; }
+.terms-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.term-pill { font-size: 12px; padding: 3px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; color: var(--muted); }
+
+.exam-box { background: #fffbeb; border-left: 3px solid #fcd34d; padding: 1.2rem 1.4rem; border-radius: 0 6px 6px 0; margin-bottom: 2rem; }
+[data-theme="dark"] .exam-box { background: #1a1700; }
+.exam-box-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); margin-bottom: 0.8rem; }
+.exam-item { font-size: 14px; color: var(--text); margin-bottom: 0.5rem; display: flex; align-items: flex-start; gap: 0.6rem; }
+.exam-item:last-child { margin-bottom: 0; }
+.past-q { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; background: var(--green-bg); color: var(--green-deep); border: 1px solid #bbf7d0; border-radius: 4px; padding: 2px 6px; flex-shrink: 0; margin-top: 2px; }
+
+.topic-block { margin-bottom: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); }
+.topic-block:first-of-type { border-top: none; padding-top: 0; }
+.topic-number { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 4px; }
+.topic-title { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; }
+.topic-body { font-size: 15px; color: var(--muted); line-height: 1.75; margin-bottom: 1.5rem; }
+.topic-body p { margin-bottom: 0.8rem; }
+
+.example-block { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 1.5rem 0; }
+.example-header { background: var(--surface2); padding: 0.9rem 1.4rem; display: flex; align-items: center; gap: 0.8rem; border-bottom: 1px solid var(--border); }
+.example-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.step { border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 52px 1fr; }
+.step:last-child { border-bottom: none; }
+.step-num { background: var(--surface2); border-right: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: center; padding: 1.4rem 0.5rem; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--green-deep); flex-shrink: 0; }
+.step-content { padding: 1.2rem 1.6rem; }
+.step-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted2); margin-bottom: 0.5rem; }
+.step-desc { font-size: 14px; color: var(--text); line-height: 1.6; margin-bottom: 0.7rem; }
+.step-math { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--text); background: var(--math-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem 1.4rem; line-height: 2.1; white-space: pre; overflow-x: auto; margin-top: 0.6rem; }
+.step-math .hi { color: var(--green-deep); font-weight: 600; }
+.step-math .zero { color: var(--muted2); }
+.step-math .op { color: var(--amber); }
+.step-note { font-size: 12px; color: var(--muted); margin-top: 0.5rem; font-style: italic; }
+.step-result { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600; color: var(--green-deep); background: var(--green-bg); border: 1px solid #bbf7d0; border-radius: 6px; padding: 0.8rem 1.2rem; margin-top: 0.7rem; display: block; }
+
+.formula-block { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem 1.4rem; margin-bottom: 1.5rem; }
+.formula-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 0.8rem; }
+.formula-eq { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--text); line-height: 1.9; }
+.formula-vars { font-size: 12px; color: var(--muted2); line-height: 1.6; margin-top: 0.5rem; }
+
+.diagram-container { background: var(--diagram-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; overflow: hidden; }
+.diagram-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted2); margin-bottom: 1rem; }
+.diagram-container svg { width: 100%; height: auto; display: block; }
+
+.analogy-box { background: #f0fdf4; border-left: 3px solid #bbf7d0; padding: 1rem 1.4rem; border-radius: 0 6px 6px 0; margin-bottom: 1rem; }
+[data-theme="dark"] .analogy-box { background: #0a1f0f; border-left-color: #16a34a; }
+.analogy-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 0.4rem; }
+.analogy-box p { font-size: 14px; color: var(--text); line-height: 1.65; }
+
+.mistake-box { background: #fff5f5; border-left: 3px solid #fca5a5; padding: 1rem 1.4rem; border-radius: 0 6px 6px 0; margin-bottom: 1rem; }
+[data-theme="dark"] .mistake-box { background: #1f0a0a; border-left-color: #dc2626; }
+.mistake-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); margin-bottom: 0.4rem; }
+.mistake-box p { font-size: 14px; color: var(--text); line-height: 1.65; }
+
+.why-box { background: #f0fdf4; border-left: 3px solid var(--green); padding: 0.9rem 1.4rem; border-radius: 0 6px 6px 0; margin-bottom: 1rem; }
+[data-theme="dark"] .why-box { background: #0a1f0f; }
+.why-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 0.3rem; }
+.why-box p { font-size: 14px; font-weight: 500; color: var(--text); }
+
+.def-box { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 1.5rem; }
+.def-box-header { background: var(--surface2); padding: 0.7rem 1.2rem; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted2); border-bottom: 1px solid var(--border); }
+.def-box-body { padding: 0.5rem 0; }
+.def-row { display: grid; grid-template-columns: 200px 1fr; gap: 1rem; padding: 0.75rem 1.2rem; border-bottom: 1px solid var(--border); align-items: start; }
+.def-row:last-child { border-bottom: none; }
+.def-term { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--green-deep); }
+.def-meaning { font-size: 14px; color: var(--text); line-height: 1.6; }
+
+code { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; color: var(--text); }
+
+footer { background: var(--surface); border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--muted2); font-size: 13px; }
+footer strong { color: var(--text); }
+
+@media (max-width: 700px) {
+  .toc-grid { grid-template-columns: 1fr; }
+  .nav-links a { padding: 0 0.5rem; font-size: 11px; }
+  .hero, .content, .toc { padding-left: 1.2rem; padding-right: 1.2rem; }
+  .step { grid-template-columns: 36px 1fr; }
+  .step-math { font-size: 12px; }
+  .def-row { grid-template-columns: 1fr; gap: 0.2rem; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">Unify</a>
+  <div class="nav-links">
+    <a href="#">Dashboard</a>
+    <a href="#">Career</a>
+    <a href="#">Profile</a>
+    <a href="#" class="active">ECE 202</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()">Dark mode</button>
+</nav>
+
+<div class="hero">
+  <div class="hero-eyebrow">Unify · LASU Faculty of Engineering · Native Learning Library</div>
+  <h1 class="hero-title">ECE 202 — Engineering Mathematics</h1>
+  <p class="hero-desc">Weeks 7–12: matrices, determinants, inverse methods, eigenvalues, Cayley-Hamilton, and special matrices. Every concept explained clearly, every worked example carried through with full numbers.</p>
+  <div class="hero-tags">
+    <span class="tag">200 Level</span>
+    <span class="tag">First Semester</span>
+    <span class="tag green">Peer Reviewed</span>
+    <span class="tag">Weeks 7–12 of 12</span>
+  </div>
+</div>
+
+<div class="toc">
+  <h2>Table of Contents — Weeks 7–12</h2>
+  <div class="toc-grid">
+    <a class="toc-card" href="#week7"><div class="toc-week">Week 7</div><div class="toc-title">Types of Matrices</div></a>
+    <a class="toc-card" href="#week8"><div class="toc-week">Week 8</div><div class="toc-title">Determinants</div></a>
+    <a class="toc-card" href="#week9"><div class="toc-week">Week 9</div><div class="toc-title">Inverse Matrix &amp; Cramer's Rule</div></a>
+    <a class="toc-card" href="#week10"><div class="toc-week">Week 10</div><div class="toc-title">Eigenvalues &amp; Eigenvectors</div></a>
+    <a class="toc-card" href="#week11"><div class="toc-week">Week 11</div><div class="toc-title">Cayley-Hamilton &amp; Special Matrices</div></a>
+    <a class="toc-card" href="#week12"><div class="toc-week">Week 12</div><div class="toc-title">ODEs via Eigenvalues &amp; Vector Spaces</div></a>
+  </div>
+</div>
+
+<div class="content">
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:32px;padding-top:24px;border-top:1px solid var(--border);">
+    <a href="W5.html" class="back-btn">&#8592; Prev</a>
+    <span style="font-size:13px;color:var(--muted2);">Week 6 of 12</span>
+    <a href="W7.html" class="back-btn" style="border-color:var(--green-deep);color:var(--green-deep);">Next: Week 7 &#8594;</a>
+  </div>
+</div>
+<footer>
+  <strong>ECE 202 &mdash; Engineering Mathematics</strong> &middot; Week 6 &middot; Unify Platform &middot; LASU Faculty of Engineering
+</footer>
+<script>
+(function(){const saved=localStorage.getItem('unify-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);const b=document.getElementById('theme-btn');if(b)b.textContent=saved==='dark'?'☀ Light':'☾ Dark';}})();
+function toggleTheme(){const cur=document.documentElement.getAttribute('data-theme');const nxt=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',nxt);localStorage.setItem('unify-theme',nxt);document.getElementById('theme-btn').textContent=nxt==='dark'?'☀ Light':'☾ Dark';}
+</script>
+</body>
+</html>

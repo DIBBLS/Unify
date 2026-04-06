@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECE 202 — Engineering Mathematics | Unify</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --surface2: #f8f7f3;
+  --border: #e0deda;
+  --text: #0a0a0a;
+  --muted: #555;
+  --muted2: #999;
+  --green: #4ade80;
+  --green-deep: #16a34a;
+  --green-bg: #dcfce7;
+  --diagram-bg: #f8f7f3;
+  --red: #dc2626;
+  --amber: #d97706;
+  --math-bg: #fafaf8;
+}
+[data-theme="dark"] {
+  --bg: #0f0f0f;
+  --surface: #1a1a1a;
+  --surface2: #222;
+  --border: #2a2a2a;
+  --text: #f0efeb;
+  --muted: #aaa;
+  --muted2: #666;
+  --diagram-bg: #1e1e1e;
+  --math-bg: #1c1c1a;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; transition: background 0.3s, color 0.3s; }
+
+nav { position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; gap: 2rem; height: 56px; }
+.nav-logo { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 20px; color: var(--text); text-decoration: none; flex-shrink: 0; }
+.nav-links { display: flex; gap: 0; margin-left: auto; }
+.nav-links a { font-size: 13px; font-weight: 500; color: var(--muted); text-decoration: none; padding: 0 1rem; height: 56px; display: flex; align-items: center; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+.nav-links a.active { color: var(--text); border-bottom-color: var(--green-deep); }
+.theme-toggle { margin-left: 1rem; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 6px 12px; font-size: 12px; font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+.theme-toggle:hover { background: var(--border); }
+
+.hero { padding: 4rem 2rem 3rem; max-width: 900px; margin: 0 auto; border-bottom: 1px solid var(--border); }
+.hero-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 1rem; }
+.hero-title { font-family: 'Playfair Display', serif; font-style: italic; font-weight: 700; font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.2; margin-bottom: 1rem; }
+.hero-desc { font-size: 16px; color: var(--muted); margin-bottom: 1.5rem; max-width: 640px; }
+.hero-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.tag { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; padding: 4px 10px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); }
+.tag.green { background: var(--green-bg); border-color: #bbf7d0; color: var(--green-deep); }
+
+.toc { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+.toc h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 1.5rem; }
+.toc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+.toc-card { display: block; text-decoration: none; padding: 1rem 1.2rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; transition: border-color 0.2s, transform 0.2s; }
+.toc-card:hover { border-color: var(--green-deep); transform: translateY(-2px); }
+.toc-week { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 4px; }
+.toc-title { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.4; }
+
+.content { max-width: 900px; margin: 0 auto; padding: 0 2rem 4rem; }
+
+.week-block { margin-bottom: 4rem; }
+.week-header { background: var(--text); color: var(--bg); padding: 1.2rem 1.8rem; border-radius: 8px 8px 0 0; display: flex; align-items: baseline; gap: 1rem; }
+.week-number { font-size: 11px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.6; }
+.week-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; }
+.week-body { background: var(--surface); border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; padding: 2rem; }
+.week-summary { color: var(--muted); margin-bottom: 1.5rem; font-size: 15px; }
+
+.key-terms { margin-bottom: 1.5rem; }
+.key-terms-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted2); margin-bottom: 0.6rem; }
+.terms-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.term-pill { font-size: 12px; padding: 3px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; color: var(--muted); }
+
+.exam-box { background: #fffbeb; border-left: 3px solid #fcd34d; padding: 1.2rem 1.4rem; border-radius: 0 6px 6px 0; margin-bottom: 2rem; }
+[data-theme="dark"] .exam-box { background: #1a1700; }
+.exam-box-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); margin-bottom: 0.8rem; }
+.exam-item { font-size: 14px; color: var(--text); margin-bottom: 0.5rem; display: flex; align-items: flex-start; gap: 0.6rem; }
+.exam-item:last-child { margin-bottom: 0; }
+.past-q { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; background: var(--green-bg); color: var(--green-deep); border: 1px solid #bbf7d0; border-radius: 4px; padding: 2px 6px; flex-shrink: 0; margin-top: 2px; }
+
+.topic-block { margin-bottom: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); }
+.topic-block:first-of-type { border-top: none; padding-top: 0; }
+.topic-number { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 4px; }
+.topic-title { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; }
+.topic-body { font-size: 15px; color: var(--muted); line-height: 1.75; margin-bottom: 1.5rem; }
+.topic-body p { margin-bottom: 0.8rem; }
+
+/* STEP-BY-STEP EXAMPLES */
+.example-block { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 1.5rem 0; }
+.example-header { background: var(--surface2); padding: 0.9rem 1.4rem; display: flex; align-items: center; gap: 0.8rem; border-bottom: 1px solid var(--border); }
+.example-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.step { border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 52px 1fr; }
+.step:last-child { border-bottom: none; }
+.step-num { background: var(--surface2); border-right: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: center; padding: 1.4rem 0.5rem; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--green-deep); flex-shrink: 0; }
+.step-content { padding: 1.2rem 1.6rem; }
+.step-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted2); margin-bottom: 0.5rem; }
+.step-desc { font-size: 14px; color: var(--text); line-height: 1.6; margin-bottom: 0.7rem; }
+.step-math { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--text); background: var(--math-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem 1.4rem; line-height: 2.1; white-space: pre; overflow-x: auto; margin-top: 0.6rem; }
+.step-math .hi { color: var(--green-deep); font-weight: 600; }
+.step-math .zero { color: var(--muted2); }
+.step-math .op { color: var(--amber); }
+.step-note { font-size: 12px; color: var(--muted); margin-top: 0.5rem; font-style: italic; }
+.step-result { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600; color: var(--green-deep); background: var(--green-bg); border: 1px solid #bbf7d0; border-radius: 6px; padding: 0.8rem 1.2rem; margin-top: 0.7rem; display: block; }
+
+.formula-block { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem 1.4rem; margin-bottom: 1.5rem; }
+.formula-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 0.8rem; }
+.formula-eq { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--text); line-height: 1.9; }
+.formula-vars { font-size: 12px; color: var(--muted2); line-height: 1.6; margin-top: 0.5rem; }
+
+.diagram-container { background: var(--diagram-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; overflow: hidden; }
+.diagram-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted2); margin-bottom: 1rem; }
+.diagram-container svg { width: 100%; height: auto; display: block; }
+
+.analogy-box { background: #f0fdf4; border-left: 3px solid #bbf7d0; padding: 1rem 1.4rem; border-radius: 0 6px 6px 0; margin-bottom: 1rem; }
+[data-theme="dark"] .analogy-box { background: #0a1f0f; border-left-color: #16a34a; }
+.analogy-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 0.4rem; }
+.analogy-box p { font-size: 14px; color: var(--text); line-height: 1.65; }
+
+.mistake-box { background: #fff5f5; border-left: 3px solid #fca5a5; padding: 1rem 1.4rem; border-radius: 0 6px 6px 0; margin-bottom: 1rem; }
+[data-theme="dark"] .mistake-box { background: #1f0a0a; border-left-color: #dc2626; }
+.mistake-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); margin-bottom: 0.4rem; }
+.mistake-box p { font-size: 14px; color: var(--text); line-height: 1.65; }
+
+.why-box { background: #f0fdf4; border-left: 3px solid var(--green); padding: 0.9rem 1.4rem; border-radius: 0 6px 6px 0; margin-bottom: 1rem; }
+[data-theme="dark"] .why-box { background: #0a1f0f; }
+.why-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 0.3rem; }
+.why-box p { font-size: 14px; font-weight: 500; color: var(--text); }
+
+.def-box { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 1.5rem; }
+.def-box-header { background: var(--surface2); padding: 0.7rem 1.2rem; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted2); border-bottom: 1px solid var(--border); }
+.def-box-body { padding: 0.5rem 0; }
+.def-row { display: grid; grid-template-columns: 180px 1fr; gap: 1rem; padding: 0.75rem 1.2rem; border-bottom: 1px solid var(--border); align-items: start; }
+.def-row:last-child { border-bottom: none; }
+.def-term { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--green-deep); }
+.def-meaning { font-size: 14px; color: var(--text); line-height: 1.6; }
+
+code { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; color: var(--text); }
+
+footer { background: var(--surface); border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--muted2); font-size: 13px; }
+footer strong { color: var(--text); }
+
+@media (max-width: 700px) {
+  .toc-grid { grid-template-columns: 1fr; }
+  .nav-links a { padding: 0 0.5rem; font-size: 11px; }
+  .hero, .content, .toc { padding-left: 1.2rem; padding-right: 1.2rem; }
+  .step { grid-template-columns: 36px 1fr; }
+  .step-math { font-size: 12px; }
+  .def-row { grid-template-columns: 1fr; gap: 0.2rem; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">Unify</a>
+  <div class="nav-links">
+    <a href="#">Dashboard</a>
+    <a href="#">Career</a>
+    <a href="#">Profile</a>
+    <a href="#" class="active">ECE 202</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()">Dark mode</button>
+</nav>
+
+<div class="hero">
+  <div class="hero-eyebrow">Unify · LASU Faculty of Engineering · Native Learning Library</div>
+  <h1 class="hero-title">ECE 202 — Engineering Mathematics</h1>
+  <p class="hero-desc">Linear algebra for engineers. Every concept broken down with full step-by-step worked examples — actual numbers, not just letters.</p>
+  <div class="hero-tags">
+    <span class="tag">200 Level</span>
+    <span class="tag">First Semester</span>
+    <span class="tag green">Peer Reviewed</span>
+    <span class="tag green">Weeks 1–12 Complete</span>
+  </div>
+</div>
+
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <div class="toc-grid">
+    <a class="toc-card" href="#week1"><div class="toc-week">Week 1</div><div class="toc-title">Simultaneous Linear Equations</div></a>
+    <a class="toc-card" href="#week2"><div class="toc-week">Week 2</div><div class="toc-title">Gaussian Elimination</div></a>
+    <a class="toc-card" href="#week3"><div class="toc-week">Week 3</div><div class="toc-title">Gauss-Jordan Elimination</div></a>
+    <a class="toc-card" href="#week4"><div class="toc-week">Week 4</div><div class="toc-title">LU Decomposition</div></a>
+    <a class="toc-card" href="#week5"><div class="toc-week">Week 5</div><div class="toc-title">Homogeneous Equations & Rank</div></a>
+    <a class="toc-card" href="#week6"><div class="toc-week">Week 6</div><div class="toc-title">Nullity, Basis & Dimension</div></a>
+    <a class="toc-card" href="#week7"><div class="toc-week">Week 7</div><div class="toc-title">Determinants</div></a>
+    <a class="toc-card" href="#week8"><div class="toc-week">Week 8</div><div class="toc-title">Matrix Inverse</div></a>
+    <a class="toc-card" href="#week9"><div class="toc-week">Week 9</div><div class="toc-title">Eigenvalues</div></a>
+    <a class="toc-card" href="#week10"><div class="toc-week">Week 10</div><div class="toc-title">Eigenvectors & Eigenspaces</div></a>
+    <a class="toc-card" href="#week11"><div class="toc-week">Week 11</div><div class="toc-title">Diagonalization</div></a>
+    <a class="toc-card" href="#week12"><div class="toc-week">Week 12</div><div class="toc-title">Cramer's Rule & Revision</div></a>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- WEEK 1 -->
+<div class="week-block" id="week1">
+  <div class="week-header"><span class="week-number">Week 1</span><span class="week-title">Simultaneous Linear Equations</span></div>
+  <div class="week-body">
+    <p class="week-summary">A system of simultaneous equations means several equations that must all be satisfied at the same time. The key skill this week: writing any system as the matrix equation AX = C, and building the augmented matrix [A|C] you'll need for every elimination method.</p>
+
+    <div class="key-terms"><div class="key-terms-label">Key Terms</div><div class="terms-pills"><span class="term-pill">Coefficient matrix A</span><span class="term-pill">Augmented matrix [A|C]</span><span class="term-pill">Unique solution</span><span class="term-pill">No solution</span><span class="term-pill">Infinite solutions</span><span class="term-pill">Permissible row operations</span></div></div>
+
+    <div class="exam-box">
+      <div class="exam-box-label">Likely Exam Questions</div>
+      <div class="exam-item"><span class="past-q">Past Q</span> Form A and A_b for: i₁+3i₂−2i₃=6, 4i₁+5i₂+2i₃=3, i₁+3i₂+4i₃=7. Find ranks and nature of solution. (2019/2020 Q1c, 12 marks)</div>
+      <div class="exam-item"><span class="past-q">Past Q</span> State conditions for (i) no solution (ii) infinite solutions (iii) unique solution. (2019/2020 Q1b, 5 marks)</div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 1.1</div>
+      <div class="topic-title">Writing a System as AX = C</div>
+      <div class="topic-body"><p>Pull the coefficients into matrix A, the unknowns into column vector X, and the right-hand side into column vector C. Then append C to A to form the augmented matrix — this is the only thing you write when starting any elimination method.</p></div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Past Q</span><span class="example-title">2019/2020 Q1c — Build the augmented matrix</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">The system</div>
+            <div class="step-math">  i₁  +  3i₂  -  2i₃  =  6    ... (equation 1)
+  4i₁  +  5i₂  +  2i₃  =  3    ... (equation 2)
+  i₁  +  3i₂  +  4i₃  =  7    ... (equation 3)</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Extract coefficient matrix A — coefficients only, no constants</div>
+            <div class="step-math">         i₁   i₂   i₃
+  A  =  [  1    3   -2  ]   ← eq 1
+        [  4    5    2  ]   ← eq 2
+        [  1    3    4  ]   ← eq 3</div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Build augmented matrix [A | C] — append the RHS constants</div>
+            <div class="step-math">             i₁   i₂   i₃  | RHS
+  [A | C]  =  [  1    3   -2  |  6 ]
+              [  4    5    2  |  3 ]
+              [  1    3    4  |  7 ]</div>
+            <div class="step-note">The vertical bar is just notation. Everything to its left came from A; everything to its right came from C.</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="mistake-box"><div class="mistake-label">Common Mistake</div><p>Starting row operations on just A without the constants column. Every operation you do must be applied to the full row including the augmented column — otherwise your final answers will be wrong.</p></div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 1.2</div>
+      <div class="topic-title">Three Types of Solutions</div>
+      <div class="topic-body"><p>Before solving, you can already tell what kind of solution you'll get just by comparing the ranks of A and [A|C].</p></div>
+
+      <div class="def-box">
+        <div class="def-box-header">Solution Conditions — based on Rank</div>
+        <div class="def-box-body">
+          <div class="def-row"><div class="def-term">Unique solution</div><div class="def-meaning">rank(A) = rank([A|C]) = n  (n = number of unknowns). Lines cross at one point.</div></div>
+          <div class="def-row"><div class="def-term">No solution</div><div class="def-meaning">rank([A|C]) > rank(A). System is inconsistent — equations contradict each other. Parallel lines.</div></div>
+          <div class="def-row"><div class="def-term">Infinite solutions</div><div class="def-meaning">rank(A) = rank([A|C]) < n. Equations are not fully independent. Same line (one is a multiple of another).</div></div>
+        </div>
+      </div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Past Q</span><span class="example-title">2019/2020 Q1c — Determine nature of solution using rank</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">Row reduce A to find rank(A)</div>
+            <div class="step-math">  A = [  1   3  -2 ]
+      [  4   5   2 ]
+      [  1   3   4 ]
+
+  R₂ → R₂ - 4·R₁:  [4-4, 5-12, 2+8]  = [0, -7, 10]
+  R₃ → R₃ - R₁:    [1-1, 3-3, 4+2]   = [0,  0,  6]
+
+  A becomes:
+  [  <span class="hi">1</span>   3  -2 ]
+  [  <span class="hi">0</span>  -7  10 ]
+  [  <span class="hi">0</span>   0   6 ]  ← 3 non-zero rows → rank(A) = 3</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Apply same operations to [A|C] to find rank([A|C])</div>
+            <div class="step-math">  [A|C] = [  1   3  -2 | 6 ]
+           [  4   5   2 | 3 ]
+           [  1   3   4 | 7 ]
+
+  R₂ → R₂ - 4·R₁:  → [0, -7, 10, | -21]
+  R₃ → R₃ - R₁:    → [0,  0,  6, |   1]
+
+  [A|C] becomes:
+  [  1   3  -2 |  6 ]
+  [  0  -7  10 | -21]
+  [  0   0   6 |  1 ]  → rank([A|C]) = 3</div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Compare and conclude</div>
+            <div class="step-math">  rank(A)     = 3
+  rank([A|C]) = 3
+  n           = 3  (unknowns: i₁, i₂, i₃)
+
+  rank(A) = rank([A|C]) = n = 3</div>
+            <div class="step-result">∴ UNIQUE SOLUTION — the system has exactly one answer</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="why-box"><div class="why-label">Why This Matters</div><p>2019/2020 Q1c is 12 marks. Correctly forming [A|C] and finding both ranks earns partial credit even if you don't solve the full system.</p></div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 1.3</div>
+      <div class="topic-title">Three Permissible Row Operations</div>
+      <div class="topic-body"><p>These are the only operations you're allowed to do to a matrix. They don't change the solution — they just reorganise how the equations are written. Every Gaussian and Gauss-Jordan step is one of these three.</p></div>
+      <div class="def-box">
+        <div class="def-box-header">Three Permissible Operations</div>
+        <div class="def-box-body">
+          <div class="def-row"><div class="def-term">Rᵢ ↔ Rⱼ</div><div class="def-meaning">Swap rows i and j. The order of equations doesn't affect the solution.</div></div>
+          <div class="def-row"><div class="def-term">Rᵢ → k · Rᵢ</div><div class="def-meaning">Multiply every entry in row i by a non-zero constant k. k must be non-zero — multiplying by 0 destroys the equation.</div></div>
+          <div class="def-row"><div class="def-term">Rᵢ → Rᵢ + k · Rⱼ</div><div class="def-meaning">Add k times row j to every entry in row i. This is how you create zeros in specific columns.</div></div>
+        </div>
+      </div>
+      <div class="mistake-box"><div class="mistake-label">Common Mistake</div><p>When doing <code>R₂ → R₂ + k·R₁</code>, applying it to only the first few columns and forgetting the augmented constants column. Every entry in the row — including the constant after the vertical bar — must be updated.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- WEEK 2 -->
+<div class="week-block" id="week2">
+  <div class="week-header"><span class="week-number">Week 2</span><span class="week-title">Gaussian Elimination</span></div>
+  <div class="week-body">
+    <p class="week-summary">Gaussian elimination has two phases. Forward pass: use row operations to get 1s on the diagonal and 0s below it (upper triangular form). Back substitution: start from the bottom row where there's only one unknown, find it, then substitute upward until all unknowns are found.</p>
+
+    <div class="key-terms"><div class="key-terms-label">Key Terms</div><div class="terms-pills"><span class="term-pill">Forward pass</span><span class="term-pill">Back substitution</span><span class="term-pill">Upper triangular form</span><span class="term-pill">Pivot = 1 on diagonal</span><span class="term-pill">Zeros below diagonal</span></div></div>
+
+    <div class="exam-box">
+      <div class="exam-box-label">Likely Exam Questions</div>
+      <div class="exam-item"><span class="past-q">Past Q</span> Solve: 2x₁+3x₂−2x₃−x₄=−2, 2x₁+5x₂−3x₃+x₄=7, −2x₁+x₂+3x₃−2x₄=1, −5x₁+2x₂−x₃+3x₄=8. (Core lecture example)</div>
+      <div class="exam-item">Solve: 4x₁−2x₂+6x₃−2x₄=11, −3x₁+2x₂+2x₃−4x₄=−9.9, x₁+5x₂−2x₃−2x₄=−3.3, −2x₁+x₂−3x₃+x₄=−5.5.</div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 2.1</div>
+      <div class="topic-title">Forward Pass — Full 4×4 Example</div>
+      <div class="topic-body"><p>Goal: get 1s on the diagonal, 0s below. Work column by column, left to right. For each column: divide the pivot row to make the diagonal entry 1, then subtract multiples of that row from the rows below to make zeros.</p></div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Full Example</span><span class="example-title">Forward Pass — Step by step (same system from lecture notes)</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">Form the augmented matrix</div>
+            <div class="step-math">  System:
+  2x₁ + 3x₂ - 2x₃ -  x₄ = -2
+  2x₁ + 5x₂ - 3x₃ +  x₄ =  7
+ -2x₁ +  x₂ + 3x₃ - 2x₄ =  1
+ -5x₁ + 2x₂ -  x₃ + 3x₄ =  8
+
+  [A|C]:
+  R₁ [  2   3  -2  -1 | -2 ]
+  R₂ [  2   5  -3   1 |  7 ]
+  R₃ [ -2   1   3  -2 |  1 ]
+  R₄ [ -5   2  -1   3 |  8 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Make pivot at position (1,1) equal to 1</div>
+            <div class="step-desc">Divide Row 1 by 2: <code>R₁' = R₁ ÷ 2</code></div>
+            <div class="step-math">  R₁'[  <span class="hi">1</span>   3/2  -1   -1/2 | -1   ]   ← divided by 2
+  R₂ [  2    5   -3    1   |  7   ]
+  R₃ [ -2    1    3   -2   |  1   ]
+  R₄ [ -5    2   -1    3   |  8   ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Clear column 1 — make entries below (1,1) equal zero</div>
+            <div class="step-desc"><code>R₂' = R₂ − 2·R₁'</code> &nbsp; <code>R₃' = R₃ + 2·R₁'</code> &nbsp; <code>R₄' = R₄ + 5·R₁'</code></div>
+            <div class="step-math">  R₂' check: [2-2(1), 5-2(3/2), -3-2(-1), 1-2(-1/2) | 7-2(-1)]
+           = [<span class="hi">0</span>,    2,        -1,       2      |  9  ]
+
+  R₃' check: [-2+2(1), 1+2(3/2), 3+2(-1), -2+2(-1/2) | 1+2(-1)]
+            = [<span class="hi">0</span>,    4,         1,       -3      | -1  ]
+
+  R₄' check: [-5+5(1), 2+5(3/2), -1+5(-1), 3+5(-1/2) | 8+5(-1)]
+            = [<span class="hi">0</span>,  19/2,       -6,      1/2     |  3  ]
+
+  After step 3:
+  R₁'[  1    3/2   -1    -1/2 | -1   ]
+  R₂'[  <span class="hi">0</span>    2    -1     2   |  9   ]
+  R₃'[  <span class="hi">0</span>    4     1    -3   | -1   ]
+  R₄'[  <span class="hi">0</span>   19/2   -6    1/2  |  3   ]</div>
+            <div class="step-note">Column 1 done: has 1 at top, zeros below ✓</div>
+          </div></div>
+          <div class="step"><div class="step-num">04</div><div class="step-content">
+            <div class="step-label">Make pivot at position (2,2) equal to 1</div>
+            <div class="step-desc">Divide Row 2 by 2: <code>R₂'' = R₂' ÷ 2</code></div>
+            <div class="step-math">  R₁' [  1    3/2   -1    -1/2 | -1  ]
+  R₂''[  0    <span class="hi">1</span>   -1/2    1   | 9/2 ]   ← divided by 2
+  R₃' [  0    4     1    -3   | -1  ]
+  R₄' [  0   19/2   -6    1/2 |  3  ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">05</div><div class="step-content">
+            <div class="step-label">Clear column 2 below the pivot</div>
+            <div class="step-desc"><code>R₃'' = R₃' − 4·R₂''</code> &nbsp; <code>R₄'' = R₄' − (19/2)·R₂''</code></div>
+            <div class="step-math">  R₃'' = R₃' - 4·R₂'':
+  [0-0, 4-4(1), 1-4(-1/2), -3-4(1) | -1-4(9/2)]
+  = [<span class="hi">0</span>,  0,        3,          -7      |  -19    ]
+
+  R₄'' = R₄' - (19/2)·R₂'':
+  [0, 19/2-(19/2)(1), -6-(19/2)(-1/2), 1/2-(19/2)(1) | ...]
+  = [<span class="hi">0</span>,  0,              -6+19/4,         1/2-19/2  | ...]
+  ≈  [<span class="hi">0</span>,  0,              -5/4,            -9        | -33/2  ]
+
+  After step 5:
+  R₁' [  1   3/2   -1    -1/2 | -1   ]
+  R₂''[  0    <span class="hi">1</span>   -1/2    1   | 9/2  ]
+  R₃''[  0    <span class="hi">0</span>    3    -7    | -19  ]
+  R₄''[  0    <span class="hi">0</span>   -5/4   -9   | -33/2]</div>
+            <div class="step-note">Column 2 done ✓</div>
+          </div></div>
+          <div class="step"><div class="step-num">06</div><div class="step-content">
+            <div class="step-label">Make pivot at (3,3) = 1, then clear below</div>
+            <div class="step-desc"><code>R₃''' = R₃'' ÷ 3</code> then <code>R₄''' = R₄'' + (5/4)·R₃'''</code></div>
+            <div class="step-math">  R₃''' = R₃'' ÷ 3:
+  [ 0   0    <span class="hi">1</span>   -7/3  | -19/3 ]
+
+  R₄''' = R₄'' + (5/4)·R₃''':
+  entry (4,3): -5/4 + (5/4)(1) = 0  ← cleared
+  entry (4,4): -9 + (5/4)(-7/3) = -9 - 35/12 = -143/12
+  RHS: -33/2 + (5/4)(-19/3) = -33/2 - 95/12 = -594/12 → simplified later
+
+  After step 6:
+  R₁' [  1   3/2   -1    -1/2 | -1   ]
+  R₂''[  0    1   -1/2    1   | 9/2  ]
+  R₃'''[ 0    0    <span class="hi">1</span>   -7/3  |-19/3 ]
+  R₄'''[ 0    0    <span class="hi">0</span>  -143/12| ...  ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">07</div><div class="step-content">
+            <div class="step-label">Make pivot at (4,4) = 1 — forward pass complete</div>
+            <div class="step-desc">Divide R₄''' by −143/12 to get 1 at position (4,4).</div>
+            <div class="step-math">  Final upper triangular form:
+  [  1   3/2   -1    -1/2 | -1   ]
+  [  0    1   -1/2    1   | 9/2  ]
+  [  0    0    1    -7/3  |-19/3 ]
+  [  0    0    0     <span class="hi">1</span>   |  4   ]  ← x₄ = 4 directly</div>
+            <div class="step-note">1s on the diagonal, 0s below. Forward pass done. Now back substitute.</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Example</span><span class="example-title">Back Substitution — reading answers bottom to top</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">Row 4 has one unknown — read directly</div>
+            <div class="step-math">  Row 4:  x₄ = <span class="hi">4</span></div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Substitute x₄ = 4 into Row 3</div>
+            <div class="step-math">  Row 3:  x₃ - (7/3)·x₄ = -19/3
+           x₃ - (7/3)(4) = -19/3
+           x₃ - 28/3     = -19/3
+           x₃             = -19/3 + 28/3
+           x₃             = 9/3 = <span class="hi">3</span></div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Substitute x₃ = 3 and x₄ = 4 into Row 2</div>
+            <div class="step-math">  Row 2:  x₂ - (1/2)·x₃ + x₄ = 9/2
+           x₂ - (1/2)(3) + 4   = 9/2
+           x₂ - 3/2 + 4        = 9/2
+           x₂ + 5/2            = 9/2
+           x₂                  = 4/2 = <span class="hi">2</span></div>
+          </div></div>
+          <div class="step"><div class="step-num">04</div><div class="step-content">
+            <div class="step-label">Substitute x₂=2, x₃=3, x₄=4 into Row 1</div>
+            <div class="step-math">  Row 1:  x₁ + (3/2)·x₂ - x₃ - (1/2)·x₄ = -1
+           x₁ + (3/2)(2) - 3 - (1/2)(4)  = -1
+           x₁ + 3 - 3 - 2                 = -1
+           x₁ - 2                         = -1
+           x₁                             = <span class="hi">1</span></div>
+            <div class="step-result">x₁ = 1,   x₂ = 2,   x₃ = 3,   x₄ = 4</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="mistake-box"><div class="mistake-label">Common Mistake</div><p>Trying to start back substitution from Row 1. Row 1 still has 4 unknowns — you can't solve it first. Always start from the bottom row (Row 4), which has exactly one unknown. Work upward.</p></div>
+      <div class="why-box"><div class="why-label">Why This Matters</div><p>This 4×4 system is the exact template used in the lecture notes and assignments. Understand every row operation here and you can handle any Gaussian elimination question.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- WEEK 3 -->
+<div class="week-block" id="week3">
+  <div class="week-header"><span class="week-number">Week 3</span><span class="week-title">Gauss-Jordan Elimination</span></div>
+  <div class="week-body">
+    <p class="week-summary">Gauss-Jordan takes Gaussian one step further. After the forward pass you keep going — clearing entries above every pivot too — until the left side is the identity matrix. The solution appears directly on the right. No back substitution.</p>
+
+    <div class="key-terms"><div class="key-terms-label">Key Terms</div><div class="terms-pills"><span class="term-pill">Reduced row echelon form (RREF)</span><span class="term-pill">Identity matrix on left</span><span class="term-pill">Eliminate above AND below pivot</span><span class="term-pill">No back substitution</span></div></div>
+
+    <div class="exam-box">
+      <div class="exam-box-label">Likely Exam Questions</div>
+      <div class="exam-item"><span class="past-q">Past Q</span> Solve the same 4×4 system using Gauss-Jordan. (Assignment in notes)</div>
+      <div class="exam-item">Solve 2x₁+3x₂=1, −4x₁+x₂=5 using Gauss-Jordan.</div>
+      <div class="exam-item">Explain the difference between Gaussian and Gauss-Jordan elimination.</div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 3.1</div>
+      <div class="topic-title">Gauss-Jordan: Clear Above and Below Every Pivot</div>
+      <div class="topic-body"><p>Difference from Gaussian: after making a pivot = 1, you clear the entire column — not just below. When all pivots are processed, the left side is I (identity) and the right side is your solution.</p></div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Full Example</span><span class="example-title">Gauss-Jordan — 2×2 system then the key difference shown on 4×4</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">2×2 example: 2x₁ + 3x₂ = 1,  −4x₁ + x₂ = 5</div>
+            <div class="step-math">  [A|C] = [  2   3  | 1 ]
+           [ -4   1  | 5 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Make pivot (1,1) = 1</div>
+            <div class="step-desc"><code>R₁' = R₁ ÷ 2</code></div>
+            <div class="step-math">  [  <span class="hi">1</span>   3/2  | 1/2 ]
+  [ -4    1   |  5  ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Clear column 1 below pivot</div>
+            <div class="step-desc"><code>R₂' = R₂ + 4·R₁'</code></div>
+            <div class="step-math">  R₂': [-4+4(1), 1+4(3/2), 5+4(1/2)] = [<span class="hi">0</span>, 7, 7]
+
+  [  1   3/2  | 1/2 ]
+  [  <span class="hi">0</span>    7   |  7  ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">04</div><div class="step-content">
+            <div class="step-label">Make pivot (2,2) = 1</div>
+            <div class="step-desc"><code>R₂'' = R₂' ÷ 7</code></div>
+            <div class="step-math">  [  1   3/2  | 1/2 ]
+  [  0    <span class="hi">1</span>   |  1  ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">05</div><div class="step-content">
+            <div class="step-label">⬆ Gauss-Jordan step: clear column 2 ABOVE the pivot too</div>
+            <div class="step-desc"><code>R₁'' = R₁' − (3/2)·R₂''</code> — this is what makes it Gauss-Jordan</div>
+            <div class="step-math">  R₁'': [1-0, 3/2-(3/2)(1), 1/2-(3/2)(1)]
+        = [1,    <span class="hi">0</span>,           -1           ]
+
+  [  1   <span class="hi">0</span>  | -1 ]   ← identity on left
+  [  0   <span class="hi">1</span>  |  1 ]</div>
+            <div class="step-result">x₁ = −1,   x₂ = 1   (read directly, no back substitution)</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Example</span><span class="example-title">Gauss-Jordan on the 4×4 system — continuing from where Gaussian left off</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">Start from the upper triangular form (end of Gaussian forward pass)</div>
+            <div class="step-math">  [  1   3/2   -1    -1/2 | -1   ]
+  [  0    1   -1/2    1   | 9/2  ]
+  [  0    0    1    -7/3  |-19/3 ]
+  [  0    0    0     1    |  4   ]  ← x₄ = 4</div>
+            <div class="step-note">Gaussian stops here and back-substitutes. Gauss-Jordan continues eliminating.</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Use Row 4 pivot to clear column 4 — eliminate entries above it</div>
+            <div class="step-desc">R₁ → R₁ + (1/2)·R₄ &nbsp; R₂ → R₂ − 1·R₄ &nbsp; R₃ → R₃ + (7/3)·R₄</div>
+            <div class="step-math">  R₁: [-1 + (1/2)(4)] = -1+2 = 1         → RHS: 1
+  R₂: [9/2 - 1(4)]   = 9/2 - 4 = 1/2   → RHS: 1/2
+  R₃: [-19/3+(7/3)(4)] = -19/3+28/3 = 3  → RHS: 3
+
+  [  1   3/2   -1    <span class="hi">0</span>  | 1   ]
+  [  0    1   -1/2   <span class="hi">0</span>  | 1/2 ]
+  [  0    0    1     <span class="hi">0</span>  | 3   ]
+  [  0    0    0     <span class="hi">1</span>  | 4   ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Use Row 3 pivot to clear column 3 above</div>
+            <div class="step-desc">R₁ → R₁ + R₃ &nbsp; R₂ → R₂ + (1/2)·R₃</div>
+            <div class="step-math">  R₁: [-1 + 1(1)] = 0  RHS: 1+3 = 4
+  R₂: [-1/2+(1/2)(1)] = 0  RHS: 1/2+(1/2)(3) = 2
+
+  [  1   3/2    <span class="hi">0</span>   0  | 4   ]
+  [  0    1     <span class="hi">0</span>   0  | 2   ]
+  [  0    0     <span class="hi">1</span>   0  | 3   ]
+  [  0    0     0   1  | 4   ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">04</div><div class="step-content">
+            <div class="step-label">Use Row 2 pivot to clear column 2 above</div>
+            <div class="step-desc">R₁ → R₁ − (3/2)·R₂</div>
+            <div class="step-math">  R₁: [3/2 - (3/2)(1)] = 0  RHS: 4 - (3/2)(2) = 4-3 = 1
+
+  [  1    <span class="hi">0</span>   0   0  | 1   ]   ← identity matrix on left
+  [  0    <span class="hi">1</span>   0   0  | 2   ]
+  [  0    0   <span class="hi">1</span>   0  | 3   ]
+  [  0    0   0   <span class="hi">1</span>  | 4   ]</div>
+            <div class="step-result">x₁ = 1,   x₂ = 2,   x₃ = 3,   x₄ = 4   (read directly)</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="mistake-box"><div class="mistake-label">Common Mistake</div><p>After making a pivot = 1, only clearing below it (Gaussian style) and forgetting to also eliminate above. For Gauss-Jordan: once column 3 pivot is set, you must zero out the entries in rows 1 and 2 in that same column. Missing this step leaves you with upper triangular, not reduced row echelon form.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- WEEK 4 -->
+<div class="week-block" id="week4">
+  <div class="week-header"><span class="week-number">Week 4</span><span class="week-title">LU Decomposition</span></div>
+  <div class="week-body">
+    <p class="week-summary">LU decomposition splits A into two triangular matrices L (lower) and U (upper) where LU = A. Solving AX = C becomes two simple triangular problems: LE = C (forward substitution), then UX = E (back substitution). The notes work through the 3×3 manufacturing problem giving x₁=1, x₂=2, x₃=4.</p>
+
+    <div class="key-terms"><div class="key-terms-label">Key Terms</div><div class="terms-pills"><span class="term-pill">L = lower triangular, 1s on diagonal</span><span class="term-pill">U = upper triangular, 1s on diagonal</span><span class="term-pill">LU = A</span><span class="term-pill">Step 1: LE = C</span><span class="term-pill">Step 2: UX = E</span></div></div>
+
+    <div class="exam-box">
+      <div class="exam-box-label">Likely Exam Questions</div>
+      <div class="exam-item"><span class="past-q">Past Q</span> Solve x₁+3x₂+2x₃=15, 2x₁+4x₂+3x₃=22, 3x₁+4x₂+7x₃=39 using LU decomposition. (Core example — A=1, B=2, C=4)</div>
+      <div class="exam-item">Decompose A into L and U matrices, show LU = A, then solve LE = C and UX = E.</div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 4.1</div>
+      <div class="topic-title">Finding L and U, then Solving in Two Stages</div>
+      <div class="topic-body"><p>L has 1s on the diagonal and the elimination multipliers below. U has 1s on the diagonal and the modified row values above. You find their entries by expanding LU = A term by term using the formulas from matrix multiplication.</p></div>
+
+      <div class="formula-block">
+        <div class="formula-label">LU Structure (3×3)</div>
+        <div class="formula-eq">L = [ 1    0    0  ]    U = [ 1   u₁₂  u₁₃ ]
+    [ l₂₁  1    0  ]        [ 0    1   u₂₃ ]
+    [ l₃₁  l₃₂  1  ]        [ 0    0    1  ]
+
+l₁₁ = l₂₂ = l₃₃ = 1  (always, for both L and U diagonals)
+l₂₁ = a₂₁                u₁₂ = a₁₂
+l₃₁ = a₃₁                u₁₃ = a₁₃</div>
+        <div class="formula-vars">Then the remaining entries are found from: l₂₂·u₂₂ + ... = a₂₂ etc.</div>
+      </div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Full Example</span><span class="example-title">LU Decomposition — Manufacturing Problem from Notes</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">System and matrices</div>
+            <div class="step-math">  x₁ + 3x₂ + 2x₃ = 15
+  2x₁ + 4x₂ + 3x₃ = 22
+  3x₁ + 4x₂ + 7x₃ = 39
+
+  A = [ 1   3   2 ]    C = [ 15 ]
+      [ 2   4   3 ]        [ 22 ]
+      [ 3   4   7 ]        [ 39 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Find first column of L and first row of U — read directly from A</div>
+            <div class="step-math">  l₁₁ = 1  (diagonal, always)
+  l₂₁ = a₂₁ = <span class="hi">2</span>
+  l₃₁ = a₃₁ = <span class="hi">3</span>
+
+  u₁₁ = 1  (diagonal, always)
+  u₁₂ = a₁₂ = <span class="hi">3</span>
+  u₁₃ = a₁₃ = <span class="hi">2</span></div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Find l₂₂ from LU = A entry (2,2)</div>
+            <div class="step-math">  LU entry (2,2) must equal a₂₂ = 4:
+  l₂₁·u₁₂ + l₂₂·1 = a₂₂
+  2·3       + l₂₂   = 4
+  6          + l₂₂   = 4
+  l₂₂ = <span class="hi">-2</span></div>
+          </div></div>
+          <div class="step"><div class="step-num">04</div><div class="step-content">
+            <div class="step-label">Find u₂₃ from LU = A entry (2,3)</div>
+            <div class="step-math">  LU entry (2,3) must equal a₂₃ = 3:
+  l₂₁·u₁₃ + l₂₂·u₂₃ = a₂₃
+  2·2       + (-2)·u₂₃ = 3
+  4          - 2·u₂₃   = 3
+  -2·u₂₃ = -1
+  u₂₃ = <span class="hi">1/2</span></div>
+          </div></div>
+          <div class="step"><div class="step-num">05</div><div class="step-content">
+            <div class="step-label">Find l₃₂ from LU = A entry (3,2)</div>
+            <div class="step-math">  LU entry (3,2) must equal a₃₂ = 4:
+  l₃₁·u₁₂ + l₃₂·1 = a₃₂
+  3·3       + l₃₂   = 4
+  9          + l₃₂   = 4
+  l₃₂ = <span class="hi">-5</span></div>
+          </div></div>
+          <div class="step"><div class="step-num">06</div><div class="step-content">
+            <div class="step-label">Find l₃₃ from LU = A entry (3,3)</div>
+            <div class="step-math">  LU entry (3,3) must equal a₃₃ = 7:
+  l₃₁·u₁₃ + l₃₂·u₂₃ + l₃₃·1 = a₃₃
+  3·2       + (-5)·(1/2) + l₃₃  = 7
+  6          - 5/2        + l₃₃  = 7
+  l₃₃ = 7 - 6 + 5/2 = 7/2 = <span class="hi">3.5</span></div>
+          </div></div>
+          <div class="step"><div class="step-num">07</div><div class="step-content">
+            <div class="step-label">Write out the final L and U matrices</div>
+            <div class="step-math">  L = [  1    0    0  ]    U = [ 1    3    2  ]
+      [  2   -2    0  ]        [ 0    1   1/2 ]
+      [  3   -5   7/2 ]        [ 0    0    1  ]
+
+  Verify: L × U should equal A ✓</div>
+          </div></div>
+          <div class="step"><div class="step-num">08</div><div class="step-content">
+            <div class="step-label">Solve LE = C (forward substitution)</div>
+            <div class="step-math">  [  1    0    0  ][ e₁ ]   [ 15 ]
+  [  2   -2    0  ][ e₂ ] = [ 22 ]
+  [  3   -5   7/2 ][ e₃ ]   [ 39 ]
+
+  Row 1:  1·e₁ = 15              → e₁ = <span class="hi">15</span>
+  Row 2:  2·e₁ - 2·e₂ = 22
+          2(15) - 2e₂ = 22
+          30 - 2e₂ = 22  → e₂ = <span class="hi">4</span>
+  Row 3:  3·e₁ - 5·e₂ + (7/2)·e₃ = 39
+          3(15) - 5(4) + (7/2)e₃ = 39
+          45 - 20 + (7/2)e₃ = 39
+          (7/2)e₃ = 14  → e₃ = <span class="hi">4</span>
+
+  E = [ 15,  4,  4 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">09</div><div class="step-content">
+            <div class="step-label">Solve UX = E (back substitution)</div>
+            <div class="step-math">  [ 1    3    2  ][ x₁ ]   [ 15 ]
+  [ 0    1   1/2 ][ x₂ ] = [  4 ]
+  [ 0    0    1  ][ x₃ ]   [  4 ]
+
+  Row 3:  x₃ = <span class="hi">4</span>
+  Row 2:  x₂ + (1/2)(4) = 4
+          x₂ + 2 = 4  → x₂ = <span class="hi">2</span>
+  Row 1:  x₁ + 3(2) + 2(4) = 15
+          x₁ + 6 + 8 = 15
+          x₁ = <span class="hi">1</span></div>
+            <div class="step-result">x₁ = 1  (Supplier A),   x₂ = 2  (Supplier B),   x₃ = 4  (Supplier C)</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="analogy-box"><div class="analogy-label">Why use LU?</div><p>If you have the same matrix A but need to solve it for 10 different right-hand sides, LU means you decompose once and run 10 cheap substitutions. Redoing full Gaussian each time would be 10× the work. This is why engineering software prefers LU.</p></div>
+      <div class="mistake-box"><div class="mistake-label">Common Mistake</div><p>Mixing up L and U: L is the lower triangle (values below the diagonal come from the elimination multipliers). U is the upper triangle (values above the diagonal come from the modified row entries after scaling). Both have 1s on the main diagonal itself.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- WEEK 5 -->
+<div class="week-block" id="week5">
+  <div class="week-header"><span class="week-number">Week 5</span><span class="week-title">Homogeneous Equations & Rank of a Matrix</span></div>
+  <div class="week-body">
+    <p class="week-summary">Rank tells you how many independent equations a system actually has. Three methods exist to find it: determinant, linear dependence, and row reduction. The notes ask you to use all three on the same matrix. Homogeneous systems (all RHS = 0) always have x = 0 as a solution — the real question is whether others exist.</p>
+
+    <div class="key-terms"><div class="key-terms-label">Key Terms</div><div class="terms-pills"><span class="term-pill">Homogeneous: AX = 0</span><span class="term-pill">Trivial solution x = 0</span><span class="term-pill">Rank</span><span class="term-pill">3 methods</span><span class="term-pill">Non-zero rows after reduction</span></div></div>
+
+    <div class="exam-box">
+      <div class="exam-box-label">Likely Exam Questions</div>
+      <div class="exam-item"><span class="past-q">Past Q</span> Find rank of A and A_b for 3×3 current system. Nature of solutions. (2019/2020 Q1c)</div>
+      <div class="exam-item">Find rank of A = [[2,4,6],[1,3,5],[9,10,11]] using all three methods.</div>
+      <div class="exam-item">Does AX = 0 always have a solution? Explain.</div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 5.1</div>
+      <div class="topic-title">Homogeneous vs Non-Homogeneous</div>
+      <div class="topic-body"><p>Homogeneous: all RHS constants = 0, written AX = 0. x = 0 always satisfies it (trivial solution). Non-trivial solutions exist only when det(A) = 0. Non-homogeneous: at least one RHS ≠ 0. No guarantee of any solution.</p></div>
+      <div class="def-box">
+        <div class="def-box-header">Key Distinction</div>
+        <div class="def-box-body">
+          <div class="def-row"><div class="def-term">AX = 0</div><div class="def-meaning">Always has x = 0. Non-trivial solutions exist only if rank(A) &lt; n (equivalently: det(A) = 0).</div></div>
+          <div class="def-row"><div class="def-term">AX = b  (b≠0)</div><div class="def-meaning">Solution exists only if rank(A) = rank([A|b]). x = 0 is NOT a solution unless b happens to be 0.</div></div>
+        </div>
+      </div>
+      <div class="mistake-box"><div class="mistake-label">Common Mistake</div><p>"The homogeneous system has no solution." Wrong. AX = 0 always has x = 0. What you mean is: "the only solution is the trivial solution x = 0." These are different and examiners penalise the incorrect phrasing.</p></div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 5.2</div>
+      <div class="topic-title">Three Methods for Rank — Applied to the Same Matrix</div>
+      <div class="topic-body"><p>We'll use A = [[2,4,6],[1,3,5],[9,10,11]] from the class notes and apply all three methods. All three must give the same answer.</p></div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Example</span><span class="example-title">Method 1 — Determinant Method</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">Try the full 3×3 determinant first</div>
+            <div class="step-math">  A = [ 2   4   6 ]
+      [ 1   3   5 ]
+      [ 9  10  11 ]
+
+  det(A) = 2·(3·11 - 5·10) - 4·(1·11 - 5·9) + 6·(1·10 - 3·9)
+         = 2·(33-50) - 4·(11-45) + 6·(10-27)
+         = 2(-17) - 4(-34) + 6(-17)
+         = -34 + 136 - 102
+         = <span class="hi">0</span>  → rank ≠ 3</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Since det = 0, try the largest 2×2 submatrix</div>
+            <div class="step-math">  Take top-left 2×2:
+  [ 2   4 ]
+  [ 1   3 ]
+
+  det = (2×3) - (4×1) = 6 - 4 = <span class="hi">2 ≠ 0</span>
+
+  Non-zero 2×2 found → Rank exists at order 2</div>
+            <div class="step-result">Rank = 2</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Example</span><span class="example-title">Method 2 — Row Reduction (most reliable)</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">Swap R₁ and R₂ to get 1 as the leading entry</div>
+            <div class="step-math">  [ 2   4   6 ]    R₁ ↔ R₂    [ 1   3   5 ]
+  [ 1   3   5 ]    ────────►   [ 2   4   6 ]
+  [ 9  10  11 ]                [ 9  10  11 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Clear column 1 below pivot</div>
+            <div class="step-math">  R₂' = R₂ - 2·R₁:
+  [2-2(1), 4-2(3), 6-2(5)] = [<span class="hi">0</span>, -2, -4]
+
+  R₃' = R₃ - 9·R₁:
+  [9-9(1), 10-9(3), 11-9(5)] = [<span class="hi">0</span>, -17, -34]
+
+  [ 1    3    5  ]
+  [ 0   -2   -4  ]
+  [ 0  -17  -34  ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Divide R₂' by −2, then clear column 2</div>
+            <div class="step-math">  R₂'' = R₂' ÷ (-2): [0, 1, 2]
+
+  R₃'' = R₃' - 17·R₂'':
+  [0, -17-17(1)... wait:
+  [0, -17+17(1), -34+17(2)] = [<span class="hi">0</span>, 0, 0]
+
+  [ 1   3   5 ]
+  [ 0   1   2 ]
+  [ <span class="zero">0   0   0</span> ]  ← zero row</div>
+          </div></div>
+          <div class="step"><div class="step-num">04</div><div class="step-content">
+            <div class="step-label">Count non-zero rows</div>
+            <div class="step-math">  Non-zero rows: Row 1 and Row 2  →  count = 2
+  Zero rows:     Row 3            →  count = 1</div>
+            <div class="step-result">Rank = 2  (all three methods agree)</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="why-box"><div class="why-label">Why This Matters</div><p>If an exam asks for all three methods, row reduction is the most reliable. Always count the number of non-zero rows after reducing, not the total number of rows.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- WEEK 6 -->
+<div class="week-block" id="week6">
+  <div class="week-header"><span class="week-number">Week 6</span><span class="week-title">Nullity, Basis & Dimension</span></div>
+  <div class="week-body">
+    <p class="week-summary">Nullity measures how many free variables a homogeneous system has. Rank + Nullity = number of columns — this is the rank-nullity theorem. Basis and dimension describe the structure of vector spaces: a basis is the minimal set of independent vectors that generates the whole space, and dimension is how many you need.</p>
+
+    <div class="key-terms"><div class="key-terms-label">Key Terms</div><div class="terms-pills"><span class="term-pill">Nullity = cols − rank</span><span class="term-pill">Rank + Nullity = n columns</span><span class="term-pill">Basis vectors</span><span class="term-pill">Dimension</span><span class="term-pill">Span</span><span class="term-pill">Linear independence</span></div></div>
+
+    <div class="exam-box">
+      <div class="exam-box-label">Likely Exam Questions</div>
+      <div class="exam-item">Find rank and nullity of A = [[1,3,4,3],[3,9,12,9],[−1,3,4,1]].</div>
+      <div class="exam-item">State the standard basis of R³ and its dimension.</div>
+      <div class="exam-item">What is the dimension of the solution space of AX = 0 for a matrix with rank 2 and 5 columns?</div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 6.1</div>
+      <div class="topic-title">Nullity and the Rank-Nullity Theorem</div>
+      <div class="topic-body"><p>After row reduction, zero rows = free variables. Nullity counts exactly those free variables. The rank-nullity theorem: rank + nullity = number of columns (not rows — columns).</p></div>
+
+      <div class="formula-block">
+        <div class="formula-label">Rank-Nullity Theorem</div>
+        <div class="formula-eq">Rank(A) + Nullity(A) = n     where n = number of COLUMNS
+
+Nullity(A) = n - Rank(A)</div>
+        <div class="formula-vars">Critical: n is the column count. Using row count instead is the most common error on this topic.</div>
+      </div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Example</span><span class="example-title">Rank and Nullity — 3×4 matrix</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">Matrix has 3 rows but 4 columns — n = 4</div>
+            <div class="step-math">  A = [ 1   3   4   3 ]   ← 3 rows
+      [ 3   9  12   9 ]   ← 4 columns ← this is n
+      [-1   3   4   1 ]
+
+  n = 4  (we use this in rank-nullity)</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Row reduce to find rank</div>
+            <div class="step-math">  R₂' = R₂ - 3·R₁:
+  [3-3, 9-9, 12-12, 9-9] = [<span class="hi">0</span>, 0, 0, 0]  → entire zero row
+
+  R₃' = R₃ + R₁:
+  [-1+1, 3+3, 4+4, 1+3] = [<span class="hi">0</span>, 6, 8, 4]
+
+  After reduction:
+  [ 1   3   4   3 ]
+  [ <span class="zero">0   0   0   0</span> ]  ← zero row
+  [ 0   6   8   4 ]
+
+  Swap R₂ and R₃:
+  [ 1   3   4   3 ]
+  [ 0   6   8   4 ]
+  [ <span class="zero">0   0   0   0</span> ]  ← zero row
+
+  Non-zero rows = 2  →  Rank = 2</div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Apply rank-nullity theorem</div>
+            <div class="step-math">  Rank + Nullity = n
+  2    + Nullity = 4
+  Nullity = <span class="hi">2</span>
+
+  This means: AX = 0 has 2 free variables.
+  The homogeneous solution space has dimension 2.</div>
+            <div class="step-result">Rank = 2,   Nullity = 2</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="mistake-box"><div class="mistake-label">Common Mistake</div><p>Using rows instead of columns: students write nullity = 3 − 2 = 1. Wrong. The theorem uses columns: nullity = 4 − 2 = 2. The matrix has 3 rows, 4 columns. Always count columns for n.</p></div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 6.2</div>
+      <div class="topic-title">Basis and Dimension</div>
+      <div class="topic-body"><p>A basis is any set of vectors that is (1) linearly independent — none can be built from the others — and (2) spans the space — every vector can be built from them. Dimension = number of vectors in any basis (always the same regardless of which basis you pick).</p></div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Example</span><span class="example-title">Standard basis of R², R³ — decomposing any vector</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">Standard basis of R² — dimension 2</div>
+            <div class="step-math">  e₁ = (1, 0)     e₂ = (0, 1)
+
+  Any vector in R² = a·e₁ + b·e₂
+
+  Example: (5, -3) = 5·(1,0) + (-3)·(0,1)
+                   = (5,0) + (0,-3)
+                   = <span class="hi">(5, -3) ✓</span></div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Standard basis of R³ — dimension 3</div>
+            <div class="step-math">  e₁ = (1,0,0)    e₂ = (0,1,0)    e₃ = (0,0,1)
+
+  Any vector in R³ = a·e₁ + b·e₂ + c·e₃
+
+  Example: (4, -2, 7) = 4·(1,0,0) + (-2)·(0,1,0) + 7·(0,0,1)
+                      = (4,0,0) + (0,-2,0) + (0,0,7)
+                      = <span class="hi">(4, -2, 7) ✓</span></div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Why this is a valid basis — checking both conditions</div>
+            <div class="step-math">  Condition 1 (Independent): Can e₁ be built from e₂ and e₃?
+  a·(0,1,0) + b·(0,0,1) = (0, a, b)
+  For this to equal (1,0,0): need first entry = 1, impossible.
+  → e₁, e₂, e₃ are independent ✓
+
+  Condition 2 (Spans R³): any (x,y,z) = x·e₁ + y·e₂ + z·e₃ ✓</div>
+            <div class="step-result">dim(R²) = 2,   dim(R³) = 3,   dim(Rⁿ) = n</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="diagram-container">
+        <div class="diagram-label">Standard Basis Vectors in R³</div>
+        <svg viewBox="0 0 600 210" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="va" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#16a34a"/></marker>
+            <marker id="vb" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#0a0a0a"/></marker>
+            <marker id="vc" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#dc2626"/></marker>
+          </defs>
+          <g transform="translate(148,162)">
+            <line x1="0" y1="0" x2="115" y2="0" stroke="#e0deda" stroke-width="1.5"/>
+            <line x1="0" y1="0" x2="0" y2="-120" stroke="#e0deda" stroke-width="1.5"/>
+            <line x1="0" y1="0" x2="-68" y2="37" stroke="#e0deda" stroke-width="1.5"/>
+            <line x1="0" y1="0" x2="75" y2="0" stroke="#16a34a" stroke-width="2.5" marker-end="url(#va)"/>
+            <text x="82" y="5" font-family="JetBrains Mono" font-size="14" fill="#16a34a" font-weight="600">e₁ = (1,0,0)</text>
+            <line x1="0" y1="0" x2="-45" y2="24" stroke="#0a0a0a" stroke-width="2.5" marker-end="url(#vb)"/>
+            <text x="-92" y="48" font-family="JetBrains Mono" font-size="14" fill="#0a0a0a" font-weight="600">e₂ = (0,1,0)</text>
+            <line x1="0" y1="0" x2="0" y2="-78" stroke="#dc2626" stroke-width="2.5" marker-end="url(#vc)"/>
+            <text x="8" y="-82" font-family="JetBrains Mono" font-size="14" fill="#dc2626" font-weight="600">e₃ = (0,0,1)</text>
+            <circle cx="0" cy="0" r="3" fill="#0a0a0a"/>
+            <text x="8" y="16" font-family="DM Sans" font-size="11" fill="#999">origin</text>
+          </g>
+          <rect x="320" y="20" width="265" height="170" rx="8" fill="var(--surface2)" stroke="var(--border)"/>
+          <text x="338" y="48" font-family="DM Sans" font-size="13" fill="#0a0a0a" font-weight="600">Decompose  (4, −2, 7):</text>
+          <text x="338" y="78" font-family="JetBrains Mono" font-size="13" fill="#16a34a"> 4·e₁ = (4,  0, 0)</text>
+          <text x="338" y="103" font-family="JetBrains Mono" font-size="13" fill="#0a0a0a">−2·e₂ = (0, −2, 0)</text>
+          <text x="338" y="128" font-family="JetBrains Mono" font-size="13" fill="#dc2626"> 7·e₃ = (0,  0, 7)</text>
+          <line x1="335" y1="140" x2="572" y2="140" stroke="var(--border)"/>
+          <text x="338" y="163" font-family="JetBrains Mono" font-size="13" fill="#16a34a" font-weight="600"> sum  = (4, −2, 7) ✓</text>
+        </svg>
+      </div>
+
+      <div class="mistake-box"><div class="mistake-label">Common Mistake</div><p>Thinking there's only one basis for a vector space. Any 3 linearly independent vectors in R³ form a valid basis — not just e₁, e₂, e₃. What is fixed is the dimension (3). Examiners may ask you to find "a basis", not "the basis".</p></div>
+      <div class="why-box"><div class="why-label">Why This Matters</div><p>Connects directly to Week 10: eigenvectors form a basis for eigenspaces, and the dimension of each eigenspace determines whether a matrix is diagonalisable.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- WEEK 7 -->
+<div class="week-block" id="week7">
+  <div class="week-header"><span class="week-number">Week 7</span><span class="week-title">Determinants</span></div>
+  <div class="week-body">
+    <p class="week-summary">The determinant is a scalar computed from a square matrix. It tells you instantly whether the matrix is invertible (det ≠ 0), and it is the engine behind Cramer's rule, eigenvalue equations, and the adjoint inverse method. The key skill this week: expanding a 3×3 determinant along the first row using cofactors, and knowing three properties that let you shortcut zero-determinant cases.</p>
+
+    <div class="key-terms"><div class="key-terms-label">Key Terms</div><div class="terms-pills"><span class="term-pill">det(A) or |A|</span><span class="term-pill">Minor Mᵢⱼ</span><span class="term-pill">Cofactor Cᵢⱼ = (−1)^(i+j)·Mᵢⱼ</span><span class="term-pill">Singular matrix (det = 0)</span><span class="term-pill">Cofactor expansion</span></div></div>
+
+    <div class="exam-box">
+      <div class="exam-box-label">Likely Exam Questions</div>
+      <div class="exam-item"><span class="past-q">Past Q</span> Find the determinant of A = [[2,1,−1],[1,3,2],[3,2,1]] by cofactor expansion along the first row.</div>
+      <div class="exam-item">State three properties of determinants and use them to evaluate det([[2,4,6],[1,3,5],[9,10,11]]).</div>
+      <div class="exam-item">If det(A) = 5 and A is a 3×3 matrix, find det(2A).</div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 7.1</div>
+      <div class="topic-title">2×2 and 3×3 Determinants by Cofactor Expansion</div>
+      <div class="topic-body"><p>For a 2×2 matrix the determinant is the product of the main diagonal minus the product of the off-diagonal. For 3×3, expand along the first row — multiply each entry by its cofactor and add. The cofactor absorbs an alternating sign: C₁ⱼ = (−1)^(1+j) × (the 2×2 minor formed by deleting row 1 and column j).</p></div>
+
+      <div class="formula-block">
+        <div class="formula-label">Determinant Formulas</div>
+        <div class="formula-eq">2×2:  det [ a  b ] = ad − bc
+             [ c  d ]
+
+3×3 expansion along row 1:
+det(A) = a₁₁·C₁₁  +  a₁₂·C₁₂  +  a₁₃·C₁₃
+       = a₁₁·(+M₁₁) + a₁₂·(−M₁₂) + a₁₃·(+M₁₃)
+
+Sign pattern (checkerboard):
+  +  −  +
+  −  +  −
+  +  −  +</div>
+        <div class="formula-vars">Mᵢⱼ = determinant of the 2×2 matrix left after deleting row i and column j from A.</div>
+      </div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Full Example</span><span class="example-title">3×3 determinant — A = [[2,1,−1],[1,3,2],[3,2,1]]</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">Write the matrix and identify the top row</div>
+            <div class="step-math">  A = [  2    1   -1 ]
+      [  1    3    2 ]
+      [  3    2    1 ]
+
+  Top row: a₁₁=2,   a₁₂=1,   a₁₃=−1</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Find M₁₁ — delete row 1 and column 1</div>
+            <div class="step-math">  M₁₁ = det [ 3   2 ] = (3)(1) − (2)(2) = 3 − 4 = <span class="hi">-1</span>
+               [ 2   1 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Find M₁₂ — delete row 1 and column 2</div>
+            <div class="step-math">  M₁₂ = det [ 1   2 ] = (1)(1) − (2)(3) = 1 − 6 = <span class="hi">-5</span>
+               [ 3   1 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">04</div><div class="step-content">
+            <div class="step-label">Find M₁₃ — delete row 1 and column 3</div>
+            <div class="step-math">  M₁₃ = det [ 1   3 ] = (1)(2) − (3)(3) = 2 − 9 = <span class="hi">-7</span>
+               [ 3   2 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">05</div><div class="step-content">
+            <div class="step-label">Apply signs (+, −, +) and combine</div>
+            <div class="step-math">  det(A) = a₁₁·(+M₁₁)  +  a₁₂·(−M₁₂)  +  a₁₃·(+M₁₃)
+           =  2·(−1)     +    1·(−(−5))  +  (−1)·(−7)
+           =  −2         +    5           +    7</div>
+            <div class="step-result">det(A) = 10</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="mistake-box"><div class="mistake-label">Common Mistake</div><p>Forgetting the alternating signs. The cofactor for position (1,2) is MINUS, not plus. The formula is a₁₁(+M₁₁) + a₁₂(−M₁₂) + a₁₃(+M₁₃). Many students use all positive signs and get the wrong answer.</p></div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 7.2</div>
+      <div class="topic-title">Three Key Properties of Determinants</div>
+      <div class="topic-body"><p>These properties can save enormous work in exam questions — or let you explain why a determinant is zero before calculating. They also tell you exactly what happens to det when you apply the row operations from earlier weeks.</p></div>
+
+      <div class="def-box">
+        <div class="def-box-header">Core Determinant Properties</div>
+        <div class="def-box-body">
+          <div class="def-row"><div class="def-term">Row swap</div><div class="def-meaning">Swapping any two rows multiplies det by −1. Swap twice → sign unchanged.</div></div>
+          <div class="def-row"><div class="def-term">Scalar multiple</div><div class="def-meaning">Multiplying one row by k multiplies det by k. Multiplying the whole n×n matrix by k: det(kA) = kⁿ·det(A).</div></div>
+          <div class="def-row"><div class="def-term">Row addition</div><div class="def-meaning">Adding a multiple of one row to another does NOT change det. This is why Gaussian elimination preserves the solution set.</div></div>
+          <div class="def-row"><div class="def-term">Zero row</div><div class="def-meaning">If any row (or column) is all zeros, det(A) = 0 immediately.</div></div>
+          <div class="def-row"><div class="def-term">Identical rows</div><div class="def-meaning">If two rows are identical or proportional, det(A) = 0.</div></div>
+          <div class="def-row"><div class="def-term">Product rule</div><div class="def-meaning">det(AB) = det(A) × det(B). Also: det(Aᵀ) = det(A).</div></div>
+        </div>
+      </div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Example</span><span class="example-title">Explaining why det([[2,4,6],[1,3,5],[9,10,11]]) = 0 using properties</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">This is the same matrix from Week 5 — rank = 2, not 3</div>
+            <div class="step-math">  A = [ 2    4    6  ]
+      [ 1    3    5  ]
+      [ 9   10   11  ]
+
+  From Week 5: after row reduction, Row 3 became a zero row.
+  Rank = 2  &lt;  3  (not full rank)</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Property: a zero row after row addition operations → det = 0</div>
+            <div class="step-math">  R₂' = R₃ − 9·R₂:  [0, −17, −34] = 17·[0, 1, 2]
+  This row is a multiple of [0,1,2].
+
+  After full reduction: matrix gains a zero row.
+  det(reduced matrix) = 0.
+
+  Row addition does not change det, so det(A) = 0 also.</div>
+            <div class="step-result">det(A) = 0  — singular matrix, not invertible, rank &lt; 3</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="analogy-box"><div class="analogy-label">Property Shortcut</div><p>If you spot two proportional rows, write det = 0 immediately and state the property. Examiners give full marks for recognising and stating the relevant property — you don't need to expand all cofactors.</p></div>
+      <div class="mistake-box"><div class="mistake-label">Common Mistake</div><p>Writing det(2A) = 2·det(A). For a 3×3 matrix: det(2A) = 2³·det(A) = 8·det(A). The scalar is raised to the power n, not multiplied once. A 3×3 matrix has 3 rows, each picked up the factor of 2.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- WEEK 8 -->
+<div class="week-block" id="week8">
+  <div class="week-header"><span class="week-number">Week 8</span><span class="week-title">Matrix Inverse — Adjoint & Gauss-Jordan</span></div>
+  <div class="week-body">
+    <p class="week-summary">The inverse A⁻¹ satisfies AA⁻¹ = A⁻¹A = I. It only exists when det(A) ≠ 0 (non-singular). Two methods: the adjoint method uses cofactors — A⁻¹ = adj(A)/det(A); the Gauss-Jordan method row-reduces [A|I] until the left side becomes I, after which the right side is A⁻¹. Both methods must give the same answer — use that as a check.</p>
+
+    <div class="key-terms"><div class="key-terms-label">Key Terms</div><div class="terms-pills"><span class="term-pill">A⁻¹ exists iff det(A) ≠ 0</span><span class="term-pill">Cofactor Cᵢⱼ = (−1)^(i+j)·Mᵢⱼ</span><span class="term-pill">adj(A) = transpose of cofactor matrix</span><span class="term-pill">A⁻¹ = adj(A)/det(A)</span><span class="term-pill">[A|I] → [I|A⁻¹]</span></div></div>
+
+    <div class="exam-box">
+      <div class="exam-box-label">Likely Exam Questions</div>
+      <div class="exam-item"><span class="past-q">Past Q</span> Find the inverse of A = [[2,1,0],[1,3,1],[0,1,2]] using the adjoint method. Hence solve AX = [5,10,5]ᵀ.</div>
+      <div class="exam-item">Find A⁻¹ using Gauss-Jordan for the same matrix. Verify AA⁻¹ = I.</div>
+      <div class="exam-item">Under what condition does A⁻¹ not exist? Give a specific 3×3 example.</div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 8.1</div>
+      <div class="topic-title">Adjoint Method — A⁻¹ = adj(A) / det(A)</div>
+      <div class="topic-body"><p>Steps: (1) compute det(A) — stop if zero; (2) find all 9 cofactors using the sign checkerboard; (3) write the cofactor matrix C; (4) TRANSPOSE C to get adj(A) — this is the step most students miss; (5) divide every entry of adj(A) by det(A).</p></div>
+
+      <div class="formula-block">
+        <div class="formula-label">Adjoint Method — 3×3 Steps</div>
+        <div class="formula-eq">Step 1:  Compute det(A). If = 0, stop — inverse does not exist.
+Step 2:  Cᵢⱼ = (−1)^(i+j) × Mᵢⱼ   for all 9 positions (i,j)
+Step 3:  Cofactor matrix C = all 9 cofactors in their positions
+Step 4:  adj(A) = Cᵀ   ← TRANSPOSE — rows become columns
+Step 5:  A⁻¹ = (1/det(A)) × adj(A)</div>
+        <div class="formula-vars">Critical: adj(A) = Cᵀ, NOT C. The transpose swaps Cᵢⱼ and Cⱼᵢ. Only if C is symmetric does adj(A) = C.</div>
+      </div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Full Example</span><span class="example-title">Adjoint method — A = [[2,1,0],[1,3,1],[0,1,2]]</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">Compute det(A) — expansion along row 1</div>
+            <div class="step-math">  A = [ 2   1   0 ]
+      [ 1   3   1 ]
+      [ 0   1   2 ]
+
+  det = 2·det([3,1],[1,2]) − 1·det([1,1],[0,2]) + 0·(...)
+      = 2·(6−1)  −  1·(2−0)
+      = 2(5)     −  2
+      = 10 − 2 = <span class="hi">8</span>   ← non-zero, inverse exists</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Compute all 9 cofactors using sign pattern + − + / − + − / + − +</div>
+            <div class="step-math">  C₁₁ = +(3·2 − 1·1) = +(6−1) = <span class="hi"> 5</span>
+  C₁₂ = −(1·2 − 1·0) = −(2−0) = <span class="hi">-2</span>
+  C₁₃ = +(1·1 − 3·0) = +(1−0) = <span class="hi"> 1</span>
+
+  C₂₁ = −(1·2 − 0·1) = −(2−0) = <span class="hi">-2</span>
+  C₂₂ = +(2·2 − 0·0) = +(4−0) = <span class="hi"> 4</span>
+  C₂₃ = −(2·1 − 1·0) = −(2−0) = <span class="hi">-2</span>
+
+  C₃₁ = +(1·1 − 0·3) = +(1−0) = <span class="hi"> 1</span>
+  C₃₂ = −(2·1 − 0·1) = −(2−0) = <span class="hi">-2</span>
+  C₃₃ = +(2·3 − 1·1) = +(6−1) = <span class="hi"> 5</span></div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Form cofactor matrix C, then TRANSPOSE to get adj(A)</div>
+            <div class="step-math">  C =  [  5   -2    1 ]     adj(A) = Cᵀ = [  5   -2    1 ]
+       [ -2    4   -2 ]                         [ -2    4   -2 ]
+       [  1   -2    5 ]                         [  1   -2    5 ]
+
+  (C is symmetric here so Cᵀ = C — but always write adj(A) = Cᵀ explicitly)</div>
+            <div class="step-note">If C were not symmetric, transposing would move C₁₂ to position (2,1) etc. Always check.</div>
+          </div></div>
+          <div class="step"><div class="step-num">04</div><div class="step-content">
+            <div class="step-label">Divide adj(A) by det(A) = 8</div>
+            <div class="step-math">  A⁻¹ = (1/8) × [  5   -2    1 ]
+                  [ -2    4   -2 ]
+                  [  1   -2    5 ]</div>
+            <div class="step-result">A⁻¹ = (1/8) · [[5,−2,1],[−2,4,−2],[1,−2,5]]</div>
+          </div></div>
+          <div class="step"><div class="step-num">05</div><div class="step-content">
+            <div class="step-label">Verify AA⁻¹ = I — spot check row 1 of A against columns of A⁻¹</div>
+            <div class="step-math">  [2,1,0] · [5/8, -2/8, 1/8]ᵀ  = 10/8 − 2/8 + 0 = 8/8 = <span class="hi">1</span> ✓
+  [2,1,0] · [-2/8, 4/8, -2/8]ᵀ = −4/8 + 4/8 + 0 = 0/8 = <span class="hi">0</span> ✓
+  [2,1,0] · [1/8, -2/8, 5/8]ᵀ  =  2/8 − 2/8 + 0 = 0/8 = <span class="hi">0</span> ✓</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="mistake-box"><div class="mistake-label">Common Mistake</div><p>Using the cofactor matrix C directly as adj(A) without transposing. The transpose swaps position (i,j) and (j,i). Only if the matrix is symmetric will C = Cᵀ happen to be true. Always write and perform the transpose step explicitly.</p></div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 8.2</div>
+      <div class="topic-title">Gauss-Jordan Method for Inverse</div>
+      <div class="topic-body"><p>Augment A with the n×n identity matrix I to form [A|I], then apply Gauss-Jordan row reduction until the left side is I. The right side will have become A⁻¹. Every row operation you apply to the left side is applied identically to the right side — this is the key.</p></div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Example</span><span class="example-title">Gauss-Jordan Inverse — A = [[2,1,0],[1,3,1],[0,1,2]]</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">Form [A | I]</div>
+            <div class="step-math">  R₁ [  2   1   0  |  1   0   0 ]
+  R₂ [  1   3   1  |  0   1   0 ]
+  R₃ [  0   1   2  |  0   0   1 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Swap R₁ and R₂ to get 1 at position (1,1)</div>
+            <div class="step-math">  R₁ [  1   3   1  |  0   1   0 ]   ← swapped
+  R₂ [  2   1   0  |  1   0   0 ]
+  R₃ [  0   1   2  |  0   0   1 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Clear column 1 below pivot: R₂' = R₂ − 2·R₁</div>
+            <div class="step-math">  R₂': [2−2(1), 1−2(3), 0−2(1) | 1−2(0), 0−2(1), 0−2(0)]
+         = [0,  -5,  -2 | 1, -2, 0]
+
+  R₁ [  1    3    1  |  0    1    0 ]
+  R₂'[  <span class="hi">0</span>   -5   -2  |  1   -2    0 ]
+  R₃ [  0    1    2  |  0    0    1 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">04</div><div class="step-content">
+            <div class="step-label">Swap R₂' and R₃ (puts 1 at pivot position (2,2))</div>
+            <div class="step-math">  R₁ [  1    3    1  |  0    1    0 ]
+  R₂ [  0    1    2  |  0    0    1 ]   ← R₃ moved up
+  R₃'[  0   -5   -2  |  1   -2    0 ]   ← R₂' moved down
+
+  R₃'' = R₃' + 5·R₂:
+  [0, -5+5, -2+10 | 1+0, -2+0, 0+5] = [0, 0, 8 | 1, -2, 5]
+
+  R₁ [  1   3   1  |  0    1    0 ]
+  R₂ [  0   1   2  |  0    0    1 ]
+  R₃''[  0   0   8  |  1   -2    5 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">05</div><div class="step-content">
+            <div class="step-label">Make pivot (3,3) = 1: R₃''' = R₃'' ÷ 8</div>
+            <div class="step-math">  R₃''' = [0, 0, <span class="hi">1</span> | 1/8, -1/4, 5/8]
+
+  Now clear column 3 above: R₂' = R₂ − 2·R₃''', R₁' = R₁ − 1·R₃'''
+  R₂' RHS: [0−2/8, 0+2/4, 1−10/8] = [-1/4,  1/2, -1/4]
+  R₁' RHS: [0−1/8, 1+1/4, 0−5/8]  = [-1/8,  5/4, -5/8]
+
+  R₁' [  1   3   <span class="hi">0</span>  | -1/8   5/4  -5/8 ]
+  R₂' [  0   1   <span class="hi">0</span>  | -1/4   1/2  -1/4 ]
+  R₃'''[  0   0   <span class="hi">1</span>  |  1/8  -1/4   5/8 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">06</div><div class="step-content">
+            <div class="step-label">Clear column 2 above: R₁'' = R₁' − 3·R₂'</div>
+            <div class="step-math">  R₁'' RHS: [-1/8−3(-1/4), 5/4−3(1/2), -5/8−3(-1/4)]
+           = [-1/8+6/8,    5/4−6/4,   -5/8+6/8]
+           = [ 5/8,        -1/4,        1/8 ]
+
+  [  <span class="hi">1</span>   <span class="hi">0</span>   0  |  5/8   -1/4   1/8  ]
+  [  0   <span class="hi">1</span>   0  | -1/4    1/2  -1/4  ]
+  [  0   0   <span class="hi">1</span>  |  1/8   -1/4   5/8  ]   ← identity on left</div>
+            <div class="step-result">A⁻¹ = (1/8)·[[5,−2,1],[−2,4,−2],[1,−2,5]]  ← matches adjoint method ✓</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="why-box"><div class="why-label">Why This Matters</div><p>With A⁻¹ in hand, any system AX = C solves as X = A⁻¹C — one matrix multiply instead of a full elimination. If you must solve AX = C for 10 different RHS vectors, compute A⁻¹ once and multiply each time.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- WEEK 9 -->
+<div class="week-block" id="week9">
+  <div class="week-header"><span class="week-number">Week 9</span><span class="week-title">Eigenvalues</span></div>
+  <div class="week-body">
+    <p class="week-summary">An eigenvalue λ of matrix A is a scalar such that Av = λv for some non-zero vector v. The equation says: A transforms v by simply scaling it — not rotating or shearing it. All eigenvalues are found by solving the characteristic equation det(A − λI) = 0. For 2×2 this is a quadratic; for 3×3 a cubic — but exam matrices are always chosen to factorise neatly.</p>
+
+    <div class="key-terms"><div class="key-terms-label">Key Terms</div><div class="terms-pills"><span class="term-pill">Eigenvalue λ</span><span class="term-pill">Characteristic equation det(A−λI)=0</span><span class="term-pill">Characteristic polynomial</span><span class="term-pill">tr(A) = sum of eigenvalues</span><span class="term-pill">det(A) = product of eigenvalues</span></div></div>
+
+    <div class="exam-box">
+      <div class="exam-box-label">Likely Exam Questions</div>
+      <div class="exam-item"><span class="past-q">Past Q</span> Find all eigenvalues of A = [[3,1],[1,3]]. Verify using trace and determinant.</div>
+      <div class="exam-item">Find the eigenvalues of A = [[4,1,0],[2,3,0],[0,0,2]].</div>
+      <div class="exam-item">A 3×3 matrix has eigenvalues 1, −2, 3. Find det(A) and tr(A) without computing the full matrix.</div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 9.1</div>
+      <div class="topic-title">The Characteristic Equation — det(A − λI) = 0</div>
+      <div class="topic-body"><p>Eigenvalues exist at values of λ where (A − λI) becomes singular — where its rows become linearly dependent and its determinant hits zero. Expand that determinant as a polynomial in λ (the characteristic polynomial), then solve for its roots. Each root is an eigenvalue.</p></div>
+
+      <div class="formula-block">
+        <div class="formula-label">Characteristic Equation</div>
+        <div class="formula-eq">det(A − λI) = 0
+
+2×2 shortcut:
+  λ² − tr(A)·λ + det(A) = 0   where tr(A) = a₁₁ + a₂₂
+
+Verification checks (any size):
+  Σ eigenvalues  = tr(A)   = sum of diagonal entries
+  Π eigenvalues  = det(A)  = determinant of A</div>
+        <div class="formula-vars">tr(A) = trace = sum of main diagonal. Always verify eigenvalues against both checks before moving to eigenvectors.</div>
+      </div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Full Example</span><span class="example-title">Eigenvalues of A = [[3,1],[1,3]]</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">Form A − λI</div>
+            <div class="step-math">  A − λI = [ 3−λ    1  ]
+           [  1    3−λ ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Set det(A − λI) = 0</div>
+            <div class="step-math">  det = (3−λ)(3−λ) − (1)(1) = 0
+         (3−λ)² − 1 = 0
+         9 − 6λ + λ² − 1 = 0
+         λ² − 6λ + 8 = 0</div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Factorise</div>
+            <div class="step-math">  λ² − 6λ + 8 = (λ − 4)(λ − 2) = 0</div>
+            <div class="step-result">λ₁ = 4,   λ₂ = 2</div>
+          </div></div>
+          <div class="step"><div class="step-num">04</div><div class="step-content">
+            <div class="step-label">Verify using trace and determinant</div>
+            <div class="step-math">  tr(A)  = 3 + 3 = 6         λ₁ + λ₂ = 4 + 2 = <span class="hi">6</span> ✓
+  det(A) = 9 − 1 = 8         λ₁ × λ₂ = 4 × 2 = <span class="hi">8</span> ✓</div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 9.2</div>
+      <div class="topic-title">Eigenvalues of a 3×3 Matrix — Spotting Block Structure</div>
+      <div class="topic-body"><p>For 3×3, expand det(A − λI) fully. If the matrix has a block structure (a row or column with lots of zeros), expand along that row/column to reduce the work. Once you have the cubic polynomial, look for an obvious integer root by inspection, then factorise.</p></div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Example</span><span class="example-title">Eigenvalues of A = [[4,1,0],[2,3,0],[0,0,2]]</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">Form A − λI and notice column 3 has zeros in rows 1 and 2</div>
+            <div class="step-math">  A − λI = [ 4−λ    1     0  ]
+           [  2    3−λ    0  ]
+           [  0     0    2−λ ]
+
+  Column 3: only the (3,3) entry is non-zero → expand along column 3</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Expand along column 3</div>
+            <div class="step-math">  det = (2−λ) · det [ 4−λ    1  ]
+                         [  2    3−λ ]
+
+       = (2−λ) · [(4−λ)(3−λ) − 2·1]
+       = (2−λ) · [12 − 7λ + λ² − 2]
+       = (2−λ) · [λ² − 7λ + 10]
+       = (2−λ) · (λ − 2)(λ − 5)</div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Set = 0 and read eigenvalues</div>
+            <div class="step-math">  (2−λ)(λ−2)(λ−5) = 0
+  −(λ−2)·(λ−2)·(λ−5) = 0</div>
+            <div class="step-result">λ₁ = 2 (algebraic multiplicity 2),   λ₂ = 5</div>
+          </div></div>
+          <div class="step"><div class="step-num">04</div><div class="step-content">
+            <div class="step-label">Verify</div>
+            <div class="step-math">  tr(A)  = 4 + 3 + 2 = 9       λ₁+λ₁+λ₂ = 2+2+5 = <span class="hi">9</span> ✓
+  det(A) = 2·(12−2) = 20      λ₁·λ₁·λ₂ = 2·2·5 = <span class="hi">20</span> ✓</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="mistake-box"><div class="mistake-label">Common Mistake</div><p>Not verifying eigenvalues against trace and determinant before moving on. These two checks take under 10 seconds and will catch an arithmetic error in the expansion before it wastes the entire eigenvector step.</p></div>
+      <div class="analogy-box"><div class="analogy-label">Engineering Intuition</div><p>Eigenvalues describe the natural behaviour of the system A. In circuit analysis, eigenvalues determine whether voltages and currents grow, decay, or oscillate. A negative eigenvalue means exponential decay; positive means growth; purely imaginary means sustained oscillation. Engineers solve for eigenvalues before designing any feedback system.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- WEEK 10 -->
+<div class="week-block" id="week10">
+  <div class="week-header"><span class="week-number">Week 10</span><span class="week-title">Eigenvectors & Eigenspaces</span></div>
+  <div class="week-body">
+    <p class="week-summary">Once you have the eigenvalues, each one gives a direction that A preserves under transformation — the eigenvector direction. For each λ, substitute back into (A − λI)v = 0 and row-reduce. Each free variable produces one independent eigenvector. The eigenspace for λ is the full set of solutions (including 0) — it is the null space of (A − λI).</p>
+
+    <div class="key-terms"><div class="key-terms-label">Key Terms</div><div class="terms-pills"><span class="term-pill">Av = λv</span><span class="term-pill">(A−λI)v = 0</span><span class="term-pill">Free variable → eigenvector component</span><span class="term-pill">Eigenspace = null space of (A−λI)</span><span class="term-pill">Geometric multiplicity = dimension of eigenspace</span></div></div>
+
+    <div class="exam-box">
+      <div class="exam-box-label">Likely Exam Questions</div>
+      <div class="exam-item"><span class="past-q">Past Q</span> Find the eigenvectors of A = [[3,1],[1,3]] for each eigenvalue. Verify Av = λv.</div>
+      <div class="exam-item">Find the eigenspace for λ = 2 (repeated) in A = [[4,1,0],[2,3,0],[0,0,2]]. What is its dimension?</div>
+      <div class="exam-item">Are eigenvectors corresponding to distinct eigenvalues always linearly independent? Justify.</div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 10.1</div>
+      <div class="topic-title">Finding Eigenvectors — Row Reduce (A−λI) and Set Free Variable</div>
+      <div class="topic-body"><p>This is exactly the homogeneous system technique from Week 5. Form (A − λI), row-reduce the augmented matrix [(A−λI)|0], identify the free variable, set it equal to t, and express the full solution vector. That vector (for any non-zero t) is your eigenvector.</p></div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Full Example</span><span class="example-title">Eigenvectors of A = [[3,1],[1,3]] for λ₁=4 and λ₂=2</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">For λ₁ = 4: form (A − 4I) and set up the homogeneous system</div>
+            <div class="step-math">  A − 4I = [ 3−4    1  ] = [ -1    1 ]
+           [  1    3−4 ]   [  1   -1 ]
+
+  Augmented: [ -1   1 | 0 ]
+             [  1  -1 | 0 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Row reduce</div>
+            <div class="step-math">  R₁ → R₁×(−1):  [  1   -1 | 0 ]
+  R₂ → R₂ − R₁:  [  0    0 | 0 ]
+
+  One equation:  x₁ − x₂ = 0  →  x₁ = x₂</div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Set free variable x₂ = t, write eigenvector</div>
+            <div class="step-math">  x₂ = t,   x₁ = t
+
+  v = t · [ 1 ]    →  take t = 1
+          [ 1 ]</div>
+            <div class="step-result">v₁ = [1, 1]ᵀ  for λ₁ = 4</div>
+          </div></div>
+          <div class="step"><div class="step-num">04</div><div class="step-content">
+            <div class="step-label">For λ₂ = 2: form (A − 2I) and row reduce</div>
+            <div class="step-math">  A − 2I = [ 1   1 ]
+           [ 1   1 ]
+
+  R₂ → R₂ − R₁:
+  [  1   1 | 0 ]
+  [  0   0 | 0 ]
+
+  Equation:  x₁ + x₂ = 0  →  x₁ = −x₂
+  Set x₂ = t:  v = t·[−1, 1]ᵀ</div>
+            <div class="step-result">v₂ = [−1, 1]ᵀ  for λ₂ = 2</div>
+          </div></div>
+          <div class="step"><div class="step-num">05</div><div class="step-content">
+            <div class="step-label">Verify Av = λv for both eigenvectors</div>
+            <div class="step-math">  A·v₁ = [ 3   1 ]·[ 1 ] = [ 3+1 ] = [ 4 ] = 4·[ 1 ] = λ₁·v₁ ✓
+           [ 1   3 ] [ 1 ]   [ 1+3 ]   [ 4 ]      [ 1 ]
+
+  A·v₂ = [ 3   1 ]·[-1 ] = [ -3+1 ] = [ -2 ] = 2·[-1] = λ₂·v₂ ✓
+          [ 1   3 ] [ 1 ]   [ -1+3 ]   [  2 ]      [ 1 ]</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="mistake-box"><div class="mistake-label">Common Mistake</div><p>Writing [0, 0]ᵀ as an eigenvector. Eigenvectors must be non-zero — that's part of the definition. Setting t = 0 gives the trivial solution, which is not an eigenvector. Always report the simplest non-zero vector (set t = 1 or t = 2 to clear fractions).</p></div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 10.2</div>
+      <div class="topic-title">Eigenspace Dimension — Geometric Multiplicity</div>
+      <div class="topic-body"><p>When an eigenvalue appears k times in the characteristic polynomial (algebraic multiplicity k), it may produce between 1 and k independent eigenvectors. The actual count is the geometric multiplicity — the dimension of the eigenspace. Geometric multiplicity ≤ algebraic multiplicity always. When they are equal for every eigenvalue, the matrix is diagonalizable.</p></div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Example</span><span class="example-title">Eigenspace for λ=2 (alg. multiplicity 2) in A = [[4,1,0],[2,3,0],[0,0,2]]</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">Form (A − 2I)</div>
+            <div class="step-math">  A − 2I = [ 2   1   0 ]
+           [ 2   1   0 ]
+           [ 0   0   0 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Row reduce</div>
+            <div class="step-math">  R₂ → R₂ − R₁:  [0, 0, 0]
+
+  Reduced:
+  [ 2   1   0 | 0 ]   → 2x₁ + x₂ = 0,  so x₁ = −x₂/2
+  [ <span class="zero">0   0   0</span> | 0 ]   → free
+  [ <span class="zero">0   0   0</span> | 0 ]   → free
+
+  Free variables: x₂ and x₃  (two free variables)</div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Two free variables → two independent eigenvectors</div>
+            <div class="step-math">  Let x₂ = 2s  (use 2s to avoid fractions),  x₃ = t
+  Then x₁ = −s
+
+  v = s·[-1, 2, 0]ᵀ  +  t·[0, 0, 1]ᵀ
+
+  Basis of eigenspace for λ = 2:
+  v₁ = [-1,  2,  0]ᵀ
+  v₂ = [ 0,  0,  1]ᵀ</div>
+            <div class="step-result">Geometric multiplicity = 2 = algebraic multiplicity  →  A is diagonalizable ✓</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="why-box"><div class="why-label">Why This Matters</div><p>This connects directly to Week 11. A matrix is diagonalizable only if you can collect enough eigenvectors (n total for an n×n matrix) to form the matrix P. If any eigenvalue has geometric multiplicity less than its algebraic multiplicity, P cannot have n independent columns and diagonalization fails.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- WEEK 11 -->
+<div class="week-block" id="week11">
+  <div class="week-header"><span class="week-number">Week 11</span><span class="week-title">Diagonalization</span></div>
+  <div class="week-body">
+    <p class="week-summary">Diagonalization rewrites A = PDP⁻¹ where D is a diagonal matrix of eigenvalues and P is the matrix whose columns are the corresponding eigenvectors. This factorisation makes repeated multiplication trivial: Aⁿ = PDⁿP⁻¹, and Dⁿ is just each diagonal entry raised to the power n. A matrix is diagonalizable when it has n linearly independent eigenvectors.</p>
+
+    <div class="key-terms"><div class="key-terms-label">Key Terms</div><div class="terms-pills"><span class="term-pill">P = eigenvector matrix (as columns)</span><span class="term-pill">D = diagonal eigenvalue matrix</span><span class="term-pill">A = PDP⁻¹</span><span class="term-pill">P⁻¹AP = D</span><span class="term-pill">Aⁿ = PDⁿP⁻¹</span></div></div>
+
+    <div class="exam-box">
+      <div class="exam-box-label">Likely Exam Questions</div>
+      <div class="exam-item"><span class="past-q">Past Q</span> Diagonalize A = [[3,1],[1,3]]. Write P, D explicitly and verify P⁻¹AP = D.</div>
+      <div class="exam-item">Use diagonalization to compute A³ for A = [[3,1],[1,3]].</div>
+      <div class="exam-item">State the condition under which an n×n matrix is diagonalizable. Give an example of a 2×2 matrix that is NOT diagonalizable.</div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 11.1</div>
+      <div class="topic-title">Building P and D — Pairing Eigenvectors with Eigenvalues</div>
+      <div class="topic-body"><p>Each eigenvalue gets paired with its eigenvector. Write the eigenvectors as columns of P in any order. Place the corresponding eigenvalues in the matching diagonal positions of D. The order must match: column j of P and entry D(j,j) must correspond to the same eigenvalue.</p></div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Full Example</span><span class="example-title">Diagonalize A = [[3,1],[1,3]]</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">Recall from Weeks 9 and 10</div>
+            <div class="step-math">  λ₁ = 4   →   v₁ = [ 1 ]
+                          [ 1 ]
+
+  λ₂ = 2   →   v₂ = [ -1 ]
+                     [  1 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Form P (eigenvectors as columns) and D (eigenvalues on diagonal)</div>
+            <div class="step-math">  P = [ v₁  v₂ ] = [  1   -1 ]
+                        [  1    1 ]
+
+  D = [ λ₁   0  ] = [ 4   0 ]
+      [  0   λ₂ ]   [ 0   2 ]
+
+  Column 1 of P ↔ D(1,1): both correspond to λ₁ = 4
+  Column 2 of P ↔ D(2,2): both correspond to λ₂ = 2</div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Find P⁻¹ using the 2×2 inverse formula</div>
+            <div class="step-math">  P = [  1  -1 ]    det(P) = (1)(1) − (−1)(1) = 1 + 1 = 2
+      [  1   1 ]
+
+  P⁻¹ = (1/det(P)) · [  d  -b ] = (1/2) · [  1   1 ]
+                      [ -c   a ]            [ -1   1 ]
+
+  P⁻¹ = [ 1/2   1/2 ]
+        [ -1/2  1/2 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">04</div><div class="step-content">
+            <div class="step-label">Verify P⁻¹AP = D</div>
+            <div class="step-math">  P⁻¹A = [ 1/2   1/2 ] · [ 3   1 ]
+          [ -1/2  1/2 ]   [ 1   3 ]
+
+  Row 1: [1/2·3+1/2·1, 1/2·1+1/2·3] = [2,  2]
+  Row 2: [-1/2·3+1/2·1, -1/2·1+1/2·3] = [-1, 1]
+
+  P⁻¹A = [ 2   2 ]
+         [ -1  1 ]
+
+  (P⁻¹A)P = [ 2   2 ] · [  1  -1 ]
+             [ -1  1 ]   [  1   1 ]
+
+  Row 1: [2+2, -2+2] = [4, 0]
+  Row 2: [-1+1, 1+1] = [0, 2]</div>
+            <div class="step-result">P⁻¹AP = [[4,0],[0,2]] = D ✓</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="mistake-box"><div class="mistake-label">Common Mistake</div><p>Swapping the order: putting λ₁ in column 1 of D but v₂ in column 1 of P. The pairing must be consistent. If you reorder the eigenvectors, you must reorder the eigenvalues in D to match. A mismatch will give P⁻¹AP ≠ D and the diagonalization fails.</p></div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 11.2</div>
+      <div class="topic-title">Matrix Powers — Aⁿ = PDⁿP⁻¹</div>
+      <div class="topic-body"><p>Since A = PDP⁻¹, multiplying A by itself repeatedly collapses cleanly: each adjacent P⁻¹·P pair cancels to I, leaving only P, Dⁿ, and P⁻¹. Computing Dⁿ is trivial — each diagonal entry is just raised to the power n. This turns a chain of n matrix multiplications into exactly three.</p></div>
+
+      <div class="formula-block">
+        <div class="formula-label">Matrix Powers via Diagonalization</div>
+        <div class="formula-eq">A   = PDP⁻¹
+A²  = (PDP⁻¹)(PDP⁻¹) = PD(P⁻¹P)DP⁻¹ = PD²P⁻¹
+Aⁿ  = PDⁿP⁻¹
+
+For 2×2:  Dⁿ = [ λ₁ⁿ    0  ]
+               [  0    λ₂ⁿ ]</div>
+        <div class="formula-vars">The cancellation P⁻¹P = I is what collapses the chain. Aⁿ = PⁿDⁿ(P⁻¹)ⁿ is WRONG — P appears exactly once, not raised to a power.</div>
+      </div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Example</span><span class="example-title">Compute A³ for A = [[3,1],[1,3]] using diagonalization</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">Compute D³ — raise diagonal entries to the power 3</div>
+            <div class="step-math">  D³ = [ 4³   0 ] = [ 64   0 ]
+       [  0   2³]   [  0   8 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Compute P·D³</div>
+            <div class="step-math">  P·D³ = [  1   -1 ] · [ 64   0 ]
+           [  1    1 ]   [  0   8 ]
+
+  Row 1: [1·64 + (−1)·0, 1·0 + (−1)·8] = [64, -8]
+  Row 2: [1·64 + 1·0,    1·0 + 1·8]    = [64,  8]
+
+  P·D³ = [ 64  -8 ]
+         [ 64   8 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Compute (P·D³)·P⁻¹</div>
+            <div class="step-math">  (P·D³)·P⁻¹ = [ 64  -8 ] · [ 1/2   1/2 ]
+                         [ 64   8 ]   [ -1/2  1/2 ]
+
+  Row 1: [64/2 + 8/2,  64/2 − 8/2] = [36, 28]
+  Row 2: [64/2 − 8/2,  64/2 + 8/2] = [28, 36]</div>
+            <div class="step-result">A³ = [[36, 28],[28, 36]]</div>
+          </div></div>
+          <div class="step"><div class="step-num">04</div><div class="step-content">
+            <div class="step-label">Verify by direct computation</div>
+            <div class="step-math">  A² = [ 3  1 ]·[ 3  1 ] = [ 9+1   3+3 ] = [ 10   6 ]
+       [ 1  3 ] [ 1  3 ]   [ 3+3   1+9 ]   [  6  10 ]
+
+  A³ = A²·A = [ 10  6 ]·[ 3  1 ] = [ 30+6   10+18 ] = [ <span class="hi">36</span>  <span class="hi">28</span> ] ✓
+              [  6 10 ] [ 1  3 ]   [ 18+10   6+30 ]   [ <span class="hi">28</span>  <span class="hi">36</span> ] ✓</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="analogy-box"><div class="analogy-label">Why This Is Powerful</div><p>Computing A¹⁰ directly needs 9 matrix multiplications. With diagonalization: raise each eigenvalue to the 10th power (trivial), then multiply three matrices. For a 100×100 engineering system, diagonalization is the only practical approach.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- WEEK 12 -->
+<div class="week-block" id="week12">
+  <div class="week-header"><span class="week-number">Week 12</span><span class="week-title">Cramer's Rule & Exam Revision</span></div>
+  <div class="week-body">
+    <p class="week-summary">Cramer's rule solves AX = C using determinants: xᵢ = det(Aᵢ)/det(A), where Aᵢ is A with its i-th column replaced by C. It ties determinants (Week 7) back to linear systems (Week 1). The second half of this week is a complete formula reference for the entire 12-week course — every key formula and condition in one place for exam preparation.</p>
+
+    <div class="key-terms"><div class="key-terms-label">Key Terms</div><div class="terms-pills"><span class="term-pill">xᵢ = det(Aᵢ)/det(A)</span><span class="term-pill">Aᵢ = column i of A replaced by C</span><span class="term-pill">Only valid when det(A) ≠ 0</span><span class="term-pill">Exam formula sheet</span></div></div>
+
+    <div class="exam-box">
+      <div class="exam-box-label">Likely Exam Questions</div>
+      <div class="exam-item"><span class="past-q">Past Q</span> Use Cramer's rule to solve: 2x₁ + x₂ = 5,  x₁ + 3x₂ = 10.</div>
+      <div class="exam-item">Apply Cramer's rule to: x₁+2x₂+x₃=4,  2x₁+x₂+3x₃=7,  x₁+3x₂+2x₃=6.</div>
+      <div class="exam-item">When does Cramer's rule fail? What does that tell you about the system?</div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 12.1</div>
+      <div class="topic-title">Cramer's Rule — One Determinant per Unknown</div>
+      <div class="topic-body"><p>For AX = C with det(A) ≠ 0: to find xᵢ, replace column i of A with the RHS column vector C, compute the determinant of the resulting matrix, and divide by det(A). Each unknown gets its own modified matrix. For 2×2 and 3×3 exam systems this is often the fastest method.</p></div>
+
+      <div class="formula-block">
+        <div class="formula-label">Cramer's Rule</div>
+        <div class="formula-eq">For n×n system AX = C  with det(A) ≠ 0:
+
+  x₁ = det(A₁)/det(A)   A₁ = A with column 1 replaced by C
+  x₂ = det(A₂)/det(A)   A₂ = A with column 2 replaced by C
+  x₃ = det(A₃)/det(A)   A₃ = A with column 3 replaced by C
+
+If det(A) = 0:  Cramer's rule does NOT apply.
+  → Check rank(A) vs rank([A|C]) to determine solution type (Week 1).</div>
+        <div class="formula-vars">Aᵢ keeps all columns of A except column i — only that one column is swapped with C.</div>
+      </div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Full Example</span><span class="example-title">2×2 system — 2x₁ + x₂ = 5,  x₁ + 3x₂ = 10</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">Identify A and C, then compute det(A)</div>
+            <div class="step-math">  A = [ 2   1 ]    C = [  5 ]
+      [ 1   3 ]        [ 10 ]
+
+  det(A) = (2)(3) − (1)(1) = 6 − 1 = <span class="hi">5</span>   ← non-zero, rule applies</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Form A₁ — replace column 1 with C</div>
+            <div class="step-math">  A₁ = [ <span class="hi">5</span>   1 ]     det(A₁) = (5)(3) − (1)(10) = 15 − 10 = <span class="hi">5</span>
+       [ <span class="hi">10</span>  3 ]
+
+  x₁ = det(A₁)/det(A) = 5/5 = <span class="hi">1</span></div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Form A₂ — replace column 2 with C</div>
+            <div class="step-math">  A₂ = [ 2   <span class="hi">5</span>  ]     det(A₂) = (2)(10) − (5)(1) = 20 − 5 = <span class="hi">15</span>
+       [ 1   <span class="hi">10</span> ]
+
+  x₂ = det(A₂)/det(A) = 15/5 = <span class="hi">3</span></div>
+          </div></div>
+          <div class="step"><div class="step-num">04</div><div class="step-content">
+            <div class="step-label">Verify in original equations</div>
+            <div class="step-math">  Eq 1:  2(1) + 1(3) = 2 + 3 = <span class="hi">5</span> ✓
+  Eq 2:  1(1) + 3(3) = 1 + 9 = <span class="hi">10</span> ✓</div>
+            <div class="step-result">x₁ = 1,   x₂ = 3</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="mistake-box"><div class="mistake-label">Common Mistake</div><p>Replacing the wrong column. For x₂, you replace ONLY column 2 of A with C — columns 1 and 3 stay as they are from A. Many students accidentally replace all columns, or replace the column by a single number instead of the full vector C.</p></div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 12.2</div>
+      <div class="topic-title">Complete Exam Formula Reference — Weeks 1 to 12</div>
+      <div class="topic-body"><p>Every key formula and condition from the course, organised by topic. Use this as your final revision checklist — if any row below is not instantly recognisable, revisit that week's worked examples before the exam.</p></div>
+
+      <div class="def-box">
+        <div class="def-box-header">Systems of Equations — Weeks 1–4</div>
+        <div class="def-box-body">
+          <div class="def-row"><div class="def-term">Matrix form</div><div class="def-meaning">AX = C  →  form augmented matrix [A|C] before any row operation.</div></div>
+          <div class="def-row"><div class="def-term">Solution type</div><div class="def-meaning">rank(A) = rank([A|C]) = n → unique.  rank(A) = rank([A|C]) &lt; n → infinite.  rank([A|C]) &gt; rank(A) → no solution.</div></div>
+          <div class="def-row"><div class="def-term">Gaussian</div><div class="def-meaning">Forward pass → upper triangular (1s on diagonal, 0s below). Then back substitution bottom to top.</div></div>
+          <div class="def-row"><div class="def-term">Gauss-Jordan</div><div class="def-meaning">Clear above AND below every pivot → RREF (identity on left). Read solution directly, no back substitution.</div></div>
+          <div class="def-row"><div class="def-term">LU decomposition</div><div class="def-meaning">Factor A = LU. Solve LE = C (forward sub) → solve UX = E (back sub). Both L and U have 1s on diagonal.</div></div>
+        </div>
+      </div>
+
+      <div class="def-box">
+        <div class="def-box-header">Rank, Nullity & Basis — Weeks 5–6</div>
+        <div class="def-box-body">
+          <div class="def-row"><div class="def-term">Rank</div><div class="def-meaning">Number of non-zero rows after row reduction. Three methods: determinant, linear dependence, row reduction.</div></div>
+          <div class="def-row"><div class="def-term">Rank-Nullity</div><div class="def-meaning">rank(A) + nullity(A) = n  where n = number of COLUMNS (not rows).</div></div>
+          <div class="def-row"><div class="def-term">Homogeneous AX=0</div><div class="def-meaning">Always has x=0 (trivial). Non-trivial solutions exist iff rank(A) &lt; n.</div></div>
+          <div class="def-row"><div class="def-term">Basis / Dimension</div><div class="def-meaning">Basis = linearly independent set that spans the space. dim(Rⁿ) = n.</div></div>
+        </div>
+      </div>
+
+      <div class="def-box">
+        <div class="def-box-header">Determinants & Inverse — Weeks 7–8</div>
+        <div class="def-box-body">
+          <div class="def-row"><div class="def-term">3×3 cofactor det</div><div class="def-meaning">a₁₁(+M₁₁) + a₁₂(−M₁₂) + a₁₃(+M₁₃). Sign checkerboard: + − + / − + − / + − +.</div></div>
+          <div class="def-row"><div class="def-term">det(kA)</div><div class="def-meaning">det(kA) = kⁿ·det(A) for n×n. det(AB) = det(A)·det(B). det(Aᵀ) = det(A).</div></div>
+          <div class="def-row"><div class="def-term">Adjoint inverse</div><div class="def-meaning">A⁻¹ = adj(A)/det(A).  adj(A) = Cᵀ (TRANSPOSE of cofactor matrix C).</div></div>
+          <div class="def-row"><div class="def-term">Gauss-Jordan inverse</div><div class="def-meaning">[A|I] → row reduce → [I|A⁻¹]. Apply every operation to both sides.</div></div>
+          <div class="def-row"><div class="def-term">Cramer's rule</div><div class="def-meaning">xᵢ = det(Aᵢ)/det(A). Aᵢ = A with column i replaced by C. Only when det(A) ≠ 0.</div></div>
+        </div>
+      </div>
+
+      <div class="def-box">
+        <div class="def-box-header">Eigenvalues, Eigenvectors & Diagonalization — Weeks 9–11</div>
+        <div class="def-box-body">
+          <div class="def-row"><div class="def-term">Eigenvalues</div><div class="def-meaning">Solve det(A−λI) = 0. Verify: Σλᵢ = tr(A),  Πλᵢ = det(A).</div></div>
+          <div class="def-row"><div class="def-term">Eigenvectors</div><div class="def-meaning">For each λ: row-reduce (A−λI), set free variable = t, write non-zero vector. Verify Av = λv.</div></div>
+          <div class="def-row"><div class="def-term">Diagonalization</div><div class="def-meaning">P = [v₁|v₂|…] (eigenvectors as columns). D = diag(λ₁, λ₂, …). P⁻¹AP = D.</div></div>
+          <div class="def-row"><div class="def-term">Matrix powers</div><div class="def-meaning">Aⁿ = PDⁿP⁻¹. Dⁿ = diag(λ₁ⁿ, λ₂ⁿ, …). P appears exactly once on each side.</div></div>
+          <div class="def-row"><div class="def-term">Diagonalizable?</div><div class="def-meaning">Yes iff n linearly independent eigenvectors exist — i.e. geometric mult = algebraic mult for every eigenvalue.</div></div>
+        </div>
+      </div>
+
+      <div class="analogy-box"><div class="analogy-label">Exam Strategy</div><p>Answer definition and condition questions first — they are 5 marks for 2 minutes of writing. On computation questions, always write: (1) the matrix or formula you are using, (2) each row operation explicitly, (3) a verification step. Partial marks are awarded for correct setup even when arithmetic errors appear later. The trace-and-determinant check for eigenvalues and the AA⁻¹ = I check for inverse are two-line verifications that protect marks you already earned.</p></div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<footer>
+  <strong>ECE 202 — Engineering Mathematics</strong><br>
+  LASU Faculty of Engineering · Department of Electronic &amp; Computer Engineering<br>
+  All 12 weeks complete<br><br>
+  <span style="color:var(--muted2)">Built on Unify · Native Learning Library</span>
+</footer>
+
+<script>
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  localStorage.setItem('unify-theme', isDark ? 'light' : 'dark');
+  document.querySelector('.theme-toggle').textContent = isDark ? 'Dark mode' : 'Light mode';
+}
+(function() {
+  const saved = localStorage.getItem('unify-theme');
+  if (saved === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.querySelector('.theme-toggle').textContent = 'Light mode';
+  }
+})();
+</script>
+</body>
+</html>
