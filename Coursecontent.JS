@@ -705,6 +705,25 @@ const UNIFY_COURSE_CONTENT = {
     ]
   },
 
+  // ── ECE 202: Engineering Mathematics (Linear Algebra) ────────
+  "ECE 202": {
+    title: "Engineering Mathematics",
+    weeks: [
+      { week:1,  topic:"Simultaneous Linear Equations",                               subtopics:["Writing a System as AX = C"],                              time:13, resources:{ notes:"Coursecontents/ECE 202/W1.html" },  content:{ "Writing a System as AX = C":                              { hasContent:true, htmlFile:"Coursecontents/ECE 202/W1.html"  } } },
+      { week:2,  topic:"Gaussian Elimination",                                        subtopics:["Row Reduction to Row Echelon Form"],                       time:14, resources:{ notes:"Coursecontents/ECE 202/W2.html" },  content:{ "Row Reduction to Row Echelon Form":                       { hasContent:true, htmlFile:"Coursecontents/ECE 202/W2.html"  } } },
+      { week:3,  topic:"Gauss-Jordan Elimination",                                    subtopics:["Reduced Row Echelon Form"],                                time:13, resources:{ notes:"Coursecontents/ECE 202/W3.html" },  content:{ "Reduced Row Echelon Form":                                { hasContent:true, htmlFile:"Coursecontents/ECE 202/W3.html"  } } },
+      { week:4,  topic:"LU Decomposition",                                            subtopics:["Factorising A into L and U"],                              time:14, resources:{ notes:"Coursecontents/ECE 202/W4.html" },  content:{ "Factorising A into L and U":                              { hasContent:true, htmlFile:"Coursecontents/ECE 202/W4.html"  } } },
+      { week:5,  topic:"Homogeneous Equations & Rank of a Matrix",                    subtopics:["Rank, Trivial & Non-Trivial Solutions"],                   time:13, resources:{ notes:"Coursecontents/ECE 202/W5.html" },  content:{ "Rank, Trivial & Non-Trivial Solutions":                   { hasContent:true, htmlFile:"Coursecontents/ECE 202/W5.html"  } } },
+      { week:6,  topic:"Nullity, Basis & Dimension",                                  subtopics:["Null Space, Basis Vectors & Dimension"],                   time:14, resources:{ notes:"Coursecontents/ECE 202/W6.html" },  content:{ "Null Space, Basis Vectors & Dimension":                   { hasContent:true, htmlFile:"Coursecontents/ECE 202/W6.html"  } } },
+      { week:7,  topic:"Types of Matrices",                                           subtopics:["Symmetric, Skew-Symmetric, Orthogonal & More"],            time:13, resources:{ notes:"Coursecontents/ECE 202/W7.html" },  content:{ "Symmetric, Skew-Symmetric, Orthogonal & More":            { hasContent:true, htmlFile:"Coursecontents/ECE 202/W7.html"  } } },
+      { week:8,  topic:"Determinants",                                                subtopics:["Cofactor Expansion & Properties"],                         time:14, resources:{ notes:"Coursecontents/ECE 202/W8.html" },  content:{ "Cofactor Expansion & Properties":                         { hasContent:true, htmlFile:"Coursecontents/ECE 202/W8.html"  } } },
+      { week:9,  topic:"Inverse Matrix & Solving AX = B",                            subtopics:["Finding A⁻¹ via Adjoint & Cramer's Rule"],                 time:14, resources:{ notes:"Coursecontents/ECE 202/W9.html" },  content:{ "Finding A\u207B\u00B9 via Adjoint & Cramer's Rule":       { hasContent:true, htmlFile:"Coursecontents/ECE 202/W9.html"  } } },
+      { week:10, topic:"Eigenvalues & Eigenvectors",                                  subtopics:["Characteristic Equation & Eigenvectors"],                  time:14, resources:{ notes:"Coursecontents/ECE 202/W10.html" }, content:{ "Characteristic Equation & Eigenvectors":                  { hasContent:true, htmlFile:"Coursecontents/ECE 202/W10.html" } } },
+      { week:11, topic:"Cayley-Hamilton Theorem & Special Matrices",                  subtopics:["Cayley-Hamilton & Diagonalisation"],                       time:13, resources:{ notes:"Coursecontents/ECE 202/W11.html" }, content:{ "Cayley-Hamilton & Diagonalisation":                       { hasContent:true, htmlFile:"Coursecontents/ECE 202/W11.html" } } },
+      { week:12, topic:"Systems of First-Order ODEs via Eigenvalues & Vector Spaces", subtopics:["Solving ODE Systems with Eigenvalues"],                    time:13, resources:{ notes:"Coursecontents/ECE 202/W12.html" }, content:{ "Solving ODE Systems with Eigenvalues":                    { hasContent:true, htmlFile:"Coursecontents/ECE 202/W12.html" } } },
+    ]
+  },
+
   // ── IPE 212: Automotive Engineering & Workshop ───────────────
   "IPE 212": {
     title: "Automotive Engineering & Workshop",

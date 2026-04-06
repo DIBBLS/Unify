@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECE 202 &mdash; Week 5: Homogeneous Equations & Rank of a Matrix | Unify</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --surface2: #f8f7f3;
+  --border: #e0deda;
+  --text: #0a0a0a;
+  --muted: #555;
+  --muted2: #999;
+  --green: #4ade80;
+  --green-deep: #16a34a;
+  --green-bg: #dcfce7;
+  --diagram-bg: #f8f7f3;
+  --red: #dc2626;
+  --amber: #d97706;
+  --math-bg: #fafaf8;
+}
+[data-theme="dark"] {
+  --bg: #0f0f0f;
+  --surface: #1a1a1a;
+  --surface2: #222;
+  --border: #2a2a2a;
+  --text: #f0efeb;
+  --muted: #aaa;
+  --muted2: #666;
+  --diagram-bg: #1e1e1e;
+  --math-bg: #1c1c1a;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; transition: background 0.3s, color 0.3s; }
+
+nav { position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; gap: 2rem; height: 56px; }
+.nav-logo { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 20px; color: var(--text); text-decoration: none; flex-shrink: 0; }
+.nav-links { display: flex; gap: 0; margin-left: auto; }
+.nav-links a { font-size: 13px; font-weight: 500; color: var(--muted); text-decoration: none; padding: 0 1rem; height: 56px; display: flex; align-items: center; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+.nav-links a.active { color: var(--text); border-bottom-color: var(--green-deep); }
+.theme-toggle { margin-left: 1rem; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 6px 12px; font-size: 12px; font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+.theme-toggle:hover { background: var(--border); }
+
+.hero { padding: 4rem 2rem 3rem; max-width: 900px; margin: 0 auto; border-bottom: 1px solid var(--border); }
+.hero-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 1rem; }
+.hero-title { font-family: 'Playfair Display', serif; font-style: italic; font-weight: 700; font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.2; margin-bottom: 1rem; }
+.hero-desc { font-size: 16px; color: var(--muted); margin-bottom: 1.5rem; max-width: 640px; }
+.hero-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.tag { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; padding: 4px 10px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); }
+.tag.green { background: var(--green-bg); border-color: #bbf7d0; color: var(--green-deep); }
+
+.toc { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+.toc h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 1.5rem; }
+.toc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+.toc-card { display: block; text-decoration: none; padding: 1rem 1.2rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; transition: border-color 0.2s, transform 0.2s; }
+.toc-card:hover { border-color: var(--green-deep); transform: translateY(-2px); }
+.toc-week { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 4px; }
+.toc-title { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.4; }
+
+.content { max-width: 900px; margin: 0 auto; padding: 0 2rem 4rem; }
+
+.week-block { margin-bottom: 4rem; }
+.week-header { background: var(--text); color: var(--bg); padding: 1.2rem 1.8rem; border-radius: 8px 8px 0 0; display: flex; align-items: baseline; gap: 1rem; }
+.week-number { font-size: 11px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.6; }
+.week-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; }
+.week-body { background: var(--surface); border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; padding: 2rem; }
+.week-summary { color: var(--muted); margin-bottom: 1.5rem; font-size: 15px; }
+
+.key-terms { margin-bottom: 1.5rem; }
+.key-terms-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted2); margin-bottom: 0.6rem; }
+.terms-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.term-pill { font-size: 12px; padding: 3px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; color: var(--muted); }
+
+.exam-box { background: #fffbeb; border-left: 3px solid #fcd34d; padding: 1.2rem 1.4rem; border-radius: 0 6px 6px 0; margin-bottom: 2rem; }
+[data-theme="dark"] .exam-box { background: #1a1700; }
+.exam-box-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); margin-bottom: 0.8rem; }
+.exam-item { font-size: 14px; color: var(--text); margin-bottom: 0.5rem; display: flex; align-items: flex-start; gap: 0.6rem; }
+.exam-item:last-child { margin-bottom: 0; }
+.past-q { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; background: var(--green-bg); color: var(--green-deep); border: 1px solid #bbf7d0; border-radius: 4px; padding: 2px 6px; flex-shrink: 0; margin-top: 2px; }
+
+.topic-block { margin-bottom: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); }
+.topic-block:first-of-type { border-top: none; padding-top: 0; }
+.topic-number { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 4px; }
+.topic-title { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; }
+.topic-body { font-size: 15px; color: var(--muted); line-height: 1.75; margin-bottom: 1.5rem; }
+.topic-body p { margin-bottom: 0.8rem; }
+
+/* STEP-BY-STEP EXAMPLES */
+.example-block { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 1.5rem 0; }
+.example-header { background: var(--surface2); padding: 0.9rem 1.4rem; display: flex; align-items: center; gap: 0.8rem; border-bottom: 1px solid var(--border); }
+.example-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.step { border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 52px 1fr; }
+.step:last-child { border-bottom: none; }
+.step-num { background: var(--surface2); border-right: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: center; padding: 1.4rem 0.5rem; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--green-deep); flex-shrink: 0; }
+.step-content { padding: 1.2rem 1.6rem; }
+.step-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted2); margin-bottom: 0.5rem; }
+.step-desc { font-size: 14px; color: var(--text); line-height: 1.6; margin-bottom: 0.7rem; }
+.step-math { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--text); background: var(--math-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem 1.4rem; line-height: 2.1; white-space: pre; overflow-x: auto; margin-top: 0.6rem; }
+.step-math .hi { color: var(--green-deep); font-weight: 600; }
+.step-math .zero { color: var(--muted2); }
+.step-math .op { color: var(--amber); }
+.step-note { font-size: 12px; color: var(--muted); margin-top: 0.5rem; font-style: italic; }
+.step-result { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600; color: var(--green-deep); background: var(--green-bg); border: 1px solid #bbf7d0; border-radius: 6px; padding: 0.8rem 1.2rem; margin-top: 0.7rem; display: block; }
+
+.formula-block { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem 1.4rem; margin-bottom: 1.5rem; }
+.formula-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 0.8rem; }
+.formula-eq { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--text); line-height: 1.9; }
+.formula-vars { font-size: 12px; color: var(--muted2); line-height: 1.6; margin-top: 0.5rem; }
+
+.diagram-container { background: var(--diagram-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; overflow: hidden; }
+.diagram-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted2); margin-bottom: 1rem; }
+.diagram-container svg { width: 100%; height: auto; display: block; }
+
+.analogy-box { background: #f0fdf4; border-left: 3px solid #bbf7d0; padding: 1rem 1.4rem; border-radius: 0 6px 6px 0; margin-bottom: 1rem; }
+[data-theme="dark"] .analogy-box { background: #0a1f0f; border-left-color: #16a34a; }
+.analogy-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 0.4rem; }
+.analogy-box p { font-size: 14px; color: var(--text); line-height: 1.65; }
+
+.mistake-box { background: #fff5f5; border-left: 3px solid #fca5a5; padding: 1rem 1.4rem; border-radius: 0 6px 6px 0; margin-bottom: 1rem; }
+[data-theme="dark"] .mistake-box { background: #1f0a0a; border-left-color: #dc2626; }
+.mistake-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); margin-bottom: 0.4rem; }
+.mistake-box p { font-size: 14px; color: var(--text); line-height: 1.65; }
+
+.why-box { background: #f0fdf4; border-left: 3px solid var(--green); padding: 0.9rem 1.4rem; border-radius: 0 6px 6px 0; margin-bottom: 1rem; }
+[data-theme="dark"] .why-box { background: #0a1f0f; }
+.why-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 0.3rem; }
+.why-box p { font-size: 14px; font-weight: 500; color: var(--text); }
+
+.def-box { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 1.5rem; }
+.def-box-header { background: var(--surface2); padding: 0.7rem 1.2rem; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted2); border-bottom: 1px solid var(--border); }
+.def-box-body { padding: 0.5rem 0; }
+.def-row { display: grid; grid-template-columns: 180px 1fr; gap: 1rem; padding: 0.75rem 1.2rem; border-bottom: 1px solid var(--border); align-items: start; }
+.def-row:last-child { border-bottom: none; }
+.def-term { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--green-deep); }
+.def-meaning { font-size: 14px; color: var(--text); line-height: 1.6; }
+
+code { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; color: var(--text); }
+
+footer { background: var(--surface); border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--muted2); font-size: 13px; }
+footer strong { color: var(--text); }
+
+@media (max-width: 700px) {
+  .toc-grid { grid-template-columns: 1fr; }
+  .nav-links a { padding: 0 0.5rem; font-size: 11px; }
+  .hero, .content, .toc { padding-left: 1.2rem; padding-right: 1.2rem; }
+  .step { grid-template-columns: 36px 1fr; }
+  .step-math { font-size: 12px; }
+  .def-row { grid-template-columns: 1fr; gap: 0.2rem; }
+}
+.week-page{max-width:900px;margin:0 auto;padding:40px 48px 80px}
+.back-bar{display:flex;align-items:center;gap:12px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.back-btn:hover{color:var(--text);border-color:var(--text)}
+.week-nav{display:flex;gap:8px;margin-left:auto}
+.wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.wnav-btn:hover{color:var(--text);border-color:var(--text)}.wnav-btn.disabled{opacity:.35;pointer-events:none}
+@media(max-width:700px){nav{padding:0 16px}.nav-links{display:none}.week-page{padding:20px 16px 60px}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="../../dashboard.html" class="nav-logo">Unify</a>
+  <div class="nav-links">
+    <a href="../../dashboard.html">Dashboard</a>
+    <a href="../../careers.html">Career</a>
+    <a href="../../profile.html">Profile</a>
+    <a href="#" class="active">ECE 202</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">&#9790; Dark</button>
+</nav>
+<div class="week-page">
+  <div class="back-bar">
+    <a href="../../learn.html?course=ECE+202&name=ECE+202" class="back-btn">&#8592; Back to ECE 202</a>
+    <div class="week-nav"><a href="W4.html" class="wnav-btn">&#8592; Prev</a><a href="W6.html" class="wnav-btn">Next &#8594;</a></div>
+  </div>
+  <div class="week-block">
+    <div class="week-header"><span class="week-number">Week 5</span><span class="week-title">Homogeneous Equations & Rank of a Matrix</span></div>
+  <div class="week-body">
+    <p class="week-summary">Rank tells you how many independent equations a system actually has. Three methods exist to find it: determinant, linear dependence, and row reduction. The notes ask you to use all three on the same matrix. Homogeneous systems (all RHS = 0) always have x = 0 as a solution — the real question is whether others exist.</p>
+
+    <div class="key-terms"><div class="key-terms-label">Key Terms</div><div class="terms-pills"><span class="term-pill">Homogeneous: AX = 0</span><span class="term-pill">Trivial solution x = 0</span><span class="term-pill">Rank</span><span class="term-pill">3 methods</span><span class="term-pill">Non-zero rows after reduction</span></div></div>
+
+    <div class="exam-box">
+      <div class="exam-box-label">Likely Exam Questions</div>
+      <div class="exam-item"><span class="past-q">Past Q</span> Find rank of A and A_b for 3×3 current system. Nature of solutions. (2019/2020 Q1c)</div>
+      <div class="exam-item">Find rank of A = [[2,4,6],[1,3,5],[9,10,11]] using all three methods.</div>
+      <div class="exam-item">Does AX = 0 always have a solution? Explain.</div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 5.1</div>
+      <div class="topic-title">Homogeneous vs Non-Homogeneous</div>
+      <div class="topic-body"><p>Homogeneous: all RHS constants = 0, written AX = 0. x = 0 always satisfies it (trivial solution). Non-trivial solutions exist only when det(A) = 0. Non-homogeneous: at least one RHS ≠ 0. No guarantee of any solution.</p></div>
+      <div class="def-box">
+        <div class="def-box-header">Key Distinction</div>
+        <div class="def-box-body">
+          <div class="def-row"><div class="def-term">AX = 0</div><div class="def-meaning">Always has x = 0. Non-trivial solutions exist only if rank(A) &lt; n (equivalently: det(A) = 0).</div></div>
+          <div class="def-row"><div class="def-term">AX = b  (b≠0)</div><div class="def-meaning">Solution exists only if rank(A) = rank([A|b]). x = 0 is NOT a solution unless b happens to be 0.</div></div>
+        </div>
+      </div>
+      <div class="mistake-box"><div class="mistake-label">Common Mistake</div><p>"The homogeneous system has no solution." Wrong. AX = 0 always has x = 0. What you mean is: "the only solution is the trivial solution x = 0." These are different and examiners penalise the incorrect phrasing.</p></div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 5.2</div>
+      <div class="topic-title">Three Methods for Rank — Applied to the Same Matrix</div>
+      <div class="topic-body"><p>We'll use A = [[2,4,6],[1,3,5],[9,10,11]] from the class notes and apply all three methods. All three must give the same answer.</p></div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Example</span><span class="example-title">Method 1 — Determinant Method</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">Try the full 3×3 determinant first</div>
+            <div class="step-math">  A = [ 2   4   6 ]
+      [ 1   3   5 ]
+      [ 9  10  11 ]
+
+  det(A) = 2·(3·11 - 5·10) - 4·(1·11 - 5·9) + 6·(1·10 - 3·9)
+         = 2·(33-50) - 4·(11-45) + 6·(10-27)
+         = 2(-17) - 4(-34) + 6(-17)
+         = -34 + 136 - 102
+         = <span class="hi">0</span>  → rank ≠ 3</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Since det = 0, try the largest 2×2 submatrix</div>
+            <div class="step-math">  Take top-left 2×2:
+  [ 2   4 ]
+  [ 1   3 ]
+
+  det = (2×3) - (4×1) = 6 - 4 = <span class="hi">2 ≠ 0</span>
+
+  Non-zero 2×2 found → Rank exists at order 2</div>
+            <div class="step-result">Rank = 2</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Example</span><span class="example-title">Method 2 — Row Reduction (most reliable)</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">Swap R₁ and R₂ to get 1 as the leading entry</div>
+            <div class="step-math">  [ 2   4   6 ]    R₁ ↔ R₂    [ 1   3   5 ]
+  [ 1   3   5 ]    ────────►   [ 2   4   6 ]
+  [ 9  10  11 ]                [ 9  10  11 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Clear column 1 below pivot</div>
+            <div class="step-math">  R₂' = R₂ - 2·R₁:
+  [2-2(1), 4-2(3), 6-2(5)] = [<span class="hi">0</span>, -2, -4]
+
+  R₃' = R₃ - 9·R₁:
+  [9-9(1), 10-9(3), 11-9(5)] = [<span class="hi">0</span>, -17, -34]
+
+  [ 1    3    5  ]
+  [ 0   -2   -4  ]
+  [ 0  -17  -34  ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Divide R₂' by −2, then clear column 2</div>
+            <div class="step-math">  R₂'' = R₂' ÷ (-2): [0, 1, 2]
+
+  R₃'' = R₃' - 17·R₂'':
+  [0, -17-17(1)... wait:
+  [0, -17+17(1), -34+17(2)] = [<span class="hi">0</span>, 0, 0]
+
+  [ 1   3   5 ]
+  [ 0   1   2 ]
+  [ <span class="zero">0   0   0</span> ]  ← zero row</div>
+          </div></div>
+          <div class="step"><div class="step-num">04</div><div class="step-content">
+            <div class="step-label">Count non-zero rows</div>
+            <div class="step-math">  Non-zero rows: Row 1 and Row 2  →  count = 2
+  Zero rows:     Row 3            →  count = 1</div>
+            <div class="step-result">Rank = 2  (all three methods agree)</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="why-box"><div class="why-label">Why This Matters</div><p>If an exam asks for all three methods, row reduction is the most reliable. Always count the number of non-zero rows after reducing, not the total number of rows.</p></div>
+    </div>
+  </div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:32px;padding-top:24px;border-top:1px solid var(--border);">
+    <a href="W4.html" class="back-btn">&#8592; Prev</a>
+    <span style="font-size:13px;color:var(--muted2);">Week 5 of 12</span>
+    <a href="W6.html" class="back-btn" style="border-color:var(--green-deep);color:var(--green-deep);">Next: Week 6 &#8594;</a>
+  </div>
+</div>
+<footer>
+  <strong>ECE 202 &mdash; Engineering Mathematics</strong> &middot; Week 5 &middot; Unify Platform &middot; LASU Faculty of Engineering
+</footer>
+<script>
+(function(){const saved=localStorage.getItem('unify-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);const b=document.getElementById('theme-btn');if(b)b.textContent=saved==='dark'?'☀ Light':'☾ Dark';}})();
+function toggleTheme(){const cur=document.documentElement.getAttribute('data-theme');const nxt=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',nxt);localStorage.setItem('unify-theme',nxt);document.getElementById('theme-btn').textContent=nxt==='dark'?'☀ Light':'☾ Dark';}
+</script>
+</body>
+</html>

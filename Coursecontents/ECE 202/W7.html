@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECE 202 &mdash; Week 7: Types of Matrices | Unify</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --surface2: #f8f7f3;
+  --border: #e0deda;
+  --text: #0a0a0a;
+  --muted: #555;
+  --muted2: #999;
+  --green: #4ade80;
+  --green-deep: #16a34a;
+  --green-bg: #dcfce7;
+  --diagram-bg: #f8f7f3;
+  --red: #dc2626;
+  --amber: #d97706;
+  --math-bg: #fafaf8;
+}
+[data-theme="dark"] {
+  --bg: #0f0f0f;
+  --surface: #1a1a1a;
+  --surface2: #222;
+  --border: #2a2a2a;
+  --text: #f0efeb;
+  --muted: #aaa;
+  --muted2: #666;
+  --diagram-bg: #1e1e1e;
+  --math-bg: #1c1c1a;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; transition: background 0.3s, color 0.3s; }
+
+nav { position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; gap: 2rem; height: 56px; }
+.nav-logo { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 20px; color: var(--text); text-decoration: none; flex-shrink: 0; }
+.nav-links { display: flex; gap: 0; margin-left: auto; }
+.nav-links a { font-size: 13px; font-weight: 500; color: var(--muted); text-decoration: none; padding: 0 1rem; height: 56px; display: flex; align-items: center; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+.nav-links a.active { color: var(--text); border-bottom-color: var(--green-deep); }
+.theme-toggle { margin-left: 1rem; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 6px 12px; font-size: 12px; font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+.theme-toggle:hover { background: var(--border); }
+
+.hero { padding: 4rem 2rem 3rem; max-width: 900px; margin: 0 auto; border-bottom: 1px solid var(--border); }
+.hero-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 1rem; }
+.hero-title { font-family: 'Playfair Display', serif; font-style: italic; font-weight: 700; font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.2; margin-bottom: 1rem; }
+.hero-desc { font-size: 16px; color: var(--muted); margin-bottom: 1.5rem; max-width: 640px; }
+.hero-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.tag { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; padding: 4px 10px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); }
+.tag.green { background: var(--green-bg); border-color: #bbf7d0; color: var(--green-deep); }
+
+.toc { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+.toc h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 1.5rem; }
+.toc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+.toc-card { display: block; text-decoration: none; padding: 1rem 1.2rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; transition: border-color 0.2s, transform 0.2s; }
+.toc-card:hover { border-color: var(--green-deep); transform: translateY(-2px); }
+.toc-week { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 4px; }
+.toc-title { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.4; }
+
+.content { max-width: 900px; margin: 0 auto; padding: 0 2rem 4rem; }
+
+.week-block { margin-bottom: 4rem; }
+.week-header { background: var(--text); color: var(--bg); padding: 1.2rem 1.8rem; border-radius: 8px 8px 0 0; display: flex; align-items: baseline; gap: 1rem; }
+.week-number { font-size: 11px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.6; }
+.week-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; }
+.week-body { background: var(--surface); border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; padding: 2rem; }
+.week-summary { color: var(--muted); margin-bottom: 1.5rem; font-size: 15px; }
+
+.key-terms { margin-bottom: 1.5rem; }
+.key-terms-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted2); margin-bottom: 0.6rem; }
+.terms-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.term-pill { font-size: 12px; padding: 3px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; color: var(--muted); }
+
+.exam-box { background: #fffbeb; border-left: 3px solid #fcd34d; padding: 1.2rem 1.4rem; border-radius: 0 6px 6px 0; margin-bottom: 2rem; }
+[data-theme="dark"] .exam-box { background: #1a1700; }
+.exam-box-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); margin-bottom: 0.8rem; }
+.exam-item { font-size: 14px; color: var(--text); margin-bottom: 0.5rem; display: flex; align-items: flex-start; gap: 0.6rem; }
+.exam-item:last-child { margin-bottom: 0; }
+.past-q { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; background: var(--green-bg); color: var(--green-deep); border: 1px solid #bbf7d0; border-radius: 4px; padding: 2px 6px; flex-shrink: 0; margin-top: 2px; }
+
+.topic-block { margin-bottom: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); }
+.topic-block:first-of-type { border-top: none; padding-top: 0; }
+.topic-number { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 4px; }
+.topic-title { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; }
+.topic-body { font-size: 15px; color: var(--muted); line-height: 1.75; margin-bottom: 1.5rem; }
+.topic-body p { margin-bottom: 0.8rem; }
+
+/* STEP-BY-STEP EXAMPLES */
+.example-block { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 1.5rem 0; }
+.example-header { background: var(--surface2); padding: 0.9rem 1.4rem; display: flex; align-items: center; gap: 0.8rem; border-bottom: 1px solid var(--border); }
+.example-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.step { border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 52px 1fr; }
+.step:last-child { border-bottom: none; }
+.step-num { background: var(--surface2); border-right: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: center; padding: 1.4rem 0.5rem; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--green-deep); flex-shrink: 0; }
+.step-content { padding: 1.2rem 1.6rem; }
+.step-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted2); margin-bottom: 0.5rem; }
+.step-desc { font-size: 14px; color: var(--text); line-height: 1.6; margin-bottom: 0.7rem; }
+.step-math { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--text); background: var(--math-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem 1.4rem; line-height: 2.1; white-space: pre; overflow-x: auto; margin-top: 0.6rem; }
+.step-math .hi { color: var(--green-deep); font-weight: 600; }
+.step-math .zero { color: var(--muted2); }
+.step-math .op { color: var(--amber); }
+.step-note { font-size: 12px; color: var(--muted); margin-top: 0.5rem; font-style: italic; }
+.step-result { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600; color: var(--green-deep); background: var(--green-bg); border: 1px solid #bbf7d0; border-radius: 6px; padding: 0.8rem 1.2rem; margin-top: 0.7rem; display: block; }
+
+.formula-block { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem 1.4rem; margin-bottom: 1.5rem; }
+.formula-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 0.8rem; }
+.formula-eq { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--text); line-height: 1.9; }
+.formula-vars { font-size: 12px; color: var(--muted2); line-height: 1.6; margin-top: 0.5rem; }
+
+.diagram-container { background: var(--diagram-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; overflow: hidden; }
+.diagram-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted2); margin-bottom: 1rem; }
+.diagram-container svg { width: 100%; height: auto; display: block; }
+
+.analogy-box { background: #f0fdf4; border-left: 3px solid #bbf7d0; padding: 1rem 1.4rem; border-radius: 0 6px 6px 0; margin-bottom: 1rem; }
+[data-theme="dark"] .analogy-box { background: #0a1f0f; border-left-color: #16a34a; }
+.analogy-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 0.4rem; }
+.analogy-box p { font-size: 14px; color: var(--text); line-height: 1.65; }
+
+.mistake-box { background: #fff5f5; border-left: 3px solid #fca5a5; padding: 1rem 1.4rem; border-radius: 0 6px 6px 0; margin-bottom: 1rem; }
+[data-theme="dark"] .mistake-box { background: #1f0a0a; border-left-color: #dc2626; }
+.mistake-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); margin-bottom: 0.4rem; }
+.mistake-box p { font-size: 14px; color: var(--text); line-height: 1.65; }
+
+.why-box { background: #f0fdf4; border-left: 3px solid var(--green); padding: 0.9rem 1.4rem; border-radius: 0 6px 6px 0; margin-bottom: 1rem; }
+[data-theme="dark"] .why-box { background: #0a1f0f; }
+.why-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); margin-bottom: 0.3rem; }
+.why-box p { font-size: 14px; font-weight: 500; color: var(--text); }
+
+.def-box { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 1.5rem; }
+.def-box-header { background: var(--surface2); padding: 0.7rem 1.2rem; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted2); border-bottom: 1px solid var(--border); }
+.def-box-body { padding: 0.5rem 0; }
+.def-row { display: grid; grid-template-columns: 180px 1fr; gap: 1rem; padding: 0.75rem 1.2rem; border-bottom: 1px solid var(--border); align-items: start; }
+.def-row:last-child { border-bottom: none; }
+.def-term { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--green-deep); }
+.def-meaning { font-size: 14px; color: var(--text); line-height: 1.6; }
+
+code { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; color: var(--text); }
+
+footer { background: var(--surface); border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--muted2); font-size: 13px; }
+footer strong { color: var(--text); }
+
+@media (max-width: 700px) {
+  .toc-grid { grid-template-columns: 1fr; }
+  .nav-links a { padding: 0 0.5rem; font-size: 11px; }
+  .hero, .content, .toc { padding-left: 1.2rem; padding-right: 1.2rem; }
+  .step { grid-template-columns: 36px 1fr; }
+  .step-math { font-size: 12px; }
+  .def-row { grid-template-columns: 1fr; gap: 0.2rem; }
+}
+.week-page{max-width:900px;margin:0 auto;padding:40px 48px 80px}
+.back-bar{display:flex;align-items:center;gap:12px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.back-btn:hover{color:var(--text);border-color:var(--text)}
+.week-nav{display:flex;gap:8px;margin-left:auto}
+.wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.wnav-btn:hover{color:var(--text);border-color:var(--text)}.wnav-btn.disabled{opacity:.35;pointer-events:none}
+@media(max-width:700px){nav{padding:0 16px}.nav-links{display:none}.week-page{padding:20px 16px 60px}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="../../dashboard.html" class="nav-logo">Unify</a>
+  <div class="nav-links">
+    <a href="../../dashboard.html">Dashboard</a>
+    <a href="../../careers.html">Career</a>
+    <a href="../../profile.html">Profile</a>
+    <a href="#" class="active">ECE 202</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">&#9790; Dark</button>
+</nav>
+<div class="week-page">
+  <div class="back-bar">
+    <a href="../../learn.html?course=ECE+202&name=ECE+202" class="back-btn">&#8592; Back to ECE 202</a>
+    <div class="week-nav"><a href="W6.html" class="wnav-btn">&#8592; Prev</a><a href="W8.html" class="wnav-btn">Next &#8594;</a></div>
+  </div>
+  <div class="week-block">
+    <div class="week-header"><span class="week-number">Week 7</span><span class="week-title">Types of Matrices</span></div>
+  <div class="week-body">
+    <p class="week-summary">Before you can work with matrices fluently, you need to recognise every type on sight. Each type has special properties that shortcuts later work — a diagonal matrix's determinant is just the product of its diagonal entries, a symmetric matrix has a transpose equal to itself, and so on. This week is about building that visual vocabulary.</p>
+
+    <div class="key-terms"><div class="key-terms-label">Key Terms</div><div class="terms-pills"><span class="term-pill">Square matrix</span><span class="term-pill">Diagonal matrix</span><span class="term-pill">Identity matrix I</span><span class="term-pill">Zero matrix</span><span class="term-pill">Symmetric: Aᵀ = A</span><span class="term-pill">Skew-symmetric: Aᵀ = −A</span><span class="term-pill">Triangular matrix</span><span class="term-pill">Singular: det = 0</span><span class="term-pill">Orthogonal: AᵀA = I</span></div></div>
+
+    <div class="exam-box">
+      <div class="exam-box-label">Likely Exam Questions</div>
+      <div class="exam-item"><span class="past-q">Past Q</span> Define a matrix. Differentiate between row and column matrices. Write short notes on square, diagonal, and zero matrices. (2019/2020 Q4a–c, 7 marks)</div>
+      <div class="exam-item"><span class="past-q">Past Q</span> Given F = [[1,−2],[1,3]] and G = [[0,1],[4,3]], find x, y, z if F − 2G = [[1,2x],[y/2,−z]]. (2019/2020 Q4d, 4 marks)</div>
+      <div class="exam-item"><span class="past-q">Past Q</span> Given H = (1,−1) and I = [[1],[2]], evaluate HI and IH. Comment on results. (2019/2020 Q4e, 4 marks)</div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-number">Topic 7.1</div>
+      <div class="topic-title">The Matrix Zoo — Every Type You Need to Know</div>
+      <div class="topic-body">
+        <p>A matrix is simply a rectangular arrangement of numbers in rows and columns. The position of an element is described as (row, column) — so element a₂₃ is in row 2, column 3. The size is always stated as rows × columns.</p>
+        <p>Different types of matrices appear constantly in exam questions. Knowing them on sight saves time and prevents errors — you should be able to look at any matrix and immediately say what type it is.</p>
+      </div>
+
+      <div class="def-box">
+        <div class="def-box-header">Matrix Types — Definitions and Recognition</div>
+        <div class="def-box-body">
+          <div class="def-row"><div class="def-term">Row matrix</div><div class="def-meaning">Has only one row. e.g. [2, 5, 3, 7] — size 1×4.</div></div>
+          <div class="def-row"><div class="def-term">Column matrix</div><div class="def-meaning">Has only one column. e.g. [[1],[9],[4],[8]] — size 4×1.</div></div>
+          <div class="def-row"><div class="def-term">Square matrix</div><div class="def-meaning">Same number of rows and columns. A 3×3 or 4×4 matrix is square. Determinants are only defined for square matrices.</div></div>
+          <div class="def-row"><div class="def-term">Diagonal matrix</div><div class="def-meaning">Square matrix where all off-diagonal entries are zero. Only the main diagonal (top-left to bottom-right) has non-zero entries.</div></div>
+          <div class="def-row"><div class="def-term">Identity matrix I</div><div class="def-meaning">Diagonal matrix with all 1s on the diagonal. Any matrix multiplied by I gives itself: AI = IA = A.</div></div>
+          <div class="def-row"><div class="def-term">Zero/Null matrix</div><div class="def-meaning">Every entry is zero. Adding a zero matrix to any matrix changes nothing.</div></div>
+          <div class="def-row"><div class="def-term">Symmetric</div><div class="def-meaning">Square matrix where Aᵀ = A. Entry aᵢⱼ = aⱼᵢ for all i, j. The matrix is a mirror across the main diagonal.</div></div>
+          <div class="def-row"><div class="def-term">Skew-symmetric</div><div class="def-meaning">Square matrix where Aᵀ = −A. Entry aᵢⱼ = −aⱼᵢ. All diagonal entries must be zero.</div></div>
+          <div class="def-row"><div class="def-term">Upper triangular</div><div class="def-meaning">All entries below the main diagonal are zero. The form you produce during the Gaussian forward pass.</div></div>
+          <div class="def-row"><div class="def-term">Lower triangular</div><div class="def-meaning">All entries above the main diagonal are zero. The L matrix in LU decomposition.</div></div>
+          <div class="def-row"><div class="def-term">Singular</div><div class="def-meaning">Square matrix whose determinant is zero. A singular matrix has no inverse.</div></div>
+          <div class="def-row"><div class="def-term">Orthogonal</div><div class="def-meaning">Square matrix where AᵀA = I. Its transpose IS its inverse: Aᵀ = A⁻¹. Determinant = ±1.</div></div>
+        </div>
+      </div>
+
+      <div class="diagram-container">
+        <div class="diagram-label">Visual Guide — Common Matrix Types</div>
+        <svg viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg">
+          <!-- Diagonal -->
+          <text x="60" y="18" font-family="DM Sans" font-size="10" fill="#999" text-anchor="middle" font-weight="600" letter-spacing="1">DIAGONAL</text>
+          <rect x="15" y="26" width="90" height="80" rx="4" fill="none" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="30" y="52" font-family="JetBrains Mono" font-size="12" fill="#16a34a" font-weight="600">3  0  0</text>
+          <text x="30" y="72" font-family="JetBrains Mono" font-size="12" fill="#0a0a0a">0  2  0</text>
+          <text x="30" y="92" font-family="JetBrains Mono" font-size="12" fill="#0a0a0a">0  0  5</text>
+          <text x="60" y="120" font-family="DM Sans" font-size="10" fill="#16a34a" text-anchor="middle">only diagonal ≠ 0</text>
+          <!-- Identity -->
+          <text x="195" y="18" font-family="DM Sans" font-size="10" fill="#999" text-anchor="middle" font-weight="600" letter-spacing="1">IDENTITY</text>
+          <rect x="150" y="26" width="90" height="80" rx="4" fill="none" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="165" y="52" font-family="JetBrains Mono" font-size="12" fill="#16a34a" font-weight="600">1  0  0</text>
+          <text x="165" y="72" font-family="JetBrains Mono" font-size="12" fill="#0a0a0a">0  1  0</text>
+          <text x="165" y="92" font-family="JetBrains Mono" font-size="12" fill="#0a0a0a">0  0  1</text>
+          <text x="195" y="120" font-family="DM Sans" font-size="10" fill="#16a34a" text-anchor="middle">AI = IA = A</text>
+          <!-- Upper triangular -->
+          <text x="340" y="18" font-family="DM Sans" font-size="10" fill="#999" text-anchor="middle" font-weight="600" letter-spacing="1">UPPER TRIANGULAR</text>
+          <rect x="295" y="26" width="90" height="80" rx="4" fill="none" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="310" y="52" font-family="JetBrains Mono" font-size="12" fill="#16a34a" font-weight="600">1  3  2</text>
+          <text x="310" y="72" font-family="JetBrains Mono" font-size="12" fill="#0a0a0a">0  1  5</text>
+          <text x="310" y="92" font-family="JetBrains Mono" font-size="12" fill="#999">0  0  1</text>
+          <text x="340" y="120" font-family="DM Sans" font-size="10" fill="#16a34a" text-anchor="middle">zeros below diagonal</text>
+          <!-- Symmetric -->
+          <text x="505" y="18" font-family="DM Sans" font-size="10" fill="#999" text-anchor="middle" font-weight="600" letter-spacing="1">SYMMETRIC</text>
+          <rect x="460" y="26" width="90" height="80" rx="4" fill="none" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="475" y="52" font-family="JetBrains Mono" font-size="12" fill="#0a0a0a">2  3  1</text>
+          <text x="475" y="72" font-family="JetBrains Mono" font-size="12" fill="#0a0a0a">3  5  4</text>
+          <text x="475" y="92" font-family="JetBrains Mono" font-size="12" fill="#0a0a0a">1  4  6</text>
+          <text x="505" y="120" font-family="DM Sans" font-size="10" fill="#16a34a" text-anchor="middle">Aᵀ = A</text>
+          <!-- Row label -->
+          <text x="60" y="160" font-family="DM Sans" font-size="10" fill="#999" text-anchor="middle" font-weight="600" letter-spacing="1">ROW MATRIX</text>
+          <rect x="15" y="168" width="90" height="30" rx="4" fill="none" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="25" y="188" font-family="JetBrains Mono" font-size="12" fill="#0a0a0a">2  5  3  7</text>
+          <!-- Column label -->
+          <text x="195" y="160" font-family="DM Sans" font-size="10" fill="#999" text-anchor="middle" font-weight="600" letter-spacing="1">COLUMN MATRIX</text>
+          <rect x="175" y="168" width="40" height="50" rx="4" fill="none" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="182" y="185" font-family="JetBrains Mono" font-size="12" fill="#0a0a0a">1</text>
+          <text x="182" y="200" font-family="JetBrains Mono" font-size="12" fill="#0a0a0a">9</text>
+          <text x="182" y="215" font-family="JetBrains Mono" font-size="12" fill="#0a0a0a">4</text>
+          <!-- Singular note -->
+          <text x="340" y="160" font-family="DM Sans" font-size="10" fill="#999" text-anchor="middle" font-weight="600" letter-spacing="1">SINGULAR</text>
+          <rect x="295" y="168" width="90" height="50" rx="4" fill="#fff5f5" stroke="#fca5a5" stroke-width="1.5"/>
+          <text x="310" y="188" font-family="JetBrains Mono" font-size="12" fill="#dc2626">1  2  3</text>
+          <text x="310" y="203" font-family="JetBrains Mono" font-size="12" fill="#dc2626">2  4  6</text>
+          <text x="340" y="218" font-family="DM Sans" font-size="10" fill="#dc2626" text-anchor="middle">det = 0, no inverse</text>
+        </svg>
+      </div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Past Q</span><span class="example-title">2019/2020 Q4d — Find x, y, z from matrix equation F − 2G = result</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">Write out F, G, and compute 2G</div>
+            <div class="step-math">  F = [ 1  -2 ]    G = [ 0   1 ]
+      [ 1   3 ]        [ 4   3 ]
+
+  2G = 2 × [ 0   1 ] = [ 0   2 ]
+           [ 4   3 ]   [ 8   6 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Compute F − 2G</div>
+            <div class="step-math">  F - 2G = [ 1-0    -2-2  ] = [  1   -4 ]
+            [ 1-8    3-6  ]   [ -7   -3 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Set equal to given result and match entries</div>
+            <div class="step-math">  [  1   -4 ]   =   [ 1    2x ]
+  [ -7   -3 ]       [ y/2  -z ]
+
+  Entry (1,2):  -4 = 2x   →  x = <span class="hi">-2</span>
+  Entry (2,1):  -7 = y/2  →  y = <span class="hi">-14</span>
+  Entry (2,2):  -3 = -z   →  z = <span class="hi">3</span></div>
+            <div class="step-result">x = −2,   y = −14,   z = 3</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="example-block">
+        <div class="example-header"><span class="past-q">Past Q</span><span class="example-title">2019/2020 Q4e — Evaluate HI and IH, comment on results</span></div>
+        <div class="example-body">
+          <div class="step"><div class="step-num">01</div><div class="step-content">
+            <div class="step-label">H is a row matrix (1×2), I is a column matrix (2×1)</div>
+            <div class="step-math">  H = [ 1  -1 ]    (1×2 matrix)
+
+  I = [ 1 ]        (2×1 matrix)
+      [ 2 ]</div>
+          </div></div>
+          <div class="step"><div class="step-num">02</div><div class="step-content">
+            <div class="step-label">Compute HI — (1×2) × (2×1) = (1×1) result</div>
+            <div class="step-math">  HI = [ 1  -1 ] × [ 1 ] = [ 1(1) + (-1)(2) ]
+                       [ 2 ]
+     = [ 1 - 2 ] = <span class="hi">[-1]</span>   ← a 1×1 matrix (scalar)</div>
+          </div></div>
+          <div class="step"><div class="step-num">03</div><div class="step-content">
+            <div class="step-label">Compute IH — (2×1) × (1×2) = (2×2) result</div>
+            <div class="step-math">  IH = [ 1 ] × [ 1  -1 ]
+       [ 2 ]
+
+     = [ 1(1)   1(-1) ] = [  1  -1 ]
+       [ 2(1)   2(-1) ]   [  2  -2 ]   ← a 2×2 matrix</div>
+          </div></div>
+          <div class="step"><div class="step-num">04</div><div class="step-content">
+            <div class="step-label">Comment on results</div>
+            <div class="step-desc">HI gives a 1×1 scalar result. IH gives a 2×2 matrix result. They are completely different in size — this is why matrix multiplication is NOT commutative. HI ≠ IH in general.</div>
+            <div class="step-result">HI = [−1]  (scalar),   IH = [[1,−1],[2,−2]]  (2×2 matrix)</div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="mistake-box"><div class="mistake-label">Common Mistake</div><p>Assuming matrix multiplication is commutative — that AB = BA. It is not. The order matters both for the result and for whether the multiplication is even possible. You can only multiply A × B if A has as many columns as B has rows.</p></div>
+      <div class="why-box"><div class="why-label">Why This Matters</div><p>2019/2020 Q4 is entirely about matrix types and operations — 7 marks of definitions, 4 marks of matrix equation solving, 4 marks of multiplication and comment.</p></div>
+    </div>
+  </div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:32px;padding-top:24px;border-top:1px solid var(--border);">
+    <a href="W6.html" class="back-btn">&#8592; Prev</a>
+    <span style="font-size:13px;color:var(--muted2);">Week 7 of 12</span>
+    <a href="W8.html" class="back-btn" style="border-color:var(--green-deep);color:var(--green-deep);">Next: Week 8 &#8594;</a>
+  </div>
+</div>
+<footer>
+  <strong>ECE 202 &mdash; Engineering Mathematics</strong> &middot; Week 7 &middot; Unify Platform &middot; LASU Faculty of Engineering
+</footer>
+<script>
+(function(){const saved=localStorage.getItem('unify-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);const b=document.getElementById('theme-btn');if(b)b.textContent=saved==='dark'?'☀ Light':'☾ Dark';}})();
+function toggleTheme(){const cur=document.documentElement.getAttribute('data-theme');const nxt=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',nxt);localStorage.setItem('unify-theme',nxt);document.getElementById('theme-btn').textContent=nxt==='dark'?'☀ Light':'☾ Dark';}
+</script>
+</body>
+</html>
