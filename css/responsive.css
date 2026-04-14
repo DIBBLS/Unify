@@ -1,0 +1,54 @@
+/*
+ * Unify — Shared Responsive / Media Queries
+ * These complement page-specific responsive rules.
+ */
+
+/* ── Mobile nav appears below 768px ──────────────────── */
+@media (max-width: 768px) {
+  nav {
+    padding: 0 16px;
+    height: 56px;
+  }
+
+  .nav-links,
+  .nav-tabs {
+    display: none;
+  }
+
+  .nav-user-name {
+    display: none;
+  }
+
+  .mobile-nav {
+    display: block;
+  }
+
+  body {
+    padding-bottom: 76px;
+  }
+
+  /* Toast rises above mobile nav */
+  .toast {
+    bottom: 90px;
+  }
+}
+
+/* ── Touch-friendly tap targets ──────────────────────── */
+@media (hover: none) {
+  /* Any interactive element too small gets a minimum */
+  button,
+  a,
+  [role="button"] {
+    min-height: 44px;
+  }
+}
+
+/* ── Fluid spacing helpers ───────────────────────────── */
+@media (max-width: 480px) {
+  .hide-xs { display: none !important; }
+}
+
+@media (min-width: 769px) {
+  .hide-desktop { display: none !important; }
+  .mobile-only  { display: none !important; }
+}

@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Unify — Timetable</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/responsive.css">
+<script src="js/theme.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -130,7 +135,15 @@ nav {
 
 /* ── DAY TABS ── */
 .day-tabs-wrap { padding: 0 48px; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 60px; z-index: 90; transition: background 0.25s; }
-.day-tabs { display: flex; gap: 0; overflow-x: auto; }
+.day-tabs {
+  display: flex; gap: 0; overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  scroll-snap-type: x proximity;
+}
+.day-tabs::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+.day-tab { scroll-snap-align: start; }
 .day-tab {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
   padding: 14px 20px; cursor: pointer; border-bottom: 2px solid transparent;
@@ -489,23 +502,9 @@ nav {
 </nav>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, getDocs, collection, query, orderBy, onSnapshot, where, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBjZyfNNpXZFJwB7GKXVeSzLTVknfwCa8I",
-  authDomain: "unify-b4316.firebaseapp.com",
-  projectId: "unify-b4316",
-  storageBucket: "unify-b4316.firebasestorage.app",
-  messagingSenderId: "114594366615",
-  appId: "1:114594366615:web:44ef821b4618f1a24615d2",
-  measurementId: "G-MY2M1R6DJV"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+import { auth, db } from './js/firebase-config.js';
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { doc, getDoc, setDoc, getDocs, collection, query, orderBy, onSnapshot, where, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
 let currentUser = null, userProfile = {};
@@ -515,24 +514,7 @@ let saveTimeout = null;
 let isAdminUser = false;
 let editingClass = null; // { cls, day } — used by edit modal
 
-// ── THEME ─────────────────────────────────────────────
-function initTheme() {
-  const saved = localStorage.getItem('unify-theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  applyTheme(saved || (prefersDark ? 'dark' : 'light'));
-}
-function applyTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
-  const btn = document.getElementById('themeToggle');
-  if (btn) btn.textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
-}
-window.toggleTheme = function() {
-  const cur = document.documentElement.getAttribute('data-theme');
-  const next = cur === 'dark' ? 'light' : 'dark';
-  localStorage.setItem('unify-theme', next);
-  applyTheme(next);
-}
-initTheme();
+// ── THEME handled by js/theme.js ──────────────────────
 
 // ── AUTH ──────────────────────────────────────────────
 onAuthStateChanged(auth, async user => {

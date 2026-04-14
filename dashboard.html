@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Unify — Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/responsive.css">
+<script src="js/theme.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -220,6 +225,7 @@ input::placeholder { color: var(--text3); }
   border-radius: 16px; padding: 18px 16px 14px;
   height: 100%; display: flex; flex-direction: column; gap: 9px;
   transition: background 0.2s, border-color 0.2s;
+  position: relative;
 }
 .course-item.active-card .course-card-inner {
   background: var(--invert-bg); border-color: var(--invert-bg); color: var(--invert-text);
@@ -401,6 +407,10 @@ input::placeholder { color: var(--text3); }
 }
 @media (max-width: 480px) {
   #courses { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .personal-hero { padding: 20px 16px; }
+  .main-content { padding: 16px; }
+  .mastery-wrap, .planner-wrap, .streak-nudge-wrap, .goal-card-wrap { padding: 14px 16px; }
+  .progress-bar-wrap { padding: 12px 16px; }
 }
 
 /* ═══════════════════════════
@@ -616,6 +626,117 @@ input::placeholder { color: var(--text3); }
   cursor: pointer; font-family: var(--font-body); transition: all 0.15s;
 }
 .review-skip-btn:hover { border-color: var(--text); color: var(--text); }
+
+/* ═══════════════════════════
+   GOAL CARD
+═══════════════════════════ */
+.goal-card-wrap {
+  padding: 16px 32px; background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.25s, border-color 0.25s;
+}
+.goal-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 18px 22px;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  transition: border-color 0.2s;
+}
+.goal-card-body { flex: 1; min-width: 0; }
+.goal-mode-badge {
+  display: inline-block; padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.5px; margin-bottom: 8px;
+}
+.goal-mode-badge.recovery  { background: rgba(248,113,113,0.12); color: #f87171; }
+.goal-mode-badge.stability { background: rgba(251,191,36,0.1);  color: #fbbf24; }
+.goal-mode-badge.push      { background: rgba(147,197,253,0.12); color: #93c5fd; }
+.goal-mode-badge.elite     { background: rgba(74,222,128,0.12);  color: #4ade80; }
+.goal-card-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 3px; }
+.goal-card-sub { font-size: 12px; color: var(--text3); line-height: 1.5; }
+.goal-card-cta { font-size: 13px; color: var(--text2); }
+.goal-card-action {
+  flex-shrink: 0; padding: 9px 18px; background: var(--text); color: var(--bg);
+  border: none; border-radius: 8px; font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: var(--font-body); text-decoration: none;
+  transition: opacity 0.15s; white-space: nowrap; display: inline-block;
+}
+.goal-card-action:hover { opacity: 0.8; }
+@media (max-width: 768px) { .goal-card-wrap { padding: 12px 16px; } }
+
+/* ═══════════════════════════
+   ACHIEVEMENTS SECTION (main content)
+═══════════════════════════ */
+.achievements-section { margin-top: 28px; padding-bottom: 8px; }
+.achievements-heading { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); margin-bottom: 14px; }
+.achievements-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+@media (max-width: 500px) { .achievements-grid { grid-template-columns: 1fr; } }
+.achievement-card {
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px 16px; background: var(--surface);
+  display: flex; align-items: flex-start; gap: 12px;
+  transition: border-color 0.15s;
+}
+.achievement-card.earned { border-color: rgba(74,222,128,0.4); background: rgba(74,222,128,0.03); }
+.achievement-card.locked { background: var(--surface2); opacity: 0.65; }
+.ach-icon-wrap { position: relative; flex-shrink: 0; line-height: 1; }
+.ach-icon { font-size: 24px; }
+.ach-lock { position: absolute; bottom: -3px; right: -5px; font-size: 11px; }
+.ach-body { flex: 1; min-width: 0; }
+.ach-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.ach-desc { font-size: 11px; color: var(--text3); margin-bottom: 6px; line-height: 1.4; }
+.ach-progress {
+  font-size: 10px; color: var(--text3); background: var(--surface2);
+  padding: 2px 8px; border-radius: 20px; border: 1px solid var(--border);
+  display: inline-block;
+}
+.achievement-card.earned .ach-progress { background: rgba(74,222,128,0.1); border-color: rgba(74,222,128,0.3); color: #4ade80; }
+
+/* ═══════════════════════════
+   COURSE CARD REMOVE BUTTON
+═══════════════════════════ */
+.course-rm-btn {
+  position: absolute; top: 7px; right: 7px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text3); font-size: 13px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0.55; transition: all 0.15s; font-family: var(--font-body);
+  line-height: 1; z-index: 2; padding: 0;
+}
+.course-rm-btn:hover { opacity: 1; background: rgba(248,113,113,0.12); border-color: #f87171; color: #f87171; }
+/* On touch devices always show it fully */
+@media (hover: none) { .course-rm-btn { opacity: 0.8; } }
+
+/* ═══════════════════════════
+   ADD COURSE INLINE
+═══════════════════════════ */
+.add-course-toggle {
+  padding: 5px 12px; background: none; border: 1px solid var(--border);
+  border-radius: 6px; font-size: 12px; color: var(--text3); cursor: pointer;
+  font-family: var(--font-body); transition: all 0.15s;
+}
+.add-course-toggle:hover { border-color: var(--text); color: var(--text); }
+.add-course-row {
+  display: none; align-items: center; gap: 8px; margin-bottom: 14px;
+  padding: 12px 14px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.add-course-row.open { display: flex; }
+.add-course-inp {
+  flex: 1; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px;
+  font-family: var(--font-body); font-size: 13px; background: var(--bg);
+  color: var(--text); outline: none; margin: 0 !important; width: auto !important;
+}
+.add-course-inp:focus { border-color: var(--text); }
+.add-units-inp {
+  width: 64px !important; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px;
+  font-family: var(--font-body); font-size: 13px; background: var(--bg);
+  color: var(--text); outline: none; margin: 0 !important;
+}
+.add-course-sub {
+  padding: 8px 16px; background: var(--text); color: var(--bg); border: none;
+  border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer;
+  font-family: var(--font-body); white-space: nowrap; width: auto;
+}
 </style>
 </head>
 <body>
@@ -688,6 +809,16 @@ input::placeholder { color: var(--text3); }
     <span class="progress-pct" id="progressPct">0%</span>
   </div>
 
+
+  <!-- ── GOAL CARD ── -->
+  <div class="goal-card-wrap">
+    <div class="goal-card" id="goalCard">
+      <div class="goal-card-body">
+        <div class="goal-card-cta" style="font-size:13px;color:var(--text2);">You haven't set a graduation target yet.</div>
+      </div>
+      <a href="predictor.html" class="goal-card-action">Build your plan →</a>
+    </div>
+  </div>
 
   <!-- ── STREAK + DAILY NUDGE ── -->
   <div class="streak-nudge-wrap">
@@ -794,26 +925,37 @@ input::placeholder { color: var(--text3); }
         <button class="btn btn-outline" onclick="clearCourses()">Clear All</button>
       </div>
       <div class="sidebar-section">
-        <span class="sidebar-title">Achievements</span>
-        <div id="achievementsList"><div style="font-size:12px;color:var(--text3);">Complete courses to earn badges.</div></div>
-      </div>
-      <div class="sidebar-section">
-        <a href="predictor.html" class="sidebar-link">Grade Planner →</a>
         <a href="onboarding.html?edit=1" class="sidebar-link">Change university / level →</a>
       </div>
+      <!-- Hidden for JS compat -->
+      <div id="achievementsList" style="display:none"></div>
     </div>
 
     <div style="display:flex;min-width:0;position:relative;">
       <div class="main-content" style="flex:1;min-width:0;">
         <div class="content-header">
           <h2 class="content-title">Your Courses</h2>
-          <span class="content-count" id="coursesCount">0 courses</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="content-count" id="coursesCount">0 courses</span>
+            <button class="add-course-toggle" onclick="toggleAddCourse()">+ Add</button>
+          </div>
+        </div>
+        <div class="add-course-row" id="addCourseRow">
+          <input type="text" class="add-course-inp" id="addCourseCode" placeholder="Course code (e.g. ECE 301)" onkeydown="if(event.key==='Enter')addCourseInline()">
+          <input type="number" class="add-units-inp" id="addCourseUnits" min="1" max="6" placeholder="Units" onkeydown="if(event.key==='Enter')addCourseInline()">
+          <button class="add-course-sub" onclick="addCourseInline()">Add</button>
         </div>
         <div class="empty-state" id="emptyState">
           <div class="empty-icon">📚</div>
           <p class="empty-text">No courses loaded yet.<br>Select a semester and tap "Load Semester",<br>or add courses manually.</p>
         </div>
         <ul id="courses"></ul>
+
+        <!-- ACHIEVEMENTS SECTION -->
+        <div class="achievements-section">
+          <div class="achievements-heading">Achievements</div>
+          <div class="achievements-grid" id="achievementsGrid"></div>
+        </div>
       </div>
 
       <!-- RESOURCE PANEL -->
@@ -867,23 +1009,9 @@ input::placeholder { color: var(--text3); }
 <script src="courses.js"></script>
 <script src="courseContent.js"></script>
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBjZyfNNpXZFJwB7GKXVeSzLTVknfwCa8I",
-  authDomain: "unify-b4316.firebaseapp.com",
-  projectId: "unify-b4316",
-  storageBucket: "unify-b4316.firebasestorage.app",
-  messagingSenderId: "114594366515",
-  appId: "1:114594366615:web:44ef821b4618f1a24615d2",
-  measurementId: "G-MY2M1R6DJV"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+import { auth, db } from './js/firebase-config.js';
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 let currentUser = null, saveTimeout = null, activeCourseId = null;
 let userProfile = {}, aspirations = [];
@@ -914,27 +1042,7 @@ function rateLimit(key, max = 5, windowMs = 60000) {
 
 
 
-// ── DARK MODE ─────────────────────────────────────────
-function initTheme() {
-  const saved = localStorage.getItem('unify-theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  applyTheme(saved || (prefersDark ? 'dark' : 'light'));
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-    if (!localStorage.getItem('unify-theme')) applyTheme(e.matches ? 'dark' : 'light');
-  });
-}
-function applyTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
-  const btn = document.getElementById('themeToggle');
-  if (btn) btn.textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
-}
-window.toggleTheme = function() {
-  const cur = document.documentElement.getAttribute('data-theme');
-  const next = cur === 'dark' ? 'light' : 'dark';
-  localStorage.setItem('unify-theme', next);
-  applyTheme(next);
-}
-initTheme();
+// ── DARK MODE handled by js/theme.js ──────────────────
 
 // ── AUTH ──────────────────────────────────────────────
 onAuthStateChanged(auth, async user => {
@@ -970,18 +1078,17 @@ document.getElementById('signOutBtn').addEventListener('click', async () => {
 
 // ── LOAD DATA ─────────────────────────────────────────
 async function loadUserData() {
+  let savedGoalPlan = null;
   try {
     const snap = await getDoc(doc(db, 'users', currentUser.uid));
     if (!snap.exists() || !snap.data().university) { window.location.href = 'onboarding.html'; return; }
     const d = snap.data();
+    savedGoalPlan = d.gradePlanner || null; // grab it first before anything can throw
     userProfile = { university: d.university, faculty: d.faculty, department: d.department, level: d.level };
-    // Use firstName from Firestore if available — overrides email-parsed guess
     if (!d.firstName) {
-      // Old account — nudge them to set their name
       const nudge = document.getElementById('nameNudge');
       if (nudge) nudge.style.display = 'flex';
     }
-
     if (d.firstName) {
       const first = d.firstName;
       const hr = new Date().getHours();
@@ -995,11 +1102,8 @@ async function loadUserData() {
     document.getElementById('heroTag').textContent = `${d.university} · ${d.level}`;
     document.getElementById('heroDept').textContent = d.department;
 
-    // Always reload from coursesDatabase if:
-    // 1. courses array is empty, OR
-    // 2. courses don't match current dept (e.g. after changing department)
     const firstCourse = window.courses[0]?.course || '';
-    const deptPrefix = { 
+    const deptPrefix = {
       'Electronic & Computer Engineering': 'ECE',
       'Mechanical Engineering': 'MEE',
       'Chemical & Polymer Engineering': 'CHE',
@@ -1012,10 +1116,41 @@ async function loadUserData() {
       autoLoadCourses(d.department, d.level);
     }
     renderAspirations();
-  } catch(e) { window.courses = []; }
+  } catch(e) {
+    console.error('loadUserData error:', e);
+    window.courses = [];
+  }
+  // Outside the try/catch — always runs even if something above threw
+  renderGoalCard(savedGoalPlan);
   displayCourses();
   updateStats();
   renderPlanner();
+}
+
+function renderGoalCard(gp) {
+  const card = document.getElementById('goalCard');
+  if (!card) return;
+  if (!gp || !gp.target) {
+    card.innerHTML = `
+      <div style="font-size:13px;color:var(--text2);flex:1;">You haven't set a graduation target yet.</div>
+      <a href="predictor.html" class="goal-card-action">Build your plan →</a>`;
+    return;
+  }
+  const modeCls = { recovery:'recovery', stability:'stability', push:'push', elite:'elite' }[(gp.academicMode||'').toLowerCase()] || 'push';
+  const reqAvg  = gp.neededAvg != null ? Math.min(5, Math.max(0, parseFloat(gp.neededAvg))) : null;
+  const targetMap = { first:'First Class (≥4.50)', upper:'2nd Class Upper (≥3.50)', lower:'2nd Class Lower (≥2.40)', pass:'Pass (≥1.50)' };
+  const targetLabel = targetMap[gp.targetClass] || `CGPA ≥ ${parseFloat(gp.target).toFixed(2)}`;
+  const shortTarget = targetLabel.split(' (')[0];
+  const contextLine = reqAvg != null
+    ? `You need ${reqAvg.toFixed(2)} avg to hit ${shortTarget}`
+    : 'View your full semester roadmap';
+  card.innerHTML = `
+    <div class="goal-card-body">
+      <div class="goal-mode-badge ${modeCls}">${gp.academicMode || 'Push'}</div>
+      <div class="goal-card-title">Target: ${targetLabel}</div>
+      <div class="goal-card-sub">Req. avg: ${reqAvg != null ? reqAvg.toFixed(2)+' GP/sem' : '—'} · ${contextLine}</div>
+    </div>
+    <a href="predictor.html" class="goal-card-action">View Plan →</a>`;
 }
 
 function autoLoadCourses(dept, level) {
@@ -1081,15 +1216,35 @@ const BADGES = [
   { id:'full',  icon:'🏆', name:'Full Semester', desc:'All courses graded', check:(c,g)=>c>0&&c===g },
 ];
 function checkAchievements(c, g) {
-  const list = document.getElementById('achievementsList');
-  const earned = BADGES.filter(b => b.check(c, g));
-  if (!earned.length) { list.innerHTML = '<div style="font-size:12px;color:var(--text3);">Complete courses to earn badges.</div>'; return; }
-  earned.forEach(b => { if (!earnedBadges.has(b.id)) { earnedBadges.add(b.id); showMilestone(`${b.icon} ${b.name} unlocked!`); } });
-  list.innerHTML = earned.map(b => `
-    <div class="achievement-badge">
-      <div class="badge-icon">${b.icon}</div>
-      <div><div class="badge-name">${b.name}</div><div class="badge-desc">${b.desc}</div></div>
-    </div>`).join('');
+  const grid = document.getElementById('achievementsGrid');
+  if (!grid) return;
+
+  grid.innerHTML = BADGES.map(b => {
+    const earned = b.check(c, g);
+    if (earned && !earnedBadges.has(b.id)) {
+      earnedBadges.add(b.id);
+      showMilestone(`${b.icon} ${b.name} unlocked!`);
+    }
+
+    let progress = '';
+    if      (b.id === 'five')   progress = `${Math.min(c, 5)}/5 courses`;
+    else if (b.id === 'first')  progress = c > 0 ? `${c} course${c!==1?'s':''}` : '0 courses';
+    else if (b.id === 'grade1') progress = `${g} graded`;
+    else if (b.id === 'full')   progress = c > 0 ? `${g}/${c} graded` : '0/0';
+
+    return `
+      <div class="achievement-card ${earned ? 'earned' : 'locked'}">
+        <div class="ach-icon-wrap">
+          <div class="ach-icon">${b.icon}</div>
+          ${!earned ? '<div class="ach-lock">🔒</div>' : ''}
+        </div>
+        <div class="ach-body">
+          <div class="ach-name">${b.name}</div>
+          <div class="ach-desc">${b.desc}</div>
+          <div class="ach-progress">${progress}</div>
+        </div>
+      </div>`;
+  }).join('');
 }
 
 // ── COURSE GRID ───────────────────────────────────────
@@ -1126,6 +1281,7 @@ window.displayCourses = function() {
 
     li.innerHTML = `
       <div class="course-card-inner">
+        <button class="course-rm-btn" title="Not my course — remove" onclick="removeCourse(event,${idx})">×</button>
         <div class="course-accent accent-${idx % 6}"></div>
         <div class="course-card-code">${code}</div>
         ${name ? `<div class="course-card-name">${name}</div>` : ''}
@@ -1146,6 +1302,13 @@ window.displayCourses = function() {
       else { activeCourseId = idx; openResourcePanel(c.course); displayCourses(); }
     });
     ul.appendChild(li);
+    // Touch: long-press (500ms) shows a confirm toast instead of click-to-remove
+    let pressTimer;
+    li.addEventListener('touchstart', () => {
+      pressTimer = setTimeout(() => showRemoveConfirm(idx), 500);
+    }, { passive: true });
+    li.addEventListener('touchend',   () => clearTimeout(pressTimer), { passive: true });
+    li.addEventListener('touchmove',  () => clearTimeout(pressTimer), { passive: true });
   });
   updateStats();
 }
@@ -1279,6 +1442,51 @@ window.clearCourses = function() {
   autoLoadCourses(userProfile.department, userProfile.level);
   displayCourses();
 }
+
+// ── INLINE ADD / REMOVE COURSE ────────────────────────
+window.toggleAddCourse = function() {
+  const row = document.getElementById('addCourseRow');
+  row.classList.toggle('open');
+  if (row.classList.contains('open')) {
+    setTimeout(() => document.getElementById('addCourseCode').focus(), 50);
+  }
+};
+
+window.addCourseInline = function() {
+  const code  = (document.getElementById('addCourseCode').value || '').trim().toUpperCase();
+  const units = parseInt(document.getElementById('addCourseUnits').value) || 3;
+  if (!code) return;
+  window.courses.push({ course: code, grade: '-', units });
+  displayCourses(); saveUserData();
+  document.getElementById('addCourseCode').value  = '';
+  document.getElementById('addCourseUnits').value = '';
+  document.getElementById('addCourseRow').classList.remove('open');
+  if (window.courses.length === 1) showMilestone('📚 First course added!');
+};
+
+window.removeCourse = function(event, idx) {
+  event.stopPropagation();
+  if (!window.courses.length) return;
+  const name = window.courses[idx]?.course || 'course';
+  window.courses.splice(idx, 1);
+  if (activeCourseId === idx) { activeCourseId = null; closeResourcePanel(); }
+  else if (activeCourseId > idx) activeCourseId--;
+  displayCourses(); saveUserData();
+  showMilestone(`${name} removed from your list.`);
+};
+
+// Long-press remove confirm (mobile) — shows a confirm toast with undo window
+let _removeConfirmTimer = null;
+window.showRemoveConfirm = function(idx) {
+  const name = window.courses[idx]?.course || 'course';
+  const toast = document.getElementById('milestoneToast');
+  const text  = document.getElementById('milestoneText');
+  clearTimeout(_removeConfirmTimer);
+  // Repurpose the toast as a brief confirm — tap the toast to confirm removal
+  text.innerHTML = `Remove <strong>${name}</strong>? <span style="text-decoration:underline;cursor:pointer" onclick="window.removeCourse({stopPropagation:()=>{}},${idx})">Yes, remove</span>`;
+  toast.classList.add('show');
+  _removeConfirmTimer = setTimeout(() => toast.classList.remove('show'), 4000);
+};
 
 // ── TOAST ─────────────────────────────────────────────
 window.showMilestone = function(msg) {
