@@ -201,6 +201,22 @@ nav.top-nav {
   .st-text { display: none; }
   .st-btn { padding: 4px 7px; }
 }
+.rm-course-btn {
+  width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--border);
+  background: transparent; cursor: pointer; color: var(--text3); font-size: 13px;
+  display: flex; align-items: center; justify-content: center; line-height: 1;
+  flex-shrink: 0; transition: all 0.15s; font-family: var(--fb);
+}
+.rm-course-btn:hover { border-color: var(--red); color: var(--red); background: rgba(248,113,113,0.08); }
+.restore-section { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.restore-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: block; }
+.restore-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.restore-chip {
+  padding: 4px 12px; border-radius: 20px; border: 1px dashed var(--border);
+  background: transparent; cursor: pointer; font-family: var(--fb);
+  font-size: 11px; color: var(--text3); transition: all 0.15s;
+}
+.restore-chip:hover { border-color: var(--green); color: var(--green); }
 
 /* ── BUTTONS ── */
 .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px; border-radius: 8px; border: none; cursor: pointer; font-family: var(--fb); font-size: 14px; font-weight: 500; transition: all 0.2s; }
@@ -372,6 +388,30 @@ nav.top-nav {
 @keyframes spin { to { transform: rotate(360deg); } }
 
 hr.divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ── DEPT CARDS ── */
+.dept-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
+@media (max-width: 520px) { .dept-grid { grid-template-columns: repeat(2, 1fr); } }
+.dept-btn {
+  padding: 14px 12px; border-radius: 10px; border: 1.5px solid var(--border);
+  background: var(--surface); cursor: pointer; font-family: var(--fb);
+  text-align: left; transition: all 0.2s; color: var(--text);
+}
+.dept-btn:hover { border-color: var(--text3); }
+.dept-btn.on { border-color: var(--green); background: var(--green-bg); }
+.dept-code { font-size: 15px; font-weight: 700; margin-bottom: 3px; letter-spacing: -0.3px; }
+.dept-name { font-size: 11px; color: var(--text3); line-height: 1.3; }
+.dept-btn.on .dept-name { color: var(--green); }
+
+/* ── SEMESTER CHIPS ── */
+.sem-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.sem-chip {
+  padding: 7px 16px; border-radius: 20px; border: 1.5px solid var(--border);
+  background: var(--surface); cursor: pointer; font-family: var(--fb);
+  font-size: 12px; font-weight: 500; color: var(--text2); transition: all 0.15s;
+}
+.sem-chip:hover { border-color: var(--text3); color: var(--text); }
+.sem-chip.on { border-color: var(--green); background: var(--green-bg); color: var(--green); }
 </style>
 </head>
 <body>
@@ -422,40 +462,43 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; 
     </div>
     <div class="step-node" id="snode-2">
       <div class="step-circle" id="sc-2">2</div>
-      <span class="step-label">Numbers</span>
-    </div>
-    <div class="step-node" id="snode-3">
-      <div class="step-circle" id="sc-3">3</div>
       <span class="step-label">Plan</span>
     </div>
   </div>
 
   <div class="step-panel active" id="step-1">
-    <span class="sec-lbl">Department &amp; History</span>
+    <span class="sec-lbl">Your Department</span>
 
-    <div class="form-row">
-      <div>
-        <label class="field-lbl" for="deptSel">Department</label>
-        <div class="sel-wrap">
-          <select class="field-select" id="deptSel">
-            <option value="">Select department</option>
-            <option value="ECE">Electronic &amp; Computer Eng.</option>
-            <option value="MEE">Mechanical Engineering</option>
-            <option value="CPE">Chemical &amp; Polymer Eng.</option>
-            <option value="CVE">Civil Engineering</option>
-            <option value="ASE">Aerospace Engineering</option>
-            <option value="IPE">Industrial &amp; Petroleum Eng.</option>
-          </select>
-        </div>
-      </div>
-      <div>
-        <label class="field-lbl" for="lastSemSel">Results are out for</label>
-        <div class="sel-wrap">
-          <select class="field-select" id="lastSemSel" disabled>
-            <option value="">Pick department first</option>
-          </select>
-        </div>
-      </div>
+    <div class="dept-grid">
+      <button class="dept-btn" data-dept="ECE" onclick="pickDept(this)">
+        <div class="dept-code">ECE</div>
+        <div class="dept-name">Electronic &amp; Computer</div>
+      </button>
+      <button class="dept-btn" data-dept="MEE" onclick="pickDept(this)">
+        <div class="dept-code">MEE</div>
+        <div class="dept-name">Mechanical Engineering</div>
+      </button>
+      <button class="dept-btn" data-dept="CPE" onclick="pickDept(this)">
+        <div class="dept-code">CPE</div>
+        <div class="dept-name">Chemical &amp; Polymer</div>
+      </button>
+      <button class="dept-btn" data-dept="CVE" onclick="pickDept(this)">
+        <div class="dept-code">CVE</div>
+        <div class="dept-name">Civil Engineering</div>
+      </button>
+      <button class="dept-btn" data-dept="ASE" onclick="pickDept(this)">
+        <div class="dept-code">ASE</div>
+        <div class="dept-name">Aerospace Engineering</div>
+      </button>
+      <button class="dept-btn" data-dept="IPE" onclick="pickDept(this)">
+        <div class="dept-code">IPE</div>
+        <div class="dept-name">Industrial &amp; Petroleum</div>
+      </button>
+    </div>
+
+    <div id="semSection" style="display:none">
+      <span class="sec-lbl">Results are out for</span>
+      <div class="sem-chips" id="semChips"></div>
     </div>
 
     <div class="unit-bar" id="unitBar" style="display:none">
@@ -482,93 +525,87 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; 
 
     <div id="accordions"></div>
 
-    <div class="btn-row">
-      <button class="btn primary" id="step1Next" onclick="goStep(2)" style="display:none">
-        Your Numbers →
-      </button>
+    <div id="bottomSection" style="display:none">
+      <hr class="divider">
+      <span class="sec-lbl">Your Numbers</span>
+
+      <div class="form-row">
+        <div>
+          <label class="field-lbl">Completed units (graded)</label>
+          <input class="field-input" id="unitsDisplay" type="number" readonly placeholder="0" style="opacity:0.6;cursor:default">
+        </div>
+        <div>
+          <label class="field-lbl" for="cgpaIn">Current CGPA</label>
+          <input class="field-input" id="cgpaIn" type="number" min="0" max="5" step="0.01" placeholder="e.g. 3.42">
+        </div>
+      </div>
+
+      <hr class="divider">
+      <span class="sec-lbl">Graduation Target</span>
+
+      <div class="target-grid">
+        <button class="tgt-btn" data-cls="first"  data-cgpa="4.50" onclick="pickTarget(this)">
+          <div class="tgt-name">First Class</div>
+          <div class="tgt-range">CGPA ≥ 4.50</div>
+        </button>
+        <button class="tgt-btn" data-cls="upper"  data-cgpa="3.50" onclick="pickTarget(this)">
+          <div class="tgt-name">2nd Class Upper</div>
+          <div class="tgt-range">CGPA ≥ 3.50</div>
+        </button>
+        <button class="tgt-btn" data-cls="lower"  data-cgpa="2.40" onclick="pickTarget(this)">
+          <div class="tgt-name">2nd Class Lower</div>
+          <div class="tgt-range">CGPA ≥ 2.40</div>
+        </button>
+        <button class="tgt-btn" data-cls="pass"   data-cgpa="1.50" onclick="pickTarget(this)">
+          <div class="tgt-name">Pass</div>
+          <div class="tgt-range">CGPA ≥ 1.50</div>
+        </button>
+      </div>
+
+      <div class="specific-row">
+        <label for="specIn">Or specific target:</label>
+        <input class="field-input" id="specIn" type="number" min="0" max="5" step="0.01" placeholder="0.00 – 5.00">
+      </div>
+
+      <div class="profile-card" id="profileCard">
+        <div class="pc-row">
+          <span class="pc-key">Your target</span>
+          <span class="pc-val" id="pc-target">—</span>
+        </div>
+        <div class="pc-row">
+          <span class="pc-key">Current CGPA</span>
+          <span class="pc-val" id="pc-current">—</span>
+        </div>
+        <div class="pc-row">
+          <span class="pc-key">Gap to close</span>
+          <span class="pc-val" id="pc-gap">—</span>
+        </div>
+        <div class="pc-row">
+          <span class="pc-key">What this requires</span>
+          <span class="pc-val note" id="pc-req">—</span>
+        </div>
+        <div class="pc-row">
+          <span class="pc-key">Academic mode</span>
+          <span class="pc-val" id="pc-mode">—</span>
+        </div>
+      </div>
+
+      <div class="reflect-wrap" id="reflectWrap">
+        <p class="reflect-q">What's driving this target?</p>
+        <div class="radio-opt" data-why="career"      onclick="pickWhy(this)"><div class="radio-dot"></div>I want a strong career start</div>
+        <div class="radio-opt" data-why="scholarship" onclick="pickWhy(this)"><div class="radio-dot"></div>I'm aiming for a scholarship or postgrad</div>
+        <div class="radio-opt" data-why="prove"       onclick="pickWhy(this)"><div class="radio-dot"></div>I want to prove something to myself</div>
+        <div class="radio-opt" data-why="family"      onclick="pickWhy(this)"><div class="radio-dot"></div>Family or personal expectations</div>
+        <div class="radio-opt" data-why="habit"       onclick="pickWhy(this)"><div class="radio-dot"></div>I just want to build a good habit</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn primary" id="planBtn" onclick="goStep(2)" style="display:none">See My Plan →</button>
+      </div>
     </div>
   </div>
 
   <div class="step-panel" id="step-2">
-    <span class="sec-lbl">Your Current Standing</span>
-
-    <div class="form-row">
-      <div>
-        <label class="field-lbl">Completed units (graded)</label>
-        <input class="field-input" id="unitsDisplay" type="number" readonly placeholder="0" style="opacity:0.6;cursor:default">
-      </div>
-      <div>
-        <label class="field-lbl" for="cgpaIn">Current CGPA</label>
-        <input class="field-input" id="cgpaIn" type="number" min="0" max="5" step="0.01" placeholder="e.g. 3.42">
-      </div>
-    </div>
-
-    <hr class="divider">
-    <span class="sec-lbl">Graduation Target</span>
-
-    <div class="target-grid">
-      <button class="tgt-btn" data-cls="first"  data-cgpa="4.50" onclick="pickTarget(this)">
-        <div class="tgt-name">First Class</div>
-        <div class="tgt-range">CGPA ≥ 4.50</div>
-      </button>
-      <button class="tgt-btn" data-cls="upper"  data-cgpa="3.50" onclick="pickTarget(this)">
-        <div class="tgt-name">2nd Class Upper</div>
-        <div class="tgt-range">CGPA ≥ 3.50</div>
-      </button>
-      <button class="tgt-btn" data-cls="lower"  data-cgpa="2.40" onclick="pickTarget(this)">
-        <div class="tgt-name">2nd Class Lower</div>
-        <div class="tgt-range">CGPA ≥ 2.40</div>
-      </button>
-      <button class="tgt-btn" data-cls="pass"   data-cgpa="1.50" onclick="pickTarget(this)">
-        <div class="tgt-name">Pass</div>
-        <div class="tgt-range">CGPA ≥ 1.50</div>
-      </button>
-    </div>
-
-    <div class="specific-row">
-      <label for="specIn">Or specific target:</label>
-      <input class="field-input" id="specIn" type="number" min="0" max="5" step="0.01" placeholder="0.00 – 5.00">
-    </div>
-
-    <div class="profile-card" id="profileCard">
-      <div class="pc-row">
-        <span class="pc-key">Your target</span>
-        <span class="pc-val" id="pc-target">—</span>
-      </div>
-      <div class="pc-row">
-        <span class="pc-key">Current CGPA</span>
-        <span class="pc-val" id="pc-current">—</span>
-      </div>
-      <div class="pc-row">
-        <span class="pc-key">Gap to close</span>
-        <span class="pc-val" id="pc-gap">—</span>
-      </div>
-      <div class="pc-row">
-        <span class="pc-key">What this requires</span>
-        <span class="pc-val note" id="pc-req">—</span>
-      </div>
-      <div class="pc-row">
-        <span class="pc-key">Academic mode</span>
-        <span class="pc-val" id="pc-mode">—</span>
-      </div>
-    </div>
-
-    <div class="reflect-wrap" id="reflectWrap">
-      <p class="reflect-q">What's driving this target?</p>
-      <div class="radio-opt" data-why="career"      onclick="pickWhy(this)"><div class="radio-dot"></div>I want a strong career start</div>
-      <div class="radio-opt" data-why="scholarship" onclick="pickWhy(this)"><div class="radio-dot"></div>I'm aiming for a scholarship or postgrad</div>
-      <div class="radio-opt" data-why="prove"       onclick="pickWhy(this)"><div class="radio-dot"></div>I want to prove something to myself</div>
-      <div class="radio-opt" data-why="family"      onclick="pickWhy(this)"><div class="radio-dot"></div>Family or personal expectations</div>
-      <div class="radio-opt" data-why="habit"       onclick="pickWhy(this)"><div class="radio-dot"></div>I just want to build a good habit</div>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn ghost" onclick="goStep(1)">← Back</button>
-      <button class="btn primary" id="step2Next" onclick="goStep(3)" style="display:none">See My Plan →</button>
-    </div>
-  </div>
-
-  <div class="step-panel" id="step-3">
 
     <div class="feas-banner" id="feasBanner">
       <span id="feasIcon">🎯</span>
@@ -619,7 +656,7 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; 
     </div>
 
     <div class="btn-row">
-      <button class="btn ghost" onclick="goStep(2)">← Adjust Numbers</button>
+      <button class="btn ghost" onclick="goStep(1)">← Adjust Setup</button>
     </div>
   </div>
 </main>
@@ -703,7 +740,7 @@ const COURSES = {
     '200L Sem 1': ['ECE 201','ECE 203','ECE 207','ECE 211','MEE 203','MEE 205','MEE 207','MEE 209','ENT 211'],
     '200L Sem 2': ['ECE 202','ECE 206','ECE 208','ECE 210','ECE 220','MEE 202','MEE 204','CHE 206','GNS 212'],
     '300L Sem 1': ['ECE 301','ECE 303','ECE 305','ECE 307','ECE 309','ECE 319','ECE 321','ECE 351','MEE 301'],
-    '300L Sem 2': ['ECE 302','ECE 306','ECE 308','ECE 310','ECE 312','ECE 314','ECE 316','ECE 320','ECE 322','ECE 350','ECE 352'],
+    '300L Sem 2': ['ECE 302','ECE 306','ECE 308','ECE 310','ECE 312','ECE 314','ECE 316','ECE 320','ECE 352','CHE 352','MEE 352','ENT 312','GNS 312'],
     '400L Sem 1': ['ECE 401','ECE 403','ECE 405','ECE 407','ECE 409','ECE 411','ECE 413'],
     '400L Sem 2': ['ECE 402','ECE 404','ECE 406','ECE 408','ECE 410','ECE 412','ECE 414'],
     '500L Sem 1': ['ECE 501','ECE 503','ECE 505','ECE 507','ECE 509','ECE 511'],
@@ -715,7 +752,7 @@ const COURSES = {
     '200L Sem 1': ['MEE 201','MEE 203','MEE 205','MEE 207','MEE 209','MEE 211','ENT 211'],
     '200L Sem 2': ['MEE 202','MEE 204','MEE 206','MEE 208','MEE 210','MEE 212','CHE 206','GNS 212'],
     '300L Sem 1': ['ECE 351','MEE 301','MEE 305','MEE 351','MEE 353','MEE 355','MEE 357'],
-    '300L Sem 2': ['MEE 304','MEE 306','MEE 308','MEE 310','MEE 322','MEE 352','ENT 312','GNS 312'],
+    '300L Sem 2': ['MEE 304','MEE 306','MEE 308','MEE 310','MEE 322','MEE 352','MEE 354','ECE 302','ECE 316','ECE 352','CHE 352','ENT 312','GNS 312'],
     '400L Sem 1': ['MEE 401','MEE 403','MEE 405','MEE 407','MEE 409','MEE 411','MEE 413'],
     '400L Sem 2': ['MEE 402','MEE 404','MEE 406','MEE 408','MEE 410','MEE 412','MEE 414'],
     '500L Sem 1': ['MEE 501','MEE 503','MEE 505','MEE 507','MEE 509','MEE 511'],
@@ -727,7 +764,7 @@ const COURSES = {
     '200L Sem 1': ['CHE 201','CHE 203','ECE 203','ECE 211','MEE 203','MEE 205','MEE 209','ENT 211'],
     '200L Sem 2': ['CHE 202','CHE 204','CHE 206','CHE 208','MEE 202','MEE 204','GNS 212'],
     '300L Sem 1': ['CHE 301','CHE 303','CHE 305','CHE 307','CHE 309','CHE 311','CHE 313','CHE 315','ECE 351'],
-    '300L Sem 2': ['CPE 302','CPE 304','CPE 306','CPE 308','CPE 310','CPE 312','CPE 314','ENT 312','GNS 312'],
+    '300L Sem 2': ['CPE 302','CPE 304','CPE 306','CPE 308','CPE 310','CPE 312','CPE 314','CPE 316','CHE 304','CHE 308','CHE 312','CHE 314','CHE 352','ECE 352','ENT 312','GNS 312'],
     '400L Sem 1': ['CPE 401','CPE 403','CPE 405','CPE 407','CPE 409','CPE 411','CPE 413'],
     '400L Sem 2': ['CPE 402','CPE 404','CPE 406','CPE 408','CPE 410','CPE 412','CPE 414'],
   },
@@ -737,7 +774,7 @@ const COURSES = {
     '200L Sem 1': ['CVE 201','CVE 203','CVE 205','CVE 207','MEE 203','MEE 205','MEE 209','ENT 211'],
     '200L Sem 2': ['CVE 202','CVE 204','CVE 206','CVE 208','MEE 202','MEE 204','CHE 206','GNS 212'],
     '300L Sem 1': ['CVE 301','CVE 303','CVE 305','CVE 307','CVE 309','ECE 351','MEE 301','MEE 351'],
-    '300L Sem 2': ['CVE 302','CVE 304','CVE 306','CVE 308','CVE 310','CVE 322','CVE 352','ENT 312','GNS 312'],
+    '300L Sem 2': ['CVE 302','CVE 304','CVE 306','CVE 308','CVE 310','CVE 322','CVE 352','ECE 302','ECE 312','ECE 316','ECE 352','CHE 352','ENT 312','GNS 312'],
     '400L Sem 1': ['CVE 401','CVE 403','CVE 405','CVE 407','CVE 409','CVE 411','CVE 413'],
     '400L Sem 2': ['CVE 402','CVE 404','CVE 406','CVE 408','CVE 410','CVE 412','CVE 414'],
     '500L Sem 1': ['CVE 501','CVE 503','CVE 505','CVE 507','CVE 509','CVE 511'],
@@ -749,7 +786,7 @@ const COURSES = {
     '200L Sem 1': ['ASE 201','ECE 203','ECE 211','ASE 207','MEE 203','MEE 205','MEE 207','MEE 209','ENT 211'],
     '200L Sem 2': ['ASE 202','ASE 204','MEE 202','MEE 204','MEE 208','ECE 202','ECE 210','CHE 206','GNS 212'],
     '300L Sem 1': ['ASE 351','ASE 353','ASE 355','ASE 357','MEE 301','MEE 351','ECE 351'],
-    '300L Sem 2': ['ASE 302','ASE 304','ASE 306','ASE 308','ASE 310','ASE 322','ASE 352','ENT 312','GNS 312'],
+    '300L Sem 2': ['ASE 312','ASE 344','ASE 352','ASE 360','ASE 362','ASE 364','ASE 366','ASE 378','ASE 380','ECE 302','CHE 352','ECE 352','GNS 312','ENT 302'],
     '400L Sem 1': ['ASE 401','ASE 403','ASE 405','ASE 407','ASE 409','ASE 411','ASE 413'],
     '400L Sem 2': ['ASE 402','ASE 404','ASE 406','ASE 408','ASE 410','ASE 412','ASE 414'],
     '500L Sem 1': ['ASE 501','ASE 503','ASE 505','ASE 507','ASE 509','ASE 511'],
@@ -761,7 +798,7 @@ const COURSES = {
     '200L Sem 1': ['IPE 201','IPE 203','IPE 205','IPE 207','IPE 209','MEE 203','MEE 205','ENT 211'],
     '200L Sem 2': ['IPE 202','IPE 204','IPE 206','IPE 208','MEE 202','CHE 206','GNS 212'],
     '300L Sem 1': ['IPE 301','IPE 303','IPE 309','IPE 311','IPE 315','ECE 351','MEE 301','MEE 351'],
-    '300L Sem 2': ['IPE 302','IPE 304','IPE 306','IPE 308','IPE 310','IPE 322','IPE 352','ENT 312','GNS 312'],
+    '300L Sem 2': ['IPE 302','IPE 304','IPE 306','IPE 308','IPE 310','IPE 316','IPE 322','IPE 352','ECE 302','ECE 312','ECE 316','ECE 352','CHE 352','ENT 312','GNS 312'],
     '400L Sem 1': ['IPE 401','IPE 403','IPE 405','IPE 407','IPE 409','IPE 411','IPE 413'],
     '400L Sem 2': ['IPE 402','IPE 404','IPE 406','IPE 408','IPE 410','IPE 412','IPE 414'],
     '500L Sem 1': ['IPE 501','IPE 503','IPE 505','IPE 507','IPE 509','IPE 511'],
@@ -769,12 +806,19 @@ const COURSES = {
   },
 };
 
-// Unit assignments — GNS/ENT = 2, labs (x07/x08/MAT 108/161) = 1, rest = 3
+// Unit assignments — GNS/ENT = 2, labs (x07/x08/MAT 108/161) = 1, 300L 2-unit courses, rest = 3
 const UNIT_OVERRIDE = {
   'GNS 101':2,'GNS 104':2,'GNS 111':2,'GNS 112':2,'GNS 212':2,'GNS 312':2,
-  'ENT 211':2,'ENT 312':2,
+  'ENT 211':2,'ENT 312':2,'ENT 302':2,
   'MAT 161':1,'MAT 108':1,
   'PHY 107':1,'PHY 108':1,'CHM 108':1,
+  // 300L 2-unit courses confirmed from timetable
+  'ECE 302':2,'ECE 306':1,'ECE 308':2,'ECE 310':2,'ECE 312':2,
+  'ECE 314':2,'ECE 316':2,'ECE 320':2,
+  'MEE 354':2,
+  'ASE 362':2,'ASE 366':2,
+  'CHE 304':2,'CHE 308':2,'CHE 312':2,'CHE 314':1,
+  'IPE 306':2,'IPE 316':2,
 };
 const unitOf = code => UNIT_OVERRIDE[code] ?? 3;
 
@@ -783,17 +827,21 @@ const unitOf = code => UNIT_OVERRIDE[code] ?? 3;
 ════════════════════════════════════════ */
 let S = {
   dept: '', lastIdx: -1,
-  states: {},       // { 'semKey': { code: 'graded'|'pending'|'missing' } }
+  states: {},         // { 'semKey': { code: 'graded'|'pending'|'missing' } }
+  removedCourses: {}, // { 'semKey': { code: true } }
   cgpa: null, targetCgpa: null, targetCls: '',
   why: '', mode: '', neededAvg: null,
 };
 
-function ensureStates(dept, maxIdx) {
+function ensureStates(dept, maxIdx, defaultState) {
+  defaultState = defaultState || 'pending';
   for (let i = 0; i <= maxIdx; i++) {
     const sem = ALL_SEMS[i];
     if (!S.states[sem]) S.states[sem] = {};
+    const removed = S.removedCourses[sem] || {};
     for (const code of ((COURSES[dept] || {})[sem] || [])) {
-      if (!S.states[sem][code]) S.states[sem][code] = 'pending';
+      if (removed[code]) continue;
+      if (!S.states[sem][code]) S.states[sem][code] = defaultState;
     }
   }
 }
@@ -805,7 +853,9 @@ function calcUnits() {
   let g = 0, p = 0, m = 0, t = 0;
   for (let i = 0; i <= S.lastIdx; i++) {
     const sem = ALL_SEMS[i];
+    const removed = S.removedCourses[sem] || {};
     for (const code of ((COURSES[S.dept] || {})[sem] || [])) {
+      if (removed[code]) continue;
       const u  = unitOf(code);
       const st = (S.states[sem] || {})[code] || 'pending';
       t += u;
@@ -827,40 +877,47 @@ function refreshUnitBar() {
 }
 
 /* ════════════════════════════════════════
-    STEP 1 — SELECTS
+    STEP 1 — DEPT CARDS & SEMESTER CHIPS
 ════════════════════════════════════════ */
-const deptSel    = document.getElementById('deptSel');
-const lastSemSel = document.getElementById('lastSemSel');
+window.pickDept = function(btn) {
+  document.querySelectorAll('.dept-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  const dept = btn.dataset.dept;
+  S.dept = dept; S.states = {}; S.removedCourses = {}; S.lastIdx = -1;
+  document.getElementById('unitBar').style.display = 'none';
+  document.getElementById('accordions').innerHTML = '';
+  document.getElementById('bottomSection').style.display = 'none';
+  checkPlanReady();
 
-deptSel.addEventListener('change', () => {
-  const dept = deptSel.value;
-  S.dept = dept; S.states = {}; S.lastIdx = -1;
-  lastSemSel.innerHTML = '';
-  if (!dept) { lastSemSel.disabled = true; lastSemSel.innerHTML = '<option value="">Pick department first</option>'; return; }
-  lastSemSel.disabled = false;
-  lastSemSel.innerHTML = '<option value="">Select semester</option>';
+  const chips = document.getElementById('semChips');
+  chips.innerHTML = '';
   ALL_SEMS.forEach((sem, i) => {
     if ((COURSES[dept] || {})[sem]) {
-      const o = document.createElement('option');
-      o.value = i; o.textContent = sem;
-      lastSemSel.appendChild(o);
+      const c = document.createElement('button');
+      c.className = 'sem-chip';
+      c.dataset.idx = i;
+      c.textContent = sem;
+      c.onclick = function() { pickSem(this); };
+      chips.appendChild(c);
     }
   });
-  document.getElementById('unitBar').style.display = 'none';
-  document.getElementById('accordions').innerHTML  = '';
-  document.getElementById('step1Next').style.display = 'none';
-});
+  document.getElementById('semSection').style.display = 'block';
+};
 
-lastSemSel.addEventListener('change', () => {
-  const idx = parseInt(lastSemSel.value);
-  if (isNaN(idx)) return;
+window.pickSem = function(btn) {
+  document.querySelectorAll('.sem-chip').forEach(c => c.classList.remove('on'));
+  btn.classList.add('on');
+  const idx = parseInt(btn.dataset.idx);
   S.lastIdx = idx;
-  ensureStates(S.dept, idx);
+  S.states = {};
+  S.removedCourses = {};
+  ensureStates(S.dept, idx, 'graded'); // default all to graded — results are out
   document.getElementById('unitBar').style.display = 'flex';
   refreshUnitBar();
   buildAccordions();
-  document.getElementById('step1Next').style.display = 'inline-flex';
-});
+  document.getElementById('bottomSection').style.display = 'block';
+  checkPlanReady();
+};
 
 /* ════════════════════════════════════════
     ACCORDIONS
@@ -870,9 +927,13 @@ function buildAccordions() {
   wrap.innerHTML = '';
   for (let i = 0; i <= S.lastIdx; i++) {
     const sem     = ALL_SEMS[i];
-    const courses = (COURSES[S.dept] || {})[sem] || [];
-    if (!courses.length) continue;
-    const semUnits = courses.reduce((s, c) => s + unitOf(c), 0);
+    const allCourses = (COURSES[S.dept] || {})[sem] || [];
+    if (!allCourses.length) continue;
+
+    const removed  = S.removedCourses[sem] || {};
+    const active   = allCourses.filter(c => !removed[c]);
+    const inactive = allCourses.filter(c => removed[c]);
+    const semUnits = active.reduce((s, c) => s + unitOf(c), 0);
 
     const section = document.createElement('div');
     section.className = 'acc-section';
@@ -889,9 +950,9 @@ function buildAccordions() {
     const body = document.createElement('div');
     body.className = 'acc-body' + (i === S.lastIdx ? ' open' : '');
 
-    for (const code of courses) {
+    for (const code of active) {
       const u  = unitOf(code);
-      const st = (S.states[sem] || {})[code] || 'pending';
+      const st = (S.states[sem] || {})[code] || 'graded';
       const row = document.createElement('div');
       row.className = 'course-row';
       row.innerHTML = `
@@ -901,8 +962,24 @@ function buildAccordions() {
           <button class="st-btn ${st==='graded'?'on':''}"  data-sem="${sem}" data-code="${code}" data-st="graded"  onclick="setCS(this)">✓ <span class="st-text">Graded</span></button>
           <button class="st-btn ${st==='pending'?'on':''}" data-sem="${sem}" data-code="${code}" data-st="pending" onclick="setCS(this)">⏳ <span class="st-text">Pending</span></button>
           <button class="st-btn ${st==='missing'?'on':''}" data-sem="${sem}" data-code="${code}" data-st="missing" onclick="setCS(this)">✗ <span class="st-text">Missing</span></button>
-        </div>`;
+        </div>
+        <button class="rm-course-btn" title="I didn't take this" onclick="removeCS('${sem}','${code}')">×</button>`;
       body.appendChild(row);
+    }
+
+    if (inactive.length > 0) {
+      const restoreSection = document.createElement('div');
+      restoreSection.className = 'restore-section';
+      restoreSection.innerHTML = '<span class="restore-label">Not taking</span><div class="restore-chips"></div>';
+      const chipsWrap = restoreSection.querySelector('.restore-chips');
+      inactive.forEach(code => {
+        const chip = document.createElement('button');
+        chip.className = 'restore-chip';
+        chip.textContent = '+ ' + code;
+        chip.onclick = function() { restoreCS(sem, code); };
+        chipsWrap.appendChild(chip);
+      });
+      body.appendChild(restoreSection);
     }
 
     hd.addEventListener('click', () => {
@@ -925,37 +1002,49 @@ window.setCS = function(btn) {
   refreshUnitBar();
 };
 
+window.removeCS = function(sem, code) {
+  if (!S.removedCourses[sem]) S.removedCourses[sem] = {};
+  S.removedCourses[sem][code] = true;
+  if (S.states[sem]) delete S.states[sem][code];
+  buildAccordions();
+  refreshUnitBar();
+};
+
+window.restoreCS = function(sem, code) {
+  if (S.removedCourses[sem]) delete S.removedCourses[sem][code];
+  if (!S.states[sem]) S.states[sem] = {};
+  S.states[sem][code] = 'graded';
+  buildAccordions();
+  refreshUnitBar();
+};
+
 /* ════════════════════════════════════════
     STEP NAVIGATION
 ════════════════════════════════════════ */
 window.goStep = function(n) {
   if (n === 2) {
-    if (!S.dept || S.lastIdx < 0) return;
-    document.getElementById('unitsDisplay').value = calcUnits().g;
-  }
-  if (n === 3) {
     const c = parseFloat(document.getElementById('cgpaIn').value);
+    if (!S.dept || S.lastIdx < 0) return;
     if (isNaN(c) || c < 0 || c > 5) { alert('Please enter a valid CGPA (0–5).'); return; }
-    if (!S.targetCgpa)                { alert('Please select a graduation target.');  return; }
-    if (!S.why)                       { alert('Please answer the reflection question.'); return; }
+    if (!S.targetCgpa)               { alert('Please select a graduation target.'); return; }
+    if (!S.why)                      { alert('Please answer the reflection question.'); return; }
     S.cgpa = c;
     buildStep3();
   }
   document.querySelectorAll('.step-panel').forEach((p, i) => p.classList.toggle('active', i + 1 === n));
-  for (let i = 1; i <= 3; i++) {
+  for (let i = 1; i <= 2; i++) {
     const node = document.getElementById(`snode-${i}`);
     node.classList.remove('active','done');
     if (i < n) node.classList.add('done');
     else if (i === n) node.classList.add('active');
     if (i < n) document.getElementById(`sc-${i}`).textContent = '✓';
-    else if (i > n) document.getElementById(`sc-${i}`).textContent = i;
     else document.getElementById(`sc-${i}`).textContent = i;
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 /* ════════════════════════════════════════
-    STEP 2 — TARGET & REFLECTION
+    TARGET & REFLECTION
 ════════════════════════════════════════ */
 window.pickTarget = function(btn) {
   document.querySelectorAll('.tgt-btn').forEach(b => b.classList.remove('on'));
@@ -977,7 +1066,7 @@ document.getElementById('specIn').addEventListener('input', function() {
 
 document.getElementById('cgpaIn').addEventListener('input', () => {
   if (S.targetCgpa != null) refreshCard();
-  checkStep2();
+  checkPlanReady();
 });
 
 function refreshCard() {
@@ -1016,20 +1105,21 @@ function refreshCard() {
   S.mode = mode;
   document.getElementById('pc-mode').innerHTML = `<span class="mode-badge ${modeCls}">${mode}</span>`;
 
-  checkStep2();
+  checkPlanReady();
 }
 
-function checkStep2() {
+function checkPlanReady() {
   const c = parseFloat(document.getElementById('cgpaIn').value);
-  const ok = !isNaN(c) && c >= 0 && c <= 5 && S.targetCgpa != null && S.why;
-  document.getElementById('step2Next').style.display = ok ? 'inline-flex' : 'none';
+  const ok = S.dept && S.lastIdx >= 0 && !isNaN(c) && c >= 0 && c <= 5 && S.targetCgpa != null && S.why;
+  const btn = document.getElementById('planBtn');
+  if (btn) btn.style.display = ok ? 'inline-flex' : 'none';
 }
 
 window.pickWhy = function(el) {
   document.querySelectorAll('.radio-opt').forEach(e => e.classList.remove('on'));
   el.classList.add('on');
   S.why = el.dataset.why;
-  checkStep2();
+  checkPlanReady();
 };
 
 /* ════════════════════════════════════════
@@ -1236,6 +1326,7 @@ window.savePlan = async function() {
         academicMode:   S.mode,
         neededAvg:      S.neededAvg,
         courseStates:   S.states,
+        removedCourses: S.removedCourses,
         updatedAt:      serverTimestamp(),
       }
     }, { merge: true });
@@ -1279,20 +1370,17 @@ async function loadSaved() {
     if (gp && gp.dept && COURSES[gp.dept]) {
       // ── Restore saved grade planner ──────────────────
 
-      deptSel.value = gp.dept;
-      deptSel.dispatchEvent(new Event('change'));
-      S.dept = gp.dept;
+      const deptBtn = document.querySelector(`.dept-btn[data-dept="${gp.dept}"]`);
+      if (deptBtn) pickDept(deptBtn);
 
       if (gp.lastSem && ALL_SEMS.includes(gp.lastSem) && (COURSES[gp.dept] || {})[gp.lastSem]) {
         const idx = ALL_SEMS.indexOf(gp.lastSem);
-        lastSemSel.value = String(idx);
-        S.lastIdx = idx;
-        ensureStates(gp.dept, idx);
+        const semBtn = document.querySelector(`.sem-chip[data-idx="${idx}"]`);
+        if (semBtn) pickSem(semBtn);
+        if (gp.removedCourses && typeof gp.removedCourses === 'object') S.removedCourses = gp.removedCourses;
         if (gp.courseStates && typeof gp.courseStates === 'object') S.states = gp.courseStates;
-        document.getElementById('unitBar').style.display = 'flex';
         refreshUnitBar();
         buildAccordions();
-        document.getElementById('step1Next').style.display = 'inline-flex';
       }
 
       if (gp.cgpa != null) { document.getElementById('cgpaIn').value = gp.cgpa; S.cgpa = gp.cgpa; }
@@ -1312,27 +1400,24 @@ async function loadSaved() {
         });
       }
 
-      if (gp.cgpa != null && gp.target != null && gp.whyChoice) checkStep2();
+      if (gp.cgpa != null && gp.target != null && gp.whyChoice) checkPlanReady();
 
     } else if (data.department) {
       // ── No grade planner data yet — pre-fill from profile ──
       const code = DEPT_NAME_TO_CODE[data.department];
       if (code) {
-        deptSel.value = code;
-        deptSel.dispatchEvent(new Event('change'));
-        S.dept = code;
+        const deptBtn = document.querySelector(`.dept-btn[data-dept="${code}"]`);
+        if (deptBtn) pickDept(deptBtn);
 
         // Pre-select last semester based on their current level
         const levelIdx = LEVEL_TO_LAST_SEM_IDX[data.level];
-        setTimeout(() => {
-          if (levelIdx != null && levelIdx >= 0) {
-            const sem = ALL_SEMS[levelIdx];
-            if ((COURSES[code] || {})[sem]) {
-              lastSemSel.value = String(levelIdx);
-              lastSemSel.dispatchEvent(new Event('change'));
-            }
+        if (levelIdx != null && levelIdx >= 0) {
+          const sem = ALL_SEMS[levelIdx];
+          if ((COURSES[code] || {})[sem]) {
+            const semBtn = document.querySelector(`.sem-chip[data-idx="${levelIdx}"]`);
+            if (semBtn) pickSem(semBtn);
           }
-        }, 50);
+        }
       }
     }
   } catch (e) {
