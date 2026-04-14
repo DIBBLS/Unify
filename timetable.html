@@ -262,6 +262,36 @@ nav {
 .toast.show { transform: translateX(-50%) translateY(0); }
 @media (max-width: 768px) { .toast { bottom: 90px; } }
 
+/* ADMIN BADGE */
+.admin-badge { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: rgba(74,222,128,0.12); color: var(--green); border: 1px solid var(--green-border); letter-spacing: .06em; text-transform: uppercase; }
+
+/* ADMIN EDIT BUTTON */
+.class-action-btn.edit-class { border-color: rgba(99,102,241,.3); color: #6366f1; background: rgba(99,102,241,.06); }
+.class-action-btn.edit-class:hover { background: rgba(99,102,241,.14); border-color: #6366f1; }
+
+/* EDIT MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 500; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.open { display: flex; }
+.modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 480px; overflow: hidden; box-shadow: 0 24px 64px rgba(0,0,0,0.18); animation: modalIn .2s ease; }
+@keyframes modalIn { from { opacity:0; transform:scale(.96) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
+.modal-header { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 15px; font-weight: 700; }
+.modal-close { background: none; border: none; cursor: pointer; color: var(--text3); font-size: 18px; line-height: 1; padding: 4px; border-radius: 6px; transition: color .15s; }
+.modal-close:hover { color: var(--text); }
+.modal-body { padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+.modal-course-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text3); background: var(--surface2); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; }
+.modal-field { display: flex; flex-direction: column; gap: 4px; }
+.modal-label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; }
+.modal-input, .modal-select, .modal-textarea { padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font-family: var(--font-body); font-size: 13px; background: var(--bg); color: var(--text); outline: none; transition: border-color .15s; width: 100%; }
+.modal-input:focus, .modal-select:focus, .modal-textarea:focus { border-color: var(--text); }
+.modal-textarea { resize: vertical; min-height: 72px; }
+.modal-footer { padding: 16px 22px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+.modal-btn { padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--font-body); transition: all .15s; border: 1px solid var(--border); background: none; color: var(--text3); }
+.modal-btn:hover { border-color: var(--text); color: var(--text); }
+.modal-btn.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+.modal-btn.primary:hover { opacity: .8; }
+.modal-btn.primary:disabled { opacity: .5; cursor: default; }
+
 /* LOADING */
 .loading-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 999; flex-direction: column; gap: 14px; }
 .loading-logo { font-family: var(--font-display); font-size: 30px; font-weight: 900; letter-spacing: -1px; }
@@ -283,6 +313,45 @@ nav {
 </div>
 <div class="toast" id="toast"></div>
 
+<!-- COURSE REP / ADMIN EDIT MODAL -->
+<div class="modal-overlay" id="editModal" onclick="handleModalOverlayClick(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title">Edit Course Info</span>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div><span class="modal-course-chip" id="editModalCourseChip">—</span></div>
+      <div class="modal-field">
+        <label class="modal-label">Class Status</label>
+        <select class="modal-select" id="editStatus">
+          <option value="scheduled">Scheduled (pending)</option>
+          <option value="confirmed">Confirmed — class is holding</option>
+          <option value="cancelled">Cancelled — class won't hold</option>
+          <option value="postponed">Postponed — TBD</option>
+          <option value="venue_change">Venue change only</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Lecturer (leave blank to keep unchanged)</label>
+        <input class="modal-input" id="editLecturer" placeholder="e.g. Dr. Adeyemi">
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Venue (leave blank to keep unchanged)</label>
+        <input class="modal-input" id="editVenue" placeholder="e.g. ECE Block, LT2">
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Message to students (optional)</label>
+        <textarea class="modal-textarea" id="editMessage" placeholder="e.g. Class starts 30 minutes late. Bring your lab sheets."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn" onclick="closeEditModal()">Cancel</button>
+      <button class="modal-btn primary" id="editSubmitBtn" onclick="submitCourseUpdate()">Post Update →</button>
+    </div>
+  </div>
+</div>
+
 <!-- NAV -->
 <nav>
   <a href="index.html" class="nav-logo">Unify</a>
@@ -297,6 +366,7 @@ nav {
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <span class="notif-badge" id="notifBadge" style="display:none;"></span>
     </button>
+    <span class="admin-badge" id="adminBadge" style="display:none;">Course Rep</span>
     <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">🌙 Dark</button>
     <button class="nav-signout" id="signOutBtn">Sign out</button>
   </div>
@@ -421,7 +491,7 @@ nav {
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, getDocs, collection, query, orderBy, onSnapshot, where, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, getDocs, collection, query, orderBy, onSnapshot, where, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBjZyfNNpXZFJwB7GKXVeSzLTVknfwCa8I",
@@ -442,6 +512,8 @@ let currentUser = null, userProfile = {};
 let timetable = {}; // { Monday: [...classes], Tuesday: [...] }
 let activeDay = '';
 let saveTimeout = null;
+let isAdminUser = false;
+let editingClass = null; // { cls, day } — used by edit modal
 
 // ── THEME ─────────────────────────────────────────────
 function initTheme() {
@@ -483,6 +555,11 @@ async function loadData() {
       const d = snap.data();
       userProfile = d;
       timetable = d.timetable || getDefaultTimetable(d.department, d.level);
+      isAdminUser = d.isAdmin === true || d.isCourseRep === true;
+      if (isAdminUser) {
+        const badge = document.getElementById('adminBadge');
+        if (badge) badge.style.display = 'inline-flex';
+      }
     }
   } catch(e) {
     timetable = getDefaultTimetable('', '');
@@ -626,91 +703,419 @@ function saveData() {
 }
 
 // ── DEFAULT TIMETABLE ─────────────────────────────────
-// LASU Faculty of Engineering — 2025/2026 Second Semester Official Timetable
-// Source: Engineering Lecture Timetable 2025/2026 2nd Semester (signed: A.Prof O.O Shoewu, Sub Dean)
-// ECE courses extracted per level. Times derived from cell positions in faculty grid:
-// Slots: 8–9am, 9–10am, 10–11am, 11am–12pm, [12–1pm break], 1–2pm, 2–3pm, 3–4pm, 4–5pm, 5–6pm
+// LASU Faculty of Engineering — 2025/2026 Second Semester Timetable
+// Departments: ECE, MEE, ASE, CPE, IPE, CVE — Levels: 200, 300, 500
 
 const TIMETABLES = {
-  '200': {
-    Monday: [
-      { id: 'm1', code: 'ECE 220', name: 'Electrical Machines & Circuits', start: '10:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: 'Engr Mumuni / Prof Yussuf / Dr Mary / Dr Ogundare' },
-      { id: 'm2', code: 'ECE 206', name: 'Electronics I', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-    ],
-    Tuesday: [
-      { id: 't1', code: 'ECE 208', name: 'Introduction to Computer Engineering', start: '14:00', end: '17:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-    ],
-    Wednesday: [
-      { id: 'w1', code: 'ECE 206', name: 'Electronics I', start: '13:00', end: '14:00', lecturer: '', location: '', status: 'scheduled', note: 'Shared slot with CVE 210' },
-    ],
-    Thursday: [
-      { id: 'th1', code: 'ECE 202', name: 'Circuit Theory I', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-      { id: 'th2', code: 'ECE 204', name: 'Engineering Drawing II', start: '10:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-    ],
-    Friday: [
-      { id: 'f1', code: 'GNS 212', name: 'Use of English II', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-      { id: 'f2', code: 'ECE 210', name: 'Electrical Machines & Circuits', start: '10:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: 'Runs 10–1pm (3 hrs). Break at 12.' },
-      { id: 'f3', code: 'ECE 202', name: 'Circuit Theory I', start: '13:00', end: '14:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-      { id: 'f4', code: 'ECE 218', name: 'Workshop Practice II', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-    ],
+  ECE: {
+    '200': {
+      Monday: [
+        { id: 'm1', code: 'ECE 220', name: 'ECE 220', start: '10:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory · Title TBD' },
+        { id: 'm2', code: 'CHE 206', name: 'CHE 206', start: '10:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory · Title TBD' },
+      ],
+      Tuesday: [
+        { id: 't1', code: 'ECE 202', name: 'ECE 202', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 't2', code: 'ECE 206', name: 'ECE 206', start: '13:00', end: '14:00', lecturer: '', location: '', status: 'scheduled', note: '1 Unit · Compulsory · Title TBD' },
+      ],
+      Wednesday: [
+        { id: 'w1', code: 'ECE 202', name: 'ECE 202', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 'w2', code: 'ECE 204', name: 'ECE 204', start: '10:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: 'Units TBD · Compulsory · Title TBD' },
+        { id: 'w3', code: 'MEE 204', name: 'MEE 204', start: '11:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '1 Unit · Compulsory · Title TBD' },
+      ],
+      Thursday: [
+        { id: 'th1', code: 'ECE 202', name: 'ECE 202', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 'th2', code: 'ECE 204', name: 'ECE 204', start: '10:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: 'Units TBD · Compulsory · Title TBD' },
+        { id: 'th3', code: 'MEE 204', name: 'MEE 204', start: '11:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '1 Unit · Compulsory · Title TBD' },
+      ],
+      Friday: [
+        { id: 'f1', code: 'GNS 212', name: 'GNS 212', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+        { id: 'f2', code: 'ECE 210', name: 'ECE 210', start: '10:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory · Title TBD' },
+        { id: 'f3', code: 'ECE 202', name: 'ECE 202', start: '15:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 'f4', code: 'MEE 202', name: 'MEE 202', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+      ],
+    },
+    '300': {
+      Monday: [
+        { id: 'm1', code: 'ECE 308', name: 'Digital Electronics II', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Elective' },
+        { id: 'm2', code: 'ECE 351', name: 'Introduction to AI/ML', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 'm3', code: 'ECE 316', name: 'Electrical Machines', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+      ],
+      Tuesday: [
+        { id: 't1', code: 'CHE 352', name: 'Engineering Mathematics IV', start: '08:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 't2', code: 'ECE 302', name: 'Analogue Electronics', start: '11:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+        { id: 't3', code: 'ECE 310', name: 'Introduction to Telecommunications and Broadcasting', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Elective' },
+      ],
+      Wednesday: [
+        { id: 'w1', code: 'ECE 352', name: 'Technical Writing and Communication', start: '08:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 'w2', code: 'ECE 308', name: 'Digital Electronics II', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Elective' },
+        { id: 'w3', code: 'ECE 351', name: 'Introduction to AI/ML', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+      ],
+      Thursday: [
+        { id: 'th1', code: 'ENT 312', name: 'Venture Creation', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+        { id: 'th2', code: 'ECE 306', name: 'Electronic Laboratory II', start: '10:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '1 Unit · Compulsory' },
+        { id: 'th3', code: 'GNS 312', name: 'Peace and Conflict Resolution', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+        { id: 'th4', code: 'ECE 314', name: 'Microprocessor Fundamentals and Applications', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Elective' },
+      ],
+      Friday: [
+        { id: 'f1', code: 'ECE 320', name: 'Electromagnetic Fields and Waves', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Elective' },
+        { id: 'f2', code: 'MEE 352', name: 'Renewable Energy Systems and Technology', start: '10:00', end: '12:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 'f3', code: 'ECE 312', name: 'Signals and Systems', start: '15:00', end: '17:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Elective' },
+      ],
+    },
+    '500': {
+      Monday: [
+        { id: 'm1', code: 'ECE 524', name: 'ECE 524', start: '09:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'm2', code: 'ECE 522', name: 'ECE 522', start: '11:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'm3', code: 'ECE 504', name: 'ECE 504', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Tuesday: [
+        { id: 't1', code: 'ECE 512', name: 'ECE 512', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 't2', code: 'ECE 514', name: 'ECE 514', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Wednesday: [
+        { id: 'w1', code: 'ECE 502', name: 'ECE 502', start: '10:00', end: '12:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'w2', code: 'ECE 520', name: 'ECE 520', start: '12:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Thursday: [
+        { id: 'th1', code: 'ECE 508', name: 'ECE 508', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'th2', code: 'ECE 506', name: 'ECE 506', start: '11:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'th3', code: 'ECE 516', name: 'ECE 516', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Friday: [
+        { id: 'f1', code: 'ECE 514', name: 'ECE 514', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'f2', code: 'ECE 520', name: 'ECE 520', start: '15:00', end: '17:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+    },
   },
 
-  '300': {
-    Monday: [
-      { id: 'm1', code: 'ECE 308', name: 'Network Analysis', start: '13:00', end: '15:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-      { id: 'm2', code: 'ECE 350', name: 'Electronic Devices & Circuits', start: '15:00', end: '17:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-      { id: 'm3', code: 'ECE 351', name: 'Electronic Devices & Circuits Lab', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: 'Lab session' },
-      { id: 'm4', code: 'ECE 316', name: 'Control Systems I', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-    ],
-    Tuesday: [
-      { id: 't1', code: 'ECE 302', name: 'Electromagnetic Fields', start: '13:00', end: '15:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-      { id: 't2', code: 'ECE 310', name: 'Signals & Systems', start: '15:00', end: '17:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-    ],
-    Wednesday: [
-      { id: 'w1', code: 'ECE 352', name: 'Electronic Devices & Circuits II', start: '08:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: '3-hour lecture block' },
-      { id: 'w2', code: 'ECE 322', name: 'Digital Electronics', start: '13:00', end: '15:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-    ],
-    Thursday: [
-      { id: 'th1', code: 'ECE 306', name: 'Electronics II', start: '13:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '3-hour block' },
-      { id: 'th2', code: 'ECE 314', name: 'Communication Systems I', start: '15:00', end: '17:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-    ],
-    Friday: [
-      { id: 'f1', code: 'ECE 320', name: 'Instrumentation & Measurement', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-      { id: 'f2', code: 'ECE 312', name: 'Microprocessors & Microcontrollers', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-    ],
+  MEE: {
+    '200': {
+      Monday: [
+        { id: 'm1', code: 'MEE 212', name: 'MEE 212', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+        { id: 'm2', code: 'CHE 206', name: 'CHE 206', start: '11:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory · Title TBD' },
+        { id: 'm3', code: 'MEE 208', name: 'MEE 208', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory · Title TBD' },
+      ],
+      Tuesday: [],
+      Wednesday: [
+        { id: 'w1', code: 'ENT 202', name: 'ENT 202', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory · Title TBD' },
+        { id: 'w2', code: 'MEE 206', name: 'MEE 206', start: '10:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: 'Units TBD · Compulsory · Title TBD' },
+      ],
+      Thursday: [
+        { id: 'th1', code: 'ECE 202', name: 'ECE 202', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 'th2', code: 'MEE 204', name: 'MEE 204', start: '11:00', end: '12:00', lecturer: '', location: '', status: 'scheduled', note: '1 Unit · Compulsory · Title TBD' },
+        { id: 'th3', code: 'MEE 216', name: 'MEE 216', start: '15:00', end: '17:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+      ],
+      Friday: [
+        { id: 'f1', code: 'GNS 212', name: 'GNS 212', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+        { id: 'f2', code: 'ECE 210', name: 'ECE 210', start: '10:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory · Title TBD' },
+        { id: 'f3', code: 'ECE 202', name: 'ECE 202', start: '15:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+      ],
+    },
+    '300': {
+      Monday: [
+        { id: 'm1', code: 'ECE 351', name: 'Introduction to AI/ML', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 'm2', code: 'ECE 316', name: 'Electrical Machines', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+      ],
+      Tuesday: [
+        { id: 't1', code: 'CHE 352', name: 'Engineering Mathematics IV', start: '08:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+      ],
+      Wednesday: [
+        { id: 'w1', code: 'ECE 352', name: 'Technical Writing and Communication', start: '08:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 'w2', code: 'SPORTS', name: 'Sports', start: '14:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: 'Sports period' },
+      ],
+      Thursday: [
+        { id: 'th1', code: 'ENT 312', name: 'Venture Creation', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+        { id: 'th2', code: 'GNS 312', name: 'Peace and Conflict Resolution', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+        { id: 'th3', code: 'MEE 354', name: 'Computer-Aided Design and Manufacture', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+      ],
+      Friday: [
+        { id: 'f1', code: 'MEE 352', name: 'Renewable Energy Systems and Technology', start: '10:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 'f2', code: 'ECE 302', name: 'Analogue Electronics', start: '17:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+      ],
+    },
+    '500': {
+      Monday: [
+        { id: 'm1', code: 'MEE 516', name: 'MEE 516', start: '08:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'm2', code: 'MEE 526', name: 'MEE 526', start: '12:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'm3', code: 'MEE 518', name: 'MEE 518', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Tuesday: [
+        { id: 't1', code: 'MEE 354', name: 'Computer-Aided Design and Manufacture', start: '08:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+        { id: 't2', code: 'MEE 518', name: 'MEE 518', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 't3', code: 'MEE 526', name: 'MEE 526', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Wednesday: [
+        { id: 'w1', code: 'MEE 504', name: 'Energy Source and Conversion', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+        { id: 'w2', code: 'MEE 512', name: 'MEE 512', start: '10:00', end: '12:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'w3', code: 'MEE 524', name: 'MEE 524', start: '12:00', end: '14:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Thursday: [
+        { id: 'th1', code: 'MEE 510', name: 'MEE 510', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'th2', code: 'MEE 508', name: 'MEE 508', start: '10:00', end: '12:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'th3', code: 'MEE 514', name: 'MEE 514', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Friday: [
+        { id: 'f1', code: 'MEE 520', name: 'MEE 520', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'f2', code: 'MEE 506', name: 'MEE 506', start: '15:00', end: '17:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+    },
   },
 
-  '500': {
-    Monday: [
-      { id: 'm1', code: 'ECE 524', name: 'Power Systems Analysis', start: '09:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-      { id: 'm2', code: 'ECE 522', name: 'Digital Signal Processing', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-      { id: 'm3', code: 'ECE 504', name: 'Electromagnetic Compatibility', start: '15:00', end: '17:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-    ],
-    Tuesday: [
-      { id: 't1', code: 'ECE 512', name: 'Advanced Control Systems', start: '13:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '3-hour block' },
-      { id: 't2', code: 'ECE 514', name: 'Communication Systems II', start: '15:00', end: '17:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-      { id: 't3', code: 'ECE 518', name: 'Power Electronics', start: '15:00', end: '17:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-    ],
-    Wednesday: [
-      { id: 'w1', code: 'ECE 502', name: 'Engineering Management', start: '15:00', end: '17:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-      { id: 'w2', code: 'ECE 520', name: 'Microwave Engineering', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-    ],
-    Thursday: [
-      { id: 'th1', code: 'ECE 508', name: 'Antenna Theory & Design', start: '13:00', end: '15:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-      { id: 'th2', code: 'ECE 506', name: 'Digital Communications', start: '15:00', end: '17:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-      { id: 'th3', code: 'ECE 516', name: 'Fibre Optics & Photonics', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-    ],
-    Friday: [
-      { id: 'f1', code: 'ECE 518', name: 'Power Electronics', start: '13:00', end: '15:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-      { id: 'f2', code: 'ECE 510', name: 'VLSI Design', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '' },
-    ],
+  ASE: {
+    '200': {
+      Monday: [
+        { id: 'm1', code: 'MEE 212', name: 'MEE 212', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+        { id: 'm2', code: 'CHE 206', name: 'CHE 206', start: '10:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory · Title TBD' },
+        { id: 'm3', code: 'MEE 208', name: 'MEE 208', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory · Title TBD' },
+      ],
+      Tuesday: [
+        { id: 't1', code: 'ASE 204', name: 'ASE 204', start: '15:00', end: '17:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+      ],
+      Wednesday: [
+        { id: 'w1', code: 'ENT 202', name: 'ENT 202', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+        { id: 'w2', code: 'ASE 202', name: 'ASE 202', start: '11:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+      ],
+      Thursday: [
+        { id: 'th1', code: 'ECE 202', name: 'ECE 202', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 'th2', code: 'MEE 204', name: 'MEE 204', start: '11:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '1 Unit · Compulsory · Title TBD' },
+        { id: 'th3', code: 'ASE 212', name: 'ASE 212', start: '14:00', end: '17:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+      ],
+      Friday: [
+        { id: 'f1', code: 'GNS 212', name: 'GNS 212', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+        { id: 'f2', code: 'ECE 210', name: 'ECE 210', start: '10:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory · Title TBD' },
+        { id: 'f3', code: 'MEE 212', name: 'MEE 212', start: '12:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+        { id: 'f4', code: 'ECE 202', name: 'ECE 202', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 'f5', code: 'MEE 202', name: 'MEE 202', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+      ],
+    },
+    '300': {
+      Monday: [
+        { id: 'm1', code: 'ASE 344', name: 'ASE 344', start: '08:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'm2', code: 'ASE 362', name: 'Aerospace Technology Lab II', start: '11:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+        { id: 'm3', code: 'ECE 351', name: 'Introduction to AI/ML', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 'm4', code: 'ASE 352', name: 'ASE 352', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Tuesday: [
+        { id: 't1', code: 'CHE 352', name: 'Engineering Mathematics IV', start: '08:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 't2', code: 'ASE 378', name: 'ASE 378', start: '11:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 't3', code: 'ASE 366', name: 'Principle of Aerodynamics', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Required' },
+        { id: 't4', code: 'ASE 364', name: 'ASE 364', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Wednesday: [
+        { id: 'w1', code: 'ECE 352', name: 'Technical Writing and Communication', start: '08:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 'w2', code: 'ASE 380', name: 'ASE 380', start: '11:00', end: '14:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Thursday: [
+        { id: 'th1', code: 'ASE 312', name: 'ASE 312', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'th2', code: 'ASE 360', name: 'ASE 360', start: '10:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'th3', code: 'GNS 312', name: 'Peace and Conflict Resolution', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+        { id: 'th4', code: 'ASE 366', name: 'Principle of Aerodynamics', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Required' },
+      ],
+      Friday: [
+        { id: 'f1', code: 'ECE 302', name: 'Analogue Electronics', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+        { id: 'f2', code: 'ASE 352', name: 'ASE 352', start: '10:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'f3', code: 'ASE 366', name: 'Principle of Aerodynamics', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Required' },
+        { id: 'f4', code: 'ENT 302', name: 'ENT 302', start: '17:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+    },
+    '500': {
+      Monday: [
+        { id: 'm1', code: 'ASE 508', name: 'Airline Enterprise Operations', start: '08:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Required' },
+      ],
+      Tuesday: [
+        { id: 't1', code: 'ASE 580', name: 'ASE 580', start: '14:00', end: '17:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Wednesday: [
+        { id: 'w1', code: 'ASE 524', name: 'Aircraft Materials', start: '08:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Required' },
+        { id: 'w2', code: 'ASE 504', name: 'Aircraft Maintenance', start: '11:00', end: '14:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Required' },
+      ],
+      Thursday: [
+        { id: 'th1', code: 'ASE 566', name: 'Safety & Reliability', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Required' },
+        { id: 'th2', code: 'ASE 588', name: 'Aircraft Design II', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Required' },
+      ],
+      Friday: [],
+    },
+  },
+
+  CPE: {
+    '200': {
+      Monday: [
+        { id: 'm1', code: 'CHE 206', name: 'CHE 206', start: '08:00', end: '09:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory · Title TBD' },
+        { id: 'm2', code: 'CHE 206', name: 'CHE 206', start: '10:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory · Title TBD' },
+        { id: 'm3', code: 'CPE 206', name: 'CPE 206', start: '14:00', end: '15:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'm4', code: 'CPE 202', name: 'CPE 202', start: '15:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Tuesday: [
+        { id: 't1', code: 'CHE 202', name: 'CHE 202', start: '11:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory · Title TBD' },
+        { id: 't2', code: 'CHE 202', name: 'CHE 202', start: '14:00', end: '15:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory · Title TBD' },
+        { id: 't3', code: 'CPE 204', name: 'CPE 204', start: '15:00', end: '17:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Wednesday: [
+        { id: 'w1', code: 'ENT 202', name: 'ENT 202', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+        { id: 'w2', code: 'CPE 206', name: 'CPE 206', start: '10:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Thursday: [
+        { id: 'th1', code: 'ENT 202', name: 'ENT 202', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+        { id: 'th2', code: 'MEE 204', name: 'MEE 204', start: '11:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+      ],
+      Friday: [
+        { id: 'f1', code: 'GNS 212', name: 'GNS 212', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+        { id: 'f2', code: 'CPE 204', name: 'CPE 204', start: '10:00', end: '12:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+    },
+    '300': {
+      Monday: [
+        { id: 'm1', code: 'CHE 308', name: 'Numerical Method in Chemical Engineering', start: '08:00', end: '09:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+        { id: 'm2', code: 'CPE 306', name: 'CPE 306', start: '09:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'm3', code: 'CHE 312', name: 'Transfer Process II', start: '11:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Required' },
+        { id: 'm4', code: 'CPE 316', name: 'CPE 316', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Tuesday: [
+        { id: 't1', code: 'CHE 352', name: 'Engineering Mathematics IV', start: '08:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 't2', code: 'CPE 314', name: 'CPE 314', start: '11:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 't3', code: 'CPE 314', name: 'CPE 314', start: '14:00', end: '15:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD · 2nd slot' },
+        { id: 't4', code: 'CPE 304', name: 'CPE 304', start: '15:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Wednesday: [
+        { id: 'w1', code: 'ECE 352', name: 'Technical Writing and Communication', start: '08:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 'w2', code: 'CHE 314', name: 'Chemical Engineering Laboratory', start: '11:00', end: '12:00', lecturer: '', location: '', status: 'scheduled', note: '1 Unit · Required' },
+        { id: 'w3', code: 'CPE 310', name: 'CPE 310', start: '12:00', end: '14:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Thursday: [
+        { id: 'th1', code: 'ENT 312', name: 'Venture Creation', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+        { id: 'th2', code: 'CPE 316', name: 'CPE 316', start: '10:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'th3', code: 'GNS 312', name: 'Peace and Conflict Resolution', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+        { id: 'th4', code: 'CPE 302', name: 'CPE 302', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Friday: [
+        { id: 'f1', code: 'CPE 308', name: 'CPE 308', start: '08:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'f2', code: 'CHE 304', name: 'Separation Process', start: '11:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+        { id: 'f3', code: 'CPE 312', name: 'CPE 312', start: '15:00', end: '17:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'f4', code: 'CHE 308', name: 'Numerical Method in Chemical Engineering', start: '17:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+      ],
+    },
+    '500': {
+      Monday: [
+        { id: 'm1', code: 'CPE 510', name: 'CPE 510', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'm2', code: 'CPE 502', name: 'CPE 502', start: '11:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'm3', code: 'CPE 520', name: 'CPE 520', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Tuesday: [
+        { id: 't1', code: 'CPE 504', name: 'CPE 504', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 't2', code: 'CPE 522', name: 'CPE 522', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Wednesday: [
+        { id: 'w1', code: 'CPE 516', name: 'CPE 516', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'w2', code: 'CPE 508', name: 'CPE 508', start: '10:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Thursday: [
+        { id: 'th1', code: 'CPE 508', name: 'CPE 508', start: '08:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'th2', code: 'CPE 506', name: 'CPE 506', start: '11:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'th3', code: 'CPE 524', name: 'CPE 524', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Friday: [
+        { id: 'f1', code: 'CPE 518', name: 'CPE 518', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+    },
+  },
+
+  IPE: {
+    '200': {
+      Monday: [
+        { id: 'm1', code: 'MEE 212', name: 'MEE 212', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+        { id: 'm2', code: 'MEE 208', name: 'MEE 208', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory · Title TBD' },
+      ],
+      Tuesday: [
+        { id: 't1', code: 'IPE 212', name: 'IPE 212', start: '08:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+      ],
+      Wednesday: [
+        { id: 'w1', code: 'ENT 202', name: 'ENT 202', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+      ],
+      Thursday: [
+        { id: 'th1', code: 'ECE 202', name: 'ECE 202', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 'th2', code: 'MEE 204', name: 'MEE 204', start: '11:00', end: '12:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+        { id: 'th3', code: 'IPE 214', name: 'IPE 214', start: '17:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+      ],
+      Friday: [
+        { id: 'f1', code: 'GNS 212', name: 'GNS 212', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+        { id: 'f2', code: 'ECE 210', name: 'ECE 210', start: '10:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory · Title TBD' },
+        { id: 'f3', code: 'ECE 202', name: 'ECE 202', start: '15:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 'f4', code: 'MEE 202', name: 'MEE 202', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory · Title TBD' },
+      ],
+    },
+    '300': {
+      Monday: [
+        { id: 'm1', code: 'ECE 351', name: 'Introduction to AI/ML', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 'm2', code: 'ECE 316', name: 'Electrical Machines', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+      ],
+      Tuesday: [
+        { id: 't1', code: 'CHE 352', name: 'Engineering Mathematics IV', start: '08:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+      ],
+      Wednesday: [
+        { id: 'w1', code: 'ECE 352', name: 'Technical Writing and Communication', start: '08:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 'w2', code: 'IPE 316', name: 'Ergonomics', start: '11:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+        { id: 'w3', code: 'IPE 306', name: 'Operations Research II', start: '13:00', end: '14:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+      ],
+      Thursday: [
+        { id: 'th1', code: 'ECE 312', name: 'Signals and Systems', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Elective' },
+        { id: 'th2', code: 'GNS 312', name: 'Peace and Conflict Resolution', start: '13:00', end: '14:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+      ],
+      Friday: [
+        { id: 'f1', code: 'ECE 302', name: 'Analogue Electronics', start: '17:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+      ],
+    },
+    '500': {
+      Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [],
+    },
+  },
+
+  CVE: {
+    '200': {
+      Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [],
+    },
+    '300': {
+      Monday: [
+        { id: 'm1', code: 'ECE 351', name: 'Introduction to AI/ML', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 'm2', code: 'ECE 316', name: 'Electrical Machines', start: '16:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+      ],
+      Tuesday: [
+        { id: 't1', code: 'CHE 352', name: 'Engineering Mathematics IV', start: '08:00', end: '11:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+        { id: 't2', code: 'CVE 304', name: 'CVE 304', start: '11:00', end: '13:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+      ],
+      Wednesday: [
+        { id: 'w1', code: 'ECE 352', name: 'Technical Writing and Communication', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '3 Units · Compulsory' },
+      ],
+      Thursday: [
+        { id: 'th1', code: 'ECE 312', name: 'Signals and Systems', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Elective' },
+        { id: 'th2', code: 'GNS 312', name: 'Peace and Conflict Resolution', start: '14:00', end: '16:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+      ],
+      Friday: [
+        { id: 'f1', code: 'CVE 308', name: 'CVE 308', start: '08:00', end: '10:00', lecturer: '', location: '', status: 'scheduled', note: 'Units/Title TBD' },
+        { id: 'f2', code: 'ECE 302', name: 'Analogue Electronics', start: '17:00', end: '18:00', lecturer: '', location: '', status: 'scheduled', note: '2 Units · Compulsory' },
+      ],
+    },
+    '500': {
+      Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [],
+    },
   },
 };
 
+function guessDeptKey(dept) {
+  if (!dept) return 'ECE';
+  const d = dept.toUpperCase();
+  if (d.includes('ELECTRICAL') || d.includes('ECE') || d.includes('COMPUTER')) return 'ECE';
+  if (d.includes('MECHANICAL') || d.includes('MEE')) return 'MEE';
+  if (d.includes('AEROSPACE') || d.includes('ASE')) return 'ASE';
+  if (d.includes('CHEMICAL') || d.includes('CPE')) return 'CPE';
+  if (d.includes('INDUSTRIAL') || d.includes('IPE')) return 'IPE';
+  if (d.includes('CIVIL') || d.includes('CVE')) return 'CVE';
+  return 'ECE';
+}
+
 function getDefaultTimetable(dept, level) {
-  // Map level string to key: '200 Level' → '200', '300 Level' → '300', etc.
   const lvlKey = level ? level.replace(/\D/g, '').slice(0, 3) : '300';
-  return TIMETABLES[lvlKey] || TIMETABLES['300'];
+  const deptKey = guessDeptKey(dept);
+  return (TIMETABLES[deptKey] && TIMETABLES[deptKey][lvlKey]) || TIMETABLES['ECE']['300'];
 }
 
 // ── INIT PAGE ─────────────────────────────────────────
@@ -802,12 +1207,21 @@ function renderClasses() {
       rescheduled: '<span class="class-status-badge" style="background:rgba(59,130,246,.1);color:#2563eb;border:1px solid rgba(59,130,246,.25);"><div class="status-dot" style="background:#2563eb;"></div>Rescheduled</span>',
     };
 
-    const actions = cls.status === 'cancelled'
-      ? `<button class="class-action-btn undo" onclick="updateStatus('${cls.id}','scheduled')">↩ Restore</button>`
-      : cls.status === 'confirmed'
-      ? `<button class="class-action-btn cancel" onclick="updateStatus('${cls.id}','cancelled')">Mark Cancelled</button>`
-      : `<button class="class-action-btn confirm" onclick="updateStatus('${cls.id}','confirmed')">✓ Confirm</button>
-         <button class="class-action-btn cancel" onclick="updateStatus('${cls.id}','cancelled')">✕ Cancel</button>`;
+    const editBtn = isAdminUser
+      ? `<button class="class-action-btn edit-class" onclick="openEditModal('${cls.id}','${activeDay}')">✏ Edit</button>`
+      : '';
+    const confirmBtn = `<button class="class-action-btn confirm" onclick="updateStatus('${cls.id}','confirmed')">✓ Confirm</button>`;
+    const cancelBtn  = `<button class="class-action-btn cancel"  onclick="updateStatus('${cls.id}','cancelled')">✕ Cancel</button>`;
+    const pendingBtn = `<button class="class-action-btn undo"    onclick="updateStatus('${cls.id}','scheduled')">⏸ Pending</button>`;
+    let actions;
+    if (cls.status === 'confirmed') {
+      actions = pendingBtn + cancelBtn + editBtn;
+    } else if (cls.status === 'cancelled') {
+      actions = pendingBtn + confirmBtn + editBtn;
+    } else {
+      // scheduled / postponed / anything else → pending is the current state
+      actions = confirmBtn + cancelBtn + editBtn;
+    }
 
     return `<div class="class-card ${displayStatus}" id="card-${cls.id}">
       <div class="class-status-strip"></div>
@@ -850,7 +1264,7 @@ window.updateStatus = function(id, newStatus) {
   const msgs = {
     confirmed: '✅ Class confirmed — it\'s happening!',
     cancelled: '❌ Class marked as cancelled.',
-    scheduled: '↩ Class restored to scheduled.',
+    scheduled: '⏸ Class set back to pending.',
   };
   showToast(msgs[newStatus] || 'Updated');
 }
@@ -905,6 +1319,76 @@ function showToast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
+
+// ── ADMIN / COURSE REP EDIT MODAL ────────────────────
+window.openEditModal = function(id, day) {
+  const dayClasses = timetable[day] || [];
+  const cls = dayClasses.find(c => c.id === id);
+  if (!cls) return;
+  editingClass = { cls, day };
+  document.getElementById('editModalCourseChip').textContent = `${cls.code} · ${day}`;
+  document.getElementById('editStatus').value =
+    ['scheduled','confirmed','cancelled','postponed','venue_change'].includes(cls.status) ? cls.status : 'scheduled';
+  document.getElementById('editLecturer').value = cls.lecturer || '';
+  document.getElementById('editVenue').value = cls.location || '';
+  document.getElementById('editMessage').value = '';
+  document.getElementById('editModal').classList.add('open');
+};
+
+window.closeEditModal = function() {
+  document.getElementById('editModal').classList.remove('open');
+  editingClass = null;
+};
+
+window.handleModalOverlayClick = function(e) {
+  if (e.target === document.getElementById('editModal')) closeEditModal();
+};
+
+window.submitCourseUpdate = async function() {
+  if (!editingClass || !currentUser) return;
+  const { cls, day } = editingClass;
+  const status   = document.getElementById('editStatus').value;
+  const lecturer = document.getElementById('editLecturer').value.trim();
+  const venue    = document.getElementById('editVenue').value.trim();
+  const message  = document.getElementById('editMessage').value.trim();
+
+  const btn = document.getElementById('editSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Posting...';
+
+  try {
+    const updateId = `${cls.code.replace(/\s/g,'-')}_${Date.now()}`;
+    const payload = {
+      courseCode: cls.code,
+      status,
+      lecturer: lecturer || null,
+      venue: venue || null,
+      message: message || null,
+      postedAt: serverTimestamp(),
+      postedBy: userProfile?.name || currentUser.email,
+      postedByEmail: currentUser.email,
+    };
+    await setDoc(doc(db, 'courseUpdates', updateId), payload);
+
+    // Update local copy immediately so the card reflects the change
+    if (lecturer) cls.lecturer = lecturer;
+    if (venue) cls.location = venue;
+    if (message) cls.adminMessage = message;
+    if (['confirmed','cancelled','postponed'].includes(status)) cls.status = status;
+    else if (status === 'scheduled') cls.status = 'scheduled';
+    saveData();
+    renderClasses();
+
+    closeEditModal();
+    showToast('✅ Update posted to all students');
+  } catch(e) {
+    console.error(e);
+    showToast('❌ Failed to post update');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Post Update →';
+  }
+};
 
 // ── SERVICE WORKER (Push Notifications) ───────────────
 async function registerServiceWorker() {
