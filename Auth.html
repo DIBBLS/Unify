@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Unify — Sign In</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/responsive.css">
+<script src="js/theme.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -49,16 +54,16 @@ body { background: var(--white); color: var(--black); font-family: var(--font-bo
 
 .form-label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--mid); margin-bottom: 4px; display: block; }
 .form-input {
-  width: 100%; padding: 12px 14px; background: var(--white);
+  width: 100%; padding: 12px 14px; min-height: 44px; background: var(--white);
   border: 1px solid var(--grey); border-radius: 6px;
-  font-family: var(--font-body); font-size: 14px; color: var(--black);
+  font-family: var(--font-body); font-size: 16px; color: var(--black);
   outline: none; transition: border-color 0.15s;
 }
 .form-input:focus { border-color: var(--black); }
 .form-input::placeholder { color: #bbb; }
 
 .btn-submit {
-  width: 100%; padding: 14px; background: var(--black); color: var(--white);
+  width: 100%; padding: 14px; min-height: 48px; background: var(--black); color: var(--white);
   border: none; border-radius: 6px; font-family: var(--font-display);
   font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; margin-top: 4px;
 }
@@ -70,7 +75,7 @@ body { background: var(--white); color: var(--black); font-family: var(--font-bo
 .divider span { font-size: 11px; color: var(--mid); text-transform: uppercase; letter-spacing: 1px; }
 
 .btn-google {
-  width: 100%; padding: 12px; background: var(--white); color: var(--black);
+  width: 100%; padding: 12px; min-height: 48px; background: var(--white); color: var(--black);
   border: 1px solid var(--grey); border-radius: 6px; font-family: var(--font-body);
   font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s;
   display: flex; align-items: center; justify-content: center; gap: 10px;
@@ -89,9 +94,16 @@ body { background: var(--white); color: var(--black); font-family: var(--font-bo
 
 @media (max-width: 768px) {
   body { flex-direction: column; }
-  .auth-left { min-height: 240px; padding: 32px 24px; }
+  .auth-left { min-height: 220px; padding: 28px 20px; }
   .auth-left-bg { font-size: 50vw; }
-  .auth-right { width: 100%; padding: 32px 24px; border-left: none; border-top: 1px solid var(--grey); }
+  .auth-left-title { font-size: clamp(28px, 7vw, 44px); }
+  .auth-right { width: 100%; padding: 28px 20px 40px; border-left: none; border-top: 1px solid var(--grey); }
+  .auth-left-footer { display: none; }
+}
+@media (max-width: 380px) {
+  .auth-left { min-height: 180px; padding: 24px 16px; }
+  .auth-left-bg { display: none; }
+  .auth-right { padding: 24px 16px 40px; }
 }
 </style>
 </head>
@@ -159,24 +171,9 @@ body { background: var(--white); color: var(--black); font-family: var(--font-bo
 
 <!-- Firebase -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, linkWithPopup, GoogleAuthProvider, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyBjZyfNNpXZFJwB7GKXVeSzLTVknfwCa8I",
-    authDomain: "unify-b4316.firebaseapp.com",
-    projectId: "unify-b4316",
-    storageBucket: "unify-b4316.firebasestorage.app",
-    messagingSenderId: "114594366615",
-    appId: "1:114594366615:web:44ef821b4618f1a24615d2",
-    measurementId: "G-MY2M1R6DJV"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-  const provider = new GoogleAuthProvider();
+  import { auth, db, provider } from './js/firebase-config.js';
+  import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   // If already logged in → check if onboarded
   onAuthStateChanged(auth, async user => {

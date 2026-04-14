@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Unify — Learn</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/responsive.css">
+<script src="js/theme.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -638,9 +643,54 @@ nav {
 .mobile-nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text); margin-top: 2px; opacity: 0; transition: opacity 0.15s; }
 .mobile-nav-btn.active .mobile-nav-dot { opacity: 1; }
 
+/* ── Mobile sidebar toggle button ────────────────────── */
+.sidebar-mobile-toggle {
+  display: none;
+  width: 100%;
+  padding: 14px 20px;
+  background: var(--bg);
+  border: none;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  transition: background 0.15s, border-color 0.25s;
+}
+.sidebar-mobile-toggle:hover { background: var(--surface2); }
+.sidebar-mobile-toggle-icon {
+  font-size: 12px;
+  color: var(--text3);
+  transition: transform 0.25s;
+  flex-shrink: 0;
+}
+.sidebar-mobile-toggle.open .sidebar-mobile-toggle-icon {
+  transform: rotate(180deg);
+}
+
 @media (max-width: 900px) {
   .learn-layout { grid-template-columns: 1fr; }
-  .learn-sidebar { position: relative; height: auto; top: 0; border-right: none; border-bottom: 1px solid var(--border); max-height: 360px; overflow-y: auto; }
+  .learn-sidebar {
+    position: relative;
+    height: auto;
+    top: 0;
+    border-right: none;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, border-bottom 0.25s;
+    border-bottom: none;
+  }
+  .learn-sidebar.sidebar-open {
+    max-height: 60vh;
+    overflow-y: auto;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-mobile-toggle { display: flex; }
   .lesson-header, .lesson-body, .lesson-complete-section { padding: 24px 20px; }
   .week-landing { padding: 24px 20px; }
   .course-complete { padding: 40px 20px; }
@@ -650,6 +700,12 @@ nav {
   .cc-week-bar-wrap, .cc-week-conf, .cc-week-topics { display: none; }
   .mobile-nav { display: block; }
   body { padding-bottom: 76px; }
+}
+
+@media (max-width: 480px) {
+  .lesson-header, .lesson-body, .lesson-complete-section { padding: 20px 16px; }
+  .week-landing { padding: 20px 16px; }
+  .wl-title { font-size: clamp(20px, 6vw, 28px); }
 }
 </style>
 </head>
@@ -688,10 +744,16 @@ nav {
   </div>
 </nav>
 
+<!-- Mobile sidebar toggle (only visible on ≤900px) -->
+<button class="sidebar-mobile-toggle" id="sidebarMobileToggle" onclick="toggleMobileSidebar()">
+  <span id="sidebarToggleLabel">📋 Course Outline</span>
+  <span class="sidebar-mobile-toggle-icon">▼</span>
+</button>
+
 <div class="learn-layout">
 
   <!-- ── SIDEBAR ── -->
-  <div class="learn-sidebar">
+  <div class="learn-sidebar" id="learnSidebar">
     <div class="sidebar-course-header">
       <div class="sidebar-course-code" id="sidebarCode">—</div>
       <div class="sidebar-course-name" id="sidebarName">Loading...</div>
@@ -902,23 +964,9 @@ nav {
 <script src="courses.js"></script>
 <script src="courseContent.js"></script>
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBjZyfNNpXZFJwB7GKXVeSzLTVknfwCa8I",
-  authDomain: "unify-b4316.firebaseapp.com",
-  projectId: "unify-b4316",
-  storageBucket: "unify-b4316.firebasestorage.app",
-  messagingSenderId: "114594366615",
-  appId: "1:114594366615:web:44ef821b4618f1a24615d2",
-  measurementId: "G-MY2M1R6DJV"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+import { auth, db } from './js/firebase-config.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 let currentUser = null, userProfile = {};
 let courseCode = '', courseName = '', courseTopics = [];
@@ -938,24 +986,17 @@ let activeWeekIdx = null, activeTopicIdx = null;
 let selectedConfidence = 0;
 let saveTimeout = null;
 
-// ── DARK MODE ─────────────────────────────────────────
-function initTheme() {
-  const saved = localStorage.getItem('unify-theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  applyTheme(saved || (prefersDark ? 'dark' : 'light'));
-}
-function applyTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
-  const btn = document.getElementById('themeToggle');
-  if (btn) btn.textContent = theme === 'dark' ? 'Light' : 'Dark';
-}
-window.toggleTheme = function() {
-  const cur = document.documentElement.getAttribute('data-theme');
-  const next = cur === 'dark' ? 'light' : 'dark';
-  localStorage.setItem('unify-theme', next);
-  applyTheme(next);
-}
-initTheme();
+// ── DARK MODE handled by js/theme.js ──────────────────
+
+// ── MOBILE SIDEBAR TOGGLE ──────────────────────────────
+window.toggleMobileSidebar = function() {
+  const sidebar = document.getElementById('learnSidebar');
+  const toggle  = document.getElementById('sidebarMobileToggle');
+  const label   = document.getElementById('sidebarToggleLabel');
+  const isOpen  = sidebar.classList.toggle('sidebar-open');
+  toggle.classList.toggle('open', isOpen);
+  label.textContent = isOpen ? '📋 Hide Course Outline' : '📋 Course Outline';
+};
 
 // ── AUTH ──────────────────────────────────────────────
 onAuthStateChanged(auth, async user => {

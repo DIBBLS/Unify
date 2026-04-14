@@ -1,0 +1,66 @@
+/*
+ * Unify — Base / Reset
+ * Shared across all pages.
+ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  overflow-x: hidden;
+  transition: background 0.25s, color 0.25s;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Fluid typography helper ─────────────────────────── */
+h1, h2, h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.5px;
+}
+
+/* ── Focus ring (accessibility) ──────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Images ──────────────────────────────────────────── */
+img, video, iframe {
+  max-width: 100%;
+}
+
+/* ── Loading overlay ─────────────────────────────────── */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  flex-direction: column;
+  gap: 14px;
+  transition: background 0.25s;
+}
+.loading-logo {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: -1px;
+}
+.loading-sub {
+  font-size: 13px;
+  color: var(--text3);
+}
