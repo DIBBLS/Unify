@@ -1,0 +1,1155 @@
+      import { auth, db } from "./js/firebase-config.js";
+      import {
+        onAuthStateChanged,
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+      import {
+        doc,
+        getDoc,
+        setDoc,
+        collection,
+        query,
+        orderBy,
+        limit,
+        getDocs,
+        updateDoc,
+        arrayUnion,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+      let currentUser = null,
+        saveTimeout = null,
+        activeCourseId = null;
+      let userProfile = {},
+        aspirations = [];
+      let earnedBadges = new Set();
+      let weekProgress = {};
+      // ── SECURITY ──────────────────────────────────────────
+      function sanitise(str) {
+        if (!str) return "";
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#x27;")
+          .replace(/[/]/g, "&#x2F;");
+      }
+
+      // Rate limiter — max N actions per window
+      const rateLimits = {};
+      function rateLimit(key, max = 5, windowMs = 60000) {
+        const now = Date.now();
+        if (!rateLimits[key]) rateLimits[key] = [];
+        rateLimits[key] = rateLimits[key].filter((t) => now - t < windowMs);
+        if (rateLimits[key].length >= max) return false;
+        rateLimits[key].push(now);
+        return true;
+      }
+
+      // ── DARK MODE handled by js/theme.js ──────────────────
+
+      // ── AUTH ──────────────────────────────────────────────
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          window.location.href = "auth.html";
+          return;
+        }
+        currentUser = user;
+        // Best first name: Firebase Auth displayName > Firestore firstName (loaded after) > cleaned email
+        let first = "Builder";
+        if (user.displayName && user.displayName.trim()) {
+          first = user.displayName.trim().split(/\s+/)[0];
+        } else if (user.email) {
+          const raw = user.email
+            .split("@")[0]
+            .replace(/[._\-0-9]/g, " ")
+            .trim();
+          const words = raw.split(/\s+/).filter(Boolean);
+          first =
+            words.length > 1
+              ? words[0]
+              : raw.charAt(0).toUpperCase() + raw.slice(1, 9);
+        }
+        window._dashFirst = first; // will be overwritten by Firestore firstName once loaded
+        const hr = new Date().getHours();
+        const greet =
+          hr < 12
+            ? "Good morning"
+            : hr < 17
+              ? "Good afternoon"
+              : "Good evening";
+        document.getElementById("heroName").innerHTML =
+          `${greet},<br><em id="heroFirstName">${first}.</em>`;
+        document.getElementById("navUserName").textContent = first;
+        await loadUserData();
+        initStreak();
+        document.getElementById("loadingOverlay").style.display = "none";
+      });
+
+      // Refresh course card progress when returning from learn.html
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible" && window.courses?.length)
+          displayCourses();
+      });
+
+      document
+        .getElementById("signOutBtn")
+        .addEventListener("click", async () => {
+          await signOut(auth);
+          window.location.href = "auth.html";
+        });
+
+      // ── LOAD DATA ─────────────────────────────────────────
+      async function loadUserData() {
+        let savedGoalPlan = null;
+        try {
+          const snap = await getDoc(doc(db, "users", currentUser.uid));
+          if (!snap.exists() || !snap.data().university) {
+            window.location.href = "onboarding.html";
+            return;
+          }
+          const d = snap.data();
+          savedGoalPlan = d.gradePlanner || null; // grab it first before anything can throw
+          userProfile = {
+            university: d.university,
+            faculty: d.faculty,
+            department: d.department,
+            level: d.level,
+          };
+          if (!d.firstName) {
+            const nudge = document.getElementById("nameNudge");
+            if (nudge) nudge.style.display = "flex";
+          }
+          if (d.firstName) {
+            const first = d.firstName;
+            const hr = new Date().getHours();
+            const greet =
+              hr < 12
+                ? "Good morning"
+                : hr < 17
+                  ? "Good afternoon"
+                  : "Good evening";
+            document.getElementById("heroName").innerHTML =
+              `${greet},<br><em id="heroFirstName">${first}.</em>`;
+            document.getElementById("navUserName").textContent = first;
+          }
+          window.courses = d.courses || [];
+          aspirations = d.aspirations || [];
+          weekProgress = d.weekProgress || {};
+          document.getElementById("heroTag").textContent =
+            `${d.university} · ${d.level}`;
+          document.getElementById("heroDept").textContent = d.department;
+
+          const firstCourse = window.courses[0]?.course || "";
+          const deptPrefix =
+            {
+              "Electronic & Computer Engineering": "ECE",
+              "Mechanical Engineering": "MEE",
+              "Chemical & Polymer Engineering": "CHE",
+              "Civil Engineering": "CVE",
+              "Industrial & Petroleum Engineering": "IPE",
+              "Aerospace Engineering": "ASE",
+            }[d.department] || "";
+          const coursesMatchDept =
+            !deptPrefix ||
+            firstCourse.startsWith(deptPrefix) ||
+            firstCourse.startsWith("MAT") ||
+            firstCourse.startsWith("GNS") ||
+            firstCourse.startsWith("PHY") ||
+            firstCourse.startsWith("CHM") ||
+            firstCourse.startsWith("ENT");
+          if (!window.courses.length || !coursesMatchDept) {
+            autoLoadCourses(d.department, d.level);
+          }
+          renderAspirations();
+        } catch (e) {
+          console.error("loadUserData error:", e);
+          window.courses = [];
+        }
+        // Outside the try/catch — always runs even if something above threw
+        renderGoalCard(savedGoalPlan);
+        displayCourses();
+        updateStats();
+        renderPlanner();
+      }
+
+      function renderGoalCard(gp) {
+        const card = document.getElementById("goalCard");
+        if (!card) return;
+        if (!gp || !gp.target) {
+          card.innerHTML = `
+      <div style="font-size:13px;color:var(--text2);flex:1;">You haven't set a graduation target yet.</div>
+      <a href="predictor.html" class="goal-card-action">Build your plan →</a>`;
+          return;
+        }
+        const modeCls =
+          {
+            recovery: "recovery",
+            stability: "stability",
+            push: "push",
+            elite: "elite",
+          }[(gp.academicMode || "").toLowerCase()] || "push";
+        const reqAvg =
+          gp.neededAvg != null
+            ? Math.min(5, Math.max(0, parseFloat(gp.neededAvg)))
+            : null;
+        const targetMap = {
+          first: "First Class (≥4.50)",
+          upper: "2nd Class Upper (≥3.50)",
+          lower: "2nd Class Lower (≥2.40)",
+          pass: "Pass (≥1.50)",
+        };
+        const targetLabel =
+          targetMap[gp.targetClass] ||
+          `CGPA ≥ ${parseFloat(gp.target).toFixed(2)}`;
+        const shortTarget = targetLabel.split(" (")[0];
+        const contextLine =
+          reqAvg != null
+            ? `You need ${reqAvg.toFixed(2)} avg to hit ${shortTarget}`
+            : "View your full semester roadmap";
+        card.innerHTML = `
+    <div class="goal-card-body">
+      <div class="goal-mode-badge ${modeCls}">${gp.academicMode || "Push"}</div>
+      <div class="goal-card-title">Target: ${targetLabel}</div>
+      <div class="goal-card-sub">Req. avg: ${reqAvg != null ? reqAvg.toFixed(2) + " GP/sem" : "—"} · ${contextLine}</div>
+    </div>
+    <a href="predictor.html" class="goal-card-action">View Plan →</a>`;
+      }
+
+      function autoLoadCourses(dept, level) {
+        const db_data =
+          window.coursesDatabase?.["Faculty of Engineering"]?.[dept]?.[level];
+        if (!db_data) {
+          console.warn(
+            "coursesDatabase not ready or dept/level not found:",
+            dept,
+            level,
+          );
+          return;
+        }
+        // Only load the currently selected semester, not both
+        const semEl = document.getElementById("semester");
+        const sem = semEl ? semEl.value : "First Semester";
+        const courses = db_data[sem] || [];
+        window.courses = courses
+          .filter(Boolean)
+          .map((c) => ({ course: c, grade: "-", units: 3 }));
+        if (currentUser) {
+          setDoc(
+            doc(db, "users", currentUser.uid),
+            { courses: window.courses },
+            { merge: true },
+          ).catch(() => {});
+        }
+        showMilestone("Courses loaded.");
+      }
+
+      // ── SAVE ──────────────────────────────────────────────
+      window.saveUserData = function () {
+        if (!currentUser) return;
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(async () => {
+          try {
+            await setDoc(
+              doc(db, "users", currentUser.uid),
+              { courses: window.courses, aspirations, weekProgress },
+              { merge: true },
+            );
+            const ind = document.getElementById("saveIndicator");
+            ind.classList.add("visible");
+            setTimeout(() => ind.classList.remove("visible"), 2000);
+          } catch (e) {
+            console.error(e);
+          }
+        }, 800);
+      };
+
+      // ── STATS ─────────────────────────────────────────────
+      window.updateStats = function () {
+        const count = window.courses.length;
+        const graded = window.courses.filter(
+          (c) => c.grade && c.grade !== "-",
+        ).length;
+        document.getElementById("coursesCount").textContent =
+          count + " course" + (count !== 1 ? "s" : "");
+        document.getElementById("statCourses").textContent = count;
+        document.getElementById("statGraded").textContent = graded;
+        document.getElementById("emptyState").style.display =
+          count === 0 ? "block" : "none";
+        let pts = 0,
+          units = 0;
+        window.courses.forEach((c) => {
+          const p = gradeToPoint(c.grade);
+          if (p !== null && c.units) {
+            pts += p * Number(c.units);
+            units += Number(c.units);
+          }
+        });
+        document.getElementById("statCGPA").textContent =
+          units > 0 ? (pts / units).toFixed(2) : "—";
+        const pct = count > 0 ? Math.round((graded / count) * 100) : 0;
+        document.getElementById("progressFill").style.width = pct + "%";
+        document.getElementById("progressPct").textContent = pct + "%";
+        checkAchievements(count, graded);
+      };
+
+      function gradeToPoint(g) {
+        return { A: 5, B: 4, C: 3, D: 2, E: 1, F: 0 }[g?.toUpperCase()] ?? null;
+      }
+
+      // ── ACHIEVEMENTS ──────────────────────────────────────
+      const BADGES = [
+        {
+          id: "first",
+          icon: "📚",
+          name: "First Course",
+          desc: "Added your first course",
+          check: (c, g) => c >= 1,
+        },
+        {
+          id: "five",
+          icon: "🎯",
+          name: "Getting Serious",
+          desc: "Added 5+ courses",
+          check: (c, g) => c >= 5,
+        },
+        {
+          id: "grade1",
+          icon: "✅",
+          name: "First Grade",
+          desc: "Recorded your first grade",
+          check: (c, g) => g >= 1,
+        },
+        {
+          id: "full",
+          icon: "🏆",
+          name: "Full Semester",
+          desc: "All courses graded",
+          check: (c, g) => c > 0 && c === g,
+        },
+      ];
+      function checkAchievements(c, g) {
+        const grid = document.getElementById("achievementsGrid");
+        if (!grid) return;
+
+        grid.innerHTML = BADGES.map((b) => {
+          const earned = b.check(c, g);
+          if (earned && !earnedBadges.has(b.id)) {
+            earnedBadges.add(b.id);
+            showMilestone(`${b.icon} ${b.name} unlocked!`);
+          }
+
+          let progress = "";
+          if (b.id === "five") progress = `${Math.min(c, 5)}/5 courses`;
+          else if (b.id === "first")
+            progress = c > 0 ? `${c} course${c !== 1 ? "s" : ""}` : "0 courses";
+          else if (b.id === "grade1") progress = `${g} graded`;
+          else if (b.id === "full")
+            progress = c > 0 ? `${g}/${c} graded` : "0/0";
+
+          return `
+      <div class="achievement-card ${earned ? "earned" : "locked"}">
+        <div class="ach-icon-wrap">
+          <div class="ach-icon">${b.icon}</div>
+          ${!earned ? '<div class="ach-lock">🔒</div>' : ""}
+        </div>
+        <div class="ach-body">
+          <div class="ach-name">${b.name}</div>
+          <div class="ach-desc">${b.desc}</div>
+          <div class="ach-progress">${progress}</div>
+        </div>
+      </div>`;
+        }).join("");
+      }
+
+      // ── COURSE GRID ───────────────────────────────────────
+      window.displayCourses = function () {
+        const ul = document.getElementById("courses");
+        ul.innerHTML = "";
+        window.courses.forEach((c, idx) => {
+          const isActive = activeCourseId === idx;
+          const li = document.createElement("li");
+          li.className = "course-item" + (isActive ? " active-card" : "");
+          const parts = c.course.match(/^([A-Z]{2,4}\s*\d{3}[A-Z]?)\s*(.*)$/);
+          const code = parts ? parts[1] : c.course;
+          const name = parts && parts[2] ? parts[2] : "";
+          const grade =
+            c.grade && c.grade !== "-" ? c.grade.toUpperCase() : null;
+          const weeks = weekProgress[c.course] || [];
+          const weekPct = Math.round((weeks.length / 12) * 100);
+
+          // Topic-based progress from learn.html (overrides old week chips if available)
+          let progressPct = weekPct;
+          let progressColor = "var(--text)";
+          try {
+            const stored = localStorage.getItem("unify-topic-" + c.course);
+            if (stored) {
+              const tp = JSON.parse(stored);
+              const curriculum = generateWeekStructure(code);
+              const total = curriculum.reduce(
+                (a, w) => a + w.subtopics.length,
+                0,
+              );
+              const done = Object.values(tp).filter((t) => t.done).length;
+              if (total > 0) {
+                progressPct = Math.round((done / total) * 100);
+                progressColor =
+                  progressPct >= 70
+                    ? "var(--green)"
+                    : progressPct >= 30
+                      ? "var(--yellow)"
+                      : "var(--text)";
+              }
+            }
+          } catch (e) {}
+
+          li.innerHTML = `
+      <div class="course-card-inner">
+        <button class="course-rm-btn" title="Not my course — remove" onclick="removeCourse(event,${idx})">×</button>
+        <div class="course-accent accent-${idx % 6}"></div>
+        <div class="course-card-code">${code}</div>
+        ${name ? `<div class="course-card-name">${name}</div>` : ""}
+        <div class="course-progress-wrap">
+          <div class="course-progress-track">
+            <div class="course-progress-fill" style="width:${progressPct}%;background:${progressColor};"></div>
+          </div>
+          <span class="course-progress-pct">${progressPct}%</span>
+        </div>
+        <div class="course-card-footer">
+          <div class="course-card-grade ${grade ? "grade-" + grade : "grade-none"}">${grade || "—"}</div>
+          <div class="course-card-units">${c.units}u</div>
+        </div>
+        <div class="course-card-tap">${isActive ? "✕ close" : "tap for resources"}</div>
+      </div>`;
+          li.addEventListener("click", () => {
+            if (activeCourseId === idx) {
+              closeResourcePanel();
+            } else {
+              activeCourseId = idx;
+              openResourcePanel(c.course);
+              displayCourses();
+            }
+          });
+          ul.appendChild(li);
+          // Touch: long-press (500ms) shows a confirm toast instead of click-to-remove
+          let pressTimer;
+          li.addEventListener(
+            "touchstart",
+            () => {
+              pressTimer = setTimeout(() => showRemoveConfirm(idx), 500);
+            },
+            { passive: true },
+          );
+          li.addEventListener("touchend", () => clearTimeout(pressTimer), {
+            passive: true,
+          });
+          li.addEventListener("touchmove", () => clearTimeout(pressTimer), {
+            passive: true,
+          });
+        });
+        updateStats();
+      };
+
+      // ── RESOURCE PANEL ────────────────────────────────────
+      const RES_ICONS = {
+        "Course Outline": "📄",
+        "Lecture Material PDF": "📚",
+        "Video Courses": "🎬",
+        "Past Questions": "📝",
+        "Continuous Assessment": "✅",
+      };
+
+      window.closeResourcePanel = function () {
+        document.getElementById("resourcePanel")?.classList.remove("open");
+        activeCourseId = null;
+        document
+          .querySelectorAll(".course-item")
+          .forEach((el) => el.classList.remove("active-card"));
+      };
+
+      window.openResourcePanel = function (courseName) {
+        const parts = courseName.match(/^([A-Z]{2,4}\s*\d{3}[A-Z]?)\s*(.*)$/);
+        const code = parts ? parts[1] : courseName;
+        const name = parts && parts[2] ? parts[2] : courseName;
+
+        document.getElementById("resourcePanelTitle").textContent =
+          code + (name && name !== code ? " — " + name : "");
+        document.getElementById("resourcePanelMeta").textContent =
+          (userProfile.level || "") +
+          (userProfile.department ? " · " + userProfile.department : "");
+        document.getElementById("resourcePanel").classList.add("open");
+
+        const enc = encodeURIComponent(courseName);
+        document.getElementById("learnPageBtn").href =
+          "learn.html?course=" + enc + "&name=" + enc;
+
+        // Build week-topic accordion
+        buildWeekAccordion(courseName, code);
+      };
+
+      function buildWeekAccordion(courseName, code) {
+        const accordion = document.getElementById("weekAccordion");
+
+        // Get topic progress from localStorage
+        let topicProgress = {};
+        try {
+          const stored = localStorage.getItem("unify-topic-" + courseName);
+          if (stored) topicProgress = JSON.parse(stored);
+        } catch (e) {}
+
+        // Generate 12-week structure (matches learn.html logic)
+        const weeks = generateWeekStructure(code);
+
+        accordion.innerHTML = weeks
+          .map((week, wi) => {
+            const topics = week.subtopics || [];
+            const doneCnt = topics.filter(
+              (_, ti) => topicProgress[`w${wi}_t${ti}`]?.done,
+            ).length;
+            const isFirst = wi === 0;
+
+            const topicsHtml = topics
+              .map((topic, ti) => {
+                const key = `w${wi}_t${ti}`;
+                const p = topicProgress[key];
+                const done = p?.done;
+                const conf = p?.confidence || 0;
+                const enc = encodeURIComponent(courseName);
+                const stars = conf > 0 ? "★".repeat(conf) : "";
+                return `<a class="topic-row" href="learn.html?course=${enc}&name=${enc}&week=${wi}&topic=${ti}">
+        <div class="topic-check ${done ? "done" : ""}">✓</div>
+        <span class="topic-name">${topic}</span>
+        ${stars ? `<span class="topic-conf">${stars}</span>` : ""}
+      </a>`;
+              })
+              .join("");
+
+            return `<div class="week-acc-item">
+      <div class="week-acc-header ${isFirst ? "open" : ""}" onclick="toggleWeekAcc(this)">
+        <span class="week-acc-num">Wk ${wi + 1}</span>
+        <span class="week-acc-title">${week.title}</span>
+        <span class="week-acc-done">${doneCnt}/${topics.length}</span>
+        <span class="week-acc-check">▼</span>
+      </div>
+      <div class="week-acc-body ${isFirst ? "open" : ""}">${topicsHtml}</div>
+    </div>`;
+          })
+          .join("");
+      }
+
+      window.toggleWeekAcc = function (header) {
+        const body = header.nextElementSibling;
+        const isOpen = header.classList.contains("open");
+        header.classList.toggle("open", !isOpen);
+        body.classList.toggle("open", !isOpen);
+      };
+
+      function generateWeekStructure(code) {
+        // Single source of truth — reads from courseContent.js
+        // generateCourseStubs() fills in any course not manually defined
+        if (window.generateCourseStubs) window.generateCourseStubs();
+        const entry = window.UNIFY_COURSE_CONTENT?.[code];
+        if (entry && entry.weeks) {
+          return entry.weeks.map((w) => ({
+            title: w.topic,
+            subtopics: w.subtopics,
+          }));
+        }
+        // Absolute fallback (should never reach here after stubs generated)
+        const topics = [
+          "Introduction & Fundamentals",
+          "Core Principles I",
+          "Core Principles II",
+          "Methods & Techniques I",
+          "Methods & Techniques II",
+          "Analysis & Problem Solving",
+          "Applications I",
+          "Applications II",
+          "Advanced Topics I",
+          "Advanced Topics II",
+          "Integration & Design",
+          "Revision & Past Questions",
+        ];
+        return topics.map((title) => ({
+          title,
+          subtopics: [title + " — Theory", title + " — Practice"],
+        }));
+      }
+
+      // ── COURSE ACTIONS ────────────────────────────────────
+      window.switchSemester = function () {
+        const sem = document.getElementById("semester").value;
+        const data =
+          window.coursesDatabase?.["Faculty of Engineering"]?.[
+            userProfile.department
+          ]?.[userProfile.level]?.[sem];
+        if (!data) {
+          alert("No courses found for this semester.");
+          return;
+        }
+        window.courses = data.map((c) => ({ course: c, grade: "-", units: 3 }));
+        activeCourseId = null;
+        closeResourcePanel();
+        displayCourses();
+        saveUserData();
+        renderPlanner();
+      };
+
+      window.addCourse = function () {
+        const name = document.getElementById("courseInput").value.trim();
+        const grade = document
+          .getElementById("gradeInput")
+          .value.toUpperCase()
+          .trim();
+        const units =
+          parseInt(document.getElementById("unitsInput").value) || 3;
+        if (!name) {
+          alert("Please enter a course code.");
+          return;
+        }
+        window.courses.push({ course: name, grade: grade || "-", units });
+        displayCourses();
+        saveUserData();
+        ["courseInput", "gradeInput", "unitsInput"].forEach(
+          (id) => (document.getElementById(id).value = ""),
+        );
+        if (window.courses.length === 1)
+          showMilestone("📚 First course added!");
+      };
+
+      window.clearCourses = function () {
+        if (
+          !window.courses.length ||
+          !confirm("Reset courses for this semester?")
+        )
+          return;
+        window.courses = [];
+        activeCourseId = null;
+        closeResourcePanel();
+        autoLoadCourses(userProfile.department, userProfile.level);
+        displayCourses();
+      };
+
+      // ── INLINE ADD / REMOVE COURSE ────────────────────────
+      window.toggleAddCourse = function () {
+        const row = document.getElementById("addCourseRow");
+        row.classList.toggle("open");
+        if (row.classList.contains("open")) {
+          setTimeout(
+            () => document.getElementById("addCourseCode").focus(),
+            50,
+          );
+        }
+      };
+
+      window.addCourseInline = function () {
+        const code = (document.getElementById("addCourseCode").value || "")
+          .trim()
+          .toUpperCase();
+        const units =
+          parseInt(document.getElementById("addCourseUnits").value) || 3;
+        if (!code) return;
+        window.courses.push({ course: code, grade: "-", units });
+        displayCourses();
+        saveUserData();
+        document.getElementById("addCourseCode").value = "";
+        document.getElementById("addCourseUnits").value = "";
+        document.getElementById("addCourseRow").classList.remove("open");
+        if (window.courses.length === 1)
+          showMilestone("📚 First course added!");
+      };
+
+      window.removeCourse = function (event, idx) {
+        event.stopPropagation();
+        if (!window.courses.length) return;
+        const name = window.courses[idx]?.course || "course";
+        window.courses.splice(idx, 1);
+        if (activeCourseId === idx) {
+          activeCourseId = null;
+          closeResourcePanel();
+        } else if (activeCourseId > idx) activeCourseId--;
+        displayCourses();
+        saveUserData();
+        showMilestone(`${name} removed from your list.`);
+      };
+
+      // Long-press remove confirm (mobile) — shows a confirm toast with undo window
+      let _removeConfirmTimer = null;
+      window.showRemoveConfirm = function (idx) {
+        const name = window.courses[idx]?.course || "course";
+        const toast = document.getElementById("milestoneToast");
+        const text = document.getElementById("milestoneText");
+        clearTimeout(_removeConfirmTimer);
+        // Repurpose the toast as a brief confirm — tap the toast to confirm removal
+        text.innerHTML = `Remove <strong>${name}</strong>? <span style="text-decoration:underline;cursor:pointer" onclick="window.removeCourse({stopPropagation:()=>{}},${idx})">Yes, remove</span>`;
+        toast.classList.add("show");
+        _removeConfirmTimer = setTimeout(
+          () => toast.classList.remove("show"),
+          4000,
+        );
+      };
+
+      // ── TOAST ─────────────────────────────────────────────
+      window.showMilestone = function (msg) {
+        const t = document.getElementById("milestoneToast");
+        document.getElementById("milestoneText").textContent = msg;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 3500);
+      };
+
+      // ── STREAK + REVIEW SYSTEM ────────────────────────────
+      const REVIEW_QUESTIONS = [
+        {
+          topic: "Laplace Transform",
+          course: "ECE 301",
+          question:
+            "What does the Laplace Transform do to a differential equation?",
+          options: [
+            "Makes it harder to solve",
+            "Converts it into an algebraic equation",
+            "Removes all variables",
+            "Converts it to a graph",
+          ],
+          answer: 1,
+          explanation:
+            "Exactly right. Laplace acts like a translator — it turns the messy differential equation into a simpler algebraic one you can solve normally, then translate back.",
+        },
+        {
+          topic: "Superposition Theorem",
+          course: "ECE 301",
+          question:
+            "When using Superposition, what do you do with sources you are NOT currently analysing?",
+          options: [
+            "Leave them as they are",
+            "Double their value",
+            "Replace voltage sources with short circuits, current sources with open circuits",
+            "Remove them from the circuit entirely",
+          ],
+          answer: 2,
+          explanation:
+            "Correct! You deactivate the other sources — voltage sources become wires (short circuit), current sources become gaps (open circuit). Then you analyse one source at a time.",
+        },
+        {
+          topic: "Fourier Series",
+          course: "ECE 301",
+          question:
+            "What kind of signal can be represented using a Fourier Series?",
+          options: [
+            "Any random signal",
+            "Only DC signals",
+            "Periodic signals",
+            "Only sine waves",
+          ],
+          answer: 2,
+          explanation:
+            "Fourier Series works on periodic signals — signals that repeat. It breaks them down into a sum of simple sine and cosine waves.",
+        },
+        {
+          topic: "Thevenin's Theorem",
+          course: "ECE 301",
+          question:
+            "What does Thevenin's theorem let you replace a complex circuit with?",
+          options: [
+            "A single resistor",
+            "A voltage source and series resistor",
+            "A current source and parallel resistor",
+            "An open circuit",
+          ],
+          answer: 1,
+          explanation:
+            "Right! Thevenin says any linear circuit can be simplified to just one voltage source (Vth) in series with one resistor (Rth). Makes analysis so much easier.",
+        },
+        {
+          topic: "Network Analysis",
+          course: "ECE 301",
+          question:
+            "In mesh analysis, what do you assign to each independent loop?",
+          options: [
+            "A node voltage",
+            "A mesh current",
+            "A power value",
+            "A frequency",
+          ],
+          answer: 1,
+          explanation:
+            "Mesh analysis assigns a loop current (mesh current) to each independent loop. You then apply KVL around each mesh to build equations and solve.",
+        },
+      ];
+
+      let streakData = {
+        count: 0,
+        lastStudied: null,
+        todayDone: false,
+        weekDays: [],
+      };
+      let currentQuestion = null;
+      let reviewAnswered = false;
+
+      function initStreak() {
+        const saved = localStorage.getItem("unify-streak");
+        if (saved) streakData = JSON.parse(saved);
+
+        // Check if today already done
+        const today = new Date().toDateString();
+        streakData.todayDone = streakData.lastStudied === today;
+
+        // Check if streak broken (missed yesterday)
+        if (streakData.lastStudied) {
+          const last = new Date(streakData.lastStudied);
+          const now = new Date();
+          const diffDays = Math.floor((now - last) / 86400000);
+          if (diffDays > 1) {
+            streakData.count = 0;
+            streakData.weekDays = [];
+            saveStreak();
+          }
+        }
+
+        renderStreak();
+      }
+
+      function saveStreak() {
+        localStorage.setItem("unify-streak", JSON.stringify(streakData));
+      }
+
+      function renderStreak() {
+        const nudge = document.getElementById("streakNudge");
+        const fire = document.getElementById("streakFire");
+        const daysVal = document.getElementById("streakDaysVal");
+        const message = document.getElementById("streakMessage");
+        const sub = document.getElementById("streakSub");
+        const btn = document.getElementById("streakActionBtn");
+        const dots = document.getElementById("streakDots");
+
+        daysVal.textContent = streakData.count;
+
+        // Week dots (last 7 days)
+        const week = streakData.weekDays || [];
+        dots.innerHTML = Array.from({ length: 7 }, (_, i) => {
+          const cls =
+            i < week.length ? "done" : i === week.length ? "active" : "";
+          return '<div class="streak-dot ' + cls + '"></div>';
+        }).join("");
+
+        if (streakData.todayDone) {
+          nudge.classList.add("completed");
+          nudge.style.cursor = "default";
+          fire.textContent = "✅";
+          message.textContent = "Done for today!";
+          sub.textContent =
+            streakData.count > 0
+              ? streakData.count +
+                "-day streak. Come back tomorrow to keep it going. 💪"
+              : "You studied today. Come back tomorrow!";
+          btn.textContent = "See you tomorrow";
+          btn.style.background = "#4ade80";
+          btn.style.color = "#0a0a0a";
+        } else {
+          nudge.classList.remove("completed");
+          fire.textContent =
+            streakData.count >= 7 ? "🔥" : streakData.count >= 3 ? "⚡" : "💡";
+
+          const hr = new Date().getHours();
+          const greet =
+            hr < 12
+              ? "Morning check-in"
+              : hr < 17
+                ? "Afternoon nudge"
+                : "Evening review";
+
+          if (streakData.count === 0) {
+            message.textContent = "Start your streak today 🚀";
+            sub.textContent = "One question. 2 minutes. That's all it takes.";
+          } else if (streakData.count === 1) {
+            message.textContent = "Day 2 — keep it going!";
+            sub.textContent = "You showed up yesterday. Show up today.";
+          } else {
+            message.textContent =
+              greet + " — " + streakData.count + " days strong 🔥";
+            sub.textContent =
+              "Quick question from your last topic. 2 minutes max.";
+          }
+          btn.textContent = "Let's go →";
+          btn.style.background = "";
+          btn.style.color = "";
+        }
+      }
+
+      window.openReview = function () {
+        if (streakData.todayDone) return;
+        reviewAnswered = false;
+
+        // Pick a random question
+        currentQuestion =
+          REVIEW_QUESTIONS[Math.floor(Math.random() * REVIEW_QUESTIONS.length)];
+
+        document.getElementById("reviewModalTopic").textContent =
+          currentQuestion.topic;
+        document.getElementById("reviewModalCourse").textContent =
+          currentQuestion.course;
+        document.getElementById("reviewQuestion").textContent =
+          currentQuestion.question;
+        document
+          .getElementById("reviewResult")
+          .classList.remove("show", "win", "lose");
+        document.getElementById("reviewDoneBtn").textContent = "Done ✓";
+        document.getElementById("reviewDoneBtn").disabled = false;
+
+        const opts = document.getElementById("reviewOptions");
+        opts.innerHTML = currentQuestion.options
+          .map(
+            (opt, i) =>
+              '<button class="review-option" onclick="answerQuestion(' +
+              i +
+              ')">' +
+              opt +
+              "</button>",
+          )
+          .join("");
+
+        document.getElementById("reviewModalOverlay").classList.add("open");
+      };
+
+      window.answerQuestion = function (idx) {
+        if (reviewAnswered) return;
+        reviewAnswered = true;
+
+        const opts = document.querySelectorAll(".review-option");
+        const correct = currentQuestion.answer;
+        const isCorrect = idx === correct;
+
+        opts.forEach((opt, i) => {
+          if (i === correct) opt.classList.add("correct");
+          else if (i === idx && !isCorrect) opt.classList.add("wrong");
+          opt.style.pointerEvents = "none";
+        });
+
+        const result = document.getElementById("reviewResult");
+        const title = document.getElementById("reviewResultTitle");
+        const body = document.getElementById("reviewResultBody");
+
+        result.classList.add("show");
+        if (isCorrect) {
+          result.classList.add("win");
+          title.textContent = "🔥 Correct!";
+          body.textContent = currentQuestion.explanation;
+          document.getElementById("reviewDoneBtn").textContent =
+            "Keep the streak! ✓";
+        } else {
+          result.classList.add("lose");
+          title.textContent = "😅 Not quite — here's why:";
+          body.textContent = currentQuestion.explanation;
+          document.getElementById("reviewDoneBtn").textContent = "Got it ✓";
+        }
+      };
+
+      window.finishReview = function () {
+        const today = new Date().toDateString();
+        if (streakData.lastStudied !== today) {
+          streakData.count += 1;
+          streakData.weekDays = [
+            ...(streakData.weekDays || []).slice(-6),
+            today,
+          ];
+        }
+        streakData.lastStudied = today;
+        streakData.todayDone = true;
+        saveStreak();
+        renderStreak();
+        closeReview();
+        showMilestone("🔥 " + streakData.count + "-day streak! Keep going.");
+      };
+
+      window.closeReview = function () {
+        document.getElementById("reviewModalOverlay").classList.remove("open");
+      };
+
+      window.closeReviewOnOverlay = function (e) {
+        if (e.target === document.getElementById("reviewModalOverlay"))
+          closeReview();
+      };
+
+      // ── STUDY PLANNER ─────────────────────────────────────
+      var plannerPrefs = JSON.parse(
+        localStorage.getItem("unify-planner") || "null",
+      );
+      var plannerDoneToday = JSON.parse(
+        localStorage.getItem(
+          "unify-planner-done-" + new Date().toDateString(),
+        ) || "[]",
+      );
+
+      const TIME_SLOTS = {
+        morning: [
+          ["7:00 AM", "8:00 AM"],
+          ["8:00 AM", "9:00 AM"],
+          ["9:00 AM", "10:00 AM"],
+        ],
+        afternoon: [
+          ["2:00 PM", "3:00 PM"],
+          ["3:00 PM", "4:00 PM"],
+          ["4:00 PM", "5:00 PM"],
+        ],
+        night: [
+          ["8:00 PM", "9:00 PM"],
+          ["9:00 PM", "10:00 PM"],
+          ["10:00 PM", "11:00 PM"],
+        ],
+      };
+
+      function renderPlanner() {
+        const sessions = document.getElementById("plannerSessions");
+        const empty = document.getElementById("plannerEmpty");
+        if (!plannerPrefs || !window.courses?.length) {
+          if (empty) empty.style.display = "block";
+          return;
+        }
+        if (empty) empty.style.display = "none";
+
+        const { duration, sessionsPerDay, timeOfDay } = plannerPrefs;
+        const slots = TIME_SLOTS[timeOfDay] || TIME_SLOTS.afternoon;
+        const count = Math.min(
+          parseInt(sessionsPerDay),
+          slots.length,
+          window.courses.length,
+        );
+
+        // Rotate courses each day so you don't study the same course every day
+        const dayIndex = new Date().getDate();
+        // Normalise to strings for sorting
+        const rotated = [...window.courses].sort((a, b) => {
+          const sa = typeof a === "string" ? a : a.course || "";
+          const sb = typeof b === "string" ? b : b.course || "";
+          return sa.localeCompare(sb);
+        });
+        const todayCourses = [];
+        for (let i = 0; i < count; i++)
+          todayCourses.push(rotated[(dayIndex + i) % rotated.length]);
+
+        const durationLabel =
+          duration >= 60
+            ? Math.floor(duration / 60) +
+              "h" +
+              (duration % 60 ? (duration % 60) + "m" : "")
+            : duration + " min";
+
+        sessions.innerHTML = todayCourses
+          .map((c, i) => {
+            const slot = slots[i];
+            const isDone = plannerDoneToday.includes(i);
+            const courseStr =
+              typeof c === "string"
+                ? c
+                : c.course || c.name || c.code || "Course";
+            // Try to split "ECE 301" into code + friendly name
+            const parts = courseStr.split(" ");
+            const codeDisplay = parts.slice(0, 2).join(" ");
+            return `<div class="planner-session ${isDone ? "done" : ""}" onclick="togglePlannerSession(${i}, this)">
+      <div class="planner-session-check">✅</div>
+      <div class="planner-session-time">${slot[0]} – ${slot[1]}</div>
+      <div class="planner-session-topic">${courseStr}</div>
+      <div class="planner-session-course">${codeDisplay}</div>
+      <span class="planner-session-duration">${durationLabel}</span>
+    </div>`;
+          })
+          .join("");
+      }
+
+      window.togglePlannerSession = function (idx, el) {
+        if (plannerDoneToday.includes(idx)) {
+          plannerDoneToday = plannerDoneToday.filter((i) => i !== idx);
+          el.classList.remove("done");
+        } else {
+          plannerDoneToday.push(idx);
+          el.classList.add("done");
+          const allCards = document.querySelectorAll(".planner-session");
+          if (plannerDoneToday.length === allCards.length)
+            showMilestone("📚 All sessions done today! Incredible.");
+        }
+        localStorage.setItem(
+          "unify-planner-done-" + new Date().toDateString(),
+          JSON.stringify(plannerDoneToday),
+        );
+      };
+
+      window.openPlannerSetup = function () {
+        const overlay = document.getElementById("plannerModalOverlay");
+        overlay.classList.add("open");
+        if (plannerPrefs) {
+          selectChipByVal("duration", plannerPrefs.duration);
+          selectChipByVal("sessions", plannerPrefs.sessionsPerDay);
+          selectChipByVal("time", plannerPrefs.timeOfDay);
+        }
+      };
+      window.closePlannerSetup = function () {
+        document.getElementById("plannerModalOverlay").classList.remove("open");
+      };
+      window.selectChip = function (el, group) {
+        document
+          .querySelectorAll(`#${group}Chips .planner-chip`)
+          .forEach((c) => c.classList.remove("selected"));
+        el.classList.add("selected");
+      };
+      function selectChipByVal(group, val) {
+        document
+          .querySelectorAll(`#${group}Chips .planner-chip`)
+          .forEach((c) => {
+            c.classList.toggle("selected", c.dataset.val == val);
+          });
+      }
+      window.savePlannerSetup = function () {
+        const duration = parseInt(
+          document.querySelector("#durationChips .planner-chip.selected")
+            ?.dataset.val || "60",
+        );
+        const sessionsPerDay = parseInt(
+          document.querySelector("#sessionsChips .planner-chip.selected")
+            ?.dataset.val || "2",
+        );
+        const timeOfDay =
+          document.querySelector("#timeChips .planner-chip.selected")?.dataset
+            .val || "afternoon";
+        plannerPrefs = { duration, sessionsPerDay, timeOfDay };
+        localStorage.setItem("unify-planner", JSON.stringify(plannerPrefs));
+        closePlannerSetup();
+        renderPlanner();
+        showMilestone("📅 Study plan updated!");
+      };
+
+      // ── ASPIRATIONS ───────────────────────────────────────
+      window.addAspiration = function () {
+        const input = document.getElementById("aspirationInput");
+        if (!input) return;
+        const text = input.value.trim();
+        if (!text) return;
+        aspirations.push(text);
+        input.value = "";
+        renderAspirations();
+        saveUserData();
+        showMilestone("🎯 Aspiration added — go build it!");
+      };
+
+      window.removeAspiration = function (idx) {
+        aspirations.splice(idx, 1);
+        renderAspirations();
+        saveUserData();
+      };
+
+      function renderAspirations() {
+        const list = document.getElementById("aspirationList");
+        if (!list) return;
+        list.innerHTML =
+          aspirations.length === 0
+            ? '<div style="font-size:13px;color:var(--text3);padding:8px 0;">No aspirations yet — add what you\'re working towards.</div>'
+            : aspirations
+                .map(
+                  (a, i) => `
+        <div class="aspiration-item">
+          <div class="aspiration-dot"></div>
+          <div class="aspiration-text">${a}</div>
+          <button class="aspiration-del" onclick="removeAspiration(${i})">×</button>
+        </div>`,
+                )
+                .join("");
+      }
+    

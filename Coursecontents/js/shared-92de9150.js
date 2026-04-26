@@ -1,0 +1,2 @@
+(function(){const saved=localStorage.getItem('unify-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);const b=document.getElementById('theme-btn');if(b)b.textContent=saved==='dark'?'☀ Light':'☾ Dark';}})();
+function toggleTheme(){const cur=document.documentElement.getAttribute('data-theme');const nxt=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',nxt);localStorage.setItem('unify-theme',nxt);document.getElementById('theme-btn').textContent=nxt==='dark'?'☀ Light':'☾ Dark';}
