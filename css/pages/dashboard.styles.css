@@ -584,7 +584,7 @@ input::placeholder {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 18px 16px 14px;
+  padding: 22px 18px 16px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -604,13 +604,13 @@ input::placeholder {
   height: 3px;
   border-radius: 2px;
 }
-.accent-0 {
+/* .accent-0 {
   background: #0a0a0a;
-}
-.accent-1 {
+} */
+/* .accent-1 {
   background: #3b3b3b;
-}
-.accent-2 {
+} */
+/* .accent-2 {
   background: #666;
 }
 .accent-3 {
@@ -621,32 +621,34 @@ input::placeholder {
 }
 .accent-5 {
   background: #0a0a0a;
-}
-[data-theme="dark"] .accent-0 {
+} */
+/* [data-theme="dark"] .accent-0 {
   background: #f0efeb;
 }
 [data-theme="dark"] .accent-1 {
-  background: #bbb;
+  background: #f0efeb;
 }
 [data-theme="dark"] .accent-2 {
-  background: #888;
+  background: #f0efeb;
 }
 [data-theme="dark"] .accent-3 {
-  background: #555;
+  background: #f0efeb;
 }
 [data-theme="dark"] .accent-4 {
-  background: #333;
+  background: #f0efeb;
 }
 [data-theme="dark"] .accent-5 {
   background: #f0efeb;
-}
+} */
 
 .course-card-code {
   font-size: 11px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: var(--text3);
+  color:  #f0efeb;
   font-weight: 500;
+  line-height: 1.35;
+  margin-right: 28px;
 }
 .course-item.active-card .course-card-code {
   color: #666;
@@ -753,10 +755,12 @@ input::placeholder {
   border-color: rgba(255, 255, 255, 0.08);
 }
 .course-card-tap {
-  font-size: 10px;
-  color: var(--text3);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
   text-align: center;
-  opacity: 0.5;
+  opacity: 0.75;
+  letter-spacing: 0.02em;
 }
 .course-item.active-card .course-card-tap {
   color: #555;
@@ -2170,10 +2174,10 @@ input::placeholder {
 ═══════════════════════════ */
 .course-rm-btn {
   position: absolute;
-  top: 7px;
-  right: 7px;
-  width: 20px;
-  height: 20px;
+  top: 10px;
+  right: 10px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: var(--surface2);
   border: 1px solid var(--border);
