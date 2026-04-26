@@ -85,7 +85,7 @@ function displayCourses() {
       <span class="course-toggle">▶</span>
       <span class="course-name">${c.course}</span>
       <span class="course-grade ${gradeClass(c.grade)}">${c.grade !== "-" ? "Grade: " + c.grade : "No grade"}</span>
-      <span class="course-units">${c.units}u</span>
+      <span class="course-units">${c.units} units</span>
     `;
 
     const resources = document.createElement("div");
