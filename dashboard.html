@@ -350,22 +350,6 @@
             </button>
           </div>
           <div class="sidebar-section">
-            <span class="sidebar-title">Add Course Manually</span>
-            <input id="courseInput" placeholder="Course code (e.g. ECE 301)" />
-            <input id="gradeInput" placeholder="Grade (A, B, C, D, E, F)" />
-            <input
-              id="unitsInput"
-              type="number"
-              min="1"
-              max="6"
-              placeholder="Credit units"
-            />
-            <button class="btn" onclick="addCourse()">Add Course</button>
-            <button class="btn btn-outline" onclick="clearCourses()">
-              Clear All
-            </button>
-          </div>
-          <div class="sidebar-section">
             <a href="onboarding.html?edit=1" class="sidebar-link"
               >Change university / level →</a
             >
@@ -414,6 +398,23 @@
               </p>
             </div>
             <ul id="courses"></ul>
+
+            <div class="sidebar-section">
+              <span class="sidebar-title">Add Course Manually</span>
+              <input id="courseInput" placeholder="Course code (e.g. ECE 301)" />
+              <input id="gradeInput" placeholder="Grade (A, B, C, D, E, F)" />
+              <input
+                id="unitsInput"
+                type="number"
+                min="1"
+                max="6"
+                placeholder="Credit units"
+              />
+              <button class="btn" onclick="addCourse()">Add Course</button>
+              <button class="btn btn-outline" onclick="clearCourses()">
+                Clear All
+              </button>
+            </div>
 
             <!-- ACHIEVEMENTS SECTION -->
             <div class="achievements-section">
@@ -495,7 +496,7 @@
     </nav>
 
     <script src="courses.js"></script>
-    <script src="courseContent.js"></script>
+    <script src="Coursecontent.JS"></script>
     <script type="module" src="js/pages/dashboard.js"></script>
   </body>
 </html>

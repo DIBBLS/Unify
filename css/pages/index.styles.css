@@ -903,7 +903,7 @@ nav {
   transform: translateX(-50%) translateY(0);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   nav {
     padding: 0 16px;
   }

@@ -1,4 +1,4 @@
-  import { auth, db, provider } from './js/firebase-config.js';
+  import { auth, db, provider } from '../firebase-config.js';
   import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
