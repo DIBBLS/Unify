@@ -1,0 +1,44 @@
+/* Extracted from Coursecontents/MEE 202/W10.html */
+
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--muted:#555;--muted2:#999;--accent:#4ade80;--green-deep:#16a34a;--green-bg:#dcfce7;--diagram-bg:#f8f7f3;--red:#dc2626;--red-bg:#fff5f5;--red-border:#fca5a5}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--diagram-bg:#1e1e1e;--green-bg:#052e16;--red-bg:#1a0505;--red-border:#7f1d1d}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:16px;line-height:1.7;transition:background .3s,color .3s}
+nav{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+.nav-logo{font-family:'Playfair Display',serif;font-weight:900;font-size:20px;color:var(--text);text-decoration:none}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-links a{font-size:14px;color:var(--muted);text-decoration:none;padding-bottom:2px;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-links a.active{color:var(--green-deep);border-bottom:2px solid var(--accent);font-weight:500}
+.theme-toggle{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 14px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .2s}
+.theme-toggle:hover{background:var(--border)}
+.week-page{max-width:900px;margin:0 auto;padding:2rem 2rem 4rem}
+.back-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:1rem}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.back-btn:hover{color:var(--text);border-color:var(--text)}
+.week-nav{display:flex;gap:8px}
+.wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
+.wnav-btn:hover{color:var(--text);border-color:var(--text)}
+.wnav-btn.disabled{opacity:.35;pointer-events:none}
+.week-block{margin-top:0}
+.week-header{background:var(--text);color:var(--bg);padding:1.2rem 1.8rem;border-radius:8px 8px 0 0;display:flex;align-items:baseline;gap:1rem}
+.week-num-badge{font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.6}
+.week-title-main{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700}
+.week-body{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;padding:2rem}
+.week-summary{color:var(--muted);margin-bottom:1.5rem;font-size:15px;line-height:1.8}
+.key-terms{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:2rem}
+.key-term{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 12px;font-size:12px;color:var(--muted)}
+.topic-block{margin-bottom:3rem;padding-top:2rem;border-top:1px solid var(--border)}
+.topic-header{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1rem}
+.topic-num{font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em}
+.topic-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700}
+.topic-body{font-size:15px;line-height:1.85;color:var(--text);margin-bottom:1.5rem}
+.topic-body p{margin-bottom:1rem}
+.topic-body strong{font-weight:600}
+.data-table{width:100%;border-collapse:collapse;font-size:13px;margin:1.2rem 0}
+.data-table th{background:var(--surface2);border:1px solid var(--border);padding:8px 12px;text-align:left;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.data-table td{border:1px solid var(--border);padding:8px 12px;color:var(--text);vertical-align:top}
+.data-table tr:nth-child(even) td{background:var(--surface2)}
+footer{background:var(--surface);border-top:1px solid var(--border);padding:2rem;text-align:center;font-size:13px;color:var(--muted2)}
+footer strong{color:var(--text)}
+@media(max-width:700px){nav{padding:0 1rem}.nav-links{display:none}.week-page{padding-left:1rem;padding-right:1rem}.week-header{padding:1rem}.week-body{padding:1.2rem}}
