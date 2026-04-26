@@ -201,7 +201,10 @@ window.delUpdate = async function (id) {
 
 // ── GRANT / REVOKE ADMIN ──────────────────────────────────
 window.grantAdmin = async function () {
-  const email = document.getElementById("grantEmail").value.trim().toLowerCase();
+  const email = document
+    .getElementById("grantEmail")
+    .value.trim()
+    .toLowerCase();
   const fb = document.getElementById("grantFeedback");
   if (!email) {
     fb.style.color = "var(--red)";

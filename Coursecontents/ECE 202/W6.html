@@ -185,22 +185,7 @@ Nullity(A) = n - Rank(A)</div>
   <span style="color:var(--muted2)">Built on Unify · Native Learning Library</span>
 </footer>
 
-<script>
-function toggleTheme() {
-  const html = document.documentElement;
-  const isDark = html.getAttribute('data-theme') === 'dark';
-  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
-  localStorage.setItem('unify-theme', isDark ? 'light' : 'dark');
-  document.querySelector('.theme-toggle').textContent = isDark ? 'Dark mode' : 'Light mode';
-}
-(function() {
-  const saved = localStorage.getItem('unify-theme');
-  if (saved === 'dark') {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    document.querySelector('.theme-toggle').textContent = 'Light mode';
-  }
-})();
-</script>
+<script src="../js/shared-1552673a.js"></script>
 </body>
 </html>
 <!DOCTYPE html>
@@ -260,9 +245,6 @@ function toggleTheme() {
 <footer>
   <strong>ECE 202 &mdash; Engineering Mathematics</strong> &middot; Week 6 &middot; Unify Platform &middot; LASU Faculty of Engineering
 </footer>
-<script>
-(function(){const saved=localStorage.getItem('unify-theme');if(saved){document.documentElement.setAttribute('data-theme',saved);const b=document.getElementById('theme-btn');if(b)b.textContent=saved==='dark'?'☀ Light':'☾ Dark';}})();
-function toggleTheme(){const cur=document.documentElement.getAttribute('data-theme');const nxt=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',nxt);localStorage.setItem('unify-theme',nxt);document.getElementById('theme-btn').textContent=nxt==='dark'?'☀ Light':'☾ Dark';}
-</script>
+<script src="../js/shared-92de9150.js"></script>
 </body>
 </html>
