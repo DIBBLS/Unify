@@ -21,7 +21,7 @@ let currentUser = null,
   activeCourseId = null;
 let userProfile = {},
   aspirations = [];
-let earnedBadges = new Set();
+
 let weekProgress = {};
 // ── SECURITY ──────────────────────────────────────────
 function sanitise(str) {
@@ -279,76 +279,14 @@ window.updateStats = function () {
   const pct = count > 0 ? Math.round((graded / count) * 100) : 0;
   document.getElementById("progressFill").style.width = pct + "%";
   document.getElementById("progressPct").textContent = pct + "%";
-  checkAchievements(count, graded);
+
 };
 
 function gradeToPoint(g) {
   return { A: 5, B: 4, C: 3, D: 2, E: 1, F: 0 }[g?.toUpperCase()] ?? null;
 }
 
-// ── ACHIEVEMENTS ──────────────────────────────────────
-const BADGES = [
-  {
-    id: "first",
-    icon: "📚",
-    name: "First Course",
-    desc: "Added your first course",
-    check: (c, g) => c >= 1,
-  },
-  {
-    id: "five",
-    icon: "🎯",
-    name: "Getting Serious",
-    desc: "Added 5+ courses",
-    check: (c, g) => c >= 5,
-  },
-  {
-    id: "grade1",
-    icon: "✅",
-    name: "First Grade",
-    desc: "Recorded your first grade",
-    check: (c, g) => g >= 1,
-  },
-  {
-    id: "full",
-    icon: "🏆",
-    name: "Full Semester",
-    desc: "All courses graded",
-    check: (c, g) => c > 0 && c === g,
-  },
-];
-function checkAchievements(c, g) {
-  const grid = document.getElementById("achievementsGrid");
-  if (!grid) return;
 
-  grid.innerHTML = BADGES.map((b) => {
-    const earned = b.check(c, g);
-    if (earned && !earnedBadges.has(b.id)) {
-      earnedBadges.add(b.id);
-      showMilestone(`${b.icon} ${b.name} unlocked!`);
-    }
-
-    let progress = "";
-    if (b.id === "five") progress = `${Math.min(c, 5)}/5 courses`;
-    else if (b.id === "first")
-      progress = c > 0 ? `${c} course${c !== 1 ? "s" : ""}` : "0 courses";
-    else if (b.id === "grade1") progress = `${g} graded`;
-    else if (b.id === "full") progress = c > 0 ? `${g}/${c} graded` : "0/0";
-
-    return `
-      <div class="achievement-card ${earned ? "earned" : "locked"}">
-        <div class="ach-icon-wrap">
-          <div class="ach-icon">${b.icon}</div>
-          ${!earned ? '<div class="ach-lock">🔒</div>' : ""}
-        </div>
-        <div class="ach-body">
-          <div class="ach-name">${b.name}</div>
-          <div class="ach-desc">${b.desc}</div>
-          <div class="ach-progress">${progress}</div>
-        </div>
-      </div>`;
-  }).join("");
-}
 
 // ── COURSE GRID ───────────────────────────────────────
 window.displayCourses = function () {

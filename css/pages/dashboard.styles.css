@@ -427,29 +427,7 @@ input::placeholder {
   border-color: var(--text);
   opacity: 1;
 }
-.achievement-badge {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  background: var(--surface2);
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  margin-bottom: 7px;
-}
-.badge-icon {
-  font-size: 20px;
-  flex-shrink: 0;
-}
-.badge-name {
-  font-size: 12px;
-  font-weight: 500;
-}
-.badge-desc {
-  font-size: 11px;
-  color: var(--text3);
-  margin-top: 1px;
-}
+
 .sidebar-link {
   font-size: 12px;
   color: var(--text3);
@@ -2083,91 +2061,7 @@ input::placeholder {
   }
 }
 
-/* ═══════════════════════════
-   ACHIEVEMENTS SECTION (main content)
-═══════════════════════════ */
-.achievements-section {
-  margin-top: 28px;
-  padding-bottom: 8px;
-}
-.achievements-heading {
-  font-size: 10px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--text3);
-  margin-bottom: 14px;
-}
-.achievements-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-}
-@media (max-width: 500px) {
-  .achievements-grid {
-    grid-template-columns: 1fr;
-  }
-}
-.achievement-card {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px 16px;
-  background: var(--surface);
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  transition: border-color 0.15s;
-}
-.achievement-card.earned {
-  border-color: rgba(74, 222, 128, 0.4);
-  background: rgba(74, 222, 128, 0.03);
-}
-.achievement-card.locked {
-  background: var(--surface2);
-  opacity: 0.65;
-}
-.ach-icon-wrap {
-  position: relative;
-  flex-shrink: 0;
-  line-height: 1;
-}
-.ach-icon {
-  font-size: 24px;
-}
-.ach-lock {
-  position: absolute;
-  bottom: -3px;
-  right: -5px;
-  font-size: 11px;
-}
-.ach-body {
-  flex: 1;
-  min-width: 0;
-}
-.ach-name {
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 2px;
-}
-.ach-desc {
-  font-size: 11px;
-  color: var(--text3);
-  margin-bottom: 6px;
-  line-height: 1.4;
-}
-.ach-progress {
-  font-size: 10px;
-  color: var(--text3);
-  background: var(--surface2);
-  padding: 2px 8px;
-  border-radius: 20px;
-  border: 1px solid var(--border);
-  display: inline-block;
-}
-.achievement-card.earned .ach-progress {
-  background: rgba(74, 222, 128, 0.1);
-  border-color: rgba(74, 222, 128, 0.3);
-  color: #4ade80;
-}
+
 
 /* ═══════════════════════════
    COURSE CARD REMOVE BUTTON
