@@ -230,7 +230,7 @@ nav {
   transition: opacity 0.15s;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   nav {
     padding: 0 16px;
   }

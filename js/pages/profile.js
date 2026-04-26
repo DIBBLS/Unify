@@ -1,4 +1,4 @@
-import { auth, db } from './js/firebase-config.js';
+import { auth, db } from '../firebase-config.js';
 import { onAuthStateChanged, signOut, updateProfile as fbUp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, setDoc, collection, addDoc, query, where, orderBy, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 let currentUser=null,profile={},posts=[],works=[],activePostTag=null;
