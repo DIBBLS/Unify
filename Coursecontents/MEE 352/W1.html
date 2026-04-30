@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FFOR 300 — Week 1: Energy Sources | Unify</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;
+  --text:#0a0a0a;--muted:#555;--muted2:#999;
+  --green:#4ade80;--green-deep:#16a34a;--green-bg:rgba(74,222,128,0.1);--green-border:rgba(74,222,128,0.3);
+  --yellow-bg:#fffbeb;--yellow-border:#fcd34d;
+  --red:#dc2626;--red-bg:#fff5f5;--red-border:#fca5a5;
+  --fd:'Playfair Display',serif;--fb:'DM Sans',sans-serif;
+}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--green-bg:rgba(74,222,128,0.08);--green-border:rgba(74,222,128,0.2);--yellow-bg:#1a1500;--yellow-border:#b45309;--red-bg:#1a0505;--red-border:#7f1d1d;}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--bg);color:var(--text);line-height:1.75;font-size:16px;transition:background .2s,color .2s}
+nav{position:sticky;top:0;z-index:100;height:60px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;gap:32px}
+.nav-logo{font-family:var(--fd);font-size:20px;font-weight:900;color:var(--text);text-decoration:none}
+.nav-logo span{color:var(--green)}
+.theme-toggle{margin-left:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-family:var(--fb);font-size:12px;font-weight:500;color:var(--muted);cursor:pointer}
+.page{max-width:860px;margin:0 auto;padding:40px 48px 80px}
+.back-bar{display:flex;align-items:center;gap:12px;margin-bottom:28px;flex-wrap:wrap}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px}
+.week-nav{display:flex;gap:8px;margin-left:auto}
+.wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px}
+.wnav-btn.off{opacity:.35;pointer-events:none}
+.week-progress{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:24px;display:flex;align-items:center;gap:14px}
+.wp-label{font-size:11px;font-weight:600;color:var(--muted2);flex-shrink:0;text-transform:uppercase;letter-spacing:.1em}
+.wp-bar{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.wp-fill{height:100%;background:var(--green);border-radius:3px;width:0%;transition:width .5s ease}
+.wp-pct{font-size:11px;font-weight:700;color:var(--green-deep);flex-shrink:0}
+.week-block{border-radius:14px;border:1px solid var(--border);overflow:hidden;background:var(--surface)}
+.week-header{background:var(--text);color:#f0efeb;padding:32px 36px 28px}
+[data-theme="dark"] .week-header{background:var(--surface2);border-bottom:1px solid var(--border)}
+.wh-eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.wh-course-tag{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:var(--green);color:var(--text);padding:3px 12px;border-radius:20px}
+.wh-week-label{font-size:11px;font-weight:500;color:rgba(240,239,235,.45);letter-spacing:.05em}
+.wh-title{font-family:var(--fd);font-size:clamp(1.6rem,4vw,2.2rem);font-weight:700;line-height:1.2;margin-bottom:6px}
+.wh-subtitle{font-size:15px;color:rgba(240,239,235,.55);margin-bottom:20px}
+.wh-hook{font-size:15px;color:rgba(240,239,235,.85);line-height:1.7;max-width:60ch;padding-top:18px;border-top:1px solid rgba(240,239,235,.12)}
+.wh-meta{display:flex;flex-wrap:wrap;gap:18px;margin-top:16px}
+.wh-meta-item{font-size:12px;color:rgba(240,239,235,.45)}
+.wh-meta-item strong{color:rgba(240,239,235,.75);font-weight:500}
+.week-body{padding:36px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:32px}
+.tag{font-size:11px;font-weight:500;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:3px 12px}
+.topic-block{border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden}
+.topic-header{background:var(--surface2);padding:14px 24px;border-bottom:1px solid var(--border)}
+.topic-num{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:3px}
+.topic-title{font-size:16px;font-weight:600;color:var(--text)}
+.topic-body{padding:28px 32px}
+.topic-body p{font-size:15px;line-height:1.8;margin-bottom:16px;color:var(--text);max-width:66ch}
+.topic-body ol,.topic-body ul{padding-left:22px;margin-bottom:16px;max-width:66ch}
+.topic-body li{font-size:15px;line-height:1.8;margin-bottom:6px;color:var(--text)}
+.formula-block{background:var(--surface2);border:1px solid var(--border);border-left:4px solid var(--green);border-radius:0 10px 10px 0;padding:20px 24px;margin:18px 0}
+.formula-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green-deep);margin-bottom:14px}
+.formula-eq{font-family:var(--fd);font-size:20px;font-weight:700;font-style:italic;color:var(--text);margin-bottom:10px;line-height:1.5;display:block}
+.formula-vars{font-size:12px;color:var(--muted2);line-height:1.9;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.diagram-wrap{margin:22px 0;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.diagram-titlebar{background:var(--surface2);padding:10px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.diagram-titlebar span{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--green-deep)}
+.diagram-titlebar small{font-size:11px;color:var(--muted2)}
+.diagram-canvas{background:var(--surface);padding:24px;display:flex;justify-content:center}
+.accordion-section-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin:28px 0 12px;display:flex;align-items:center;gap:10px}
+.accordion-section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.accordion-wrap{display:flex;flex-direction:column;gap:8px}
+.accordion-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.accordion-btn{width:100%;background:none;border:none;cursor:pointer;padding:14px 20px;text-align:left;font-family:var(--fb);font-size:14px;font-weight:500;color:var(--text);line-height:1.55;transition:background .15s}
+.accordion-btn:hover{background:var(--surface2)}
+.accordion-btn-inner{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.accordion-btn-text{flex:1;min-width:0}
+.q-type{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--green-bg);color:var(--green-deep);border:1px solid var(--green-border);padding:2px 8px;border-radius:4px;margin-bottom:6px}
+.accordion-icon{flex-shrink:0;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--muted);transition:transform .25s,background .2s;margin-top:2px}
+.accordion-item.open .accordion-icon{transform:rotate(45deg);background:var(--green);border-color:var(--green);color:var(--text)}
+.accordion-body{max-height:0;overflow:hidden;transition:max-height .35s ease,padding .25s;padding:0 20px}
+.accordion-item.open .accordion-body{max-height:600px;padding:0 20px 18px}
+.answer-inner{border-top:1px solid var(--border);padding-top:14px;font-size:14px;color:var(--muted);line-height:1.8}
+.answer-inner strong{color:var(--green-deep)}
+.quiz-zone{margin:32px 0;border-radius:14px;overflow:hidden;border:2px solid var(--text)}
+.quiz-zone.mid{border-color:var(--green-deep)}
+.quiz-header{background:var(--text);padding:18px 24px;display:flex;align-items:center;justify-content:space-between}
+.quiz-zone.mid .quiz-header{background:var(--green-deep)}
+.quiz-header-left{display:flex;align-items:center;gap:12px}
+.quiz-badge{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;border-radius:20px;background:rgba(74,222,128,.2);color:var(--green);border:1px solid rgba(74,222,128,.3)}
+.quiz-zone.mid .quiz-badge{background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.3)}
+.quiz-title{font-family:var(--fd);font-size:16px;font-weight:700;color:#f0efeb}
+.quiz-count{font-size:11px;color:rgba(240,239,235,.45)}
+.quiz-body{background:var(--surface);padding:24px}
+.quiz-intro{font-size:13px;color:var(--muted);margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);line-height:1.6}
+.q-block{margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border)}
+.q-block:last-of-type{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.q-meta{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.q-num{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
+.q-type-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;letter-spacing:.5px}
+.q-type-badge.mcq{background:var(--green-bg);color:var(--green-deep);border:1px solid var(--green-border)}
+.q-type-badge.fitb{background:rgba(251,191,36,.1);color:#b45309;border:1px solid rgba(251,191,36,.3)}
+.q-text{font-size:15px;font-weight:600;color:var(--text);margin-bottom:14px;line-height:1.6;max-width:66ch}
+.options{display:flex;flex-direction:column;gap:8px;max-width:66ch}
+.option{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s;background:var(--surface2)}
+.option:hover{border-color:var(--muted)}
+.option.selected{border-color:var(--text);background:var(--surface)}
+.option.correct{border-color:var(--green);background:var(--green-bg)!important}
+.option.wrong{border-color:var(--red);background:var(--red-bg)!important}
+.opt-letter{width:26px;height:26px;border-radius:6px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted2);flex-shrink:0}
+.option.selected .opt-letter{background:var(--text);border-color:var(--text);color:var(--green)}
+.option.correct .opt-letter{background:var(--green);border-color:var(--green);color:var(--text)}
+.option.wrong .opt-letter{background:var(--red);border-color:var(--red);color:#fff}
+.opt-text{font-size:14px;color:var(--text);line-height:1.5}
+.fitb-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:15px;color:var(--text);line-height:2.4;max-width:66ch}
+.fitb-input{border:none;border-bottom:2px solid var(--text);background:transparent;font-family:var(--fb);font-size:15px;font-weight:600;color:var(--text);width:160px;text-align:center;padding:2px 8px;outline:none}
+.fitb-input.correct{border-color:var(--green);color:var(--green-deep)}
+.fitb-input.wrong{border-color:var(--red);color:var(--red)}
+.fitb-hint{font-size:12px;color:var(--muted2);margin-top:6px;font-style:italic}
+.q-feedback{margin-top:10px;padding:10px 14px;border-radius:8px;font-size:13px;line-height:1.6;display:none;max-width:66ch}
+.q-feedback.show{display:block}
+.q-feedback.ok{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green-deep)}
+.q-feedback.no{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red)}
+.quiz-footer{padding:20px 24px;background:var(--surface2);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.quiz-submit{padding:11px 28px;background:var(--text);color:var(--green);border:none;border-radius:8px;font-family:var(--fb);font-size:13px;font-weight:700;cursor:pointer}
+.quiz-submit:disabled{opacity:.4;cursor:not-allowed}
+.quiz-result{display:none;align-items:center;gap:12px;flex:1}
+.quiz-result.show{display:flex}
+.result-score{font-family:var(--fd);font-size:28px;font-weight:900;color:var(--text)}
+.result-label{font-size:12px;color:var(--muted);line-height:1.5}
+.result-pill{padding:5px 16px;border-radius:20px;font-size:11px;font-weight:700;flex-shrink:0}
+.result-pill.pass{background:var(--green-bg);color:var(--green-deep);border:1px solid var(--green-border)}
+.result-pill.fail{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.nudge{background:var(--yellow-bg);border:1px solid var(--yellow-border);border-radius:10px;padding:16px 20px;margin:16px 24px 0;display:none}
+.nudge.show{display:block}
+.nudge-title{font-size:12px;font-weight:700;color:#92400e;margin-bottom:6px}
+.nudge-body{font-size:13px;color:var(--muted);line-height:1.6}
+.next-unlock{margin:16px 24px 20px;padding:18px 20px;background:var(--green-bg);border:1.5px solid var(--green-border);border-radius:10px;display:none;align-items:center;justify-content:space-between;gap:12px}
+.next-unlock.show{display:flex}
+.next-unlock-eyebrow{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--green-deep);margin-bottom:4px}
+.next-unlock-text{font-size:13px;font-weight:600;color:var(--green-deep)}
+.next-unlock-btn{padding:10px 22px;background:var(--green-deep);color:#fff;border:none;border-radius:8px;font-family:var(--fb);font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;white-space:nowrap}
+footer{border-top:1px solid var(--border);padding:32px 48px;text-align:center;font-size:13px;color:var(--muted2);max-width:860px;margin:0 auto}
+@media(max-width:700px){nav{padding:0 16px}.page{padding:20px 20px 60px}.week-header{padding:24px 20px 20px}.week-body{padding:20px}.topic-body{padding:20px}footer{padding:24px 20px}.quiz-footer{flex-direction:column}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="../../learn.html?course=FFOR+300&name=FFOR+300" class="nav-logo">Unify<span>.</span></a>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">☾ Dark</button>
+</nav>
+<div class="page">
+  <div class="back-bar">
+    <a href="../../learn.html?course=FFOR+300&name=FFOR+300" class="back-btn">← Back to FFOR 300</a>
+    <div class="week-nav">
+      <a href="../../learn.html?course=FFOR+300&name=FFOR+300" class="wnav-btn off">← Prev</a>
+      <a href="W2.html" class="wnav-btn">Next →</a>
+    </div>
+  </div>
+  <div class="week-progress">
+    <span class="wp-label">Week 1 Progress</span>
+    <div class="wp-bar"><div class="wp-fill" id="progress-fill"></div></div>
+    <span class="wp-pct" id="progress-pct">0%</span>
+  </div>
+  <div class="week-block">
+    <div class="week-header">
+      <div class="wh-eyebrow">
+        <span class="wh-course-tag">FFOR 300</span>
+        <span class="wh-week-label">Week 1 of 12</span>
+      </div>
+      <div class="wh-title">Energy Sources</div>
+      <div class="wh-subtitle">General Concepts — Classifications and Types</div>
+      <p class="wh-hook">By the end of this week, you should be able to classify energy sources into primary, secondary, and supplementary types, and distinguish between conventional and unconventional sources.</p>
+      <div class="wh-meta">
+        <span class="wh-meta-item"><strong>Lecturer</strong> Mr. Ololade</span>
+        <span class="wh-meta-item"><strong>Date</strong> 23 February 2025</span>
+        <span class="wh-meta-item"><strong>Institution</strong> Lagos State University</span>
+      </div>
+    </div>
+    <div class="week-body">
+      <div class="tags">
+        <span class="tag">Primary Energy</span>
+        <span class="tag">Secondary Energy</span>
+        <span class="tag">Supplementary Energy</span>
+        <span class="tag">Conventional Sources</span>
+        <span class="tag">Unconventional Sources</span>
+        <span class="tag">Fossil Fuels</span>
+        <span class="tag">Renewable Energy</span>
+      </div>
+
+      <!-- TOPIC 1 -->
+      <div class="topic-block" id="topic-1">
+        <div class="topic-header">
+          <div class="topic-num">Topic 2.1</div>
+          <div class="topic-title">General Concept of Energy</div>
+        </div>
+        <div class="topic-body">
+          <p>The energy is demand of human being for their survival. It is directly related with the population. As the population of the word is increasing everyday and so is demand of energy. It is required to sustain the industrial growth, transportation and human beings comfort. It is well known fact that the known sources of energy <em>i.e.,</em> "Fossile Fuel" is depleting very fast and by the turn of the century it may not exist at all. Due to this fact new sources of energy have found an encouraging demand. Energy sources available can be divided into the three type;</p>
+          <ol>
+            <li>Primary energy</li>
+            <li>Secondary energy</li>
+            <li>Supplementary energy</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- TOPIC 2 -->
+      <div class="topic-block" id="topic-2">
+        <div class="topic-header">
+          <div class="topic-num">Topic 2.1.1</div>
+          <div class="topic-title">Primary Energy</div>
+        </div>
+        <div class="topic-body">
+          <p>It provides a net supply of energy. Their energy yield ratio is very high. The yield ratio is "the energy feedback by the materials to the energy received from the environment." The primary sources can only accelerate the growth rate but their supply is limited. It becomes essential to use these fuels sparingly. It contributes considerably to the energy supply.</p>
+
+          <div class="accordion-section-label">Active Recall</div>
+          <div class="accordion-wrap">
+            <div class="accordion-item">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <div class="accordion-btn-inner">
+                  <div class="accordion-btn-text">
+                    <span class="q-type">Definition</span><br>
+                    What is meant by the "energy yield ratio" of primary energy sources?
+                  </div>
+                  <div class="accordion-icon">+</div>
+                </div>
+              </button>
+              <div class="accordion-body">
+                <div class="answer-inner">The energy yield ratio is defined as <strong>"the energy feedback by the materials to the energy received from the environment."</strong> For primary energy, this ratio is very high, meaning these sources return significantly more energy than is invested in harnessing them. However, their supply is limited, so they must be used sparingly.</div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <div class="accordion-btn-inner">
+                  <div class="accordion-btn-text">
+                    <span class="q-type">Application</span><br>
+                    Why must primary energy sources be used sparingly despite contributing considerably to energy supply?
+                  </div>
+                  <div class="accordion-icon">+</div>
+                </div>
+              </button>
+              <div class="accordion-body">
+                <div class="answer-inner">Although primary energy sources have a high energy yield ratio and contribute considerably to energy supply, <strong>their supply is limited</strong>. They cannot be replenished at the rate they are consumed, making conservation essential to ensure long-term availability.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOPIC 3 -->
+      <div class="topic-block" id="topic-3">
+        <div class="topic-header">
+          <div class="topic-num">Topic 2.1.2</div>
+          <div class="topic-title">Secondary Energy</div>
+        </div>
+        <div class="topic-body">
+          <p>It produces net energy though it may be necessary for the economy, these may not yield net energy. Intensive agricultural is an example where in the terms of energy yield is less than the input.</p>
+
+          <div class="accordion-section-label">Active Recall</div>
+          <div class="accordion-wrap">
+            <div class="accordion-item">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <div class="accordion-btn-inner">
+                  <div class="accordion-btn-text">
+                    <span class="q-type">Comparison</span><br>
+                    How does secondary energy differ from primary energy in terms of energy yield?
+                  </div>
+                  <div class="accordion-icon">+</div>
+                </div>
+              </button>
+              <div class="accordion-body">
+                <div class="answer-inner"><strong>Primary energy</strong> has a very high energy yield ratio — far more energy is returned than is invested. <strong>Secondary energy</strong> may produce net energy, but in some cases the energy yield is less than the input. Intensive agriculture is given as an example where the energy returned may not exceed what was invested in farming activities.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pulse Check -->
+      <div class="quiz-zone mid" id="pulse-quiz">
+        <div class="quiz-header">
+          <div class="quiz-header-left">
+            <span class="quiz-badge">PULSE CHECK</span>
+            <div>
+              <div class="quiz-title">Mid-Week Check</div>
+              <div class="quiz-count">3 questions · No grade</div>
+            </div>
+          </div>
+        </div>
+        <div class="quiz-body">
+          <p class="quiz-intro">Quick check before we continue. No grade — just making sure the basics are solid.</p>
+
+          <div class="q-block" id="pq1">
+            <div class="q-meta"><span class="q-num">Q1</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">Which type of energy has a net energy yield that is practically zero?</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'pq1','A')"><span class="opt-letter">A</span><span class="opt-text">Primary energy</span></div>
+              <div class="option" onclick="selectOption(this,'pq1','B')"><span class="opt-letter">B</span><span class="opt-text">Secondary energy</span></div>
+              <div class="option" onclick="selectOption(this,'pq1','C')"><span class="opt-letter">C</span><span class="opt-text">Supplementary energy</span></div>
+              <div class="option" onclick="selectOption(this,'pq1','D')"><span class="opt-letter">D</span><span class="opt-text">Conventional energy</span></div>
+            </div>
+            <div class="q-feedback" id="pq1-fb"></div>
+          </div>
+
+          <div class="q-block" id="pq2">
+            <div class="q-meta"><span class="q-num">Q2</span><span class="q-type-badge fitb">FILL IN</span></div>
+            <p class="q-text">Coal, natural gas, oil and nuclear energy are classified as ________ sources.</p>
+            <div class="fitb-row">
+              <input class="fitb-input" id="pq2-in" placeholder="type here" oninput="clearFeedback('pq2')">
+            </div>
+            <div class="fitb-hint">Hint: these are also called unrenewable sources</div>
+            <div class="q-feedback" id="pq2-fb"></div>
+          </div>
+
+          <div class="q-block" id="pq3">
+            <div class="q-meta"><span class="q-num">Q3</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">Intensive agriculture is given as an example of which energy type?</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'pq3','A')"><span class="opt-letter">A</span><span class="opt-text">Primary energy</span></div>
+              <div class="option" onclick="selectOption(this,'pq3','B')"><span class="opt-letter">B</span><span class="opt-text">Secondary energy</span></div>
+              <div class="option" onclick="selectOption(this,'pq3','C')"><span class="opt-letter">C</span><span class="opt-text">Supplementary energy</span></div>
+              <div class="option" onclick="selectOption(this,'pq3','D')"><span class="opt-letter">D</span><span class="opt-text">Unconventional energy</span></div>
+            </div>
+            <div class="q-feedback" id="pq3-fb"></div>
+          </div>
+        </div>
+        <div class="quiz-footer">
+          <button class="quiz-submit" onclick="submitPulse()">Check Answers</button>
+          <div class="quiz-result" id="pulse-result">
+            <div><div class="result-score" id="pulse-score"></div><div class="result-label">out of 3 correct</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOPIC 4 -->
+      <div class="topic-block" id="topic-4">
+        <div class="topic-header">
+          <div class="topic-num">Topic 2.1.3</div>
+          <div class="topic-title">Supplementary Energy</div>
+        </div>
+        <div class="topic-body">
+          <p>It is those whose net energy yield is practically zero. It requires highest investment in terms energy insulation.</p>
+          <p>On the basis of above discussion it becomes apparent that the energy can be classified as shown in Fig. 2.1.</p>
+
+          <div class="diagram-wrap">
+            <div class="diagram-titlebar">
+              <span>Fig. 2.1</span>
+              <small>Classification of energy sources</small>
+            </div>
+            <div class="diagram-canvas">
+              <svg viewBox="0 0 500 200" width="500" height="200" xmlns="http://www.w3.org/2000/svg">
+                <rect x="195" y="10" width="110" height="44" rx="8" fill="#d1fae5" stroke="#16a34a" stroke-width="2"/>
+                <text x="250" y="37" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="14" font-weight="600" fill="#0a0a0a">Energy</text>
+                <line x1="250" y1="54" x2="120" y2="110" stroke="#16a34a" stroke-width="2"/>
+                <line x1="250" y1="54" x2="380" y2="110" stroke="#16a34a" stroke-width="2"/>
+                <rect x="20" y="110" width="200" height="52" rx="8" fill="#f8f7f3" stroke="#e0deda" stroke-width="1.5"/>
+                <text x="120" y="131" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" fill="#0a0a0a">Conventional sources/</text>
+                <text x="120" y="148" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" fill="#0a0a0a">unrenewable source.</text>
+                <rect x="280" y="110" width="200" height="52" rx="8" fill="#f8f7f3" stroke="#e0deda" stroke-width="1.5"/>
+                <text x="380" y="131" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" fill="#0a0a0a">Unconventional sources/</text>
+                <text x="380" y="148" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" fill="#0a0a0a">renewable source.</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOPIC 5 -->
+      <div class="topic-block" id="topic-5">
+        <div class="topic-header">
+          <div class="topic-num">Topic 2.1.4</div>
+          <div class="topic-title">Conventional Sources</div>
+        </div>
+        <div class="topic-body">
+          <p>These are energy sources which are naturally available <em>viz.,</em> coal, natural gas, oil and/or nuclear energy. These form the part of primary energy sources. It is also know as unrenewable sources.</p>
+
+          <p><strong>Unconventional sources:</strong> The secondary sources <em>i.e.,</em> solar energy, wind energy, water energy, human energy etc. Categorized as secondary sources. Solar energy can be used through plants, solar cells, solar heater, solar drying and solar tower. These are some of the emerging technologies where solar energy are used. Solar heating/drying is economical application if passive methods are used. Another unconventional sources are wind, tide, wave, hydroelectric, geothermal, ocean thermal etc.</p>
+
+          <p>As the unrenewable sources are depleting very fast the coming generation has to depend mostly on renewable sources of energy. It can be classified as:</p>
+          <ol>
+            <li>Solar energy</li>
+            <li>Wind energy</li>
+            <li>Energy from biomass</li>
+            <li>Geothermal energy</li>
+            <li>Ocean energy (OTEC)</li>
+            <li>Chemical engg. sources</li>
+            <li>Magneto hydrodynamic (MHD)</li>
+          </ol>
+
+          <div class="accordion-section-label">Active Recall</div>
+          <div class="accordion-wrap">
+            <div class="accordion-item">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <div class="accordion-btn-inner">
+                  <div class="accordion-btn-text">
+                    <span class="q-type">Definition</span><br>
+                    What are conventional energy sources? Give four examples.
+                  </div>
+                  <div class="accordion-icon">+</div>
+                </div>
+              </button>
+              <div class="accordion-body">
+                <div class="answer-inner">Conventional energy sources are those which are <strong>naturally available</strong>. They form part of primary energy sources and are also known as <strong>unrenewable sources</strong>. Examples include: <strong>coal, natural gas, oil, and nuclear energy</strong>.</div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <div class="accordion-btn-inner">
+                  <div class="accordion-btn-text">
+                    <span class="q-type">Application</span><br>
+                    List the seven classifications of renewable (unconventional) energy sources.
+                  </div>
+                  <div class="accordion-icon">+</div>
+                </div>
+              </button>
+              <div class="accordion-body">
+                <div class="answer-inner">The seven renewable energy classifications are: <strong>(1) Solar energy, (2) Wind energy, (3) Energy from biomass, (4) Geothermal energy, (5) Ocean energy (OTEC), (6) Chemical engineering sources, (7) Magneto hydrodynamic (MHD)</strong>.</div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <div class="accordion-btn-inner">
+                  <div class="accordion-btn-text">
+                    <span class="q-type">Comparison</span><br>
+                    Distinguish between conventional and unconventional energy sources with examples.
+                  </div>
+                  <div class="accordion-icon">+</div>
+                </div>
+              </button>
+              <div class="accordion-body">
+                <div class="answer-inner"><strong>Conventional sources</strong> are naturally available, finite (unrenewable) and form part of primary energy — e.g., coal, oil, natural gas, nuclear energy. <strong>Unconventional sources</strong> are secondary sources that are renewable — e.g., solar, wind, wave, hydroelectric, geothermal, ocean thermal energy. As conventional sources deplete, future generations must rely on unconventional sources.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WEEK QUIZ -->
+      <div class="quiz-zone" id="week-quiz">
+        <div class="quiz-header">
+          <div class="quiz-header-left">
+            <span class="quiz-badge">WEEK 1 QUIZ</span>
+            <div>
+              <div class="quiz-title">Energy Sources — General Concepts</div>
+              <div class="quiz-count">8 questions · 60% to pass</div>
+            </div>
+          </div>
+        </div>
+        <div class="quiz-body">
+          <p class="quiz-intro">Answer all 8 questions. You need 60% (5/8) to pass and unlock Week 2.</p>
+
+          <div class="q-block" id="wq1">
+            <div class="q-meta"><span class="q-num">Q1</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">Energy demand is directly related to which of the following?</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq1','A')"><span class="opt-letter">A</span><span class="opt-text">Climate change</span></div>
+              <div class="option" onclick="selectOption(this,'wq1','B')"><span class="opt-letter">B</span><span class="opt-text">Population growth</span></div>
+              <div class="option" onclick="selectOption(this,'wq1','C')"><span class="opt-letter">C</span><span class="opt-text">Technological innovation</span></div>
+              <div class="option" onclick="selectOption(this,'wq1','D')"><span class="opt-letter">D</span><span class="opt-text">Political stability</span></div>
+            </div>
+            <div class="q-feedback" id="wq1-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq2">
+            <div class="q-meta"><span class="q-num">Q2</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">Which energy type requires the highest investment in terms of energy insulation and has a net yield of practically zero?</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq2','A')"><span class="opt-letter">A</span><span class="opt-text">Primary energy</span></div>
+              <div class="option" onclick="selectOption(this,'wq2','B')"><span class="opt-letter">B</span><span class="opt-text">Secondary energy</span></div>
+              <div class="option" onclick="selectOption(this,'wq2','C')"><span class="opt-letter">C</span><span class="opt-text">Supplementary energy</span></div>
+              <div class="option" onclick="selectOption(this,'wq2','D')"><span class="opt-letter">D</span><span class="opt-text">Conventional energy</span></div>
+            </div>
+            <div class="q-feedback" id="wq2-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq3">
+            <div class="q-meta"><span class="q-num">Q3</span><span class="q-type-badge fitb">FILL IN</span></div>
+            <p class="q-text">Primary energy sources have a very ________ energy yield ratio.</p>
+            <div class="fitb-row">
+              <input class="fitb-input" id="wq3-in" placeholder="type here" oninput="clearFeedback('wq3')">
+            </div>
+            <div class="q-feedback" id="wq3-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq4">
+            <div class="q-meta"><span class="q-num">Q4</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">Which of the following is NOT an unconventional energy source?</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq4','A')"><span class="opt-letter">A</span><span class="opt-text">Solar energy</span></div>
+              <div class="option" onclick="selectOption(this,'wq4','B')"><span class="opt-letter">B</span><span class="opt-text">Natural gas</span></div>
+              <div class="option" onclick="selectOption(this,'wq4','C')"><span class="opt-letter">C</span><span class="opt-text">Wind energy</span></div>
+              <div class="option" onclick="selectOption(this,'wq4','D')"><span class="opt-letter">D</span><span class="opt-text">Geothermal energy</span></div>
+            </div>
+            <div class="q-feedback" id="wq4-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq5">
+            <div class="q-meta"><span class="q-num">Q5</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">According to the classification in Fig. 2.1, energy sources are broadly divided into:</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq5','A')"><span class="opt-letter">A</span><span class="opt-text">Primary, secondary, and supplementary</span></div>
+              <div class="option" onclick="selectOption(this,'wq5','B')"><span class="opt-letter">B</span><span class="opt-text">Conventional/unrenewable and unconventional/renewable</span></div>
+              <div class="option" onclick="selectOption(this,'wq5','C')"><span class="opt-letter">C</span><span class="opt-text">Fossil and non-fossil</span></div>
+              <div class="option" onclick="selectOption(this,'wq5','D')"><span class="opt-letter">D</span><span class="opt-text">Thermal and electrical</span></div>
+            </div>
+            <div class="q-feedback" id="wq5-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq6">
+            <div class="q-meta"><span class="q-num">Q6</span><span class="q-type-badge fitb">FILL IN</span></div>
+            <p class="q-text">The full abbreviation for the ocean energy classification is ________.</p>
+            <div class="fitb-row">
+              <input class="fitb-input" id="wq6-in" placeholder="type here" oninput="clearFeedback('wq6')">
+            </div>
+            <div class="fitb-hint">Hint: Ocean Thermal Energy Conversion</div>
+            <div class="q-feedback" id="wq6-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq7">
+            <div class="q-meta"><span class="q-num">Q7</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">Solar energy can be used through all of the following EXCEPT:</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq7','A')"><span class="opt-letter">A</span><span class="opt-text">Solar cells</span></div>
+              <div class="option" onclick="selectOption(this,'wq7','B')"><span class="opt-letter">B</span><span class="opt-text">Solar heater</span></div>
+              <div class="option" onclick="selectOption(this,'wq7','C')"><span class="opt-letter">C</span><span class="opt-text">Nuclear fission</span></div>
+              <div class="option" onclick="selectOption(this,'wq7','D')"><span class="opt-letter">D</span><span class="opt-text">Solar tower</span></div>
+            </div>
+            <div class="q-feedback" id="wq7-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq8">
+            <div class="q-meta"><span class="q-num">Q8</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">MHD stands for:</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq8','A')"><span class="opt-letter">A</span><span class="opt-text">Mechanical Heat Dissipation</span></div>
+              <div class="option" onclick="selectOption(this,'wq8','B')"><span class="opt-letter">B</span><span class="opt-text">Magneto Hydro Dynamic</span></div>
+              <div class="option" onclick="selectOption(this,'wq8','C')"><span class="opt-letter">C</span><span class="opt-text">Multi-Heat Distribution</span></div>
+              <div class="option" onclick="selectOption(this,'wq8','D')"><span class="opt-letter">D</span><span class="opt-text">Maximum Heat Density</span></div>
+            </div>
+            <div class="q-feedback" id="wq8-fb"></div>
+          </div>
+        </div>
+        <div class="quiz-footer">
+          <button class="quiz-submit" id="week-submit" onclick="submitWeekQuiz()">Submit Quiz</button>
+          <div class="quiz-result" id="week-result">
+            <div><div class="result-score" id="week-score"></div><div class="result-label" id="week-label"></div></div>
+            <span class="result-pill" id="week-pill"></span>
+          </div>
+        </div>
+        <div class="nudge" id="week-nudge">
+          <div class="nudge-title">📚 Review Recommended</div>
+          <div class="nudge-body" id="nudge-body">Go back and review the topics above before retrying.</div>
+        </div>
+        <div class="next-unlock" id="next-unlock">
+          <div>
+            <div class="next-unlock-eyebrow">Week 1 Complete ✓</div>
+            <div class="next-unlock-text">You're ready for Week 2 — Unconventional Energy Sources</div>
+          </div>
+          <a href="W2.html" class="next-unlock-btn">Week 2 →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<footer>
+  <strong>FFOR 300 — Energy Conservation &amp; Dissipation</strong> · Lagos State University · Unify Notes
+</footer>
+
+<script>
+// Theme
+function toggleTheme(){
+  const h=document.documentElement,b=document.getElementById('theme-btn');
+  if(h.getAttribute('data-theme')==='dark'){h.setAttribute('data-theme','light');b.textContent='☾ Dark';localStorage.setItem('theme','light');}
+  else{h.setAttribute('data-theme','dark');b.textContent='☀ Light';localStorage.setItem('theme','dark');}
+}
+(function(){const t=localStorage.getItem('theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');document.getElementById('theme-btn').textContent='☀ Light';}})();
+
+// Accordion
+function toggleAccordion(btn){
+  const item=btn.closest('.accordion-item');
+  const wasOpen=item.classList.contains('open');
+  document.querySelectorAll('.accordion-item.open').forEach(i=>{if(i!==item){i.classList.remove('open');}});
+  item.classList.toggle('open',!wasOpen);
+  updateProgress();
+}
+
+// Options
+const selections={};
+function selectOption(el,qid,val){
+  if(selections[qid]&&selections[qid].locked)return;
+  const opts=el.closest('.options').querySelectorAll('.option');
+  opts.forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  selections[qid]={val,locked:false};
+}
+
+function clearFeedback(qid){
+  const fb=document.getElementById(qid+'-fb');
+  if(fb){fb.className='q-feedback';fb.textContent='';}
+}
+
+// Pulse Quiz
+const pulseAnswers={pq1:'C',pq2:['conventional','conventional sources'],pq3:'B'};
+function submitPulse(){
+  let correct=0;
+  // pq1
+  const s1=selections['pq1'];
+  const fb1=document.getElementById('pq1-fb');
+  if(s1&&s1.val==='C'){correct++;fb1.className='q-feedback ok show';fb1.textContent='✓ Correct! Supplementary energy has practically zero net yield.';}
+  else{fb1.className='q-feedback no show';fb1.textContent='✗ The answer is C — Supplementary energy.';}
+  if(s1)selections['pq1'].locked=true;
+  document.querySelectorAll('#pq1 .option').forEach(o=>{if(o.classList.contains('selected')){if(s1&&s1.val==='C')o.classList.add('correct');else o.classList.add('wrong');}});
+  // pq2
+  const v2=(document.getElementById('pq2-in').value||'').toLowerCase().trim();
+  const fb2=document.getElementById('pq2-fb');
+  if(pulseAnswers.pq2.some(a=>v2.includes(a))){correct++;fb2.className='q-feedback ok show';fb2.textContent='✓ Correct! These are conventional/unrenewable sources.';document.getElementById('pq2-in').classList.add('correct');}
+  else{fb2.className='q-feedback no show';fb2.textContent='✗ The answer is "conventional" sources.';document.getElementById('pq2-in').classList.add('wrong');}
+  // pq3
+  const s3=selections['pq3'];
+  const fb3=document.getElementById('pq3-fb');
+  if(s3&&s3.val==='B'){correct++;fb3.className='q-feedback ok show';fb3.textContent='✓ Correct! Intensive agriculture is a secondary energy example.';}
+  else{fb3.className='q-feedback no show';fb3.textContent='✗ The answer is B — Secondary energy.';}
+  if(s3)selections['pq3'].locked=true;
+  document.querySelectorAll('#pq3 .option').forEach(o=>{if(o.classList.contains('selected')){if(s3&&s3.val==='B')o.classList.add('correct');else o.classList.add('wrong');}});
+  const pr=document.getElementById('pulse-result');
+  document.getElementById('pulse-score').textContent=correct+'/3';
+  pr.classList.add('show');
+  updateProgress();
+}
+
+// Week Quiz
+const weekAnswers={
+  wq1:{type:'mcq',correct:'B',explanation:'Energy demand is directly related to population growth — as population grows, so does energy demand.'},
+  wq2:{type:'mcq',correct:'C',explanation:'Supplementary energy has practically zero net yield and requires the highest investment in energy insulation.'},
+  wq3:{type:'fitb',correct:['high','very high'],explanation:'Primary energy sources have a very HIGH energy yield ratio — they return significantly more than is invested.'},
+  wq4:{type:'mcq',correct:'B',explanation:'Natural gas is a conventional/unrenewable source, not an unconventional source.'},
+  wq5:{type:'mcq',correct:'B',explanation:'Fig. 2.1 shows the broad division: Conventional/unrenewable sources and Unconventional/renewable sources.'},
+  wq6:{type:'fitb',correct:['otec','ocean thermal energy conversion'],explanation:'OTEC stands for Ocean Thermal Energy Conversion.'},
+  wq7:{type:'mcq',correct:'C',explanation:'Nuclear fission is unrelated to solar energy. Solar energy uses plants, solar cells, solar heaters, solar drying, and solar towers.'},
+  wq8:{type:'mcq',correct:'B',explanation:'MHD stands for Magneto Hydro Dynamic.'},
+};
+
+function submitWeekQuiz(){
+  let correct=0;
+  Object.keys(weekAnswers).forEach(qid=>{
+    const ans=weekAnswers[qid];
+    const fb=document.getElementById(qid+'-fb');
+    if(ans.type==='mcq'){
+      const sel=selections[qid];
+      if(sel&&sel.val===ans.correct){correct++;fb.className='q-feedback ok show';fb.textContent='✓ '+ans.explanation;}
+      else{fb.className='q-feedback no show';fb.textContent='✗ '+ans.explanation;}
+      if(sel)sel.locked=true;
+      document.querySelectorAll('#'+qid+' .option').forEach(o=>{
+        if(o.classList.contains('selected')){if(sel&&sel.val===ans.correct)o.classList.add('correct');else o.classList.add('wrong');}
+        const letter=o.querySelector('.opt-letter').textContent;
+        if(letter===ans.correct&&!(sel&&sel.val===ans.correct))o.classList.add('correct');
+      });
+    } else {
+      const inp=document.getElementById(qid+'-in');
+      const v=(inp.value||'').toLowerCase().trim();
+      if(ans.correct.some(a=>v.includes(a))){correct++;fb.className='q-feedback ok show';fb.textContent='✓ '+ans.explanation;inp.classList.add('correct');}
+      else{fb.className='q-feedback no show';fb.textContent='✗ '+ans.explanation;inp.classList.add('wrong');}
+    }
+  });
+  const total=Object.keys(weekAnswers).length;
+  const pct=Math.round(correct/total*100);
+  const passed=pct>=60;
+  document.getElementById('week-score').textContent=correct+'/'+total;
+  document.getElementById('week-label').textContent=pct+'% — '+(passed?'Passed!':'Not quite.');
+  const pill=document.getElementById('week-pill');
+  pill.textContent=passed?'PASS':'FAIL';
+  pill.className='result-pill '+(passed?'pass':'fail');
+  document.getElementById('week-result').classList.add('show');
+  document.getElementById('week-submit').disabled=true;
+  if(passed){document.getElementById('next-unlock').classList.add('show');localStorage.setItem('mee352_w1_passed','1');}
+  else{document.getElementById('week-nudge').classList.add('show');}
+  updateProgress();
+}
+
+// Progress
+function updateProgress(){
+  const total=10;
+  let done=0;
+  document.querySelectorAll('.accordion-item.open').forEach(()=>done++);
+  if(document.getElementById('pulse-result').classList.contains('show'))done+=3;
+  if(document.getElementById('week-result').classList.contains('show'))done+=5;
+  const pct=Math.min(100,Math.round(done/total*100));
+  document.getElementById('progress-fill').style.width=pct+'%';
+  document.getElementById('progress-pct').textContent=pct+'%';
+}
+</script>
+</body>
+</html>
+

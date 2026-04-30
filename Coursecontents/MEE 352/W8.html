@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FFOR 300 — Week 8: Miscellaneous Sources & Merits/Demerits | Unify</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--muted:#555;--muted2:#999;--green:#4ade80;--green-deep:#16a34a;--green-bg:rgba(74,222,128,0.1);--green-border:rgba(74,222,128,0.3);--yellow-bg:#fffbeb;--yellow-border:#fcd34d;--red:#dc2626;--red-bg:#fff5f5;--red-border:#fca5a5;--fd:'Playfair Display',serif;--fb:'DM Sans',sans-serif;}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--green-bg:rgba(74,222,128,0.08);--green-border:rgba(74,222,128,0.2);--yellow-bg:#1a1500;--yellow-border:#b45309;--red-bg:#1a0505;--red-border:#7f1d1d;}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{font-family:var(--fb);background:var(--bg);color:var(--text);line-height:1.75;font-size:16px;transition:background .2s,color .2s}
+nav{position:sticky;top:0;z-index:100;height:60px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;gap:32px}
+.nav-logo{font-family:var(--fd);font-size:20px;font-weight:900;color:var(--text);text-decoration:none}.nav-logo span{color:var(--green)}
+.theme-toggle{margin-left:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-family:var(--fb);font-size:12px;font-weight:500;color:var(--muted);cursor:pointer}
+.page{max-width:860px;margin:0 auto;padding:40px 48px 80px}
+.back-bar{display:flex;align-items:center;gap:12px;margin-bottom:28px;flex-wrap:wrap}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px}
+.week-nav{display:flex;gap:8px;margin-left:auto}.wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px}.wnav-btn.off{opacity:.35;pointer-events:none}
+.week-progress{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:24px;display:flex;align-items:center;gap:14px}
+.wp-label{font-size:11px;font-weight:600;color:var(--muted2);flex-shrink:0;text-transform:uppercase;letter-spacing:.1em}.wp-bar{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden}.wp-fill{height:100%;background:var(--green);border-radius:3px;width:0%;transition:width .5s ease}.wp-pct{font-size:11px;font-weight:700;color:var(--green-deep);flex-shrink:0}
+.week-block{border-radius:14px;border:1px solid var(--border);overflow:hidden;background:var(--surface)}
+.week-header{background:var(--text);color:#f0efeb;padding:32px 36px 28px}[data-theme="dark"] .week-header{background:var(--surface2);border-bottom:1px solid var(--border)}
+.wh-eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:18px}.wh-course-tag{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:var(--green);color:var(--text);padding:3px 12px;border-radius:20px}.wh-week-label{font-size:11px;font-weight:500;color:rgba(240,239,235,.45);letter-spacing:.05em}
+.wh-title{font-family:var(--fd);font-size:clamp(1.6rem,4vw,2.2rem);font-weight:700;line-height:1.2;margin-bottom:6px}.wh-subtitle{font-size:15px;color:rgba(240,239,235,.55);margin-bottom:20px}.wh-hook{font-size:15px;color:rgba(240,239,235,.85);line-height:1.7;max-width:60ch;padding-top:18px;border-top:1px solid rgba(240,239,235,.12)}
+.wh-meta{display:flex;flex-wrap:wrap;gap:18px;margin-top:16px}.wh-meta-item{font-size:12px;color:rgba(240,239,235,.45)}.wh-meta-item strong{color:rgba(240,239,235,.75);font-weight:500}
+.week-body{padding:36px}.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:32px}.tag{font-size:11px;font-weight:500;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:3px 12px}
+.topic-block{border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden}.topic-header{background:var(--surface2);padding:14px 24px;border-bottom:1px solid var(--border)}.topic-num{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:3px}.topic-title{font-size:16px;font-weight:600;color:var(--text)}
+.topic-body{padding:28px 32px}.topic-body p{font-size:15px;line-height:1.8;margin-bottom:16px;color:var(--text);max-width:66ch}.topic-body ol,.topic-body ul{padding-left:22px;margin-bottom:16px;max-width:66ch}.topic-body li{font-size:15px;line-height:1.8;margin-bottom:6px;color:var(--text)}
+.accordion-section-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin:28px 0 12px;display:flex;align-items:center;gap:10px}.accordion-section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.accordion-wrap{display:flex;flex-direction:column;gap:8px}.accordion-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.accordion-btn{width:100%;background:none;border:none;cursor:pointer;padding:14px 20px;text-align:left;font-family:var(--fb);font-size:14px;font-weight:500;color:var(--text);line-height:1.55;transition:background .15s}.accordion-btn:hover{background:var(--surface2)}
+.accordion-btn-inner{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.accordion-btn-text{flex:1;min-width:0}
+.q-type{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--green-bg);color:var(--green-deep);border:1px solid var(--green-border);padding:2px 8px;border-radius:4px;margin-bottom:6px}
+.accordion-icon{flex-shrink:0;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--muted);transition:transform .25s,background .2s;margin-top:2px}.accordion-item.open .accordion-icon{transform:rotate(45deg);background:var(--green);border-color:var(--green);color:var(--text)}
+.accordion-body{max-height:0;overflow:hidden;transition:max-height .35s ease,padding .25s;padding:0 20px}.accordion-item.open .accordion-body{max-height:600px;padding:0 20px 18px}
+.answer-inner{border-top:1px solid var(--border);padding-top:14px;font-size:14px;color:var(--muted);line-height:1.8}.answer-inner strong{color:var(--green-deep)}
+.quiz-zone{margin:32px 0;border-radius:14px;overflow:hidden;border:2px solid var(--text)}.quiz-header{background:var(--text);padding:18px 24px;display:flex;align-items:center;justify-content:space-between}.quiz-header-left{display:flex;align-items:center;gap:12px}
+.quiz-badge{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;border-radius:20px;background:rgba(74,222,128,.2);color:var(--green);border:1px solid rgba(74,222,128,.3)}.quiz-title{font-family:var(--fd);font-size:16px;font-weight:700;color:#f0efeb}.quiz-count{font-size:11px;color:rgba(240,239,235,.45)}
+.quiz-body{background:var(--surface);padding:24px}.quiz-intro{font-size:13px;color:var(--muted);margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);line-height:1.6}
+.q-block{margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border)}.q-block:last-of-type{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.q-meta{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}.q-num{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
+.q-type-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;letter-spacing:.5px}.q-type-badge.mcq{background:var(--green-bg);color:var(--green-deep);border:1px solid var(--green-border)}.q-type-badge.fitb{background:rgba(251,191,36,.1);color:#b45309;border:1px solid rgba(251,191,36,.3)}
+.q-text{font-size:15px;font-weight:600;color:var(--text);margin-bottom:14px;line-height:1.6;max-width:66ch}.options{display:flex;flex-direction:column;gap:8px;max-width:66ch}
+.option{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s;background:var(--surface2)}.option:hover{border-color:var(--muted)}.option.selected{border-color:var(--text);background:var(--surface)}.option.correct{border-color:var(--green);background:var(--green-bg)!important}.option.wrong{border-color:var(--red);background:var(--red-bg)!important}
+.opt-letter{width:26px;height:26px;border-radius:6px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted2);flex-shrink:0}.option.selected .opt-letter{background:var(--text);border-color:var(--text);color:var(--green)}.option.correct .opt-letter{background:var(--green);border-color:var(--green);color:var(--text)}.option.wrong .opt-letter{background:var(--red);border-color:var(--red);color:#fff}.opt-text{font-size:14px;color:var(--text);line-height:1.5}
+.fitb-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:15px;color:var(--text);line-height:2.4;max-width:66ch}.fitb-input{border:none;border-bottom:2px solid var(--text);background:transparent;font-family:var(--fb);font-size:15px;font-weight:600;color:var(--text);width:160px;text-align:center;padding:2px 8px;outline:none}.fitb-input.correct{border-color:var(--green);color:var(--green-deep)}.fitb-input.wrong{border-color:var(--red);color:var(--red)}.fitb-hint{font-size:12px;color:var(--muted2);margin-top:6px;font-style:italic}
+.q-feedback{margin-top:10px;padding:10px 14px;border-radius:8px;font-size:13px;line-height:1.6;display:none;max-width:66ch}.q-feedback.show{display:block}.q-feedback.ok{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green-deep)}.q-feedback.no{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red)}
+.quiz-footer{padding:20px 24px;background:var(--surface2);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.quiz-submit{padding:11px 28px;background:var(--text);color:var(--green);border:none;border-radius:8px;font-family:var(--fb);font-size:13px;font-weight:700;cursor:pointer}.quiz-submit:disabled{opacity:.4;cursor:not-allowed}
+.quiz-result{display:none;align-items:center;gap:12px;flex:1}.quiz-result.show{display:flex}.result-score{font-family:var(--fd);font-size:28px;font-weight:900;color:var(--text)}.result-label{font-size:12px;color:var(--muted);line-height:1.5}.result-pill{padding:5px 16px;border-radius:20px;font-size:11px;font-weight:700;flex-shrink:0}.result-pill.pass{background:var(--green-bg);color:var(--green-deep);border:1px solid var(--green-border)}.result-pill.fail{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.nudge{background:var(--yellow-bg);border:1px solid var(--yellow-border);border-radius:10px;padding:16px 20px;margin:16px 24px 0;display:none}.nudge.show{display:block}.nudge-title{font-size:12px;font-weight:700;color:#92400e;margin-bottom:6px}.nudge-body{font-size:13px;color:var(--muted);line-height:1.6}
+.next-unlock{margin:16px 24px 20px;padding:18px 20px;background:var(--green-bg);border:1.5px solid var(--green-border);border-radius:10px;display:none;align-items:center;justify-content:space-between;gap:12px}.next-unlock.show{display:flex}.next-unlock-eyebrow{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--green-deep);margin-bottom:4px}.next-unlock-text{font-size:13px;font-weight:600;color:var(--green-deep)}.next-unlock-btn{padding:10px 22px;background:var(--green-deep);color:#fff;border:none;border-radius:8px;font-family:var(--fb);font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;white-space:nowrap}
+footer{border-top:1px solid var(--border);padding:32px 48px;text-align:center;font-size:13px;color:var(--muted2);max-width:860px;margin:0 auto}
+@media(max-width:700px){nav{padding:0 16px}.page{padding:20px 20px 60px}.week-header{padding:24px 20px 20px}.week-body{padding:20px}.topic-body{padding:20px}footer{padding:24px 20px}.quiz-footer{flex-direction:column}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="../../learn.html?course=FFOR+300&name=FFOR+300" class="nav-logo">Unify<span>.</span></a>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">&#9790; Dark</button>
+</nav>
+<div class="page">
+  <div class="back-bar">
+    <a href="../../learn.html?course=FFOR+300&name=FFOR+300" class="back-btn">&#8592; Back to FFOR 300</a>
+    <div class="week-nav">
+      <a href="W7.html" class="wnav-btn">&#8592; Prev</a>
+      <a href="W9.html" class="wnav-btn">Next &#8594;</a>
+    </div>
+  </div>
+  <div class="week-progress">
+    <span class="wp-label">Week 8 Progress</span>
+    <div class="wp-bar"><div class="wp-fill" id="progress-fill"></div></div>
+    <span class="wp-pct" id="progress-pct">0%</span>
+  </div>
+  <div class="week-block">
+    <div class="week-header">
+      <div class="wh-eyebrow">
+        <span class="wh-course-tag">FFOR 300</span>
+        <span class="wh-week-label">Week 8 of 12</span>
+      </div>
+      <div class="wh-title">Miscellaneous Sources & Merits/Demerits</div>
+      <div class="wh-subtitle">Fuel Cells, Batteries, Energy Harvesting Technology</div>
+      <p class="wh-hook">By the end of this week, you should be able to classify fuel cells by temperature and electrolyte type, explain battery energy efficiency, and describe innovative energy harvesting technology.</p>
+      <div class="wh-meta">
+        <span class="wh-meta-item"><strong>Lecturer</strong> Mr. Ololade</span>
+        <span class="wh-meta-item"><strong>Date</strong> 13 April 2025</span>
+        <span class="wh-meta-item"><strong>Institution</strong> Lagos State University</span>
+      </div>
+    </div>
+    <div class="week-body">
+      <div class="tags"><span class="tag">Fuel Cells</span><span class="tag">Batteries</span><span class="tag">Energy Harvesting</span><span class="tag">MHD</span><span class="tag">Conventional Merits</span><span class="tag">Non-Conventional Merits</span><span class="tag">HYDROX Cell</span></div>
+      
+      <div class="topic-block">
+        <div class="topic-header">
+          <div class="topic-num">Topic 2.17</div>
+          <div class="topic-title">Miscellaneous Sources</div>
+        </div>
+        <div class="topic-body">
+          <p>Chemical Energy Sources include augmentation of efforts on the development of fuel cell and batteries. These have promise for: (i) Running small and light commercial vehicles. (ii) Rural electrification through rechargeable power batteries.</p>
+          <div class="accordion-section-label">Active Recall</div>
+          <div class="accordion-wrap">
+            <div class="accordion-item">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <div class="accordion-btn-inner">
+                  <div class="accordion-btn-text"><span class="q-type">Review</span><br>What are the key facts, figures, and definitions from Miscellaneous Sources?</div>
+                  <div class="accordion-icon">+</div>
+                </div>
+              </button>
+              <div class="accordion-body"><div class="answer-inner">Review the notes above. Focus on: specific numerical values, definitions, classification schemes, and the logic connecting ideas in <strong>Miscellaneous Sources</strong>.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="topic-block">
+        <div class="topic-header">
+          <div class="topic-num">Topic 2.17.2</div>
+          <div class="topic-title">Fuel Cell</div>
+        </div>
+        <div class="topic-body">
+          <p>A cell or combination of cells are capable to generate an electric current by converting the chemical energy of a fuel directly onto electricity. The chemical energy is the free energy of the reactant used. This conversion takes place at a constant temperature and pressure. As per the fuel used the fuel cell can be classified as:</p><ol><li>Hydrogen (H₂) fuel cell</li><li>Hydrazine (N₂H₄) fuel cell</li><li>Hydrocarbon fuel cell</li><li>Alcohol (Methanol) fuel cell</li></ol><p>The main components of a hydrogen, oxygen (HYDROX) cell are: (i) A fuel electrode (anode) (ii) An oxidant or air electrode (Cathode) and (iii) An electrolyte</p><p><strong>Classification by Temperature:</strong></p><ol><li>Low temperature fuel cell — 20-100°C</li><li>Medium temperature fuel cell — 100-500°C</li><li>High temperature fuel cell — 500-1000°C</li><li>Very high temperature fuel cell — more than 1000°C</li></ol><p><strong>Classification by Electrolyte:</strong></p><ol><li>Gas fuel cell — hydrogen low hydrocarbon</li><li>Liquid fuel cell — alcohols, hydrazine, higher hydrocarbon</li><li>Solid fuel cell — metals</li></ol><p>The fuel cell can be used for: (a) Domestic purpose (b) Central power station (c) Automotive vehicles (d) Special application</p>
+          <div class="accordion-section-label">Active Recall</div>
+          <div class="accordion-wrap">
+            <div class="accordion-item">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <div class="accordion-btn-inner">
+                  <div class="accordion-btn-text"><span class="q-type">Review</span><br>What are the key facts, figures, and definitions from Fuel Cell?</div>
+                  <div class="accordion-icon">+</div>
+                </div>
+              </button>
+              <div class="accordion-body"><div class="answer-inner">Review the notes above. Focus on: specific numerical values, definitions, classification schemes, and the logic connecting ideas in <strong>Fuel Cell</strong>.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="topic-block">
+        <div class="topic-header">
+          <div class="topic-num">Topic 2.17.3</div>
+          <div class="topic-title">Batteries</div>
+        </div>
+        <div class="topic-body">
+          <p>It is a combination of individual cell. It can also be called as a black-box containing electrical energy stored electrochemically and later recovered as electrical energy. It is of two types (a) Stored and (b) Charged cell.</p><p>The battery can be of two types:</p><ol><li>Primary battery (non-chargeable) — chemical reactions are irreversible e.g., dry cell flash light batteries.</li><li>Secondary battery (solar, wind electrical energy storage) — the chemical reactions are reversible e. g., lead acid batteries.</li></ol><p><strong>Energy efficiency of a battery formula:</strong></p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--green-deep);padding:12px 0;">η<sub>e</sub> = (E₁ × Amp. hour output) / (E₂ × Amp. hour input)</p><p>Where: I₁ = Battery discharge current, I₂ = Battery charged current, E₁ = Battery discharge terminal voltage, E₂ = Battery charged terminal voltage, θ₁ = Battery discharge time, θ₂ = Battery charging time.</p><p>"Cycle life" is the number of times the battery can be charged/discharged under specified conditions. It vary greatly with depth of discharge/deep discharge tending to short cycle life.</p>
+          <div class="accordion-section-label">Active Recall</div>
+          <div class="accordion-wrap">
+            <div class="accordion-item">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <div class="accordion-btn-inner">
+                  <div class="accordion-btn-text"><span class="q-type">Review</span><br>What are the key facts, figures, and definitions from Batteries?</div>
+                  <div class="accordion-icon">+</div>
+                </div>
+              </button>
+              <div class="accordion-body"><div class="answer-inner">Review the notes above. Focus on: specific numerical values, definitions, classification schemes, and the logic connecting ideas in <strong>Batteries</strong>.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="topic-block">
+        <div class="topic-header">
+          <div class="topic-num">Topic 2.18</div>
+          <div class="topic-title">Merits and Demerits of Energy Sources</div>
+        </div>
+        <div class="topic-body">
+          <p><strong>Conventional Energy Sources — Merits:</strong></p><ol><li>Cheaper than non-conventional resources. Electricity costs: ₹2.20 from gas, 1.85 from hydro and ₹3.8 from nuclear source on the basic of per kwh.</li><li>Storage of raw materials is easy and convenient.</li><li>Technology is universally available.</li></ol><p><strong>Conventional Energy Sources — Demerits:</strong></p><ol><li>Generate pollution — main pollutants are CO, CO₂, NOx, SOx, particulate matter and heat.</li><li>Can be used for the production of other chemical petrochemical, paraceutical and paint products. It is necessary to preserve this purposes.</li><li>Safety of nuclear plants is controversial — handling nuclear waste is dangerous, accidental leakage of radioactive materials, availability is limited, sophisticated technology is required.</li><li>Hydro-electric plants are cleanest but hydro reserver have following problem: ecological disturbances, affect wild life, dislocation of large population, rehabilitation problems.</li></ol><p><strong>Non-conventional Energy Sources — Merits:</strong> Available in nature free of cost, environment friendly, inexhaustible, low gestation period.</p><p><strong>Non-conventional Energy Sources — Demerits:</strong> Energy available in dilute form, cost of harnessing energy is generally high, initial cost is high, requires sophisticated equipment.</p>
+          <div class="accordion-section-label">Active Recall</div>
+          <div class="accordion-wrap">
+            <div class="accordion-item">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <div class="accordion-btn-inner">
+                  <div class="accordion-btn-text"><span class="q-type">Review</span><br>What are the key facts, figures, and definitions from Merits and Demerits of Energy Sources?</div>
+                  <div class="accordion-icon">+</div>
+                </div>
+              </button>
+              <div class="accordion-body"><div class="answer-inner">Review the notes above. Focus on: specific numerical values, definitions, classification schemes, and the logic connecting ideas in <strong>Merits and Demerits of Energy Sources</strong>.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="topic-block">
+        <div class="topic-header">
+          <div class="topic-num">Topic 2.19</div>
+          <div class="topic-title">Innovation Energy Harvesting Technology</div>
+        </div>
+        <div class="topic-body">
+          <p>The scientists have developed an innovative energy harvesting technology which can capture human motion power to charge mobile/electronics devices such as smart phones, laptop, batteries etc.</p><p>The energy harvesting and storage technology developed could reduce Reliance on the batteries in the mobile. Technology could enable a footwear embeded energy harvester which captures energy produced by human being while walking and it could be stored for later use.</p><p>It could be especially useful for military, as soldiers currently carry heavy batteries to power their Radio, global positioning system (GPS) units, night vision goggles etc in the field.</p><p>Human walking carries a lot of energy — theoretical estimates shows that can produce up to 10 watts of electrical power per shoe which is being wasted as heat. A total of 20 watts from walking is not a small thing, especially compared to the power requirements of the majority of the modern mobile device.</p><p>The research work at the university of Wisconsin. Madison (U-W madison), U.S.A is in progress to enhance the rate of energy generation.</p>
+          <div class="accordion-section-label">Active Recall</div>
+          <div class="accordion-wrap">
+            <div class="accordion-item">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <div class="accordion-btn-inner">
+                  <div class="accordion-btn-text"><span class="q-type">Review</span><br>What are the key facts, figures, and definitions from Innovation Energy Harvesting Technology?</div>
+                  <div class="accordion-icon">+</div>
+                </div>
+              </button>
+              <div class="accordion-body"><div class="answer-inner">Review the notes above. Focus on: specific numerical values, definitions, classification schemes, and the logic connecting ideas in <strong>Innovation Energy Harvesting Technology</strong>.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="quiz-zone" id="week-quiz">
+        <div class="quiz-header">
+          <div class="quiz-header-left">
+            <span class="quiz-badge">WEEK 8 QUIZ</span>
+            <div><div class="quiz-title">Week 8 Assessment</div><div class="quiz-count">8 questions &middot; 60% to pass</div></div>
+          </div>
+        </div>
+        <div class="quiz-body">
+          <p class="quiz-intro">Answer all 8 questions. You need 60% (5/8) to pass.</p>
+          
+          <div class="q-block" id="wq1">
+            <div class="q-meta"><span class="q-num">Q1</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">A fuel cell converts chemical energy of fuel directly into:</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq1','A')"><span class="opt-letter">A</span><span class="opt-text">Heat</span></div>
+              <div class="option" onclick="selectOption(this,'wq1','B')"><span class="opt-letter">B</span><span class="opt-text">Mechanical energy</span></div>
+              <div class="option" onclick="selectOption(this,'wq1','C')"><span class="opt-letter">C</span><span class="opt-text">Electrical energy</span></div>
+              <div class="option" onclick="selectOption(this,'wq1','D')"><span class="opt-letter">D</span><span class="opt-text">Light</span></div>
+            </div>
+            <div class="q-feedback" id="wq1-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq2">
+            <div class="q-meta"><span class="q-num">Q2</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">A High temperature fuel cell operates at:</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq2','A')"><span class="opt-letter">A</span><span class="opt-text">20-100°C</span></div>
+              <div class="option" onclick="selectOption(this,'wq2','B')"><span class="opt-letter">B</span><span class="opt-text">100-500°C</span></div>
+              <div class="option" onclick="selectOption(this,'wq2','C')"><span class="opt-letter">C</span><span class="opt-text">500-1000°C</span></div>
+              <div class="option" onclick="selectOption(this,'wq2','D')"><span class="opt-letter">D</span><span class="opt-text">Above 1000°C</span></div>
+            </div>
+            <div class="q-feedback" id="wq2-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq3">
+            <div class="q-meta"><span class="q-num">Q3</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">A primary battery (e.g. dry cell) has chemical reactions that are:</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq3','A')"><span class="opt-letter">A</span><span class="opt-text">Reversible</span></div>
+              <div class="option" onclick="selectOption(this,'wq3','B')"><span class="opt-letter">B</span><span class="opt-text">Irreversible</span></div>
+              <div class="option" onclick="selectOption(this,'wq3','C')"><span class="opt-letter">C</span><span class="opt-text">Partially reversible</span></div>
+              <div class="option" onclick="selectOption(this,'wq3','D')"><span class="opt-letter">D</span><span class="opt-text">Temperature-dependent</span></div>
+            </div>
+            <div class="q-feedback" id="wq3-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq4">
+            <div class="q-meta"><span class="q-num">Q4</span><span class="q-type-badge fitb">FILL IN</span></div>
+            <p class="q-text">Human walking can produce up to ________ watts per shoe.</p>
+            <div class="fitb-row"><input class="fitb-input" id="wq4-in" placeholder="type here" oninput="clearFeedback('wq4')"></div>
+            <div class="q-feedback" id="wq4-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq5">
+            <div class="q-meta"><span class="q-num">Q5</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">Which is the cathode in a HYDROX fuel cell?</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq5','A')"><span class="opt-letter">A</span><span class="opt-text">Fuel electrode</span></div>
+              <div class="option" onclick="selectOption(this,'wq5','B')"><span class="opt-letter">B</span><span class="opt-text">Oxidant/air electrode</span></div>
+              <div class="option" onclick="selectOption(this,'wq5','C')"><span class="opt-letter">C</span><span class="opt-text">Electrolyte</span></div>
+              <div class="option" onclick="selectOption(this,'wq5','D')"><span class="opt-letter">D</span><span class="opt-text">Membrane</span></div>
+            </div>
+            <div class="q-feedback" id="wq5-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq6">
+            <div class="q-meta"><span class="q-num">Q6</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">The 'cycle life' of a battery refers to:</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq6','A')"><span class="opt-letter">A</span><span class="opt-text">The time before it needs replacing</span></div>
+              <div class="option" onclick="selectOption(this,'wq6','B')"><span class="opt-letter">B</span><span class="opt-text">Number of charge/discharge cycles under specified conditions</span></div>
+              <div class="option" onclick="selectOption(this,'wq6','C')"><span class="opt-letter">C</span><span class="opt-text">The storage capacity</span></div>
+              <div class="option" onclick="selectOption(this,'wq6','D')"><span class="opt-letter">D</span><span class="opt-text">The operating temperature range</span></div>
+            </div>
+            <div class="q-feedback" id="wq6-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq7">
+            <div class="q-meta"><span class="q-num">Q7</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">Which of the following is a merit of conventional energy sources?</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq7','A')"><span class="opt-letter">A</span><span class="opt-text">Environment friendly</span></div>
+              <div class="option" onclick="selectOption(this,'wq7','B')"><span class="opt-letter">B</span><span class="opt-text">Inexhaustible</span></div>
+              <div class="option" onclick="selectOption(this,'wq7','C')"><span class="opt-letter">C</span><span class="opt-text">Technology universally available</span></div>
+              <div class="option" onclick="selectOption(this,'wq7','D')"><span class="opt-letter">D</span><span class="opt-text">Available free of cost</span></div>
+            </div>
+            <div class="q-feedback" id="wq7-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq8">
+            <div class="q-meta"><span class="q-num">Q8</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">The energy harvesting footwear technology research is conducted at:</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq8','A')"><span class="opt-letter">A</span><span class="opt-text">MIT, USA</span></div>
+              <div class="option" onclick="selectOption(this,'wq8','B')"><span class="opt-letter">B</span><span class="opt-text">Stanford University</span></div>
+              <div class="option" onclick="selectOption(this,'wq8','C')"><span class="opt-letter">C</span><span class="opt-text">University of Wisconsin-Madison</span></div>
+              <div class="option" onclick="selectOption(this,'wq8','D')"><span class="opt-letter">D</span><span class="opt-text">Cambridge University</span></div>
+            </div>
+            <div class="q-feedback" id="wq8-fb"></div>
+          </div>
+
+        </div>
+        <div class="quiz-footer">
+          <button class="quiz-submit" id="week-submit" onclick="submitWeekQuiz()">Submit Quiz</button>
+          <div class="quiz-result" id="week-result">
+            <div><div class="result-score" id="week-score"></div><div class="result-label" id="week-label"></div></div>
+            <span class="result-pill" id="week-pill"></span>
+          </div>
+        </div>
+        <div class="nudge" id="week-nudge"><div class="nudge-title">&#128218; Review Recommended</div><div class="nudge-body">Go back and review the topics above before retrying.</div></div>
+        <div class="next-unlock" id="next-unlock">
+          <div><div class="next-unlock-eyebrow">Week 8 Complete &#10003;</div><div class="next-unlock-text">Week 9</div></div>
+          <a href="W9.html" class="next-unlock-btn">Week 9 &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<footer>
+  <strong>FFOR 300 &mdash; Energy Conservation &amp; Dissipation</strong> &middot; Lagos State University &middot; Unify Notes
+</footer>
+<script>
+function toggleTheme(){const h=document.documentElement,b=document.getElementById('theme-btn');if(h.getAttribute('data-theme')==='dark'){h.setAttribute('data-theme','light');b.textContent='\u263E Dark';localStorage.setItem('theme','light');}else{h.setAttribute('data-theme','dark');b.textContent='\u2600 Light';localStorage.setItem('theme','dark');}}
+(function(){const t=localStorage.getItem('theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');document.getElementById('theme-btn').textContent='\u2600 Light';}})();
+function toggleAccordion(btn){const item=btn.closest('.accordion-item');const wasOpen=item.classList.contains('open');document.querySelectorAll('.accordion-item.open').forEach(i=>{if(i!==item)i.classList.remove('open');});item.classList.toggle('open',!wasOpen);updateProgress();}
+const selections={};
+function selectOption(el,qid,val){if(selections[qid]&&selections[qid].locked)return;const opts=el.closest('.options').querySelectorAll('.option');opts.forEach(o=>o.classList.remove('selected'));el.classList.add('selected');selections[qid]={val,locked:false};}
+function clearFeedback(qid){const fb=document.getElementById(qid+'-fb');if(fb){fb.className='q-feedback';fb.textContent='';}}
+const weekAnswers={"wq1":{type:"mcq",correct:"C",explanation:"A fuel cell generates an electric current by converting the chemical energy of a fuel directly onto electricity."},"wq2":{type:"mcq",correct:"C",explanation:"High temperature fuel cell operates at 500-1000°C. Very high temperature is above 1000°C."},"wq3":{type:"mcq",correct:"B",explanation:"Primary battery (non-chargeable) — chemical reactions are irreversible, e.g., dry cell flash light batteries."},"wq4":{type:"fitb",correct:["10"],explanation:"Theoretical estimates show walking can produce up to 10 watts of electrical power per shoe."},"wq5":{type:"mcq",correct:"B",explanation:"The main components of a HYDROX cell: (i) Fuel electrode (anode), (ii) Oxidant or air electrode (Cathode), (iii) Electrolyte."},"wq6":{type:"mcq",correct:"B",explanation:"'Cycle life' is the number of times the battery can be charged/discharged under specified conditions."},"wq7":{type:"mcq",correct:"C",explanation:"Technology is universally available is a merit of conventional sources. The others listed are merits of non-conventional sources."},"wq8":{type:"mcq",correct:"C",explanation:"The research work at the University of Wisconsin, Madison (U-W Madison), U.S.A is in progress."}};
+function submitWeekQuiz(){let correct=0;Object.keys(weekAnswers).forEach(qid=>{const ans=weekAnswers[qid];const fb=document.getElementById(qid+'-fb');if(ans.type==='mcq'){const sel=selections[qid];if(sel&&sel.val===ans.correct){correct++;fb.className='q-feedback ok show';fb.textContent='\u2713 '+ans.explanation;}else{fb.className='q-feedback no show';fb.textContent='\u2717 '+ans.explanation;}if(sel)sel.locked=true;document.querySelectorAll('#'+qid+' .option').forEach(o=>{if(o.classList.contains('selected')){if(sel&&sel.val===ans.correct)o.classList.add('correct');else o.classList.add('wrong');}const letter=o.querySelector('.opt-letter').textContent;if(letter===ans.correct&&!(sel&&sel.val===ans.correct))o.classList.add('correct');});}else{const inp=document.getElementById(qid+'-in');const v=(inp.value||'').toLowerCase().trim();if(ans.correct.some(a=>v.includes(a))){correct++;fb.className='q-feedback ok show';fb.textContent='\u2713 '+ans.explanation;inp.classList.add('correct');}else{fb.className='q-feedback no show';fb.textContent='\u2717 '+ans.explanation;inp.classList.add('wrong');}}}); const total=Object.keys(weekAnswers).length;const pct=Math.round(correct/total*100);const passed=pct>=60;document.getElementById('week-score').textContent=correct+'/'+total;document.getElementById('week-label').textContent=pct+'% \u2014 '+(passed?'Passed!':'Not quite.');const pill=document.getElementById('week-pill');pill.textContent=passed?'PASS':'FAIL';pill.className='result-pill '+(passed?'pass':'fail');document.getElementById('week-result').classList.add('show');document.getElementById('week-submit').disabled=true;if(passed){document.getElementById('next-unlock').classList.add('show');localStorage.setItem('mee352_w8_passed','1');}else{document.getElementById('week-nudge').classList.add('show');}updateProgress();}
+function updateProgress(){let done=0;document.querySelectorAll('.accordion-item.open').forEach(()=>done++);if(document.getElementById('week-result').classList.contains('show'))done+=5;const pct=Math.min(100,Math.round(done/10*100));document.getElementById('progress-fill').style.width=pct+'%';document.getElementById('progress-pct').textContent=pct+'%';}
+</script>
+</body>
+</html>

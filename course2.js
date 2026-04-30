@@ -220,7 +220,9 @@ var coursesDatabase = {
         "PED 301",
         "PED 303"
       ],
-      "Second Semester": []
+      "Second Semester": [
+        "FFOR 300"
+      ]
     },
     "400 Level": {
       "First Semester": [],
