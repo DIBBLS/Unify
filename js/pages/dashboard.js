@@ -7,13 +7,6 @@ import {
   doc,
   getDoc,
   setDoc,
-  collection,
-  query,
-  orderBy,
-  limit,
-  getDocs,
-  updateDoc,
-  arrayUnion,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 let currentUser = null,
@@ -23,6 +16,7 @@ let userProfile = {},
   aspirations = [];
 
 let weekProgress = {};
+
 // ── SECURITY ──────────────────────────────────────────
 function sanitise(str) {
   if (!str) return "";
@@ -35,7 +29,6 @@ function sanitise(str) {
     .replace(/[/]/g, "&#x2F;");
 }
 
-// Rate limiter — max N actions per window
 const rateLimits = {};
 function rateLimit(key, max = 5, windowMs = 60000) {
   const now = Date.now();
@@ -46,8 +39,6 @@ function rateLimit(key, max = 5, windowMs = 60000) {
   return true;
 }
 
-// ── DARK MODE handled by js/theme.js ──────────────────
-
 // ── AUTH ──────────────────────────────────────────────
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
@@ -55,7 +46,7 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
   currentUser = user;
-  // Best first name: Firebase Auth displayName > Firestore firstName (loaded after) > cleaned email
+
   let first = "Builder";
   if (user.displayName && user.displayName.trim()) {
     first = user.displayName.trim().split(/\s+/)[0];
@@ -70,19 +61,19 @@ onAuthStateChanged(auth, async (user) => {
         ? words[0]
         : raw.charAt(0).toUpperCase() + raw.slice(1, 9);
   }
-  window._dashFirst = first; // will be overwritten by Firestore firstName once loaded
+
   const hr = new Date().getHours();
   const greet =
     hr < 12 ? "Good morning" : hr < 17 ? "Good afternoon" : "Good evening";
   document.getElementById("heroName").innerHTML =
     `${greet},<br><em id="heroFirstName">${first}.</em>`;
   document.getElementById("navUserName").textContent = first;
+
   await loadUserData();
   initStreak();
   document.getElementById("loadingOverlay").style.display = "none";
 });
 
-// Refresh course card progress when returning from learn.html
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible" && window.courses?.length)
     displayCourses();
@@ -103,13 +94,15 @@ async function loadUserData() {
       return;
     }
     const d = snap.data();
-    savedGoalPlan = d.gradePlanner || null; // grab it first before anything can throw
+    savedGoalPlan = d.gradePlanner || null;
+
     userProfile = {
       university: d.university,
       faculty: d.faculty,
       department: d.department,
       level: d.level,
     };
+
     if (!d.firstName) {
       const nudge = document.getElementById("nameNudge");
       if (nudge) nudge.style.display = "flex";
@@ -123,40 +116,35 @@ async function loadUserData() {
         `${greet},<br><em id="heroFirstName">${first}.</em>`;
       document.getElementById("navUserName").textContent = first;
     }
+
+    // ── FIX: only use saved courses — never auto-overwrite them ──
+    // If the user has saved courses (even with grade "-"), honour them.
+    // Only fall back to autoLoadCourses when there are genuinely zero courses.
     window.courses = d.courses || [];
     aspirations = d.aspirations || [];
     weekProgress = d.weekProgress || {};
+
     document.getElementById("heroTag").textContent =
       `${d.university} · ${d.level}`;
     document.getElementById("heroDept").textContent = d.department;
 
-    const firstCourse = window.courses[0]?.course || "";
-    const deptPrefix =
-      {
-        "Electronic & Computer Engineering": "ECE",
-        "Mechanical Engineering": "MEE",
-        "Chemical & Polymer Engineering": "CHE",
-        "Civil Engineering": "CVE",
-        "Industrial & Petroleum Engineering": "IPE",
-        "Aerospace Engineering": "ASE",
-      }[d.department] || "";
-    const coursesMatchDept =
-      !deptPrefix ||
-      firstCourse.startsWith(deptPrefix) ||
-      firstCourse.startsWith("MAT") ||
-      firstCourse.startsWith("GNS") ||
-      firstCourse.startsWith("PHY") ||
-      firstCourse.startsWith("CHM") ||
-      firstCourse.startsWith("ENT");
-    if (!window.courses.length || !coursesMatchDept) {
+    // ── FIX: show persisted CGPA immediately from Firestore ──
+    // This means the hero "balance" is visible even before courses render.
+    if (typeof d.cgpa === "number" && d.cgpa > 0) {
+      document.getElementById("statCGPA").textContent = d.cgpa.toFixed(2);
+    }
+
+    if (window.courses.length === 0) {
+      // Truly first time or cleared — auto-populate from course DB
       autoLoadCourses(d.department, d.level);
     }
+
     renderAspirations();
   } catch (e) {
     console.error("loadUserData error:", e);
     window.courses = [];
   }
-  // Outside the try/catch — always runs even if something above threw
+
   renderGoalCard(savedGoalPlan);
   displayCourses();
   updateStats();
@@ -216,7 +204,6 @@ function autoLoadCourses(dept, level) {
     );
     return;
   }
-  // Only load the currently selected semester, not both
   const semEl = document.getElementById("semester");
   const sem = semEl ? semEl.value : "First Semester";
   const courses = db_data[sem] || [];
@@ -234,14 +221,26 @@ function autoLoadCourses(dept, level) {
 }
 
 // ── SAVE ──────────────────────────────────────────────
+// ── FIX: save CGPA as a top-level field so the hero can read it on next load ──
 window.saveUserData = function () {
   if (!currentUser) return;
   clearTimeout(saveTimeout);
   saveTimeout = setTimeout(async () => {
     try {
+      // Calculate CGPA to persist alongside the courses array
+      let pts = 0, units = 0;
+      window.courses.forEach((c) => {
+        const p = gradeToPoint(c.grade);
+        if (p !== null && c.units) {
+          pts += p * Number(c.units);
+          units += Number(c.units);
+        }
+      });
+      const cgpa = units > 0 ? parseFloat((pts / units).toFixed(2)) : 0;
+
       await setDoc(
         doc(db, "users", currentUser.uid),
-        { courses: window.courses, aspirations, weekProgress },
+        { courses: window.courses, aspirations, weekProgress, cgpa },
         { merge: true },
       );
       const ind = document.getElementById("saveIndicator");
@@ -265,8 +264,8 @@ window.updateStats = function () {
   document.getElementById("statGraded").textContent = graded;
   document.getElementById("emptyState").style.display =
     count === 0 ? "block" : "none";
-  let pts = 0,
-    units = 0;
+
+  let pts = 0, units = 0;
   window.courses.forEach((c) => {
     const p = gradeToPoint(c.grade);
     if (p !== null && c.units) {
@@ -274,19 +273,21 @@ window.updateStats = function () {
       units += Number(c.units);
     }
   });
-  document.getElementById("statCGPA").textContent =
-    units > 0 ? (pts / units).toFixed(2) : "—";
+
+  const cgpa = units > 0 ? pts / units : null;
+
+  // ── FIX: update the hero CGPA display (the "balance") ──
+  const cgpaEl = document.getElementById("statCGPA");
+  cgpaEl.textContent = cgpa !== null ? cgpa.toFixed(2) : "—";
+
   const pct = count > 0 ? Math.round((graded / count) * 100) : 0;
   document.getElementById("progressFill").style.width = pct + "%";
   document.getElementById("progressPct").textContent = pct + "%";
-
 };
 
 function gradeToPoint(g) {
   return { A: 5, B: 4, C: 3, D: 2, E: 1, F: 0 }[g?.toUpperCase()] ?? null;
 }
-
-
 
 // ── COURSE GRID ───────────────────────────────────────
 window.displayCourses = function () {
@@ -303,7 +304,6 @@ window.displayCourses = function () {
     const weeks = weekProgress[c.course] || [];
     const weekPct = Math.round((weeks.length / 12) * 100);
 
-    // Topic-based progress from learn.html (overrides old week chips if available)
     let progressPct = weekPct;
     let progressColor = "var(--text)";
     try {
@@ -343,6 +343,17 @@ window.displayCourses = function () {
         </div>
         <div class="course-card-tap">${isActive ? "✕ close" : "tap for resources"}</div>
       </div>`;
+
+    // ── FIX: inline grade editing — tap the grade badge to change it ──
+    // This lets students update their grade directly from the card and persists immediately.
+    const gradeEl = li.querySelector(".course-card-grade");
+    gradeEl.title = "Tap to set grade";
+    gradeEl.style.cursor = "pointer";
+    gradeEl.addEventListener("click", (e) => {
+      e.stopPropagation();
+      showGradePicker(idx, li, gradeEl);
+    });
+
     li.addEventListener("click", () => {
       if (activeCourseId === idx) {
         closeResourcePanel();
@@ -353,7 +364,7 @@ window.displayCourses = function () {
       }
     });
     ul.appendChild(li);
-    // Touch: long-press (500ms) shows a confirm toast instead of click-to-remove
+
     let pressTimer;
     li.addEventListener(
       "touchstart",
@@ -372,15 +383,75 @@ window.displayCourses = function () {
   updateStats();
 };
 
-// ── RESOURCE PANEL ────────────────────────────────────
-const RES_ICONS = {
-  "Course Outline": "📄",
-  "Lecture Material PDF": "📚",
-  "Video Courses": "🎬",
-  "Past Questions": "📝",
-  "Continuous Assessment": "✅",
-};
+// ── INLINE GRADE PICKER ───────────────────────────────
+// Tapping a grade badge on the card opens a small picker and saves immediately.
+function showGradePicker(idx, cardEl, gradeEl) {
+  // Remove any existing picker
+  document.querySelectorAll(".grade-picker-popup").forEach((el) => el.remove());
 
+  const grades = ["A", "B", "C", "D", "E", "F", "-"];
+  const popup = document.createElement("div");
+  popup.className = "grade-picker-popup";
+  popup.style.cssText = `
+    position:absolute;
+    z-index:200;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:8px;
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    box-shadow:0 8px 24px rgba(0,0,0,0.15);
+    max-width:200px;
+  `;
+
+  grades.forEach((g) => {
+    const btn = document.createElement("button");
+    btn.textContent = g === "-" ? "—" : g;
+    const current = window.courses[idx]?.grade?.toUpperCase();
+    const isActive = (g === "-" && current === "-") || g === current;
+    btn.style.cssText = `
+      width:36px;height:36px;
+      border-radius:8px;
+      border:1.5px solid ${isActive ? "var(--green)" : "var(--border)"};
+      background:${isActive ? "var(--green-bg)" : "var(--bg)"};
+      color:var(--text);
+      font-family:var(--font-display);
+      font-size:15px;
+      font-weight:700;
+      cursor:pointer;
+    `;
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      window.courses[idx].grade = g;
+      popup.remove();
+      saveUserData();
+      displayCourses();
+      updateStats();
+      const label = g === "-" ? "—" : `Grade: ${g}`;
+      showMilestone(`${window.courses[idx]?.course} → ${label}`);
+    });
+    popup.appendChild(btn);
+  });
+
+  // Position popup near the grade badge
+  cardEl.style.position = "relative";
+  cardEl.querySelector(".course-card-inner").appendChild(popup);
+
+  // Close on outside click
+  setTimeout(() => {
+    const close = (e) => {
+      if (!popup.contains(e.target)) {
+        popup.remove();
+        document.removeEventListener("click", close);
+      }
+    };
+    document.addEventListener("click", close);
+  }, 0);
+}
+
+// ── RESOURCE PANEL ────────────────────────────────────
 window.closeResourcePanel = function () {
   document.getElementById("resourcePanel")?.classList.remove("open");
   activeCourseId = null;
@@ -405,21 +476,18 @@ window.openResourcePanel = function (courseName) {
   document.getElementById("learnPageBtn").href =
     "learn.html?course=" + enc + "&name=" + enc;
 
-  // Build week-topic accordion
   buildWeekAccordion(courseName, code);
 };
 
 function buildWeekAccordion(courseName, code) {
   const accordion = document.getElementById("weekAccordion");
 
-  // Get topic progress from localStorage
   let topicProgress = {};
   try {
     const stored = localStorage.getItem("unify-topic-" + courseName);
     if (stored) topicProgress = JSON.parse(stored);
   } catch (e) {}
 
-  // Generate 12-week structure (matches learn.html logic)
   const weeks = generateWeekStructure(code);
 
   accordion.innerHTML = weeks
@@ -467,8 +535,6 @@ window.toggleWeekAcc = function (header) {
 };
 
 function generateWeekStructure(code) {
-  // Single source of truth — reads from courseContent.js
-  // generateCourseStubs() fills in any course not manually defined
   if (window.generateCourseStubs) window.generateCourseStubs();
   const entry = window.UNIFY_COURSE_CONTENT?.[code];
   if (entry && entry.weeks) {
@@ -477,7 +543,6 @@ function generateWeekStructure(code) {
       subtopics: w.subtopics,
     }));
   }
-  // Absolute fallback (should never reach here after stubs generated)
   const topics = [
     "Introduction & Fundamentals",
     "Core Principles I",
@@ -509,7 +574,17 @@ window.switchSemester = function () {
     alert("No courses found for this semester.");
     return;
   }
-  window.courses = data.map((c) => ({ course: c, grade: "-", units: 3 }));
+  // ── FIX: preserve existing grades when switching semester ──
+  // Match by course code so any grade the student already entered survives.
+  const existing = {};
+  (window.courses || []).forEach((c) => {
+    existing[c.course] = { grade: c.grade, units: c.units };
+  });
+  window.courses = data.map((c) => ({
+    course: c,
+    grade: existing[c]?.grade || "-",
+    units: existing[c]?.units || 3,
+  }));
   activeCourseId = null;
   closeResourcePanel();
   displayCourses();
@@ -547,7 +622,6 @@ window.clearCourses = function () {
   displayCourses();
 };
 
-// ── INLINE ADD / REMOVE COURSE ────────────────────────
 window.toggleAddCourse = function () {
   const row = document.getElementById("addCourseRow");
   row.classList.toggle("open");
@@ -585,14 +659,12 @@ window.removeCourse = function (event, idx) {
   showMilestone(`${name} removed from your list.`);
 };
 
-// Long-press remove confirm (mobile) — shows a confirm toast with undo window
 let _removeConfirmTimer = null;
 window.showRemoveConfirm = function (idx) {
   const name = window.courses[idx]?.course || "course";
   const toast = document.getElementById("milestoneToast");
   const text = document.getElementById("milestoneText");
   clearTimeout(_removeConfirmTimer);
-  // Repurpose the toast as a brief confirm — tap the toast to confirm removal
   text.innerHTML = `Remove <strong>${name}</strong>? <span style="text-decoration:underline;cursor:pointer" onclick="window.removeCourse({stopPropagation:()=>{}},${idx})">Yes, remove</span>`;
   toast.classList.add("show");
   _removeConfirmTimer = setTimeout(() => toast.classList.remove("show"), 4000);
@@ -695,11 +767,9 @@ function initStreak() {
   const saved = localStorage.getItem("unify-streak");
   if (saved) streakData = JSON.parse(saved);
 
-  // Check if today already done
   const today = new Date().toDateString();
   streakData.todayDone = streakData.lastStudied === today;
 
-  // Check if streak broken (missed yesterday)
   if (streakData.lastStudied) {
     const last = new Date(streakData.lastStudied);
     const now = new Date();
@@ -729,7 +799,6 @@ function renderStreak() {
 
   daysVal.textContent = streakData.count;
 
-  // Week dots (last 7 days)
   const week = streakData.weekDays || [];
   dots.innerHTML = Array.from({ length: 7 }, (_, i) => {
     const cls = i < week.length ? "done" : i === week.length ? "active" : "";
@@ -783,7 +852,6 @@ window.openReview = function () {
   if (streakData.todayDone) return;
   reviewAnswered = false;
 
-  // Pick a random question
   currentQuestion =
     REVIEW_QUESTIONS[Math.floor(Math.random() * REVIEW_QUESTIONS.length)];
 
@@ -910,9 +978,7 @@ function renderPlanner() {
     window.courses.length,
   );
 
-  // Rotate courses each day so you don't study the same course every day
   const dayIndex = new Date().getDate();
-  // Normalise to strings for sorting
   const rotated = [...window.courses].sort((a, b) => {
     const sa = typeof a === "string" ? a : a.course || "";
     const sb = typeof b === "string" ? b : b.course || "";
@@ -935,7 +1001,6 @@ function renderPlanner() {
       const isDone = plannerDoneToday.includes(i);
       const courseStr =
         typeof c === "string" ? c : c.course || c.name || c.code || "Course";
-      // Try to split "ECE 301" into code + friendly name
       const parts = courseStr.split(" ");
       const codeDisplay = parts.slice(0, 2).join(" ");
       return `<div class="planner-session ${isDone ? "done" : ""}" onclick="togglePlannerSession(${i}, this)">

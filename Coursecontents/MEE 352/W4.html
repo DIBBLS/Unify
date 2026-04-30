@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FFOR 300 — Week 4: India's Industries, Infrastructure & Energy Consumption | Unify</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--muted:#555;--muted2:#999;--green:#4ade80;--green-deep:#16a34a;--green-bg:rgba(74,222,128,0.1);--green-border:rgba(74,222,128,0.3);--yellow-bg:#fffbeb;--yellow-border:#fcd34d;--red:#dc2626;--red-bg:#fff5f5;--red-border:#fca5a5;--fd:'Playfair Display',serif;--fb:'DM Sans',sans-serif;}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--green-bg:rgba(74,222,128,0.08);--green-border:rgba(74,222,128,0.2);--yellow-bg:#1a1500;--yellow-border:#b45309;--red-bg:#1a0505;--red-border:#7f1d1d;}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{font-family:var(--fb);background:var(--bg);color:var(--text);line-height:1.75;font-size:16px;transition:background .2s,color .2s}
+nav{position:sticky;top:0;z-index:100;height:60px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;gap:32px}
+.nav-logo{font-family:var(--fd);font-size:20px;font-weight:900;color:var(--text);text-decoration:none}.nav-logo span{color:var(--green)}
+.theme-toggle{margin-left:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-family:var(--fb);font-size:12px;font-weight:500;color:var(--muted);cursor:pointer}
+.page{max-width:860px;margin:0 auto;padding:40px 48px 80px}
+.back-bar{display:flex;align-items:center;gap:12px;margin-bottom:28px;flex-wrap:wrap}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px}
+.week-nav{display:flex;gap:8px;margin-left:auto}.wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px}.wnav-btn.off{opacity:.35;pointer-events:none}
+.week-progress{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:24px;display:flex;align-items:center;gap:14px}
+.wp-label{font-size:11px;font-weight:600;color:var(--muted2);flex-shrink:0;text-transform:uppercase;letter-spacing:.1em}.wp-bar{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden}.wp-fill{height:100%;background:var(--green);border-radius:3px;width:0%;transition:width .5s ease}.wp-pct{font-size:11px;font-weight:700;color:var(--green-deep);flex-shrink:0}
+.week-block{border-radius:14px;border:1px solid var(--border);overflow:hidden;background:var(--surface)}
+.week-header{background:var(--text);color:#f0efeb;padding:32px 36px 28px}[data-theme="dark"] .week-header{background:var(--surface2);border-bottom:1px solid var(--border)}
+.wh-eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:18px}.wh-course-tag{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:var(--green);color:var(--text);padding:3px 12px;border-radius:20px}.wh-week-label{font-size:11px;font-weight:500;color:rgba(240,239,235,.45);letter-spacing:.05em}
+.wh-title{font-family:var(--fd);font-size:clamp(1.6rem,4vw,2.2rem);font-weight:700;line-height:1.2;margin-bottom:6px}.wh-subtitle{font-size:15px;color:rgba(240,239,235,.55);margin-bottom:20px}.wh-hook{font-size:15px;color:rgba(240,239,235,.85);line-height:1.7;max-width:60ch;padding-top:18px;border-top:1px solid rgba(240,239,235,.12)}
+.wh-meta{display:flex;flex-wrap:wrap;gap:18px;margin-top:16px}.wh-meta-item{font-size:12px;color:rgba(240,239,235,.45)}.wh-meta-item strong{color:rgba(240,239,235,.75);font-weight:500}
+.week-body{padding:36px}.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:32px}.tag{font-size:11px;font-weight:500;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:3px 12px}
+.topic-block{border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden}.topic-header{background:var(--surface2);padding:14px 24px;border-bottom:1px solid var(--border)}.topic-num{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:3px}.topic-title{font-size:16px;font-weight:600;color:var(--text)}
+.topic-body{padding:28px 32px}.topic-body p{font-size:15px;line-height:1.8;margin-bottom:16px;color:var(--text);max-width:66ch}.topic-body ol,.topic-body ul{padding-left:22px;margin-bottom:16px;max-width:66ch}.topic-body li{font-size:15px;line-height:1.8;margin-bottom:6px;color:var(--text)}
+.accordion-section-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin:28px 0 12px;display:flex;align-items:center;gap:10px}.accordion-section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.accordion-wrap{display:flex;flex-direction:column;gap:8px}.accordion-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.accordion-btn{width:100%;background:none;border:none;cursor:pointer;padding:14px 20px;text-align:left;font-family:var(--fb);font-size:14px;font-weight:500;color:var(--text);line-height:1.55;transition:background .15s}.accordion-btn:hover{background:var(--surface2)}
+.accordion-btn-inner{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.accordion-btn-text{flex:1;min-width:0}
+.q-type{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--green-bg);color:var(--green-deep);border:1px solid var(--green-border);padding:2px 8px;border-radius:4px;margin-bottom:6px}
+.accordion-icon{flex-shrink:0;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--muted);transition:transform .25s,background .2s;margin-top:2px}.accordion-item.open .accordion-icon{transform:rotate(45deg);background:var(--green);border-color:var(--green);color:var(--text)}
+.accordion-body{max-height:0;overflow:hidden;transition:max-height .35s ease,padding .25s;padding:0 20px}.accordion-item.open .accordion-body{max-height:600px;padding:0 20px 18px}
+.answer-inner{border-top:1px solid var(--border);padding-top:14px;font-size:14px;color:var(--muted);line-height:1.8}.answer-inner strong{color:var(--green-deep)}
+.quiz-zone{margin:32px 0;border-radius:14px;overflow:hidden;border:2px solid var(--text)}.quiz-header{background:var(--text);padding:18px 24px;display:flex;align-items:center;justify-content:space-between}.quiz-header-left{display:flex;align-items:center;gap:12px}
+.quiz-badge{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;border-radius:20px;background:rgba(74,222,128,.2);color:var(--green);border:1px solid rgba(74,222,128,.3)}.quiz-title{font-family:var(--fd);font-size:16px;font-weight:700;color:#f0efeb}.quiz-count{font-size:11px;color:rgba(240,239,235,.45)}
+.quiz-body{background:var(--surface);padding:24px}.quiz-intro{font-size:13px;color:var(--muted);margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);line-height:1.6}
+.q-block{margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border)}.q-block:last-of-type{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.q-meta{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}.q-num{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
+.q-type-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;letter-spacing:.5px}.q-type-badge.mcq{background:var(--green-bg);color:var(--green-deep);border:1px solid var(--green-border)}.q-type-badge.fitb{background:rgba(251,191,36,.1);color:#b45309;border:1px solid rgba(251,191,36,.3)}
+.q-text{font-size:15px;font-weight:600;color:var(--text);margin-bottom:14px;line-height:1.6;max-width:66ch}.options{display:flex;flex-direction:column;gap:8px;max-width:66ch}
+.option{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s;background:var(--surface2)}.option:hover{border-color:var(--muted)}.option.selected{border-color:var(--text);background:var(--surface)}.option.correct{border-color:var(--green);background:var(--green-bg)!important}.option.wrong{border-color:var(--red);background:var(--red-bg)!important}
+.opt-letter{width:26px;height:26px;border-radius:6px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted2);flex-shrink:0}.option.selected .opt-letter{background:var(--text);border-color:var(--text);color:var(--green)}.option.correct .opt-letter{background:var(--green);border-color:var(--green);color:var(--text)}.option.wrong .opt-letter{background:var(--red);border-color:var(--red);color:#fff}.opt-text{font-size:14px;color:var(--text);line-height:1.5}
+.fitb-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:15px;color:var(--text);line-height:2.4;max-width:66ch}.fitb-input{border:none;border-bottom:2px solid var(--text);background:transparent;font-family:var(--fb);font-size:15px;font-weight:600;color:var(--text);width:160px;text-align:center;padding:2px 8px;outline:none}.fitb-input.correct{border-color:var(--green);color:var(--green-deep)}.fitb-input.wrong{border-color:var(--red);color:var(--red)}.fitb-hint{font-size:12px;color:var(--muted2);margin-top:6px;font-style:italic}
+.q-feedback{margin-top:10px;padding:10px 14px;border-radius:8px;font-size:13px;line-height:1.6;display:none;max-width:66ch}.q-feedback.show{display:block}.q-feedback.ok{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green-deep)}.q-feedback.no{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red)}
+.quiz-footer{padding:20px 24px;background:var(--surface2);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.quiz-submit{padding:11px 28px;background:var(--text);color:var(--green);border:none;border-radius:8px;font-family:var(--fb);font-size:13px;font-weight:700;cursor:pointer}.quiz-submit:disabled{opacity:.4;cursor:not-allowed}
+.quiz-result{display:none;align-items:center;gap:12px;flex:1}.quiz-result.show{display:flex}.result-score{font-family:var(--fd);font-size:28px;font-weight:900;color:var(--text)}.result-label{font-size:12px;color:var(--muted);line-height:1.5}.result-pill{padding:5px 16px;border-radius:20px;font-size:11px;font-weight:700;flex-shrink:0}.result-pill.pass{background:var(--green-bg);color:var(--green-deep);border:1px solid var(--green-border)}.result-pill.fail{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.nudge{background:var(--yellow-bg);border:1px solid var(--yellow-border);border-radius:10px;padding:16px 20px;margin:16px 24px 0;display:none}.nudge.show{display:block}.nudge-title{font-size:12px;font-weight:700;color:#92400e;margin-bottom:6px}.nudge-body{font-size:13px;color:var(--muted);line-height:1.6}
+.next-unlock{margin:16px 24px 20px;padding:18px 20px;background:var(--green-bg);border:1.5px solid var(--green-border);border-radius:10px;display:none;align-items:center;justify-content:space-between;gap:12px}.next-unlock.show{display:flex}.next-unlock-eyebrow{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--green-deep);margin-bottom:4px}.next-unlock-text{font-size:13px;font-weight:600;color:var(--green-deep)}.next-unlock-btn{padding:10px 22px;background:var(--green-deep);color:#fff;border:none;border-radius:8px;font-family:var(--fb);font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;white-space:nowrap}
+footer{border-top:1px solid var(--border);padding:32px 48px;text-align:center;font-size:13px;color:var(--muted2);max-width:860px;margin:0 auto}
+@media(max-width:700px){nav{padding:0 16px}.page{padding:20px 20px 60px}.week-header{padding:24px 20px 20px}.week-body{padding:20px}.topic-body{padding:20px}footer{padding:24px 20px}.quiz-footer{flex-direction:column}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="../../learn.html?course=FFOR+300&name=FFOR+300" class="nav-logo">Unify<span>.</span></a>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">&#9790; Dark</button>
+</nav>
+<div class="page">
+  <div class="back-bar">
+    <a href="../../learn.html?course=FFOR+300&name=FFOR+300" class="back-btn">&#8592; Back to FFOR 300</a>
+    <div class="week-nav">
+      <a href="W3.html" class="wnav-btn">&#8592; Prev</a>
+      <a href="W5.html" class="wnav-btn">Next &#8594;</a>
+    </div>
+  </div>
+  <div class="week-progress">
+    <span class="wp-label">Week 4 Progress</span>
+    <div class="wp-bar"><div class="wp-fill" id="progress-fill"></div></div>
+    <span class="wp-pct" id="progress-pct">0%</span>
+  </div>
+  <div class="week-block">
+    <div class="week-header">
+      <div class="wh-eyebrow">
+        <span class="wh-course-tag">FFOR 300</span>
+        <span class="wh-week-label">Week 4 of 12</span>
+      </div>
+      <div class="wh-title">India's Industries, Infrastructure & Energy Consumption</div>
+      <div class="wh-subtitle">Infrastructure Gaps, Power Sector Demand-Supply, Exploration Scenario</div>
+      <p class="wh-hook">By the end of this week, you should be able to analyse India's infrastructure energy gap, interpret demand-supply tables, and describe the categorisation of India's sedimentary basins.</p>
+      <div class="wh-meta">
+        <span class="wh-meta-item"><strong>Lecturer</strong> Mr. Ololade</span>
+        <span class="wh-meta-item"><strong>Date</strong> 16 March 2025</span>
+        <span class="wh-meta-item"><strong>Institution</strong> Lagos State University</span>
+      </div>
+    </div>
+    <div class="week-body">
+      <div class="tags"><span class="tag">Infrastructure</span><span class="tag">Power Sector</span><span class="tag">Demand-Supply Gap</span><span class="tag">Exploration</span><span class="tag">NELP</span><span class="tag">Sedimentary Basins</span><span class="tag">Energy Consumption</span></div>
+      
+      <div class="topic-block">
+        <div class="topic-header">
+          <div class="topic-num">Topic 2.6</div>
+          <div class="topic-title">India's Industries and Infrastructure</div>
+        </div>
+        <div class="topic-body">
+          <p>The infrastructure sectors <em>viz.,</em> transport, power, telecommunication provide critical input to the manufacturing sectors. The infrastructure services constitute direct input to the production, lowering the costs and improving the quality of these sectors have direct bearing on the improvements in the profitability of the production sectors. The availability and efficient use of infrastructure sectors may help in improving the quality and cost of production sectors. Industrial output growth has closely tracked the movements in the composite index of infrastructure industries during 1980s and 1990s. The observed relationship between infrastructure growth and industrial performance has important implication for sustaining higher output. The average growth of production and composite index of infrastructure in 1980s was 7.8% and 8.4 respectively which declined to 6.5% and 6.3% in 1990s. The main reason of this declined trend was the decline in <em>growth of electricity, coal</em> and <em>petroleum i.e.,</em> essentially the energy subsector. Due to this it seems that identification and bridging of gap of infrastructure plays important role in economic growth.</p><p>Amongst the important sub-sectors, power sector has shown significant gap. The demand-supply gap in power sector is shown in the table below (Table 2.2), listing requirement vs availability in billion kWH from 1991 to 2014.</p>
+          <div class="accordion-section-label">Active Recall</div>
+          <div class="accordion-wrap">
+            <div class="accordion-item">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <div class="accordion-btn-inner">
+                  <div class="accordion-btn-text"><span class="q-type">Review</span><br>What are the key facts, figures, and definitions from India's Industries and Infrastructure?</div>
+                  <div class="accordion-icon">+</div>
+                </div>
+              </button>
+              <div class="accordion-body"><div class="answer-inner">Review the notes above. Focus on: specific numerical values, definitions, classification schemes, and the logic connecting ideas in <strong>India's Industries and Infrastructure</strong>.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="topic-block">
+        <div class="topic-header">
+          <div class="topic-num">Topic 2.7</div>
+          <div class="topic-title">Energy Consumption</div>
+        </div>
+        <div class="topic-body">
+          <p>The energy consumption in 1965 was approximately 53 MTOE (million tons oil equivalent) and per capita consumption was about 110 kg of oil equivalent. By 2010, the primary energy consumption has crossed the 500 m tonne marked roughly 9 times that of 1965. Population during the same period has tripled and thus the per capita energy consumption shows 9 times jump over 1965 level.</p><p>Except coal and hydro all other energy sources have increase that gives that the population has become more wise and prefer to use more safe energy sources. The principles of pricing adopted for energy products have greatly influenced the pattern of growth of the energy sector.</p>
+          <div class="accordion-section-label">Active Recall</div>
+          <div class="accordion-wrap">
+            <div class="accordion-item">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <div class="accordion-btn-inner">
+                  <div class="accordion-btn-text"><span class="q-type">Review</span><br>What are the key facts, figures, and definitions from Energy Consumption?</div>
+                  <div class="accordion-icon">+</div>
+                </div>
+              </button>
+              <div class="accordion-body"><div class="answer-inner">Review the notes above. Focus on: specific numerical values, definitions, classification schemes, and the logic connecting ideas in <strong>Energy Consumption</strong>.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="topic-block">
+        <div class="topic-header">
+          <div class="topic-num">Topic 2.8</div>
+          <div class="topic-title">Exploration Scenario</div>
+        </div>
+        <div class="topic-body">
+          <p>India's basins have been categorized into four categories based on the prospectivity of the basins:</p><ol><li>Established commercial production — seven basins</li><li>Known accumulation but no commercial production — two basins</li><li>Indicated and geologically prospective — seven basins</li><li>Uncertain potential — two basins</li></ol><p><strong>Salient Features of NELP (New Exploration Licensing Policy):</strong></p><ol><li>No mandatory state participation through ONGC/Oil etc.</li><li>All companies have to compete to obtain PEL.</li><li>Open availability of exploration average.</li><li>The average will be demarcated on a grid system.</li><li>Freedom for marketing of crude oil and gas.</li><li>Royalty payment for on land and offshore area @ 12.5% and 10% respectively.</li><li>Cess has been abolished for the blocks offered.</li><li>No import duty on the goods imported.</li><li>No signature, discovery and production bonuses.</li><li>Seven year tax holiday from the date of commencement.</li><li>Fiscal stability to be provided during entire period.</li><li>A separate petroleum tax guide to facilitate investors.</li><li>A revised model contract.</li><li>Royality will be charged at half the prevailing rate for normal off shore areas for deep water.</li><li>No royality for the first seven year after commencement for deep water beyond 400 meters.</li></ol>
+          <div class="accordion-section-label">Active Recall</div>
+          <div class="accordion-wrap">
+            <div class="accordion-item">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <div class="accordion-btn-inner">
+                  <div class="accordion-btn-text"><span class="q-type">Review</span><br>What are the key facts, figures, and definitions from Exploration Scenario?</div>
+                  <div class="accordion-icon">+</div>
+                </div>
+              </button>
+              <div class="accordion-body"><div class="answer-inner">Review the notes above. Focus on: specific numerical values, definitions, classification schemes, and the logic connecting ideas in <strong>Exploration Scenario</strong>.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="quiz-zone" id="week-quiz">
+        <div class="quiz-header">
+          <div class="quiz-header-left">
+            <span class="quiz-badge">WEEK 4 QUIZ</span>
+            <div><div class="quiz-title">Week 4 Assessment</div><div class="quiz-count">8 questions &middot; 60% to pass</div></div>
+          </div>
+        </div>
+        <div class="quiz-body">
+          <p class="quiz-intro">Answer all 8 questions. You need 60% (5/8) to pass.</p>
+          
+          <div class="q-block" id="wq1">
+            <div class="q-meta"><span class="q-num">Q1</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">In the 1980s, the average growth of production and composite index of infrastructure were:</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq1','A')"><span class="opt-letter">A</span><span class="opt-text">5.2% and 6.1%</span></div>
+              <div class="option" onclick="selectOption(this,'wq1','B')"><span class="opt-letter">B</span><span class="opt-text">7.8% and 8.4%</span></div>
+              <div class="option" onclick="selectOption(this,'wq1','C')"><span class="opt-letter">C</span><span class="opt-text">6.5% and 6.3%</span></div>
+              <div class="option" onclick="selectOption(this,'wq1','D')"><span class="opt-letter">D</span><span class="opt-text">9.0% and 9.5%</span></div>
+            </div>
+            <div class="q-feedback" id="wq1-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq2">
+            <div class="q-meta"><span class="q-num">Q2</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">In the 1990s, both indicators declined to:</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq2','A')"><span class="opt-letter">A</span><span class="opt-text">7.8% and 8.4%</span></div>
+              <div class="option" onclick="selectOption(this,'wq2','B')"><span class="opt-letter">B</span><span class="opt-text">5.0% and 4.9%</span></div>
+              <div class="option" onclick="selectOption(this,'wq2','C')"><span class="opt-letter">C</span><span class="opt-text">6.5% and 6.3%</span></div>
+              <div class="option" onclick="selectOption(this,'wq2','D')"><span class="opt-letter">D</span><span class="opt-text">4.2% and 3.8%</span></div>
+            </div>
+            <div class="q-feedback" id="wq2-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq3">
+            <div class="q-meta"><span class="q-num">Q3</span><span class="q-type-badge fitb">FILL IN</span></div>
+            <p class="q-text">Energy consumption in 1965 was approximately ________ MTOE.</p>
+            <div class="fitb-row"><input class="fitb-input" id="wq3-in" placeholder="type here" oninput="clearFeedback('wq3')"></div>
+            <div class="q-feedback" id="wq3-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq4">
+            <div class="q-meta"><span class="q-num">Q4</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">India's basins fall into how many categories based on prospectivity?</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq4','A')"><span class="opt-letter">A</span><span class="opt-text">Two</span></div>
+              <div class="option" onclick="selectOption(this,'wq4','B')"><span class="opt-letter">B</span><span class="opt-text">Three</span></div>
+              <div class="option" onclick="selectOption(this,'wq4','C')"><span class="opt-letter">C</span><span class="opt-text">Four</span></div>
+              <div class="option" onclick="selectOption(this,'wq4','D')"><span class="opt-letter">D</span><span class="opt-text">Five</span></div>
+            </div>
+            <div class="q-feedback" id="wq4-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq5">
+            <div class="q-meta"><span class="q-num">Q5</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">Under NELP, royalty payment for onshore areas is:</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq5','A')"><span class="opt-letter">A</span><span class="opt-text">10%</span></div>
+              <div class="option" onclick="selectOption(this,'wq5','B')"><span class="opt-letter">B</span><span class="opt-text">12.5%</span></div>
+              <div class="option" onclick="selectOption(this,'wq5','C')"><span class="opt-letter">C</span><span class="opt-text">15%</span></div>
+              <div class="option" onclick="selectOption(this,'wq5','D')"><span class="opt-letter">D</span><span class="opt-text">20%</span></div>
+            </div>
+            <div class="q-feedback" id="wq5-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq6">
+            <div class="q-meta"><span class="q-num">Q6</span><span class="q-type-badge fitb">FILL IN</span></div>
+            <p class="q-text">Under NELP, there is a ________ year tax holiday from commencement.</p>
+            <div class="fitb-row"><input class="fitb-input" id="wq6-in" placeholder="type here" oninput="clearFeedback('wq6')"></div>
+            <div class="q-feedback" id="wq6-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq7">
+            <div class="q-meta"><span class="q-num">Q7</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">Per capita energy consumption by 2010 was approximately how many times the 1965 level?</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq7','A')"><span class="opt-letter">A</span><span class="opt-text">3 times</span></div>
+              <div class="option" onclick="selectOption(this,'wq7','B')"><span class="opt-letter">B</span><span class="opt-text">5 times</span></div>
+              <div class="option" onclick="selectOption(this,'wq7','C')"><span class="opt-letter">C</span><span class="opt-text">7 times</span></div>
+              <div class="option" onclick="selectOption(this,'wq7','D')"><span class="opt-letter">D</span><span class="opt-text">9 times</span></div>
+            </div>
+            <div class="q-feedback" id="wq7-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq8">
+            <div class="q-meta"><span class="q-num">Q8</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">The main reason for the declining infrastructure trend in the 1990s was:</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq8','A')"><span class="opt-letter">A</span><span class="opt-text">Political instability</span></div>
+              <div class="option" onclick="selectOption(this,'wq8','B')"><span class="opt-letter">B</span><span class="opt-text">Decline in electricity, coal and petroleum</span></div>
+              <div class="option" onclick="selectOption(this,'wq8','C')"><span class="opt-letter">C</span><span class="opt-text">Over-investment in manufacturing</span></div>
+              <div class="option" onclick="selectOption(this,'wq8','D')"><span class="opt-letter">D</span><span class="opt-text">Foreign exchange crisis</span></div>
+            </div>
+            <div class="q-feedback" id="wq8-fb"></div>
+          </div>
+
+        </div>
+        <div class="quiz-footer">
+          <button class="quiz-submit" id="week-submit" onclick="submitWeekQuiz()">Submit Quiz</button>
+          <div class="quiz-result" id="week-result">
+            <div><div class="result-score" id="week-score"></div><div class="result-label" id="week-label"></div></div>
+            <span class="result-pill" id="week-pill"></span>
+          </div>
+        </div>
+        <div class="nudge" id="week-nudge"><div class="nudge-title">&#128218; Review Recommended</div><div class="nudge-body">Go back and review the topics above before retrying.</div></div>
+        <div class="next-unlock" id="next-unlock">
+          <div><div class="next-unlock-eyebrow">Week 4 Complete &#10003;</div><div class="next-unlock-text">Week 5</div></div>
+          <a href="W5.html" class="next-unlock-btn">Week 5 &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<footer>
+  <strong>FFOR 300 &mdash; Energy Conservation &amp; Dissipation</strong> &middot; Lagos State University &middot; Unify Notes
+</footer>
+<script>
+function toggleTheme(){const h=document.documentElement,b=document.getElementById('theme-btn');if(h.getAttribute('data-theme')==='dark'){h.setAttribute('data-theme','light');b.textContent='\u263E Dark';localStorage.setItem('theme','light');}else{h.setAttribute('data-theme','dark');b.textContent='\u2600 Light';localStorage.setItem('theme','dark');}}
+(function(){const t=localStorage.getItem('theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');document.getElementById('theme-btn').textContent='\u2600 Light';}})();
+function toggleAccordion(btn){const item=btn.closest('.accordion-item');const wasOpen=item.classList.contains('open');document.querySelectorAll('.accordion-item.open').forEach(i=>{if(i!==item)i.classList.remove('open');});item.classList.toggle('open',!wasOpen);updateProgress();}
+const selections={};
+function selectOption(el,qid,val){if(selections[qid]&&selections[qid].locked)return;const opts=el.closest('.options').querySelectorAll('.option');opts.forEach(o=>o.classList.remove('selected'));el.classList.add('selected');selections[qid]={val,locked:false};}
+function clearFeedback(qid){const fb=document.getElementById(qid+'-fb');if(fb){fb.className='q-feedback';fb.textContent='';}}
+const weekAnswers={"wq1":{type:"mcq",correct:"B",explanation:"In the 1980s, average growth of production was 7.8% and composite index of infrastructure was 8.4%."},"wq2":{type:"mcq",correct:"C",explanation:"In the 1990s, growth declined to 6.5% and 6.3% due mainly to decline in electricity, coal and petroleum sub-sectors."},"wq3":{type:"fitb",correct:["53"],explanation:"Energy consumption in 1965 was approximately 53 MTOE (million tons oil equivalent)."},"wq4":{type:"mcq",correct:"C",explanation:"India's basins are categorised into four categories: established commercial production, known accumulation, indicated/geologically prospective, and uncertain potential."},"wq5":{type:"mcq",correct:"B",explanation:"Royalty payment for on land areas is 12.5% and for offshore areas is 10%."},"wq6":{type:"fitb",correct:["7", "seven"],explanation:"NELP provides a seven-year tax holiday from the date of commencement."},"wq7":{type:"mcq",correct:"D",explanation:"Per capita energy consumption by 2010 shows 9 times jump over the 1965 level."},"wq8":{type:"mcq",correct:"B",explanation:"The main reason was the decline in growth of electricity, coal and petroleum — the energy subsector."}};
+function submitWeekQuiz(){let correct=0;Object.keys(weekAnswers).forEach(qid=>{const ans=weekAnswers[qid];const fb=document.getElementById(qid+'-fb');if(ans.type==='mcq'){const sel=selections[qid];if(sel&&sel.val===ans.correct){correct++;fb.className='q-feedback ok show';fb.textContent='\u2713 '+ans.explanation;}else{fb.className='q-feedback no show';fb.textContent='\u2717 '+ans.explanation;}if(sel)sel.locked=true;document.querySelectorAll('#'+qid+' .option').forEach(o=>{if(o.classList.contains('selected')){if(sel&&sel.val===ans.correct)o.classList.add('correct');else o.classList.add('wrong');}const letter=o.querySelector('.opt-letter').textContent;if(letter===ans.correct&&!(sel&&sel.val===ans.correct))o.classList.add('correct');});}else{const inp=document.getElementById(qid+'-in');const v=(inp.value||'').toLowerCase().trim();if(ans.correct.some(a=>v.includes(a))){correct++;fb.className='q-feedback ok show';fb.textContent='\u2713 '+ans.explanation;inp.classList.add('correct');}else{fb.className='q-feedback no show';fb.textContent='\u2717 '+ans.explanation;inp.classList.add('wrong');}}}); const total=Object.keys(weekAnswers).length;const pct=Math.round(correct/total*100);const passed=pct>=60;document.getElementById('week-score').textContent=correct+'/'+total;document.getElementById('week-label').textContent=pct+'% \u2014 '+(passed?'Passed!':'Not quite.');const pill=document.getElementById('week-pill');pill.textContent=passed?'PASS':'FAIL';pill.className='result-pill '+(passed?'pass':'fail');document.getElementById('week-result').classList.add('show');document.getElementById('week-submit').disabled=true;if(passed){document.getElementById('next-unlock').classList.add('show');localStorage.setItem('mee352_w4_passed','1');}else{document.getElementById('week-nudge').classList.add('show');}updateProgress();}
+function updateProgress(){let done=0;document.querySelectorAll('.accordion-item.open').forEach(()=>done++);if(document.getElementById('week-result').classList.contains('show'))done+=5;const pct=Math.min(100,Math.round(done/10*100));document.getElementById('progress-fill').style.width=pct+'%';document.getElementById('progress-pct').textContent=pct+'%';}
+</script>
+</body>
+</html>

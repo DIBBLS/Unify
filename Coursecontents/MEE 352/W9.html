@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FFOR 300 — Week 9: Solved Examples & Numerical Problems | Unify</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--muted:#555;--muted2:#999;--green:#4ade80;--green-deep:#16a34a;--green-bg:rgba(74,222,128,0.1);--green-border:rgba(74,222,128,0.3);--yellow-bg:#fffbeb;--yellow-border:#fcd34d;--red:#dc2626;--red-bg:#fff5f5;--red-border:#fca5a5;--fd:'Playfair Display',serif;--fb:'DM Sans',sans-serif;}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--muted:#aaa;--muted2:#666;--green-bg:rgba(74,222,128,0.08);--green-border:rgba(74,222,128,0.2);--yellow-bg:#1a1500;--yellow-border:#b45309;--red-bg:#1a0505;--red-border:#7f1d1d;}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{font-family:var(--fb);background:var(--bg);color:var(--text);line-height:1.75;font-size:16px;transition:background .2s,color .2s}
+nav{position:sticky;top:0;z-index:100;height:60px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;gap:32px}
+.nav-logo{font-family:var(--fd);font-size:20px;font-weight:900;color:var(--text);text-decoration:none}.nav-logo span{color:var(--green)}
+.theme-toggle{margin-left:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-family:var(--fb);font-size:12px;font-weight:500;color:var(--muted);cursor:pointer}
+.page{max-width:860px;margin:0 auto;padding:40px 48px 80px}
+.back-bar{display:flex;align-items:center;gap:12px;margin-bottom:28px;flex-wrap:wrap}
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px}
+.week-nav{display:flex;gap:8px;margin-left:auto}.wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px}.wnav-btn.off{opacity:.35;pointer-events:none}
+.week-progress{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:24px;display:flex;align-items:center;gap:14px}
+.wp-label{font-size:11px;font-weight:600;color:var(--muted2);flex-shrink:0;text-transform:uppercase;letter-spacing:.1em}.wp-bar{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden}.wp-fill{height:100%;background:var(--green);border-radius:3px;width:0%;transition:width .5s ease}.wp-pct{font-size:11px;font-weight:700;color:var(--green-deep);flex-shrink:0}
+.week-block{border-radius:14px;border:1px solid var(--border);overflow:hidden;background:var(--surface)}
+.week-header{background:var(--text);color:#f0efeb;padding:32px 36px 28px}[data-theme="dark"] .week-header{background:var(--surface2);border-bottom:1px solid var(--border)}
+.wh-eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:18px}.wh-course-tag{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:var(--green);color:var(--text);padding:3px 12px;border-radius:20px}.wh-week-label{font-size:11px;font-weight:500;color:rgba(240,239,235,.45);letter-spacing:.05em}
+.wh-title{font-family:var(--fd);font-size:clamp(1.6rem,4vw,2.2rem);font-weight:700;line-height:1.2;margin-bottom:6px}.wh-subtitle{font-size:15px;color:rgba(240,239,235,.55);margin-bottom:20px}.wh-hook{font-size:15px;color:rgba(240,239,235,.85);line-height:1.7;max-width:60ch;padding-top:18px;border-top:1px solid rgba(240,239,235,.12)}
+.wh-meta{display:flex;flex-wrap:wrap;gap:18px;margin-top:16px}.wh-meta-item{font-size:12px;color:rgba(240,239,235,.45)}.wh-meta-item strong{color:rgba(240,239,235,.75);font-weight:500}
+.week-body{padding:36px}.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:32px}.tag{font-size:11px;font-weight:500;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:3px 12px}
+.topic-block{border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden}.topic-header{background:var(--surface2);padding:14px 24px;border-bottom:1px solid var(--border)}.topic-num{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:3px}.topic-title{font-size:16px;font-weight:600;color:var(--text)}
+.topic-body{padding:28px 32px}.topic-body p{font-size:15px;line-height:1.8;margin-bottom:16px;color:var(--text);max-width:66ch}.topic-body ol,.topic-body ul{padding-left:22px;margin-bottom:16px;max-width:66ch}.topic-body li{font-size:15px;line-height:1.8;margin-bottom:6px;color:var(--text)}
+.accordion-section-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin:28px 0 12px;display:flex;align-items:center;gap:10px}.accordion-section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.accordion-wrap{display:flex;flex-direction:column;gap:8px}.accordion-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.accordion-btn{width:100%;background:none;border:none;cursor:pointer;padding:14px 20px;text-align:left;font-family:var(--fb);font-size:14px;font-weight:500;color:var(--text);line-height:1.55;transition:background .15s}.accordion-btn:hover{background:var(--surface2)}
+.accordion-btn-inner{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.accordion-btn-text{flex:1;min-width:0}
+.q-type{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--green-bg);color:var(--green-deep);border:1px solid var(--green-border);padding:2px 8px;border-radius:4px;margin-bottom:6px}
+.accordion-icon{flex-shrink:0;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--muted);transition:transform .25s,background .2s;margin-top:2px}.accordion-item.open .accordion-icon{transform:rotate(45deg);background:var(--green);border-color:var(--green);color:var(--text)}
+.accordion-body{max-height:0;overflow:hidden;transition:max-height .35s ease,padding .25s;padding:0 20px}.accordion-item.open .accordion-body{max-height:600px;padding:0 20px 18px}
+.answer-inner{border-top:1px solid var(--border);padding-top:14px;font-size:14px;color:var(--muted);line-height:1.8}.answer-inner strong{color:var(--green-deep)}
+.quiz-zone{margin:32px 0;border-radius:14px;overflow:hidden;border:2px solid var(--text)}.quiz-header{background:var(--text);padding:18px 24px;display:flex;align-items:center;justify-content:space-between}.quiz-header-left{display:flex;align-items:center;gap:12px}
+.quiz-badge{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;border-radius:20px;background:rgba(74,222,128,.2);color:var(--green);border:1px solid rgba(74,222,128,.3)}.quiz-title{font-family:var(--fd);font-size:16px;font-weight:700;color:#f0efeb}.quiz-count{font-size:11px;color:rgba(240,239,235,.45)}
+.quiz-body{background:var(--surface);padding:24px}.quiz-intro{font-size:13px;color:var(--muted);margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);line-height:1.6}
+.q-block{margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border)}.q-block:last-of-type{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.q-meta{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}.q-num{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
+.q-type-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;letter-spacing:.5px}.q-type-badge.mcq{background:var(--green-bg);color:var(--green-deep);border:1px solid var(--green-border)}.q-type-badge.fitb{background:rgba(251,191,36,.1);color:#b45309;border:1px solid rgba(251,191,36,.3)}
+.q-text{font-size:15px;font-weight:600;color:var(--text);margin-bottom:14px;line-height:1.6;max-width:66ch}.options{display:flex;flex-direction:column;gap:8px;max-width:66ch}
+.option{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s;background:var(--surface2)}.option:hover{border-color:var(--muted)}.option.selected{border-color:var(--text);background:var(--surface)}.option.correct{border-color:var(--green);background:var(--green-bg)!important}.option.wrong{border-color:var(--red);background:var(--red-bg)!important}
+.opt-letter{width:26px;height:26px;border-radius:6px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted2);flex-shrink:0}.option.selected .opt-letter{background:var(--text);border-color:var(--text);color:var(--green)}.option.correct .opt-letter{background:var(--green);border-color:var(--green);color:var(--text)}.option.wrong .opt-letter{background:var(--red);border-color:var(--red);color:#fff}.opt-text{font-size:14px;color:var(--text);line-height:1.5}
+.fitb-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:15px;color:var(--text);line-height:2.4;max-width:66ch}.fitb-input{border:none;border-bottom:2px solid var(--text);background:transparent;font-family:var(--fb);font-size:15px;font-weight:600;color:var(--text);width:160px;text-align:center;padding:2px 8px;outline:none}.fitb-input.correct{border-color:var(--green);color:var(--green-deep)}.fitb-input.wrong{border-color:var(--red);color:var(--red)}.fitb-hint{font-size:12px;color:var(--muted2);margin-top:6px;font-style:italic}
+.q-feedback{margin-top:10px;padding:10px 14px;border-radius:8px;font-size:13px;line-height:1.6;display:none;max-width:66ch}.q-feedback.show{display:block}.q-feedback.ok{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green-deep)}.q-feedback.no{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red)}
+.quiz-footer{padding:20px 24px;background:var(--surface2);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.quiz-submit{padding:11px 28px;background:var(--text);color:var(--green);border:none;border-radius:8px;font-family:var(--fb);font-size:13px;font-weight:700;cursor:pointer}.quiz-submit:disabled{opacity:.4;cursor:not-allowed}
+.quiz-result{display:none;align-items:center;gap:12px;flex:1}.quiz-result.show{display:flex}.result-score{font-family:var(--fd);font-size:28px;font-weight:900;color:var(--text)}.result-label{font-size:12px;color:var(--muted);line-height:1.5}.result-pill{padding:5px 16px;border-radius:20px;font-size:11px;font-weight:700;flex-shrink:0}.result-pill.pass{background:var(--green-bg);color:var(--green-deep);border:1px solid var(--green-border)}.result-pill.fail{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.nudge{background:var(--yellow-bg);border:1px solid var(--yellow-border);border-radius:10px;padding:16px 20px;margin:16px 24px 0;display:none}.nudge.show{display:block}.nudge-title{font-size:12px;font-weight:700;color:#92400e;margin-bottom:6px}.nudge-body{font-size:13px;color:var(--muted);line-height:1.6}
+.next-unlock{margin:16px 24px 20px;padding:18px 20px;background:var(--green-bg);border:1.5px solid var(--green-border);border-radius:10px;display:none;align-items:center;justify-content:space-between;gap:12px}.next-unlock.show{display:flex}.next-unlock-eyebrow{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--green-deep);margin-bottom:4px}.next-unlock-text{font-size:13px;font-weight:600;color:var(--green-deep)}.next-unlock-btn{padding:10px 22px;background:var(--green-deep);color:#fff;border:none;border-radius:8px;font-family:var(--fb);font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;white-space:nowrap}
+footer{border-top:1px solid var(--border);padding:32px 48px;text-align:center;font-size:13px;color:var(--muted2);max-width:860px;margin:0 auto}
+@media(max-width:700px){nav{padding:0 16px}.page{padding:20px 20px 60px}.week-header{padding:24px 20px 20px}.week-body{padding:20px}.topic-body{padding:20px}footer{padding:24px 20px}.quiz-footer{flex-direction:column}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="../../learn.html?course=FFOR+300&name=FFOR+300" class="nav-logo">Unify<span>.</span></a>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">&#9790; Dark</button>
+</nav>
+<div class="page">
+  <div class="back-bar">
+    <a href="../../learn.html?course=FFOR+300&name=FFOR+300" class="back-btn">&#8592; Back to FFOR 300</a>
+    <div class="week-nav">
+      <a href="W8.html" class="wnav-btn">&#8592; Prev</a>
+      <a href="W10.html" class="wnav-btn off">Next &#8594;</a>
+    </div>
+  </div>
+  <div class="week-progress">
+    <span class="wp-label">Week 9 Progress</span>
+    <div class="wp-bar"><div class="wp-fill" id="progress-fill"></div></div>
+    <span class="wp-pct" id="progress-pct">0%</span>
+  </div>
+  <div class="week-block">
+    <div class="week-header">
+      <div class="wh-eyebrow">
+        <span class="wh-course-tag">FFOR 300</span>
+        <span class="wh-week-label">Week 9 of 12</span>
+      </div>
+      <div class="wh-title">Solved Examples & Numerical Problems</div>
+      <div class="wh-subtitle">Solar Calculations, Wind Power, Biogas, Tidal & Thermal Problems</div>
+      <p class="wh-hook">By the end of this week, you should be able to solve numerical problems on solar time, beam radiation angles, wind power density, biogas digester design, and tidal energy generation.</p>
+      <div class="wh-meta">
+        <span class="wh-meta-item"><strong>Lecturer</strong> Mr. Ololade</span>
+        <span class="wh-meta-item"><strong>Date</strong> 20 April 2025</span>
+        <span class="wh-meta-item"><strong>Institution</strong> Lagos State University</span>
+      </div>
+    </div>
+    <div class="week-body">
+      <div class="tags"><span class="tag">Solar Time</span><span class="tag">Declination</span><span class="tag">Cooper Equation</span><span class="tag">Wind Power</span><span class="tag">Biogas Digester</span><span class="tag">Tidal Energy</span><span class="tag">Flat Plate Collector</span><span class="tag">Thermal Power</span></div>
+      
+      <div class="topic-block">
+        <div class="topic-header">
+          <div class="topic-num">Topic Ex 2.1</div>
+          <div class="topic-title">Local Solar Time and Declination</div>
+        </div>
+        <div class="topic-body">
+          <p><strong>Problem:</strong> Determine the local solar time (LST) and declination at a location latitude 23° 15'N, longitude 77° 30' E at 12.30 IST on June 19. Equation of time correction = – (1'01") from standard table.</p><p><strong>Solution:</strong> LST = IST – (Standard time longitude – Longitude of location) + Equation of time correction</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;font-style:italic;padding:12px 16px;border-left:4px solid var(--green);background:var(--surface2);border-radius:0 8px 8px 0;margin:16px 0;">LST = 12ᵇ 30' – 4(82°30' – 77°30') – 1'01" = 12ᵇ 8ᵐ 59ˢ</p><p>Declination from Cooper's equation: δ(in degree) = 23.45 sin{(360/365)(284 + n)}</p><p>Where n = days of the year. For June 19: n = 31+28+31+30+31+19 = 170 days</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;font-style:italic;padding:12px 16px;border-left:4px solid var(--green);background:var(--surface2);border-radius:0 8px 8px 0;margin:16px 0;">δ = 23.45 sin{(360/365)(284+170)} = 23.45 sin 86° = <strong>23.43°</strong></p>
+          <div class="accordion-section-label">Active Recall</div>
+          <div class="accordion-wrap">
+            <div class="accordion-item">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <div class="accordion-btn-inner">
+                  <div class="accordion-btn-text"><span class="q-type">Review</span><br>What are the key facts, figures, and definitions from Local Solar Time and Declination?</div>
+                  <div class="accordion-icon">+</div>
+                </div>
+              </button>
+              <div class="accordion-body"><div class="answer-inner">Review the notes above. Focus on: specific numerical values, definitions, classification schemes, and the logic connecting ideas in <strong>Local Solar Time and Declination</strong>.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="topic-block">
+        <div class="topic-header">
+          <div class="topic-num">Topic Ex 2.2</div>
+          <div class="topic-title">Beam Radiation Angle on Flat Plate Collector</div>
+        </div>
+        <div class="topic-body">
+          <p><strong>Problem:</strong> Calculate the angle made by beam radiation with the normal to a flat plate collector on December 1, at 9.00 am, solar time for a location at 28°35'N. The collector is tilted to an angle of latitude plus 10° with the horizontal and is pointing due south.</p><p><strong>Solution:</strong> cos θ_T = cos(φ – s) cos δ cos w + sin(φ + s) sin δ</p><p>Declination from Cooper equation on December 1, n = 335:</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;font-style:italic;padding:12px 16px;border-left:4px solid var(--green);background:var(--surface2);border-radius:0 8px 8px 0;margin:16px 0;">δ = 23.45 sin{(360/365)(284+335)} = 22.11°</p><p>Hour angle w corresponding to 9.00 am = 45°</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;font-style:italic;padding:12px 16px;border-left:4px solid var(--green);background:var(--surface2);border-radius:0 8px 8px 0;margin:16px 0;">cos θ_T = cos10° cos22.11° cos45° + sin22.11° sin10° = 0.71<br>∴ θ_T = <strong>44.72°</strong></p>
+          <div class="accordion-section-label">Active Recall</div>
+          <div class="accordion-wrap">
+            <div class="accordion-item">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <div class="accordion-btn-inner">
+                  <div class="accordion-btn-text"><span class="q-type">Review</span><br>What are the key facts, figures, and definitions from Beam Radiation Angle on Flat Plate Collector?</div>
+                  <div class="accordion-icon">+</div>
+                </div>
+              </button>
+              <div class="accordion-body"><div class="answer-inner">Review the notes above. Focus on: specific numerical values, definitions, classification schemes, and the logic connecting ideas in <strong>Beam Radiation Angle on Flat Plate Collector</strong>.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="topic-block">
+        <div class="topic-header">
+          <div class="topic-num">Topic Ex 2.3</div>
+          <div class="topic-title">Wind Power Calculations</div>
+        </div>
+        <div class="topic-body">
+          <p><strong>Problem:</strong> Wind at atmospheric pressure and 15°C has velocity of 15 m/s. Turbine diameter = 120 m, operating speed = 40 r.p.m. Calculate: (a) Total power density, (b) Maximum obtainable power density, (c) Reasonable power density (η=35%), (d) Total power, (e) Torque and axial thrust.</p><p><strong>Solution:</strong> Air density δ = P/RT = (1.01325 × 10⁵)/(287 × 288) = 1.226 Kg/m³</p><p style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;font-style:italic;padding:12px 16px;border-left:4px solid var(--green);background:var(--surface2);border-radius:0 8px 8px 0;margin:16px 0;">(a) Power density = (1/2gc) ρv₁³ = ½ × 1.226 × 15³ ≅ <strong>2069 W/m²</strong><br>(b) Max power density = (8/27gc) ρAv₁³ ≅ <strong>1226 W/m²</strong><br>(c) P/A = η × 2069 = 0.35 × 2069 = <strong>724 W/m²</strong><br>(d) Total power = 724 × (π/4) × (120)² = <strong>8184 kW</strong><br>(e) Torque at max efficiency ≅ <strong>55170 Newton</strong><br>Max axial thrust ≅ <strong>14 × 10⁵ Newton</strong></p>
+          <div class="accordion-section-label">Active Recall</div>
+          <div class="accordion-wrap">
+            <div class="accordion-item">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <div class="accordion-btn-inner">
+                  <div class="accordion-btn-text"><span class="q-type">Review</span><br>What are the key facts, figures, and definitions from Wind Power Calculations?</div>
+                  <div class="accordion-icon">+</div>
+                </div>
+              </button>
+              <div class="accordion-body"><div class="answer-inner">Review the notes above. Focus on: specific numerical values, definitions, classification schemes, and the logic connecting ideas in <strong>Wind Power Calculations</strong>.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="topic-block">
+        <div class="topic-header">
+          <div class="topic-num">Topic Ex 2.7</div>
+          <div class="topic-title">Bio-gas Digester Design</div>
+        </div>
+        <div class="topic-body">
+          <p><strong>Problem:</strong> Bio-gas digester for 5 cows. Retention time: 20 days, Temperature: 30°C, Dry matter consumed/day: 2 kg, Bio-gas yield: 0.24 m³/kg, Burner efficiency: 60%, CH₄ proportion: 0.8, Heat of combustion of CH₄: 28 MJ/m³, Density of slurry: 50 kg/m³.</p><p><strong>Solution:</strong></p><p style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;font-style:italic;padding:12px 16px;border-left:4px solid var(--green);background:var(--surface2);border-radius:0 8px 8px 0;margin:16px 0;">Mass of dry input: m₀ = 2 kg/day × 5 = 10 kg/day<br>Fluid volume: V_f = m₀/ρ_m = 10/50 = 0.2 m³/day<br>Digester volume: V_d = 0.2 × 20 = <strong>4.0 m³</strong> (Ans i)<br>Volume of biogas: V_b = 0.24 × 10 = 2.4 m³/day<br>Power = η × H_m × F_m × V_b = 0.6 × 28 × 0.8 × 2.4 = 32.25 MJ/day<br>= <strong>8.8 kWh/day = 370 W</strong> (Ans ii)</p>
+          <div class="accordion-section-label">Active Recall</div>
+          <div class="accordion-wrap">
+            <div class="accordion-item">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <div class="accordion-btn-inner">
+                  <div class="accordion-btn-text"><span class="q-type">Review</span><br>What are the key facts, figures, and definitions from Bio-gas Digester Design?</div>
+                  <div class="accordion-icon">+</div>
+                </div>
+              </button>
+              <div class="accordion-body"><div class="answer-inner">Review the notes above. Focus on: specific numerical values, definitions, classification schemes, and the logic connecting ideas in <strong>Bio-gas Digester Design</strong>.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="topic-block">
+        <div class="topic-header">
+          <div class="topic-num">Topic Ex 2.9</div>
+          <div class="topic-title">Tidal Power Plant</div>
+        </div>
+        <div class="topic-body">
+          <p><strong>Problem:</strong> A tidal power plant of simple single basin type, has a basin area = 30 × 10⁶ m². The tide has a range of 12 m. Turbine stops operating when the head falls below 3 m. Calculate the energy generated in one filling/emptying process, if generating efficiency of turbine is 0.73.</p><p><strong>Solution:</strong> The total theoretical work:</p><p style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;font-style:italic;padding:12px 16px;border-left:4px solid var(--green);background:var(--surface2);border-radius:0 8px 8px 0;margin:16px 0;">W = ½gρA(R² – r²)<br>P_av = W/time = gρA(R² – r²)/44,700<br>= (1/44,700) × 9.8 × 1025 × 30×10⁶ (12² – 3²) watts<br>= 3280.5 × 10⁶ kWh<br>Energy generated = 3280.5 × 10⁶ × 0.73 = <strong>2395 × 10⁶ kWh</strong></p>
+          <div class="accordion-section-label">Active Recall</div>
+          <div class="accordion-wrap">
+            <div class="accordion-item">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <div class="accordion-btn-inner">
+                  <div class="accordion-btn-text"><span class="q-type">Review</span><br>What are the key facts, figures, and definitions from Tidal Power Plant?</div>
+                  <div class="accordion-icon">+</div>
+                </div>
+              </button>
+              <div class="accordion-body"><div class="answer-inner">Review the notes above. Focus on: specific numerical values, definitions, classification schemes, and the logic connecting ideas in <strong>Tidal Power Plant</strong>.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="quiz-zone" id="week-quiz">
+        <div class="quiz-header">
+          <div class="quiz-header-left">
+            <span class="quiz-badge">WEEK 9 QUIZ</span>
+            <div><div class="quiz-title">Week 9 Assessment</div><div class="quiz-count">8 questions &middot; 60% to pass</div></div>
+          </div>
+        </div>
+        <div class="quiz-body">
+          <p class="quiz-intro">Answer all 8 questions. You need 60% (5/8) to pass.</p>
+          
+          <div class="q-block" id="wq1">
+            <div class="q-meta"><span class="q-num">Q1</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">In Ex 2.1, what is the calculated LST for the June 19 problem?</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq1','A')"><span class="opt-letter">A</span><span class="opt-text">12h 5m 30s</span></div>
+              <div class="option" onclick="selectOption(this,'wq1','B')"><span class="opt-letter">B</span><span class="opt-text">12h 8m 59s</span></div>
+              <div class="option" onclick="selectOption(this,'wq1','C')"><span class="opt-letter">C</span><span class="opt-text">12h 10m 0s</span></div>
+              <div class="option" onclick="selectOption(this,'wq1','D')"><span class="opt-letter">D</span><span class="opt-text">12h 15m 0s</span></div>
+            </div>
+            <div class="q-feedback" id="wq1-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq2">
+            <div class="q-meta"><span class="q-num">Q2</span><span class="q-type-badge fitb">FILL IN</span></div>
+            <p class="q-text">In Cooper's equation, n for June 19 = ________ days.</p>
+            <div class="fitb-row"><input class="fitb-input" id="wq2-in" placeholder="type here" oninput="clearFeedback('wq2')"></div>
+            <div class="q-feedback" id="wq2-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq3">
+            <div class="q-meta"><span class="q-num">Q3</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">In Ex 2.3, air density at atmospheric pressure and 15°C is:</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq3','A')"><span class="opt-letter">A</span><span class="opt-text">1.125 kg/m³</span></div>
+              <div class="option" onclick="selectOption(this,'wq3','B')"><span class="opt-letter">B</span><span class="opt-text">1.226 kg/m³</span></div>
+              <div class="option" onclick="selectOption(this,'wq3','C')"><span class="opt-letter">C</span><span class="opt-text">1.312 kg/m³</span></div>
+              <div class="option" onclick="selectOption(this,'wq3','D')"><span class="opt-letter">D</span><span class="opt-text">1.415 kg/m³</span></div>
+            </div>
+            <div class="q-feedback" id="wq3-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq4">
+            <div class="q-meta"><span class="q-num">Q4</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">In Ex 2.3, the total power density is approximately:</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq4','A')"><span class="opt-letter">A</span><span class="opt-text">1226 W/m²</span></div>
+              <div class="option" onclick="selectOption(this,'wq4','B')"><span class="opt-letter">B</span><span class="opt-text">1500 W/m²</span></div>
+              <div class="option" onclick="selectOption(this,'wq4','C')"><span class="opt-letter">C</span><span class="opt-text">2069 W/m²</span></div>
+              <div class="option" onclick="selectOption(this,'wq4','D')"><span class="opt-letter">D</span><span class="opt-text">2500 W/m²</span></div>
+            </div>
+            <div class="q-feedback" id="wq4-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq5">
+            <div class="q-meta"><span class="q-num">Q5</span><span class="q-type-badge fitb">FILL IN</span></div>
+            <p class="q-text">In Ex 2.7, the digester volume for 5 cows is ________ m³.</p>
+            <div class="fitb-row"><input class="fitb-input" id="wq5-in" placeholder="type here" oninput="clearFeedback('wq5')"></div>
+            <div class="q-feedback" id="wq5-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq6">
+            <div class="q-meta"><span class="q-num">Q6</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">In Ex 2.7, the power available from the biogas digester is:</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq6','A')"><span class="opt-letter">A</span><span class="opt-text">200 W</span></div>
+              <div class="option" onclick="selectOption(this,'wq6','B')"><span class="opt-letter">B</span><span class="opt-text">300 W</span></div>
+              <div class="option" onclick="selectOption(this,'wq6','C')"><span class="opt-letter">C</span><span class="opt-text">370 W</span></div>
+              <div class="option" onclick="selectOption(this,'wq6','D')"><span class="opt-letter">D</span><span class="opt-text">450 W</span></div>
+            </div>
+            <div class="q-feedback" id="wq6-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq7">
+            <div class="q-meta"><span class="q-num">Q7</span><span class="q-type-badge mcq">MCQ</span></div>
+            <p class="q-text">In Ex 2.9, the tidal basin area is:</p>
+            <div class="options">
+              <div class="option" onclick="selectOption(this,'wq7','A')"><span class="opt-letter">A</span><span class="opt-text">10 × 10⁶ m²</span></div>
+              <div class="option" onclick="selectOption(this,'wq7','B')"><span class="opt-letter">B</span><span class="opt-text">20 × 10⁶ m²</span></div>
+              <div class="option" onclick="selectOption(this,'wq7','C')"><span class="opt-letter">C</span><span class="opt-text">30 × 10⁶ m²</span></div>
+              <div class="option" onclick="selectOption(this,'wq7','D')"><span class="opt-letter">D</span><span class="opt-text">40 × 10⁶ m²</span></div>
+            </div>
+            <div class="q-feedback" id="wq7-fb"></div>
+          </div>
+
+          <div class="q-block" id="wq8">
+            <div class="q-meta"><span class="q-num">Q8</span><span class="q-type-badge fitb">FILL IN</span></div>
+            <p class="q-text">In Ex 2.9, the energy generated = ________ × 10⁶ kWh.</p>
+            <div class="fitb-row"><input class="fitb-input" id="wq8-in" placeholder="type here" oninput="clearFeedback('wq8')"></div>
+            <div class="q-feedback" id="wq8-fb"></div>
+          </div>
+
+        </div>
+        <div class="quiz-footer">
+          <button class="quiz-submit" id="week-submit" onclick="submitWeekQuiz()">Submit Quiz</button>
+          <div class="quiz-result" id="week-result">
+            <div><div class="result-score" id="week-score"></div><div class="result-label" id="week-label"></div></div>
+            <span class="result-pill" id="week-pill"></span>
+          </div>
+        </div>
+        <div class="nudge" id="week-nudge"><div class="nudge-title">&#128218; Review Recommended</div><div class="nudge-body">Go back and review the topics above before retrying.</div></div>
+        <div class="next-unlock" id="next-unlock">
+          <div><div class="next-unlock-eyebrow">Week 9 Complete &#10003;</div><div class="next-unlock-text">Course Complete! 🎓</div></div>
+          <a href="../../learn.html?course=FFOR+300&name=FFOR+300" class="next-unlock-btn">View Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<footer>
+  <strong>FFOR 300 &mdash; Energy Conservation &amp; Dissipation</strong> &middot; Lagos State University &middot; Unify Notes
+</footer>
+<script>
+function toggleTheme(){const h=document.documentElement,b=document.getElementById('theme-btn');if(h.getAttribute('data-theme')==='dark'){h.setAttribute('data-theme','light');b.textContent='\u263E Dark';localStorage.setItem('theme','light');}else{h.setAttribute('data-theme','dark');b.textContent='\u2600 Light';localStorage.setItem('theme','dark');}}
+(function(){const t=localStorage.getItem('theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');document.getElementById('theme-btn').textContent='\u2600 Light';}})();
+function toggleAccordion(btn){const item=btn.closest('.accordion-item');const wasOpen=item.classList.contains('open');document.querySelectorAll('.accordion-item.open').forEach(i=>{if(i!==item)i.classList.remove('open');});item.classList.toggle('open',!wasOpen);updateProgress();}
+const selections={};
+function selectOption(el,qid,val){if(selections[qid]&&selections[qid].locked)return;const opts=el.closest('.options').querySelectorAll('.option');opts.forEach(o=>o.classList.remove('selected'));el.classList.add('selected');selections[qid]={val,locked:false};}
+function clearFeedback(qid){const fb=document.getElementById(qid+'-fb');if(fb){fb.className='q-feedback';fb.textContent='';}}
+const weekAnswers={"wq1":{type:"mcq",correct:"B",explanation:"LST = IST – 4(82°30'–77°30') – 1'01' = 12ᵇ 8ᵐ 59ˢ"},"wq2":{type:"fitb",correct:["170"],explanation:"n = 31+28+31+30+31+19 = 170 days (Jan through June 19)."},"wq3":{type:"mcq",correct:"B",explanation:"δ = P/RT = (1.01325×10⁵)/(287×288) = 1.226 Kg/m³"},"wq4":{type:"mcq",correct:"C",explanation:"Power density = ½ρv₁³ = ½ × 1.226 × 15³ ≅ 2069 W/m²"},"wq5":{type:"fitb",correct:["4", "4.0"],explanation:"V_d = Fluid volume × Retention time = 0.2 × 20 = 4.0 m³"},"wq6":{type:"mcq",correct:"C",explanation:"Power = η × H_m × F_m × V_b = 0.6 × 28 × 0.8 × 2.4 = 32.25 MJ/day = 370 W"},"wq7":{type:"mcq",correct:"C",explanation:"The basin area = 30 × 10⁶ m² as stated in the problem."},"wq8":{type:"fitb",correct:["2395"],explanation:"Energy generated = 3280.5 × 10⁶ × 0.73 = 2395 × 10⁶ kWh"}};
+function submitWeekQuiz(){let correct=0;Object.keys(weekAnswers).forEach(qid=>{const ans=weekAnswers[qid];const fb=document.getElementById(qid+'-fb');if(ans.type==='mcq'){const sel=selections[qid];if(sel&&sel.val===ans.correct){correct++;fb.className='q-feedback ok show';fb.textContent='\u2713 '+ans.explanation;}else{fb.className='q-feedback no show';fb.textContent='\u2717 '+ans.explanation;}if(sel)sel.locked=true;document.querySelectorAll('#'+qid+' .option').forEach(o=>{if(o.classList.contains('selected')){if(sel&&sel.val===ans.correct)o.classList.add('correct');else o.classList.add('wrong');}const letter=o.querySelector('.opt-letter').textContent;if(letter===ans.correct&&!(sel&&sel.val===ans.correct))o.classList.add('correct');});}else{const inp=document.getElementById(qid+'-in');const v=(inp.value||'').toLowerCase().trim();if(ans.correct.some(a=>v.includes(a))){correct++;fb.className='q-feedback ok show';fb.textContent='\u2713 '+ans.explanation;inp.classList.add('correct');}else{fb.className='q-feedback no show';fb.textContent='\u2717 '+ans.explanation;inp.classList.add('wrong');}}}); const total=Object.keys(weekAnswers).length;const pct=Math.round(correct/total*100);const passed=pct>=60;document.getElementById('week-score').textContent=correct+'/'+total;document.getElementById('week-label').textContent=pct+'% \u2014 '+(passed?'Passed!':'Not quite.');const pill=document.getElementById('week-pill');pill.textContent=passed?'PASS':'FAIL';pill.className='result-pill '+(passed?'pass':'fail');document.getElementById('week-result').classList.add('show');document.getElementById('week-submit').disabled=true;if(passed){document.getElementById('next-unlock').classList.add('show');localStorage.setItem('mee352_w9_passed','1');}else{document.getElementById('week-nudge').classList.add('show');}updateProgress();}
+function updateProgress(){let done=0;document.querySelectorAll('.accordion-item.open').forEach(()=>done++);if(document.getElementById('week-result').classList.contains('show'))done+=5;const pct=Math.min(100,Math.round(done/10*100));document.getElementById('progress-fill').style.width=pct+'%';document.getElementById('progress-pct').textContent=pct+'%';}
+</script>
+</body>
+</html>

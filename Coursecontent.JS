@@ -743,6 +743,24 @@ const UNIFY_COURSE_CONTENT = {
     ]
   },
 
+  "FFOR 300": {
+    title: "Energy Sources",
+    weeks: [
+      { week:1,  topic:"Energy Sources", subtopics:["General Concepts — Classifications and Types"], time:12, resources:{ notes:"Coursecontents/FFOR 300/W1.html" }, content:{ "General Concepts — Classifications and Types": { hasContent:true, htmlFile:"Coursecontents/FFOR 300/W1.html" } } },
+      { week:2,  topic:"Unconventional/Renewable Energy Sources", subtopics:["Secondary Sources and Emerging Technologies"], time:12, resources:{ notes:"Coursecontents/FFOR 300/W2.html" }, content:{ "Secondary Sources and Emerging Technologies": { hasContent:true, htmlFile:"Coursecontents/FFOR 300/W2.html" } } },
+      { week:3,  topic:"Energy Consumption & Alternate Strategies", subtopics:["Consumption Patterns and Alternatives"], time:12, resources:{ notes:"Coursecontents/FFOR 300/W3.html" }, content:{ "Consumption Patterns and Alternatives": { hasContent:true, htmlFile:"Coursecontents/FFOR 300/W3.html" } } },
+      { week:4,  topic:"India's Industries, Infrastructure & Energy Consumption", subtopics:["Industrial Energy Use and Infrastructure"], time:12, resources:{ notes:"Coursecontents/FFOR 300/W4.html" }, content:{ "Industrial Energy Use and Infrastructure": { hasContent:true, htmlFile:"Coursecontents/FFOR 300/W4.html" } } },
+      { week:5,  topic:"Miscellaneous Sources & Merits/Demerits", subtopics:["Additional Sources and Comparative Analysis"], time:12, resources:{ notes:"Coursecontents/FFOR 300/W5.html" }, content:{ "Additional Sources and Comparative Analysis": { hasContent:true, htmlFile:"Coursecontents/FFOR 300/W5.html" } } },
+      { week:6,  topic:"Solved Examples & Numerical Problems", subtopics:["Problem Solving and Calculations"], time:12, resources:{ notes:"Coursecontents/FFOR 300/W6.html" }, content:{ "Problem Solving and Calculations": { hasContent:true, htmlFile:"Coursecontents/FFOR 300/W6.html" } } },
+      { week:7,  topic:"Miscellaneous Sources & Merits/Demerits", subtopics:["Additional Sources and Comparative Analysis"], time:12, resources:{ notes:"Coursecontents/FFOR 300/W7.html" }, content:{ "Additional Sources and Comparative Analysis": { hasContent:true, htmlFile:"Coursecontents/FFOR 300/W7.html" } } },
+      { week:8,  topic:"Miscellaneous Sources & Merits/Demerits", subtopics:["Additional Sources and Comparative Analysis"], time:12, resources:{ notes:"Coursecontents/FFOR 300/W8.html" }, content:{ "Additional Sources and Comparative Analysis": { hasContent:true, htmlFile:"Coursecontents/FFOR 300/W8.html" } } },
+      { week:9,  topic:"Solved Examples & Numerical Problems", subtopics:["Problem Solving and Calculations"], time:12, resources:{ notes:"Coursecontents/FFOR 300/W9.html" }, content:{ "Problem Solving and Calculations": { hasContent:true, htmlFile:"Coursecontents/FFOR 300/W9.html" } } },
+      { week:10, topic:"Solved Examples & Numerical Problems", subtopics:["Problem Solving and Calculations"], time:12, resources:{ notes:"Coursecontents/FFOR 300/W10.html" }, content:{ "Problem Solving and Calculations": { hasContent:true, htmlFile:"Coursecontents/FFOR 300/W10.html" } } },
+      { week:11, topic:"Solved Examples & Numerical Problems", subtopics:["Problem Solving and Calculations"], time:12, resources:{ notes:"Coursecontents/FFOR 300/W11.html" }, content:{ "Problem Solving and Calculations": { hasContent:true, htmlFile:"Coursecontents/FFOR 300/W11.html" } } },
+      { week:12, topic:"Solved Examples & Numerical Problems", subtopics:["Problem Solving and Calculations"], time:12, resources:{ notes:"Coursecontents/FFOR 300/W12.html" }, content:{ "Problem Solving and Calculations": { hasContent:true, htmlFile:"Coursecontents/FFOR 300/W12.html" } } },
+    ]
+  },
+
   // ── GENERATE STUBS FOR REMAINING COURSES ────────────────────
   // These are auto-generated 12-week structures.
   // Replace with real content as coordinators review each course.
