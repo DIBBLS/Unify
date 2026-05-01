@@ -473,8 +473,11 @@ window.openResourcePanel = function (courseName) {
   document.getElementById("resourcePanel").classList.add("open");
 
   const enc = encodeURIComponent(courseName);
+  const encCode = encodeURIComponent(code);
   document.getElementById("learnPageBtn").href =
     "learn.html?course=" + enc + "&name=" + enc;
+  const cpBtn = document.getElementById("coursePageBtn");
+  if (cpBtn) cpBtn.href = "course.html?code=" + encCode;
 
   buildWeekAccordion(courseName, code);
 };

@@ -1,5 +1,12 @@
 import { auth, db } from "./firebase-config.js";
 import {
+  listCourses,
+  upsertCourse,
+  deleteCourse as deleteCourseDoc,
+  getCourse,
+  normalizeCode,
+} from "./courses-service.js";
+import {
   onAuthStateChanged,
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -61,6 +68,7 @@ onAuthStateChanged(auth, async (user) => {
   initTheme();
   listenToUpdates();
   loadAdmins();
+  loadCourses();
 });
 
 document.getElementById("signOutBtn").addEventListener("click", async () => {
@@ -300,6 +308,158 @@ window.toggleTheme = function () {
   document.getElementById("themeBtn").textContent =
     nxt === "dark" ? "☀ Light" : "☾ Dark";
 };
+
+// ── MANAGE COURSES ────────────────────────────────────────
+const CADD_FIELDS = [
+  "cAddCode",
+  "cAddTitle",
+  "cAddFaculty",
+  "cAddDept",
+  "cAddLevel",
+  "cAddSemester",
+  "cAddUnits",
+  "cAddDesc",
+];
+let editingCourseCode = null;
+
+window.saveCourse = async function () {
+  const code = normalizeCode(document.getElementById("cAddCode").value);
+  const title = document.getElementById("cAddTitle").value.trim();
+  const faculty = document.getElementById("cAddFaculty").value.trim();
+  const department = document.getElementById("cAddDept").value.trim();
+  const level = document.getElementById("cAddLevel").value;
+  const semester = document.getElementById("cAddSemester").value;
+  const units = parseInt(document.getElementById("cAddUnits").value, 10) || 3;
+  const description = document.getElementById("cAddDesc").value.trim();
+  const fb = document.getElementById("cAddFeedback");
+
+  if (!code) {
+    fb.style.color = "var(--red)";
+    fb.textContent = "Course code is required.";
+    return;
+  }
+  if (!title) {
+    fb.style.color = "var(--red)";
+    fb.textContent = "Course title is required.";
+    return;
+  }
+
+  const btn = document.getElementById("cAddBtn");
+  btn.disabled = true;
+  btn.textContent = "Saving…";
+  fb.style.color = "var(--text3)";
+  fb.textContent = "Saving course…";
+
+  try {
+    await upsertCourse(
+      { code, title, faculty, department, level, semester, units, description },
+      me?.uid,
+    );
+    fb.style.color = "var(--green-deep)";
+    fb.textContent = editingCourseCode
+      ? `Updated ${code}.`
+      : `Added ${code}. Students can now select this course.`;
+    showToast(editingCourseCode ? "Course updated" : "Course added");
+    resetCourseForm();
+    loadCourses();
+  } catch (e) {
+    console.error(e);
+    fb.style.color = "var(--red)";
+    fb.textContent =
+      "Error saving course — check Firestore rules allow admin writes to /courses.";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = editingCourseCode ? "Update Course →" : "Save Course →";
+  }
+};
+
+function resetCourseForm() {
+  CADD_FIELDS.forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (id === "cAddUnits") el.value = "3";
+    else el.value = "";
+  });
+  editingCourseCode = null;
+  const btn = document.getElementById("cAddBtn");
+  if (btn) btn.textContent = "Save Course →";
+}
+
+window.editCourse = async function (code) {
+  const c = await getCourse(code);
+  if (!c) {
+    showToast("Course not found");
+    return;
+  }
+  document.getElementById("cAddCode").value = c.code || "";
+  document.getElementById("cAddTitle").value = c.title || "";
+  document.getElementById("cAddFaculty").value = c.faculty || "";
+  document.getElementById("cAddDept").value = c.department || "";
+  document.getElementById("cAddLevel").value = c.level || "";
+  document.getElementById("cAddSemester").value = c.semester || "";
+  document.getElementById("cAddUnits").value = c.units || 3;
+  document.getElementById("cAddDesc").value = c.description || "";
+  editingCourseCode = c.code;
+  document.getElementById("cAddBtn").textContent = "Update Course →";
+  document.getElementById("cAddCode").scrollIntoView({
+    behavior: "smooth",
+    block: "center",
+  });
+};
+
+window.removeCourseDoc = async function (code) {
+  if (
+    !confirm(
+      `Delete course ${code}? Students who already added it will keep their entry until they remove it themselves, but the dynamic course page will no longer load data.`,
+    )
+  )
+    return;
+  try {
+    await deleteCourseDoc(code);
+    showToast(`${code} deleted`);
+    loadCourses();
+  } catch (e) {
+    console.error(e);
+    showToast("Error deleting course");
+  }
+};
+
+async function loadCourses() {
+  const el = document.getElementById("courseList");
+  if (!el) return;
+  try {
+    const courses = await listCourses();
+    if (!courses.length) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon">📚</div><div class="empty-text">No courses added yet. Add the first one above.</div></div>`;
+      return;
+    }
+    el.innerHTML =
+      `<div class="update-log">` +
+      courses
+        .map((c) => {
+          const meta = [c.department, c.level, c.semester]
+            .filter(Boolean)
+            .join(" · ");
+          return `<div class="update-item">
+        <div class="update-course-code">${c.code}</div>
+        <div>
+          <div style="font-weight:600;font-size:14px;">${c.title || "—"}</div>
+          ${meta ? `<div class="update-detail">${meta}</div>` : ""}
+          ${c.description ? `<div class="update-meta">${c.description}</div>` : ""}
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn-icon" style="border-color:var(--border);color:var(--text2);" onclick="editCourse('${c.code}')" title="Edit">Edit</button>
+          <button class="btn-icon" onclick="removeCourseDoc('${c.code}')" title="Delete">✕</button>
+        </div>
+      </div>`;
+        })
+        .join("") +
+      `</div>`;
+  } catch (e) {
+    console.error(e);
+    el.innerHTML = `<div class="empty-state"><div class="empty-text">Couldn't load courses. Check Firestore rules.</div></div>`;
+  }
+}
 
 // ── TOAST ─────────────────────────────────────────────────
 function showToast(msg) {
