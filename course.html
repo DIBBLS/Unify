@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Unify — Course</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <link rel="stylesheet" href="css/pages/course.styles.css" />
+    <script src="js/theme.js"></script>
+    <!-- Hard-coded fallbacks (kept so legacy courses still render) -->
+    <script src="courses.js"></script>
+    <script src="Coursecontent.JS"></script>
+  </head>
+  <body>
+    <div class="loading-screen" id="loadingScreen">
+      <div class="loading-logo">Unify</div>
+      <div class="loading-sub">Loading course…</div>
+    </div>
+
+    <div id="mainContent" style="display: none">
+      <nav>
+        <a href="dashboard.html" class="nav-logo">Unify</a>
+        <div class="nav-links">
+          <a href="dashboard.html" class="nl">Dashboard</a>
+          <a href="timetable.html" class="nl">Timetable</a>
+          <a href="profile.html" class="nl">Profile</a>
+        </div>
+        <div class="nav-r">
+          <button class="nbtn" onclick="toggleTheme()" id="themeToggle">
+            Dark mode
+          </button>
+          <a href="dashboard.html" class="nbtn">← Back</a>
+        </div>
+      </nav>
+
+      <div class="course-page">
+        <div class="course-hero">
+          <div class="course-code" id="courseCode">—</div>
+          <div class="course-title" id="courseTitle">Loading…</div>
+          <div class="course-meta" id="courseMeta"></div>
+          <div class="course-source-tag" id="courseSourceTag"></div>
+        </div>
+
+        <div class="course-body">
+          <section class="course-section" id="aboutSection" style="display:none">
+            <div class="course-section-label">About</div>
+            <div class="course-card" id="aboutBody"></div>
+          </section>
+
+          <section class="course-section">
+            <div class="course-section-label">Course Outline</div>
+            <div id="weeksWrap">
+              <div class="course-empty">
+                <div class="course-empty-icon">📖</div>
+                <div class="course-empty-text">No weekly outline yet.</div>
+                <div class="course-empty-sub" id="weeksEmptySub">
+                  Materials uploaded by faculty will appear here automatically.
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="course-section">
+            <div class="course-section-label">Resources</div>
+            <div id="resourcesWrap">
+              <div class="course-empty">
+                <div class="course-empty-icon">📂</div>
+                <div class="course-empty-text">
+                  No resources have been uploaded for this course yet.
+                </div>
+                <div class="course-empty-sub">
+                  Coming soon — admins will be able to upload materials directly
+                  from the admin panel.
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="course-section">
+            <div class="course-section-label">Actions</div>
+            <div class="course-actions" id="courseActions"></div>
+          </section>
+        </div>
+      </div>
+
+      <div class="course-not-found" id="notFound" style="display:none">
+        <div class="course-nf-title">Course not found</div>
+        <div class="course-nf-sub" id="nfSub"></div>
+        <a href="dashboard.html" class="nbtn">← Back to Dashboard</a>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script type="module" src="js/pages/course.js"></script>
+  </body>
+</html>

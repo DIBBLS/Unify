@@ -177,6 +177,149 @@
           </div>
         </div>
 
+        <!-- MANAGE COURSES -->
+        <div class="section">
+          <div class="section-label">Manage Courses</div>
+          <div class="card">
+            <div class="card-title">Add or edit a course</div>
+            <div class="card-sub">
+              Courses added here become available to students immediately —
+              they can add the course to their dashboard and open its dynamic
+              course page. No redeployment required.
+            </div>
+
+            <div class="form-row two">
+              <div class="form-group">
+                <label class="form-label">Course Code</label>
+                <input
+                  class="form-input"
+                  id="cAddCode"
+                  placeholder="e.g. ECE 301"
+                  oninput="this.value = this.value.toUpperCase()"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Course Title</label>
+                <input
+                  class="form-input"
+                  id="cAddTitle"
+                  placeholder="e.g. Signals & Systems"
+                />
+              </div>
+            </div>
+
+            <div class="form-row two">
+              <div class="form-group">
+                <label class="form-label">Faculty</label>
+                <input
+                  class="form-input"
+                  id="cAddFaculty"
+                  placeholder="e.g. Faculty of Engineering"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Department</label>
+                <input
+                  class="form-input"
+                  id="cAddDept"
+                  placeholder="e.g. Electronic & Computer Engineering"
+                />
+              </div>
+            </div>
+
+            <div class="form-row two">
+              <div class="form-group">
+                <label class="form-label">Level</label>
+                <select class="form-select" id="cAddLevel">
+                  <option value="">Select level…</option>
+                  <option value="100 Level">100 Level</option>
+                  <option value="200 Level">200 Level</option>
+                  <option value="300 Level">300 Level</option>
+                  <option value="400 Level">400 Level</option>
+                  <option value="500 Level">500 Level</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Semester</label>
+                <select class="form-select" id="cAddSemester">
+                  <option value="">Select semester…</option>
+                  <option value="First Semester">First Semester</option>
+                  <option value="Second Semester">Second Semester</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row two">
+              <div class="form-group">
+                <label class="form-label">Units</label>
+                <input
+                  class="form-input"
+                  id="cAddUnits"
+                  type="number"
+                  min="1"
+                  max="6"
+                  value="3"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label"
+                  >Description
+                  <span
+                    style="
+                      font-size: 11px;
+                      color: var(--text3);
+                      text-transform: none;
+                      letter-spacing: 0;
+                      font-weight: 400;
+                    "
+                    >(optional)</span
+                  ></label
+                >
+                <input
+                  class="form-input"
+                  id="cAddDesc"
+                  placeholder="One-line summary"
+                />
+              </div>
+            </div>
+
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                margin-top: 6px;
+              "
+            >
+              <div
+                id="cAddFeedback"
+                style="font-size: 12px; min-height: 16px; color: var(--text3)"
+              ></div>
+              <button
+                class="btn btn-primary"
+                id="cAddBtn"
+                onclick="saveCourse()"
+              >
+                Save Course →
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="section-label"
+            style="margin-top: 28px; margin-bottom: 12px"
+          >
+            Existing Courses
+          </div>
+          <div id="courseList">
+            <div class="empty-state">
+              <div class="empty-icon">📚</div>
+              <div class="empty-text">Loading courses…</div>
+            </div>
+          </div>
+        </div>
+
         <!-- GRANT ADMIN -->
         <div class="section">
           <div class="section-label">Admin Access</div>

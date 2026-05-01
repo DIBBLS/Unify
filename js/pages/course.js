@@ -1,0 +1,176 @@
+/**
+ * Unify — Dynamic course page
+ *
+ * Renders a course based on ?code=<COURSE CODE>. Reads from Firestore
+ * `courses/{code}` first; falls back to hard-coded data so existing
+ * courses (e.g. ECE 301) still render until they're migrated.
+ */
+
+import { auth } from '../firebase-config.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import {
+  resolveCourse,
+  getHardcodedWeeks,
+  normalizeCode,
+} from '../courses-service.js';
+
+// ── AUTH GATE ────────────────────────────────────────────
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    window.location.href = 'auth.html';
+    return;
+  }
+  init();
+});
+
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  const rawCode = params.get('code') || params.get('course') || '';
+  const code = normalizeCode(rawCode);
+  const loading = document.getElementById('loadingScreen');
+  const main = document.getElementById('mainContent');
+
+  if (!code) {
+    showNotFound('No course code in URL.');
+    loading.style.display = 'none';
+    main.style.display = 'block';
+    return;
+  }
+
+  const { course, source } = await resolveCourse(code);
+
+  if (!course) {
+    showNotFound(
+      `We couldn't find a course matching "${code}". Ask an admin to add it from the Admin panel.`,
+    );
+    loading.style.display = 'none';
+    main.style.display = 'block';
+    return;
+  }
+
+  renderHero(course, source);
+  renderAbout(course);
+  renderWeeks(code, source);
+  renderActions(code, course, source);
+
+  loading.style.display = 'none';
+  main.style.display = 'block';
+}
+
+function renderHero(course, source) {
+  document.getElementById('courseCode').textContent = course.code;
+  document.getElementById('courseTitle').textContent =
+    course.title || 'Untitled course';
+
+  const metaParts = [
+    course.department,
+    course.level,
+    course.semester,
+    course.units ? `${course.units} units` : null,
+  ].filter(Boolean);
+  document.getElementById('courseMeta').textContent = metaParts.join(' · ');
+
+  const tag = document.getElementById('courseSourceTag');
+  if (source === 'hardcoded') {
+    tag.textContent = 'Legacy course — not yet migrated';
+    tag.classList.add('tag-legacy');
+  } else if (source === 'firestore') {
+    tag.textContent = '';
+  }
+}
+
+function renderAbout(course) {
+  if (!course.description) return;
+  document.getElementById('aboutSection').style.display = 'block';
+  document.getElementById('aboutBody').textContent = course.description;
+}
+
+function renderWeeks(code, source) {
+  const wrap = document.getElementById('weeksWrap');
+  const weeks = getHardcodedWeeks(code);
+
+  if (!weeks || !weeks.length) {
+    if (source === 'firestore') {
+      document.getElementById('weeksEmptySub').textContent =
+        'Faculty will upload weekly topics and materials soon. They will appear here automatically.';
+    }
+    return;
+  }
+
+  // Hard-coded weeks — render same shape Learn.html / dashboard accordion uses.
+  let topicProgress = {};
+  try {
+    const stored = localStorage.getItem('unify-topic-' + code);
+    if (stored) topicProgress = JSON.parse(stored);
+  } catch (e) {}
+
+  wrap.innerHTML =
+    `<div class="weeks">` +
+    weeks
+      .map((week, wi) => {
+        const subtopics = week.subtopics || [];
+        const enc = encodeURIComponent(code);
+        const topicsHtml = subtopics
+          .map((t, ti) => {
+            const key = `w${wi}_t${ti}`;
+            const done = topicProgress[key]?.done;
+            return `<a class="topic" href="learn.html?course=${enc}&name=${enc}&week=${wi}&topic=${ti}">
+            <span class="topic-check ${done ? 'done' : ''}">✓</span>
+            <span class="topic-text">${escapeHtml(t)}</span>
+          </a>`;
+          })
+          .join('');
+        const time = week.time ? ` · ${escapeHtml(week.time)}` : '';
+        return `<div class="week">
+        <div class="week-head" onclick="this.parentElement.classList.toggle('open')">
+          <span class="week-num">Wk ${wi + 1}</span>
+          <span class="week-title">${escapeHtml(week.topic || 'Untitled')}${time}</span>
+          <span class="week-chev">▾</span>
+        </div>
+        <div class="week-body">${topicsHtml}</div>
+      </div>`;
+      })
+      .join('') +
+    `</div>`;
+}
+
+function renderActions(code, course, source) {
+  const wrap = document.getElementById('courseActions');
+  const enc = encodeURIComponent(code);
+  const actions = [];
+
+  // For hard-coded courses we keep the legacy Learn.html link so nothing breaks.
+  if (source === 'hardcoded' || getHardcodedWeeks(code)) {
+    actions.push(
+      `<a class="course-action" href="learn.html?course=${enc}&name=${enc}">
+        <div class="course-action-title">Open in legacy Learn page</div>
+        <div class="course-action-sub">The original study experience for this course</div>
+      </a>`,
+    );
+  }
+
+  actions.push(
+    `<a class="course-action" href="dashboard.html">
+      <div class="course-action-title">Add to my dashboard</div>
+      <div class="course-action-sub">Track this course alongside your CGPA</div>
+    </a>`,
+  );
+
+  wrap.innerHTML = actions.join('');
+}
+
+function showNotFound(message) {
+  document.querySelector('.course-page').style.display = 'none';
+  const nf = document.getElementById('notFound');
+  document.getElementById('nfSub').textContent = message;
+  nf.style.display = 'block';
+}
+
+function escapeHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
