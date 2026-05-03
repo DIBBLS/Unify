@@ -42,7 +42,7 @@ function rateLimit(key, max = 5, windowMs = 60000) {
 // ── AUTH ──────────────────────────────────────────────
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    window.location.href = "auth.html";
+    window.location.href = "Auth.html";
     return;
   }
   currentUser = user;
@@ -81,7 +81,7 @@ document.addEventListener("visibilitychange", () => {
 
 document.getElementById("signOutBtn").addEventListener("click", async () => {
   await signOut(auth);
-  window.location.href = "auth.html";
+  window.location.href = "Auth.html";
 });
 
 // ── LOAD DATA ─────────────────────────────────────────
@@ -90,7 +90,7 @@ async function loadUserData() {
   try {
     const snap = await getDoc(doc(db, "users", currentUser.uid));
     if (!snap.exists() || !snap.data().university) {
-      window.location.href = "onboarding.html";
+      window.location.href = "Onboarding.html";
       return;
     }
     const d = snap.data();

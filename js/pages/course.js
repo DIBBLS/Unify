@@ -17,7 +17,7 @@ import {
 // ── AUTH GATE ────────────────────────────────────────────
 onAuthStateChanged(auth, (user) => {
   if (!user) {
-    window.location.href = 'auth.html';
+    window.location.href = 'Auth.html';
     return;
   }
   init();

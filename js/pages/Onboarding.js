@@ -54,7 +54,7 @@ const leftContent = {
 
 // ── AUTH ─────────────────────────────────────────────────────────────────────
 onAuthStateChanged(auth, async user => {
-  if (!user) { window.location.href = 'auth.html'; return; }
+  if (!user) { window.location.href = 'Auth.html'; return; }
   currentUser = user;
 
   // If user is already onboarded AND didn't come here intentionally, send them back

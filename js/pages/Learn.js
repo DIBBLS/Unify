@@ -34,7 +34,7 @@ window.toggleMobileSidebar = function() {
 
 // ── AUTH ──────────────────────────────────────────────
 onAuthStateChanged(auth, async user => {
-  if (!user) { window.location.href = 'auth.html'; return; }
+  if (!user) { window.location.href = 'Auth.html'; return; }
   currentUser = user;
 
   // Get course from URL params
