@@ -70,7 +70,9 @@ export async function listCourses() {
     return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
   } catch (e) {
     console.warn('[courses-service] listCourses failed:', e);
-    return [];
+    // Re-throw so callers can surface the real error (permissions, network)
+    // instead of silently treating it as "no courses exist".
+    throw e;
   }
 }
 

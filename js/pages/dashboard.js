@@ -18,6 +18,50 @@ let userProfile = {},
 
 let weekProgress = {};
 
+// ── DEBUG ─────────────────────────────────────────────
+// Temporary visible debug panel for Step 1 (course discovery).
+// Remove once dynamic courses are confirmed working.
+const DEBUG_COURSES = true;
+let debugLogs = [];
+function dbg(msg, data) {
+  const line = data !== undefined ? `${msg} ${JSON.stringify(data)}` : msg;
+  console.log("[unify-debug]", line);
+  if (DEBUG_COURSES) {
+    debugLogs.push(line);
+    renderDebugPanel();
+  }
+}
+function renderDebugPanel() {
+  if (!DEBUG_COURSES) return;
+  let panel = document.getElementById("__unifyDebug");
+  if (!panel) {
+    panel = document.createElement("div");
+    panel.id = "__unifyDebug";
+    panel.style.cssText =
+      "position:fixed;bottom:8px;left:8px;right:8px;max-height:40vh;overflow:auto;" +
+      "background:rgba(0,0,0,0.92);color:#0f0;font:11px/1.4 ui-monospace,Menlo,monospace;" +
+      "padding:10px 12px;border-radius:8px;z-index:99999;white-space:pre-wrap;" +
+      "box-shadow:0 4px 12px rgba(0,0,0,0.4);";
+    const close = document.createElement("button");
+    close.textContent = "× close debug";
+    close.style.cssText =
+      "position:absolute;top:6px;right:8px;background:#f00;color:#fff;border:none;" +
+      "padding:2px 8px;border-radius:4px;font:11px ui-monospace;cursor:pointer;";
+    close.onclick = () => panel.remove();
+    panel.appendChild(close);
+    const body = document.createElement("div");
+    body.id = "__unifyDebugBody";
+    body.style.marginTop = "18px";
+    panel.appendChild(body);
+    document.body.appendChild(panel);
+  }
+  const body = document.getElementById("__unifyDebugBody");
+  if (body) body.textContent = debugLogs.join("\n");
+}
+function eq(a, b) {
+  return String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase();
+}
+
 // ── SECURITY ──────────────────────────────────────────
 function sanitise(str) {
   if (!str) return "";
@@ -47,6 +91,7 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
   currentUser = user;
+  dbg("auth: signed in as", { uid: user.uid, email: user.email });
 
   let first = "Builder";
   if (user.displayName && user.displayName.trim()) {
@@ -103,6 +148,9 @@ async function loadUserData() {
       department: d.department,
       level: d.level,
     };
+    dbg("profile:", userProfile);
+    const semSel = document.getElementById("semester");
+    dbg("dashboard semester selector value:", semSel ? semSel.value : "(no element)");
 
     if (!d.firstName) {
       const nudge = document.getElementById("nameNudge");
@@ -150,6 +198,10 @@ async function loadUserData() {
   displayCourses();
   updateStats();
   renderPlanner();
+
+  // Eagerly probe Firestore so the debug panel reports immediately
+  // on first paint, without requiring the student to click "+ Add".
+  loadCoursePickerList();
 }
 
 function renderGoalCard(gp) {
@@ -197,12 +249,14 @@ function renderGoalCard(gp) {
 async function autoLoadCourses(dept, level) {
   const semEl = document.getElementById("semester");
   const sem = semEl ? semEl.value : "First Semester";
+  dbg("autoLoadCourses called with", { dept, level, sem });
 
   const courseMap = {};
 
   // Hardcoded fallback
   const hardcodedList =
     window.coursesDatabase?.["Faculty of Engineering"]?.[dept]?.[level]?.[sem] || [];
+  dbg("hardcoded match count:", hardcodedList.length);
   hardcodedList.filter(Boolean).forEach((c) => {
     const code = String(c).trim().toUpperCase();
     courseMap[code] = { course: code, grade: "-", units: 3 };
@@ -211,13 +265,22 @@ async function autoLoadCourses(dept, level) {
   // Firestore courses — merge in (Firestore units win)
   try {
     const all = await listCourses();
-    all.forEach((c) => {
+    dbg("Firestore listCourses returned:", all.length + " docs");
+    all.forEach((c, i) => {
       const code = String(c.code || "").trim().toUpperCase();
-      if (!code) return;
-      const matchDept = !c.department || c.department === dept;
-      const matchLevel = !c.level || c.level === level;
-      const matchSem = !c.semester || c.semester === sem;
-      if (matchDept && matchLevel && matchSem) {
+      const matchDept = !c.department || eq(c.department, dept);
+      const matchLevel = !c.level || eq(c.level, level);
+      const matchSem = !c.semester || eq(c.semester, sem);
+      const included = !!code && matchDept && matchLevel && matchSem;
+      dbg(`  [auto] #${i} ${c.code} →`, {
+        faculty: c.faculty || "(blank)",
+        department: c.department || "(blank)",
+        level: c.level || "(blank)",
+        semester: c.semester || "(blank)",
+        matchDept, matchLevel, matchSem,
+        included,
+      });
+      if (included) {
         courseMap[code] = {
           course: code,
           grade: courseMap[code]?.grade || "-",
@@ -226,11 +289,12 @@ async function autoLoadCourses(dept, level) {
       }
     });
   } catch (e) {
+    dbg("Firestore listCourses ERROR:", e?.message || String(e));
     console.warn("[dashboard] Could not load Firestore courses:", e);
   }
 
+  dbg("autoLoadCourses final list:", Object.keys(courseMap));
   if (!Object.keys(courseMap).length) {
-    console.warn("autoLoadCourses: no courses found for", dept, level, sem);
     return;
   }
 
@@ -594,8 +658,8 @@ function generateWeekStructure(code) {
 // ── COURSE ACTIONS ────────────────────────────────────
 window.switchSemester = async function () {
   const sem = document.getElementById("semester").value;
+  dbg("switchSemester to", sem);
 
-  // Preserve existing grades
   const existing = {};
   (window.courses || []).forEach((c) => {
     existing[c.course] = { grade: c.grade, units: c.units };
@@ -603,11 +667,11 @@ window.switchSemester = async function () {
 
   const courseMap = {};
 
-  // Hardcoded courses
   const hardcodedList =
     window.coursesDatabase?.["Faculty of Engineering"]?.[
       userProfile.department
     ]?.[userProfile.level]?.[sem] || [];
+  dbg("switchSemester hardcoded count:", hardcodedList.length);
   hardcodedList.filter(Boolean).forEach((c) => {
     const code = String(c).trim().toUpperCase();
     courseMap[code] = {
@@ -617,27 +681,33 @@ window.switchSemester = async function () {
     };
   });
 
-  // Firestore courses — merge in
   try {
     const all = await listCourses();
-    all.forEach((c) => {
+    dbg("switchSemester Firestore docs:", all.length);
+    all.forEach((c, i) => {
       const code = String(c.code || "").trim().toUpperCase();
-      if (!code) return;
       const matchDept =
-        !c.department || c.department === userProfile.department;
-      const matchLevel = !c.level || c.level === userProfile.level;
-      const matchSem = !c.semester || c.semester === sem;
-      if (matchDept && matchLevel && matchSem) {
-        if (!courseMap[code]) {
-          courseMap[code] = {
-            course: code,
-            grade: existing[code]?.grade || "-",
-            units: existing[code]?.units || c.units || 3,
-          };
-        }
+        !c.department || eq(c.department, userProfile.department);
+      const matchLevel = !c.level || eq(c.level, userProfile.level);
+      const matchSem = !c.semester || eq(c.semester, sem);
+      const included = !!code && matchDept && matchLevel && matchSem;
+      dbg(`  [switch] #${i} ${c.code} →`, {
+        department: c.department || "(blank)",
+        level: c.level || "(blank)",
+        semester: c.semester || "(blank)",
+        matchDept, matchLevel, matchSem,
+        included,
+      });
+      if (included && !courseMap[code]) {
+        courseMap[code] = {
+          course: code,
+          grade: existing[code]?.grade || "-",
+          units: existing[code]?.units || c.units || 3,
+        };
       }
     });
   } catch (e) {
+    dbg("switchSemester Firestore ERROR:", e?.message || String(e));
     console.warn("[dashboard] Could not load Firestore courses:", e);
   }
 
@@ -712,29 +782,44 @@ window.addCourseInline = function () {
 async function loadCoursePickerList() {
   const container = document.getElementById("coursePickerList");
   if (!container) return;
+  dbg("loadCoursePickerList opened. profile:", userProfile);
 
   try {
     const all = await listCourses();
+    dbg("picker: Firestore returned", all.length + " docs");
     const added = new Set(
       (window.courses || []).map((c) =>
         String(c.course || c).trim().toUpperCase(),
       ),
     );
 
-    const available = all.filter((c) => {
+    const available = [];
+    all.forEach((c, i) => {
       const code = String(c.code || "").trim().toUpperCase();
-      if (!code || added.has(code)) return false;
+      const alreadyAdded = added.has(code);
       const matchDept =
         !c.department ||
         !userProfile.department ||
-        c.department === userProfile.department;
+        eq(c.department, userProfile.department);
       const matchLevel =
-        !c.level || !userProfile.level || c.level === userProfile.level;
-      return matchDept && matchLevel;
+        !c.level || !userProfile.level || eq(c.level, userProfile.level);
+      const included = !!code && !alreadyAdded && matchDept && matchLevel;
+      dbg(`  [picker] #${i} ${c.code} →`, {
+        faculty: c.faculty || "(blank)",
+        department: c.department || "(blank)",
+        level: c.level || "(blank)",
+        semester: c.semester || "(blank)",
+        alreadyAdded, matchDept, matchLevel,
+        included,
+      });
+      if (included) available.push(c);
     });
 
+    dbg("picker: available count:", available.length);
+
     if (!available.length) {
-      container.innerHTML = "";
+      container.innerHTML =
+        `<div class="picker-label">No additional Firestore courses for your class yet</div>`;
       return;
     }
 
@@ -753,7 +838,9 @@ async function loadCoursePickerList() {
         .join("") +
       `</div>`;
   } catch (e) {
-    container.innerHTML = "";
+    dbg("picker ERROR:", e?.message || String(e));
+    container.innerHTML =
+      `<div class="picker-label" style="color:#f55">Error loading courses: ${sanitise(e?.message || String(e))}</div>`;
   }
 }
 
