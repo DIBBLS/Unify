@@ -369,25 +369,28 @@
               </div>
             </div>
             <div class="add-course-row" id="addCourseRow">
-              <input
-                type="text"
-                class="add-course-inp"
-                id="addCourseCode"
-                placeholder="Course code (e.g. ECE 301)"
-                onkeydown="if (event.key === 'Enter') addCourseInline();"
-              />
-              <input
-                type="number"
-                class="add-units-inp"
-                id="addCourseUnits"
-                min="1"
-                max="6"
-                placeholder="Units"
-                onkeydown="if (event.key === 'Enter') addCourseInline();"
-              />
-              <button class="add-course-sub" onclick="addCourseInline()">
-                Add
-              </button>
+              <div class="add-course-inputs">
+                <input
+                  type="text"
+                  class="add-course-inp"
+                  id="addCourseCode"
+                  placeholder="Course code (e.g. ECE 301)"
+                  onkeydown="if (event.key === 'Enter') addCourseInline();"
+                />
+                <input
+                  type="number"
+                  class="add-units-inp"
+                  id="addCourseUnits"
+                  min="1"
+                  max="6"
+                  placeholder="Units"
+                  onkeydown="if (event.key === 'Enter') addCourseInline();"
+                />
+                <button class="add-course-sub" onclick="addCourseInline()">
+                  Add
+                </button>
+              </div>
+              <div id="coursePickerList"></div>
             </div>
             <div class="empty-state" id="emptyState">
               <div class="empty-icon">📚</div>

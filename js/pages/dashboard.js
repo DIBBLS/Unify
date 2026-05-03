@@ -1,4 +1,5 @@
 import { auth, db } from "../firebase-config.js";
+import { listCourses } from "../courses-service.js";
 import {
   onAuthStateChanged,
   signOut,
@@ -135,8 +136,8 @@ async function loadUserData() {
     }
 
     if (window.courses.length === 0) {
-      // Truly first time or cleared — auto-populate from course DB
-      autoLoadCourses(d.department, d.level);
+      // Truly first time or cleared — auto-populate from course DB + Firestore
+      await autoLoadCourses(d.department, d.level);
     }
 
     renderAspirations();
@@ -193,23 +194,47 @@ function renderGoalCard(gp) {
     <a href="predictor.html" class="goal-card-action">View Plan →</a>`;
 }
 
-function autoLoadCourses(dept, level) {
-  const db_data =
-    window.coursesDatabase?.["Faculty of Engineering"]?.[dept]?.[level];
-  if (!db_data) {
-    console.warn(
-      "coursesDatabase not ready or dept/level not found:",
-      dept,
-      level,
-    );
-    return;
-  }
+async function autoLoadCourses(dept, level) {
   const semEl = document.getElementById("semester");
   const sem = semEl ? semEl.value : "First Semester";
-  const courses = db_data[sem] || [];
-  window.courses = courses
-    .filter(Boolean)
-    .map((c) => ({ course: c, grade: "-", units: 3 }));
+
+  const courseMap = {};
+
+  // Hardcoded fallback
+  const hardcodedList =
+    window.coursesDatabase?.["Faculty of Engineering"]?.[dept]?.[level]?.[sem] || [];
+  hardcodedList.filter(Boolean).forEach((c) => {
+    const code = String(c).trim().toUpperCase();
+    courseMap[code] = { course: code, grade: "-", units: 3 };
+  });
+
+  // Firestore courses — merge in (Firestore units win)
+  try {
+    const all = await listCourses();
+    all.forEach((c) => {
+      const code = String(c.code || "").trim().toUpperCase();
+      if (!code) return;
+      const matchDept = !c.department || c.department === dept;
+      const matchLevel = !c.level || c.level === level;
+      const matchSem = !c.semester || c.semester === sem;
+      if (matchDept && matchLevel && matchSem) {
+        courseMap[code] = {
+          course: code,
+          grade: courseMap[code]?.grade || "-",
+          units: c.units || courseMap[code]?.units || 3,
+        };
+      }
+    });
+  } catch (e) {
+    console.warn("[dashboard] Could not load Firestore courses:", e);
+  }
+
+  if (!Object.keys(courseMap).length) {
+    console.warn("autoLoadCourses: no courses found for", dept, level, sem);
+    return;
+  }
+
+  window.courses = Object.values(courseMap);
   if (currentUser) {
     setDoc(
       doc(db, "users", currentUser.uid),
@@ -567,27 +592,61 @@ function generateWeekStructure(code) {
 }
 
 // ── COURSE ACTIONS ────────────────────────────────────
-window.switchSemester = function () {
+window.switchSemester = async function () {
   const sem = document.getElementById("semester").value;
-  const data =
-    window.coursesDatabase?.["Faculty of Engineering"]?.[
-      userProfile.department
-    ]?.[userProfile.level]?.[sem];
-  if (!data) {
-    alert("No courses found for this semester.");
-    return;
-  }
-  // ── FIX: preserve existing grades when switching semester ──
-  // Match by course code so any grade the student already entered survives.
+
+  // Preserve existing grades
   const existing = {};
   (window.courses || []).forEach((c) => {
     existing[c.course] = { grade: c.grade, units: c.units };
   });
-  window.courses = data.map((c) => ({
-    course: c,
-    grade: existing[c]?.grade || "-",
-    units: existing[c]?.units || 3,
-  }));
+
+  const courseMap = {};
+
+  // Hardcoded courses
+  const hardcodedList =
+    window.coursesDatabase?.["Faculty of Engineering"]?.[
+      userProfile.department
+    ]?.[userProfile.level]?.[sem] || [];
+  hardcodedList.filter(Boolean).forEach((c) => {
+    const code = String(c).trim().toUpperCase();
+    courseMap[code] = {
+      course: code,
+      grade: existing[code]?.grade || "-",
+      units: existing[code]?.units || 3,
+    };
+  });
+
+  // Firestore courses — merge in
+  try {
+    const all = await listCourses();
+    all.forEach((c) => {
+      const code = String(c.code || "").trim().toUpperCase();
+      if (!code) return;
+      const matchDept =
+        !c.department || c.department === userProfile.department;
+      const matchLevel = !c.level || c.level === userProfile.level;
+      const matchSem = !c.semester || c.semester === sem;
+      if (matchDept && matchLevel && matchSem) {
+        if (!courseMap[code]) {
+          courseMap[code] = {
+            course: code,
+            grade: existing[code]?.grade || "-",
+            units: existing[code]?.units || c.units || 3,
+          };
+        }
+      }
+    });
+  } catch (e) {
+    console.warn("[dashboard] Could not load Firestore courses:", e);
+  }
+
+  if (!Object.keys(courseMap).length) {
+    alert("No courses found for this semester.");
+    return;
+  }
+
+  window.courses = Object.values(courseMap);
   activeCourseId = null;
   closeResourcePanel();
   displayCourses();
@@ -615,13 +674,13 @@ window.addCourse = function () {
   if (window.courses.length === 1) showMilestone("📚 First course added!");
 };
 
-window.clearCourses = function () {
+window.clearCourses = async function () {
   if (!window.courses.length || !confirm("Reset courses for this semester?"))
     return;
   window.courses = [];
   activeCourseId = null;
   closeResourcePanel();
-  autoLoadCourses(userProfile.department, userProfile.level);
+  await autoLoadCourses(userProfile.department, userProfile.level);
   displayCourses();
 };
 
@@ -630,6 +689,7 @@ window.toggleAddCourse = function () {
   row.classList.toggle("open");
   if (row.classList.contains("open")) {
     setTimeout(() => document.getElementById("addCourseCode").focus(), 50);
+    loadCoursePickerList();
   }
 };
 
@@ -646,6 +706,73 @@ window.addCourseInline = function () {
   document.getElementById("addCourseUnits").value = "";
   document.getElementById("addCourseRow").classList.remove("open");
   if (window.courses.length === 1) showMilestone("📚 First course added!");
+  loadCoursePickerList();
+};
+
+async function loadCoursePickerList() {
+  const container = document.getElementById("coursePickerList");
+  if (!container) return;
+
+  try {
+    const all = await listCourses();
+    const added = new Set(
+      (window.courses || []).map((c) =>
+        String(c.course || c).trim().toUpperCase(),
+      ),
+    );
+
+    const available = all.filter((c) => {
+      const code = String(c.code || "").trim().toUpperCase();
+      if (!code || added.has(code)) return false;
+      const matchDept =
+        !c.department ||
+        !userProfile.department ||
+        c.department === userProfile.department;
+      const matchLevel =
+        !c.level || !userProfile.level || c.level === userProfile.level;
+      return matchDept && matchLevel;
+    });
+
+    if (!available.length) {
+      container.innerHTML = "";
+      return;
+    }
+
+    container.innerHTML =
+      `<div class="picker-label">Available for your class</div>` +
+      `<div class="picker-chips">` +
+      available
+        .map(
+          (c) =>
+            `<button class="picker-chip" onclick="addPickerCourse('${sanitise(c.code)}',${Number(c.units) || 3})">` +
+            `<span class="picker-code">${sanitise(c.code)}</span>` +
+            (c.title ? `<span class="picker-title">${sanitise(c.title)}</span>` : "") +
+            `<span class="picker-add">+ Add</span>` +
+            `</button>`,
+        )
+        .join("") +
+      `</div>`;
+  } catch (e) {
+    container.innerHTML = "";
+  }
+}
+
+window.addPickerCourse = function (code, units) {
+  code = String(code).trim().toUpperCase();
+  if (
+    window.courses.some(
+      (c) => String(c.course || c).trim().toUpperCase() === code,
+    )
+  ) {
+    showMilestone(`${code} is already in your list.`);
+    return;
+  }
+  window.courses.push({ course: code, grade: "-", units: units || 3 });
+  displayCourses();
+  saveUserData();
+  loadCoursePickerList();
+  if (window.courses.length === 1) showMilestone("📚 First course added!");
+  else showMilestone(`${code} added.`);
 };
 
 window.removeCourse = function (event, idx) {
