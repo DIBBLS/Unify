@@ -14,7 +14,7 @@ let editingClass = null; // { cls, day } — used by edit modal
 
 // ── AUTH ──────────────────────────────────────────────
 onAuthStateChanged(auth, async user => {
-  if (!user) { window.location.href = 'auth.html'; return; }
+  if (!user) { window.location.href = 'Auth.html'; return; }
   currentUser = user;
   await loadData();
   initPage();
@@ -22,7 +22,7 @@ onAuthStateChanged(auth, async user => {
 });
 
 document.getElementById('signOutBtn').addEventListener('click', async () => {
-  await signOut(auth); window.location.href = 'auth.html';
+  await signOut(auth); window.location.href = 'Auth.html';
 });
 
 // ── LOAD DATA ─────────────────────────────────────────

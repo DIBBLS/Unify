@@ -10,7 +10,7 @@
       if (snap.exists() && snap.data().university) {
         window.location.href = 'dashboard.html';
       } else {
-        window.location.href = 'onboarding.html';
+        window.location.href = 'Onboarding.html';
       }
     } catch(e) {
       window.location.href = 'dashboard.html';
@@ -68,7 +68,7 @@
       );
       // New user → onboarding. Existing user → dashboard
       updateProfile(cred.user, { displayName: document.getElementById('signupName').value });
-      window.location.href = 'onboarding.html';
+      window.location.href = 'Onboarding.html';
     } catch(err) {
       showError(friendlyError(err.code));
       btn.disabled = false; btn.textContent = 'Create Account →';

@@ -34,7 +34,7 @@ onAuthStateChanged(auth, async (user) => {
   document.getElementById("loadingScreen").style.display = "none";
 
   if (!user) {
-    window.location.href = "auth.html";
+    window.location.href = "Auth.html";
     return;
   }
   me = user;
@@ -73,7 +73,7 @@ onAuthStateChanged(auth, async (user) => {
 
 document.getElementById("signOutBtn").addEventListener("click", async () => {
   await signOut(auth);
-  window.location.href = "auth.html";
+  window.location.href = "Auth.html";
 });
 
 // ── POST UPDATE ───────────────────────────────────────────
