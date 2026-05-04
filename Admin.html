@@ -64,7 +64,7 @@
 
       <div class="admin-body">
         <!-- POST UPDATE -->
-        <div class="section">
+        <div class="section" id="postUpdateSection">
           <div class="section-label">Post a Course Update</div>
           <div class="card">
             <div class="card-title">Notify the class</div>
@@ -167,7 +167,7 @@
         </div>
 
         <!-- RECENT UPDATES -->
-        <div class="section">
+        <div class="section" id="recentUpdatesSection">
           <div class="section-label">Recent Updates</div>
           <div id="updateLog">
             <div class="empty-state">
@@ -178,7 +178,7 @@
         </div>
 
         <!-- MANAGE COURSES -->
-        <div class="section">
+        <div class="section" id="manageCoursesSection">
           <div class="section-label">Manage Courses</div>
           <div class="card">
             <div class="card-title">Add or edit a course</div>
@@ -323,8 +323,123 @@
           </div>
         </div>
 
+        <!-- TIMETABLE MANAGER -->
+        <div class="section" id="timetableSection">
+          <div class="section-label">Timetable Manager</div>
+          <div class="card">
+            <div class="card-title">Manage class timetable</div>
+            <div class="card-sub">
+              Add or remove timetable entries for your assigned class. Students
+              will see this as their live timetable.
+            </div>
+
+            <div id="timetableClassInfo" style="font-size:13px;color:var(--text2);margin-bottom:16px;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);"></div>
+
+            <!-- super_admin target selectors (hidden for class_rep) -->
+            <div id="ttTargetSelectors" style="display:none;">
+              <div class="form-row two">
+                <div class="form-group">
+                  <label class="form-label">Faculty</label>
+                  <select class="form-select" id="ttFaculty" onchange="onTTTargetChange()">
+                    <option value="">Select faculty…</option>
+                    <option value="Faculty of Engineering">Faculty of Engineering</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Department</label>
+                  <select class="form-select" id="ttDept" onchange="onTTTargetChange()">
+                    <option value="">Select department…</option>
+                    <option value="Electronic &amp; Computer Engineering">Electronic &amp; Computer Engineering</option>
+                    <option value="Mechanical Engineering">Mechanical Engineering</option>
+                    <option value="Industrial &amp; Petroleum Engineering">Industrial &amp; Petroleum Engineering</option>
+                    <option value="Chemical &amp; Polymer Engineering">Chemical &amp; Polymer Engineering</option>
+                    <option value="Civil Engineering">Civil Engineering</option>
+                    <option value="Aerospace Engineering">Aerospace Engineering</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row two">
+                <div class="form-group">
+                  <label class="form-label">Level</label>
+                  <select class="form-select" id="ttLevel" onchange="onTTTargetChange()">
+                    <option value="">Select level…</option>
+                    <option value="100 Level">100 Level</option>
+                    <option value="200 Level">200 Level</option>
+                    <option value="300 Level">300 Level</option>
+                    <option value="400 Level">400 Level</option>
+                    <option value="500 Level">500 Level</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Semester</label>
+                  <select class="form-select" id="ttSemester" onchange="onTTTargetChange()">
+                    <option value="">Select semester…</option>
+                    <option value="First Semester">First Semester</option>
+                    <option value="Second Semester">Second Semester</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row two">
+              <div class="form-group">
+                <label class="form-label">Day</label>
+                <select class="form-select" id="ttDay">
+                  <option value="Monday">Monday</option>
+                  <option value="Tuesday">Tuesday</option>
+                  <option value="Wednesday">Wednesday</option>
+                  <option value="Thursday">Thursday</option>
+                  <option value="Friday">Friday</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Course Code</label>
+                <input class="form-input" id="ttCode" placeholder="e.g. ECE 308"
+                  oninput="this.value = this.value.toUpperCase()"
+                  list="ttCodeSuggestions" />
+                <datalist id="ttCodeSuggestions"></datalist>
+              </div>
+            </div>
+            <div class="form-row two">
+              <div class="form-group">
+                <label class="form-label">Start Time</label>
+                <input class="form-input" id="ttStart" type="time" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">End Time</label>
+                <input class="form-input" id="ttEnd" type="time" />
+              </div>
+            </div>
+            <div class="form-row two">
+              <div class="form-group">
+                <label class="form-label">Venue <span style="font-size:11px;color:var(--text3);text-transform:none;letter-spacing:0;font-weight:400;">(optional)</span></label>
+                <input class="form-input" id="ttVenue" placeholder="e.g. ECE Block, LT1" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Lecturer <span style="font-size:11px;color:var(--text3);text-transform:none;letter-spacing:0;font-weight:400;">(optional)</span></label>
+                <input class="form-input" id="ttLecturer" placeholder="e.g. Dr. Adeyemi" />
+              </div>
+            </div>
+
+            <div id="ttWarning" style="display:none;padding:10px 14px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.4);border-radius:8px;font-size:13px;color:#92400e;margin-bottom:12px;"></div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px;flex-wrap:wrap;">
+              <div id="ttFeedback" style="font-size:12px;min-height:16px;color:var(--text3);"></div>
+              <button class="btn btn-green" id="ttSaveBtn" onclick="saveTimetableEntry()">Add Entry →</button>
+            </div>
+          </div>
+
+          <div class="section-label" style="margin-top:28px;margin-bottom:12px;">Existing Entries</div>
+          <div id="timetableList">
+            <div class="empty-state">
+              <div class="empty-icon">📅</div>
+              <div class="empty-text">No timetable entries yet.</div>
+            </div>
+          </div>
+        </div>
+
         <!-- GRANT ADMIN -->
-        <div class="section">
+        <div class="section" id="adminAccessSection">
           <div class="section-label">Admin Access</div>
           <div class="card">
             <div class="card-title">Grant access to an HOD or Coordinator</div>
@@ -333,15 +448,8 @@
               Enter their registered email and grant access — they'll see this
               admin panel on their next login.
             </div>
-            <div
-              style="
-                display: flex;
-                gap: 12px;
-                align-items: flex-end;
-                flex-wrap: wrap;
-              "
-            >
-              <div class="form-group" style="flex: 1; min-width: 200px">
+            <div class="form-row two" style="margin-bottom:12px;">
+              <div class="form-group">
                 <label class="form-label">Email Address</label>
                 <input
                   class="form-input"
@@ -350,6 +458,63 @@
                   type="email"
                 />
               </div>
+              <div class="form-group">
+                <label class="form-label">Role</label>
+                <select class="form-select" id="grantRole" onchange="onGrantRoleChange()">
+                  <option value="academic_lead">Academic Lead (HOD/Coordinator)</option>
+                  <option value="class_rep">Class Rep</option>
+                  <option value="super_admin">Super Admin</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Assignment fields (shown for class_rep only) -->
+            <div id="grantAssignmentFields" style="display:none;">
+              <div class="form-row two">
+                <div class="form-group">
+                  <label class="form-label">Assigned Faculty</label>
+                  <select class="form-select" id="grantFaculty">
+                    <option value="">Select faculty…</option>
+                    <option value="Faculty of Engineering">Faculty of Engineering</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Assigned Department</label>
+                  <select class="form-select" id="grantDept">
+                    <option value="">Select department…</option>
+                    <option value="Electronic &amp; Computer Engineering">Electronic &amp; Computer Engineering</option>
+                    <option value="Mechanical Engineering">Mechanical Engineering</option>
+                    <option value="Industrial &amp; Petroleum Engineering">Industrial &amp; Petroleum Engineering</option>
+                    <option value="Chemical &amp; Polymer Engineering">Chemical &amp; Polymer Engineering</option>
+                    <option value="Civil Engineering">Civil Engineering</option>
+                    <option value="Aerospace Engineering">Aerospace Engineering</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row two" style="margin-bottom:12px;">
+                <div class="form-group">
+                  <label class="form-label">Assigned Level</label>
+                  <select class="form-select" id="grantLevel">
+                    <option value="">Select level…</option>
+                    <option value="100 Level">100 Level</option>
+                    <option value="200 Level">200 Level</option>
+                    <option value="300 Level">300 Level</option>
+                    <option value="400 Level">400 Level</option>
+                    <option value="500 Level">500 Level</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Assigned Semester</label>
+                  <select class="form-select" id="grantSemester">
+                    <option value="">Select semester…</option>
+                    <option value="First Semester">First Semester</option>
+                    <option value="Second Semester">Second Semester</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;gap:12px;flex-wrap:wrap;">
               <button
                 class="btn btn-green"
                 onclick="grantAdmin()"

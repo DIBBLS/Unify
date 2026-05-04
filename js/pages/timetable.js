@@ -9,6 +9,11 @@ let activeDay = '';
 let saveTimeout = null;
 let isAdminUser = false;
 let editingClass = null; // { cls, day } — used by edit modal
+let timetableSource = 'static'; // 'firestore' | 'static'
+
+function normField(s) {
+  return String(s || '').trim().toLowerCase().replace(/\s*&\s*/g, ' and ').replace(/\s+/g, ' ');
+}
 
 // ── THEME handled by js/theme.js ──────────────────────
 
@@ -32,26 +37,65 @@ async function loadData() {
     if (snap.exists()) {
       const d = snap.data();
       userProfile = d;
-      timetable = d.timetable || getDefaultTimetable(d.department, d.level);
-      isAdminUser = d.isAdmin === true || d.isCourseRep === true;
+      isAdminUser = d.isAdmin === true || d.isCourseRep === true || d.role === 'class_rep';
       if (isAdminUser) {
         const badge = document.getElementById('adminBadge');
         if (badge) badge.style.display = 'inline-flex';
+      }
+
+      // Try Firestore shared timetable first; fall back to user-saved or static
+      const firestoreTT = await loadFirestoreTimetable(d);
+      if (firestoreTT) {
+        timetable = firestoreTT;
+        timetableSource = 'firestore';
+      } else {
+        timetable = d.timetable || getDefaultTimetable(d.department, d.level);
+        timetableSource = 'static';
       }
     }
   } catch(e) {
     timetable = getDefaultTimetable('', '');
   }
 
-  // Course updates are handled live by subscribeNotifications() below
   subscribeNotifications();
+}
+
+async function loadFirestoreTimetable(profile) {
+  if (!profile.department || !profile.level) return null;
+  try {
+    const snap = await getDocs(query(
+      collection(db, 'timetableEntries'),
+      where('department', '==', profile.department),
+      where('level', '==', profile.level),
+    ));
+    if (snap.empty) return null;
+    const tt = { Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [] };
+    snap.docs.forEach(d => {
+      const e = d.data();
+      if (!DAYS.includes(e.day)) return;
+      tt[e.day].push({
+        id: d.id,
+        code: e.courseCode,
+        name: e.courseCode,
+        start: e.startTime,
+        end: e.endTime,
+        lecturer: e.lecturer || '',
+        location: e.venue || '',
+        status: 'scheduled',
+        note: '',
+      });
+    });
+    return tt;
+  } catch(e) {
+    console.warn('[timetable] loadFirestoreTimetable failed:', e);
+    return null;
+  }
 }
 
 // ── NOTIFICATION BELL ─────────────────────────────────
 let unreadCount = 0;
 
 function subscribeNotifications() {
-  // Listen to courseUpdates — the collection admin.html writes to
   const q = query(collection(db, 'courseUpdates'), orderBy('postedAt', 'desc'));
 
   onSnapshot(q, snap => {
@@ -60,10 +104,16 @@ function subscribeNotifications() {
       day.forEach(cls => { if (cls.code && !myCourseCodes.includes(cls.code)) myCourseCodes.push(cls.code); });
     });
 
-    // Show all updates for courses in this student's timetable
     const updates = snap.docs
       .map(d => ({ id: d.id, ...d.data() }))
-      .filter(u => !myCourseCodes.length || myCourseCodes.includes(u.courseCode));
+      .filter(u => {
+        // If the update targets a specific class, skip unless the student matches
+        if (u.targetDepartment) {
+          if (normField(userProfile.department) !== normField(u.targetDepartment)) return false;
+          if (u.targetLevel && normField(userProfile.level) !== normField(u.targetLevel)) return false;
+        }
+        return !myCourseCodes.length || myCourseCodes.includes(u.courseCode);
+      });
 
     const readIds = JSON.parse(localStorage.getItem('unify-read-notifs') || '[]');
     unreadCount = updates.filter(u => !readIds.includes(u.id)).length;
@@ -619,6 +669,17 @@ function initPage() {
         ? `${confirmed} class${confirmed > 1 ? 'es' : ''} confirmed today`
         : `${todayClasses.length} class${todayClasses.length > 1 ? 'es' : ''} scheduled today`;
     document.getElementById('todayClassesCount').textContent = `${todayClasses.length} classes`;
+  }
+
+  // Show live-timetable note if data came from Firestore
+  const sourceNote = document.getElementById('timetableSourceNote');
+  if (sourceNote) {
+    if (timetableSource === 'firestore') {
+      sourceNote.textContent = 'Live timetable — set by your class rep';
+      sourceNote.style.display = 'block';
+    } else {
+      sourceNote.style.display = 'none';
+    }
   }
 
   renderDayTabs();
