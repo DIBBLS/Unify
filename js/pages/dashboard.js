@@ -68,6 +68,17 @@ function normaliseField(s) {
 function eq(a, b) {
   return normaliseField(a) === normaliseField(b);
 }
+// Self-test: if this commit is loaded, the line below will appear in the
+// debug panel as "BUILD: dept normalise OK". If it is missing or shows FAIL,
+// the browser is still serving the previous dashboard.js from cache.
+(function () {
+  const probe =
+    normaliseField("Electronic & Computer Engineering") ===
+    normaliseField("Electronic and Computer Engineering");
+  setTimeout(() => {
+    dbg("BUILD: dept normalise " + (probe ? "OK" : "FAIL"));
+  }, 0);
+})();
 
 // ── SECURITY ──────────────────────────────────────────
 function sanitise(str) {
