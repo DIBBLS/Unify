@@ -21,7 +21,7 @@ let weekProgress = {};
 // ── DEBUG ─────────────────────────────────────────────
 // Temporary visible debug panel for Step 1 (course discovery).
 // Remove once dynamic courses are confirmed working.
-const DEBUG_COURSES = true;
+const DEBUG_COURSES = false;
 let debugLogs = [];
 function dbg(msg, data) {
   const line = data !== undefined ? `${msg} ${JSON.stringify(data)}` : msg;
