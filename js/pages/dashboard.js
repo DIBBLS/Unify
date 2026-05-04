@@ -58,8 +58,15 @@ function renderDebugPanel() {
   const body = document.getElementById("__unifyDebugBody");
   if (body) body.textContent = debugLogs.join("\n");
 }
+function normaliseField(s) {
+  return String(s || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s*&\s*/g, " and ")
+    .replace(/\s+/g, " ");
+}
 function eq(a, b) {
-  return String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase();
+  return normaliseField(a) === normaliseField(b);
 }
 
 // ── SECURITY ──────────────────────────────────────────
