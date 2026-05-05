@@ -477,10 +477,13 @@ nav {
   border: 1px solid var(--border);
   border-radius: 16px;
   width: 100%;
-  max-width: 760px;
+  max-width: 920px;
+  height: calc(100dvh - 80px);
+  max-height: 900px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .notes-modal-header {
@@ -498,90 +501,56 @@ nav {
   line-height: 1.3;
 }
 
-.notes-modal-close {
+.notes-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.notes-modal-close,
+.notes-modal-fullscreen {
   background: none;
   border: none;
   cursor: pointer;
   color: var(--text3);
   font-size: 18px;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
   line-height: 1;
-  transition: color 0.15s;
+  transition: color 0.15s, background 0.15s;
+  font-family: inherit;
 }
 
-.notes-modal-close:hover {
+.notes-modal-close:hover,
+.notes-modal-fullscreen:hover {
   color: var(--text);
+  background: var(--surface);
 }
 
-.notes-modal-body {
-  padding: 24px;
-  overflow-y: auto;
-  max-height: 70vh;
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--text2);
+.notes-modal-fullscreen {
+  font-size: 16px;
+  font-weight: 600;
 }
 
-/* Basic typography for uploaded HTML notes */
-.notes-modal-body h1,
-.notes-modal-body h2,
-.notes-modal-body h3,
-.notes-modal-body h4 {
-  color: var(--text);
-  margin: 1.2em 0 0.5em;
-  font-family: var(--font-display);
-  font-weight: 700;
-  line-height: 1.2;
-}
-.notes-modal-body h1 { font-size: 22px; }
-.notes-modal-body h2 { font-size: 18px; }
-.notes-modal-body h3 { font-size: 15px; }
-.notes-modal-body p { margin-bottom: 0.9em; }
-.notes-modal-body ul,
-.notes-modal-body ol { padding-left: 1.5em; margin-bottom: 0.9em; }
-.notes-modal-body li { margin-bottom: 0.3em; }
-.notes-modal-body code {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 1px 6px;
-  font-size: 13px;
-  font-family: ui-monospace, Menlo, monospace;
-}
-.notes-modal-body pre {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 14px 16px;
-  overflow-x: auto;
-  font-family: ui-monospace, Menlo, monospace;
-  font-size: 13px;
-  margin-bottom: 1em;
-}
-.notes-modal-body pre code {
-  background: none;
+.notes-modal-frame {
+  width: 100%;
   border: none;
-  padding: 0;
-}
-.notes-modal-body strong { color: var(--text); }
-.notes-modal-body blockquote {
-  border-left: 3px solid var(--border);
-  padding-left: 14px;
-  color: var(--text3);
-  margin: 1em 0;
+  background: #fff;
+  flex: 1;
+  min-height: 60vh;
+  border-radius: 0 0 16px 16px;
 }
 
 @media (max-width: 600px) {
   .notes-overlay {
     padding: 0;
-    align-items: flex-end;
   }
   .notes-modal {
-    border-radius: 16px 16px 0 0;
-    max-height: 90dvh;
+    border-radius: 0;
+    height: 100dvh;
+    max-height: 100dvh;
   }
-  .notes-modal-body {
-    max-height: 60dvh;
+  .notes-modal-frame {
+    border-radius: 0;
   }
 }

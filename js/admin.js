@@ -15,7 +15,7 @@ import {
   canUploadContent,
   getAssignment,
   normField,
-} from "./roles.js?v=content-1";
+} from "./roles.js?v=content-2";
 import {
   onAuthStateChanged,
   signOut,
@@ -1037,6 +1037,58 @@ async function loadContentCourseList() {
   } catch (e) {
     // Datalist is non-critical; silently skip if courses can't load
   }
+  initContentFilePicker();
+}
+
+function initContentFilePicker() {
+  const zone = document.getElementById("ccDropZone");
+  const input = document.getElementById("ccFileInput");
+  const sub = document.getElementById("ccDropSub");
+  const textarea = document.getElementById("ccHtml");
+  const titleInp = document.getElementById("ccTitle");
+  if (!zone || !input || !textarea) return;
+
+  function handleFile(file) {
+    if (!file) return;
+    if (!/\.html?$/i.test(file.name) && file.type !== "text/html") {
+      sub.textContent = `${file.name} — not an HTML file`;
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const html = String(e.target.result || "");
+      textarea.value = html;
+      sub.innerHTML = `<strong>${file.name}</strong> loaded · ${(file.size / 1024).toFixed(1)} KB`;
+      // Auto-fill the title from <title> if blank
+      if (!titleInp.value) {
+        const m = html.match(/<title>([^<]+)<\/title>/i);
+        if (m) titleInp.value = m[1].split(/[—|·:-]/).pop().trim();
+      }
+    };
+    reader.onerror = () => { sub.textContent = "Could not read file"; };
+    reader.readAsText(file);
+  }
+
+  input.addEventListener("change", (e) => handleFile(e.target.files[0]));
+
+  ["dragenter", "dragover"].forEach(ev =>
+    zone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      zone.classList.add("cc-drop-zone-active");
+    })
+  );
+  ["dragleave", "drop"].forEach(ev =>
+    zone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      zone.classList.remove("cc-drop-zone-active");
+    })
+  );
+  zone.addEventListener("drop", (e) => {
+    const file = e.dataTransfer?.files?.[0];
+    if (file) handleFile(file);
+  });
 }
 
 window.uploadCourseContent = async function () {
@@ -1076,9 +1128,18 @@ window.uploadCourseContent = async function () {
     document.getElementById("ccYoutube").value = "";
 
     showToast(`Week ${week} uploaded for ${courseCode}`);
+    // Reset drop sub text
+    const sub = document.getElementById("ccDropSub");
+    if (sub) sub.textContent = "Whole-page HTML works — styles and scripts stay isolated";
   } catch (e) {
-    console.error(e);
-    showToast("Upload failed — check Firestore rules");
+    console.error("[uploadCourseContent]", e);
+    if (e?.code === "permission-denied") {
+      showToast("Permission denied — Firestore rules not deployed yet");
+    } else if (String(e?.message || "").includes("longer than")) {
+      showToast("Note too large for Firestore (>1MB). Trim or split it.");
+    } else {
+      showToast("Upload failed: " + (e?.message || "unknown error"));
+    }
   }
   btn.disabled = false;
   btn.textContent = "Upload →";
