@@ -98,6 +98,7 @@
         <a href="#announcements" class="anchor-link" data-anchor="announcements">Announcements</a>
         <a href="#timetable" class="anchor-link" data-anchor="timetable">Timetable</a>
         <a href="#activity" class="anchor-link" data-anchor="activity">Activity</a>
+        <a href="#content" class="anchor-link" data-anchor="content">Content</a>
         <a href="#courses" class="anchor-link" data-anchor="courses">Courses</a>
         <a href="#access" class="anchor-link" data-anchor="access">Access</a>
       </nav>
@@ -304,6 +305,84 @@
               <div class="empty-icon">📋</div>
               <div class="empty-text">No activity yet.</div>
             </div>
+          </div>
+        </section>
+
+        <!-- COURSE CONTENT -->
+        <section class="panel" id="content">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">Course Content</h2>
+              <p class="panel-sub">Upload weekly notes and YouTube links for any course. Students see them on the course page.</p>
+            </div>
+          </div>
+
+          <div class="form-row two">
+            <div class="form-group">
+              <label class="form-label">Course Code</label>
+              <input
+                class="form-input"
+                id="ccCode"
+                placeholder="e.g. ECE 309"
+                oninput="this.value = this.value.toUpperCase()"
+                list="ccCodeSuggestions"
+              />
+              <datalist id="ccCodeSuggestions"></datalist>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Week</label>
+              <select class="form-select" id="ccWeek">
+                <option value="">Select week…</option>
+                <option value="1">Week 1</option>
+                <option value="2">Week 2</option>
+                <option value="3">Week 3</option>
+                <option value="4">Week 4</option>
+                <option value="5">Week 5</option>
+                <option value="6">Week 6</option>
+                <option value="7">Week 7</option>
+                <option value="8">Week 8</option>
+                <option value="9">Week 9</option>
+                <option value="10">Week 10</option>
+                <option value="11">Week 11</option>
+                <option value="12">Week 12</option>
+                <option value="13">Week 13</option>
+                <option value="14">Week 14</option>
+                <option value="15">Week 15</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Week Title</label>
+              <input class="form-input" id="ccTitle" placeholder="e.g. Introduction to Signals" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Notes <span class="form-label-hint">(HTML)</span></label>
+              <textarea
+                class="form-textarea"
+                id="ccHtml"
+                placeholder="Paste formatted HTML notes here…"
+                style="min-height: 180px; font-family: ui-monospace, monospace; font-size: 13px;"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">YouTube URL <span class="form-label-hint">(optional)</span></label>
+              <input class="form-input" id="ccYoutube" placeholder="https://youtube.com/watch?v=…" type="url" />
+            </div>
+          </div>
+
+          <div class="ann-foot">
+            <div class="ann-meta">
+              Uploading as <span id="contentPostedAsLabel" class="ann-meta-strong">—</span>
+            </div>
+            <button class="btn btn-primary" id="ccUploadBtn" onclick="uploadCourseContent()">Upload →</button>
           </div>
         </section>
 

@@ -99,6 +99,17 @@
 
     <div class="toast" id="toast"></div>
 
+    <!-- NOTES MODAL -->
+    <div class="notes-overlay" id="notesOverlay" onclick="handleNotesOverlayClick(event)">
+      <div class="notes-modal">
+        <div class="notes-modal-header">
+          <div class="notes-modal-title" id="notesModalTitle">Notes</div>
+          <button class="notes-modal-close" onclick="closeNotesModal()">✕</button>
+        </div>
+        <div class="notes-modal-body" id="notesModalBody"></div>
+      </div>
+    </div>
+
     <script type="module" src="js/pages/course.js"></script>
   </body>
 </html>

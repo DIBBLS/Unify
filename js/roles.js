@@ -25,6 +25,10 @@ export function canGrantAccess(role) {
   return role === 'super_admin';
 }
 
+export function canUploadContent(role) {
+  return role === 'super_admin' || role === 'academic_lead';
+}
+
 export function getAssignment(profile) {
   return {
     faculty: profile?.assignedFaculty || null,

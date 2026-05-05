@@ -12,6 +12,7 @@ import {
   canPostUpdates,
   canManageTimetable,
   canGrantAccess,
+  canUploadContent,
   getAssignment,
   normField,
 } from "./roles.js";
@@ -104,6 +105,7 @@ onAuthStateChanged(auth, async (user) => {
   if (!canManageCourses(myRole)) hide("courses");
   if (!canGrantAccess(myRole)) hide("access");
   if (!canManageTimetable(myRole)) hide("timetable");
+  if (!canUploadContent(myRole)) hide("content");
 
   // Hide audience hint for non-class-reps
   if (myRole !== "class_rep") {
@@ -115,6 +117,7 @@ onAuthStateChanged(auth, async (user) => {
   if (canGrantAccess(myRole)) loadAdmins();
   if (canManageCourses(myRole)) loadCourses();
   if (canManageTimetable(myRole)) initTimetableSection(myRole, myProfile);
+  if (canUploadContent(myRole)) loadContentCourseList();
 });
 
 document.getElementById("signOutBtn").addEventListener("click", async () => {
@@ -140,6 +143,8 @@ function hydrateHero(user) {
 
   const postedAs = document.getElementById("postedAsLabel");
   if (postedAs) postedAs.textContent = displayName;
+  const contentPostedAs = document.getElementById("contentPostedAsLabel");
+  if (contentPostedAs) contentPostedAs.textContent = displayName;
 
   // Role badge
   const rb = document.getElementById("roleBadge");
@@ -1020,4 +1025,61 @@ window.deleteTimetableEntry = async function (id, code) {
   } catch (e) {
     showToast("Error removing entry");
   }
+};
+
+// ── COURSE CONTENT ───────────────────────────────────────
+async function loadContentCourseList() {
+  try {
+    const courses = await listCourses();
+    const dl = document.getElementById("ccCodeSuggestions");
+    if (!dl) return;
+    dl.innerHTML = courses.map(c => `<option value="${c.code}">`).join("");
+  } catch (e) {
+    // Datalist is non-critical; silently skip if courses can't load
+  }
+}
+
+window.uploadCourseContent = async function () {
+  const btn = document.getElementById("ccUploadBtn");
+  const courseCode = document.getElementById("ccCode").value.trim().toUpperCase().replace(/\s+/g, " ");
+  const weekRaw = document.getElementById("ccWeek").value;
+  const title = document.getElementById("ccTitle").value.trim();
+  const htmlContent = document.getElementById("ccHtml").value.trim();
+  const youtubeUrl = document.getElementById("ccYoutube").value.trim();
+
+  if (!courseCode) { showToast("Enter a course code"); return; }
+  if (!weekRaw) { showToast("Select a week"); return; }
+  if (!title) { showToast("Enter a week title"); return; }
+  if (!htmlContent) { showToast("Paste HTML notes content"); return; }
+
+  const week = parseInt(weekRaw, 10);
+
+  btn.disabled = true;
+  btn.textContent = "Uploading…";
+  try {
+    await addDoc(collection(db, "courseContent"), {
+      courseCode,
+      week,
+      title,
+      htmlContent,
+      youtubeUrl: youtubeUrl || "",
+      createdAt: serverTimestamp(),
+      createdBy: me.uid,
+      createdByName: myProfile?.name || myProfile?.firstName || me.email,
+    });
+
+    // Clear form
+    document.getElementById("ccCode").value = "";
+    document.getElementById("ccWeek").value = "";
+    document.getElementById("ccTitle").value = "";
+    document.getElementById("ccHtml").value = "";
+    document.getElementById("ccYoutube").value = "";
+
+    showToast(`Week ${week} uploaded for ${courseCode}`);
+  } catch (e) {
+    console.error(e);
+    showToast("Upload failed — check Firestore rules");
+  }
+  btn.disabled = false;
+  btn.textContent = "Upload →";
 };

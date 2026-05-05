@@ -164,6 +164,12 @@ service cloud.firestore {
         && resource.data.authorId == request.auth.uid;
     }
 
+    // ── COURSE CONTENT (admin writes, students read) ────────
+    match /courseContent/{id} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
     // ── COURSES (admin writes, students read) ───────────────
     match /courses/{code} {
       allow read: if signedIn();

@@ -348,3 +348,240 @@ nav {
     border-radius: 12px;
   }
 }
+
+/* ── FIRESTORE COURSE CONTENT CARDS ── */
+.fc-weeks {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fc-week-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.fc-week-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text3);
+  padding: 14px 16px 2px;
+}
+
+.fc-week-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  padding: 0 16px 12px;
+  line-height: 1.35;
+}
+
+.fc-thumb {
+  display: block;
+  position: relative;
+  margin: 0 16px 12px;
+  border-radius: 8px;
+  overflow: hidden;
+  line-height: 0;
+  border: 1px solid var(--border);
+}
+
+.fc-thumb img {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+  max-height: 180px;
+}
+
+.fc-play {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-size: 28px;
+  transition: background 0.15s;
+}
+
+.fc-thumb:hover .fc-play {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.fc-actions {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 14px;
+  flex-wrap: wrap;
+}
+
+.fc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-body);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s;
+  border: 1px solid var(--border);
+}
+
+.fc-btn-notes {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+.fc-btn-notes:hover {
+  opacity: 0.85;
+}
+
+.fc-btn-video {
+  background: transparent;
+  color: var(--text2);
+}
+
+.fc-btn-video:hover {
+  border-color: var(--text);
+  color: var(--text);
+}
+
+/* ── NOTES MODAL ── */
+.notes-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 500;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px;
+  overflow-y: auto;
+}
+
+.notes-overlay.open {
+  display: flex;
+}
+
+.notes-modal {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 760px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.notes-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.notes-modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.notes-modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text3);
+  font-size: 18px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.notes-modal-close:hover {
+  color: var(--text);
+}
+
+.notes-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  max-height: 70vh;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text2);
+}
+
+/* Basic typography for uploaded HTML notes */
+.notes-modal-body h1,
+.notes-modal-body h2,
+.notes-modal-body h3,
+.notes-modal-body h4 {
+  color: var(--text);
+  margin: 1.2em 0 0.5em;
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.2;
+}
+.notes-modal-body h1 { font-size: 22px; }
+.notes-modal-body h2 { font-size: 18px; }
+.notes-modal-body h3 { font-size: 15px; }
+.notes-modal-body p { margin-bottom: 0.9em; }
+.notes-modal-body ul,
+.notes-modal-body ol { padding-left: 1.5em; margin-bottom: 0.9em; }
+.notes-modal-body li { margin-bottom: 0.3em; }
+.notes-modal-body code {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 13px;
+  font-family: ui-monospace, Menlo, monospace;
+}
+.notes-modal-body pre {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 13px;
+  margin-bottom: 1em;
+}
+.notes-modal-body pre code {
+  background: none;
+  border: none;
+  padding: 0;
+}
+.notes-modal-body strong { color: var(--text); }
+.notes-modal-body blockquote {
+  border-left: 3px solid var(--border);
+  padding-left: 14px;
+  color: var(--text3);
+  margin: 1em 0;
+}
+
+@media (max-width: 600px) {
+  .notes-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+  .notes-modal {
+    border-radius: 16px 16px 0 0;
+    max-height: 90dvh;
+  }
+  .notes-modal-body {
+    max-height: 60dvh;
+  }
+}
