@@ -15,7 +15,7 @@ import {
   canUploadContent,
   getAssignment,
   normField,
-} from "./roles.js";
+} from "./roles.js?v=content-1";
 import {
   onAuthStateChanged,
   signOut,
