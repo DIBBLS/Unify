@@ -104,9 +104,18 @@
       <div class="notes-modal">
         <div class="notes-modal-header">
           <div class="notes-modal-title" id="notesModalTitle">Notes</div>
-          <button class="notes-modal-close" onclick="closeNotesModal()">✕</button>
+          <div class="notes-modal-actions">
+            <button class="notes-modal-fullscreen" id="notesFullscreenBtn" title="Open in new tab">↗</button>
+            <button class="notes-modal-close" onclick="closeNotesModal()">✕</button>
+          </div>
         </div>
-        <div class="notes-modal-body" id="notesModalBody"></div>
+        <iframe
+          id="notesModalFrame"
+          class="notes-modal-frame"
+          sandbox="allow-scripts allow-same-origin allow-popups"
+          referrerpolicy="no-referrer"
+          title="Course notes"
+        ></iframe>
       </div>
     </div>
 

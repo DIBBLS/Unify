@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="css/components.css" />
     <link rel="stylesheet" href="css/responsive.css" />
     <script src="js/theme.js"></script>
-    <link rel="stylesheet" href="css/pages/Admin.styles.css?v=content-1" />
+    <link rel="stylesheet" href="css/pages/Admin.styles.css?v=content-2" />
   </head>
   <body>
     <div class="loading-screen" id="loadingScreen">
@@ -361,12 +361,18 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">Notes <span class="form-label-hint">(HTML)</span></label>
+              <label class="form-label">Notes <span class="form-label-hint">(drop a full .html file or paste HTML)</span></label>
+              <div class="cc-drop-zone" id="ccDropZone" onclick="document.getElementById('ccFileInput').click()">
+                <div class="cc-drop-icon">📄</div>
+                <div class="cc-drop-text"><strong>Drop a .html file here</strong> or click to browse</div>
+                <div class="cc-drop-sub" id="ccDropSub">Whole-page HTML works — styles and scripts stay isolated</div>
+              </div>
+              <input type="file" id="ccFileInput" accept=".html,.htm,text/html" style="display:none" />
               <textarea
                 class="form-textarea"
                 id="ccHtml"
-                placeholder="Paste formatted HTML notes here…"
-                style="min-height: 180px; font-family: ui-monospace, monospace; font-size: 13px;"
+                placeholder="…or paste HTML directly here"
+                style="min-height: 140px; font-family: ui-monospace, monospace; font-size: 12px; margin-top: 10px;"
               ></textarea>
             </div>
           </div>
@@ -570,6 +576,6 @@
 
     <div class="toast" id="toast"></div>
 
-    <script type="module" src="js/admin.js?v=content-1"></script>
+    <script type="module" src="js/admin.js?v=content-2"></script>
   </body>
 </html>

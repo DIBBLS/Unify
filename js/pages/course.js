@@ -253,16 +253,49 @@ async function renderFirestoreContent(code) {
   }
 }
 
+// Detects whether the stored content is a full HTML document or just a snippet.
+// Full pages render perfectly; snippets get wrapped so basic typography still works.
+function wrapIfSnippet(html) {
+  const trimmed = String(html || '').trim();
+  if (/^<!DOCTYPE/i.test(trimmed) || /^<html[\s>]/i.test(trimmed)) return trimmed;
+  return `<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      body { font-family: 'DM Sans', system-ui, sans-serif; line-height: 1.7; color: #0a0a0a; padding: 28px; max-width: 760px; margin: 0 auto; }
+      h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; line-height: 1.2; margin-top: 1.4em; }
+      pre, code { font-family: ui-monospace, Menlo, monospace; }
+      pre { background: #f5f4f0; padding: 14px; border-radius: 8px; overflow-x: auto; }
+    </style>
+  </head><body>${trimmed}</body></html>`;
+}
+
 window.openNotes = function (id) {
   const item = _contentStore[id];
   if (!item) return;
   document.getElementById('notesModalTitle').textContent = `Week ${item.week} — ${item.title}`;
-  document.getElementById('notesModalBody').innerHTML = item.htmlContent;
+  const iframe = document.getElementById('notesModalFrame');
+  iframe.srcdoc = wrapIfSnippet(item.htmlContent);
+
+  // Wire fullscreen button to open the same HTML in a new tab via blob URL
+  const fsBtn = document.getElementById('notesFullscreenBtn');
+  if (fsBtn) {
+    fsBtn.onclick = () => {
+      const blob = new Blob([wrapIfSnippet(item.htmlContent)], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank', 'noopener,noreferrer');
+      // Revoke later — keeps the new tab usable for a while
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    };
+  }
+
   document.getElementById('notesOverlay').classList.add('open');
 };
 
 window.closeNotesModal = function () {
   document.getElementById('notesOverlay').classList.remove('open');
+  const iframe = document.getElementById('notesModalFrame');
+  if (iframe) iframe.srcdoc = '';
 };
 
 window.handleNotesOverlayClick = function (e) {

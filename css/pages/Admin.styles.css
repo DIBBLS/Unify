@@ -652,6 +652,43 @@ body {
 [data-theme="dark"] .form-textarea:focus {
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.04);
 }
+
+/* ── COURSE CONTENT DROP ZONE ── */
+.cc-drop-zone {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  background: var(--surface2);
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+.cc-drop-zone:hover {
+  border-color: var(--text3);
+  background: var(--surface);
+}
+.cc-drop-zone-active {
+  border-color: var(--green);
+  background: var(--green-bg);
+}
+.cc-drop-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+  opacity: 0.6;
+}
+.cc-drop-text {
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.cc-drop-text strong {
+  font-weight: 600;
+}
+.cc-drop-sub {
+  font-size: 12px;
+  color: var(--text3);
+}
 .form-input::placeholder,
 .form-textarea::placeholder {
   color: var(--text3);
