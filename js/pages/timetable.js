@@ -37,7 +37,7 @@ async function loadData() {
     if (snap.exists()) {
       const d = snap.data();
       userProfile = d;
-      isAdminUser = d.isAdmin === true || d.isCourseRep === true || d.role === 'class_rep';
+      isAdminUser = d.isAdmin === true || d.role === 'class_rep';
       if (isAdminUser) {
         const badge = document.getElementById('adminBadge');
         if (badge) badge.style.display = 'inline-flex';

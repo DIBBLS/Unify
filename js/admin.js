@@ -55,7 +55,7 @@ onAuthStateChanged(auth, async (user) => {
 
   const isSuperAdmin = user.email === SUPER_ADMIN_EMAIL;
   const isAdmin = isSuperAdmin || myProfile.isAdmin === true;
-  const isClassRep = myProfile.isCourseRep === true;
+  const isClassRep = myProfile.role === 'class_rep';
 
   // Bootstrap: ensure super-admin flag is set
   if (isSuperAdmin && !myProfile.isAdmin) {
@@ -304,7 +304,6 @@ window.grantAdmin = async function () {
 
     const update = { role };
     if (role === 'class_rep') {
-      update.isCourseRep = true;
       update.isAdmin = false;
       const gFaculty = document.getElementById("grantFaculty")?.value || '';
       const gDept = document.getElementById("grantDept")?.value || '';
@@ -337,7 +336,6 @@ window.revokeAdmin = async function (uid, email) {
   try {
     await updateDoc(doc(db, "users", uid), {
       isAdmin: false,
-      isCourseRep: false,
       role: null,
       assignedFaculty: null,
       assignedDepartment: null,
@@ -356,7 +354,7 @@ async function loadAdmins() {
   try {
     const [adminSnap, repSnap] = await Promise.all([
       getDocs(query(collection(db, "users"), where("isAdmin", "==", true))),
-      getDocs(query(collection(db, "users"), where("isCourseRep", "==", true))),
+      getDocs(query(collection(db, "users"), where("role", "==", "class_rep"))),
     ]);
 
     const seen = new Set();
