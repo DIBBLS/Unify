@@ -112,7 +112,7 @@ function subscribeNotifications() {
           if (normField(userProfile.department) !== normField(u.targetDepartment)) return false;
           if (u.targetLevel && normField(userProfile.level) !== normField(u.targetLevel)) return false;
         }
-        return !myCourseCodes.length || myCourseCodes.includes(u.courseCode);
+        return u.kind === 'general' || !myCourseCodes.length || myCourseCodes.includes(u.courseCode);
       });
 
     const readIds = JSON.parse(localStorage.getItem('unify-read-notifs') || '[]');
