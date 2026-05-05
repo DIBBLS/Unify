@@ -8,6 +8,10 @@ import {
   doc,
   getDoc,
   setDoc,
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 let currentUser = null,
@@ -135,6 +139,7 @@ onAuthStateChanged(auth, async (user) => {
 
   await loadUserData();
   initStreak();
+  subscribeNotifications();
   document.getElementById("loadingOverlay").style.display = "none";
 });
 
@@ -1353,3 +1358,101 @@ function renderAspirations() {
           )
           .join("");
 }
+
+// ── NOTIFICATIONS ─────────────────────────────────────
+let _unreadCount = 0;
+
+function subscribeNotifications() {
+  const q = query(collection(db, 'courseUpdates'), orderBy('postedAt', 'desc'));
+  onSnapshot(q, snap => {
+    const myCodes = (window.courses || []).map(c => (c.code || c.name || '').toUpperCase());
+    const updates = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(u => {
+        if (u.targetDepartment) {
+          const norm = s => (s || '').toLowerCase().replace(/\s+/g, '');
+          if (norm(userProfile.department) !== norm(u.targetDepartment)) return false;
+          if (u.targetLevel && norm(userProfile.level) !== norm(u.targetLevel)) return false;
+        }
+        return u.kind === 'general' || !myCodes.length || myCodes.includes((u.courseCode || '').toUpperCase());
+      });
+
+    const readIds = JSON.parse(localStorage.getItem('unify-read-notifs') || '[]');
+    _unreadCount = updates.filter(u => !readIds.includes(u.id)).length;
+    _updateBell(_unreadCount);
+    _renderNotifDrawer(updates.slice(0, 30), readIds);
+  });
+}
+
+function _updateBell(count) {
+  const bell = document.getElementById('notifBell');
+  const badge = document.getElementById('notifBadge');
+  if (!bell || !badge) return;
+  if (count > 0) {
+    badge.textContent = count > 9 ? '9+' : count;
+    badge.style.display = 'flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function _renderNotifDrawer(updates, readIds) {
+  const list = document.getElementById('notifList');
+  if (!list) return;
+  if (!updates.length) {
+    list.innerHTML = `<div class="notif-empty"><div class="notif-empty-icon">🔔</div><div class="notif-empty-text">No updates for your class yet.</div></div>`;
+    return;
+  }
+  const chipClass = { confirmed: 'notif-chip-confirmed', postponed: 'notif-chip-postponed', cancelled: 'notif-chip-cancelled', venue_change: 'notif-chip-venue_change', general: 'notif-chip-general' };
+  const chipLabel = { confirmed: 'Confirmed', postponed: 'Postponed', cancelled: 'Cancelled', venue_change: 'Venue Change', general: 'Announcement' };
+  list.innerHTML = updates.map(u => {
+    const isUnread = !readIds.includes(u.id);
+    const ts = u.postedAt?.toDate?.();
+    const timeStr = ts ? ts.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ' · ' + ts.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
+    const statusKey = u.kind === 'general' ? 'general' : u.status;
+    const chip = `<span class="notif-chip ${chipClass[statusKey] || 'notif-chip-general'}">${chipLabel[statusKey] || statusKey}</span>`;
+    const label = u.kind === 'general' ? (u.title || 'Announcement') : u.courseCode;
+    const details = [u.lecturer ? `Lecturer: ${u.lecturer}` : null, u.venue ? `Venue: ${u.venue}` : null].filter(Boolean).join(' · ');
+    return `<div class="notif-item ${isUnread ? 'unread' : ''}" onclick="markRead('${u.id}')">
+      <div class="notif-item-top">
+        <span class="notif-course-code">${label}</span>
+        <div style="display:flex;align-items:center;gap:6px;">${chip}${isUnread ? '<div class="notif-unread-dot"></div>' : ''}</div>
+      </div>
+      ${u.message ? `<div class="notif-msg">${u.message}</div>` : ''}
+      ${details ? `<div class="notif-detail">${details}</div>` : ''}
+      <div class="notif-meta">Posted by ${u.postedBy || 'Admin'} · ${timeStr}</div>
+    </div>`;
+  }).join('');
+}
+
+window.markRead = function (id) {
+  const readIds = JSON.parse(localStorage.getItem('unify-read-notifs') || '[]');
+  if (!readIds.includes(id)) readIds.push(id);
+  localStorage.setItem('unify-read-notifs', JSON.stringify(readIds));
+  _updateBell(Math.max(0, _unreadCount - 1));
+  document.querySelector(`.notif-item[onclick="markRead('${id}')"]`)?.classList.remove('unread');
+};
+
+window.markAllRead = function () {
+  const list = document.getElementById('notifList');
+  const ids = Array.from(list?.querySelectorAll('.notif-item') || []).map(el => {
+    const m = el.getAttribute('onclick')?.match(/markRead\('(.+?)'\)/);
+    return m ? m[1] : null;
+  }).filter(Boolean);
+  const readIds = JSON.parse(localStorage.getItem('unify-read-notifs') || '[]');
+  ids.forEach(id => { if (!readIds.includes(id)) readIds.push(id); });
+  localStorage.setItem('unify-read-notifs', JSON.stringify(readIds));
+  _updateBell(0);
+  list?.querySelectorAll('.notif-item').forEach(el => el.classList.remove('unread'));
+  list?.querySelectorAll('.notif-unread-dot').forEach(el => el.remove());
+};
+
+window.toggleNotifDrawer = function () {
+  document.getElementById('notifDrawer')?.classList.toggle('open');
+  document.getElementById('notifOverlay')?.classList.toggle('active');
+};
+
+window.closeNotifDrawer = function () {
+  document.getElementById('notifDrawer')?.classList.remove('open');
+  document.getElementById('notifOverlay')?.classList.remove('active');
+};
