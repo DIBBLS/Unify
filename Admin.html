@@ -208,7 +208,7 @@
             <div>
               <h2 class="panel-title">Weekly Timetable</h2>
               <p class="panel-sub" id="ttClassSub">
-                Add classes day-by-day. Durations are flexible — set any start &amp; end time.
+                Set the whole week at once. Add as many rows as you need, then click <strong>Save</strong>.
               </p>
             </div>
             <div class="panel-actions">
@@ -264,8 +264,30 @@
 
           <datalist id="ttCodeSuggestions"></datalist>
 
-          <div class="tt-grid" id="ttGrid">
-            <!-- Rendered by admin.js renderTimetableGrid() -->
+          <div class="tt-sheet-wrap">
+            <table class="tt-sheet">
+              <thead>
+                <tr>
+                  <th class="th-day">Day</th>
+                  <th class="th-code">Course</th>
+                  <th class="th-time">Start</th>
+                  <th class="th-time">End</th>
+                  <th>Venue</th>
+                  <th>Lecturer</th>
+                  <th class="th-act"></th>
+                </tr>
+              </thead>
+              <tbody id="ttSheetBody">
+                <!-- Rendered by admin.js renderTimetableSheet() -->
+              </tbody>
+            </table>
+          </div>
+          <div class="tt-sheet-foot">
+            <button class="tt-add-row-btn" id="ttAddRowBtn" type="button" onclick="addTTDraftRow()">+ Add row</button>
+            <div class="tt-sheet-actions">
+              <span class="tt-draft-hint" id="ttDraftHint"></span>
+              <button class="btn btn-primary" id="ttSaveAllBtn" type="button" onclick="saveTTDraftRows()" style="display:none">Save</button>
+            </div>
           </div>
         </section>
 

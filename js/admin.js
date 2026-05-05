@@ -815,9 +815,11 @@ async function loadTimetableEntries(target) {
   }
 }
 
-function renderTimetableGrid(entries) {
-  const grid = document.getElementById("ttGrid");
-  if (!grid) return;
+let _ttDraftSeq = 0;
+
+function renderTimetableSheet(entries) {
+  const tbody = document.getElementById("ttSheetBody");
+  if (!tbody) return;
 
   // Stats
   const countEl = document.getElementById("ttCount");
@@ -826,153 +828,168 @@ function renderTimetableGrid(entries) {
   if (sEntries) sEntries.textContent = String(entries.length);
 
   const targetReady = !!(_ttTarget.department && _ttTarget.level);
-  const todayName = DAYS[(new Date().getDay() + 6) % 7] || ""; // Mon=0
-  const byDay = {};
-  DAYS.forEach((d) => (byDay[d] = []));
-  entries.forEach((e) => {
-    if (byDay[e.day]) byDay[e.day].push(e);
+  const addBtn = document.getElementById("ttAddRowBtn");
+  if (addBtn) addBtn.disabled = !targetReady;
+
+  // Strip saved-entry rows but preserve any in-progress draft rows
+  Array.from(tbody.querySelectorAll("tr:not([data-draft])")).forEach((r) => r.remove());
+
+  const todayName = DAYS[(new Date().getDay() + 6) % 7] || "";
+  const dayOrder = Object.fromEntries(DAYS.map((d, i) => [d, i]));
+  const sorted = [...entries].sort((a, b) => {
+    const dc = (dayOrder[a.day] ?? 99) - (dayOrder[b.day] ?? 99);
+    return dc !== 0 ? dc : (a.startTime || "").localeCompare(b.startTime || "");
   });
 
-  grid.innerHTML = DAYS.map((day) => {
-    const list = byDay[day];
-    const isToday = day === todayName;
-    const entriesHtml = list.length
-      ? list
-          .map(
-            (e) => `
-        <div class="entry">
-          <div class="entry-time">${escapeHtml(e.startTime || "")} – ${escapeHtml(e.endTime || "")}</div>
-          <div class="entry-code">${escapeHtml(e.courseCode || "—")}</div>
-          ${e.venue || e.lecturer ? `<div class="entry-meta">${escapeHtml([e.venue, e.lecturer].filter(Boolean).join(" · "))}</div>` : ""}
-          <button class="entry-del" onclick="deleteTimetableEntry('${e.id}','${escapeHtml(e.courseCode || "")}')" title="Remove">✕</button>
-        </div>`,
-          )
-          .join("")
-      : `<div class="day-empty">No classes scheduled</div>`;
+  const firstDraft = tbody.querySelector("[data-draft]");
 
-    const addControl = targetReady
-      ? `
-        <button class="day-add-toggle" onclick="toggleDayAddForm('${day}')">+ Add class</button>
-        <div class="day-add-form" id="addForm-${day}" hidden>
-          <div>
-            <label class="time-pair-label">Course code</label>
-            <input id="ttCode-${day}" placeholder="e.g. ECE 308" list="ttCodeSuggestions" oninput="this.value=this.value.toUpperCase()" />
-          </div>
-          <div>
-            <label class="time-pair-label">Time</label>
-            <div class="time-pair">
-              <input id="ttStart-${day}" type="time" />
-              <input id="ttEnd-${day}" type="time" />
-            </div>
-          </div>
-          <div>
-            <label class="time-pair-label">Venue (optional)</label>
-            <input id="ttVenue-${day}" placeholder="e.g. ECE Block, LT1" />
-          </div>
-          <div>
-            <label class="time-pair-label">Lecturer (optional)</label>
-            <input id="ttLecturer-${day}" placeholder="e.g. Dr. Adeyemi" />
-          </div>
-          <div class="day-add-warn" id="warn-${day}" style="display:none"></div>
-          <div class="day-add-foot">
-            <button type="button" class="btn btn-ghost" onclick="toggleDayAddForm('${day}')">Cancel</button>
-            <button type="button" class="btn btn-primary" onclick="addClassToDay('${day}')">Add</button>
-          </div>
-        </div>`
-      : "";
+  if (!sorted.length && !firstDraft) {
+    const tr = document.createElement("tr");
+    tr.className = "tt-empty-row";
+    tr.innerHTML = `<td colspan="7" class="tt-empty">${
+      targetReady
+        ? 'No classes scheduled — click <strong>+ Add row</strong> to build the week.'
+        : 'Select a class above to view or edit its timetable.'
+    }</td>`;
+    tbody.appendChild(tr);
+    return;
+  }
 
-    return `
-      <div class="day-card ${isToday ? "is-today" : ""}">
-        <div class="day-card-head">
-          <span class="day-name">${day}</span>
-          <span class="day-count">${list.length}</span>
-        </div>
-        <div class="day-entries">${entriesHtml}</div>
-        ${addControl}
-      </div>`;
-  }).join("");
+  let lastDay = null;
+  sorted.forEach((e) => {
+    const tr = document.createElement("tr");
+    tr.dataset.id = e.id;
+    if (e.day === todayName) tr.classList.add("row-today");
+    if (e.day !== lastDay) {
+      tr.classList.add("row-day-start");
+      lastDay = e.day;
+    }
+    tr.innerHTML = `
+      <td><span class="tt-day-pill">${escapeHtml(e.day || "—")}</span></td>
+      <td class="tt-code-cell">${escapeHtml(e.courseCode || "—")}</td>
+      <td class="tt-time-cell">${escapeHtml(e.startTime || "")}</td>
+      <td class="tt-time-cell">${escapeHtml(e.endTime || "")}</td>
+      <td class="tt-meta-cell">${escapeHtml(e.venue || "")}</td>
+      <td class="tt-meta-cell">${escapeHtml(e.lecturer || "")}</td>
+      <td class="tt-act-cell"><button class="tt-del-btn" onclick="deleteTimetableEntry('${e.id}','${escapeHtml(e.courseCode || "")}')" title="Remove">✕</button></td>`;
+    tbody.insertBefore(tr, firstDraft);
+  });
 }
 
-window.toggleDayAddForm = function (day) {
-  const form = document.getElementById(`addForm-${day}`);
-  if (!form) return;
-  const open = !form.hasAttribute("hidden");
-  if (open) {
-    form.setAttribute("hidden", "");
-  } else {
-    form.removeAttribute("hidden");
-    setTimeout(() => document.getElementById(`ttCode-${day}`)?.focus(), 50);
-  }
-};
+// Backwards-compat alias
+function renderTimetableGrid(entries) {
+  renderTimetableSheet(entries);
+}
 
-window.addClassToDay = async function (day) {
-  if (!_ttTarget.department || !_ttTarget.level || !_ttTarget.semester) {
+window.addTTDraftRow = function () {
+  if (!(_ttTarget.department && _ttTarget.level && _ttTarget.semester)) {
     showToast("Select a class first");
     return;
   }
-  const code = (document.getElementById(`ttCode-${day}`)?.value || "").trim().toUpperCase();
-  const startTime = document.getElementById(`ttStart-${day}`)?.value || "";
-  const endTime = document.getElementById(`ttEnd-${day}`)?.value || "";
-  const venue = (document.getElementById(`ttVenue-${day}`)?.value || "").trim() || null;
-  const lecturer = (document.getElementById(`ttLecturer-${day}`)?.value || "").trim() || null;
-  const warn = document.getElementById(`warn-${day}`);
+  const tbody = document.getElementById("ttSheetBody");
+  if (!tbody) return;
+  tbody.querySelector(".tt-empty-row")?.remove();
 
-  if (!code || !startTime || !endTime) {
-    if (warn) {
-      warn.style.display = "block";
-      warn.textContent = "Course code, start and end time are required.";
-    }
+  _ttDraftSeq += 1;
+  const uid = "draft_" + _ttDraftSeq;
+  const tr = document.createElement("tr");
+  tr.dataset.draft = uid;
+  tr.className = "tt-draft-row";
+  tr.innerHTML = `
+    <td><select class="tt-cell-input tt-cell-day" data-f="day">
+      <option value="">—</option>
+      ${DAYS.map((d) => `<option value="${d}">${d}</option>`).join("")}
+    </select></td>
+    <td><input class="tt-cell-input" data-f="courseCode" placeholder="ECE 308" list="ttCodeSuggestions" oninput="this.value=this.value.toUpperCase()" /></td>
+    <td><input class="tt-cell-input tt-cell-time" data-f="startTime" type="time" /></td>
+    <td><input class="tt-cell-input tt-cell-time" data-f="endTime" type="time" /></td>
+    <td><input class="tt-cell-input" data-f="venue" placeholder="e.g. LT1" /></td>
+    <td><input class="tt-cell-input" data-f="lecturer" placeholder="e.g. Dr. Adeyemi" /></td>
+    <td class="tt-act-cell"><button class="tt-del-btn" onclick="removeTTDraftRow('${uid}')" title="Remove draft">✕</button></td>`;
+  tbody.appendChild(tr);
+  updateTTSaveBtn();
+  tr.querySelector("select")?.focus();
+};
+
+window.removeTTDraftRow = function (uid) {
+  const tr = document.querySelector(`tr[data-draft="${uid}"]`);
+  if (tr) tr.remove();
+  updateTTSaveBtn();
+  const tbody = document.getElementById("ttSheetBody");
+  if (tbody && !tbody.querySelector("tr")) renderTimetableSheet(_ttEntries);
+};
+
+function updateTTSaveBtn() {
+  const drafts = document.querySelectorAll("tr[data-draft]");
+  const btn = document.getElementById("ttSaveAllBtn");
+  const hint = document.getElementById("ttDraftHint");
+  const count = drafts.length;
+  if (btn) {
+    btn.style.display = count > 0 ? "inline-flex" : "none";
+    btn.textContent = count === 1 ? "Save 1 entry" : `Save ${count} entries`;
+  }
+  if (hint) hint.textContent = count > 0 ? `${count} unsaved row${count === 1 ? "" : "s"}` : "";
+}
+
+window.saveTTDraftRows = async function () {
+  if (!(_ttTarget.department && _ttTarget.level && _ttTarget.semester)) {
+    showToast("Select a class first");
     return;
   }
-  if (startTime >= endTime) {
-    if (warn) {
-      warn.style.display = "block";
-      warn.textContent = "End time must be after start time.";
+  const drafts = Array.from(document.querySelectorAll("tr[data-draft]"));
+  if (!drafts.length) return;
+
+  const btn = document.getElementById("ttSaveAllBtn");
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "Saving…";
+  }
+
+  let saved = 0, skipped = 0, errors = 0;
+  for (const tr of drafts) {
+    tr.classList.remove("tt-row-error");
+    const get = (f) => (tr.querySelector(`[data-f="${f}"]`)?.value || "").trim();
+    const day = get("day");
+    const courseCode = get("courseCode").toUpperCase();
+    const startTime = get("startTime");
+    const endTime = get("endTime");
+    const venue = get("venue") || null;
+    const lecturer = get("lecturer") || null;
+
+    if (!day || !courseCode || !startTime || !endTime || startTime >= endTime) {
+      tr.classList.add("tt-row-error");
+      skipped += 1;
+      continue;
     }
-    return;
+
+    try {
+      await addDoc(collection(db, "timetableEntries"), {
+        day, courseCode, startTime, endTime, venue, lecturer,
+        faculty: _ttTarget.faculty,
+        department: _ttTarget.department,
+        level: _ttTarget.level,
+        semester: _ttTarget.semester,
+        createdBy: me?.uid || null,
+        createdAt: serverTimestamp(),
+      });
+      tr.remove();
+      saved += 1;
+    } catch (e) {
+      console.error(e);
+      tr.classList.add("tt-row-error");
+      errors += 1;
+    }
   }
 
-  // Overlap warning (does not block save)
-  const conflict = _ttEntries.find(
-    (e) => e.day === day && startTime < e.endTime && endTime > e.startTime,
-  );
-  if (conflict && warn) {
-    warn.style.display = "block";
-    warn.textContent = `⚠ Overlaps ${conflict.courseCode} (${conflict.startTime}–${conflict.endTime}). Saved anyway.`;
-  } else if (warn) {
-    warn.style.display = "none";
-  }
-
-  try {
-    await addDoc(collection(db, "timetableEntries"), {
-      day,
-      courseCode: code,
-      startTime,
-      endTime,
-      venue,
-      lecturer,
-      faculty: _ttTarget.faculty,
-      department: _ttTarget.department,
-      level: _ttTarget.level,
-      semester: _ttTarget.semester,
-      createdBy: me?.uid || null,
-      createdAt: serverTimestamp(),
-    });
-    showToast(`${code} added — ${day}`);
-    // Clear inputs but keep form open for next entry
-    ["ttCode", "ttStart", "ttEnd", "ttVenue", "ttLecturer"].forEach((p) => {
-      const el = document.getElementById(`${p}-${day}`);
-      if (el) el.value = "";
-    });
-    document.getElementById(`ttCode-${day}`)?.focus();
+  if (saved > 0) {
     await loadTimetableEntries(_ttTarget);
-  } catch (e) {
-    console.error(e);
-    if (warn) {
-      warn.style.display = "block";
-      warn.textContent = "Error saving — check Firestore rules.";
-    }
+    showToast(`${saved} entr${saved === 1 ? "y" : "ies"} saved`);
   }
+  if (skipped > 0) showToast(`${skipped} row${skipped === 1 ? "" : "s"} need day, code & valid times`);
+  if (errors > 0) showToast(`${errors} error${errors === 1 ? "" : "s"} — check Firestore rules`);
+
+  updateTTSaveBtn();
+  if (btn) btn.disabled = false;
 };
 
 window.deleteTimetableEntry = async function (id, code) {
