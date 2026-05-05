@@ -267,14 +267,34 @@ window.grantAdmin = async function () {
   fb.textContent = "Looking up account...";
 
   try {
+    console.log("[grant] looking up email:", email);
     const q = query(collection(db, "users"), where("email", "==", email));
     const snap = await getDocs(q);
-    if (snap.empty) {
+    console.log("[grant] indexed query results:", snap.size);
+
+    let userSnap = snap.empty ? null : snap.docs[0];
+
+    // Fallback: legacy user docs may have email in different case, or under no
+    // field at all. Scan all users and match case-insensitively.
+    if (!userSnap) {
+      console.log("[grant] indexed query empty — scanning all users");
+      const allSnap = await getDocs(collection(db, "users"));
+      console.log("[grant] total users in collection:", allSnap.size);
+      const emails = [];
+      allSnap.docs.forEach((docSnap) => {
+        const stored = (docSnap.data().email || "").toLowerCase().trim();
+        emails.push(stored || "(no email field)");
+        if (stored && stored === email) userSnap = docSnap;
+      });
+      console.log("[grant] emails found:", emails);
+      console.log("[grant] match after scan:", userSnap ? userSnap.id : "none");
+    }
+
+    if (!userSnap) {
       fb.style.color = "var(--red)";
-      fb.textContent = `No Unify account found for ${email}. They need to sign up first.`;
+      fb.textContent = `No Unify account found for ${email}. Ask them to sign in once so their email is registered, then try again.`;
       return;
     }
-    const userSnap = snap.docs[0];
     const existing = userSnap.data();
     if (existing.isAdmin && existing.role === role) {
       fb.style.color = "var(--amber)";

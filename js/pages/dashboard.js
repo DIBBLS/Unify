@@ -160,6 +160,15 @@ async function loadUserData() {
     const d = snap.data();
     savedGoalPlan = d.gradePlanner || null;
 
+    // Backfill email so admins can grant access by email (legacy docs lack it)
+    const authEmail = (currentUser.email || '').toLowerCase();
+    if (authEmail && (d.email || '').toLowerCase() !== authEmail) {
+      try {
+        await setDoc(doc(db, "users", currentUser.uid), { email: authEmail }, { merge: true });
+        d.email = authEmail;
+      } catch (e) { /* non-fatal */ }
+    }
+
     userProfile = {
       university: d.university,
       faculty: d.faculty,

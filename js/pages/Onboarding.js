@@ -264,6 +264,7 @@ async function saveAndGo() {
     }
     await setDoc(doc(db, 'users', currentUser.uid), {
       firstName: selected.firstName,
+      email: (currentUser.email || '').toLowerCase(),
       university: selected.university,
       faculty: selected.faculty,
       department: selected.department,
