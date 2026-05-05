@@ -6,8 +6,14 @@
  * courses (e.g. ECE 301) still render until they're migrated.
  */
 
-import { auth } from '../firebase-config.js';
+import { auth, db } from '../firebase-config.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import {
   resolveCourse,
   getHardcodedWeeks,
@@ -55,6 +61,9 @@ async function init() {
 
   loading.style.display = 'none';
   main.style.display = 'block';
+
+  // Load Firestore-uploaded content after page is visible (non-blocking)
+  renderFirestoreContent(code);
 }
 
 function renderHero(course, source) {
@@ -174,3 +183,88 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
+
+// ── FIRESTORE COURSE CONTENT ─────────────────────────────
+
+function getYoutubeId(url) {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    if (u.hostname === 'youtu.be') return u.pathname.slice(1).split('?')[0];
+    if (u.hostname.includes('youtube.com')) {
+      return u.searchParams.get('v') || u.pathname.replace('/embed/', '').split('?')[0];
+    }
+  } catch (e) {}
+  return null;
+}
+
+function renderContentCard(item) {
+  const ytId = getYoutubeId(item.youtubeUrl);
+  const thumbHtml = ytId
+    ? `<a class="fc-thumb" href="${escapeHtml(item.youtubeUrl)}" target="_blank" rel="noopener noreferrer">
+        <img src="https://img.youtube.com/vi/${ytId}/mqdefault.jpg" alt="Watch Week ${item.week} video" loading="lazy" />
+        <div class="fc-play">▶</div>
+      </a>`
+    : '';
+
+  // Safely encode content for the onclick attribute
+  const safeId = escapeHtml(item.id);
+  const safeTitle = escapeHtml(item.title);
+
+  const videoBtn = ytId
+    ? `<a class="fc-btn fc-btn-video" href="${escapeHtml(item.youtubeUrl)}" target="_blank" rel="noopener noreferrer">Watch Video</a>`
+    : '';
+
+  return `<div class="fc-week-card">
+    <div class="fc-week-label">Week ${item.week}</div>
+    <div class="fc-week-title">${safeTitle}</div>
+    ${thumbHtml}
+    <div class="fc-actions">
+      <button class="fc-btn fc-btn-notes" onclick="openNotes('${safeId}')">View Notes</button>
+      ${videoBtn}
+    </div>
+  </div>`;
+}
+
+// Store content keyed by doc ID for modal lookup
+const _contentStore = {};
+
+async function renderFirestoreContent(code) {
+  const wrap = document.getElementById('weeksWrap');
+  if (!wrap) return;
+
+  try {
+    const snap = await getDocs(
+      query(collection(db, 'courseContent'), where('courseCode', '==', code))
+    );
+
+    if (snap.empty) return;
+
+    const docs = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => a.week - b.week);
+
+    // Cache for modal lookup
+    docs.forEach(d => { _contentStore[d.id] = d; });
+
+    wrap.innerHTML = `<div class="fc-weeks">${docs.map(renderContentCard).join('')}</div>`;
+  } catch (e) {
+    console.warn('[course] Firestore content load failed:', e);
+  }
+}
+
+window.openNotes = function (id) {
+  const item = _contentStore[id];
+  if (!item) return;
+  document.getElementById('notesModalTitle').textContent = `Week ${item.week} — ${item.title}`;
+  document.getElementById('notesModalBody').innerHTML = item.htmlContent;
+  document.getElementById('notesOverlay').classList.add('open');
+};
+
+window.closeNotesModal = function () {
+  document.getElementById('notesOverlay').classList.remove('open');
+};
+
+window.handleNotesOverlayClick = function (e) {
+  if (e.target === document.getElementById('notesOverlay')) closeNotesModal();
+};
