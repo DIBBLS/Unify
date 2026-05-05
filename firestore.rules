@@ -1,0 +1,178 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── HELPERS ─────────────────────────────────────────────
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // Class reps are identified solely by role == 'class_rep' (no isCourseRep field).
+    function isClassRep() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'class_rep';
+    }
+
+    function validUserProfile() {
+      return request.resource.data.keys().hasAll(['university', 'faculty', 'department', 'level'])
+        && request.resource.data.university is string
+        && request.resource.data.university.size() > 0
+        && request.resource.data.university.size() <= 120
+        && request.resource.data.faculty is string
+        && request.resource.data.faculty.size() > 0
+        && request.resource.data.faculty.size() <= 120
+        && request.resource.data.department is string
+        && request.resource.data.department.size() > 0
+        && request.resource.data.department.size() <= 100
+        && request.resource.data.level is string
+        && request.resource.data.level.size() > 0
+        && request.resource.data.level.size() <= 40
+        && (!('email' in request.resource.data) || (
+          request.resource.data.email is string
+          && request.resource.data.email.size() <= 120
+        ))
+        && (!('bio' in request.resource.data) || (
+          request.resource.data.bio is string
+          && request.resource.data.bio.size() <= 500
+        ))
+        && (!('headline' in request.resource.data) || (
+          request.resource.data.headline is string
+          && request.resource.data.headline.size() <= 120
+        ))
+        && (!('firstName' in request.resource.data) || (
+          request.resource.data.firstName is string
+          && request.resource.data.firstName.size() <= 60
+        ));
+    }
+
+    // ── USERS ──────────────────────────────────────────────
+    match /users/{userId} {
+      allow read: if signedIn() && (request.auth.uid == userId || isAdmin());
+
+      // User creates their own profile — cannot self-assign role or admin flags
+      allow create: if signedIn()
+        && request.auth.uid == userId
+        && validUserProfile()
+        && (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == false)
+        && (!('role' in request.resource.data) || request.resource.data.role == null);
+
+      // User updates their own profile — cannot change role or admin flags
+      allow update: if signedIn()
+        && request.auth.uid == userId
+        && validUserProfile()
+        && (!('role' in request.resource.data)
+            || request.resource.data.role == resource.data.get('role', null))
+        && (
+          !('isAdmin' in resource.data) && !('isAdmin' in request.resource.data)
+          || ('isAdmin' in resource.data && 'isAdmin' in request.resource.data
+              && request.resource.data.isAdmin == resource.data.isAdmin)
+          || ('isAdmin' in resource.data && !('isAdmin' in request.resource.data)
+              && resource.data.isAdmin == false)
+        );
+
+      // Admin can grant/revoke roles and class assignments
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'isAdmin',
+          'role',
+          'assignedFaculty',
+          'assignedDepartment',
+          'assignedLevel',
+          'assignedSemester',
+          'updatedAt'
+        ])
+        && (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin is bool)
+        && (!('role' in request.resource.data) || request.resource.data.role in [
+          'super_admin',
+          'academic_lead',
+          'class_rep'
+        ]);
+    }
+
+    // ── COURSE UPDATES (admin + class reps write, students read) ──
+    match /courseUpdates/{updateId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin() || isClassRep();
+    }
+
+    // ── COURSE STATUS (latest state per course) ─────────────
+    match /courseStatus/{courseCode} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ── TIMETABLE ENTRIES (admin + class reps write, students read) ──
+    match /timetableEntries/{entryId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin() || isClassRep();
+    }
+
+    // ── CAMPUS POSTS ────────────────────────────────────────
+    match /posts/{postId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.keys().hasAll(['content', 'author', 'authorId', 'createdAt'])
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.content is string
+        && request.resource.data.content.size() > 0
+        && request.resource.data.content.size() <= 2000
+        && request.resource.data.author is string
+        && request.resource.data.author.size() <= 60;
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'comments'])
+        && request.resource.data.authorId == resource.data.authorId;
+      allow delete: if signedIn()
+        && resource.data.authorId == request.auth.uid;
+    }
+
+    // ── PROFILE POSTS ───────────────────────────────────────
+    match /profile_posts/{postId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.content is string
+        && request.resource.data.content.size() > 0
+        && request.resource.data.content.size() <= 2000
+        && request.resource.data.author is string
+        && request.resource.data.author.size() <= 60;
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'comments'])
+        && resource.data.authorId == request.auth.uid;
+      allow delete: if signedIn()
+        && resource.data.authorId == request.auth.uid;
+    }
+
+    // ── WORKS (Projects) ────────────────────────────────────
+    match /works/{workId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 120
+        && request.resource.data.desc is string
+        && request.resource.data.desc.size() <= 1000;
+      allow update: if signedIn()
+        && resource.data.authorId == request.auth.uid
+        && request.resource.data.authorId == request.auth.uid;
+      allow delete: if signedIn()
+        && resource.data.authorId == request.auth.uid;
+    }
+
+    // ── COURSES (admin writes, students read) ───────────────
+    match /courses/{code} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ── DENY EVERYTHING ELSE ────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
