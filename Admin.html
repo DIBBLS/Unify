@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Unify — Admin</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="css/variables.css" />
@@ -13,67 +13,143 @@
     <link rel="stylesheet" href="css/components.css" />
     <link rel="stylesheet" href="css/responsive.css" />
     <script src="js/theme.js"></script>
-
-    <link rel="stylesheet" href="css/pages/Admin.styles.css" />
+    <link rel="stylesheet" href="css/pages/Admin.styles.css?v=premium-1" />
   </head>
   <body>
     <div class="loading-screen" id="loadingScreen">
       <div class="loading-logo">Unify</div>
-      <div class="loading-sub">Verifying access...</div>
+      <div class="loading-sub">Verifying access…</div>
     </div>
 
     <div class="denied-wrap" id="accessDenied">
       <div class="denied-title">Access Restricted</div>
       <div class="denied-sub">
-        This page is for Faculty Administrators only.<br />If you believe this
-        is an error, contact the Sub Dean's office.
+        This panel is for faculty staff and elected class representatives only.<br />
+        If you believe this is an error, contact the Sub Dean's office.
       </div>
-      <a href="dashboard.html" style="font-size: 13px; color: var(--text3)"
-        >← Back to Dashboard</a
-      >
+      <a href="dashboard.html" class="denied-back">← Back to Dashboard</a>
     </div>
 
-    <div id="mainContent" style="display: none">
-      <nav>
+    <div id="mainContent" style="display:none">
+      <!-- TOP NAV -->
+      <nav class="admin-nav">
         <a href="dashboard.html" class="nav-logo">
           Unify
-          <span class="nav-admin-badge">Admin</span>
+          <span class="nav-admin-badge">Console</span>
         </a>
         <div class="nav-right">
-          <button class="btn-nav" onclick="toggleTheme()" id="themeBtn">
-            ☾ Dark
-          </button>
+          <button class="btn-nav" id="themeBtn" onclick="toggleTheme()">☾ Dark</button>
           <span class="nav-user" id="navUser"></span>
           <button class="btn-nav" id="signOutBtn">Sign out</button>
         </div>
       </nav>
 
-      <div class="page-header">
-        <div>
-          <div class="page-title">Faculty Admin Panel</div>
-          <div class="page-sub">
-            LASU Faculty of Engineering · 2025/2026 Second Semester
-          </div>
-          <div class="hod-badge">HOD / Coordinator Access</div>
-        </div>
-        <div
-          style="text-align: right; color: var(--invert-sub); font-size: 12px"
-          id="adminNameDisplay"
-        ></div>
-      </div>
-
-      <div class="admin-body">
-        <!-- POST UPDATE -->
-        <div class="section" id="postUpdateSection">
-          <div class="section-label">Post a Course Update</div>
-          <div class="card">
-            <div class="card-title">Notify the class</div>
-            <div class="card-sub">
-              Updates are pushed instantly to every student who has this course
-              in their timetable. The course card will reflect your changes and
-              students will see a notification badge.
+      <!-- HERO -->
+      <header class="admin-hero">
+        <div class="hero-inner">
+          <div class="hero-left">
+            <div class="hero-eyebrow">
+              <span class="status-pulse"><span class="dot"></span> Active session</span>
+              <span class="hero-divider">·</span>
+              <span class="hero-eyebrow-text">Restricted Console</span>
             </div>
+            <h1 class="hero-title">
+              <span id="heroGreeting">Welcome back,</span>
+              <em id="heroName">—</em>
+            </h1>
+            <div class="hero-meta">
+              <span class="role-badge" id="roleBadge">—</span>
+              <span class="hero-class" id="heroClass">—</span>
+            </div>
+          </div>
+          <div class="hero-right">
+            <div class="hero-email-label">Signed in as</div>
+            <div class="hero-email" id="heroEmail">—</div>
+          </div>
+        </div>
+      </header>
 
+      <!-- QUICK STATS -->
+      <section class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Timetable Entries</div>
+          <div class="stat-value" id="statEntries">0</div>
+          <div class="stat-sub" id="statEntriesSub">Across the week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Announcements (7d)</div>
+          <div class="stat-value" id="statUpdates">0</div>
+          <div class="stat-sub">Posted this week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Assigned Class</div>
+          <div class="stat-value stat-value--text" id="statClass">—</div>
+          <div class="stat-sub" id="statClassSub">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Last Update</div>
+          <div class="stat-value stat-value--text" id="statLast">—</div>
+          <div class="stat-sub" id="statLastSub">No activity yet</div>
+        </div>
+      </section>
+
+      <!-- IN-PAGE NAV -->
+      <nav class="anchor-nav" id="anchorNav">
+        <a href="#announcements" class="anchor-link" data-anchor="announcements">Announcements</a>
+        <a href="#timetable" class="anchor-link" data-anchor="timetable">Timetable</a>
+        <a href="#activity" class="anchor-link" data-anchor="activity">Activity</a>
+        <a href="#courses" class="anchor-link" data-anchor="courses">Courses</a>
+        <a href="#access" class="anchor-link" data-anchor="access">Access</a>
+      </nav>
+
+      <main class="admin-body">
+        <!-- ANNOUNCEMENTS -->
+        <section class="panel" id="announcements">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">Announcements</h2>
+              <p class="panel-sub">
+                Reach your class instantly. Use <strong>General</strong> for broad updates, or
+                <strong>Course-specific</strong> to flag a class change.
+              </p>
+            </div>
+          </div>
+
+          <div class="seg-control" role="tablist">
+            <button type="button" class="seg active" data-kind="general" onclick="setAnnKind('general')">
+              <span class="seg-dot"></span> General
+            </button>
+            <button type="button" class="seg" data-kind="course" onclick="setAnnKind('course')">
+              <span class="seg-dot"></span> Course-specific
+            </button>
+          </div>
+
+          <!-- GENERAL FIELDS -->
+          <div class="ann-fields" id="annGeneralFields">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Title</label>
+                <input
+                  class="form-input"
+                  id="annTitle"
+                  placeholder="e.g. Test fix-up class on Saturday"
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Message</label>
+                <textarea
+                  class="form-textarea"
+                  id="annMessage"
+                  placeholder="What do you want to tell your class?"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- COURSE-SPECIFIC FIELDS -->
+          <div class="ann-fields" id="annCourseFields" style="display:none">
             <div class="form-row two">
               <div class="form-group">
                 <label class="form-label">Course Code</label>
@@ -82,143 +158,77 @@
                   id="upCode"
                   placeholder="e.g. ECE 308"
                   oninput="this.value = this.value.toUpperCase()"
+                  list="ttCodeSuggestions"
                 />
               </div>
               <div class="form-group">
                 <label class="form-label">Status</label>
                 <select class="form-select" id="upStatus">
-                  <option value="confirmed">
-                    Confirmed — class is holding
-                  </option>
+                  <option value="confirmed">Confirmed — class is holding</option>
                   <option value="postponed">Postponed — rescheduled</option>
-                  <option value="cancelled">
-                    Cancelled — class won't hold
-                  </option>
+                  <option value="cancelled">Cancelled — class won't hold</option>
                   <option value="venue_change">Venue change only</option>
                 </select>
               </div>
             </div>
             <div class="form-row two">
               <div class="form-group">
-                <label class="form-label">Lecturer Name</label>
-                <input
-                  class="form-input"
-                  id="upLecturer"
-                  placeholder="e.g. Dr. Adeyemi"
-                />
+                <label class="form-label">Lecturer</label>
+                <input class="form-input" id="upLecturer" placeholder="e.g. Dr. Adeyemi" />
               </div>
               <div class="form-group">
-                <label class="form-label">Venue / Location</label>
-                <input
-                  class="form-input"
-                  id="upVenue"
-                  placeholder="e.g. ECE Block, LT1"
-                />
+                <label class="form-label">Venue</label>
+                <input class="form-input" id="upVenue" placeholder="e.g. ECE Block, LT1" />
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label"
-                  >Message to Students
-                  <span
-                    style="
-                      font-size: 11px;
-                      color: var(--text3);
-                      text-transform: none;
-                      letter-spacing: 0;
-                      font-weight: 400;
-                    "
-                    >(optional)</span
-                  ></label
-                >
+                <label class="form-label">Message <span class="form-label-hint">(optional)</span></label>
                 <textarea
                   class="form-textarea"
                   id="upMessage"
-                  placeholder="e.g. Venue changed to Main Auditorium due to generator fault in LT1. Bring textbook."
+                  placeholder="e.g. Venue changed to Main Auditorium. Bring textbook."
                 ></textarea>
               </div>
             </div>
-            <div
-              style="
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                flex-wrap: wrap;
-                gap: 12px;
-                margin-top: 6px;
-              "
-            >
-              <div style="font-size: 12px; color: var(--text3)">
-                Posting as:
-                <span
-                  id="postedAsLabel"
-                  style="color: var(--text2); font-weight: 500"
-                ></span>
-              </div>
-              <button
-                class="btn btn-primary"
-                id="postBtn"
-                onclick="postUpdate()"
-              >
-                Post Update →
-              </button>
+          </div>
+
+          <div class="ann-foot">
+            <div class="ann-meta">
+              Posting as <span id="postedAsLabel" class="ann-meta-strong">—</span>
+              <span id="annAudience" class="ann-meta-aud"></span>
+            </div>
+            <button class="btn btn-primary" id="postBtn" onclick="postUpdate()">Post →</button>
+          </div>
+        </section>
+
+        <!-- TIMETABLE -->
+        <section class="panel panel-feature" id="timetable">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">Weekly Timetable</h2>
+              <p class="panel-sub" id="ttClassSub">
+                Add classes day-by-day. Durations are flexible — set any start &amp; end time.
+              </p>
+            </div>
+            <div class="panel-actions">
+              <span class="panel-pill" id="ttCount">0 entries</span>
             </div>
           </div>
-        </div>
 
-        <!-- RECENT UPDATES -->
-        <div class="section" id="recentUpdatesSection">
-          <div class="section-label">Recent Updates</div>
-          <div id="updateLog">
-            <div class="empty-state">
-              <div class="empty-icon">📋</div>
-              <div class="empty-text">No updates posted yet.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- MANAGE COURSES -->
-        <div class="section" id="manageCoursesSection">
-          <div class="section-label">Manage Courses</div>
-          <div class="card">
-            <div class="card-title">Add or edit a course</div>
-            <div class="card-sub">
-              Courses added here become available to students immediately —
-              they can add the course to their dashboard and open its dynamic
-              course page. No redeployment required.
-            </div>
-
-            <div class="form-row two">
-              <div class="form-group">
-                <label class="form-label">Course Code</label>
-                <input
-                  class="form-input"
-                  id="cAddCode"
-                  placeholder="e.g. ECE 301"
-                  oninput="this.value = this.value.toUpperCase()"
-                />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Course Title</label>
-                <input
-                  class="form-input"
-                  id="cAddTitle"
-                  placeholder="e.g. Signals & Systems"
-                />
-              </div>
-            </div>
-
+          <!-- super_admin target selectors -->
+          <div id="ttTargetSelectors" class="tt-target-bar" style="display:none">
             <div class="form-row two">
               <div class="form-group">
                 <label class="form-label">Faculty</label>
-                <select class="form-select" id="cAddFaculty">
+                <select class="form-select" id="ttFaculty" onchange="onTTTargetChange()">
                   <option value="">Select faculty…</option>
                   <option value="Faculty of Engineering">Faculty of Engineering</option>
                 </select>
               </div>
               <div class="form-group">
                 <label class="form-label">Department</label>
-                <select class="form-select" id="cAddDept">
+                <select class="form-select" id="ttDept" onchange="onTTTargetChange()">
                   <option value="">Select department…</option>
                   <option value="Electronic &amp; Computer Engineering">Electronic &amp; Computer Engineering</option>
                   <option value="Mechanical Engineering">Mechanical Engineering</option>
@@ -229,11 +239,10 @@
                 </select>
               </div>
             </div>
-
             <div class="form-row two">
               <div class="form-group">
                 <label class="form-label">Level</label>
-                <select class="form-select" id="cAddLevel">
+                <select class="form-select" id="ttLevel" onchange="onTTTargetChange()">
                   <option value="">Select level…</option>
                   <option value="100 Level">100 Level</option>
                   <option value="200 Level">200 Level</option>
@@ -244,110 +253,74 @@
               </div>
               <div class="form-group">
                 <label class="form-label">Semester</label>
-                <select class="form-select" id="cAddSemester">
+                <select class="form-select" id="ttSemester" onchange="onTTTargetChange()">
                   <option value="">Select semester…</option>
                   <option value="First Semester">First Semester</option>
                   <option value="Second Semester">Second Semester</option>
                 </select>
               </div>
             </div>
-
-            <div class="form-row two">
-              <div class="form-group">
-                <label class="form-label">Units</label>
-                <input
-                  class="form-input"
-                  id="cAddUnits"
-                  type="number"
-                  min="1"
-                  max="6"
-                  value="3"
-                />
-              </div>
-              <div class="form-group">
-                <label class="form-label"
-                  >Description
-                  <span
-                    style="
-                      font-size: 11px;
-                      color: var(--text3);
-                      text-transform: none;
-                      letter-spacing: 0;
-                      font-weight: 400;
-                    "
-                    >(optional)</span
-                  ></label
-                >
-                <input
-                  class="form-input"
-                  id="cAddDesc"
-                  placeholder="One-line summary"
-                />
-              </div>
-            </div>
-
-            <div
-              style="
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 12px;
-                margin-top: 6px;
-              "
-            >
-              <div
-                id="cAddFeedback"
-                style="font-size: 12px; min-height: 16px; color: var(--text3)"
-              ></div>
-              <button
-                class="btn btn-primary"
-                id="cAddBtn"
-                onclick="saveCourse()"
-              >
-                Save Course →
-              </button>
-            </div>
           </div>
 
-          <div
-            class="section-label"
-            style="margin-top: 28px; margin-bottom: 12px"
-          >
-            Existing Courses
+          <datalist id="ttCodeSuggestions"></datalist>
+
+          <div class="tt-grid" id="ttGrid">
+            <!-- Rendered by admin.js renderTimetableGrid() -->
           </div>
-          <div id="courseList">
+        </section>
+
+        <!-- ACTIVITY -->
+        <section class="panel" id="activity">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">Recent Activity</h2>
+              <p class="panel-sub">Live feed of announcements and class changes.</p>
+            </div>
+          </div>
+          <div id="updateLog">
             <div class="empty-state">
-              <div class="empty-icon">📚</div>
-              <div class="empty-text">Loading courses…</div>
+              <div class="empty-icon">📋</div>
+              <div class="empty-text">No activity yet.</div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <!-- TIMETABLE MANAGER -->
-        <div class="section" id="timetableSection">
-          <div class="section-label">Timetable Manager</div>
-          <div class="card">
-            <div class="card-title">Manage class timetable</div>
-            <div class="card-sub">
-              Add or remove timetable entries for your assigned class. Students
-              will see this as their live timetable.
+        <!-- MANAGE COURSES (collapsible) -->
+        <details class="panel panel-collapsible" id="courses">
+          <summary class="panel-head panel-head-summary">
+            <div>
+              <h2 class="panel-title">Manage Courses</h2>
+              <p class="panel-sub">Add or edit the courses students can pick. Rarely needed.</p>
             </div>
-
-            <div id="timetableClassInfo" style="font-size:13px;color:var(--text2);margin-bottom:16px;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);"></div>
-
-            <!-- super_admin target selectors (hidden for class_rep) -->
-            <div id="ttTargetSelectors" style="display:none;">
+            <span class="panel-chev">▾</span>
+          </summary>
+          <div class="panel-body" id="manageCoursesSection">
+            <div class="card card-flush">
+              <div class="card-title">Add or edit a course</div>
+              <div class="card-sub">
+                Courses added here become available to students immediately. No redeployment.
+              </div>
+              <div class="form-row two">
+                <div class="form-group">
+                  <label class="form-label">Course Code</label>
+                  <input class="form-input" id="cAddCode" placeholder="e.g. ECE 301" oninput="this.value = this.value.toUpperCase()" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Course Title</label>
+                  <input class="form-input" id="cAddTitle" placeholder="e.g. Signals & Systems" />
+                </div>
+              </div>
               <div class="form-row two">
                 <div class="form-group">
                   <label class="form-label">Faculty</label>
-                  <select class="form-select" id="ttFaculty" onchange="onTTTargetChange()">
+                  <select class="form-select" id="cAddFaculty">
                     <option value="">Select faculty…</option>
                     <option value="Faculty of Engineering">Faculty of Engineering</option>
                   </select>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Department</label>
-                  <select class="form-select" id="ttDept" onchange="onTTTargetChange()">
+                  <select class="form-select" id="cAddDept">
                     <option value="">Select department…</option>
                     <option value="Electronic &amp; Computer Engineering">Electronic &amp; Computer Engineering</option>
                     <option value="Mechanical Engineering">Mechanical Engineering</option>
@@ -361,7 +334,7 @@
               <div class="form-row two">
                 <div class="form-group">
                   <label class="form-label">Level</label>
-                  <select class="form-select" id="ttLevel" onchange="onTTTargetChange()">
+                  <select class="form-select" id="cAddLevel">
                     <option value="">Select level…</option>
                     <option value="100 Level">100 Level</option>
                     <option value="200 Level">200 Level</option>
@@ -372,171 +345,130 @@
                 </div>
                 <div class="form-group">
                   <label class="form-label">Semester</label>
-                  <select class="form-select" id="ttSemester" onchange="onTTTargetChange()">
+                  <select class="form-select" id="cAddSemester">
                     <option value="">Select semester…</option>
                     <option value="First Semester">First Semester</option>
                     <option value="Second Semester">Second Semester</option>
                   </select>
                 </div>
               </div>
-            </div>
-
-            <div class="form-row two">
-              <div class="form-group">
-                <label class="form-label">Day</label>
-                <select class="form-select" id="ttDay">
-                  <option value="Monday">Monday</option>
-                  <option value="Tuesday">Tuesday</option>
-                  <option value="Wednesday">Wednesday</option>
-                  <option value="Thursday">Thursday</option>
-                  <option value="Friday">Friday</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Course Code</label>
-                <input class="form-input" id="ttCode" placeholder="e.g. ECE 308"
-                  oninput="this.value = this.value.toUpperCase()"
-                  list="ttCodeSuggestions" />
-                <datalist id="ttCodeSuggestions"></datalist>
-              </div>
-            </div>
-            <div class="form-row two">
-              <div class="form-group">
-                <label class="form-label">Start Time</label>
-                <input class="form-input" id="ttStart" type="time" />
-              </div>
-              <div class="form-group">
-                <label class="form-label">End Time</label>
-                <input class="form-input" id="ttEnd" type="time" />
-              </div>
-            </div>
-            <div class="form-row two">
-              <div class="form-group">
-                <label class="form-label">Venue <span style="font-size:11px;color:var(--text3);text-transform:none;letter-spacing:0;font-weight:400;">(optional)</span></label>
-                <input class="form-input" id="ttVenue" placeholder="e.g. ECE Block, LT1" />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Lecturer <span style="font-size:11px;color:var(--text3);text-transform:none;letter-spacing:0;font-weight:400;">(optional)</span></label>
-                <input class="form-input" id="ttLecturer" placeholder="e.g. Dr. Adeyemi" />
-              </div>
-            </div>
-
-            <div id="ttWarning" style="display:none;padding:10px 14px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.4);border-radius:8px;font-size:13px;color:#92400e;margin-bottom:12px;"></div>
-
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px;flex-wrap:wrap;">
-              <div id="ttFeedback" style="font-size:12px;min-height:16px;color:var(--text3);"></div>
-              <button class="btn btn-green" id="ttSaveBtn" onclick="saveTimetableEntry()">Add Entry →</button>
-            </div>
-          </div>
-
-          <div class="section-label" style="margin-top:28px;margin-bottom:12px;">Existing Entries</div>
-          <div id="timetableList">
-            <div class="empty-state">
-              <div class="empty-icon">📅</div>
-              <div class="empty-text">No timetable entries yet.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- GRANT ADMIN -->
-        <div class="section" id="adminAccessSection">
-          <div class="section-label">Admin Access</div>
-          <div class="card">
-            <div class="card-title">Grant access to an HOD or Coordinator</div>
-            <div class="card-sub">
-              The person must have already signed into Unify at least once.
-              Enter their registered email and grant access — they'll see this
-              admin panel on their next login.
-            </div>
-            <div class="form-row two" style="margin-bottom:12px;">
-              <div class="form-group">
-                <label class="form-label">Email Address</label>
-                <input
-                  class="form-input"
-                  id="grantEmail"
-                  placeholder="e.g. hod.ece@lasu.edu.ng"
-                  type="email"
-                />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Role</label>
-                <select class="form-select" id="grantRole" onchange="onGrantRoleChange()">
-                  <option value="academic_lead">Academic Lead (HOD/Coordinator)</option>
-                  <option value="class_rep">Class Rep</option>
-                  <option value="super_admin">Super Admin</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Assignment fields (shown for class_rep only) -->
-            <div id="grantAssignmentFields" style="display:none;">
               <div class="form-row two">
                 <div class="form-group">
-                  <label class="form-label">Assigned Faculty</label>
-                  <select class="form-select" id="grantFaculty">
-                    <option value="">Select faculty…</option>
-                    <option value="Faculty of Engineering">Faculty of Engineering</option>
-                  </select>
+                  <label class="form-label">Units</label>
+                  <input class="form-input" id="cAddUnits" type="number" min="1" max="6" value="3" />
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Assigned Department</label>
-                  <select class="form-select" id="grantDept">
-                    <option value="">Select department…</option>
-                    <option value="Electronic &amp; Computer Engineering">Electronic &amp; Computer Engineering</option>
-                    <option value="Mechanical Engineering">Mechanical Engineering</option>
-                    <option value="Industrial &amp; Petroleum Engineering">Industrial &amp; Petroleum Engineering</option>
-                    <option value="Chemical &amp; Polymer Engineering">Chemical &amp; Polymer Engineering</option>
-                    <option value="Civil Engineering">Civil Engineering</option>
-                    <option value="Aerospace Engineering">Aerospace Engineering</option>
-                  </select>
+                  <label class="form-label">Description <span class="form-label-hint">(optional)</span></label>
+                  <input class="form-input" id="cAddDesc" placeholder="One-line summary" />
                 </div>
               </div>
-              <div class="form-row two" style="margin-bottom:12px;">
-                <div class="form-group">
-                  <label class="form-label">Assigned Level</label>
-                  <select class="form-select" id="grantLevel">
-                    <option value="">Select level…</option>
-                    <option value="100 Level">100 Level</option>
-                    <option value="200 Level">200 Level</option>
-                    <option value="300 Level">300 Level</option>
-                    <option value="400 Level">400 Level</option>
-                    <option value="500 Level">500 Level</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Assigned Semester</label>
-                  <select class="form-select" id="grantSemester">
-                    <option value="">Select semester…</option>
-                    <option value="First Semester">First Semester</option>
-                    <option value="Second Semester">Second Semester</option>
-                  </select>
-                </div>
+              <div class="card-foot">
+                <div id="cAddFeedback" class="feedback"></div>
+                <button class="btn btn-primary" id="cAddBtn" onclick="saveCourse()">Save Course →</button>
               </div>
             </div>
 
-            <div style="display:flex;justify-content:flex-end;gap:12px;flex-wrap:wrap;">
-              <button
-                class="btn btn-green"
-                onclick="grantAdmin()"
-                style="height: 42px; flex-shrink: 0"
-              >
-                Grant Access
-              </button>
+            <div class="sub-section-label">Existing Courses</div>
+            <div id="courseList">
+              <div class="empty-state">
+                <div class="empty-icon">📚</div>
+                <div class="empty-text">Loading courses…</div>
+              </div>
             </div>
-            <div
-              id="grantFeedback"
-              style="font-size: 12px; margin-top: 10px; min-height: 16px"
-            ></div>
           </div>
+        </details>
 
-          <div class="admin-list" id="adminList"></div>
-        </div>
-      </div>
+        <!-- ACCESS (collapsible, super_admin only) -->
+        <details class="panel panel-collapsible" id="access">
+          <summary class="panel-head panel-head-summary">
+            <div>
+              <h2 class="panel-title">Access &amp; Roles</h2>
+              <p class="panel-sub">Grant admin or class rep access to other staff.</p>
+            </div>
+            <span class="panel-chev">▾</span>
+          </summary>
+          <div class="panel-body" id="adminAccessSection">
+            <div class="card card-flush">
+              <div class="card-title">Grant access</div>
+              <div class="card-sub">
+                The person must have signed into Unify at least once. Enter their registered
+                email — they'll see this console on their next login.
+              </div>
+              <div class="form-row two">
+                <div class="form-group">
+                  <label class="form-label">Email Address</label>
+                  <input class="form-input" id="grantEmail" placeholder="e.g. hod.ece@lasu.edu.ng" type="email" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Role</label>
+                  <select class="form-select" id="grantRole" onchange="onGrantRoleChange()">
+                    <option value="academic_lead">Academic Lead (HOD/Coordinator)</option>
+                    <option value="class_rep">Class Rep</option>
+                    <option value="super_admin">Super Admin</option>
+                  </select>
+                </div>
+              </div>
+
+              <div id="grantAssignmentFields" style="display:none">
+                <div class="form-row two">
+                  <div class="form-group">
+                    <label class="form-label">Assigned Faculty</label>
+                    <select class="form-select" id="grantFaculty">
+                      <option value="">Select faculty…</option>
+                      <option value="Faculty of Engineering">Faculty of Engineering</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Assigned Department</label>
+                    <select class="form-select" id="grantDept">
+                      <option value="">Select department…</option>
+                      <option value="Electronic &amp; Computer Engineering">Electronic &amp; Computer Engineering</option>
+                      <option value="Mechanical Engineering">Mechanical Engineering</option>
+                      <option value="Industrial &amp; Petroleum Engineering">Industrial &amp; Petroleum Engineering</option>
+                      <option value="Chemical &amp; Polymer Engineering">Chemical &amp; Polymer Engineering</option>
+                      <option value="Civil Engineering">Civil Engineering</option>
+                      <option value="Aerospace Engineering">Aerospace Engineering</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-row two">
+                  <div class="form-group">
+                    <label class="form-label">Assigned Level</label>
+                    <select class="form-select" id="grantLevel">
+                      <option value="">Select level…</option>
+                      <option value="100 Level">100 Level</option>
+                      <option value="200 Level">200 Level</option>
+                      <option value="300 Level">300 Level</option>
+                      <option value="400 Level">400 Level</option>
+                      <option value="500 Level">500 Level</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Assigned Semester</label>
+                    <select class="form-select" id="grantSemester">
+                      <option value="">Select semester…</option>
+                      <option value="First Semester">First Semester</option>
+                      <option value="Second Semester">Second Semester</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-foot">
+                <div id="grantFeedback" class="feedback"></div>
+                <button class="btn btn-green" onclick="grantAdmin()">Grant Access</button>
+              </div>
+            </div>
+
+            <div class="sub-section-label">Current Admins &amp; Reps</div>
+            <div class="admin-list" id="adminList"></div>
+          </div>
+        </details>
+      </main>
     </div>
-    <!-- /mainContent -->
 
     <div class="toast" id="toast"></div>
 
-    <script type="module" src="js/admin.js"></script>
+    <script type="module" src="js/admin.js?v=premium-1"></script>
   </body>
 </html>
