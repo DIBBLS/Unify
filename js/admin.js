@@ -750,6 +750,9 @@ window.onTTTargetChange = function () {
 };
 
 window.initTimetableSection = async function (role, profile) {
+  const sel = document.getElementById("ttTargetSelectors");
+  const sub = document.getElementById("ttClassSub");
+
   if (role === "class_rep") {
     _ttTarget = {
       faculty: profile.assignedFaculty || "",
@@ -757,20 +760,27 @@ window.initTimetableSection = async function (role, profile) {
       level: profile.assignedLevel || "",
       semester: profile.assignedSemester || "",
     };
-    const sub = document.getElementById("ttClassSub");
-    if (sub) {
-      const txt = [_ttTarget.department, _ttTarget.level, _ttTarget.semester]
-        .filter(Boolean)
-        .join(" · ");
-      sub.textContent = txt
-        ? `${txt} — durations are flexible (set any start & end time).`
-        : "No class assigned — contact the super admin.";
+    const complete = _ttTarget.department && _ttTarget.level && _ttTarget.semester;
+    if (complete) {
+      if (sel) sel.style.display = "none";
+      if (sub) {
+        const txt = [_ttTarget.department, _ttTarget.level, _ttTarget.semester].filter(Boolean).join(" · ");
+        sub.textContent = `${txt} — durations are flexible (set any start & end time).`;
+      }
+    } else {
+      // No complete assignment — show the picker so they can still scope it
+      if (sel) sel.style.display = "block";
+      if (sub) sub.textContent = "Your class assignment is incomplete. Pick the class below, or ask a super admin to set your assignment.";
+      // Pre-fill any partial values onto the selectors
+      const setVal = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
+      setVal("ttFaculty", _ttTarget.faculty);
+      setVal("ttDept", _ttTarget.department);
+      setVal("ttLevel", _ttTarget.level);
+      setVal("ttSemester", _ttTarget.semester);
     }
   } else {
-    const sel = document.getElementById("ttTargetSelectors");
     if (sel) sel.style.display = "block";
-    const sub = document.getElementById("ttClassSub");
-    if (sub) sub.textContent = "Select a class above to manage its weekly timetable.";
+    if (sub) sub.textContent = "Select Faculty, Department, Level & Semester below to manage that class's weekly timetable.";
     renderTimetableGrid([]);
     return;
   }
@@ -849,7 +859,7 @@ function renderTimetableSheet(entries) {
     tr.innerHTML = `<td colspan="7" class="tt-empty">${
       targetReady
         ? 'No classes scheduled — click <strong>+ Add row</strong> to build the week.'
-        : 'Select a class above to view or edit its timetable.'
+        : 'Pick Faculty, Department, Level &amp; Semester in the panel above to begin.'
     }</td>`;
     tbody.appendChild(tr);
     return;
@@ -883,7 +893,16 @@ function renderTimetableGrid(entries) {
 
 window.addTTDraftRow = function () {
   if (!(_ttTarget.department && _ttTarget.level && _ttTarget.semester)) {
-    showToast("Select a class first");
+    showToast("Pick Faculty, Department, Level & Semester first");
+    const sel = document.getElementById("ttTargetSelectors");
+    if (sel) {
+      sel.style.display = "block";
+      sel.scrollIntoView({ behavior: "smooth", block: "center" });
+      const missing = ["ttFaculty", "ttDept", "ttLevel", "ttSemester"]
+        .map((id) => document.getElementById(id))
+        .find((el) => el && !el.value);
+      missing?.focus();
+    }
     return;
   }
   const tbody = document.getElementById("ttSheetBody");
