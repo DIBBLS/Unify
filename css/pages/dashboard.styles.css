@@ -2161,6 +2161,46 @@ input::placeholder {
 .hero-stat {
   padding: 18px 20px;
 }
+.stats-eye-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 6px 10px;
+  border-right: 1px solid var(--invert-border);
+  opacity: 0.55;
+  transition: opacity 0.15s;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+}
+.stats-eye-btn:hover { opacity: 1; }
+
+/* ── GOAL CARD — change-target expander ── */
+.goal-card {
+  flex-wrap: wrap;
+}
+.goal-card-change-wrap {
+  width: 100%;
+  border-top: 1px solid var(--border);
+  margin-top: 12px;
+  padding-top: 10px;
+}
+.goal-card-change-toggle {
+  background: none;
+  border: none;
+  font-size: 11px;
+  color: var(--text3);
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+  letter-spacing: 0.02em;
+  transition: color 0.15s;
+}
+.goal-card-change-toggle:hover { color: var(--text2); }
+.goal-card-change-body {
+  margin-top: 14px;
+}
 
 @media (max-width: 768px) {
   .goal-card-wrap {

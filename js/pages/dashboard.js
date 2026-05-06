@@ -209,11 +209,11 @@ async function loadUserData() {
       `${d.university} · ${d.level}`;
     document.getElementById("heroDept").textContent = d.department;
 
-    // ── FIX: show persisted CGPA immediately from Firestore ──
-    // This means the hero "balance" is visible even before courses render.
+    // Show persisted CGPA immediately from Firestore (before courses render)
     if (typeof d.cgpa === "number" && d.cgpa > 0) {
       document.getElementById("statCGPA").textContent = d.cgpa.toFixed(2);
     }
+    applyStatsMask();
 
     if (window.courses.length === 0) {
       // Truly first time or cleared — auto-populate from course DB + Firestore
@@ -240,27 +240,31 @@ function renderGoalCard(gp) {
   const card = document.getElementById("goalCard");
   if (!card) return;
 
+  const chipForm = `
+    <div class="goal-chip-form" id="goalChipForm">
+      <div class="goal-setup-chips">
+        <button class="goal-chip" data-val="4.50" data-cls="first" onclick="selectGoalChip(this)">First Class <span>≥ 4.50</span></button>
+        <button class="goal-chip" data-val="3.50" data-cls="upper" onclick="selectGoalChip(this)">2nd Upper <span>≥ 3.50</span></button>
+        <button class="goal-chip" data-val="2.40" data-cls="lower" onclick="selectGoalChip(this)">2nd Lower <span>≥ 2.40</span></button>
+        <button class="goal-chip" data-val="1.50" data-cls="pass" onclick="selectGoalChip(this)">Pass <span>≥ 1.50</span></button>
+      </div>
+      <div class="goal-setup-actions">
+        <button class="goal-save-btn" id="goalSaveBtn" onclick="saveGoalTarget()" disabled>Save target →</button>
+        <a href="predictor.html" class="goal-setup-link">Full planner ↗</a>
+      </div>
+    </div>`;
+
   if (!gp || !gp.target) {
-    // ── NO PLAN SET: show inline quick-pick form ──
     card.innerHTML = `
       <div class="goal-card-setup">
         <div class="goal-card-setup-title">Set your graduation target</div>
         <div class="goal-card-setup-sub">Pick a class — we'll track whether you're on pace.</div>
-        <div class="goal-setup-chips" id="goalChips">
-          <button class="goal-chip" data-val="4.50" data-cls="first" onclick="selectGoalChip(this)">First Class <span>≥ 4.50</span></button>
-          <button class="goal-chip" data-val="3.50" data-cls="upper" onclick="selectGoalChip(this)">2nd Upper <span>≥ 3.50</span></button>
-          <button class="goal-chip" data-val="2.40" data-cls="lower" onclick="selectGoalChip(this)">2nd Lower <span>≥ 2.40</span></button>
-          <button class="goal-chip" data-val="1.50" data-cls="pass" onclick="selectGoalChip(this)">Pass <span>≥ 1.50</span></button>
-        </div>
-        <div class="goal-setup-actions">
-          <button class="goal-save-btn" id="goalSaveBtn" onclick="saveGoalTarget()" disabled>Save target →</button>
-          <a href="predictor.html" class="goal-setup-link">Full planner ↗</a>
-        </div>
+        ${chipForm}
       </div>`;
     return;
   }
 
-  // ── PLAN SET: compact summary ──
+  // ── PLAN SET: compact summary + hidden expander for changing ──
   const modeCls = { recovery:"recovery", stability:"stability", push:"push", elite:"elite" }
     [(gp.academicMode||"").toLowerCase()] || "push";
   const reqAvg = gp.neededAvg != null
@@ -279,9 +283,12 @@ function renderGoalCard(gp) {
       <div class="goal-card-title">Target: ${targetLabel}</div>
       <div class="goal-card-sub">Req. avg: ${reqAvg != null ? reqAvg.toFixed(2) + " GP/sem" : "—"} · ${contextLine}</div>
     </div>
-    <div class="goal-card-actions">
-      <button class="goal-card-action goal-card-action-ghost" onclick="clearGoalTarget()">Change</button>
-      <a href="predictor.html" class="goal-card-action">View Plan →</a>
+    <a href="predictor.html" class="goal-card-action">View Plan →</a>
+    <div class="goal-card-change-wrap">
+      <button class="goal-card-change-toggle" onclick="toggleGoalChange(this)">Change target ▾</button>
+      <div class="goal-card-change-body" id="goalChangeBody" style="display:none;">
+        ${chipForm}
+      </div>
     </div>`;
 }
 
@@ -323,6 +330,40 @@ window.saveGoalTarget = async function() {
 window.clearGoalTarget = function() {
   _pendingGoalVal = null; _pendingGoalCls = null;
   renderGoalCard(null);
+};
+
+window.toggleGoalChange = function(btn) {
+  const body = document.getElementById('goalChangeBody');
+  if (!body) return;
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  btn.textContent = open ? 'Change target ▾' : 'Change target ▴';
+  if (!open) { _pendingGoalVal = null; _pendingGoalCls = null; }
+};
+
+// ── STATS HIDE/SHOW (bank-style eye toggle) ──────────────
+let _statsHidden = localStorage.getItem('unify-stats-hidden') === '1';
+
+function applyStatsMask() {
+  const ids = ['statTarget', 'statSemGP', 'statCGPA', 'statCourses'];
+  const eyeBtn = document.getElementById('statsEyeBtn');
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (_statsHidden) {
+      if (!el.dataset.real) el.dataset.real = el.textContent;
+      el.textContent = '••••';
+    } else {
+      if (el.dataset.real) { el.textContent = el.dataset.real; delete el.dataset.real; }
+    }
+  });
+  if (eyeBtn) eyeBtn.textContent = _statsHidden ? '👁' : '🙈';
+}
+
+window.toggleStatsVisibility = function() {
+  _statsHidden = !_statsHidden;
+  localStorage.setItem('unify-stats-hidden', _statsHidden ? '1' : '0');
+  applyStatsMask();
 };
 
 async function autoLoadCourses(dept, level) {
@@ -432,7 +473,8 @@ window.updateStats = function () {
   document.getElementById("emptyState").style.display =
     count === 0 ? "block" : "none";
 
-  // Semester GP — calculated from all courses the student has entered grades for
+  // Sem GP = the required average GP per semester to reach the target (from plan).
+  // Falls back to the calculated GP from current courses when no plan exists.
   let pts = 0, units = 0;
   window.courses.forEach((c) => {
     const p = gradeToPoint(c.grade);
@@ -441,24 +483,27 @@ window.updateStats = function () {
       units += Number(c.units);
     }
   });
-  const semGP = units > 0 ? pts / units : null;
+  const calcGP = units > 0 ? pts / units : null;
+  const semGP = (savedGoalPlan?.neededAvg != null)
+    ? Math.min(5, Math.max(0, parseFloat(savedGoalPlan.neededAvg)))
+    : calcGP;
 
   document.getElementById("statSemGP").textContent =
-    semGP !== null ? semGP.toFixed(2) : "—";
+    semGP !== null ? Number(semGP).toFixed(2) : "—";
 
-  // Cumulative CGPA: prefer predictor-entered value (gradePlanner.cgpa), fall back to sem calc
+  // Cumulative CGPA: prefer predictor-entered value, fall back to calc
   const cumCGPA = (savedGoalPlan?.cgpa != null && savedGoalPlan.cgpa > 0)
-    ? savedGoalPlan.cgpa
-    : semGP;
-  const cgpaEl = document.getElementById("statCGPA");
-  cgpaEl.textContent = cumCGPA !== null ? Number(cumCGPA).toFixed(2) : "—";
+    ? savedGoalPlan.cgpa : calcGP;
+  document.getElementById("statCGPA").textContent =
+    cumCGPA !== null ? Number(cumCGPA).toFixed(2) : "—";
 
   // Target CGPA from saved plan
+  const t = savedGoalPlan?.target;
   const targetEl = document.getElementById("statTarget");
-  if (targetEl) {
-    const t = savedGoalPlan?.target;
-    targetEl.textContent = t != null ? Number(t).toFixed(2) : "—";
-  }
+  if (targetEl) targetEl.textContent = t != null ? Number(t).toFixed(2) : "—";
+
+  // Apply hidden mask if active
+  applyStatsMask();
 
   const pct = count > 0 ? Math.round((graded / count) * 100) : 0;
   document.getElementById("progressFill").style.width = pct + "%";
