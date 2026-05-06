@@ -12,6 +12,7 @@ import {
   query,
   orderBy,
   onSnapshot,
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 let currentUser = null,
@@ -19,8 +20,8 @@ let currentUser = null,
   activeCourseId = null;
 let userProfile = {},
   aspirations = [];
-
 let weekProgress = {};
+let savedGoalPlan = null; // module-scope so the inline save can update it
 
 // ── DEBUG ─────────────────────────────────────────────
 // Temporary visible debug panel for Step 1 (course discovery).
@@ -155,7 +156,6 @@ document.getElementById("signOutBtn").addEventListener("click", async () => {
 
 // ── LOAD DATA ─────────────────────────────────────────
 async function loadUserData() {
-  let savedGoalPlan = null;
   try {
     const snap = await getDoc(doc(db, "users", currentUser.uid));
     if (!snap.exists() || !snap.data().university) {
@@ -239,44 +239,91 @@ async function loadUserData() {
 function renderGoalCard(gp) {
   const card = document.getElementById("goalCard");
   if (!card) return;
+
   if (!gp || !gp.target) {
+    // ── NO PLAN SET: show inline quick-pick form ──
     card.innerHTML = `
-      <div style="font-size:13px;color:var(--text2);flex:1;">You haven't set a graduation target yet.</div>
-      <a href="predictor.html" class="goal-card-action">Build your plan →</a>`;
+      <div class="goal-card-setup">
+        <div class="goal-card-setup-title">Set your graduation target</div>
+        <div class="goal-card-setup-sub">Pick a class — we'll track whether you're on pace.</div>
+        <div class="goal-setup-chips" id="goalChips">
+          <button class="goal-chip" data-val="4.50" data-cls="first" onclick="selectGoalChip(this)">First Class <span>≥ 4.50</span></button>
+          <button class="goal-chip" data-val="3.50" data-cls="upper" onclick="selectGoalChip(this)">2nd Upper <span>≥ 3.50</span></button>
+          <button class="goal-chip" data-val="2.40" data-cls="lower" onclick="selectGoalChip(this)">2nd Lower <span>≥ 2.40</span></button>
+          <button class="goal-chip" data-val="1.50" data-cls="pass" onclick="selectGoalChip(this)">Pass <span>≥ 1.50</span></button>
+        </div>
+        <div class="goal-setup-actions">
+          <button class="goal-save-btn" id="goalSaveBtn" onclick="saveGoalTarget()" disabled>Save target →</button>
+          <a href="predictor.html" class="goal-setup-link">Full planner ↗</a>
+        </div>
+      </div>`;
     return;
   }
-  const modeCls =
-    {
-      recovery: "recovery",
-      stability: "stability",
-      push: "push",
-      elite: "elite",
-    }[(gp.academicMode || "").toLowerCase()] || "push";
-  const reqAvg =
-    gp.neededAvg != null
-      ? Math.min(5, Math.max(0, parseFloat(gp.neededAvg)))
-      : null;
+
+  // ── PLAN SET: compact summary ──
+  const modeCls = { recovery:"recovery", stability:"stability", push:"push", elite:"elite" }
+    [(gp.academicMode||"").toLowerCase()] || "push";
+  const reqAvg = gp.neededAvg != null
+    ? Math.min(5, Math.max(0, parseFloat(gp.neededAvg))) : null;
   const targetMap = {
-    first: "First Class (≥4.50)",
-    upper: "2nd Class Upper (≥3.50)",
-    lower: "2nd Class Lower (≥2.40)",
-    pass: "Pass (≥1.50)",
+    first: "First Class (≥4.50)", upper: "2nd Class Upper (≥3.50)",
+    lower: "2nd Class Lower (≥2.40)", pass: "Pass (≥1.50)",
   };
-  const targetLabel =
-    targetMap[gp.targetClass] || `CGPA ≥ ${parseFloat(gp.target).toFixed(2)}`;
-  const shortTarget = targetLabel.split(" (")[0];
-  const contextLine =
-    reqAvg != null
-      ? `You need ${reqAvg.toFixed(2)} avg to hit ${shortTarget}`
-      : "View your full semester roadmap";
+  const targetLabel = targetMap[gp.targetClass] || `CGPA ≥ ${parseFloat(gp.target).toFixed(2)}`;
+  const contextLine = reqAvg != null
+    ? `You need ${reqAvg.toFixed(2)} avg to hit ${targetLabel.split(" (")[0]}`
+    : "View your full semester roadmap";
   card.innerHTML = `
     <div class="goal-card-body">
       <div class="goal-mode-badge ${modeCls}">${gp.academicMode || "Push"}</div>
       <div class="goal-card-title">Target: ${targetLabel}</div>
       <div class="goal-card-sub">Req. avg: ${reqAvg != null ? reqAvg.toFixed(2) + " GP/sem" : "—"} · ${contextLine}</div>
     </div>
-    <a href="predictor.html" class="goal-card-action">View Plan →</a>`;
+    <div class="goal-card-actions">
+      <button class="goal-card-action goal-card-action-ghost" onclick="clearGoalTarget()">Change</button>
+      <a href="predictor.html" class="goal-card-action">View Plan →</a>
+    </div>`;
 }
+
+let _pendingGoalVal = null, _pendingGoalCls = null;
+
+window.selectGoalChip = function(btn) {
+  document.querySelectorAll('.goal-chip').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  _pendingGoalVal = parseFloat(btn.dataset.val);
+  _pendingGoalCls = btn.dataset.cls;
+  const saveBtn = document.getElementById('goalSaveBtn');
+  if (saveBtn) saveBtn.disabled = false;
+};
+
+window.saveGoalTarget = async function() {
+  if (!_pendingGoalVal || !currentUser) return;
+  const btn = document.getElementById('goalSaveBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  try {
+    const update = {
+      target: _pendingGoalVal,
+      targetClass: _pendingGoalCls,
+      updatedAt: serverTimestamp(),
+    };
+    await setDoc(doc(db, 'users', currentUser.uid), { gradePlanner: update }, { merge: true });
+    savedGoalPlan = { ...(savedGoalPlan || {}), ...update };
+    renderGoalCard(savedGoalPlan);
+    updateStats();
+    const t = document.getElementById('milestoneToast');
+    if (t) { t.textContent = 'Target saved!'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+  } catch(e) {
+    console.error('saveGoalTarget:', e);
+    const t = document.getElementById('milestoneToast');
+    if (t) { t.textContent = 'Save failed — try again'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+    if (btn) { btn.disabled = false; btn.textContent = 'Save target →'; }
+  }
+};
+
+window.clearGoalTarget = function() {
+  _pendingGoalVal = null; _pendingGoalCls = null;
+  renderGoalCard(null);
+};
 
 async function autoLoadCourses(dept, level) {
   const semEl = document.getElementById("semester");
@@ -382,10 +429,10 @@ window.updateStats = function () {
   document.getElementById("coursesCount").textContent =
     count + " course" + (count !== 1 ? "s" : "");
   document.getElementById("statCourses").textContent = count;
-  document.getElementById("statGraded").textContent = graded;
   document.getElementById("emptyState").style.display =
     count === 0 ? "block" : "none";
 
+  // Semester GP — calculated from all courses the student has entered grades for
   let pts = 0, units = 0;
   window.courses.forEach((c) => {
     const p = gradeToPoint(c.grade);
@@ -394,12 +441,24 @@ window.updateStats = function () {
       units += Number(c.units);
     }
   });
+  const semGP = units > 0 ? pts / units : null;
 
-  const cgpa = units > 0 ? pts / units : null;
+  document.getElementById("statSemGP").textContent =
+    semGP !== null ? semGP.toFixed(2) : "—";
 
-  // ── FIX: update the hero CGPA display (the "balance") ──
+  // Cumulative CGPA: prefer predictor-entered value (gradePlanner.cgpa), fall back to sem calc
+  const cumCGPA = (savedGoalPlan?.cgpa != null && savedGoalPlan.cgpa > 0)
+    ? savedGoalPlan.cgpa
+    : semGP;
   const cgpaEl = document.getElementById("statCGPA");
-  cgpaEl.textContent = cgpa !== null ? cgpa.toFixed(2) : "—";
+  cgpaEl.textContent = cumCGPA !== null ? Number(cumCGPA).toFixed(2) : "—";
+
+  // Target CGPA from saved plan
+  const targetEl = document.getElementById("statTarget");
+  if (targetEl) {
+    const t = savedGoalPlan?.target;
+    targetEl.textContent = t != null ? Number(t).toFixed(2) : "—";
+  }
 
   const pct = count > 0 ? Math.round((graded / count) * 100) : 0;
   document.getElementById("progressFill").style.width = pct + "%";
