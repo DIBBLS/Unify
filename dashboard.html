@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="css/responsive.css" />
     <script src="js/theme.js"></script>
 
-    <link rel="stylesheet" href="css/pages/dashboard.styles.css" />
+    <link rel="stylesheet" href="css/pages/dashboard.styles.css?v=goal-2" />
   </head>
   <body>
     <!-- LOADING -->
@@ -131,16 +131,20 @@
         </div>
         <div class="hero-stats">
           <div class="hero-stat">
+            <div class="hero-stat-val" id="statTarget">—</div>
+            <div class="hero-stat-label">Target</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-val" id="statSemGP">—</div>
+            <div class="hero-stat-label">Sem GP</div>
+          </div>
+          <div class="hero-stat">
             <div class="hero-stat-val" id="statCGPA">—</div>
             <div class="hero-stat-label">CGPA</div>
           </div>
           <div class="hero-stat">
             <div class="hero-stat-val" id="statCourses">0</div>
             <div class="hero-stat-label">Courses</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-val" id="statGraded">0</div>
-            <div class="hero-stat-label">Graded</div>
           </div>
         </div>
       </div>
@@ -155,19 +159,7 @@
 
       <!-- ── GOAL CARD ── -->
       <div class="goal-card-wrap">
-        <div class="goal-card" id="goalCard">
-          <div class="goal-card-body">
-            <div
-              class="goal-card-cta"
-              style="font-size: 13px; color: var(--text2)"
-            >
-              You haven't set a graduation target yet.
-            </div>
-          </div>
-          <a href="predictor.html" class="goal-card-action"
-            >Build your plan →</a
-          >
-        </div>
+        <div class="goal-card" id="goalCard"></div>
       </div>
 
       <!-- ── STREAK + DAILY NUDGE ── -->
@@ -532,6 +524,6 @@
 
     <script src="courses.js?v=step1-deptfix"></script>
     <script src="Coursecontent.JS?v=step1-deptfix"></script>
-    <script type="module" src="js/pages/dashboard.js?v=step1-deptfix"></script>
+    <script type="module" src="js/pages/dashboard.js?v=goal-2"></script>
   </body>
 </html>
