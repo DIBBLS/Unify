@@ -5,7 +5,7 @@ let currentUser=null,profile={},posts=[],works=[],activePostTag=null;
 // ── THEME handled by js/theme.js ──────────────────────
 
 onAuthStateChanged(auth,async user=>{
-  if(!user){window.location.href='auth.html';return;}
+  if(!user){window.location.href='Auth.html';return;}
   currentUser=user;
   const init=(user.displayName||user.email||'U')[0].toUpperCase();
   document.getElementById('heroAvatar').textContent=init;
@@ -14,7 +14,7 @@ onAuthStateChanged(auth,async user=>{
   await Promise.all([loadPosts(),loadWorks()]);
   document.getElementById('loadingOverlay').style.display='none';
 });
-document.getElementById('signOutBtn').addEventListener('click',async()=>{await signOut(auth);window.location.href='auth.html';});
+document.getElementById('signOutBtn').addEventListener('click',async()=>{await signOut(auth);window.location.href='Auth.html';});
 
 async function loadProfile(){
   try{const snap=await getDoc(doc(db,'users',currentUser.uid));if(snap.exists())profile=snap.data();}catch(e){profile={};}

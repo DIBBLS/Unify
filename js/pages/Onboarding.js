@@ -1,6 +1,6 @@
 import { auth, db } from '../firebase-config.js';
 import { onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 let currentUser = null;
 
 // ── DATA ─────────────────────────────────────────────────────────────────────
@@ -42,19 +42,20 @@ const deptMaxLevel = { "Chemical & Polymer Engineering": "400 Level" };
 
 // ── STATE ────────────────────────────────────────────────────────────────────
 let step = 0;
-let selected = { firstName: '', university: null, faculty: null, department: null, level: null };
+let selected = { firstName: '', university: null, faculty: null, department: null, level: null, gradTarget: null, gradTargetClass: null };
 
 const leftContent = {
-  0: { step: "Step 1 of 5", title: "What's your<br><em>first name?</em>", sub: "This is how Unify will greet you. Just your first name is fine." },
-  1: { step: "Step 2 of 5", title: "Where are<br>you <em>studying?</em>", sub: "Select your university to get a dashboard personalised to your exact courses, resources, and career paths." },
-  2: { step: "Step 3 of 5", title: "What's your<br><em>faculty?</em>", sub: "Choose your faculty so we can show you the right departments and course data." },
-  3: { step: "Step 4 of 5", title: "Which<br><em>department?</em>", sub: "Pick your department and we'll load all your courses, resources, and career paths automatically." },
-  4: { step: "Step 5 of 5", title: "What level<br>are you <em>in?</em>", sub: "Select your current level and your dashboard will be ready with everything you need." },
+  0: { step: "Step 1 of 6", title: "What's your<br><em>first name?</em>", sub: "This is how Unify will greet you. Just your first name is fine." },
+  1: { step: "Step 2 of 6", title: "Where are<br>you <em>studying?</em>", sub: "Select your university to get a dashboard personalised to your exact courses, resources, and career paths." },
+  2: { step: "Step 3 of 6", title: "What's your<br><em>faculty?</em>", sub: "Choose your faculty so we can show you the right departments and course data." },
+  3: { step: "Step 4 of 6", title: "Which<br><em>department?</em>", sub: "Pick your department and we'll load all your courses, resources, and career paths automatically." },
+  4: { step: "Step 5 of 6", title: "What level<br>are you <em>in?</em>", sub: "Select your current level and your dashboard will be ready with everything you need." },
+  5: { step: "Step 6 of 6", title: "What's your<br><em>graduation target?</em>", sub: "Pick your goal class — Unify will show you the exact GP you need each semester to get there." },
 };
 
 // ── AUTH ─────────────────────────────────────────────────────────────────────
 onAuthStateChanged(auth, async user => {
-  if (!user) { window.location.href = 'auth.html'; return; }
+  if (!user) { window.location.href = 'Auth.html'; return; }
   currentUser = user;
 
   // If user is already onboarded AND didn't come here intentionally, send them back
@@ -85,9 +86,9 @@ function updateLeft() {
   document.getElementById('leftStep').textContent = c.step;
   document.getElementById('leftTitle').innerHTML = c.title;
   document.getElementById('leftSub').textContent = c.sub;
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 6; i++) {
     const dot = document.getElementById('dot' + i);
-    dot.className = 'step-dot' + (i === step ? ' active' : i < step ? ' done' : '');
+    if (dot) dot.className = 'step-dot' + (i === step ? ' active' : i < step ? ' done' : '');
   }
 }
 
@@ -101,6 +102,7 @@ function renderStep() {
   else if (step === 2) renderOptions(panel, faculties[selected.university], 'faculty');
   else if (step === 3) renderOptions(panel, departments[selected.faculty], 'department');
   else if (step === 4) renderLevels(panel);
+  else if (step === 5) renderGradeTarget(panel);
 }
 
 function backBtn(panel) {
@@ -144,7 +146,7 @@ function renderName(panel) {
   panel.appendChild(preview);
 
   const btn = document.createElement('button');
-  btn.className = 'next-btn';
+  btn.className = 'btn';
   btn.textContent = 'Continue →';
   btn.addEventListener('click', () => {
     const val = input.value.trim();
@@ -246,11 +248,74 @@ function renderLevels(panel) {
       document.querySelectorAll('.level-card').forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
       selected.level = lvl;
-      setTimeout(() => saveAndGo(), 300);
+      setTimeout(() => { step = 5; renderStep(); }, 300);
     });
     grid.appendChild(card);
   });
   panel.appendChild(grid);
+}
+
+function renderGradeTarget(panel) {
+  backBtn(panel);
+
+  const title = document.createElement('h2');
+  title.className = 'right-title';
+  title.textContent = 'Pick your graduation target';
+  const sub = document.createElement('p');
+  sub.className = 'right-sub';
+  sub.textContent = "You can change this anytime from the predictor. Pick what you're aiming for.";
+  panel.appendChild(title);
+  panel.appendChild(sub);
+
+  const targets = [
+    { label: 'First Class', sub: 'CGPA ≥ 4.50', val: 4.50, cls: 'first' },
+    { label: '2nd Class Upper', sub: 'CGPA ≥ 3.50', val: 3.50, cls: 'upper' },
+    { label: '2nd Class Lower', sub: 'CGPA ≥ 2.40', val: 2.40, cls: 'lower' },
+    { label: 'Pass', sub: 'CGPA ≥ 1.50', val: 1.50, cls: 'pass' },
+  ];
+
+  const list = document.createElement('div');
+  list.className = 'option-list';
+
+  let chosenVal = null, chosenCls = null;
+
+  targets.forEach(t => {
+    const el = document.createElement('div');
+    el.className = 'option-item';
+    el.innerHTML = `
+      <div>
+        <div class="option-name">${t.label}</div>
+        <div class="option-sub">${t.sub}</div>
+      </div>
+      <div class="option-check"><div class="option-check-inner"></div></div>`;
+    el.addEventListener('click', () => {
+      document.querySelectorAll('#rightPanel .option-item').forEach(i => i.classList.remove('selected'));
+      el.classList.add('selected');
+      chosenVal = t.val; chosenCls = t.cls;
+      continueBtn.disabled = false;
+    });
+    list.appendChild(el);
+  });
+  panel.appendChild(list);
+
+  const continueBtn = document.createElement('button');
+  continueBtn.className = 'btn';
+  continueBtn.style.marginTop = '8px';
+  continueBtn.textContent = 'Finish setup →';
+  continueBtn.disabled = true;
+  continueBtn.addEventListener('click', () => {
+    selected.gradTarget = chosenVal;
+    selected.gradTargetClass = chosenCls;
+    saveAndGo();
+  });
+
+  const skipBtn = document.createElement('button');
+  skipBtn.className = 'ob-skip-btn';
+  skipBtn.textContent = 'Skip for now — I\'ll set this later';
+  skipBtn.addEventListener('click', () => saveAndGo());
+
+  panel.appendChild(continueBtn);
+  panel.appendChild(skipBtn);
 }
 
 // ── SAVE & REDIRECT ──────────────────────────────────────────────────────────
@@ -262,14 +327,23 @@ async function saveAndGo() {
     if (selected.firstName && !currentUser.displayName) {
       try { await updateProfile(currentUser, { displayName: selected.firstName }); } catch(e) {}
     }
-    await setDoc(doc(db, 'users', currentUser.uid), {
+    const payload = {
       firstName: selected.firstName,
+      email: (currentUser.email || '').toLowerCase(),
       university: selected.university,
       faculty: selected.faculty,
       department: selected.department,
       level: selected.level,
       courses: [],
-    }, { merge: true });
+    };
+    if (selected.gradTarget != null) {
+      payload.gradePlanner = {
+        target: selected.gradTarget,
+        targetClass: selected.gradTargetClass,
+        updatedAt: serverTimestamp(),
+      };
+    }
+    await setDoc(doc(db, 'users', currentUser.uid), payload, { merge: true });
     window.location.href = 'dashboard.html';
   } catch(e) {
     console.error(e);
