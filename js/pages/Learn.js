@@ -1,9 +1,12 @@
 import { auth, db } from '../firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { doc, getDoc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { normalizeCode } from '../courses-service.js';
 
 let currentUser = null, userProfile = {};
 let courseCode = '', courseName = '', courseTopics = [];
+// Firestore-uploaded course content, indexed by week number (1-15)
+let firestoreContentByWeek = {};
 
 // Simple XSS sanitiser for rendering coordinator-supplied content
 function sanitise(str) {
@@ -39,14 +42,14 @@ onAuthStateChanged(auth, async user => {
 
   // Get course from URL params
   const params = new URLSearchParams(window.location.search);
-  courseCode = params.get('course') || '';
+  courseCode = normalizeCode(params.get('course') || '');
   courseName = params.get('name') || courseCode;
 
   document.getElementById('navCourseName').textContent = courseName;
   document.getElementById('sidebarCode').textContent = courseCode;
   document.getElementById('sidebarName').textContent = courseName;
 
-  await loadUserData();
+  await Promise.all([loadUserData(), loadFirestoreContent(courseCode)]);
   // Generate stubs for any course not manually defined in courseContent.js
   if (window.generateCourseStubs) window.generateCourseStubs();
   buildCurriculum();
@@ -68,6 +71,26 @@ async function loadUserData() {
       topicProgress = d.topicProgress?.[courseCode] || {};
     }
   } catch(e) { console.error(e); }
+}
+
+// Loads admin-uploaded weekly content from Firestore, keyed by week number.
+// Falls back gracefully — students still see the legacy URL-based notes if
+// the network call fails or no content has been uploaded yet.
+async function loadFirestoreContent(code) {
+  firestoreContentByWeek = {};
+  if (!code) return;
+  try {
+    const snap = await getDocs(
+      query(collection(db, 'courseContent'), where('courseCode', '==', code))
+    );
+    snap.docs.forEach(d => {
+      const data = { id: d.id, ...d.data() };
+      const wk = Number(data.week);
+      if (Number.isFinite(wk)) firestoreContentByWeek[wk] = data;
+    });
+  } catch (e) {
+    console.warn('[learn] Firestore content load failed:', e);
+  }
 }
 
 async function saveProgress() {
@@ -333,6 +356,8 @@ function populateLesson(week, subtopic, wi, ti) {
   }
 
   // ── NOTES CARD ──────────────────────────────────────────────────────────
+  // Firestore-uploaded content (admin) takes precedence over the legacy URL.
+  const fsContent = firestoreContentByWeek[week.week] || null;
   const notesUrl = weekResources.notes || '';
   const weekSummary = weekEntry?.summary || '';
   const subtopics = week.subtopics || [];
@@ -342,17 +367,31 @@ function populateLesson(week, subtopic, wi, ti) {
   document.getElementById('notesCardMeta').textContent =
     courseCode + ' · Week ' + week.week + ' · ' + subtopic;
 
-  // Description — use week summary if available, else generic
-  document.getElementById('notesCardDesc').textContent = weekSummary ||
+  // Description — use Firestore title if uploaded, else week summary, else generic
+  document.getElementById('notesCardDesc').textContent =
+    (fsContent && fsContent.title) ||
+    weekSummary ||
     'Peer-reviewed notes for this week — written by students who sat through this course, reviewed by the departmental coordinator.';
 
   // Tags
   document.getElementById('notesCardTags').innerHTML = subtopics
     .map(s => `<span class="notes-tag">${sanitise(s)}</span>`).join('');
 
-  // Action — Read full notes button or unavailable state
+  // Action — Firestore notes (iframe modal) > legacy URL > unavailable
   const actionEl = document.getElementById('notesCardAction');
-  if (notesUrl) {
+  if (fsContent && fsContent.htmlContent) {
+    actionEl.innerHTML = `
+      <button type="button" class="notes-read-btn" onclick="openNotes(${week.week})">
+        <div class="notes-read-btn-left">
+          <span class="notes-read-btn-icon">📖</span>
+          <div>
+            <div class="notes-read-btn-text">View full notes</div>
+            <div class="notes-read-btn-sub">Week ${week.week} — uploaded by your coordinator</div>
+          </div>
+        </div>
+        <span class="notes-read-btn-arrow">↗</span>
+      </button>`;
+  } else if (notesUrl) {
     actionEl.innerHTML = `
       <a href="${sanitise(notesUrl)}" target="_blank" class="notes-read-btn">
         <div class="notes-read-btn-left">
@@ -376,7 +415,12 @@ function populateLesson(week, subtopic, wi, ti) {
   }
 
   // ── VIDEO ──────────────────────────────────────────────────────────────
-  const videoUrl = weekResources.video || resources['Video Courses'] || '';
+  // Firestore-uploaded YouTube link takes precedence over legacy resources.
+  const videoUrl =
+    (fsContent && fsContent.youtubeUrl) ||
+    weekResources.video ||
+    resources['Video Courses'] ||
+    '';
   const videoEl = document.getElementById('videoContent');
   if (videoUrl && (videoUrl.includes('youtube') || videoUrl.includes('youtu.be'))) {
     const m = videoUrl.match(/(?:youtube[.]com[/]watch[?]v=|youtu[.]be[/])([a-zA-Z0-9_-]{11})/);
@@ -846,3 +890,54 @@ function showToast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3500);
 }
+
+// ── FIRESTORE NOTES MODAL ─────────────────────────────────────────────
+// Wraps fragments in a minimal HTML doc so basic typography still works.
+// Full <!DOCTYPE> / <html> documents are passed through unchanged.
+function wrapIfSnippet(html) {
+  const trimmed = String(html || '').trim();
+  if (/^<!DOCTYPE/i.test(trimmed) || /^<html[\s>]/i.test(trimmed)) return trimmed;
+  return `<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      body { font-family: 'DM Sans', system-ui, sans-serif; line-height: 1.7; color: #0a0a0a; padding: 28px; max-width: 760px; margin: 0 auto; }
+      h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; line-height: 1.2; margin-top: 1.4em; }
+      pre, code { font-family: ui-monospace, Menlo, monospace; }
+      pre { background: #f5f4f0; padding: 14px; border-radius: 8px; overflow-x: auto; }
+    </style>
+  </head><body>${trimmed}</body></html>`;
+}
+
+window.openNotes = function (weekNum) {
+  const item = firestoreContentByWeek[Number(weekNum)];
+  if (!item) return;
+  const titleEl = document.getElementById('notesModalTitle');
+  if (titleEl) titleEl.textContent = `Week ${item.week} — ${item.title || ''}`.trim();
+  const iframe = document.getElementById('notesModalFrame');
+  if (iframe) iframe.srcdoc = wrapIfSnippet(item.htmlContent);
+
+  const fsBtn = document.getElementById('notesFullscreenBtn');
+  if (fsBtn) {
+    fsBtn.onclick = () => {
+      const blob = new Blob([wrapIfSnippet(item.htmlContent)], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank', 'noopener,noreferrer');
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    };
+  }
+
+  const overlay = document.getElementById('notesOverlay');
+  if (overlay) overlay.classList.add('open');
+};
+
+window.closeNotesModal = function () {
+  const overlay = document.getElementById('notesOverlay');
+  if (overlay) overlay.classList.remove('open');
+  const iframe = document.getElementById('notesModalFrame');
+  if (iframe) iframe.srcdoc = '';
+};
+
+window.handleNotesOverlayClick = function (e) {
+  if (e.target === document.getElementById('notesOverlay')) window.closeNotesModal();
+};
