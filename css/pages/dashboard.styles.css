@@ -2161,6 +2161,29 @@ input::placeholder {
 .hero-stat {
   padding: 18px 20px;
 }
+.hero-stat-link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.15s;
+}
+.hero-stat-link:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+.hero-stat-link::after {
+  content: "↗";
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 9px;
+  opacity: 0;
+  color: var(--invert-sub);
+  transition: opacity 0.15s;
+}
+.hero-stat-link:hover::after {
+  opacity: 1;
+}
 .stats-eye-btn {
   background: none;
   border: none;
