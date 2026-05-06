@@ -238,8 +238,20 @@ async function loadUserData() {
 
 function renderGoalCard(gp) {
   const card = document.getElementById("goalCard");
+  const wrap = card?.parentElement; // .goal-card-wrap
   if (!card) return;
 
+  // Plan exists → the hero stats (Target / Sem GP / CGPA) already show
+  // this info, so we hide the entire card to avoid duplication. Predictor
+  // is reachable by clicking the Target stat.
+  if (gp && gp.target) {
+    card.innerHTML = '';
+    if (wrap) wrap.style.display = 'none';
+    return;
+  }
+
+  // Plan missing → show inline chip picker as a one-time nudge
+  if (wrap) wrap.style.display = '';
   const chipForm = `
     <div class="goal-chip-form" id="goalChipForm">
       <div class="goal-setup-chips">
@@ -253,37 +265,12 @@ function renderGoalCard(gp) {
         <a href="predictor.html" class="goal-setup-link">Full planner ↗</a>
       </div>
     </div>`;
-
-  if (!gp || !gp.target) {
-    card.innerHTML = `
-      <div class="goal-card-setup">
-        <div class="goal-card-setup-title">Set your graduation target</div>
-        <div class="goal-card-setup-sub">Pick a class — we'll track whether you're on pace.</div>
-        ${chipForm}
-      </div>`;
-    return;
-  }
-
-  // ── PLAN SET: compact summary ──
-  const modeCls = { recovery:"recovery", stability:"stability", push:"push", elite:"elite" }
-    [(gp.academicMode||"").toLowerCase()] || "push";
-  const reqAvg = gp.neededAvg != null
-    ? Math.min(5, Math.max(0, parseFloat(gp.neededAvg))) : null;
-  const targetMap = {
-    first: "First Class (≥4.50)", upper: "2nd Class Upper (≥3.50)",
-    lower: "2nd Class Lower (≥2.40)", pass: "Pass (≥1.50)",
-  };
-  const targetLabel = targetMap[gp.targetClass] || `CGPA ≥ ${parseFloat(gp.target).toFixed(2)}`;
-  const contextLine = reqAvg != null
-    ? `You need ${reqAvg.toFixed(2)} avg to hit ${targetLabel.split(" (")[0]}`
-    : "View your full semester roadmap";
   card.innerHTML = `
-    <div class="goal-card-body">
-      <div class="goal-mode-badge ${modeCls}">${gp.academicMode || "Push"}</div>
-      <div class="goal-card-title">Target: ${targetLabel}</div>
-      <div class="goal-card-sub">Req. avg: ${reqAvg != null ? reqAvg.toFixed(2) + " GP/sem" : "—"} · ${contextLine}</div>
-    </div>
-    <a href="predictor.html" class="goal-card-action">View Plan →</a>`;
+    <div class="goal-card-setup">
+      <div class="goal-card-setup-title">Set your graduation target</div>
+      <div class="goal-card-setup-sub">Pick a class — we'll track whether you're on pace.</div>
+      ${chipForm}
+    </div>`;
 }
 
 let _pendingGoalVal = null, _pendingGoalCls = null;
