@@ -1101,24 +1101,42 @@ window.uploadCourseContent = async function () {
 
   if (!courseCode) { showToast("Enter a course code"); return; }
   if (!weekRaw) { showToast("Select a week"); return; }
-  if (!title) { showToast("Enter a week title"); return; }
-  if (!htmlContent) { showToast("Paste HTML notes content"); return; }
+  if (!htmlContent && !youtubeUrl) {
+    showToast("Add either HTML notes, a YouTube link, or both");
+    return;
+  }
 
   const week = parseInt(weekRaw, 10);
+  // Deterministic ID per (course, week). setDoc + merge means re-uploading
+  // partial fields (e.g. just the YouTube link) doesn't wipe out the rest.
+  const docId = courseCode.replace(/\s+/g, "_") + "_W" + week;
 
   btn.disabled = true;
   btn.textContent = "Uploading…";
   try {
-    await addDoc(collection(db, "courseContent"), {
+    const ref = doc(db, "courseContent", docId);
+    const existing = await getDoc(ref);
+    const now = serverTimestamp();
+
+    // Build payload — only include fields the user actually filled in,
+    // so a YouTube-only update doesn't blank out existing HTML/title.
+    const payload = {
       courseCode,
       week,
-      title,
-      htmlContent,
-      youtubeUrl: youtubeUrl || "",
-      createdAt: serverTimestamp(),
-      createdBy: me.uid,
-      createdByName: myProfile?.name || myProfile?.firstName || me.email,
-    });
+      updatedAt: now,
+      updatedBy: me.uid,
+      updatedByName: myProfile?.name || myProfile?.firstName || me.email,
+    };
+    if (title) payload.title = title;
+    if (htmlContent) payload.htmlContent = htmlContent;
+    if (youtubeUrl) payload.youtubeUrl = youtubeUrl;
+    if (!existing.exists()) {
+      payload.createdAt = now;
+      payload.createdBy = me.uid;
+      payload.createdByName = myProfile?.name || myProfile?.firstName || me.email;
+    }
+
+    await setDoc(ref, payload, { merge: true });
 
     // Clear form
     document.getElementById("ccCode").value = "";
@@ -1127,7 +1145,11 @@ window.uploadCourseContent = async function () {
     document.getElementById("ccHtml").value = "";
     document.getElementById("ccYoutube").value = "";
 
-    showToast(`Week ${week} uploaded for ${courseCode}`);
+    showToast(
+      existing.exists()
+        ? `Week ${week} updated for ${courseCode}`
+        : `Week ${week} uploaded for ${courseCode}`
+    );
     // Reset drop sub text
     const sub = document.getElementById("ccDropSub");
     if (sub) sub.textContent = "Whole-page HTML works — styles and scripts stay isolated";

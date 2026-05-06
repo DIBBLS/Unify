@@ -90,10 +90,21 @@ async function loadFirestoreContent(code) {
       );
       console.log(`[learn] courseContent query for "${variant}": ${snap.size} doc(s)`);
       if (!snap.empty) {
-        snap.docs.forEach(d => {
-          const data = { id: d.id, ...d.data() };
+        // Sort newest-first so legacy duplicates from addDoc-era uploads
+        // resolve to the most recently saved version per week.
+        const ts = (d) => {
+          const v = d.updatedAt || d.createdAt;
+          return v?.toMillis ? v.toMillis() : (typeof v === 'number' ? v : 0);
+        };
+        const docs = snap.docs
+          .map(d => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => ts(b) - ts(a));
+        docs.forEach(data => {
           const wk = Number(data.week);
-          if (Number.isFinite(wk)) firestoreContentByWeek[wk] = data;
+          if (!Number.isFinite(wk)) return;
+          // First write (newest) wins; skip older duplicates
+          if (firestoreContentByWeek[wk]) return;
+          firestoreContentByWeek[wk] = data;
         });
         break; // found results with this variant, no need to try others
       }
