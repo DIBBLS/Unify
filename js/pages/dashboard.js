@@ -1,4 +1,5 @@
 import { auth, db } from "../firebase-config.js";
+import { listCourses } from "../courses-service.js";
 import {
   onAuthStateChanged,
   signOut,
@@ -7,6 +8,11 @@ import {
   doc,
   getDoc,
   setDoc,
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 let currentUser = null,
@@ -14,8 +20,70 @@ let currentUser = null,
   activeCourseId = null;
 let userProfile = {},
   aspirations = [];
-
 let weekProgress = {};
+let savedGoalPlan = null; // module-scope so the inline save can update it
+
+// ── DEBUG ─────────────────────────────────────────────
+// Temporary visible debug panel for Step 1 (course discovery).
+// Remove once dynamic courses are confirmed working.
+const DEBUG_COURSES = false;
+let debugLogs = [];
+function dbg(msg, data) {
+  const line = data !== undefined ? `${msg} ${JSON.stringify(data)}` : msg;
+  console.log("[unify-debug]", line);
+  if (DEBUG_COURSES) {
+    debugLogs.push(line);
+    renderDebugPanel();
+  }
+}
+function renderDebugPanel() {
+  if (!DEBUG_COURSES) return;
+  let panel = document.getElementById("__unifyDebug");
+  if (!panel) {
+    panel = document.createElement("div");
+    panel.id = "__unifyDebug";
+    panel.style.cssText =
+      "position:fixed;bottom:8px;left:8px;right:8px;max-height:40vh;overflow:auto;" +
+      "background:rgba(0,0,0,0.92);color:#0f0;font:11px/1.4 ui-monospace,Menlo,monospace;" +
+      "padding:10px 12px;border-radius:8px;z-index:99999;white-space:pre-wrap;" +
+      "box-shadow:0 4px 12px rgba(0,0,0,0.4);";
+    const close = document.createElement("button");
+    close.textContent = "× close debug";
+    close.style.cssText =
+      "position:absolute;top:6px;right:8px;background:#f00;color:#fff;border:none;" +
+      "padding:2px 8px;border-radius:4px;font:11px ui-monospace;cursor:pointer;";
+    close.onclick = () => panel.remove();
+    panel.appendChild(close);
+    const body = document.createElement("div");
+    body.id = "__unifyDebugBody";
+    body.style.marginTop = "18px";
+    panel.appendChild(body);
+    document.body.appendChild(panel);
+  }
+  const body = document.getElementById("__unifyDebugBody");
+  if (body) body.textContent = debugLogs.join("\n");
+}
+function normaliseField(s) {
+  return String(s || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s*&\s*/g, " and ")
+    .replace(/\s+/g, " ");
+}
+function eq(a, b) {
+  return normaliseField(a) === normaliseField(b);
+}
+// Self-test: if this commit is loaded, the line below will appear in the
+// debug panel as "BUILD: dept normalise OK". If it is missing or shows FAIL,
+// the browser is still serving the previous dashboard.js from cache.
+(function () {
+  const probe =
+    normaliseField("Electronic & Computer Engineering") ===
+    normaliseField("Electronic and Computer Engineering");
+  setTimeout(() => {
+    dbg("BUILD: dept normalise " + (probe ? "OK" : "FAIL"));
+  }, 0);
+})();
 
 // ── SECURITY ──────────────────────────────────────────
 function sanitise(str) {
@@ -42,10 +110,11 @@ function rateLimit(key, max = 5, windowMs = 60000) {
 // ── AUTH ──────────────────────────────────────────────
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    window.location.href = "auth.html";
+    window.location.href = "Auth.html";
     return;
   }
   currentUser = user;
+  dbg("auth: signed in as", { uid: user.uid, email: user.email });
 
   let first = "Builder";
   if (user.displayName && user.displayName.trim()) {
@@ -71,6 +140,7 @@ onAuthStateChanged(auth, async (user) => {
 
   await loadUserData();
   initStreak();
+  subscribeNotifications();
   document.getElementById("loadingOverlay").style.display = "none";
 });
 
@@ -81,20 +151,28 @@ document.addEventListener("visibilitychange", () => {
 
 document.getElementById("signOutBtn").addEventListener("click", async () => {
   await signOut(auth);
-  window.location.href = "auth.html";
+  window.location.href = "Auth.html";
 });
 
 // ── LOAD DATA ─────────────────────────────────────────
 async function loadUserData() {
-  let savedGoalPlan = null;
   try {
     const snap = await getDoc(doc(db, "users", currentUser.uid));
     if (!snap.exists() || !snap.data().university) {
-      window.location.href = "onboarding.html";
+      window.location.href = "Onboarding.html";
       return;
     }
     const d = snap.data();
     savedGoalPlan = d.gradePlanner || null;
+
+    // Backfill email so admins can grant access by email (legacy docs lack it)
+    const authEmail = (currentUser.email || '').toLowerCase();
+    if (authEmail && (d.email || '').toLowerCase() !== authEmail) {
+      try {
+        await setDoc(doc(db, "users", currentUser.uid), { email: authEmail }, { merge: true });
+        d.email = authEmail;
+      } catch (e) { /* non-fatal */ }
+    }
 
     userProfile = {
       university: d.university,
@@ -102,6 +180,9 @@ async function loadUserData() {
       department: d.department,
       level: d.level,
     };
+    dbg("profile:", userProfile);
+    const semSel = document.getElementById("semester");
+    dbg("dashboard semester selector value:", semSel ? semSel.value : "(no element)");
 
     if (!d.firstName) {
       const nudge = document.getElementById("nameNudge");
@@ -128,15 +209,15 @@ async function loadUserData() {
       `${d.university} · ${d.level}`;
     document.getElementById("heroDept").textContent = d.department;
 
-    // ── FIX: show persisted CGPA immediately from Firestore ──
-    // This means the hero "balance" is visible even before courses render.
+    // Show persisted CGPA immediately from Firestore (before courses render)
     if (typeof d.cgpa === "number" && d.cgpa > 0) {
       document.getElementById("statCGPA").textContent = d.cgpa.toFixed(2);
     }
+    applyStatsMask();
 
     if (window.courses.length === 0) {
-      // Truly first time or cleared — auto-populate from course DB
-      autoLoadCourses(d.department, d.level);
+      // Truly first time or cleared — auto-populate from course DB + Firestore
+      await autoLoadCourses(d.department, d.level);
     }
 
     renderAspirations();
@@ -149,67 +230,167 @@ async function loadUserData() {
   displayCourses();
   updateStats();
   renderPlanner();
+
+  // Eagerly probe Firestore so the debug panel reports immediately
+  // on first paint, without requiring the student to click "+ Add".
+  loadCoursePickerList();
 }
 
 function renderGoalCard(gp) {
   const card = document.getElementById("goalCard");
+  const wrap = card?.parentElement; // .goal-card-wrap
   if (!card) return;
-  if (!gp || !gp.target) {
-    card.innerHTML = `
-      <div style="font-size:13px;color:var(--text2);flex:1;">You haven't set a graduation target yet.</div>
-      <a href="predictor.html" class="goal-card-action">Build your plan →</a>`;
+
+  // Plan exists → the hero stats (Target / Sem GP / CGPA) already show
+  // this info, so we hide the entire card to avoid duplication. Predictor
+  // is reachable by clicking the Target stat.
+  if (gp && gp.target) {
+    card.innerHTML = '';
+    if (wrap) wrap.style.display = 'none';
     return;
   }
-  const modeCls =
-    {
-      recovery: "recovery",
-      stability: "stability",
-      push: "push",
-      elite: "elite",
-    }[(gp.academicMode || "").toLowerCase()] || "push";
-  const reqAvg =
-    gp.neededAvg != null
-      ? Math.min(5, Math.max(0, parseFloat(gp.neededAvg)))
-      : null;
-  const targetMap = {
-    first: "First Class (≥4.50)",
-    upper: "2nd Class Upper (≥3.50)",
-    lower: "2nd Class Lower (≥2.40)",
-    pass: "Pass (≥1.50)",
-  };
-  const targetLabel =
-    targetMap[gp.targetClass] || `CGPA ≥ ${parseFloat(gp.target).toFixed(2)}`;
-  const shortTarget = targetLabel.split(" (")[0];
-  const contextLine =
-    reqAvg != null
-      ? `You need ${reqAvg.toFixed(2)} avg to hit ${shortTarget}`
-      : "View your full semester roadmap";
+
+  // Plan missing → show inline chip picker as a one-time nudge
+  if (wrap) wrap.style.display = '';
+  const chipForm = `
+    <div class="goal-chip-form" id="goalChipForm">
+      <div class="goal-setup-chips">
+        <button class="goal-chip" data-val="4.50" data-cls="first" onclick="selectGoalChip(this)">First Class <span>≥ 4.50</span></button>
+        <button class="goal-chip" data-val="3.50" data-cls="upper" onclick="selectGoalChip(this)">2nd Upper <span>≥ 3.50</span></button>
+        <button class="goal-chip" data-val="2.40" data-cls="lower" onclick="selectGoalChip(this)">2nd Lower <span>≥ 2.40</span></button>
+        <button class="goal-chip" data-val="1.50" data-cls="pass" onclick="selectGoalChip(this)">Pass <span>≥ 1.50</span></button>
+      </div>
+      <div class="goal-setup-actions">
+        <button class="goal-save-btn" id="goalSaveBtn" onclick="saveGoalTarget()" disabled>Save target →</button>
+        <a href="predictor.html" class="goal-setup-link">Full planner ↗</a>
+      </div>
+    </div>`;
   card.innerHTML = `
-    <div class="goal-card-body">
-      <div class="goal-mode-badge ${modeCls}">${gp.academicMode || "Push"}</div>
-      <div class="goal-card-title">Target: ${targetLabel}</div>
-      <div class="goal-card-sub">Req. avg: ${reqAvg != null ? reqAvg.toFixed(2) + " GP/sem" : "—"} · ${contextLine}</div>
-    </div>
-    <a href="predictor.html" class="goal-card-action">View Plan →</a>`;
+    <div class="goal-card-setup">
+      <div class="goal-card-setup-title">Set your graduation target</div>
+      <div class="goal-card-setup-sub">Pick a class — we'll track whether you're on pace.</div>
+      ${chipForm}
+    </div>`;
 }
 
-function autoLoadCourses(dept, level) {
-  const db_data =
-    window.coursesDatabase?.["Faculty of Engineering"]?.[dept]?.[level];
-  if (!db_data) {
-    console.warn(
-      "coursesDatabase not ready or dept/level not found:",
-      dept,
-      level,
-    );
-    return;
+let _pendingGoalVal = null, _pendingGoalCls = null;
+
+window.selectGoalChip = function(btn) {
+  document.querySelectorAll('.goal-chip').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  _pendingGoalVal = parseFloat(btn.dataset.val);
+  _pendingGoalCls = btn.dataset.cls;
+  const saveBtn = document.getElementById('goalSaveBtn');
+  if (saveBtn) saveBtn.disabled = false;
+};
+
+window.saveGoalTarget = async function() {
+  if (!_pendingGoalVal || !currentUser) return;
+  const btn = document.getElementById('goalSaveBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  try {
+    const update = {
+      target: _pendingGoalVal,
+      targetClass: _pendingGoalCls,
+      updatedAt: serverTimestamp(),
+    };
+    await setDoc(doc(db, 'users', currentUser.uid), { gradePlanner: update }, { merge: true });
+    savedGoalPlan = { ...(savedGoalPlan || {}), ...update };
+    renderGoalCard(savedGoalPlan);
+    updateStats();
+    const t = document.getElementById('milestoneToast');
+    if (t) { t.textContent = 'Target saved!'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+  } catch(e) {
+    console.error('saveGoalTarget:', e);
+    const t = document.getElementById('milestoneToast');
+    if (t) { t.textContent = 'Save failed — try again'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+    if (btn) { btn.disabled = false; btn.textContent = 'Save target →'; }
   }
+};
+
+window.clearGoalTarget = function() {
+  _pendingGoalVal = null; _pendingGoalCls = null;
+  renderGoalCard(null);
+};
+
+// ── STATS HIDE/SHOW (bank-style eye toggle) ──────────────
+let _statsHidden = localStorage.getItem('unify-stats-hidden') === '1';
+
+function applyStatsMask() {
+  const ids = ['statTarget', 'statSemGP', 'statCGPA', 'statCourses'];
+  const eyeBtn = document.getElementById('statsEyeBtn');
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (_statsHidden) {
+      if (!el.dataset.real) el.dataset.real = el.textContent;
+      el.textContent = '••••';
+    } else {
+      if (el.dataset.real) { el.textContent = el.dataset.real; delete el.dataset.real; }
+    }
+  });
+  if (eyeBtn) eyeBtn.textContent = _statsHidden ? '👁' : '🙈';
+}
+
+window.toggleStatsVisibility = function() {
+  _statsHidden = !_statsHidden;
+  localStorage.setItem('unify-stats-hidden', _statsHidden ? '1' : '0');
+  applyStatsMask();
+};
+
+async function autoLoadCourses(dept, level) {
   const semEl = document.getElementById("semester");
   const sem = semEl ? semEl.value : "First Semester";
-  const courses = db_data[sem] || [];
-  window.courses = courses
-    .filter(Boolean)
-    .map((c) => ({ course: c, grade: "-", units: 3 }));
+  dbg("autoLoadCourses called with", { dept, level, sem });
+
+  const courseMap = {};
+
+  // Hardcoded fallback
+  const hardcodedList =
+    window.coursesDatabase?.["Faculty of Engineering"]?.[dept]?.[level]?.[sem] || [];
+  dbg("hardcoded match count:", hardcodedList.length);
+  hardcodedList.filter(Boolean).forEach((c) => {
+    const code = String(c).trim().toUpperCase();
+    courseMap[code] = { course: code, grade: "-", units: 3 };
+  });
+
+  // Firestore courses — merge in (Firestore units win)
+  try {
+    const all = await listCourses();
+    dbg("Firestore listCourses returned:", all.length + " docs");
+    all.forEach((c, i) => {
+      const code = String(c.code || "").trim().toUpperCase();
+      const matchDept = !c.department || eq(c.department, dept);
+      const matchLevel = !c.level || eq(c.level, level);
+      const matchSem = !c.semester || eq(c.semester, sem);
+      const included = !!code && matchDept && matchLevel && matchSem;
+      dbg(`  [auto] #${i} ${c.code} →`, {
+        faculty: c.faculty || "(blank)",
+        department: c.department || "(blank)",
+        level: c.level || "(blank)",
+        semester: c.semester || "(blank)",
+        matchDept, matchLevel, matchSem,
+        included,
+      });
+      if (included) {
+        courseMap[code] = {
+          course: code,
+          grade: courseMap[code]?.grade || "-",
+          units: c.units || courseMap[code]?.units || 3,
+        };
+      }
+    });
+  } catch (e) {
+    dbg("Firestore listCourses ERROR:", e?.message || String(e));
+    console.warn("[dashboard] Could not load Firestore courses:", e);
+  }
+
+  dbg("autoLoadCourses final list:", Object.keys(courseMap));
+  if (!Object.keys(courseMap).length) {
+    return;
+  }
+
+  window.courses = Object.values(courseMap);
   if (currentUser) {
     setDoc(
       doc(db, "users", currentUser.uid),
@@ -261,10 +442,11 @@ window.updateStats = function () {
   document.getElementById("coursesCount").textContent =
     count + " course" + (count !== 1 ? "s" : "");
   document.getElementById("statCourses").textContent = count;
-  document.getElementById("statGraded").textContent = graded;
   document.getElementById("emptyState").style.display =
     count === 0 ? "block" : "none";
 
+  // Sem GP = the required average GP per semester to reach the target (from plan).
+  // Falls back to the calculated GP from current courses when no plan exists.
   let pts = 0, units = 0;
   window.courses.forEach((c) => {
     const p = gradeToPoint(c.grade);
@@ -273,12 +455,27 @@ window.updateStats = function () {
       units += Number(c.units);
     }
   });
+  const calcGP = units > 0 ? pts / units : null;
+  const semGP = (savedGoalPlan?.neededAvg != null)
+    ? Math.min(5, Math.max(0, parseFloat(savedGoalPlan.neededAvg)))
+    : calcGP;
 
-  const cgpa = units > 0 ? pts / units : null;
+  document.getElementById("statSemGP").textContent =
+    semGP !== null ? Number(semGP).toFixed(2) : "—";
 
-  // ── FIX: update the hero CGPA display (the "balance") ──
-  const cgpaEl = document.getElementById("statCGPA");
-  cgpaEl.textContent = cgpa !== null ? cgpa.toFixed(2) : "—";
+  // Cumulative CGPA: prefer predictor-entered value, fall back to calc
+  const cumCGPA = (savedGoalPlan?.cgpa != null && savedGoalPlan.cgpa > 0)
+    ? savedGoalPlan.cgpa : calcGP;
+  document.getElementById("statCGPA").textContent =
+    cumCGPA !== null ? Number(cumCGPA).toFixed(2) : "—";
+
+  // Target CGPA from saved plan
+  const t = savedGoalPlan?.target;
+  const targetEl = document.getElementById("statTarget");
+  if (targetEl) targetEl.textContent = t != null ? Number(t).toFixed(2) : "—";
+
+  // Apply hidden mask if active
+  applyStatsMask();
 
   const pct = count > 0 ? Math.round((graded / count) * 100) : 0;
   document.getElementById("progressFill").style.width = pct + "%";
@@ -473,8 +670,11 @@ window.openResourcePanel = function (courseName) {
   document.getElementById("resourcePanel").classList.add("open");
 
   const enc = encodeURIComponent(courseName);
+  const encCode = encodeURIComponent(code);
   document.getElementById("learnPageBtn").href =
     "learn.html?course=" + enc + "&name=" + enc;
+  const cpBtn = document.getElementById("coursePageBtn");
+  if (cpBtn) cpBtn.href = "course.html?code=" + encCode;
 
   buildWeekAccordion(courseName, code);
 };
@@ -564,27 +764,67 @@ function generateWeekStructure(code) {
 }
 
 // ── COURSE ACTIONS ────────────────────────────────────
-window.switchSemester = function () {
+window.switchSemester = async function () {
   const sem = document.getElementById("semester").value;
-  const data =
-    window.coursesDatabase?.["Faculty of Engineering"]?.[
-      userProfile.department
-    ]?.[userProfile.level]?.[sem];
-  if (!data) {
-    alert("No courses found for this semester.");
-    return;
-  }
-  // ── FIX: preserve existing grades when switching semester ──
-  // Match by course code so any grade the student already entered survives.
+  dbg("switchSemester to", sem);
+
   const existing = {};
   (window.courses || []).forEach((c) => {
     existing[c.course] = { grade: c.grade, units: c.units };
   });
-  window.courses = data.map((c) => ({
-    course: c,
-    grade: existing[c]?.grade || "-",
-    units: existing[c]?.units || 3,
-  }));
+
+  const courseMap = {};
+
+  const hardcodedList =
+    window.coursesDatabase?.["Faculty of Engineering"]?.[
+      userProfile.department
+    ]?.[userProfile.level]?.[sem] || [];
+  dbg("switchSemester hardcoded count:", hardcodedList.length);
+  hardcodedList.filter(Boolean).forEach((c) => {
+    const code = String(c).trim().toUpperCase();
+    courseMap[code] = {
+      course: code,
+      grade: existing[code]?.grade || "-",
+      units: existing[code]?.units || 3,
+    };
+  });
+
+  try {
+    const all = await listCourses();
+    dbg("switchSemester Firestore docs:", all.length);
+    all.forEach((c, i) => {
+      const code = String(c.code || "").trim().toUpperCase();
+      const matchDept =
+        !c.department || eq(c.department, userProfile.department);
+      const matchLevel = !c.level || eq(c.level, userProfile.level);
+      const matchSem = !c.semester || eq(c.semester, sem);
+      const included = !!code && matchDept && matchLevel && matchSem;
+      dbg(`  [switch] #${i} ${c.code} →`, {
+        department: c.department || "(blank)",
+        level: c.level || "(blank)",
+        semester: c.semester || "(blank)",
+        matchDept, matchLevel, matchSem,
+        included,
+      });
+      if (included && !courseMap[code]) {
+        courseMap[code] = {
+          course: code,
+          grade: existing[code]?.grade || "-",
+          units: existing[code]?.units || c.units || 3,
+        };
+      }
+    });
+  } catch (e) {
+    dbg("switchSemester Firestore ERROR:", e?.message || String(e));
+    console.warn("[dashboard] Could not load Firestore courses:", e);
+  }
+
+  if (!Object.keys(courseMap).length) {
+    alert("No courses found for this semester.");
+    return;
+  }
+
+  window.courses = Object.values(courseMap);
   activeCourseId = null;
   closeResourcePanel();
   displayCourses();
@@ -612,13 +852,13 @@ window.addCourse = function () {
   if (window.courses.length === 1) showMilestone("📚 First course added!");
 };
 
-window.clearCourses = function () {
+window.clearCourses = async function () {
   if (!window.courses.length || !confirm("Reset courses for this semester?"))
     return;
   window.courses = [];
   activeCourseId = null;
   closeResourcePanel();
-  autoLoadCourses(userProfile.department, userProfile.level);
+  await autoLoadCourses(userProfile.department, userProfile.level);
   displayCourses();
 };
 
@@ -627,6 +867,7 @@ window.toggleAddCourse = function () {
   row.classList.toggle("open");
   if (row.classList.contains("open")) {
     setTimeout(() => document.getElementById("addCourseCode").focus(), 50);
+    loadCoursePickerList();
   }
 };
 
@@ -643,6 +884,90 @@ window.addCourseInline = function () {
   document.getElementById("addCourseUnits").value = "";
   document.getElementById("addCourseRow").classList.remove("open");
   if (window.courses.length === 1) showMilestone("📚 First course added!");
+  loadCoursePickerList();
+};
+
+async function loadCoursePickerList() {
+  const container = document.getElementById("coursePickerList");
+  if (!container) return;
+  dbg("loadCoursePickerList opened. profile:", userProfile);
+
+  try {
+    const all = await listCourses();
+    dbg("picker: Firestore returned", all.length + " docs");
+    const added = new Set(
+      (window.courses || []).map((c) =>
+        String(c.course || c).trim().toUpperCase(),
+      ),
+    );
+
+    const available = [];
+    all.forEach((c, i) => {
+      const code = String(c.code || "").trim().toUpperCase();
+      const alreadyAdded = added.has(code);
+      const matchDept =
+        !c.department ||
+        !userProfile.department ||
+        eq(c.department, userProfile.department);
+      const matchLevel =
+        !c.level || !userProfile.level || eq(c.level, userProfile.level);
+      const included = !!code && !alreadyAdded && matchDept && matchLevel;
+      dbg(`  [picker] #${i} ${c.code} →`, {
+        faculty: c.faculty || "(blank)",
+        department: c.department || "(blank)",
+        level: c.level || "(blank)",
+        semester: c.semester || "(blank)",
+        alreadyAdded, matchDept, matchLevel,
+        included,
+      });
+      if (included) available.push(c);
+    });
+
+    dbg("picker: available count:", available.length);
+
+    if (!available.length) {
+      container.innerHTML =
+        `<div class="picker-label">No additional Firestore courses for your class yet</div>`;
+      return;
+    }
+
+    container.innerHTML =
+      `<div class="picker-label">Available for your class</div>` +
+      `<div class="picker-chips">` +
+      available
+        .map(
+          (c) =>
+            `<button class="picker-chip" onclick="addPickerCourse('${sanitise(c.code)}',${Number(c.units) || 3})">` +
+            `<span class="picker-code">${sanitise(c.code)}</span>` +
+            (c.title ? `<span class="picker-title">${sanitise(c.title)}</span>` : "") +
+            `<span class="picker-add">+ Add</span>` +
+            `</button>`,
+        )
+        .join("") +
+      `</div>`;
+  } catch (e) {
+    dbg("picker ERROR:", e?.message || String(e));
+    container.innerHTML =
+      `<div class="picker-label" style="color:#f55">Error loading courses: ${sanitise(e?.message || String(e))}</div>`;
+  }
+}
+
+window.addPickerCourse = function (code, units) {
+  code = String(code).trim().toUpperCase();
+  if (
+    window.courses.some(
+      (c) => String(c.course || c).trim().toUpperCase() === code,
+    )
+  ) {
+    showMilestone(`${code} is already in your list.`);
+    return;
+  }
+  window.courses.push({ course: code, grade: "-", units: units || 3 });
+  displayCourses();
+  saveUserData();
+  loadCoursePickerList();
+  if (window.courses.length === 1) showMilestone("📚 First course added!");
+  else showMilestone(`${code} added.`);
 };
 
 window.removeCourse = function (event, idx) {
@@ -1109,3 +1434,101 @@ function renderAspirations() {
           )
           .join("");
 }
+
+// ── NOTIFICATIONS ─────────────────────────────────────
+let _unreadCount = 0;
+
+function subscribeNotifications() {
+  const q = query(collection(db, 'courseUpdates'), orderBy('postedAt', 'desc'));
+  onSnapshot(q, snap => {
+    const myCodes = (window.courses || []).map(c => (c.code || c.name || '').toUpperCase());
+    const updates = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(u => {
+        if (u.targetDepartment) {
+          const norm = s => (s || '').toLowerCase().replace(/\s+/g, '');
+          if (norm(userProfile.department) !== norm(u.targetDepartment)) return false;
+          if (u.targetLevel && norm(userProfile.level) !== norm(u.targetLevel)) return false;
+        }
+        return u.kind === 'general' || !myCodes.length || myCodes.includes((u.courseCode || '').toUpperCase());
+      });
+
+    const readIds = JSON.parse(localStorage.getItem('unify-read-notifs') || '[]');
+    _unreadCount = updates.filter(u => !readIds.includes(u.id)).length;
+    _updateBell(_unreadCount);
+    _renderNotifDrawer(updates.slice(0, 30), readIds);
+  });
+}
+
+function _updateBell(count) {
+  const bell = document.getElementById('notifBell');
+  const badge = document.getElementById('notifBadge');
+  if (!bell || !badge) return;
+  if (count > 0) {
+    badge.textContent = count > 9 ? '9+' : count;
+    badge.style.display = 'flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function _renderNotifDrawer(updates, readIds) {
+  const list = document.getElementById('notifList');
+  if (!list) return;
+  if (!updates.length) {
+    list.innerHTML = `<div class="notif-empty"><div class="notif-empty-icon">🔔</div><div class="notif-empty-text">No updates for your class yet.</div></div>`;
+    return;
+  }
+  const chipClass = { confirmed: 'notif-chip-confirmed', postponed: 'notif-chip-postponed', cancelled: 'notif-chip-cancelled', venue_change: 'notif-chip-venue_change', general: 'notif-chip-general' };
+  const chipLabel = { confirmed: 'Confirmed', postponed: 'Postponed', cancelled: 'Cancelled', venue_change: 'Venue Change', general: 'Announcement' };
+  list.innerHTML = updates.map(u => {
+    const isUnread = !readIds.includes(u.id);
+    const ts = u.postedAt?.toDate?.();
+    const timeStr = ts ? ts.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ' · ' + ts.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
+    const statusKey = u.kind === 'general' ? 'general' : u.status;
+    const chip = `<span class="notif-chip ${chipClass[statusKey] || 'notif-chip-general'}">${chipLabel[statusKey] || statusKey}</span>`;
+    const label = u.kind === 'general' ? (u.title || 'Announcement') : u.courseCode;
+    const details = [u.lecturer ? `Lecturer: ${u.lecturer}` : null, u.venue ? `Venue: ${u.venue}` : null].filter(Boolean).join(' · ');
+    return `<div class="notif-item ${isUnread ? 'unread' : ''}" onclick="markRead('${u.id}')">
+      <div class="notif-item-top">
+        <span class="notif-course-code">${label}</span>
+        <div style="display:flex;align-items:center;gap:6px;">${chip}${isUnread ? '<div class="notif-unread-dot"></div>' : ''}</div>
+      </div>
+      ${u.message ? `<div class="notif-msg">${u.message}</div>` : ''}
+      ${details ? `<div class="notif-detail">${details}</div>` : ''}
+      <div class="notif-meta">Posted by ${u.postedBy || 'Admin'} · ${timeStr}</div>
+    </div>`;
+  }).join('');
+}
+
+window.markRead = function (id) {
+  const readIds = JSON.parse(localStorage.getItem('unify-read-notifs') || '[]');
+  if (!readIds.includes(id)) readIds.push(id);
+  localStorage.setItem('unify-read-notifs', JSON.stringify(readIds));
+  _updateBell(Math.max(0, _unreadCount - 1));
+  document.querySelector(`.notif-item[onclick="markRead('${id}')"]`)?.classList.remove('unread');
+};
+
+window.markAllRead = function () {
+  const list = document.getElementById('notifList');
+  const ids = Array.from(list?.querySelectorAll('.notif-item') || []).map(el => {
+    const m = el.getAttribute('onclick')?.match(/markRead\('(.+?)'\)/);
+    return m ? m[1] : null;
+  }).filter(Boolean);
+  const readIds = JSON.parse(localStorage.getItem('unify-read-notifs') || '[]');
+  ids.forEach(id => { if (!readIds.includes(id)) readIds.push(id); });
+  localStorage.setItem('unify-read-notifs', JSON.stringify(readIds));
+  _updateBell(0);
+  list?.querySelectorAll('.notif-item').forEach(el => el.classList.remove('unread'));
+  list?.querySelectorAll('.notif-unread-dot').forEach(el => el.remove());
+};
+
+window.toggleNotifDrawer = function () {
+  document.getElementById('notifDrawer')?.classList.toggle('open');
+  document.getElementById('notifOverlay')?.classList.toggle('active');
+};
+
+window.closeNotifDrawer = function () {
+  document.getElementById('notifDrawer')?.classList.remove('open');
+  document.getElementById('notifOverlay')?.classList.remove('active');
+};

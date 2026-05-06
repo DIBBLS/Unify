@@ -15,7 +15,7 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e =
 
 document.getElementById('signOutBtn').addEventListener('click', async () => {
   await signOut(auth);
-  window.location.href = 'auth.html';
+  window.location.href = 'Auth.html';
 });
 
 /* ════════════════════════════════════════
@@ -723,7 +723,7 @@ async function loadSaved() {
 
 // Register auth listener LAST — after all constants and functions are defined
 onAuthStateChanged(auth, async user => {
-  if (!user) { window.location.href = 'auth.html'; return; }
+  if (!user) { window.location.href = 'Auth.html'; return; }
   currentUser = user;
   try {
     await loadSaved();

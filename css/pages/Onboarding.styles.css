@@ -320,6 +320,22 @@ body {
   cursor: default;
 }
 
+.ob-skip-btn {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--mid);
+  cursor: pointer;
+  text-align: center;
+  padding: 8px 0;
+  transition: color 0.15s;
+}
+.ob-skip-btn:hover { color: var(--black); }
+
 .back-btn {
   background: none;
   border: none;

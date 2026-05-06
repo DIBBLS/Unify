@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unify — Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<script src="js/theme.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── TOP BAR ── */
+  .notes-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 20px;
+    height: 52px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    flex-shrink: 0;
+    z-index: 10;
+  }
+
+  .notes-back {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 6px 10px 6px 6px;
+    border-radius: 6px;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .notes-back:hover {
+    background: var(--surface);
+    color: var(--text);
+  }
+  .notes-back-arrow {
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .notes-bar-divider {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
+  .notes-bar-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .notes-bar-course {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text3);
+    line-height: 1;
+    margin-bottom: 3px;
+  }
+  .notes-bar-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .notes-bar-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .notes-bar-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: inherit;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .notes-bar-btn:hover {
+    border-color: var(--text);
+    color: var(--text);
+  }
+
+  /* ── LOADING STATE ── */
+  .notes-loading {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .notes-loading-logo {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: -0.5px;
+  }
+  .notes-loading-sub {
+    font-size: 13px;
+    color: var(--text3);
+  }
+
+  /* ── ERROR STATE ── */
+  .notes-error {
+    flex: 1;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+    padding: 40px 24px;
+  }
+  .notes-error-icon { font-size: 36px; opacity: 0.4; }
+  .notes-error-title { font-size: 16px; font-weight: 700; }
+  .notes-error-sub { font-size: 13px; color: var(--text3); line-height: 1.6; }
+
+  /* ── CONTENT IFRAME ── */
+  .notes-frame {
+    flex: 1;
+    width: 100%;
+    border: none;
+    display: none;
+    background: #fff;
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="notes-bar">
+  <button class="notes-back" onclick="goBack()">
+    <span class="notes-back-arrow">←</span>
+    Back
+  </button>
+  <div class="notes-bar-divider"></div>
+  <div class="notes-bar-info">
+    <div class="notes-bar-course" id="barCourse">Loading…</div>
+    <div class="notes-bar-title" id="barTitle">Course Notes</div>
+  </div>
+  <div class="notes-bar-actions">
+    <button class="notes-bar-btn" onclick="toggleTheme()" id="themeToggle">Dark</button>
+    <button class="notes-bar-btn" id="newTabBtn" style="display:none;" onclick="openNewTab()">↗ New tab</button>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div class="notes-loading" id="loadingState">
+  <div class="notes-loading-logo">Unify</div>
+  <div class="notes-loading-sub">Loading notes…</div>
+</div>
+
+<!-- ERROR -->
+<div class="notes-error" id="errorState">
+  <div class="notes-error-icon">📄</div>
+  <div class="notes-error-title">Notes not found</div>
+  <div class="notes-error-sub" id="errorMsg">This content may have been removed or you don't have access.</div>
+</div>
+
+<!-- CONTENT -->
+<iframe
+  id="notesFrame"
+  class="notes-frame"
+  sandbox="allow-scripts allow-same-origin allow-popups"
+  referrerpolicy="no-referrer"
+  title="Course notes"
+></iframe>
+
+<script type="module">
+import { auth, db } from './js/firebase-config.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+let _htmlContent = '';
+
+function wrapIfSnippet(html) {
+  const trimmed = String(html || '').trim();
+  if (/^<!DOCTYPE/i.test(trimmed) || /^<html[\s>]/i.test(trimmed)) return trimmed;
+  return `<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      body { font-family: 'DM Sans', system-ui, sans-serif; line-height: 1.7; color: #0a0a0a; padding: 28px 24px; max-width: 760px; margin: 0 auto; }
+      h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; line-height: 1.2; margin-top: 1.4em; }
+      h1 { font-size: 2em; } h2 { font-size: 1.5em; } h3 { font-size: 1.2em; }
+      p { margin: 0.75em 0; }
+      pre, code { font-family: ui-monospace, Menlo, monospace; }
+      pre { background: #f5f4f0; padding: 14px; border-radius: 8px; overflow-x: auto; font-size: 13px; }
+      code:not(pre code) { background: #f0ede8; padding: 2px 5px; border-radius: 3px; font-size: 0.9em; }
+      img { max-width: 100%; border-radius: 8px; }
+      table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+      th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; font-size: 14px; }
+      th { background: #f5f4f0; font-weight: 600; }
+      blockquote { border-left: 3px solid #d0ccc6; margin: 1em 0; padding: 8px 16px; color: #555; }
+    </style>
+  </head><body>${trimmed}</body></html>`;
+}
+
+function showError(msg) {
+  document.getElementById('loadingState').style.display = 'none';
+  const err = document.getElementById('errorState');
+  err.style.display = 'flex';
+  if (msg) document.getElementById('errorMsg').textContent = msg;
+}
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = 'Auth.html'; return; }
+
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+  if (!id) { showError('No notes ID in URL.'); return; }
+
+  try {
+    const snap = await getDoc(doc(db, 'courseContent', id));
+    if (!snap.exists()) { showError('These notes no longer exist.'); return; }
+
+    const data = snap.data();
+    _htmlContent = data.htmlContent || '';
+
+    // Update bar
+    document.getElementById('barCourse').textContent =
+      `${data.courseCode || ''} · Week ${data.week || ''}`;
+    document.getElementById('barTitle').textContent = data.title || 'Course Notes';
+    document.title = `${data.courseCode} W${data.week} — ${data.title || 'Notes'} | Unify`;
+
+    // Show new-tab button & render
+    document.getElementById('newTabBtn').style.display = '';
+    const frame = document.getElementById('notesFrame');
+    frame.srcdoc = wrapIfSnippet(_htmlContent);
+    frame.style.display = 'block';
+    document.getElementById('loadingState').style.display = 'none';
+  } catch (e) {
+    console.error('[notes]', e);
+    showError('Failed to load notes. Check your connection and try again.');
+  }
+});
+
+window.openNewTab = function () {
+  if (!_htmlContent) return;
+  const blob = new Blob([wrapIfSnippet(_htmlContent)], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank', 'noopener,noreferrer');
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+};
+
+window.goBack = function () {
+  if (window.history.length > 1) {
+    window.history.back();
+  } else {
+    window.close();
+  }
+};
+</script>
+</body>
+</html>

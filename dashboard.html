@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="css/responsive.css" />
     <script src="js/theme.js"></script>
 
-    <link rel="stylesheet" href="css/pages/dashboard.styles.css" />
+    <link rel="stylesheet" href="css/pages/dashboard.styles.css?v=goal-5" />
   </head>
   <body>
     <!-- LOADING -->
@@ -39,12 +39,33 @@
       </div>
       <div class="nav-right">
         <span class="nav-user-name" id="navUserName"></span>
+        <button class="notif-bell-btn" id="notifBell" onclick="toggleNotifDrawer()" title="Updates">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-badge" id="notifBadge" style="display:none;"></span>
+        </button>
         <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
           🌙 Dark
         </button>
         <button class="nav-signout" id="signOutBtn">Sign out</button>
       </div>
     </nav>
+
+    <!-- NOTIFICATION OVERLAY -->
+    <div class="notif-overlay" id="notifOverlay" onclick="closeNotifDrawer()"></div>
+
+    <!-- NOTIFICATION DRAWER -->
+    <div class="notif-drawer" id="notifDrawer">
+      <div class="notif-drawer-header">
+        <span class="notif-drawer-title">Class Updates</span>
+        <button class="notif-mark-read" onclick="markAllRead()">Mark all read</button>
+      </div>
+      <div class="notif-list" id="notifList">
+        <div class="notif-empty">
+          <div class="notif-empty-icon">🔔</div>
+          <div class="notif-empty-text">No updates yet.</div>
+        </div>
+      </div>
+    </div>
 
     <!-- ── SPACE 1: PERSONAL ── -->
     <div class="space active" id="space-personal">
@@ -109,6 +130,15 @@
           <div class="save-indicator" id="saveIndicator">✓ Saved</div>
         </div>
         <div class="hero-stats">
+          <button class="stats-eye-btn" id="statsEyeBtn" onclick="toggleStatsVisibility()" title="Hide/show stats">🙈</button>
+          <a href="predictor.html" class="hero-stat hero-stat-link" title="View full CGPA plan">
+            <div class="hero-stat-val" id="statTarget">—</div>
+            <div class="hero-stat-label">Target</div>
+          </a>
+          <div class="hero-stat">
+            <div class="hero-stat-val" id="statSemGP">—</div>
+            <div class="hero-stat-label">Sem GP</div>
+          </div>
           <div class="hero-stat">
             <div class="hero-stat-val" id="statCGPA">—</div>
             <div class="hero-stat-label">CGPA</div>
@@ -116,10 +146,6 @@
           <div class="hero-stat">
             <div class="hero-stat-val" id="statCourses">0</div>
             <div class="hero-stat-label">Courses</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-val" id="statGraded">0</div>
-            <div class="hero-stat-label">Graded</div>
           </div>
         </div>
       </div>
@@ -134,19 +160,7 @@
 
       <!-- ── GOAL CARD ── -->
       <div class="goal-card-wrap">
-        <div class="goal-card" id="goalCard">
-          <div class="goal-card-body">
-            <div
-              class="goal-card-cta"
-              style="font-size: 13px; color: var(--text2)"
-            >
-              You haven't set a graduation target yet.
-            </div>
-          </div>
-          <a href="predictor.html" class="goal-card-action"
-            >Build your plan →</a
-          >
-        </div>
+        <div class="goal-card" id="goalCard"></div>
       </div>
 
       <!-- ── STREAK + DAILY NUDGE ── -->
@@ -369,25 +383,28 @@
               </div>
             </div>
             <div class="add-course-row" id="addCourseRow">
-              <input
-                type="text"
-                class="add-course-inp"
-                id="addCourseCode"
-                placeholder="Course code (e.g. ECE 301)"
-                onkeydown="if (event.key === 'Enter') addCourseInline();"
-              />
-              <input
-                type="number"
-                class="add-units-inp"
-                id="addCourseUnits"
-                min="1"
-                max="6"
-                placeholder="Units"
-                onkeydown="if (event.key === 'Enter') addCourseInline();"
-              />
-              <button class="add-course-sub" onclick="addCourseInline()">
-                Add
-              </button>
+              <div class="add-course-inputs">
+                <input
+                  type="text"
+                  class="add-course-inp"
+                  id="addCourseCode"
+                  placeholder="Course code (e.g. ECE 301)"
+                  onkeydown="if (event.key === 'Enter') addCourseInline();"
+                />
+                <input
+                  type="number"
+                  class="add-units-inp"
+                  id="addCourseUnits"
+                  min="1"
+                  max="6"
+                  placeholder="Units"
+                  onkeydown="if (event.key === 'Enter') addCourseInline();"
+                />
+                <button class="add-course-sub" onclick="addCourseInline()">
+                  Add
+                </button>
+              </div>
+              <div id="coursePickerList"></div>
             </div>
             <div class="empty-state" id="emptyState">
               <div class="empty-icon">📚</div>
@@ -448,10 +465,23 @@
                 >
                   <a
                     class="panel-learn-btn"
-                    id="learnPageBtn"
+                    id="coursePageBtn"
                     href="#"
                     style="padding: 8px 16px; font-size: 12px"
-                    >Open in Learn →</a
+                    >Course Page →</a
+                  >
+                  <a
+                    class="panel-learn-btn"
+                    id="learnPageBtn"
+                    href="#"
+                    style="
+                      padding: 8px 14px;
+                      font-size: 12px;
+                      background: transparent;
+                      color: var(--text3);
+                      border: 1px solid var(--border);
+                    "
+                    >Legacy Learn</a
                   >
                   <button
                     class="resource-panel-close"
@@ -493,8 +523,8 @@
       </div>
     </nav>
 
-    <script src="courses.js"></script>
-    <script src="Coursecontent.JS"></script>
-    <script type="module" src="js/pages/dashboard.js"></script>
+    <script src="courses.js?v=step1-deptfix"></script>
+    <script src="Coursecontent.JS?v=step1-deptfix"></script>
+    <script type="module" src="js/pages/dashboard.js?v=goal-5"></script>
   </body>
 </html>
