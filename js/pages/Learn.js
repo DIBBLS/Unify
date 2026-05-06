@@ -1,12 +1,15 @@
 import { auth, db } from '../firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { normalizeCode } from '../courses-service.js';
 
 let currentUser = null, userProfile = {};
 let courseCode = '', courseName = '', courseTopics = [];
 // Firestore-uploaded course content, indexed by week number (1-15)
 let firestoreContentByWeek = {};
+
+function normCode(raw) {
+  return String(raw || '').trim().toUpperCase().replace(/\s+/g, ' ');
+}
 
 // Simple XSS sanitiser for rendering coordinator-supplied content
 function sanitise(str) {
@@ -42,7 +45,7 @@ onAuthStateChanged(auth, async user => {
 
   // Get course from URL params
   const params = new URLSearchParams(window.location.search);
-  courseCode = normalizeCode(params.get('course') || '');
+  courseCode = normCode(params.get('course') || '');
   courseName = params.get('name') || courseCode;
 
   document.getElementById('navCourseName').textContent = courseName;
@@ -74,23 +77,31 @@ async function loadUserData() {
 }
 
 // Loads admin-uploaded weekly content from Firestore, keyed by week number.
-// Falls back gracefully — students still see the legacy URL-based notes if
-// the network call fails or no content has been uploaded yet.
+// Tries the normalized code first, then the spaceless variant as a fallback
+// in case the admin stored it without spaces (e.g. "ECE316" vs "ECE 316").
 async function loadFirestoreContent(code) {
   firestoreContentByWeek = {};
   if (!code) return;
-  try {
-    const snap = await getDocs(
-      query(collection(db, 'courseContent'), where('courseCode', '==', code))
-    );
-    snap.docs.forEach(d => {
-      const data = { id: d.id, ...d.data() };
-      const wk = Number(data.week);
-      if (Number.isFinite(wk)) firestoreContentByWeek[wk] = data;
-    });
-  } catch (e) {
-    console.warn('[learn] Firestore content load failed:', e);
+  const variants = [...new Set([code, code.replace(/\s/g, '')])];
+  for (const variant of variants) {
+    try {
+      const snap = await getDocs(
+        query(collection(db, 'courseContent'), where('courseCode', '==', variant))
+      );
+      console.log(`[learn] courseContent query for "${variant}": ${snap.size} doc(s)`);
+      if (!snap.empty) {
+        snap.docs.forEach(d => {
+          const data = { id: d.id, ...d.data() };
+          const wk = Number(data.week);
+          if (Number.isFinite(wk)) firestoreContentByWeek[wk] = data;
+        });
+        break; // found results with this variant, no need to try others
+      }
+    } catch (e) {
+      console.warn(`[learn] Firestore content load failed for "${variant}":`, e);
+    }
   }
+  console.log('[learn] firestoreContentByWeek keys:', Object.keys(firestoreContentByWeek));
 }
 
 async function saveProgress() {
