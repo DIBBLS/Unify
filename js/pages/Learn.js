@@ -923,32 +923,6 @@ function wrapIfSnippet(html) {
 window.openNotes = function (weekNum) {
   const item = firestoreContentByWeek[Number(weekNum)];
   if (!item) return;
-  const titleEl = document.getElementById('notesModalTitle');
-  if (titleEl) titleEl.textContent = `Week ${item.week} — ${item.title || ''}`.trim();
-  const iframe = document.getElementById('notesModalFrame');
-  if (iframe) iframe.srcdoc = wrapIfSnippet(item.htmlContent);
-
-  const fsBtn = document.getElementById('notesFullscreenBtn');
-  if (fsBtn) {
-    fsBtn.onclick = () => {
-      const blob = new Blob([wrapIfSnippet(item.htmlContent)], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      window.open(url, '_blank', 'noopener,noreferrer');
-      setTimeout(() => URL.revokeObjectURL(url), 60000);
-    };
-  }
-
-  const overlay = document.getElementById('notesOverlay');
-  if (overlay) overlay.classList.add('open');
+  window.open(`notes.html?id=${encodeURIComponent(item.id)}`, '_blank', 'noopener,noreferrer');
 };
 
-window.closeNotesModal = function () {
-  const overlay = document.getElementById('notesOverlay');
-  if (overlay) overlay.classList.remove('open');
-  const iframe = document.getElementById('notesModalFrame');
-  if (iframe) iframe.srcdoc = '';
-};
-
-window.handleNotesOverlayClick = function (e) {
-  if (e.target === document.getElementById('notesOverlay')) window.closeNotesModal();
-};
