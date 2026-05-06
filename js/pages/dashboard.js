@@ -264,7 +264,7 @@ function renderGoalCard(gp) {
     return;
   }
 
-  // ── PLAN SET: compact summary + hidden expander for changing ──
+  // ── PLAN SET: compact summary ──
   const modeCls = { recovery:"recovery", stability:"stability", push:"push", elite:"elite" }
     [(gp.academicMode||"").toLowerCase()] || "push";
   const reqAvg = gp.neededAvg != null
@@ -283,13 +283,7 @@ function renderGoalCard(gp) {
       <div class="goal-card-title">Target: ${targetLabel}</div>
       <div class="goal-card-sub">Req. avg: ${reqAvg != null ? reqAvg.toFixed(2) + " GP/sem" : "—"} · ${contextLine}</div>
     </div>
-    <a href="predictor.html" class="goal-card-action">View Plan →</a>
-    <div class="goal-card-change-wrap">
-      <button class="goal-card-change-toggle" onclick="toggleGoalChange(this)">Change target ▾</button>
-      <div class="goal-card-change-body" id="goalChangeBody" style="display:none;">
-        ${chipForm}
-      </div>
-    </div>`;
+    <a href="predictor.html" class="goal-card-action">View Plan →</a>`;
 }
 
 let _pendingGoalVal = null, _pendingGoalCls = null;
@@ -330,15 +324,6 @@ window.saveGoalTarget = async function() {
 window.clearGoalTarget = function() {
   _pendingGoalVal = null; _pendingGoalCls = null;
   renderGoalCard(null);
-};
-
-window.toggleGoalChange = function(btn) {
-  const body = document.getElementById('goalChangeBody');
-  if (!body) return;
-  const open = body.style.display !== 'none';
-  body.style.display = open ? 'none' : 'block';
-  btn.textContent = open ? 'Change target ▾' : 'Change target ▴';
-  if (!open) { _pendingGoalVal = null; _pendingGoalCls = null; }
 };
 
 // ── STATS HIDE/SHOW (bank-style eye toggle) ──────────────
