@@ -210,12 +210,18 @@ body {
   padding: 6px 12px;
   border-radius: 999px;
   box-shadow: var(--shadow-sm);
+  max-width: 100%;
+  overflow: hidden;
 }
 .hero-eyebrow-text {
   color: var(--text3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .hero-divider {
   color: var(--border);
+  flex-shrink: 0;
 }
 .status-pulse {
   display: inline-flex;
@@ -223,6 +229,7 @@ body {
   gap: 6px;
   color: var(--green-deep);
   font-weight: 700;
+  flex-shrink: 0;
 }
 .status-pulse .dot {
   width: 8px;
@@ -1045,13 +1052,6 @@ body {
   color: var(--amber);
 }
 
-@media (max-width: 640px) {
-  .tt-sheet { font-size: 12px; }
-  .tt-sheet thead th,
-  .tt-sheet td { padding: 8px 10px; }
-  .tt-cell-input { padding: 6px 7px; font-size: 12px; }
-}
-
 /* ============================================================
    ACTIVITY / UPDATE LOG
    ============================================================ */
@@ -1287,3 +1287,215 @@ body {
   text-decoration: none;
 }
 .denied-back:hover { color: var(--text); }
+
+
+/* ============================================================
+   MOBILE OVERHAUL
+   ============================================================ */
+
+/* Timetable panel: green top-border accent — makes it the hero feature */
+#timetable { border-top: 3px solid var(--green); }
+
+/* Admin has no bottom nav bar — don't offset toast */
+@media (max-width: 768px) {
+  .toast { bottom: 24px !important; }
+  /* Prevent iOS auto-zoom when tapping into inputs */
+  .form-input, .form-select, .form-textarea { font-size: 16px; }
+}
+
+/* Very small screens: trim the nav bar */
+@media (max-width: 430px) {
+  #themeBtn { display: none; }
+  .btn-nav { padding: 6px 10px; font-size: 11px; }
+  .nav-logo { font-size: 19px; }
+}
+
+/* ── Small screens: general polish + timetable overhaul (≤ 640px) ── */
+@media (max-width: 640px) {
+
+  /* ── Hero ── */
+  .admin-hero { padding: 28px 16px 64px; }
+  .hero-title { letter-spacing: -0.8px; }
+  /* Hide the email card — redundant on mobile */
+  .hero-right { display: none; }
+  /* Keep eyebrow pill from overflowing */
+  .hero-eyebrow-text, .hero-divider { display: none; }
+
+  /* ── Stats ── */
+  .stats-row { margin-top: -44px; grid-template-columns: 1fr 1fr; padding: 0 16px; }
+  .stat-card { padding: 14px 16px; border-radius: 12px; }
+  .stat-value { font-size: 26px; }
+
+  /* ── Panels ── */
+  .panel { padding: 20px; border-radius: 12px; margin-bottom: 14px; }
+  .panel-body { padding: 16px 20px 0; }
+  .panel-head-summary { padding: 18px 20px; }
+  .panel-collapsible[open] { padding-bottom: 20px; }
+  .panel-head { margin-bottom: 14px; }
+  .panel-title { font-size: 18px; }
+  .card { padding: 16px; }
+
+  /* ── Announcements ── */
+  /* Segmented control: full width */
+  .seg-control { display: flex; width: 100%; }
+  .seg { flex: 1; justify-content: center; padding: 10px 6px; }
+  /* Post / Upload button: full width */
+  .ann-foot { flex-direction: column; }
+  .ann-foot .btn { width: 100%; justify-content: center; padding: 14px; }
+
+  /* ── Timetable target selectors: 2-per-row (Faculty+Dept / Level+Semester) ── */
+  .tt-target-bar { padding: 14px; }
+  .tt-target-bar .form-row.two { grid-template-columns: 1fr 1fr; }
+  .tt-target-bar .form-select { padding: 9px 10px; font-size: 14px; }
+  .tt-target-bar .form-label { font-size: 10px; }
+
+  /* ════════════════════════════════════════════
+     TIMETABLE — full mobile reflow
+     ════════════════════════════════════════════ */
+
+  /* Break the table wrapper to full bleed (panel padding = 20px here) */
+  .tt-sheet-wrap {
+    overflow-x: visible;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    margin: 0 -20px;
+    width: calc(100% + 40px);
+  }
+
+  /* Table: block layout so rows can reflow as flex/grid cards */
+  .tt-sheet, .tt-sheet tbody { display: block; min-width: unset; width: 100%; }
+  .tt-sheet thead { display: none; }
+
+  /* ── Saved entry rows: compact flex row ── */
+  .tt-sheet tbody tr:not([data-draft]) {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    border-top: none;
+    width: 100%;
+    background: none;
+  }
+  .tt-sheet tbody tr:not([data-draft]).row-today { background: var(--green-bg); }
+  .tt-sheet tbody tr:not([data-draft]).row-day-start { border-top: 2px solid var(--border); }
+  .tt-sheet tbody tr:not([data-draft]) td {
+    padding: 0;
+    display: block;
+    border-top: none !important; /* override desktop row-day-start td rule */
+  }
+  /* col 1: day pill */
+  .tt-sheet tbody tr:not([data-draft]) td:nth-child(1) { flex: 0 0 auto; }
+  /* col 2: course code */
+  .tt-sheet tbody tr:not([data-draft]) td:nth-child(2) {
+    flex: 1; min-width: 0;
+    font-size: 14px; font-weight: 700;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  /* col 3: start time */
+  .tt-sheet tbody tr:not([data-draft]) td:nth-child(3) {
+    flex: 0 0 auto; font-size: 12px; color: var(--text2); font-variant-numeric: tabular-nums;
+  }
+  .tt-sheet tbody tr:not([data-draft]) td:nth-child(3)::after { content: "–"; margin: 0 3px; color: var(--text3); }
+  /* col 4: end time */
+  .tt-sheet tbody tr:not([data-draft]) td:nth-child(4) {
+    flex: 0 0 auto; font-size: 12px; color: var(--text2); font-variant-numeric: tabular-nums;
+  }
+  /* col 5+6: venue / lecturer — hide on mobile */
+  .tt-sheet tbody tr:not([data-draft]) td:nth-child(5),
+  .tt-sheet tbody tr:not([data-draft]) td:nth-child(6) { display: none; }
+  /* col 7: delete */
+  .tt-sheet tbody tr:not([data-draft]) td:nth-child(7) { flex: 0 0 auto; }
+  .tt-del-btn { width: 34px; height: 34px; }
+
+  /* Empty row */
+  .tt-sheet tbody tr.tt-empty-row {
+    display: flex !important;
+    justify-content: center;
+    padding: 44px 20px;
+    border-bottom: none;
+  }
+  .tt-sheet tbody tr.tt-empty-row td { padding: 0; text-align: center; font-size: 13px; font-style: italic; }
+
+  /* ── Draft rows: 2-column stacked form ── */
+  .tt-draft-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 12px;
+    padding: 16px 20px !important;
+    background: var(--amber-bg) !important;
+    border-left: 3px solid var(--amber) !important;
+    border-bottom: 1px solid var(--border);
+  }
+  .tt-draft-row:hover { background: rgba(251,191,36,.14) !important; }
+  .tt-draft-row.tt-row-error { background: var(--red-bg) !important; border-left-color: var(--red) !important; }
+  .tt-draft-row td { display: flex !important; flex-direction: column; gap: 5px; padding: 0 !important; }
+
+  /* Grid positions */
+  .tt-draft-row td:nth-child(1) { grid-column: 1; grid-row: 1; }  /* Day */
+  .tt-draft-row td:nth-child(2) { grid-column: 2; grid-row: 1; }  /* Course */
+  .tt-draft-row td:nth-child(3) { grid-column: 1; grid-row: 2; }  /* Start */
+  .tt-draft-row td:nth-child(4) { grid-column: 2; grid-row: 2; }  /* End */
+  .tt-draft-row td:nth-child(5) { grid-column: 1 / -1; grid-row: 3; }  /* Venue */
+  .tt-draft-row td:nth-child(6) { grid-column: 1 / -1; grid-row: 4; }  /* Lecturer */
+  .tt-draft-row td:nth-child(7) {
+    grid-column: 1 / -1; grid-row: 5;
+    flex-direction: row !important;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  /* Auto-labels above each field */
+  .tt-draft-row td:not(:nth-child(7))::before {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text3);
+  }
+  .tt-draft-row td:nth-child(1)::before { content: "Day"; }
+  .tt-draft-row td:nth-child(2)::before { content: "Course"; }
+  .tt-draft-row td:nth-child(3)::before { content: "Start"; }
+  .tt-draft-row td:nth-child(4)::before { content: "End"; }
+  .tt-draft-row td:nth-child(5)::before { content: "Venue"; }
+  .tt-draft-row td:nth-child(6)::before { content: "Lecturer"; }
+
+  /* 46px height + 16px font = big touch targets + no iOS zoom */
+  .tt-cell-input {
+    font-size: 16px !important;
+    padding: 11px 12px !important;
+    height: 46px;
+    border-radius: 8px !important;
+  }
+  select.tt-cell-input, input[type="time"].tt-cell-input { height: 46px; }
+  .tt-draft-row td:nth-child(7) .tt-del-btn { width: 38px; height: 38px; font-size: 16px; }
+
+  /* ── Sheet footer: stacked, prominent green CTA ── */
+  .tt-sheet-foot { flex-direction: column; gap: 10px; align-items: stretch; margin-top: 16px; }
+  .tt-add-row-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 15px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    border-radius: 10px;
+    background: var(--green-bg);
+    border-color: var(--green-border);
+    color: var(--green-deep);
+    border-style: solid;
+  }
+  [data-theme="dark"] .tt-add-row-btn { color: var(--green); }
+  .tt-add-row-btn:hover:not(:disabled) {
+    background: rgba(74,222,128,.18);
+    border-color: var(--green);
+    border-style: solid;
+    transform: none;
+  }
+  .tt-add-row-btn:disabled {
+    background: transparent;
+    border-style: dashed;
+    border-color: var(--border);
+    color: var(--text3);
+  }
+  .tt-sheet-actions { width: 100%; justify-content: space-between; }
+  #ttSaveAllBtn { flex: 1; justify-content: center; padding: 14px; }
+}

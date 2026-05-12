@@ -15,7 +15,7 @@ import {
   canUploadContent,
   getAssignment,
   normField,
-} from "./roles.js?v=content-2";
+} from "./roles.js?v=content-3";
 import {
   onAuthStateChanged,
   signOut,
@@ -561,7 +561,7 @@ async function loadAdmins() {
             </div>
             <div class="admin-item-email">${escapeHtml(u.email || "")}${assignment ? " · " + escapeHtml(assignment) : (u.department ? " · " + escapeHtml(u.department) : "")}</div>
           </div>
-          ${isSuper ? "" : `<button class="btn-revoke" onclick="revokeAdmin('${d.id}','${escapeHtml(u.email || "")}')">Revoke</button>`}
+          ${isSuper ? "" : `<button class="btn-revoke" onclick="revokeAdmin('${d.id}','${escapeHtml(u.email || "")}')"}>Revoke</button>`}
         </div>`;
       })
       .join("");
@@ -1092,6 +1092,11 @@ function initContentFilePicker() {
 }
 
 window.uploadCourseContent = async function () {
+  if (!canUploadContent(myRole)) {
+    showToast("Permission denied");
+    return;
+  }
+
   const btn = document.getElementById("ccUploadBtn");
   const courseCode = document.getElementById("ccCode").value.trim().toUpperCase().replace(/\s+/g, " ");
   const weekRaw = document.getElementById("ccWeek").value;
