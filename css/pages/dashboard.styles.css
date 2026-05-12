@@ -569,61 +569,32 @@ input::placeholder {
   gap: 9px;
   transition:
     background 0.2s,
-    border-color 0.2s;
+    border-color 0.2s,
+    box-shadow 0.2s;
   position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
 }
 .course-item.active-card .course-card-inner {
   background: var(--invert-bg);
   border-color: var(--invert-bg);
   color: var(--invert-text);
+  box-shadow: none;
+}
+[data-theme="dark"] .course-card-inner {
+  box-shadow: none;
 }
 
 .course-accent {
   height: 3px;
   border-radius: 2px;
 }
-/* .accent-0 {
-  background: #0a0a0a;
-} */
-/* .accent-1 {
-  background: #3b3b3b;
-} */
-/* .accent-2 {
-  background: #666;
-}
-.accent-3 {
-  background: #999;
-}
-.accent-4 {
-  background: #bbb;
-}
-.accent-5 {
-  background: #0a0a0a;
-} */
-/* [data-theme="dark"] .accent-0 {
-  background: #f0efeb;
-}
-[data-theme="dark"] .accent-1 {
-  background: #f0efeb;
-}
-[data-theme="dark"] .accent-2 {
-  background: #f0efeb;
-}
-[data-theme="dark"] .accent-3 {
-  background: #f0efeb;
-}
-[data-theme="dark"] .accent-4 {
-  background: #f0efeb;
-}
-[data-theme="dark"] .accent-5 {
-  background: #f0efeb;
-} */
 
+/* FIX: was hardcoded #f0efeb — near-white, invisible in light mode */
 .course-card-code {
   font-size: 11px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color:  #f0efeb;
+  color: var(--text3);
   font-weight: 500;
   line-height: 1.35;
   margin-right: 28px;
@@ -1277,8 +1248,24 @@ input::placeholder {
     padding: 28px 20px;
     grid-template-columns: 1fr;
   }
+  /* Show stats as a compact scrollable row on mobile instead of hiding */
   .hero-stats {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin-top: 8px;
+    width: 100%;
+  }
+  .hero-stats::-webkit-scrollbar {
     display: none;
+  }
+  .hero-stat {
+    padding: 12px 16px;
+    flex-shrink: 0;
+  }
+  .hero-stat-val {
+    font-size: 22px;
   }
   .progress-bar-wrap {
     padding: 14px 20px;
@@ -1321,6 +1308,15 @@ input::placeholder {
   }
   .progress-bar-wrap {
     padding: 12px 16px;
+  }
+  /* Fix streak card: button was pushing info text into a ~80px column */
+  .streak-nudge {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .streak-action {
+    flex: 0 0 100%;
+    text-align: center;
   }
 }
 
