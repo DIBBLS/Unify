@@ -205,6 +205,14 @@ nav {
 .mobile-nav-btn.active .mobile-nav-dot {
   opacity: 1;
 }
+.mobile-nav-theme-icon::before {
+  content: "🌙";
+  font-size: 15px;
+  line-height: 1.2;
+}
+[data-theme="dark"] .mobile-nav-theme-icon::before {
+  content: "☀️";
+}
 
 @media (max-width: 768px) {
   nav {
@@ -1204,12 +1212,14 @@ input::placeholder {
 @media (max-width: 480px) {
   #courses {
     grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    gap: 10px;
   }
   .personal-hero { padding: 20px 16px; }
   .hero-name { font-size: 26px; }
   .hero-stat-val { font-size: 20px; }
-  .main-content { padding: 16px; }
+  /* Extra horizontal padding so cards don't bleed to screen edge */
+  .main-content { padding: 16px 20px; }
+  .course-card-inner { padding: 14px 12px 12px; }
   .mastery-wrap,
   .planner-wrap,
   .streak-nudge-wrap,
@@ -1220,11 +1230,14 @@ input::placeholder {
   /* Goal card: action buttons go full-width below body text */
   .goal-card-actions { width: 100%; }
   .goal-card-action { flex: 1; text-align: center; }
-  /* Streak: button on full-width second row */
+  /* Streak: hide sub-text, icon top-aligned, button wraps full-width */
+  .streak-sub { display: none; }
   .streak-nudge {
     flex-wrap: wrap;
     gap: 10px;
+    align-items: flex-start;
   }
+  .streak-fire { padding-top: 3px; }
   .streak-action {
     flex: 0 0 100%;
     text-align: center;
