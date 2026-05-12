@@ -568,7 +568,6 @@ input::placeholder {
   border-radius: 2px;
 }
 
-/* FIX: was hardcoded #f0efeb — near-white, invisible in light mode */
 .course-card-code {
   font-size: 11px;
   letter-spacing: 1.5px;
@@ -1138,25 +1137,45 @@ input::placeholder {
 ═══════════════════════════ */
 @media (max-width: 900px) {
   .personal-hero {
-    padding: 28px 20px;
+    padding: 24px 20px;
     grid-template-columns: 1fr;
+    gap: 16px;
   }
-  /* Show stats as a compact scrollable row on mobile instead of hiding */
+  /* Stats: each chip becomes its own card instead of sections of one bordered box */
   .hero-stats {
+    border: none;
+    border-radius: 0;
+    overflow: visible;
     display: flex;
+    gap: 8px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    margin-top: 8px;
+    margin-top: 4px;
     width: 100%;
   }
   .hero-stats::-webkit-scrollbar { display: none; }
   .hero-stat {
-    padding: 12px 16px;
     flex-shrink: 0;
+    padding: 11px 14px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+  }
+  .hero-stat + .hero-stat {
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .stats-eye-btn {
+    border-right: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 8px 10px;
   }
   .hero-stat-val { font-size: 22px; }
   .progress-bar-wrap { padding: 14px 20px; }
+  /* Planner: stack sessions vertically on mobile */
+  .planner-sessions { flex-direction: column; }
+  .planner-session { max-width: 100%; min-width: 0; flex: none; }
   /* Courses first, semester controls tucked below as a utility footer */
   .personal-body {
     display: flex;
@@ -1188,15 +1207,20 @@ input::placeholder {
     gap: 8px;
   }
   .personal-hero { padding: 20px 16px; }
+  .hero-name { font-size: 26px; }
+  .hero-stat-val { font-size: 20px; }
   .main-content { padding: 16px; }
   .mastery-wrap,
   .planner-wrap,
   .streak-nudge-wrap,
   .goal-card-wrap {
-    padding: 14px 16px;
+    padding: 12px 16px;
   }
   .progress-bar-wrap { padding: 12px 16px; }
-  /* Fix streak card: button was pushing info text into a ~80px column */
+  /* Goal card: action buttons go full-width below body text */
+  .goal-card-actions { width: 100%; }
+  .goal-card-action { flex: 1; text-align: center; }
+  /* Streak: button on full-width second row */
   .streak-nudge {
     flex-wrap: wrap;
     gap: 10px;
