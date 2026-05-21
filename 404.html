@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unify — Page Not Found</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/variables.css">
+<link rel="stylesheet" href="/css/base.css">
+<style>
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    text-align: center;
+  }
+  .not-found {
+    max-width: 420px;
+    padding: 40px 24px;
+  }
+  .not-found-code {
+    font-family: 'Playfair Display', serif;
+    font-size: 96px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--green, #34d399);
+    margin-bottom: 12px;
+  }
+  .not-found h1 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0 0 8px;
+  }
+  .not-found p {
+    font-size: 14px;
+    color: var(--text2, #999);
+    margin: 0 0 28px;
+    line-height: 1.6;
+  }
+  .not-found a {
+    display: inline-block;
+    padding: 12px 28px;
+    background: var(--text);
+    color: var(--bg);
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: opacity 0.2s;
+  }
+  .not-found a:hover {
+    opacity: 0.85;
+  }
+</style>
+</head>
+<body>
+<div class="not-found">
+  <div class="not-found-code">404</div>
+  <h1>Page not found</h1>
+  <p>The page you're looking for doesn't exist or has been moved. Let's get you back on track.</p>
+  <a href="/dashboard.html">Back to Dashboard →</a>
+</div>
+</body>
+</html>
