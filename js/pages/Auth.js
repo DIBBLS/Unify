@@ -2,9 +2,7 @@
   import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  // If already logged in → check if onboarded
-  onAuthStateChanged(auth, async user => {
-    if (!user) return;
+  async function redirectAfterAuth(user) {
     try {
       const snap = await getDoc(doc(db, 'users', user.uid));
       if (snap.exists() && snap.data().university) {
@@ -15,6 +13,12 @@
     } catch(e) {
       window.location.href = 'dashboard.html';
     }
+  }
+
+  // If already logged in → check if onboarded
+  onAuthStateChanged(auth, async user => {
+    if (!user) return;
+    await redirectAfterAuth(user);
   });
 
   function showError(msg) {
@@ -46,11 +50,11 @@
     const btn = document.getElementById('signinBtn');
     btn.disabled = true; btn.textContent = 'Signing in...';
     try {
-      await signInWithEmailAndPassword(auth,
+      const cred = await signInWithEmailAndPassword(auth,
         document.getElementById('signinEmail').value,
         document.getElementById('signinPassword').value
       );
-      window.location.href = 'dashboard.html';
+      await redirectAfterAuth(cred.user);
     } catch(err) {
       showError(friendlyError(err.code));
       btn.disabled = false; btn.textContent = 'Sign In →';
@@ -78,8 +82,8 @@
   window.signInWithGoogle = async function() {
     clearMessages();
     try {
-      await signInWithPopup(auth, provider);
-      window.location.href = 'dashboard.html';
+      const result = await signInWithPopup(auth, provider);
+      await redirectAfterAuth(result.user);
     } catch(err) {
       // If this email already exists with email/password, sign them in then link Google
       if (err.code === 'auth/account-exists-with-different-credential') {
