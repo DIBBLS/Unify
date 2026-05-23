@@ -11,7 +11,7 @@
 }
 
 :root {
-  --font-display: "Playfair Display", serif;
+  --font-display: "Barlow", sans-serif;
   --font-body: "DM Sans", sans-serif;
 
   --bg: #f5f4f0;

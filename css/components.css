@@ -23,10 +23,17 @@ nav {
 .nav-logo {
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 20px;
-  letter-spacing: -1px;
+  font-size: 22px;
+  letter-spacing: -0.5px;
   text-decoration: none;
   color: var(--text);
+  text-transform: uppercase;
+}
+
+/* Flyer-style green dot after the wordmark */
+.nav-logo::after {
+  content: '.';
+  color: var(--green);
 }
 
 .nav-links,
@@ -60,7 +67,7 @@ nav {
 .nav-link:hover,
 .nav-tab:hover { color: var(--text); }
 .nav-link.active,
-.nav-tab.active { color: var(--text); border-bottom-color: var(--text); }
+.nav-tab.active { color: var(--text); border-bottom-color: var(--green); }
 
 .nav-right {
   display: flex;
@@ -164,18 +171,19 @@ nav {
   gap: 8px;
   padding: 12px 24px;
   min-height: 44px;
-  background: var(--text);
-  color: var(--bg);
+  background: var(--green);
+  color: #0a0a0a;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   font-family: var(--font-body);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: opacity 0.2s;
   text-decoration: none;
+  letter-spacing: 0.01em;
 }
-.btn-primary:hover { opacity: 0.8; }
+.btn-primary:hover { opacity: 0.85; }
 .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .btn-outline {

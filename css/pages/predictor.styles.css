@@ -9,7 +9,7 @@
 }
 
 :root {
-  --fd: "Playfair Display", serif;
+  --fd: "Barlow", sans-serif;
   --fb: "DM Sans", sans-serif;
   --bg: #f5f4f0;
   --surface: #ffffff;
