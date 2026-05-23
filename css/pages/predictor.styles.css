@@ -11,21 +11,21 @@
 :root {
   --fd: "Barlow", sans-serif;
   --fb: "DM Sans", sans-serif;
-  --bg: #f5f4f0;
+  --bg: #edeae2;
   --surface: #ffffff;
-  --surface2: #f8f7f3;
+  --surface2: #f5f2ea;
   --border: #e0deda;
   --text: #0a0a0a;
   --text2: #555;
   --text3: #999;
-  --green: #4ade80;
+  --green: var(--green);
   --green-bg: rgba(74, 222, 128, 0.08);
   --yellow: #fbbf24;
   --red: #f87171;
   --blue: #93c5fd;
 }
 [data-theme="dark"] {
-  --bg: #0f0f0f;
+  --bg: #111111;
   --surface: #1a1a1a;
   --surface2: #222222;
   --border: #2a2a2a;
