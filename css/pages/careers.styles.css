@@ -17,7 +17,7 @@
   --text3: #999;
   --green: #4ade80;
   --green-deep: #16a34a;
-  --font-display: "Playfair Display", serif;
+  --font-display: "Barlow", sans-serif;
   --font-body: "DM Sans", sans-serif;
 }
 [data-theme="dark"] {

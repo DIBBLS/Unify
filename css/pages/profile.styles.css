@@ -8,7 +8,7 @@
   padding: 0;
 }
 :root {
-  --fd: "Playfair Display", serif;
+  --fd: "Barlow", sans-serif;
   --fb: "DM Sans", sans-serif;
   --bg: #f7f6f2;
   --surface: #fff;
