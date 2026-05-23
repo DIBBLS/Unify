@@ -3,7 +3,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --font-display: 'Barlow', sans-serif; --font-body: 'DM Sans', sans-serif;
-  --bg: #edeae2; --surface: #ffffff; --surface2: #f5f2ea; --border: #e0deda;
+  --bg: #edeae2; --surface: #f5f2ea; --surface2: #f5f2ea; --border: #e0deda;
   --text: #0a0a0a; --text2: #555; --text3: #999;
   --invert-bg: #0a0a0a; --invert-text: #edeae2; --invert-sub: #555; --invert-border: #1f1f1f;
   --green: var(--green); --green-bg: rgba(74,222,128,0.08); --green-border: rgba(74,222,128,0.25);
