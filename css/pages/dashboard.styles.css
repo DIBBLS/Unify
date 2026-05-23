@@ -13,7 +13,7 @@
   --font-display: "Barlow", sans-serif;
   --font-body: "DM Sans", sans-serif;
   --bg: #edeae2;
-  --surface: #ffffff;
+  --surface: #f5f2ea;
   --surface2: #f5f2ea;
   --border: #e0deda;
   --text: #0a0a0a;
@@ -336,6 +336,7 @@ nav {
   overflow: hidden;
 }
 .progress-fill {
+  background: var(--green) !important;
   height: 100%;
   background: var(--invert-text);
   border-radius: 2px;
@@ -605,22 +606,22 @@ input::placeholder {
   background: #0a0a0a;
 } */
 /* [data-theme="dark"] .accent-0 {
-  background: #f0efeb;
+  background: var(--surface2);
 }
 [data-theme="dark"] .accent-1 {
-  background: #f0efeb;
+  background: var(--surface2);
 }
 [data-theme="dark"] .accent-2 {
-  background: #f0efeb;
+  background: var(--surface2);
 }
 [data-theme="dark"] .accent-3 {
-  background: #f0efeb;
+  background: var(--surface2);
 }
 [data-theme="dark"] .accent-4 {
-  background: #f0efeb;
+  background: var(--surface2);
 }
 [data-theme="dark"] .accent-5 {
-  background: #f0efeb;
+  background: var(--surface2);
 } */
 
 .course-card-code {
