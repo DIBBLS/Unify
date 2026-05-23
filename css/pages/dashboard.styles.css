@@ -12,22 +12,22 @@
 :root {
   --font-display: "Barlow", sans-serif;
   --font-body: "DM Sans", sans-serif;
-  --bg: #f5f4f0;
+  --bg: #edeae2;
   --surface: #ffffff;
-  --surface2: #f8f7f3;
+  --surface2: #f5f2ea;
   --border: #e0deda;
   --text: #0a0a0a;
   --text2: #555;
   --text3: #999;
   --invert-bg: #0a0a0a;
-  --invert-text: #f5f4f0;
+  --invert-text: #edeae2;
   --invert-sub: #555;
   --invert-border: #1f1f1f;
   --tag-bg: #f0efeb;
   --tag-color: #888;
 }
 [data-theme="dark"] {
-  --bg: #0f0f0f;
+  --bg: #111111;
   --surface: #1a1a1a;
   --surface2: #222222;
   --border: #2a2a2a;
@@ -1766,7 +1766,7 @@ input::placeholder {
   opacity: 0.8;
 }
 .streak-nudge.completed .streak-action {
-  background: var(--green, #4ade80);
+  background: var(--green, var(--green));
   color: #0a0a0a;
 }
 .streak-dots {
@@ -1785,7 +1785,7 @@ input::placeholder {
   background: #f97316;
 }
 .streak-dot.done {
-  background: #4ade80;
+  background: var(--green);
 }
 
 /* QUICK REVIEW MODAL */
@@ -1898,9 +1898,9 @@ input::placeholder {
   border-color: var(--text);
 }
 .review-option.correct {
-  border-color: #4ade80;
+  border-color: var(--green);
   background: rgba(74, 222, 128, 0.08);
-  color: #4ade80;
+  color: var(--green);
 }
 .review-option.wrong {
   border-color: #ef4444;
@@ -2018,7 +2018,7 @@ input::placeholder {
 }
 .goal-mode-badge.elite {
   background: rgba(74, 222, 128, 0.12);
-  color: #4ade80;
+  color: var(--green);
 }
 .goal-card-title {
   font-family: var(--font-display);
