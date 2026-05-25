@@ -175,7 +175,6 @@
   </div>
   <div class="notes-bar-actions">
     <button class="notes-bar-btn" onclick="toggleTheme()" id="themeToggle">Dark</button>
-    <button class="notes-bar-btn" id="newTabBtn" style="display:none;" onclick="openNewTab()">↗ New tab</button>
   </div>
 </div>
 
@@ -258,8 +257,6 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById('barTitle').textContent = data.title || 'Course Notes';
     document.title = `${data.courseCode} W${data.week} — ${data.title || 'Notes'} | Unify`;
 
-    // Show new-tab button & render
-    document.getElementById('newTabBtn').style.display = '';
     const frame = document.getElementById('notesFrame');
     frame.srcdoc = wrapIfSnippet(_htmlContent);
     frame.style.display = 'block';
@@ -269,14 +266,6 @@ onAuthStateChanged(auth, async (user) => {
     showError('Failed to load notes. Check your connection and try again.');
   }
 });
-
-window.openNewTab = function () {
-  if (!_htmlContent) return;
-  const blob = new Blob([wrapIfSnippet(_htmlContent)], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  window.open(url, '_blank', 'noopener,noreferrer');
-  setTimeout(() => URL.revokeObjectURL(url), 60000);
-};
 
 window.goBack = function () {
   if (window.history.length > 1) {
