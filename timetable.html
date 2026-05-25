@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="apple-touch-icon" href="/icons/icon.svg">
 <title>Unify — Timetable</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/variables.css">
@@ -70,7 +73,6 @@
     <a href="profile.html" class="nav-link">Profile</a>
   </div>
   <div class="nav-right">
-    <!-- Notification Bell -->
     <button class="notif-bell-btn" id="notifBell" onclick="toggleNotifDrawer()" title="Notifications">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <span class="notif-badge" id="notifBadge" style="display:none;"></span>
@@ -80,9 +82,6 @@
     <button class="nav-signout" id="signOutBtn">Sign out</button>
   </div>
 </nav>
-
-<!-- NOTIFICATION DRAWER -->
-
 
 <!-- NOTIFICATION OVERLAY -->
 <div class="notif-overlay" id="notifOverlay" onclick="closeNotifDrawer()"></div>
@@ -150,7 +149,7 @@
         </div>
         <div class="form-group">
           <label class="form-label">Course Name *</label>
-          <input class="form-input" id="newName" placeholder="e.g. Signals & Systems">
+          <input class="form-input" id="newName" placeholder="e.g. Signals &amp; Systems">
         </div>
         <div class="form-group">
           <label class="form-label">Day</label>

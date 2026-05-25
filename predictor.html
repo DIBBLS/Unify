@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="apple-touch-icon" href="/icons/icon.svg">
 <title>Grade Planner — Unify</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/variables.css">
@@ -167,26 +170,11 @@
       </div>
 
       <div class="profile-card" id="profileCard">
-        <div class="pc-row">
-          <span class="pc-key">Your target</span>
-          <span class="pc-val" id="pc-target">—</span>
-        </div>
-        <div class="pc-row">
-          <span class="pc-key">Current CGPA</span>
-          <span class="pc-val" id="pc-current">—</span>
-        </div>
-        <div class="pc-row">
-          <span class="pc-key">Gap to close</span>
-          <span class="pc-val" id="pc-gap">—</span>
-        </div>
-        <div class="pc-row">
-          <span class="pc-key">What this requires</span>
-          <span class="pc-val note" id="pc-req">—</span>
-        </div>
-        <div class="pc-row">
-          <span class="pc-key">Academic mode</span>
-          <span class="pc-val" id="pc-mode">—</span>
-        </div>
+        <div class="pc-row"><span class="pc-key">Your target</span><span class="pc-val" id="pc-target">—</span></div>
+        <div class="pc-row"><span class="pc-key">Current CGPA</span><span class="pc-val" id="pc-current">—</span></div>
+        <div class="pc-row"><span class="pc-key">Gap to close</span><span class="pc-val" id="pc-gap">—</span></div>
+        <div class="pc-row"><span class="pc-key">What this requires</span><span class="pc-val note" id="pc-req">—</span></div>
+        <div class="pc-row"><span class="pc-key">Academic mode</span><span class="pc-val" id="pc-mode">—</span></div>
       </div>
 
       <div class="reflect-wrap" id="reflectWrap">
@@ -205,7 +193,6 @@
   </div>
 
   <div class="step-panel" id="step-2">
-
     <div class="feas-banner" id="feasBanner">
       <span id="feasIcon">🎯</span>
       <span id="feasText">Calculating…</span>
@@ -261,7 +248,6 @@
 </main>
 
 <script src="js/pages/predictor.js"></script>
-
 <script type="module" src="js/pages/predictor-2.js"></script>
 </body>
 </html>

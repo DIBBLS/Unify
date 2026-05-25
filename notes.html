@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="apple-touch-icon" href="/icons/icon.svg">
 <title>Unify — Notes</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/variables.css">
@@ -20,7 +23,6 @@
     overflow: hidden;
   }
 
-  /* ── TOP BAR ── */
   .notes-bar {
     display: flex;
     align-items: center;
@@ -51,118 +53,51 @@
     white-space: nowrap;
     flex-shrink: 0;
   }
-  .notes-back:hover {
-    background: var(--surface);
-    color: var(--text);
-  }
-  .notes-back-arrow {
-    font-size: 16px;
-    line-height: 1;
-  }
+  .notes-back:hover { background: var(--surface); color: var(--text); }
+  .notes-back-arrow { font-size: 16px; line-height: 1; }
 
-  .notes-bar-divider {
-    width: 1px;
-    height: 20px;
-    background: var(--border);
-    flex-shrink: 0;
-  }
+  .notes-bar-divider { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; }
 
-  .notes-bar-info {
-    flex: 1;
-    min-width: 0;
-  }
+  .notes-bar-info { flex: 1; min-width: 0; }
   .notes-bar-course {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text3);
-    line-height: 1;
-    margin-bottom: 3px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--text3); line-height: 1; margin-bottom: 3px;
   }
   .notes-bar-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 14px; font-weight: 600; color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
 
-  .notes-bar-actions {
-    display: flex;
-    gap: 6px;
-    flex-shrink: 0;
-  }
+  .notes-bar-actions { display: flex; gap: 6px; flex-shrink: 0; }
   .notes-bar-btn {
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 5px 12px;
-    font-size: 12px;
-    font-weight: 500;
-    font-family: inherit;
-    color: var(--text2);
-    cursor: pointer;
-    transition: all 0.15s;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
+    background: none; border: 1px solid var(--border); border-radius: 6px;
+    padding: 5px 12px; font-size: 12px; font-weight: 500; font-family: inherit;
+    color: var(--text2); cursor: pointer; transition: all 0.15s;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
   }
-  .notes-bar-btn:hover {
-    border-color: var(--text);
-    color: var(--text);
-  }
+  .notes-bar-btn:hover { border-color: var(--text); color: var(--text); }
 
-  /* ── LOADING STATE ── */
   .notes-loading {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 10px;
   }
-  .notes-loading-logo {
-    font-family: var(--font-display);
-    font-weight: 900;
-    font-size: 28px;
-    letter-spacing: -0.5px;
-  }
-  .notes-loading-sub {
-    font-size: 13px;
-    color: var(--text3);
-  }
+  .notes-loading-logo { font-family: var(--font-display); font-weight: 900; font-size: 28px; letter-spacing: -0.5px; }
+  .notes-loading-sub { font-size: 13px; color: var(--text3); }
 
-  /* ── ERROR STATE ── */
   .notes-error {
-    flex: 1;
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    text-align: center;
-    padding: 40px 24px;
+    flex: 1; display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 8px; text-align: center; padding: 40px 24px;
   }
   .notes-error-icon { font-size: 36px; opacity: 0.4; }
   .notes-error-title { font-size: 16px; font-weight: 700; }
   .notes-error-sub { font-size: 13px; color: var(--text3); line-height: 1.6; }
 
-  /* ── CONTENT IFRAME ── */
-  .notes-frame {
-    flex: 1;
-    width: 100%;
-    border: none;
-    display: none;
-    background: #fff;
-  }
+  .notes-frame { flex: 1; width: 100%; border: none; display: none; background: #fff; }
 </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
 <div class="notes-bar">
   <button class="notes-back" onclick="goBack()">
     <span class="notes-back-arrow">←</span>
@@ -179,20 +114,17 @@
   </div>
 </div>
 
-<!-- LOADING -->
 <div class="notes-loading" id="loadingState">
   <div class="notes-loading-logo">Unify</div>
   <div class="notes-loading-sub">Loading notes…</div>
 </div>
 
-<!-- ERROR -->
 <div class="notes-error" id="errorState">
   <div class="notes-error-icon">📄</div>
   <div class="notes-error-title">Notes not found</div>
   <div class="notes-error-sub" id="errorMsg">This content may have been removed or you don't have access.</div>
 </div>
 
-<!-- CONTENT -->
 <iframe
   id="notesFrame"
   class="notes-frame"
@@ -252,13 +184,11 @@ onAuthStateChanged(auth, async (user) => {
     const data = snap.data();
     _htmlContent = data.htmlContent || '';
 
-    // Update bar
     document.getElementById('barCourse').textContent =
       `${data.courseCode || ''} · Week ${data.week || ''}`;
     document.getElementById('barTitle').textContent = data.title || 'Course Notes';
     document.title = `${data.courseCode} W${data.week} — ${data.title || 'Notes'} | Unify`;
 
-    // Show new-tab button & render
     document.getElementById('newTabBtn').style.display = '';
     const frame = document.getElementById('notesFrame');
     frame.srcdoc = wrapIfSnippet(_htmlContent);
