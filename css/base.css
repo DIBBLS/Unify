@@ -28,7 +28,6 @@ h1, h2, h3 {
   font-family: var(--font-display);
   font-weight: 800;
   letter-spacing: -0.5px;
-  text-transform: uppercase;
 }
 
 h4, h5, h6 {
