@@ -3,6 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0a0a0a">
+    <link rel="apple-touch-icon" href="/icons/icon.svg">
     <title>Unify — Course</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap"
@@ -14,7 +17,6 @@
     <link rel="stylesheet" href="css/responsive.css" />
     <link rel="stylesheet" href="css/pages/course.styles.css" />
     <script src="js/theme.js"></script>
-    <!-- Hard-coded fallbacks (kept so legacy courses still render) -->
     <script src="courses.js"></script>
     <script src="Coursecontent.JS"></script>
   </head>
@@ -33,9 +35,7 @@
           <a href="profile.html" class="nl">Profile</a>
         </div>
         <div class="nav-r">
-          <button class="nbtn" onclick="toggleTheme()" id="themeToggle">
-            Dark mode
-          </button>
+          <button class="nbtn" onclick="toggleTheme()" id="themeToggle">Dark mode</button>
           <a href="dashboard.html" class="nbtn">← Back</a>
         </div>
       </nav>
@@ -60,9 +60,7 @@
               <div class="course-empty">
                 <div class="course-empty-icon">📖</div>
                 <div class="course-empty-text">No weekly outline yet.</div>
-                <div class="course-empty-sub" id="weeksEmptySub">
-                  Materials uploaded by faculty will appear here automatically.
-                </div>
+                <div class="course-empty-sub" id="weeksEmptySub">Materials uploaded by faculty will appear here automatically.</div>
               </div>
             </div>
           </section>
@@ -72,13 +70,8 @@
             <div id="resourcesWrap">
               <div class="course-empty">
                 <div class="course-empty-icon">📂</div>
-                <div class="course-empty-text">
-                  No resources have been uploaded for this course yet.
-                </div>
-                <div class="course-empty-sub">
-                  Coming soon — admins will be able to upload materials directly
-                  from the admin panel.
-                </div>
+                <div class="course-empty-text">No resources have been uploaded for this course yet.</div>
+                <div class="course-empty-sub">Coming soon — admins will be able to upload materials directly from the admin panel.</div>
               </div>
             </div>
           </section>
@@ -99,7 +92,6 @@
 
     <div class="toast" id="toast"></div>
 
-    <!-- NOTES MODAL -->
     <div class="notes-overlay" id="notesOverlay" onclick="handleNotesOverlayClick(event)">
       <div class="notes-modal">
         <div class="notes-modal-header">

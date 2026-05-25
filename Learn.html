@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="apple-touch-icon" href="/icons/icon.svg">
 <title>Unify — Learn</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/variables.css">
@@ -48,7 +51,6 @@
   </div>
 </nav>
 
-<!-- Mobile sidebar toggle (only visible on ≤900px) -->
 <button class="sidebar-mobile-toggle" id="sidebarMobileToggle" onclick="toggleMobileSidebar()">
   <span id="sidebarToggleLabel">📋 Course Outline</span>
   <span class="sidebar-mobile-toggle-icon">▼</span>
@@ -56,7 +58,6 @@
 
 <div class="learn-layout">
 
-  <!-- ── SIDEBAR ── -->
   <div class="learn-sidebar" id="learnSidebar">
     <div class="sidebar-course-header">
       <div class="sidebar-course-code" id="sidebarCode">—</div>
@@ -68,7 +69,6 @@
         <span class="course-progress-pct" id="sidebarProgressPct">0%</span>
       </div>
     </div>
-    <!-- Course Outline — sits above week list, applies to whole course -->
     <div style="padding: 12px 0 4px;">
       <a id="courseOutlineLink" href="#" class="sidebar-outline-link unavailable" target="_blank"
          onclick="if(this.classList.contains('unavailable'))return false;">
@@ -80,14 +80,12 @@
     <div class="week-list" id="weekList"></div>
   </div>
 
-  <!-- ── MAIN ── -->
   <div class="learn-main" id="learnMain">
     <div class="lesson-placeholder" id="lessonPlaceholder">
       <div class="placeholder-icon">📖</div>
       <p class="placeholder-text">Select a week from the sidebar<br>to start learning.</p>
     </div>
 
-    <!-- WEEK LANDING PAGE -->
     <div id="weekLanding" style="display:none;">
       <div class="lesson-header">
         <div class="lesson-breadcrumb" id="wlBreadcrumb">Week 1</div>
@@ -100,16 +98,11 @@
       <div class="week-landing">
         <p class="wl-summary" id="wlSummary"></p>
         <div class="wl-topics" id="wlTopics"></div>
-        <button class="wl-start-btn" id="wlStartBtn" onclick="startWeek()">
-          Start Week →
-        </button>
+        <button class="wl-start-btn" id="wlStartBtn" onclick="startWeek()">Start Week →</button>
       </div>
     </div>
 
-    <!-- LESSON VIEW (hidden until selected) -->
     <div id="lessonView" style="display:none;">
-
-      <!-- HEADER -->
       <div class="lesson-header">
         <div class="lesson-breadcrumb" id="lessonBreadcrumb">Week 1</div>
         <div class="lesson-title" id="lessonTitle">Topic Name</div>
@@ -119,13 +112,8 @@
         </div>
       </div>
 
-      <!-- BODY -->
       <div class="lesson-body">
-
-        <!-- MAIN CONTENT GRID: Lecture Notes left, Video right -->
         <div class="lesson-content-grid">
-
-          <!-- LECTURE NOTES CARD -->
           <div class="notes-card" id="notesCard">
             <div class="notes-card-header">
               <div class="notes-card-eyebrow">Lecture Notes</div>
@@ -139,7 +127,6 @@
             </div>
           </div>
 
-          <!-- VIDEO CARD -->
           <div class="video-card">
             <div class="video-card-header">
               <span class="video-card-title">Video Tutorial</span>
@@ -152,10 +139,8 @@
               </div>
             </div>
           </div>
-
         </div>
 
-        <!-- CONFIDENCE -->
         <div style="margin:28px 0;padding:20px 0;border-top:1px solid var(--border);">
           <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-weight:500;letter-spacing:.03em;">HOW CONFIDENT DO YOU FEEL ABOUT THIS TOPIC?</div>
           <div class="confidence-btns" id="confidenceBtns" style="gap:8px;">
@@ -167,7 +152,6 @@
           </div>
         </div>
 
-        <!-- SUMMARY -->
         <div class="lesson-section" id="sectionSummary">
           <div class="lesson-section-header">
             <span class="lesson-section-icon">📌</span>
@@ -176,10 +160,8 @@
           </div>
           <div class="summary-card" id="summaryContent"></div>
         </div>
-
       </div>
 
-      <!-- REVIEW REMINDER (inline, above sticky bar) -->
       <div class="review-reminder" id="reviewReminder" style="display:none;margin:0 48px 0;">
         <div class="review-reminder-icon">🔔</div>
         <div class="review-reminder-text">
@@ -188,7 +170,6 @@
         </div>
       </div>
 
-      <!-- STICKY COMPLETE BAR -->
       <div class="sticky-complete-bar">
         <button class="sticky-complete-btn" id="markCompleteBtn" onclick="markComplete()">
           <span id="markCompleteBtnText">✓ Mark Complete</span>
@@ -198,10 +179,8 @@
           Next Topic →
         </button>
       </div>
-
     </div>
 
-    <!-- COURSE COMPLETE PAGE -->
     <div class="course-complete" id="courseCompletePage">
       <div class="cc-hero">
         <div class="cc-icon">🎓</div>
@@ -211,31 +190,16 @@
         </div>
       </div>
 
-      <!-- STATS ROW -->
       <div class="cc-stats" id="ccStats">
-        <div class="cc-stat green">
-          <div class="cc-stat-num" id="ccStatDone">–</div>
-          <div class="cc-stat-label">Topics Done</div>
-        </div>
-        <div class="cc-stat">
-          <div class="cc-stat-num" id="ccStatWeeks">–</div>
-          <div class="cc-stat-label">Weeks Covered</div>
-        </div>
-        <div class="cc-stat yellow">
-          <div class="cc-stat-num" id="ccStatConf">–</div>
-          <div class="cc-stat-label">Avg Confidence</div>
-        </div>
-        <div class="cc-stat">
-          <div class="cc-stat-num" id="ccStatStrong">–</div>
-          <div class="cc-stat-label">Strong Topics</div>
-        </div>
+        <div class="cc-stat green"><div class="cc-stat-num" id="ccStatDone">–</div><div class="cc-stat-label">Topics Done</div></div>
+        <div class="cc-stat"><div class="cc-stat-num" id="ccStatWeeks">–</div><div class="cc-stat-label">Weeks Covered</div></div>
+        <div class="cc-stat yellow"><div class="cc-stat-num" id="ccStatConf">–</div><div class="cc-stat-label">Avg Confidence</div></div>
+        <div class="cc-stat"><div class="cc-stat-num" id="ccStatStrong">–</div><div class="cc-stat-label">Strong Topics</div></div>
       </div>
 
-      <!-- WEEK BREAKDOWN -->
       <div class="cc-section-title">Week-by-Week Mastery</div>
       <div class="cc-week-grid" id="ccWeekGrid"></div>
 
-      <!-- CONFIDENCE DISTRIBUTION -->
       <div class="cc-section-title">Confidence Distribution</div>
       <div class="cc-conf-chart" id="ccConfChart"></div>
       <div style="display:flex;justify-content:space-between;padding:0 4px;margin-bottom:4px;">
@@ -247,21 +211,18 @@
       </div>
       <div style="font-size:12px;color:var(--text3);margin-bottom:8px;" id="ccConfHint"></div>
 
-      <!-- TOPICS TO REVIEW -->
       <div id="ccReviewSection" style="display:none;">
         <div class="cc-section-title">📌 Topics to Revisit</div>
         <div id="ccReviewList" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;"></div>
         <div style="font-size:12px;color:var(--text3);">These had low confidence ratings — worth one more pass before exams.</div>
       </div>
 
-      <!-- ACTIONS -->
       <div class="cc-actions">
         <button class="cc-btn green-btn" onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
         <button class="cc-btn primary" onclick="exportCourseSummary()">⬇ Export Summary (.txt)</button>
         <button class="cc-btn" onclick="reviewWeakTopics()">🔁 Review Weak Topics</button>
       </div>
     </div>
-
   </div>
 </div>
 
