@@ -9,10 +9,10 @@
 }
 :root {
   --black: #0a0a0a;
-  --white: #f5f4f0;
+  --white: #edeae2;
   --grey: #e0deda;
   --mid: #888;
-  --font-display: "Playfair Display", serif;
+  --font-display: "Barlow", sans-serif;
   --font-body: "DM Sans", sans-serif;
 }
 body {
@@ -218,7 +218,7 @@ body {
 }
 .option-item:hover {
   border-color: #999;
-  background: #f8f7f3;
+  background: #f5f2ea;
 }
 .option-item.selected {
   border-color: var(--black);

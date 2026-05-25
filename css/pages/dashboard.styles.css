@@ -10,24 +10,28 @@
 
 /* ── THEME TOKENS ── */
 :root {
-  --font-display: "Playfair Display", serif;
+  --font-display: "Barlow", sans-serif;
   --font-body: "DM Sans", sans-serif;
-  --bg: #f5f4f0;
-  --surface: #ffffff;
-  --surface2: #f8f7f3;
+  --bg: #edeae2;
+  --surface: #f5f2ea;
+  --surface2: #f5f2ea;
   --border: #e0deda;
   --text: #0a0a0a;
   --text2: #555;
   --text3: #999;
   --invert-bg: #0a0a0a;
-  --invert-text: #f5f4f0;
+  --invert-text: #edeae2;
   --invert-sub: #555;
   --invert-border: #1f1f1f;
   --tag-bg: #f0efeb;
   --tag-color: #888;
+  --green: #22c55e;
+  --green-bg: rgba(34, 197, 94, 0.10);
+  --green-border: rgba(34, 197, 94, 0.30);
+  --green-deep: #16a34a;
 }
 [data-theme="dark"] {
-  --bg: #0f0f0f;
+  --bg: #111111;
   --surface: #1a1a1a;
   --surface2: #222222;
   --border: #2a2a2a;
@@ -257,12 +261,15 @@ nav {
 .hero-name {
   font-family: var(--font-display);
   font-size: clamp(24px, 2.5vw, 38px);
-  font-weight: 900;
-  letter-spacing: -1px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
   margin-bottom: 6px;
+  text-transform: none;
 }
 .hero-name em {
   font-style: italic;
+  color: var(--green);
+  font-weight: 700;
 }
 .hero-dept {
   font-size: 13px;
@@ -332,6 +339,7 @@ nav {
   overflow: hidden;
 }
 .progress-fill {
+  background: var(--green) !important;
   height: 100%;
   background: var(--invert-text);
   border-radius: 2px;
@@ -601,22 +609,22 @@ input::placeholder {
   background: #0a0a0a;
 } */
 /* [data-theme="dark"] .accent-0 {
-  background: #f0efeb;
+  background: var(--surface2);
 }
 [data-theme="dark"] .accent-1 {
-  background: #f0efeb;
+  background: var(--surface2);
 }
 [data-theme="dark"] .accent-2 {
-  background: #f0efeb;
+  background: var(--surface2);
 }
 [data-theme="dark"] .accent-3 {
-  background: #f0efeb;
+  background: var(--surface2);
 }
 [data-theme="dark"] .accent-4 {
-  background: #f0efeb;
+  background: var(--surface2);
 }
 [data-theme="dark"] .accent-5 {
-  background: #f0efeb;
+  background: var(--surface2);
 } */
 
 .course-card-code {
@@ -657,7 +665,7 @@ input::placeholder {
 .course-progress-fill {
   height: 100%;
   border-radius: 2px;
-  background: var(--text);
+  background: var(--green);
   transition: width 0.6s ease;
 }
 .course-item.active-card .course-progress-track {
@@ -1504,8 +1512,8 @@ input::placeholder {
   border-color: var(--text);
 }
 .planner-session.done {
-  border-color: var(--green-border, rgba(74, 222, 128, 0.25));
-  background: var(--green-bg, rgba(74, 222, 128, 0.06));
+  border-color: var(--green-border, rgba(34, 197, 94, 0.30));
+  background: var(--green-bg, rgba(34, 197, 94, 0.08));
 }
 .planner-session.skipped {
   opacity: 0.5;
@@ -1539,8 +1547,8 @@ input::placeholder {
   color: var(--text3);
 }
 .planner-session.done .planner-session-duration {
-  background: var(--green-bg, rgba(74, 222, 128, 0.08));
-  border-color: var(--green-border, rgba(74, 222, 128, 0.2));
+  background: var(--green-bg, rgba(34, 197, 94, 0.08));
+  border-color: var(--green-border, rgba(34, 197, 94, 0.25));
   color: var(--green);
 }
 .planner-session-check {
@@ -1693,7 +1701,7 @@ input::placeholder {
 }
 .streak-nudge.completed {
   border-color: var(--green);
-  background: var(--green-bg, rgba(74, 222, 128, 0.06));
+  background: var(--green-bg, rgba(34, 197, 94, 0.08));
   cursor: default;
 }
 .streak-nudge.completed:hover {
@@ -1751,12 +1759,12 @@ input::placeholder {
 .streak-action {
   flex-shrink: 0;
   padding: 9px 20px;
-  background: var(--text);
-  color: var(--bg);
+  background: var(--green);
+  color: #0a0a0a;
   border: none;
   border-radius: 8px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   font-family: var(--font-body);
   transition: opacity 0.15s;
@@ -1766,7 +1774,7 @@ input::placeholder {
   opacity: 0.8;
 }
 .streak-nudge.completed .streak-action {
-  background: var(--green, #4ade80);
+  background: var(--green, var(--green));
   color: #0a0a0a;
 }
 .streak-dots {
@@ -1785,7 +1793,7 @@ input::placeholder {
   background: #f97316;
 }
 .streak-dot.done {
-  background: #4ade80;
+  background: var(--green);
 }
 
 /* QUICK REVIEW MODAL */
@@ -1898,9 +1906,9 @@ input::placeholder {
   border-color: var(--text);
 }
 .review-option.correct {
-  border-color: #4ade80;
-  background: rgba(74, 222, 128, 0.08);
-  color: #4ade80;
+  border-color: var(--green);
+  background: rgba(34, 197, 94, 0.08);
+  color: var(--green);
 }
 .review-option.wrong {
   border-color: #ef4444;
@@ -1919,8 +1927,8 @@ input::placeholder {
   display: block;
 }
 .review-result.win {
-  background: rgba(74, 222, 128, 0.08);
-  border: 1px solid rgba(74, 222, 128, 0.25);
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.30);
   color: var(--text2);
 }
 .review-result.lose {
@@ -2018,7 +2026,7 @@ input::placeholder {
 }
 .goal-mode-badge.elite {
   background: rgba(74, 222, 128, 0.12);
-  color: #4ade80;
+  color: var(--green);
 }
 .goal-card-title {
   font-family: var(--font-display);
@@ -2167,6 +2175,9 @@ input::placeholder {
   cursor: pointer;
   position: relative;
   transition: background 0.15s;
+}
+.hero-stat-link .hero-stat-val {
+  color: var(--green);
 }
 .hero-stat-link:hover {
   background: rgba(255, 255, 255, 0.04);
@@ -2336,7 +2347,7 @@ input::placeholder {
 }
 .picker-chip:hover {
   border-color: var(--green);
-  background: var(--green-bg, rgba(74, 222, 128, 0.06));
+  background: var(--green-bg, rgba(34, 197, 94, 0.08));
 }
 .picker-code {
   font-weight: 600;

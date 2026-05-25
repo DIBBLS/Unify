@@ -26,12 +26,18 @@ body {
 /* ── Fluid typography helper ─────────────────────────── */
 h1, h2, h3 {
   font-family: var(--font-display);
+  font-weight: 800;
   letter-spacing: -0.5px;
+}
+
+h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
 }
 
 /* ── Focus ring (accessibility) ──────────────────────── */
 :focus-visible {
-  outline: 2px solid var(--text);
+  outline: 2px solid var(--green);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -59,6 +65,7 @@ img, video, iframe {
   font-size: 30px;
   font-weight: 900;
   letter-spacing: -1px;
+  text-transform: uppercase;
 }
 .loading-sub {
   font-size: 13px;
