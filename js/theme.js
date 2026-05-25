@@ -43,4 +43,13 @@
     localStorage.setItem(KEY, next);
     applyTheme(next);
   };
+
+  // Register service worker for PWA support
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/sw.js').catch(function () {
+        // SW registration failure is non-fatal
+      });
+    });
+  }
 })();
