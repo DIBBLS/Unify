@@ -261,12 +261,15 @@ nav {
 .hero-name {
   font-family: var(--font-display);
   font-size: clamp(24px, 2.5vw, 38px);
-  font-weight: 900;
-  letter-spacing: -1px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
   margin-bottom: 6px;
+  text-transform: none;
 }
 .hero-name em {
   font-style: italic;
+  color: var(--green);
+  font-weight: 700;
 }
 .hero-dept {
   font-size: 13px;
@@ -662,7 +665,7 @@ input::placeholder {
 .course-progress-fill {
   height: 100%;
   border-radius: 2px;
-  background: var(--text);
+  background: var(--green);
   transition: width 0.6s ease;
 }
 .course-item.active-card .course-progress-track {
@@ -1756,12 +1759,12 @@ input::placeholder {
 .streak-action {
   flex-shrink: 0;
   padding: 9px 20px;
-  background: var(--text);
-  color: var(--bg);
+  background: var(--green);
+  color: #0a0a0a;
   border: none;
   border-radius: 8px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   font-family: var(--font-body);
   transition: opacity 0.15s;
@@ -2172,6 +2175,9 @@ input::placeholder {
   cursor: pointer;
   position: relative;
   transition: background 0.15s;
+}
+.hero-stat-link .hero-stat-val {
+  color: var(--green);
 }
 .hero-stat-link:hover {
   background: rgba(255, 255, 255, 0.04);
