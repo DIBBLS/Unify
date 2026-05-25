@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="css/responsive.css" />
     <script src="js/theme.js"></script>
     <link rel="stylesheet" href="css/pages/dashboard.styles.css?v=goal-5" />
+    <link rel="stylesheet" href="css/pages/dashboard-v2.styles.css" />
   </head>
   <body>
 
@@ -68,7 +69,7 @@
         <label class="planner-modal-label">Preferred study time?</label>
         <div class="planner-chips" id="timeChips">
           <button class="planner-chip" data-val="morning" onclick="selectChip(this,'time')">🌅 Morning</button>
-          <button class="planner-chip selected" data-val="afternoon" onclick="selectChip(this,'time")">☀️ Afternoon</button>
+          <button class="planner-chip selected" data-val="afternoon" onclick="selectChip(this,'time')">☀️ Afternoon</button>
           <button class="planner-chip" data-val="night" onclick="selectChip(this,'time')">🌙 Night</button>
         </div>
         <button class="planner-modal-save" onclick="savePlannerSetup()">Generate My Plan →</button>
@@ -217,7 +218,7 @@
           <!-- SEMESTER PROGRESS -->
           <div class="dash-progress-wrap">
             <span class="dash-progress-label">Semester Progress</span>
-            <div class="progress-bar dash-progress-track">
+            <div class="dash-progress-track">
               <div class="progress-fill" id="progressFill"></div>
             </div>
             <span class="progress-pct" id="progressPct">0%</span>
@@ -238,8 +239,8 @@
               </div>
               <div class="dash-motivation-right">
                 <p class="dash-motivation-ahead">Ahead <strong>this week</strong></p>
-                <svg class="dash-sparkline" viewBox="0 0 80 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <polyline points="0,22 16,18 32,14 48,10 64,6 80,2" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <svg class="dash-sparkline" viewBox="0 0 80 28" xmlns="http://www.w3.org/2000/svg">
+                  <polyline points="0,24 20,18 40,13 60,8 80,3" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
                 </svg>
               </div>
             </div>
@@ -345,39 +346,39 @@
             </div>
           </div>
 
-          <!-- Hidden aspiration store -->
+          <!-- Hidden aspiration store — keeps renderAspirations working -->
           <div style="display:none;">
             <input id="aspirationInput" />
             <div id="aspirationList"></div>
           </div>
 
-          <!-- Hidden compat tab -->
+          <!-- Hidden compat element for JS tab switching -->
           <button id="tab-personal" style="display:none;"></button>
 
         </div><!-- end app-page-content -->
       </div><!-- end app-main -->
     </div><!-- end app-layout -->
 
-    <!-- BOTTOM NAV (5 items) -->
+    <!-- BOTTOM NAV (5 items with SVG icons) -->
     <div class="app-bottom-nav">
       <a href="index.html" class="app-bnav-item active" id="mob-tab-personal">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         <span>Dashboard</span>
       </a>
       <a href="timetable.html" class="app-bnav-item">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span>Timetable</span>
       </a>
       <a href="study.html" class="app-bnav-item">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
         <span>Study Plan</span>
       </a>
       <a href="predictor.html" class="app-bnav-item">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         <span>Analytics</span>
       </a>
       <a href="profile.html" class="app-bnav-item">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <span>Profile</span>
       </a>
     </div>
@@ -393,12 +394,11 @@
         document.getElementById('sidebarOverlay').classList.remove('active');
         document.body.style.overflow = '';
       }
-      // Sticky topbar shadow on scroll
       window.addEventListener('scroll', function() {
         var tb = document.getElementById('appTopbar');
         if (tb) tb.classList.toggle('scrolled', window.scrollY > 8);
       }, { passive: true });
-      // Sync sidebar avatar from navUserName
+      // Sync sidebar avatar initial from navUserName
       (function() {
         var nameEl = document.getElementById('navUserName');
         if (!nameEl) return;
