@@ -3,6 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0a0a0a">
+    <link rel="apple-touch-icon" href="/icons/icon.svg">
     <title>Unify — Dashboard</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap"
@@ -172,12 +175,8 @@
               <span class="streak-days-val" id="streakDaysVal">0</span>
               <span>day streak</span>
             </div>
-            <div class="streak-message" id="streakMessage">
-              Start your streak today
-            </div>
-            <div class="streak-sub" id="streakSub">
-              One quick question. 2 minutes max.
-            </div>
+            <div class="streak-message" id="streakMessage">Start your streak today</div>
+            <div class="streak-sub" id="streakSub">One quick question. 2 minutes max.</div>
             <div class="streak-dots" id="streakDots"></div>
           </div>
           <button class="streak-action" id="streakActionBtn">Let's go →</button>
@@ -188,22 +187,12 @@
       <div class="planner-wrap" id="plannerWrap">
         <div class="planner-header">
           <div class="planner-title">📚 Today's Study Plan</div>
-          <button class="planner-setup-link" onclick="openPlannerSetup()">
-            ⚙ Customise
-          </button>
+          <button class="planner-setup-link" onclick="openPlannerSetup()">⚙ Customise</button>
         </div>
         <div class="planner-sessions" id="plannerSessions">
           <div class="planner-empty" id="plannerEmpty">
-            Set up your study preferences and we'll build a personalised daily
-            plan.
-            <br /><a
-              href="#"
-              onclick="
-                openPlannerSetup();
-                return false;
-              "
-              >Get started →</a
-            >
+            Set up your study preferences and we'll build a personalised daily plan.
+            <br /><a href="#" onclick="openPlannerSetup(); return false;">Get started →</a>
           </div>
         </div>
       </div>
@@ -211,142 +200,54 @@
       <!-- PLANNER SETUP MODAL -->
       <div class="planner-modal-overlay" id="plannerModalOverlay">
         <div class="planner-modal">
-          <button class="planner-modal-close" onclick="closePlannerSetup()">
-            ✕ Close
-          </button>
+          <button class="planner-modal-close" onclick="closePlannerSetup()">✕ Close</button>
           <div class="planner-modal-title">Build Your Study Plan</div>
-          <div class="planner-modal-sub">
-            We'll generate a daily schedule around your courses.
-          </div>
+          <div class="planner-modal-sub">We'll generate a daily schedule around your courses.</div>
 
-          <label class="planner-modal-label"
-            >How long can you study per session?</label
-          >
+          <label class="planner-modal-label">How long can you study per session?</label>
           <div class="planner-chips" id="durationChips">
-            <button
-              class="planner-chip"
-              data-val="20"
-              onclick="selectChip(this, 'duration')"
-            >
-              20 min
-            </button>
-            <button
-              class="planner-chip"
-              data-val="30"
-              onclick="selectChip(this, 'duration')"
-            >
-              30 min
-            </button>
-            <button
-              class="planner-chip selected"
-              data-val="60"
-              onclick="selectChip(this, 'duration')"
-            >
-              1 hour
-            </button>
-            <button
-              class="planner-chip"
-              data-val="90"
-              onclick="selectChip(this, 'duration')"
-            >
-              1.5 hrs
-            </button>
+            <button class="planner-chip" data-val="20" onclick="selectChip(this, 'duration')">20 min</button>
+            <button class="planner-chip" data-val="30" onclick="selectChip(this, 'duration')">30 min</button>
+            <button class="planner-chip selected" data-val="60" onclick="selectChip(this, 'duration')">1 hour</button>
+            <button class="planner-chip" data-val="90" onclick="selectChip(this, 'duration')">1.5 hrs</button>
           </div>
 
           <label class="planner-modal-label">How many sessions per day?</label>
           <div class="planner-chips" id="sessionsChips">
-            <button
-              class="planner-chip"
-              data-val="1"
-              onclick="selectChip(this, 'sessions')"
-            >
-              1
-            </button>
-            <button
-              class="planner-chip selected"
-              data-val="2"
-              onclick="selectChip(this, 'sessions')"
-            >
-              2
-            </button>
-            <button
-              class="planner-chip"
-              data-val="3"
-              onclick="selectChip(this, 'sessions')"
-            >
-              3
-            </button>
+            <button class="planner-chip" data-val="1" onclick="selectChip(this, 'sessions')">1</button>
+            <button class="planner-chip selected" data-val="2" onclick="selectChip(this, 'sessions')">2</button>
+            <button class="planner-chip" data-val="3" onclick="selectChip(this, 'sessions')">3</button>
           </div>
 
           <label class="planner-modal-label">Preferred study time?</label>
           <div class="planner-chips" id="timeChips">
-            <button
-              class="planner-chip"
-              data-val="morning"
-              onclick="selectChip(this, 'time')"
-            >
-              🌅 Morning
-            </button>
-            <button
-              class="planner-chip selected"
-              data-val="afternoon"
-              onclick="selectChip(this, 'time')"
-            >
-              ☀️ Afternoon
-            </button>
-            <button
-              class="planner-chip"
-              data-val="night"
-              onclick="selectChip(this, 'time')"
-            >
-              🌙 Night
-            </button>
+            <button class="planner-chip" data-val="morning" onclick="selectChip(this, 'time')">🌅 Morning</button>
+            <button class="planner-chip selected" data-val="afternoon" onclick="selectChip(this, 'time')">☀️ Afternoon</button>
+            <button class="planner-chip" data-val="night" onclick="selectChip(this, 'time')">🌙 Night</button>
           </div>
 
-          <button class="planner-modal-save" onclick="savePlannerSetup()">
-            Generate My Plan →
-          </button>
+          <button class="planner-modal-save" onclick="savePlannerSetup()">Generate My Plan →</button>
         </div>
       </div>
 
       <!-- ── REVIEW MODAL ── -->
-      <div
-        class="review-modal-overlay"
-        id="reviewModalOverlay"
-        onclick="closeReviewOnOverlay(event)"
-      >
+      <div class="review-modal-overlay" id="reviewModalOverlay" onclick="closeReviewOnOverlay(event)">
         <div class="review-modal">
           <div class="review-modal-header">
-            <span class="review-modal-badge" id="reviewModalBadge"
-              >Quick Review</span
-            >
-            <button class="review-modal-close" onclick="closeReview()">
-              ✕
-            </button>
+            <span class="review-modal-badge" id="reviewModalBadge">Quick Review</span>
+            <button class="review-modal-close" onclick="closeReview()">✕</button>
           </div>
           <div class="review-modal-topic" id="reviewModalTopic">Topic Name</div>
-          <div class="review-modal-course" id="reviewModalCourse">
-            Course · Week
-          </div>
-          <div class="review-question" id="reviewQuestion">
-            Loading question...
-          </div>
+          <div class="review-modal-course" id="reviewModalCourse">Course · Week</div>
+          <div class="review-question" id="reviewQuestion">Loading question...</div>
           <div class="review-options" id="reviewOptions"></div>
           <div class="review-result" id="reviewResult">
             <div class="review-result-title" id="reviewResultTitle"></div>
             <div id="reviewResultBody"></div>
           </div>
           <div class="review-modal-actions">
-            <button
-              class="review-done-btn"
-              id="reviewDoneBtn"
-              onclick="finishReview()"
-            >
-              Done ✓
-            </button>
-            <button class="review-skip-btn" onclick="closeReview()">
-              Later
-            </button>
+            <button class="review-done-btn" id="reviewDoneBtn" onclick="finishReview()">Done ✓</button>
+            <button class="review-skip-btn" onclick="closeReview()">Later</button>
           </div>
         </div>
       </div>
@@ -359,16 +260,11 @@
               <option>First Semester</option>
               <option>Second Semester</option>
             </select>
-            <button class="btn" onclick="switchSemester()">
-              Load Semester
-            </button>
+            <button class="btn" onclick="switchSemester()">Load Semester</button>
           </div>
           <div class="sidebar-section">
-            <a href="onboarding.html?edit=1" class="sidebar-link"
-              >Change university / level →</a
-            >
+            <a href="onboarding.html?edit=1" class="sidebar-link">Change university / level →</a>
           </div>
-
         </div>
 
         <div style="display: flex; min-width: 0; position: relative">
@@ -377,65 +273,31 @@
               <h2 class="content-title">Your Courses</h2>
               <div style="display: flex; align-items: center; gap: 8px">
                 <span class="content-count" id="coursesCount">0 courses</span>
-                <button class="add-course-toggle" onclick="toggleAddCourse()">
-                  + Add
-                </button>
+                <button class="add-course-toggle" onclick="toggleAddCourse()">+ Add</button>
               </div>
             </div>
             <div class="add-course-row" id="addCourseRow">
               <div class="add-course-inputs">
-                <input
-                  type="text"
-                  class="add-course-inp"
-                  id="addCourseCode"
-                  placeholder="Course code (e.g. ECE 301)"
-                  onkeydown="if (event.key === 'Enter') addCourseInline();"
-                />
-                <input
-                  type="number"
-                  class="add-units-inp"
-                  id="addCourseUnits"
-                  min="1"
-                  max="6"
-                  placeholder="Units"
-                  onkeydown="if (event.key === 'Enter') addCourseInline();"
-                />
-                <button class="add-course-sub" onclick="addCourseInline()">
-                  Add
-                </button>
+                <input type="text" class="add-course-inp" id="addCourseCode" placeholder="Course code (e.g. ECE 301)" onkeydown="if (event.key === 'Enter') addCourseInline();" />
+                <input type="number" class="add-units-inp" id="addCourseUnits" min="1" max="6" placeholder="Units" onkeydown="if (event.key === 'Enter') addCourseInline();" />
+                <button class="add-course-sub" onclick="addCourseInline()">Add</button>
               </div>
               <div id="coursePickerList"></div>
             </div>
             <div class="empty-state" id="emptyState">
               <div class="empty-icon">📚</div>
-              <p class="empty-text">
-                No courses loaded yet.<br />Select a semester and tap "Load
-                Semester",<br />or add courses manually.
-              </p>
+              <p class="empty-text">No courses loaded yet.<br />Select a semester and tap “Load Semester”,<br />or add courses manually.</p>
             </div>
             <ul id="courses"></ul>
 
             <div class="sidebar-section">
               <span class="sidebar-title">Add Course Manually</span>
-              <input
-                id="courseInput"
-                placeholder="Course code (e.g. ECE 301)"
-              />
+              <input id="courseInput" placeholder="Course code (e.g. ECE 301)" />
               <input id="gradeInput" placeholder="Grade (A, B, C, D, E, F)" />
-              <input
-                id="unitsInput"
-                type="number"
-                min="1"
-                max="6"
-                placeholder="Credit units"
-              />
+              <input id="unitsInput" type="number" min="1" max="6" placeholder="Credit units" />
               <button class="btn" onclick="addCourse()">Add Course</button>
-              <button class="btn btn-outline" onclick="clearCourses()">
-                Clear All
-              </button>
+              <button class="btn btn-outline" onclick="clearCourses()">Clear All</button>
             </div>
-
-
           </div>
 
           <!-- RESOURCE PANEL -->
@@ -443,62 +305,21 @@
             <div class="resource-panel-inner">
               <div class="resource-panel-header">
                 <div>
-                  <h3 class="resource-panel-title" id="resourcePanelTitle">
-                    Course
-                  </h3>
-                  <div
-                    style="
-                      font-size: 11px;
-                      color: var(--text3);
-                      margin-top: 3px;
-                    "
-                    id="resourcePanelMeta"
-                  ></div>
+                  <h3 class="resource-panel-title" id="resourcePanelTitle">Course</h3>
+                  <div style="font-size: 11px; color: var(--text3); margin-top: 3px" id="resourcePanelMeta"></div>
                 </div>
-                <div
-                  style="
-                    display: flex;
-                    gap: 8px;
-                    flex-shrink: 0;
-                    align-items: center;
-                  "
-                >
-                  <a
-                    class="panel-learn-btn"
-                    id="coursePageBtn"
-                    href="#"
-                    style="padding: 8px 16px; font-size: 12px"
-                    >Course Page →</a
-                  >
-                  <a
-                    class="panel-learn-btn"
-                    id="learnPageBtn"
-                    href="#"
-                    style="
-                      padding: 8px 14px;
-                      font-size: 12px;
-                      background: transparent;
-                      color: var(--text3);
-                      border: 1px solid var(--border);
-                    "
-                    >Legacy Learn</a
-                  >
-                  <button
-                    class="resource-panel-close"
-                    onclick="closeResourcePanel()"
-                  >
-                    ✕
-                  </button>
+                <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center">
+                  <a class="panel-learn-btn" id="coursePageBtn" href="#" style="padding: 8px 16px; font-size: 12px">Course Page →</a>
+                  <a class="panel-learn-btn" id="learnPageBtn" href="#" style="padding: 8px 14px; font-size: 12px; background: transparent; color: var(--text3); border: 1px solid var(--border)">Legacy Learn</a>
+                  <button class="resource-panel-close" onclick="closeResourcePanel()">✕</button>
                 </div>
               </div>
-              <!-- WEEK ACCORDION (full panel) -->
               <div class="week-accordion" id="weekAccordion"></div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Hidden aspiration store — keeps renderAspirations working -->
       <div style="display: none">
         <input id="aspirationInput" />
         <div id="aspirationList"></div>
