@@ -277,18 +277,6 @@ window.openNotes = function (id) {
   const iframe = document.getElementById('notesModalFrame');
   iframe.srcdoc = wrapIfSnippet(item.htmlContent);
 
-  // Wire fullscreen button to open the same HTML in a new tab via blob URL
-  const fsBtn = document.getElementById('notesFullscreenBtn');
-  if (fsBtn) {
-    fsBtn.onclick = () => {
-      const blob = new Blob([wrapIfSnippet(item.htmlContent)], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      window.open(url, '_blank', 'noopener,noreferrer');
-      // Revoke later — keeps the new tab usable for a while
-      setTimeout(() => URL.revokeObjectURL(url), 60000);
-    };
-  }
-
   document.getElementById('notesOverlay').classList.add('open');
 };
 
