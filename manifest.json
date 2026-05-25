@@ -1,0 +1,42 @@
+{
+  "name": "Unify",
+  "short_name": "Unify",
+  "description": "Own your academic journey. Track skills, showcase projects, connect to opportunities.",
+  "start_url": "/dashboard.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f5f4f0",
+  "theme_color": "#0a0a0a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/dashboard.html",
+      "description": "View your dashboard"
+    },
+    {
+      "name": "Timetable",
+      "url": "/timetable.html",
+      "description": "View your class timetable"
+    },
+    {
+      "name": "Profile",
+      "url": "/profile.html",
+      "description": "View your profile"
+    }
+  ]
+}
