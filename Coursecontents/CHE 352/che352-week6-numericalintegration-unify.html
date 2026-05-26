@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHE 352 — Week 6: Numerical Integration | Unify Learn</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<script>MathJax = { chtml: { scale: 0.95 }, options: { skipHtmlTags: ["script","noscript","style","textarea","pre"] } };</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  :root {
+    --bg: #f5f4f0; --surface: #ffffff; --surface2: #f8f7f3;
+    --border: #e0deda; --text: #0a0a0a; --text2: #555555; --text3: #999999;
+    --green: #4ade80; --green-deep: #16a34a; --green-bg: rgba(74,222,128,0.1);
+    --fd: 'Playfair Display', serif; --fb: 'DM Sans', sans-serif;
+    --radius: 12px; --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  [data-theme="dark"] {
+    --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #222222;
+    --border: #2a2a2a; --text: #f0efeb; --text2: #aaa; --text3: #666;
+    --shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--fb); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; transition: background 0.3s, color 0.3s; }
+  #progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--green); width: 0%; z-index: 1000; transition: width 0.2s; }
+  .topbar { position: fixed; top: 3px; left: 0; right: 0; height: 52px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 999; transition: background 0.3s, border-color 0.3s; }
+  .topbar-wordmark { font-family: var(--fd); font-weight: 900; font-size: 18px; color: var(--text); letter-spacing: -0.5px; }
+  .topbar-wordmark span { color: var(--green); }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .course-pill { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--text3); }
+  #dark-toggle { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: all 0.2s; }
+  #dark-toggle:hover { background: var(--surface2); }
+  .progress-tracker { position: fixed; bottom: 20px; right: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; font-size: 11px; font-weight: 600; color: var(--text2); box-shadow: var(--shadow); z-index: 998; display: flex; align-items: center; gap: 8px; transition: background 0.3s, border-color 0.3s; }
+  .tracker-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+  .wrapper { max-width: 780px; margin: 0 auto; padding: 88px 20px 100px; }
+  .hero { background: #0a0a0a; color: #f5f4f0; border-radius: var(--radius); padding: 40px 36px; margin-bottom: 32px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -40px; right: -40px; width: 200px; height: 200px; border-radius: 50%; background: rgba(74,222,128,0.07); pointer-events: none; }
+  .hero-eyebrow { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #4ade80; margin-bottom: 12px; }
+  .hero-title { font-family: var(--fd); font-size: 32px; font-weight: 900; letter-spacing: -1px; line-height: 1.15; color: #f5f4f0; margin-bottom: 8px; }
+  .hero-subtitle { font-family: var(--fd); font-size: 17px; font-weight: 400; font-style: italic; color: rgba(245,244,240,0.7); margin-bottom: 24px; line-height: 1.4; }
+  .hero-outcome { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.25); border-radius: 8px; padding: 14px 18px; font-size: 13px; color: rgba(245,244,240,0.9); line-height: 1.6; margin-bottom: 24px; }
+  .hero-outcome strong { color: #4ade80; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; }
+  .meta-chip { font-size: 11px; font-weight: 500; padding: 4px 12px; border-radius: 20px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: rgba(245,244,240,0.7); }
+  .topic-progress { margin-bottom: 32px; }
+  .tp-label { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+  .tp-steps { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tp-step { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text3); }
+  .tp-step.done { background: var(--green-bg); border-color: rgba(74,222,128,0.35); color: var(--green-deep); }
+  .tp-step.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .tp-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .tags-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+  .tag { font-family: var(--fb); font-size: 11px; font-weight: 500; padding: 5px 13px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: default; }
+  .tag.green { background: var(--green-bg); border-color: rgba(74,222,128,0.3); color: var(--green-deep); }
+  .section-label { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green-deep); margin-bottom: 6px; }
+  .section-title { font-family: var(--fd); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); margin-bottom: 20px; line-height: 1.25; }
+  .subtopic-heading { display: flex; align-items: center; gap: 10px; margin: 32px 0 14px; }
+  .subtopic-heading h3 { font-family: var(--fd); font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+  .subtopic-num { font-family: var(--fb); font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; background: var(--green-bg); border: 1px solid rgba(74,222,128,0.3); color: var(--green-deep); letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+  .topic-block { margin-bottom: 56px; }
+  .topic-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 28px; margin-bottom: 0px; box-shadow: var(--shadow); }
+  .topic-card p { max-width: 66ch; color: var(--text2); font-size: 14px; line-height: 1.8; margin-bottom: 12px; overflow-x: auto; }
+  .topic-card ul, .topic-card ol { max-width: 66ch; padding-left: 20px; color: var(--text2); font-size: 14px; line-height: 1.8; margin-bottom: 12px; }
+  .topic-card li { margin-bottom: 6px; }
+  .topic-card strong { color: var(--text); }
+  .topic-card p:last-child, .topic-card ul:last-child { margin-bottom: 0; }
+  .formula-block { border-left: 4px solid var(--green); background: var(--green-bg); border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; margin: 1rem 0; overflow-x: auto; }
+  .formula-block .f-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--green-deep); margin-bottom: 0.5rem; font-family: var(--fb); }
+  .formula-block .vars { font-size: 0.82rem; color: var(--text2); margin-top: 0.4rem; }
+  .worked-example { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin: 1.25rem 0; overflow-x: auto; box-shadow: var(--shadow); }
+  .we-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; background: #0a0a0a; color: #f5f4f0; display: inline-block; padding: 3px 9px; border-radius: 4px; margin-bottom: 0.75rem; }
+  [data-theme="dark"] .we-label { background: var(--green); color: #0a0a0a; }
+  .we-q { font-family: var(--fd); font-size: 1.05rem; margin-bottom: 1rem; font-style: italic; color: var(--text); }
+  .we-step { display: flex; gap: 0.75rem; margin-bottom: 0.6rem; align-items: flex-start; }
+  .we-step-num { background: var(--green); color: #0a0a0a; border-radius: 50%; width: 1.4rem; height: 1.4rem; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex-shrink: 0; margin-top: 0.1rem; }
+  .we-step-text { font-size: 0.92rem; overflow-x: auto; color: var(--text2); line-height: 1.7; }
+  .we-step-text strong { color: var(--text); }
+  .we-result { margin-top: 0.75rem; padding: 0.75rem 1rem; background: var(--green-bg); border: 1px solid rgba(74,222,128,0.3); border-radius: 8px; font-weight: 600; font-size: 0.95rem; color: var(--text); overflow-x: auto; }
+  .note-box { background: var(--green-bg); border: 1px solid rgba(74,222,128,0.3); border-radius: var(--radius); padding: 1rem 1.25rem; margin: 1rem 0; }
+  .note-box strong { color: var(--green-deep); display: block; margin-bottom: 0.3rem; }
+  .note-box p { font-size: 14px; color: var(--text2); line-height: 1.7; margin: 0; }
+  .warn-box { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); border-radius: var(--radius); padding: 1rem 1.25rem; margin: 1rem 0; }
+  .warn-box strong { color: #b45309; display: block; margin-bottom: 0.3rem; }
+  .warn-box p { font-size: 14px; color: var(--text2); line-height: 1.7; margin: 0; }
+  .data-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; overflow-x: auto; display: block; }
+  .data-table th { background: #0a0a0a; color: #f5f4f0; padding: 0.5rem 0.75rem; text-align: center; font-weight: 700; }
+  [data-theme="dark"] .data-table th { background: var(--surface2); color: var(--text); }
+  .data-table td { border: 1px solid var(--border); padding: 0.45rem 0.75rem; text-align: center; color: var(--text2); }
+  .data-table tr:nth-child(even) td { background: var(--green-bg); }
+  .data-table .hl { font-weight: 700; background: #fef3c7 !important; color: #92400e; }
+  [data-theme="dark"] .data-table .hl { background: #451a03 !important; color: #fcd34d; }
+  .divider { height: 1px; background: var(--border); margin: 40px 0; }
+  .mini-check { background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--green); border-radius: 0 var(--radius) var(--radius) 0; padding: 20px 24px; margin: 0 0 24px 0; }
+  .mini-check-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .mini-check-icon { font-size: 14px; }
+  .mini-check-title { font-family: var(--fb); font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--green-deep); }
+  .mini-check-sub { font-size: 11px; color: var(--text3); margin-left: auto; }
+  .mc-reveal-item { margin-bottom: 14px; }
+  .mc-q { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 8px; max-width: 66ch; line-height: 1.6; }
+  .mc-reveal-btn { font-family: var(--fb); font-size: 10px; font-weight: 600; padding: 5px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); cursor: pointer; transition: all 0.2s; }
+  .mc-reveal-btn:hover { background: var(--green-bg); border-color: rgba(74,222,128,0.3); color: var(--green-deep); }
+  .mc-answer { display: none; margin-top: 8px; padding: 10px 14px; background: var(--surface); border-left: 2px solid var(--green); border-radius: 0 6px 6px 0; font-size: 12px; color: var(--text2); line-height: 1.7; max-width: 66ch; }
+  .mc-answer.show { display: block; }
+  .mc-mcq-item { margin-bottom: 14px; }
+  .mc-mcq-opts { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; max-width: 52ch; }
+  .mc-mcq-opt { display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; padding: 7px 12px; border-radius: 7px; background: var(--surface); border: 1px solid var(--border); color: var(--text2); transition: all 0.15s; user-select: none; }
+  .mc-mcq-opt:hover:not(.mc-locked) { background: var(--green-bg); border-color: rgba(74,222,128,0.3); }
+  .mc-mcq-opt.mc-correct { background: var(--green-bg); border-color: rgba(74,222,128,0.4); color: var(--green-deep); font-weight: 600; }
+  .mc-mcq-opt.mc-wrong { background: rgba(239,68,68,0.07); border-color: rgba(239,68,68,0.3); color: #b91c1c; }
+  .mc-ltr { font-weight: 700; font-size: 10px; width: 20px; height: 20px; border-radius: 50%; background: var(--surface2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .mc-mcq-fb { display: none; margin-top: 7px; font-size: 11px; font-weight: 600; }
+  .mc-fitb-item { margin-bottom: 14px; }
+  .mc-fitb-row { display: flex; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
+  .mc-fitb-input { font-family: var(--fb); font-size: 12px; padding: 7px 12px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); color: var(--text); outline: none; width: 220px; transition: border-color 0.2s; }
+  .mc-fitb-input:focus { border-color: var(--green); }
+  .mc-fitb-btn { font-family: var(--fb); font-size: 10px; font-weight: 700; padding: 7px 14px; border-radius: 7px; border: none; background: var(--text); color: var(--bg); cursor: pointer; white-space: nowrap; }
+  .mc-fitb-fb { display: none; margin-top: 7px; font-size: 11px; font-weight: 600; }
+  .recall-section { margin-top: 24px; }
+  .recall-label { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green-deep); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .recall-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .recall-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin-bottom: 10px; }
+  .recall-badge { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 9px; border-radius: 20px; margin-bottom: 10px; }
+  .badge-def { background: rgba(74,222,128,0.15); color: var(--green-deep); border: 1px solid rgba(74,222,128,0.3); }
+  .badge-mech { background: rgba(251,191,36,0.15); color: #b45309; border: 1px solid rgba(251,191,36,0.3); }
+  .badge-app { background: rgba(59,130,246,0.1); color: #1d4ed8; border: 1px solid rgba(59,130,246,0.2); }
+  .badge-comp { background: rgba(139,92,246,0.1); color: #6d28d9; border: 1px solid rgba(139,92,246,0.2); }
+  .recall-q { font-size: 14px; font-weight: 500; color: var(--text); max-width: 66ch; line-height: 1.6; margin-bottom: 12px; }
+  .reveal-btn { font-family: var(--fb); font-size: 11px; font-weight: 600; padding: 6px 16px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: pointer; transition: all 0.2s; }
+  .reveal-btn:hover { background: var(--green-bg); border-color: rgba(74,222,128,0.3); color: var(--green-deep); }
+  .recall-answer { display: none; margin-top: 12px; padding: 14px 16px; background: var(--surface2); border-left: 3px solid var(--green); border-radius: 0 8px 8px 0; font-size: 13px; color: var(--text2); line-height: 1.7; max-width: 66ch; overflow-x: auto; }
+  .recall-answer.show { display: block; }
+  .pulse-check { background: var(--green); border-radius: var(--radius); padding: 28px; margin: 40px 0; }
+  .pulse-check .pc-title { font-family: var(--fd); font-size: 20px; font-weight: 900; color: #0a0a0a; margin-bottom: 4px; }
+  .pulse-check .pc-sub { font-size: 12px; color: rgba(10,10,10,0.6); margin-bottom: 20px; }
+  .pc-question { background: rgba(255,255,255,0.35); border-radius: 10px; padding: 16px 18px; margin-bottom: 12px; }
+  .pc-q-text { font-size: 14px; font-weight: 500; color: #0a0a0a; margin-bottom: 10px; max-width: 66ch; line-height: 1.6; }
+  .pc-options { display: flex; flex-direction: column; gap: 6px; }
+  .pc-option { display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer; padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.5); color: #0a0a0a; transition: all 0.15s; max-width: 66ch; }
+  .pc-option:hover { background: rgba(255,255,255,0.65); }
+  .pc-option.correct { background: #fff; border-color: #16a34a; }
+  .pc-option.wrong { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.5); }
+  .pc-letter { font-weight: 700; font-size: 11px; width: 22px; height: 22px; border-radius: 50%; background: rgba(10,10,10,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .pc-feedback { margin-top: 8px; font-size: 12px; font-weight: 500; display: none; color: #0a0a0a; }
+  .eoq { background: var(--text); border-radius: var(--radius); padding: 32px; margin-top: 48px; }
+  .eoq-eyebrow { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green); margin-bottom: 6px; }
+  .eoq-title { font-family: var(--fd); font-size: 24px; font-weight: 900; color: #f5f4f0; margin-bottom: 4px; letter-spacing: -0.5px; }
+  .eoq-sub { font-size: 12px; color: rgba(240,239,235,0.5); margin-bottom: 24px; }
+  .eoq-question { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 18px 20px; margin-bottom: 14px; }
+  .eoq-qnum { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: rgba(240,239,235,0.4); margin-bottom: 6px; }
+  .eoq-q-text { font-size: 14px; font-weight: 500; color: #f0efeb; max-width: 66ch; line-height: 1.6; margin-bottom: 12px; }
+  .eoq-options { display: flex; flex-direction: column; gap: 6px; }
+  .eoq-option { display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer; padding: 10px 14px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(240,239,235,0.8); transition: all 0.15s; max-width: 66ch; user-select: none; }
+  .eoq-option:hover:not(.locked) { background: rgba(255,255,255,0.1); }
+  .eoq-option.selected { border-color: var(--green); background: rgba(74,222,128,0.1); }
+  .eoq-option.correct-reveal { border-color: var(--green); background: rgba(74,222,128,0.15); color: #f0efeb; }
+  .eoq-option.wrong-reveal { border-color: rgba(239,68,68,0.5); background: rgba(239,68,68,0.1); color: rgba(240,239,235,0.6); }
+  .eoq-letter { font-weight: 700; font-size: 11px; width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: rgba(240,239,235,0.7); }
+  .eoq-feedback { display: none; margin-top: 10px; font-size: 12px; line-height: 1.6; padding: 10px 14px; border-radius: 6px; max-width: 66ch; }
+  .eoq-feedback.correct-fb { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.25); color: #86efac; }
+  .eoq-feedback.wrong-fb { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #fca5a5; }
+  .eoq-submit { margin-top: 24px; width: 100%; padding: 14px; border-radius: 8px; border: none; background: var(--green); color: #0a0a0a; font-family: var(--fb); font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+  .eoq-submit:hover { opacity: 0.88; }
+  .eoq-result { display: none; margin-top: 24px; padding: 24px; border-radius: 10px; text-align: center; }
+  .eoq-result.pass { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); }
+  .eoq-result.fail { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); }
+  .result-score { font-family: var(--fd); font-size: 40px; font-weight: 900; color: #f0efeb; margin-bottom: 6px; }
+  .result-pill { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 5px 16px; border-radius: 20px; margin-bottom: 14px; }
+  .pill-pass { background: var(--green); color: #0a0a0a; }
+  .pill-fail { background: rgba(239,68,68,0.3); color: #fca5a5; border: 1px solid rgba(239,68,68,0.4); }
+  .result-msg { font-size: 13px; color: rgba(240,239,235,0.7); line-height: 1.6; max-width: 52ch; margin: 0 auto 16px; }
+  .unlock-banner { background: rgba(74,222,128,0.15); border: 1px solid rgba(74,222,128,0.3); border-radius: 8px; padding: 12px 16px; font-size: 13px; color: var(--green); font-weight: 500; margin-top: 12px; }
+  .review-nudge { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 14px 16px; margin-top: 12px; text-align: left; }
+  .review-nudge p { font-size: 12px; color: rgba(240,239,235,0.6); margin-bottom: 8px; }
+  .review-nudge ul { padding-left: 16px; font-size: 12px; color: #fca5a5; line-height: 1.8; }
+  @media (max-width: 600px) {
+    .wrapper { padding: 72px 14px 100px; }
+    .hero { padding: 28px 20px; } .hero-title { font-size: 24px; }
+    .topic-card { padding: 18px 16px; } .eoq { padding: 22px 16px; }
+    .pulse-check { padding: 20px 16px; } .mini-check { padding: 16px 18px; }
+    .progress-tracker { display: none; }
+  }
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<nav class="topbar">
+  <div class="topbar-wordmark">Unify<span>.</span></div>
+  <div class="topbar-right">
+    <span class="course-pill">CHE 352</span>
+    <button id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode">🌙</button>
+  </div>
+</nav>
+<div class="progress-tracker">
+  <div class="tracker-dot"></div>
+  <span id="tracker-text">Scroll to begin</span>
+</div>
+
+<div class="wrapper">
+
+  <header class="hero">
+    <div class="hero-eyebrow">CHE 352 · Week 6 · LASU Faculty of Engineering</div>
+    <h1 class="hero-title">Numerical Integration</h1>
+    <p class="hero-subtitle">Trapezoidal Rule &amp; Simpson's Rule</p>
+    <div class="hero-outcome">
+      <strong>By the end of this week, you should be able to</strong> apply the Trapezoidal Rule and Simpson's Rule to evaluate definite integrals numerically, set up the required data table, correctly classify ordinates as F+L, E, or R, and obtain accurate answers using both methods.
+    </div>
+    <div class="hero-meta">
+      <span class="meta-chip">📅 Week 6 of 7</span>
+      <span class="meta-chip">🎓 Dr. Lukumon Salami</span>
+      <span class="meta-chip">📍 Lagos State University</span>
+    </div>
+  </header>
+
+  <div class="topic-progress">
+    <div class="tp-label">Topics this week</div>
+    <div class="tp-steps">
+      <div class="tp-step active"><div class="tp-dot"></div> T1 · Why Numerical Integration</div>
+      <div class="tp-step"><div class="tp-dot"></div> T2 · Trapezoidal Rule</div>
+      <div class="tp-step"><div class="tp-dot"></div> T3 · Simpson's Rule</div>
+    </div>
+  </div>
+
+  <div class="tags-row">
+    <span class="tag green">Trapezoidal Rule</span>
+    <span class="tag green">Simpson's Rule</span>
+    <span class="tag green">Numerical Integration</span>
+    <span class="tag green">Sub-intervals</span>
+    <span class="tag">F+L, E, R Classification</span>
+    <span class="tag">Step size h</span>
+  </div>
+
+  <!-- ══════════════════════════════════
+       TOPIC 1 — WHY NUMERICAL INTEGRATION
+       ══════════════════════════════════ -->
+  <div class="topic-block" id="topic1">
+    <div class="section-label">Topic 1</div>
+    <div class="section-title">Why Numerical Integration?</div>
+
+    <div class="subtopic-heading">
+      <span class="subtopic-num">1.1</span>
+      <h3>Motivation &amp; Approach</h3>
+    </div>
+
+    <div class="topic-card">
+      <p>Many real-world integrals cannot be solved analytically — the function has no closed-form antiderivative, or you only have data points (not a formula). Numerical integration gives you an <strong>approximate value</strong> of \(\int_a^b f(x)\,dx\) using function values at a set of equally spaced points.</p>
+      <p>The two methods in this course approximate the area under a curve by dividing it into strips and fitting simple shapes to each strip:</p>
+      <ul>
+        <li><strong>Trapezoidal Rule</strong> — fits a straight line (trapezoid) between each pair of adjacent points</li>
+        <li><strong>Simpson's Rule</strong> — fits a parabola through each group of three points — more accurate</li>
+      </ul>
+    </div>
+
+    <!-- Mini Check 1.1 -->
+    <div class="mini-check">
+      <div class="mini-check-header">
+        <span class="mini-check-icon">⚡</span>
+        <span class="mini-check-title">Quick Check — Why Numerical Integration</span>
+        <span class="mini-check-sub">2 questions</span>
+      </div>
+      <div class="mc-reveal-item">
+        <div class="mc-q">Why do we need numerical integration instead of exact analytic methods?</div>
+        <button class="mc-reveal-btn" onclick="mcReveal(this)">Reveal Answer</button>
+        <div class="mc-answer">Many functions have <strong>no closed-form antiderivative</strong> (e.g. \(\sqrt{\sin x}\), \(\sqrt{1+x^3}\)), or you only have discrete data points — not a formula. Numerical integration works in both situations by approximating the area using the actual values.</div>
+      </div>
+      <div class="mc-mcq-item">
+        <div class="mc-q">Both the Trapezoidal Rule and Simpson's Rule require the data points to be:</div>
+        <div class="mc-mcq-opts" id="mc-1a">
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1a',false,'mc-1a-fb')"><span class="mc-ltr">A</span> Randomly spaced</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1a',true,'mc-1a-fb')"><span class="mc-ltr">B</span> Equally spaced</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1a',false,'mc-1a-fb')"><span class="mc-ltr">C</span> Increasing in value</div>
+        </div>
+        <div class="mc-mcq-fb" id="mc-1a-fb"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ══════════════════════════════════
+       TOPIC 2 — TRAPEZOIDAL RULE
+       ══════════════════════════════════ -->
+  <div class="topic-block" id="topic2">
+    <div class="section-label">Topic 2</div>
+    <div class="section-title">The Trapezoidal Rule</div>
+
+    <div class="subtopic-heading">
+      <span class="subtopic-num">2.1</span>
+      <h3>Formula &amp; Worked Example</h3>
+    </div>
+
+    <div class="topic-card">
+      <p>Divide \([a, b]\) into \(n\) equal sub-intervals of width \(h = \frac{b-a}{n}\). On each strip, approximate the curve as a straight line — forming a trapezoid. Sum all the trapezoid areas.</p>
+    </div>
+
+    <div class="formula-block">
+      <div class="f-label">Trapezoidal Rule</div>
+      \[ I = \int_a^b f(x)\,dx \approx \frac{h}{2}\left[(y_0 + y_n) + 2(y_1 + y_2 + \cdots + y_{n-1})\right] \]
+      <div class="vars">
+        \(h = \dfrac{b-a}{n}\), \(n\) = number of sub-intervals, \(y_i = f(x_i)\).<br>
+        \(y_0\) and \(y_n\) are the <strong>first and last</strong> ordinates. All middle ones are multiplied by 2.
+      </div>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 Analogy</strong>
+      <p>Think of painting a fence with a jagged top. Instead of measuring every curve, you approximate each panel as a straight line from post to post. More posts (higher \(n\)) → more accurate total area estimate.</p>
+    </div>
+
+    <div class="worked-example">
+      <div class="we-label">Example 3.1 — from Dr. Salami's notes</div>
+      <div class="we-q">Evaluate \(\displaystyle\int_0^1 x^3\,dx\) using the Trapezoidal Rule with 5 sub-intervals.</div>
+
+      <div class="we-step">
+        <div class="we-step-num">1</div>
+        <div class="we-step-text"><strong>Set up.</strong><br>
+          \(a = 0\), \(b = 1\), \(n = 5\) \(\Rightarrow h = \dfrac{1-0}{5} = 0.2\)
+        </div>
+      </div>
+
+      <div class="we-step">
+        <div class="we-step-num">2</div>
+        <div class="we-step-text"><strong>Build the table.</strong> \(y = x^3\):
+          <table class="data-table" style="margin-top:8px;">
+            <tr><th>x</th><th>0</th><th>0.2</th><th>0.4</th><th>0.6</th><th>0.8</th><th>1.0</th></tr>
+            <tr><td>\(y = x^3\)</td><td class="hl">0</td><td>0.008</td><td>0.064</td><td>0.216</td><td>0.512</td><td class="hl">1</td></tr>
+            <tr><td>Role</td><td>\(y_0\)</td><td>\(y_1\)</td><td>\(y_2\)</td><td>\(y_3\)</td><td>\(y_4\)</td><td>\(y_5\)</td></tr>
+          </table>
+          Highlighted cells: \(y_0\) and \(y_5\) (first + last).
+        </div>
+      </div>
+
+      <div class="we-step">
+        <div class="we-step-num">3</div>
+        <div class="we-step-text"><strong>Apply the formula.</strong>
+          \[ I = \frac{0.2}{2}\left[(0 + 1) + 2(0.008 + 0.064 + 0.216 + 0.512)\right] \]
+          \[ I = 0.1\left[1 + 2(0.8)\right] = 0.1 \times 2.6 \]
+        </div>
+      </div>
+
+      <div class="we-result">
+        \[ I \approx 0.26 \]
+        Exact answer: \(\int_0^1 x^3\,dx = 0.25\). Error ≈ 4% with only 5 strips.
+      </div>
+    </div>
+
+    <div class="subtopic-heading">
+      <span class="subtopic-num">2.2</span>
+      <h3>Trapezoidal Rule — Exercise</h3>
+    </div>
+
+    <div class="topic-card">
+      <p>Given the data below, evaluate \(\displaystyle\int_4^{5.2} \log x\,dx\) using the Trapezoidal Rule with 6 sub-intervals.</p>
+      <table class="data-table">
+        <tr><th>x</th><th>4</th><th>4.2</th><th>4.4</th><th>4.6</th><th>5.0</th><th>5.2</th></tr>
+        <tr><td>\(\log x\)</td><td>1.3863</td><td>1.4351</td><td>1.4816</td><td>1.5686</td><td>1.6094</td><td>1.6487</td></tr>
+      </table>
+      <p style="font-size:13px;color:var(--green-deep);font-weight:600;">Answer: 1.82766</p>
+    </div>
+
+    <!-- Mini Check 2.2 -->
+    <div class="mini-check">
+      <div class="mini-check-header">
+        <span class="mini-check-icon">⚡</span>
+        <span class="mini-check-title">Quick Check — Trapezoidal Rule</span>
+        <span class="mini-check-sub">2 questions</span>
+      </div>
+      <div class="mc-mcq-item">
+        <div class="mc-q">In the Trapezoidal Rule, the middle ordinates (not first or last) are multiplied by:</div>
+        <div class="mc-mcq-opts" id="mc-2a">
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2a',false,'mc-2a-fb')"><span class="mc-ltr">A</span> 1</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2a',true,'mc-2a-fb')"><span class="mc-ltr">B</span> 2</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2a',false,'mc-2a-fb')"><span class="mc-ltr">C</span> 4</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2a',false,'mc-2a-fb')"><span class="mc-ltr">D</span> 1/2</div>
+        </div>
+        <div class="mc-mcq-fb" id="mc-2a-fb"></div>
+      </div>
+      <div class="mc-fitb-item">
+        <div class="mc-q">For \(\int_0^1 x^3\,dx\) with 5 sub-intervals, the step size \(h =\) ___.</div>
+        <div class="mc-fitb-row">
+          <input class="mc-fitb-input" id="fitb-2b" type="text" placeholder="your answer">
+          <button class="mc-fitb-btn" onclick="mcFitb('fitb-2b',['0.2'],'fitb-2b-fb')">Check</button>
+        </div>
+        <div class="mc-fitb-fb" id="fitb-2b-fb"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ══════════════════════════════════
+       TOPIC 3 — SIMPSON'S RULE
+       ══════════════════════════════════ -->
+  <div class="topic-block" id="topic3">
+    <div class="section-label">Topic 3</div>
+    <div class="section-title">Simpson's Rule</div>
+
+    <div class="subtopic-heading">
+      <span class="subtopic-num">3.1</span>
+      <h3>Formula &amp; F+L/E/R Classification</h3>
+    </div>
+
+    <div class="topic-card">
+      <p>Simpson's Rule is more accurate than the Trapezoidal Rule because instead of fitting straight lines, it fits <strong>parabolas</strong> through groups of three consecutive points — better capturing curvature.</p>
+      <p>Important: <strong>n must be even</strong> for Simpson's Rule to work — you need pairs of strips to fit a parabola.</p>
+    </div>
+
+    <div class="formula-block">
+      <div class="f-label">Simpson's Rule — General Formula</div>
+      \[ A \approx \frac{s}{3}\left[(F+L) + 4E + 2R\right] \]
+      <div class="vars">
+        \(s\) = width of each strip (same as \(h\))<br>
+        \(F + L\) = sum of the <strong>first and last</strong> ordinates<br>
+        \(4E\) = 4 × sum of all <strong>odd-positioned</strong> middle ordinates (\(y_1, y_3, y_5, \ldots\))<br>
+        \(2R\) = 2 × sum of all <strong>even-positioned</strong> middle ordinates (\(y_2, y_4, y_6, \ldots\))<br>
+        Note: positions are counted from \(y_1\), not from \(y_0\).
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <strong>⚠️ E and R classification — common exam trap</strong>
+      <p>Start counting from \(y_1\). \(y_1, y_3, y_5, \ldots\) go into \(4E\). \(y_2, y_4, y_6, \ldots\) go into \(2R\). \(y_0\) and \(y_n\) are always F and L. Get this right before computing anything.</p>
+    </div>
+
+    <div class="subtopic-heading">
+      <span class="subtopic-num">3.2</span>
+      <h3>Worked Example — Pin Velocity (Simpson's)</h3>
+    </div>
+
+    <div class="worked-example">
+      <div class="we-label">Example 3.2 — Pin velocity problem</div>
+      <div class="we-q">A pin moves along a straight guide. Its velocity \(v\) (cm/s) at time \(t\) (s) is given below. Find the distance travelled using Simpson's Rule.</div>
+
+      <table class="data-table">
+        <tr><th>\(t\) (s)</th><th>0</th><th>0.5</th><th>1.0</th><th>1.5</th><th>2.0</th><th>2.5</th><th>3.0</th><th>3.5</th><th>4.0</th></tr>
+        <tr><td>\(v\) (cm/s)</td><td>0</td><td>4</td><td>7.94</td><td>11.68</td><td>14.97</td><td>17.39</td><td>18.25</td><td>16.08</td><td>0</td></tr>
+      </table>
+
+      <div class="we-step">
+        <div class="we-step-num">1</div>
+        <div class="we-step-text"><strong>Classify ordinates.</strong> \(s = 0.5\), 8 strips (even ✓).<br>
+          \(F+L = 0 + 0 = 0\)<br>
+          \(E\) (positions 1, 3, 5, 7): \(4 + 11.68 + 17.39 + 16.08 = 49.15\)<br>
+          \(R\) (positions 2, 4, 6): \(7.94 + 14.97 + 18.25 = 41.16\)
+        </div>
+      </div>
+
+      <div class="we-step">
+        <div class="we-step-num">2</div>
+        <div class="we-step-text"><strong>Apply Simpson's formula.</strong>
+          \[ A = \frac{0.5}{3}\left[0 + 4(49.15) + 2(41.16)\right] = \frac{0.5}{3}\left[196.6 + 82.32\right] = \frac{0.5}{3} \times 278.92 \]
+        </div>
+      </div>
+
+      <div class="we-result">\[ A \approx 46.49 \text{ cm} \]</div>
+    </div>
+
+    <div class="subtopic-heading">
+      <span class="subtopic-num">3.3</span>
+      <h3>Worked Example — \(\int_{0.2}^{1.0}\sqrt{1+x^3}\,dx\)</h3>
+    </div>
+
+    <div class="worked-example">
+      <div class="we-label">Example 3.3 — 8 intervals</div>
+      <div class="we-q">Evaluate \(\displaystyle\int_{0.2}^{1.0}\sqrt{1+x^3}\,dx\) using Simpson's Rule with 8 sub-intervals.</div>
+
+      <div class="we-step">
+        <div class="we-step-num">1</div>
+        <div class="we-step-text">\(s = \frac{1.0 - 0.2}{8} = 0.1\). Build the table and classify:
+          <table class="data-table" style="margin-top:8px;">
+            <tr><th>x</th><th>√(1+x³)</th><th>F+L</th><th>E</th><th>R</th></tr>
+            <tr><td>0.2</td><td>1.0039</td><td>1.0039</td><td>—</td><td>—</td></tr>
+            <tr><td>0.3</td><td>1.0134</td><td>—</td><td>1.0134</td><td>—</td></tr>
+            <tr><td>0.4</td><td>1.0316</td><td>—</td><td>—</td><td>1.0316</td></tr>
+            <tr><td>0.5</td><td>1.0607</td><td>—</td><td>1.0607</td><td>—</td></tr>
+            <tr><td>0.6</td><td>1.1027</td><td>—</td><td>—</td><td>1.1027</td></tr>
+            <tr><td>0.7</td><td>1.1589</td><td>—</td><td>1.1589</td><td>—</td></tr>
+            <tr><td>0.8</td><td>1.2296</td><td>—</td><td>—</td><td>1.2296</td></tr>
+            <tr><td>0.9</td><td>1.3149</td><td>—</td><td>1.3149</td><td>—</td></tr>
+            <tr><td>1.0</td><td>1.4142</td><td>1.4142</td><td>—</td><td>—</td></tr>
+            <tr><td colspan="2" style="font-weight:700;">Totals</td><td style="font-weight:700;">2.4181</td><td style="font-weight:700;">4.5479</td><td style="font-weight:700;">3.3639</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="we-step">
+        <div class="we-step-num">2</div>
+        <div class="we-step-text"><strong>Apply formula.</strong>
+          \[ I = \frac{0.1}{3}\left[2.4181 + 4(4.5479) + 2(3.3639)\right] = \frac{0.1}{3}\left[2.4181 + 18.1916 + 6.7278\right] = \frac{0.1}{3} \times 27.3375 \]
+        </div>
+      </div>
+
+      <div class="we-result">\[ I \approx 0.9113 \]</div>
+    </div>
+
+    <div class="subtopic-heading">
+      <span class="subtopic-num">3.4</span>
+      <h3>Worked Example — \(\int_0^{\pi/3}\sqrt{\sin x}\,dx\)</h3>
+    </div>
+
+    <div class="worked-example">
+      <div class="we-label">Example 3.4 — 6 intervals (degrees)</div>
+      <div class="we-q">Evaluate \(\displaystyle\int_0^{\pi/3}\sqrt{\sin x}\,dx\) using Simpson's Rule with 6 intervals.</div>
+
+      <div class="we-step">
+        <div class="we-step-num">1</div>
+        <div class="we-step-text">\(s = \frac{\pi/3 - 0}{6} = \frac{\pi}{18} = 10°\). Table:
+          <table class="data-table" style="margin-top:8px;">
+            <tr><th>x</th><th>√sin x</th><th>F+L</th><th>E</th><th>R</th></tr>
+            <tr><td>0°</td><td>0</td><td>0.0000</td><td>—</td><td>—</td></tr>
+            <tr><td>10°</td><td>0.4166</td><td>—</td><td>0.4166</td><td>—</td></tr>
+            <tr><td>20°</td><td>0.5848</td><td>—</td><td>—</td><td>0.5848</td></tr>
+            <tr><td>30°</td><td>0.7071</td><td>—</td><td>0.7071</td><td>—</td></tr>
+            <tr><td>40°</td><td>0.8016</td><td>—</td><td>—</td><td>0.8016</td></tr>
+            <tr><td>50°</td><td>0.8752</td><td>—</td><td>0.8752</td><td>—</td></tr>
+            <tr><td>60°</td><td>0.9306</td><td>0.9306</td><td>—</td><td>—</td></tr>
+            <tr><td colspan="2" style="font-weight:700;">Totals</td><td style="font-weight:700;">0.9306</td><td style="font-weight:700;">0.9989</td><td style="font-weight:700;">1.3864</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="we-step">
+        <div class="we-step-num">2</div>
+        <div class="we-step-text">
+          \[ I = \frac{10}{3}\left[0.9306 + 4(0.9989) + 2(1.3864)\right] = \frac{10}{3}\left[0.9306 + 3.9956 + 2.7728\right] = \frac{10}{3} \times 7.699 \]
+        </div>
+      </div>
+
+      <div class="we-result">\[ I \approx 0.681 \]</div>
+    </div>
+
+    <!-- Mini Check 3.4 -->
+    <div class="mini-check">
+      <div class="mini-check-header">
+        <span class="mini-check-icon">⚡</span>
+        <span class="mini-check-title">Quick Check — Simpson's Rule</span>
+        <span class="mini-check-sub">2 questions</span>
+      </div>
+      <div class="mc-mcq-item">
+        <div class="mc-q">In Simpson's Rule, the "E" ordinates (odd-positioned middle values: \(y_1, y_3, \ldots\)) are multiplied by:</div>
+        <div class="mc-mcq-opts" id="mc-3a">
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-3a',false,'mc-3a-fb')"><span class="mc-ltr">A</span> 2</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-3a',true,'mc-3a-fb')"><span class="mc-ltr">B</span> 4</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-3a',false,'mc-3a-fb')"><span class="mc-ltr">C</span> 1</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-3a',false,'mc-3a-fb')"><span class="mc-ltr">D</span> 3</div>
+        </div>
+        <div class="mc-mcq-fb" id="mc-3a-fb"></div>
+      </div>
+      <div class="mc-mcq-item">
+        <div class="mc-q">Simpson's Rule requires the number of sub-intervals \(n\) to be:</div>
+        <div class="mc-mcq-opts" id="mc-3b">
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-3b',false,'mc-3b-fb')"><span class="mc-ltr">A</span> Odd</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-3b',true,'mc-3b-fb')"><span class="mc-ltr">B</span> Even</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-3b',false,'mc-3b-fb')"><span class="mc-ltr">C</span> A multiple of 3</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-3b',false,'mc-3b-fb')"><span class="mc-ltr">D</span> Any positive integer</div>
+        </div>
+        <div class="mc-mcq-fb" id="mc-3b-fb"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       ACTIVE RECALL
+       ══════════════════════════════════ -->
+  <div class="topic-block">
+    <div class="section-label">Active Recall</div>
+    <div class="section-title">Test Yourself</div>
+    <div class="recall-section">
+      <div class="recall-label">Recall Questions</div>
+
+      <div class="recall-card">
+        <div class="recall-badge badge-def">Definition</div>
+        <div class="recall-q">Write the Trapezoidal Rule formula from memory.</div>
+        <button class="reveal-btn" onclick="rcReveal(this)">Reveal Answer</button>
+        <div class="recall-answer">
+          \[I = \frac{h}{2}\left[(y_0 + y_n) + 2(y_1 + y_2 + \cdots + y_{n-1})\right]\]
+          First + last ordinate in one bracket, all middle ordinates doubled in another.
+        </div>
+      </div>
+
+      <div class="recall-card">
+        <div class="recall-badge badge-def">Definition</div>
+        <div class="recall-q">Write Simpson's Rule formula and define F+L, E, and R.</div>
+        <button class="reveal-btn" onclick="rcReveal(this)">Reveal Answer</button>
+        <div class="recall-answer">
+          \[A \approx \frac{s}{3}\left[(F+L) + 4E + 2R\right]\]
+          <strong>F+L:</strong> first + last ordinate. <strong>4E:</strong> 4 × sum of odd-positioned middles (\(y_1, y_3, y_5, \ldots\)). <strong>2R:</strong> 2 × sum of even-positioned middles (\(y_2, y_4, \ldots\)).
+        </div>
+      </div>
+
+      <div class="recall-card">
+        <div class="recall-badge badge-mech">Mechanism</div>
+        <div class="recall-q">Why must n be even for Simpson's Rule?</div>
+        <button class="reveal-btn" onclick="rcReveal(this)">Reveal Answer</button>
+        <div class="recall-answer">Simpson's Rule fits a parabola through every group of 3 consecutive points (2 strips). With an odd number of strips, the pairing breaks down and you can't fit complete parabolas across the interval.</div>
+      </div>
+
+      <div class="recall-card">
+        <div class="recall-badge badge-comp">Computation</div>
+        <div class="recall-q">For the pin problem with \(s=0.5\), \(F+L=0\), \(E=49.15\), \(R=41.16\) — what is \(A\)?</div>
+        <button class="reveal-btn" onclick="rcReveal(this)">Reveal Answer</button>
+        <div class="recall-answer">
+          \[A = \frac{0.5}{3}\left[0 + 4(49.15) + 2(41.16)\right] = \frac{0.5}{3}(278.92) \approx 46.49 \text{ cm}\]
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       PULSE CHECK
+       ══════════════════════════════════ -->
+  <div class="pulse-check">
+    <div class="pc-title">Pulse Check ①</div>
+    <div class="pc-sub">End of Week 6 — quick ungraded check.</div>
+
+    <div class="pc-question">
+      <div class="pc-q-text">In the Trapezoidal Rule, middle ordinates are multiplied by:</div>
+      <div class="pc-options" id="pc1-opts">
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-opts',false)"><span class="pc-letter">A</span> 1</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-opts',true)"><span class="pc-letter">B</span> 2</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-opts',false)"><span class="pc-letter">C</span> 4</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-opts',false)"><span class="pc-letter">D</span> 1/2</div>
+      </div>
+      <div class="pc-feedback" id="pc1-fb"></div>
+    </div>
+
+    <div class="pc-question">
+      <div class="pc-q-text">In Simpson's Rule, the "E" ordinates (odd-positioned midpoints) are multiplied by:</div>
+      <div class="pc-options" id="pc2-opts">
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-opts',false)"><span class="pc-letter">A</span> 2</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-opts',true)"><span class="pc-letter">B</span> 4</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-opts',false)"><span class="pc-letter">C</span> 1</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-opts',false)"><span class="pc-letter">D</span> 3</div>
+      </div>
+      <div class="pc-feedback" id="pc2-fb"></div>
+    </div>
+
+    <div class="pc-question">
+      <div class="pc-q-text">For \(\int_0^1 x^3\,dx\) with 5 intervals, the step size \(h\) is:</div>
+      <div class="pc-options" id="pc3-opts">
+        <div class="pc-option" onclick="pcAnswer(this,'pc3-opts',false)"><span class="pc-letter">A</span> 0.1</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc3-opts',true)"><span class="pc-letter">B</span> 0.2</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc3-opts',false)"><span class="pc-letter">C</span> 0.5</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc3-opts',false)"><span class="pc-letter">D</span> 5</div>
+      </div>
+      <div class="pc-feedback" id="pc3-fb"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       EOQ
+       ══════════════════════════════════ -->
+  <div class="eoq">
+    <div class="eoq-eyebrow">End of Week Quiz</div>
+    <div class="eoq-title">Week 6 — Numerical Integration</div>
+    <div class="eoq-sub">10 questions · Select your answer for each, then submit · Pass mark: 6/10</div>
+
+    <div class="eoq-question">
+      <div class="eoq-qnum">Question 1</div>
+      <div class="eoq-q-text">The step size formula for numerical integration is:</div>
+      <div class="eoq-options" id="eoq-1">
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-1','A')"><span class="eoq-letter">A</span> \(h = \frac{a-b}{n}\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-1','B')"><span class="eoq-letter">B</span> \(h = \frac{b-a}{n}\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-1','C')"><span class="eoq-letter">C</span> \(h = (b-a) \times n\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-1','D')"><span class="eoq-letter">D</span> \(h = \frac{n}{b-a}\)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-1-fb"></div>
+    </div>
+
+    <div class="eoq-question">
+      <div class="eoq-qnum">Question 2</div>
+      <div class="eoq-q-text">The Trapezoidal Rule approximates each strip as a:</div>
+      <div class="eoq-options" id="eoq-2">
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-2','A')"><span class="eoq-letter">A</span> Parabola</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-2','B')"><span class="eoq-letter">B</span> Trapezoid (straight line between two points)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-2','C')"><span class="eoq-letter">C</span> Rectangle</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-2','D')"><span class="eoq-letter">D</span> Triangle</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-2-fb"></div>
+    </div>
+
+    <div class="eoq-question">
+      <div class="eoq-qnum">Question 3</div>
+      <div class="eoq-q-text">For \(\int_0^1 x^3\,dx\) with the Trapezoidal Rule (5 intervals), the answer is approximately:</div>
+      <div class="eoq-options" id="eoq-3">
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-3','A')"><span class="eoq-letter">A</span> 0.25</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-3','B')"><span class="eoq-letter">B</span> 0.26</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-3','C')"><span class="eoq-letter">C</span> 0.30</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-3','D')"><span class="eoq-letter">D</span> 0.20</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-3-fb"></div>
+    </div>
+
+    <div class="eoq-question">
+      <div class="eoq-qnum">Question 4</div>
+      <div class="eoq-q-text">Simpson's Rule requires the number of intervals \(n\) to be:</div>
+      <div class="eoq-options" id="eoq-4">
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-4','A')"><span class="eoq-letter">A</span> Odd</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-4','B')"><span class="eoq-letter">B</span> Even</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-4','C')"><span class="eoq-letter">C</span> A multiple of 3</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-4','D')"><span class="eoq-letter">D</span> Any positive integer</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-4-fb"></div>
+    </div>
+
+    <div class="eoq-question">
+      <div class="eoq-qnum">Question 5</div>
+      <div class="eoq-q-text">In Simpson's Rule \(A \approx \frac{s}{3}[(F+L) + 4E + 2R]\), the "R" ordinates are:</div>
+      <div class="eoq-options" id="eoq-5">
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-5','A')"><span class="eoq-letter">A</span> The first and last ordinates</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-5','B')"><span class="eoq-letter">B</span> The odd-positioned middle ordinates</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-5','C')"><span class="eoq-letter">C</span> The even-positioned middle ordinates (not F or L)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-5','D')"><span class="eoq-letter">D</span> All middle ordinates</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-5-fb"></div>
+    </div>
+
+    <div class="eoq-question">
+      <div class="eoq-qnum">Question 6</div>
+      <div class="eoq-q-text">For the pin problem with \(s=0.5\), \(F+L=0\), \(E=49.15\), \(R=41.16\), the area is approximately:</div>
+      <div class="eoq-options" id="eoq-6">
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-6','A')"><span class="eoq-letter">A</span> 53.87</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-6','B')"><span class="eoq-letter">B</span> 46.49</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-6','C')"><span class="eoq-letter">C</span> 90.31</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-6','D')"><span class="eoq-letter">D</span> 41.16</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-6-fb"></div>
+    </div>
+
+    <div class="eoq-question">
+      <div class="eoq-qnum">Question 7</div>
+      <div class="eoq-q-text">Simpson's Rule is generally more accurate than Trapezoidal because it fits:</div>
+      <div class="eoq-options" id="eoq-7">
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-7','A')"><span class="eoq-letter">A</span> More data points per strip</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-7','B')"><span class="eoq-letter">B</span> Parabolas instead of straight lines, better capturing curvature</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-7','C')"><span class="eoq-letter">C</span> Fewer strips</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-7','D')"><span class="eoq-letter">D</span> Exponential curves to each strip</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-7-fb"></div>
+    </div>
+
+    <div class="eoq-question">
+      <div class="eoq-qnum">Question 8</div>
+      <div class="eoq-q-text">For \(\int_{0.2}^{1.0}\sqrt{1+x^3}\,dx\) with 8 intervals, \(s =\):</div>
+      <div class="eoq-options" id="eoq-8">
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-8','A')"><span class="eoq-letter">A</span> 0.2</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-8','B')"><span class="eoq-letter">B</span> 0.1</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-8','C')"><span class="eoq-letter">C</span> 0.8</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-8','D')"><span class="eoq-letter">D</span> 0.05</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-8-fb"></div>
+    </div>
+
+    <div class="eoq-question">
+      <div class="eoq-qnum">Question 9</div>
+      <div class="eoq-q-text">For \(\int_{0.2}^{1.0}\sqrt{1+x^3}\,dx\) by Simpson's Rule (8 intervals), the answer is approximately:</div>
+      <div class="eoq-options" id="eoq-9">
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-9','A')"><span class="eoq-letter">A</span> 0.681</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-9','B')"><span class="eoq-letter">B</span> 0.9113</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-9','C')"><span class="eoq-letter">C</span> 1.4142</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-9','D')"><span class="eoq-letter">D</span> 0.26</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-9-fb"></div>
+    </div>
+
+    <div class="eoq-question">
+      <div class="eoq-qnum">Question 10</div>
+      <div class="eoq-q-text">For \(\int_0^{\pi/3}\sqrt{\sin x}\,dx\) with 6 intervals, the step in degrees is:</div>
+      <div class="eoq-options" id="eoq-10">
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-10','A')"><span class="eoq-letter">A</span> 5°</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-10','B')"><span class="eoq-letter">B</span> 10°</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-10','C')"><span class="eoq-letter">C</span> 15°</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-10','D')"><span class="eoq-letter">D</span> 30°</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-10-fb"></div>
+    </div>
+
+    <button class="eoq-submit" onclick="eoqSubmit()">Submit Quiz</button>
+
+    <div class="eoq-result" id="eoq-result">
+      <div class="result-score" id="eoq-score"></div>
+      <div class="result-pill" id="eoq-pill"></div>
+      <div class="result-msg" id="eoq-msg"></div>
+      <div class="unlock-banner" id="eoq-unlock" style="display:none">✓ Week 6 complete. Move to Week 7: Boundary Conditions →</div>
+      <div class="review-nudge" id="eoq-nudge" style="display:none">
+        <p>Review before retrying:</p>
+        <ul>
+          <li>Classifying ordinates correctly as F+L, E (×4), or R (×2)</li>
+          <li>Checking that n is even before using Simpson's Rule</li>
+          <li>Computing h = (b−a)/n before anything else</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+
+<footer style="text-align:center;padding:2rem 1rem;font-size:11px;color:var(--text3);border-top:1px solid var(--border);margin-top:40px;">
+  CHE352 — Engineering Mathematics IV · Unify Learn · LASU Faculty of Engineering
+</footer>
+
+<script>
+window.addEventListener('scroll', () => {
+  const s = document.scrollingElement;
+  const pct = s.scrollTop / (s.scrollHeight - s.clientHeight) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+  const labels = ['Scroll to begin','Topic 1: Why Num. Integration','Topic 2: Trapezoidal Rule','Topic 3: Simpson\'s Rule','Active Recall','Pulse Check','Week 6 Quiz'];
+  const idx = Math.min(Math.floor(pct / 15), labels.length - 1);
+  document.getElementById('tracker-text').textContent = labels[idx];
+});
+
+function toggleDark() {
+  const h = document.documentElement;
+  h.setAttribute('data-theme', h.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  document.getElementById('dark-toggle').textContent = h.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+}
+
+function mcReveal(btn) {
+  const ans = btn.nextElementSibling;
+  ans.classList.toggle('show');
+  btn.textContent = ans.classList.contains('show') ? 'Hide Answer' : 'Reveal Answer';
+}
+
+function mcMcq(opt, groupId, correct, fbId) {
+  const opts = document.getElementById(groupId).querySelectorAll('.mc-mcq-opt');
+  opts.forEach(o => o.classList.add('mc-locked'));
+  opt.classList.add(correct ? 'mc-correct' : 'mc-wrong');
+  const fb = document.getElementById(fbId);
+  fb.style.display = 'block';
+  fb.style.color = correct ? 'var(--green-deep)' : '#b91c1c';
+  fb.textContent = correct ? '✓ Correct!' : '✗ Not quite — review the notes.';
+}
+
+function mcFitb(inputId, answers, fbId) {
+  const val = document.getElementById(inputId).value.trim().toLowerCase();
+  const correct = answers.some(a => val === a.toLowerCase());
+  const fb = document.getElementById(fbId);
+  fb.style.display = 'block';
+  fb.style.color = correct ? 'var(--green-deep)' : '#b91c1c';
+  fb.textContent = correct ? '✓ Correct!' : '✗ Expected: ' + answers[0];
+}
+
+function rcReveal(btn) {
+  const ans = btn.nextElementSibling;
+  ans.classList.toggle('show');
+  btn.textContent = ans.classList.contains('show') ? 'Hide' : 'Reveal Answer';
+}
+
+function pcAnswer(opt, groupId, correct) {
+  const opts = document.getElementById(groupId).querySelectorAll('.pc-option');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  opt.classList.add(correct ? 'correct' : 'wrong');
+  const qEl = opt.closest('.pc-question');
+  const fb = qEl.querySelector('.pc-feedback');
+  fb.style.display = 'block';
+  fb.textContent = correct ? '✓ Correct!' : '✗ Not quite — review the section above.';
+}
+
+const eoqSelections = {};
+const eoqAnswers = { 'eoq-1':'B','eoq-2':'B','eoq-3':'B','eoq-4':'B','eoq-5':'C','eoq-6':'B','eoq-7':'B','eoq-8':'B','eoq-9':'B','eoq-10':'B' };
+const eoqFeedbacks = {
+  'eoq-1':  { correct: 'Correct. h = (b−a)/n divides the interval equally.', wrong: 'h = (b−a)/n. Note: it\'s b−a (upper minus lower), not a−b.' },
+  'eoq-2':  { correct: 'Correct. Each strip is a trapezoid — two vertical sides and a slanted top.', wrong: 'The Trapezoidal Rule fits a trapezoid (straight line top) on each strip.' },
+  'eoq-3':  { correct: 'Correct. 0.1×[1 + 2(0.8)] = 0.1×2.6 = 0.26.', wrong: '0.1×[(0+1) + 2(0.008+0.064+0.216+0.512)] = 0.1×2.6 = 0.26.' },
+  'eoq-4':  { correct: 'Correct. n must be even to pair up strips for each parabola.', wrong: 'Simpson\'s Rule requires n to be even — each parabola covers 2 strips (3 points).' },
+  'eoq-5':  { correct: 'Correct. R = even-positioned middle ordinates (y₂, y₄, y₆, …), multiplied by 2.', wrong: 'R ordinates are the even-positioned middle values: y₂, y₄, y₆, … They are multiplied by 2.' },
+  'eoq-6':  { correct: 'Correct. (0.5/3)×278.92 ≈ 46.49 cm.', wrong: '(s/3)×[F+L + 4E + 2R] = (0.5/3)×[0 + 196.6 + 82.32] = (0.5/3)×278.92 ≈ 46.49.' },
+  'eoq-7':  { correct: 'Correct. Fitting parabolas captures the curvature of the function better than straight lines.', wrong: 'Simpson\'s Rule fits parabolas — 3-point curves — to each pair of strips. This captures the actual shape of the function better.' },
+  'eoq-8':  { correct: 'Correct. s = (1.0 − 0.2)/8 = 0.8/8 = 0.1.', wrong: 's = (b−a)/n = (1.0−0.2)/8 = 0.8/8 = 0.1.' },
+  'eoq-9':  { correct: 'Correct. (0.1/3)×27.3375 ≈ 0.9113.', wrong: '(0.1/3)×[2.4181 + 4(4.5479) + 2(3.3639)] = (0.1/3)×27.3375 ≈ 0.9113.' },
+  'eoq-10': { correct: 'Correct. (π/3)/6 = π/18 = 10° per interval.', wrong: 's = (π/3 − 0)/6 = π/18. Converting: π/18 radians = 10 degrees.' }
+};
+
+function eoqSelect(opt, groupId, letter) {
+  document.getElementById(groupId).querySelectorAll('.eoq-option').forEach(o => o.classList.remove('selected'));
+  opt.classList.add('selected');
+  eoqSelections[groupId] = letter;
+}
+
+function eoqSubmit() {
+  let score = 0;
+  for (let i = 1; i <= 10; i++) {
+    const gid = 'eoq-' + i;
+    const sel = eoqSelections[gid];
+    const correct = eoqAnswers[gid];
+    const fb = document.getElementById(gid + '-fb');
+    const opts = document.getElementById(gid).querySelectorAll('.eoq-option');
+    opts.forEach(o => {
+      o.classList.add('locked');
+      const ltr = o.querySelector('.eoq-letter').textContent;
+      if (ltr === correct) o.classList.add('correct-reveal');
+      else if (ltr === sel && sel !== correct) o.classList.add('wrong-reveal');
+    });
+    const isCorrect = sel === correct;
+    if (isCorrect) score++;
+    fb.className = 'eoq-feedback ' + (isCorrect ? 'correct-fb' : 'wrong-fb');
+    fb.textContent = eoqFeedbacks[gid][isCorrect ? 'correct' : 'wrong'];
+    fb.style.display = 'block';
+  }
+  const passed = score >= 6;
+  const result = document.getElementById('eoq-result');
+  result.className = 'eoq-result ' + (passed ? 'pass' : 'fail');
+  document.getElementById('eoq-score').textContent = score + ' / 10';
+  const pill = document.getElementById('eoq-pill');
+  pill.textContent = passed ? 'Passed' : 'Not yet';
+  pill.className = 'result-pill ' + (passed ? 'pill-pass' : 'pill-fail');
+  document.getElementById('eoq-msg').textContent = passed
+    ? 'Good. You can set up and apply both rules correctly. Ready for Week 7.'
+    : "Review the E/R classification in Simpson's Rule — that's the most common mistake.";
+  document.getElementById('eoq-unlock').style.display = passed ? 'block' : 'none';
+  document.getElementById('eoq-nudge').style.display = passed ? 'none' : 'block';
+  result.style.display = 'block';
+  result.scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

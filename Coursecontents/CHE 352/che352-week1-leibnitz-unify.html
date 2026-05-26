@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHE 352 — Week 1: Successive Differentiation &amp; Leibnitz Theorem | Unify Learn</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+<script>MathJax = { chtml: { scale: 0.95 }, options: { skipHtmlTags: ["script","noscript","style","textarea","pre"] } };</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<!--
+  PAGE OUTLINE
+  ─────────────────────────────────
+  TOPIC 1: Successive Differentiation
+    1.1 The Leibnitz Theorem             → Mini Check (2 q)
+    1.2 Setting up the Recurrence Relation → Mini Check (2 q)
+    [Topic 1 Active Recall: 4 cards]
+  [Pulse Check ①]
+
+  TOPIC 2: Worked Examples
+    Examples 1, 2, 3 + Exercise          → Mini Check (2 q)
+    [Topic 2 Active Recall: 2 cards]
+  [Pulse Check ②]
+
+  [End-of-Week Quiz: 10 questions]
+-->
+
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f8f7f3;
+    --border: #e0deda;
+    --text: #0a0a0a;
+    --text2: #555555;
+    --text3: #999999;
+    --green: #4ade80;
+    --green-deep: #16a34a;
+    --green-bg: rgba(74,222,128,0.1);
+    --yellow: #fbbf24;
+    --fd: 'Playfair Display', serif;
+    --fb: 'DM Sans', sans-serif;
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  [data-theme="dark"] {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #222222;
+    --border: #2a2a2a;
+    --text: #f0efeb;
+    --text2: #aaa;
+    --text3: #666;
+    --shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--fb); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; transition: background 0.3s, color 0.3s; }
+
+  /* PROGRESS BAR */
+  #progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--green); width: 0%; z-index: 1000; transition: width 0.2s; }
+
+  /* TOPBAR */
+  .topbar { position: fixed; top: 3px; left: 0; right: 0; height: 52px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 999; transition: background 0.3s, border-color 0.3s; }
+  .topbar-wordmark { font-family: var(--fd); font-weight: 900; font-size: 18px; color: var(--text); letter-spacing: -0.5px; }
+  .topbar-wordmark span { color: var(--green); }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .course-pill { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--text3); }
+  #dark-toggle { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: all 0.2s; }
+  #dark-toggle:hover { background: var(--surface2); }
+
+  /* PROGRESS TRACKER */
+  .progress-tracker { position: fixed; bottom: 20px; right: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; font-size: 11px; font-weight: 600; color: var(--text2); box-shadow: var(--shadow); z-index: 998; display: flex; align-items: center; gap: 8px; transition: background 0.3s, border-color 0.3s; }
+  .tracker-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+  .tracker-label { font-family: var(--fb); }
+
+  /* MAIN WRAPPER */
+  .wrapper { max-width: 780px; margin: 0 auto; padding: 88px 20px 100px; }
+
+  /* HERO */
+  .hero { background: #0a0a0a; color: #f5f4f0; border-radius: var(--radius); padding: 40px 36px; margin-bottom: 32px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -40px; right: -40px; width: 200px; height: 200px; border-radius: 50%; background: rgba(74,222,128,0.07); pointer-events: none; }
+  .hero-eyebrow { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #4ade80; margin-bottom: 12px; }
+  .hero-title { font-family: var(--fd); font-size: 32px; font-weight: 900; letter-spacing: -1px; line-height: 1.15; color: #f5f4f0; margin-bottom: 8px; }
+  .hero-subtitle { font-family: var(--fd); font-size: 17px; font-weight: 400; font-style: italic; color: rgba(245,244,240,0.7); margin-bottom: 24px; line-height: 1.4; }
+  .hero-outcome { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.25); border-radius: 8px; padding: 14px 18px; font-size: 13px; color: rgba(245,244,240,0.9); line-height: 1.6; margin-bottom: 24px; }
+  .hero-outcome strong { color: #4ade80; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; }
+  .meta-chip { font-size: 11px; font-weight: 500; padding: 4px 12px; border-radius: 20px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: rgba(245,244,240,0.7); }
+
+  /* TOPIC PROGRESS */
+  .topic-progress { margin-bottom: 32px; }
+  .tp-label { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+  .tp-steps { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tp-step { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text3); }
+  .tp-step.done { background: var(--green-bg); border-color: rgba(74,222,128,0.35); color: var(--green-deep); }
+  .tp-step.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .tp-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* TAGS */
+  .tags-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+  .tag { font-family: var(--fb); font-size: 11px; font-weight: 500; padding: 5px 13px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: default; }
+  .tag.green { background: var(--green-bg); border-color: rgba(74,222,128,0.3); color: var(--green-deep); }
+
+  /* SECTION LABELS */
+  .section-label { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green-deep); margin-bottom: 6px; }
+  .section-title { font-family: var(--fd); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); margin-bottom: 20px; line-height: 1.25; }
+
+  /* SUBTOPIC HEADING */
+  .subtopic-heading { display: flex; align-items: center; gap: 10px; margin: 32px 0 14px; }
+  .subtopic-heading h3 { font-family: var(--fd); font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+  .subtopic-num { font-family: var(--fb); font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; background: var(--green-bg); border: 1px solid rgba(74,222,128,0.3); color: var(--green-deep); letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+
+  /* TOPIC BLOCK */
+  .topic-block { margin-bottom: 56px; }
+  .topic-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 28px; margin-bottom: 0px; box-shadow: var(--shadow); }
+  .topic-card p { max-width: 66ch; color: var(--text2); font-size: 14px; line-height: 1.8; margin-bottom: 12px; overflow-x: auto; }
+  .topic-card ul { max-width: 66ch; padding-left: 20px; color: var(--text2); font-size: 14px; line-height: 1.8; margin-bottom: 12px; }
+  .topic-card ol { max-width: 66ch; padding-left: 20px; color: var(--text2); font-size: 14px; line-height: 1.8; margin-bottom: 12px; }
+  .topic-card ol li, .topic-card ul li { margin-bottom: 6px; }
+  .topic-card strong { color: var(--text); }
+  .topic-card p:last-child, .topic-card ul:last-child, .topic-card ol:last-child { margin-bottom: 0; }
+
+  /* FORMULA BLOCK (preserved from CHE352) */
+  .formula-block { border-left: 4px solid var(--green); background: var(--green-bg); border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; margin: 1rem 0; overflow-x: auto; }
+  .formula-block .f-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--green-deep); margin-bottom: 0.5rem; font-family: var(--fb); }
+  .formula-block .eq { font-family: var(--fd); font-size: 1.05rem; font-weight: 700; display: block; margin-bottom: 0.4rem; color: var(--text); }
+  .formula-block .vars { font-size: 0.82rem; color: var(--text2); margin-top: 0.4rem; }
+
+  /* WORKED EXAMPLE (preserved from CHE352) */
+  .worked-example { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin: 1.25rem 0; overflow-x: auto; box-shadow: var(--shadow); }
+  .we-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; background: #0a0a0a; color: #f5f4f0; display: inline-block; padding: 3px 9px; border-radius: 4px; margin-bottom: 0.75rem; }
+  [data-theme="dark"] .we-label { background: var(--green); color: #0a0a0a; }
+  .we-q { font-family: var(--fd); font-size: 1.05rem; margin-bottom: 1rem; font-style: italic; color: var(--text); }
+  .we-step { display: flex; gap: 0.75rem; margin-bottom: 0.6rem; align-items: flex-start; }
+  .we-step-num { background: var(--green); color: #0a0a0a; border-radius: 50%; width: 1.4rem; height: 1.4rem; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex-shrink: 0; margin-top: 0.1rem; }
+  .we-step-text { font-size: 0.92rem; overflow-x: auto; color: var(--text2); line-height: 1.7; }
+  .we-step-text strong { color: var(--text); }
+  .we-result { margin-top: 0.75rem; padding: 0.75rem 1rem; background: var(--green-bg); border: 1px solid rgba(74,222,128,0.3); border-radius: 8px; font-weight: 600; font-size: 0.95rem; color: var(--text); overflow-x: auto; }
+  .we-note { font-size: 0.88rem; color: var(--text2); margin-bottom: 0.75rem; }
+
+  /* NOTE BOX (preserved from CHE352) */
+  .note-box { background: var(--green-bg); border: 1px solid rgba(74,222,128,0.3); border-radius: var(--radius); padding: 1rem 1.25rem; margin: 1rem 0; }
+  .note-box strong { color: var(--green-deep); display: block; margin-bottom: 0.3rem; }
+  .note-box p { font-size: 14px; color: var(--text2); line-height: 1.7; margin: 0; }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--border); margin: 40px 0; }
+
+  /* MINI CHECK */
+  .mini-check { background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--green); border-radius: 0 var(--radius) var(--radius) 0; padding: 20px 24px; margin: 0 0 24px 0; }
+  .mini-check-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .mini-check-icon { font-size: 14px; }
+  .mini-check-title { font-family: var(--fb); font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--green-deep); }
+  .mini-check-sub { font-size: 11px; color: var(--text3); margin-left: auto; }
+
+  /* MINI CHECK — REVEAL */
+  .mc-reveal-item { margin-bottom: 14px; }
+  .mc-q { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 8px; max-width: 66ch; line-height: 1.6; }
+  .mc-reveal-btn { font-family: var(--fb); font-size: 10px; font-weight: 600; padding: 5px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); cursor: pointer; transition: all 0.2s; }
+  .mc-reveal-btn:hover { background: var(--green-bg); border-color: rgba(74,222,128,0.3); color: var(--green-deep); }
+  .mc-answer { display: none; margin-top: 8px; padding: 10px 14px; background: var(--surface); border-left: 2px solid var(--green); border-radius: 0 6px 6px 0; font-size: 12px; color: var(--text2); line-height: 1.7; max-width: 66ch; }
+  .mc-answer.show { display: block; }
+
+  /* MINI CHECK — MCQ */
+  .mc-mcq-item { margin-bottom: 14px; }
+  .mc-mcq-opts { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; max-width: 52ch; }
+  .mc-mcq-opt { display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; padding: 7px 12px; border-radius: 7px; background: var(--surface); border: 1px solid var(--border); color: var(--text2); transition: all 0.15s; user-select: none; }
+  .mc-mcq-opt:hover:not(.mc-locked) { background: var(--green-bg); border-color: rgba(74,222,128,0.3); }
+  .mc-mcq-opt.mc-correct { background: var(--green-bg); border-color: rgba(74,222,128,0.4); color: var(--green-deep); font-weight: 600; }
+  .mc-mcq-opt.mc-wrong { background: rgba(239,68,68,0.07); border-color: rgba(239,68,68,0.3); color: #b91c1c; }
+  .mc-ltr { font-weight: 700; font-size: 10px; width: 20px; height: 20px; border-radius: 50%; background: var(--surface2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .mc-mcq-fb { display: none; margin-top: 7px; font-size: 11px; font-weight: 600; }
+
+  /* MINI CHECK — FITB */
+  .mc-fitb-item { margin-bottom: 14px; }
+  .mc-fitb-row { display: flex; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
+  .mc-fitb-input { font-family: var(--fb); font-size: 12px; padding: 7px 12px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); color: var(--text); outline: none; width: 220px; transition: border-color 0.2s; }
+  .mc-fitb-input:focus { border-color: var(--green); }
+  .mc-fitb-btn { font-family: var(--fb); font-size: 10px; font-weight: 700; padding: 7px 14px; border-radius: 7px; border: none; background: var(--text); color: var(--bg); cursor: pointer; white-space: nowrap; }
+  .mc-fitb-fb { display: none; margin-top: 7px; font-size: 11px; font-weight: 600; }
+
+  /* ACTIVE RECALL */
+  .recall-section { margin-top: 24px; }
+  .recall-label { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green-deep); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .recall-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .recall-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin-bottom: 10px; }
+  .recall-badge { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 9px; border-radius: 20px; margin-bottom: 10px; }
+  .badge-def { background: rgba(74,222,128,0.15); color: var(--green-deep); border: 1px solid rgba(74,222,128,0.3); }
+  .badge-mech { background: rgba(251,191,36,0.15); color: #b45309; border: 1px solid rgba(251,191,36,0.3); }
+  .badge-app { background: rgba(59,130,246,0.1); color: #1d4ed8; border: 1px solid rgba(59,130,246,0.2); }
+  .badge-comp { background: rgba(139,92,246,0.1); color: #6d28d9; border: 1px solid rgba(139,92,246,0.2); }
+  .recall-q { font-size: 14px; font-weight: 500; color: var(--text); max-width: 66ch; line-height: 1.6; margin-bottom: 12px; }
+  .reveal-btn { font-family: var(--fb); font-size: 11px; font-weight: 600; padding: 6px 16px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: pointer; transition: all 0.2s; }
+  .reveal-btn:hover { background: var(--green-bg); border-color: rgba(74,222,128,0.3); color: var(--green-deep); }
+  .recall-answer { display: none; margin-top: 12px; padding: 14px 16px; background: var(--surface2); border-left: 3px solid var(--green); border-radius: 0 8px 8px 0; font-size: 13px; color: var(--text2); line-height: 1.7; max-width: 66ch; overflow-x: auto; }
+  .recall-answer.show { display: block; }
+
+  /* PULSE CHECK */
+  .pulse-check { background: var(--green); border-radius: var(--radius); padding: 28px; margin: 40px 0; }
+  .pulse-check .pc-title { font-family: var(--fd); font-size: 20px; font-weight: 900; color: #0a0a0a; margin-bottom: 4px; }
+  .pulse-check .pc-sub { font-size: 12px; color: rgba(10,10,10,0.6); margin-bottom: 20px; }
+  .pc-question { background: rgba(255,255,255,0.35); border-radius: 10px; padding: 16px 18px; margin-bottom: 12px; }
+  .pc-q-text { font-size: 14px; font-weight: 500; color: #0a0a0a; margin-bottom: 10px; max-width: 66ch; line-height: 1.6; }
+  .pc-options { display: flex; flex-direction: column; gap: 6px; }
+  .pc-option { display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer; padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.5); color: #0a0a0a; transition: all 0.15s; max-width: 66ch; }
+  .pc-option:hover { background: rgba(255,255,255,0.65); }
+  .pc-option.correct { background: #fff; border-color: #16a34a; }
+  .pc-option.wrong { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.5); }
+  .pc-letter { font-weight: 700; font-size: 11px; width: 22px; height: 22px; border-radius: 50%; background: rgba(10,10,10,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .pc-fitb input { background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.7); border-radius: 6px; padding: 8px 12px; font-family: var(--fb); font-size: 13px; color: #0a0a0a; width: 100%; max-width: 300px; outline: none; }
+  .pc-fitb input:focus { background: #fff; }
+  .pc-check-btn { margin-top: 8px; font-family: var(--fb); font-size: 11px; font-weight: 700; padding: 6px 16px; border-radius: 6px; border: none; background: #0a0a0a; color: #f5f4f0; cursor: pointer; }
+  .pc-feedback { margin-top: 8px; font-size: 12px; font-weight: 500; display: none; color: #0a0a0a; }
+
+  /* EOQ */
+  .eoq { background: var(--text); border-radius: var(--radius); padding: 32px; margin-top: 48px; }
+  .eoq-eyebrow { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green); margin-bottom: 6px; }
+  .eoq-title { font-family: var(--fd); font-size: 24px; font-weight: 900; color: #f5f4f0; margin-bottom: 4px; letter-spacing: -0.5px; }
+  .eoq-sub { font-size: 12px; color: rgba(240,239,235,0.5); margin-bottom: 24px; }
+  .eoq-question { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 18px 20px; margin-bottom: 14px; }
+  .eoq-qnum { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: rgba(240,239,235,0.4); margin-bottom: 6px; }
+  .eoq-q-text { font-size: 14px; font-weight: 500; color: #f0efeb; max-width: 66ch; line-height: 1.6; margin-bottom: 12px; }
+  .eoq-options { display: flex; flex-direction: column; gap: 6px; }
+  .eoq-option { display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer; padding: 10px 14px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(240,239,235,0.8); transition: all 0.15s; max-width: 66ch; user-select: none; }
+  .eoq-option:hover:not(.locked) { background: rgba(255,255,255,0.1); }
+  .eoq-option.selected { border-color: var(--green); background: rgba(74,222,128,0.1); }
+  .eoq-option.correct-reveal { border-color: var(--green); background: rgba(74,222,128,0.15); color: #f0efeb; }
+  .eoq-option.wrong-reveal { border-color: rgba(239,68,68,0.5); background: rgba(239,68,68,0.1); color: rgba(240,239,235,0.6); }
+  .eoq-letter { font-weight: 700; font-size: 11px; width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: rgba(240,239,235,0.7); }
+  .eoq-fitb input { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 9px 14px; font-family: var(--fb); font-size: 13px; color: #f0efeb; width: 100%; max-width: 320px; outline: none; transition: border-color 0.2s; }
+  .eoq-fitb input:focus { border-color: var(--green); }
+  .eoq-fitb input.correct-input { border-color: var(--green); background: rgba(74,222,128,0.1); }
+  .eoq-fitb input.wrong-input { border-color: rgba(239,68,68,0.5); background: rgba(239,68,68,0.08); }
+  .eoq-feedback { display: none; margin-top: 10px; font-size: 12px; line-height: 1.6; padding: 10px 14px; border-radius: 6px; max-width: 66ch; }
+  .eoq-feedback.correct-fb { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.25); color: #86efac; }
+  .eoq-feedback.wrong-fb { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #fca5a5; }
+  .eoq-submit { margin-top: 24px; width: 100%; padding: 14px; border-radius: 8px; border: none; background: var(--green); color: #0a0a0a; font-family: var(--fb); font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+  .eoq-submit:hover { opacity: 0.88; }
+  .eoq-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+  .eoq-result { display: none; margin-top: 24px; padding: 24px; border-radius: 10px; text-align: center; }
+  .eoq-result.pass { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); }
+  .eoq-result.fail { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); }
+  .result-score { font-family: var(--fd); font-size: 40px; font-weight: 900; color: #f0efeb; margin-bottom: 6px; }
+  .result-pill { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 5px 16px; border-radius: 20px; margin-bottom: 14px; }
+  .pill-pass { background: var(--green); color: #0a0a0a; }
+  .pill-fail { background: rgba(239,68,68,0.3); color: #fca5a5; border: 1px solid rgba(239,68,68,0.4); }
+  .result-msg { font-size: 13px; color: rgba(240,239,235,0.7); line-height: 1.6; max-width: 52ch; margin: 0 auto 16px; }
+  .unlock-banner { background: rgba(74,222,128,0.15); border: 1px solid rgba(74,222,128,0.3); border-radius: 8px; padding: 12px 16px; font-size: 13px; color: var(--green); font-weight: 500; margin-top: 12px; }
+  .review-nudge { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 14px 16px; margin-top: 12px; text-align: left; }
+  .review-nudge p { font-size: 12px; color: rgba(240,239,235,0.6); margin-bottom: 8px; }
+  .review-nudge ul { padding-left: 16px; font-size: 12px; color: #fca5a5; line-height: 1.8; }
+
+  @media (max-width: 600px) {
+    .wrapper { padding: 72px 14px 100px; }
+    .hero { padding: 28px 20px; }
+    .hero-title { font-size: 24px; }
+    .topic-card { padding: 18px 16px; }
+    .eoq { padding: 22px 16px; }
+    .pulse-check { padding: 20px 16px; }
+    .mini-check { padding: 16px 18px; }
+    .progress-tracker { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<nav class="topbar">
+  <div class="topbar-wordmark">Unify<span>.</span></div>
+  <div class="topbar-right">
+    <span class="course-pill">CHE 352</span>
+    <button id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode">🌙</button>
+  </div>
+</nav>
+
+<div class="progress-tracker">
+  <div class="tracker-dot"></div>
+  <span class="tracker-label" id="tracker-text">Scroll to begin</span>
+</div>
+
+<div class="wrapper">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-eyebrow">CHE 352 · Week 1 · LASU Faculty of Engineering</div>
+    <h1 class="hero-title">Successive Differentiation &amp; Leibnitz Theorem</h1>
+    <p class="hero-subtitle">nth Derivatives, Products &amp; Recurrence Relations</p>
+    <div class="hero-outcome">
+      <strong>By the end of this week, you should be able to</strong> find the nth derivative of a product of two functions using the Leibnitz theorem, set up the recurrence relation \(y_n\), and apply it to solve second-order ODEs with initial conditions.
+    </div>
+    <div class="hero-meta">
+      <span class="meta-chip">📅 Week 1 of 7</span>
+      <span class="meta-chip">🎓 Dr. Lukumon Salami</span>
+      <span class="meta-chip">📍 Lagos State University</span>
+    </div>
+  </header>
+
+  <!-- TOPIC PROGRESS -->
+  <div class="topic-progress">
+    <div class="tp-label">Your Progress</div>
+    <div class="tp-steps">
+      <div class="tp-step active" id="step-1"><span class="tp-dot"></span> Topic 1: Leibnitz Theorem</div>
+      <div class="tp-step" id="step-2"><span class="tp-dot"></span> Topic 2: Worked Examples</div>
+      <div class="tp-step" id="step-quiz"><span class="tp-dot"></span> Week 1 Quiz</div>
+    </div>
+  </div>
+
+  <!-- TAGS -->
+  <div class="tags-row">
+    <span class="tag green">nth Derivative</span>
+    <span class="tag green">Leibnitz Theorem</span>
+    <span class="tag green">Product Rule</span>
+    <span class="tag green">Recurrence Relation</span>
+    <span class="tag">Successive Differentiation</span>
+    <span class="tag">Second-Order ODE</span>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       TOPIC 1: SUCCESSIVE DIFFERENTIATION
+  ════════════════════════════════════════════════════════ -->
+  <div class="topic-block" id="topic-1">
+    <div class="section-label">Topic 1</div>
+    <div class="section-title">Successive Differentiation</div>
+
+    <div class="topic-card">
+      <p>When you differentiate a function \(y = f(x)\) once, you get \(y_1 = \frac{dy}{dx}\). Differentiate again and you get \(y_2 = \frac{d^2y}{dx^2}\). Differentiating repeatedly like this is called <strong>successive differentiation</strong>, and the result of differentiating \(n\) times is written \(y_n\) or \(\frac{d^ny}{dx^n}\).</p>
+      <p>The challenge comes when \(y\) is a <strong>product</strong> of two functions — say \(y = u \cdot v\). You can't just differentiate one part. You need to account for both, and their interaction across all \(n\) derivatives. That's exactly what Leibnitz Theorem solves.</p>
+    </div>
+
+    <!-- ── SUBTOPIC 1.1 ── -->
+    <div class="subtopic-heading">
+      <span class="subtopic-num">1.1</span>
+      <h3>The Leibnitz Theorem</h3>
+    </div>
+
+    <div class="topic-card">
+      <p>If \(y = u \cdot v\) where both \(u\) and \(v\) are functions of \(x\), then the \(n\)th derivative of \(y\) is given by:</p>
+    </div>
+
+    <div class="formula-block">
+      <div class="f-label">Leibnitz Theorem — nth Derivative of a Product</div>
+      <div>\[ y_n = \sum_{k=0}^{n} \binom{n}{k} u_{n-k} \, v_k \]</div>
+      <div class="vars">Written out in full:</div>
+      <div>\[ y_n = u_n v + n u_{n-1} v_1 + \frac{n(n-1)}{2!} u_{n-2} v_2 + \frac{n(n-1)(n-2)}{3!} u_{n-3} v_3 + \cdots \]</div>
+      <div class="vars">where \(u_k = \frac{d^k u}{dx^k}\) and \(v_k = \frac{d^k v}{dx^k}\). The coefficients are binomial coefficients \(\binom{n}{k}\).</div>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 Why does it look like the binomial expansion?</strong>
+      <p>The pattern is not a coincidence. When you expand \((u + v)^n\), you get binomial coefficients. The Leibnitz formula has the exact same structure — but instead of powers, you're taking derivatives. Each term pairs a derivative of \(u\) with a derivative of \(v\), the same way each binomial term pairs powers of \(u\) and \(v\).</p>
+    </div>
+
+    <!-- MINI CHECK 1.1 -->
+    <div class="mini-check">
+      <div class="mini-check-header">
+        <span class="mini-check-icon">⚡</span>
+        <span class="mini-check-title">Quick Check — The Leibnitz Theorem</span>
+        <span class="mini-check-sub">2 questions</span>
+      </div>
+      <div class="mc-mcq-item">
+        <div class="mc-q">In the Leibnitz formula \(y_n = \sum_{k=0}^{n} \binom{n}{k} u_{n-k} v_k\), each term pairs:</div>
+        <div class="mc-mcq-opts" id="mc-1-leib-1">
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-leib-1',false,'mc-1-leib-1-fb')"><span class="mc-ltr">A</span> The \((n-k)\)th derivative of \(u\) with the \((n-k)\)th derivative of \(v\)</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-leib-1',true,'mc-1-leib-1-fb')"><span class="mc-ltr">B</span> The \((n-k)\)th derivative of \(u\) with the \(k\)th derivative of \(v\)</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-leib-1',false,'mc-1-leib-1-fb')"><span class="mc-ltr">C</span> The \(k\)th derivative of \(u\) with the \(k\)th derivative of \(v\)</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-leib-1',false,'mc-1-leib-1-fb')"><span class="mc-ltr">D</span> The \(n\)th derivative of \(u\) only, ignoring \(v\)</div>
+        </div>
+        <div class="mc-mcq-fb" id="mc-1-leib-1-fb"></div>
+      </div>
+      <div class="mc-fitb-item">
+        <div class="mc-q">The coefficients \(\binom{n}{k}\) appearing in the Leibnitz formula are called ________ coefficients.</div>
+        <div class="mc-fitb-row">
+          <input class="mc-fitb-input" id="mc-1-leib-2-inp" placeholder="Your answer…" type="text">
+          <button class="mc-fitb-btn" onclick="mcFitb('mc-1-leib-2-inp','mc-1-leib-2-fb',['binomial','binomial coefficients'])">Check</button>
+        </div>
+        <div class="mc-fitb-fb" id="mc-1-leib-2-fb"></div>
+      </div>
+    </div>
+
+    <!-- ── SUBTOPIC 1.2 ── -->
+    <div class="subtopic-heading">
+      <span class="subtopic-num">1.2</span>
+      <h3>Setting up the Recurrence Relation</h3>
+    </div>
+    <div class="topic-card">
+      <p>For ODEs of the form \(f(x) \cdot y'' + g(x) \cdot y' + h(x) \cdot y = 0\), the approach is:</p>
+      <ol>
+        <li>Differentiate the equation \(n\) times using Leibnitz Theorem on each product term</li>
+        <li>Express everything in terms of \(y_n\), \(y_{n+1}\), \(y_{n+2}\)</li>
+        <li>This gives a <strong>recurrence relation</strong> — a formula that lets you find \(y_n\) from earlier values</li>
+        <li>Use initial conditions (values at \(x = 0\)) to compute \(y_0, y_1, y_2, \ldots\) step by step</li>
+      </ol>
+    </div>
+
+    <!-- MINI CHECK 1.2 -->
+    <div class="mini-check">
+      <div class="mini-check-header">
+        <span class="mini-check-icon">⚡</span>
+        <span class="mini-check-title">Quick Check — Setting up the Recurrence Relation</span>
+        <span class="mini-check-sub">2 questions</span>
+      </div>
+      <div class="mc-mcq-item">
+        <div class="mc-q">When setting up a recurrence relation from an ODE using Leibnitz Theorem, which step comes immediately after differentiating the equation \(n\) times?</div>
+        <div class="mc-mcq-opts" id="mc-1-rec-1">
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-rec-1',false,'mc-1-rec-1-fb')"><span class="mc-ltr">A</span> Substitute initial conditions right away</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-rec-1',true,'mc-1-rec-1-fb')"><span class="mc-ltr">B</span> Express everything in terms of \(y_n\), \(y_{n+1}\), \(y_{n+2}\)</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-rec-1',false,'mc-1-rec-1-fb')"><span class="mc-ltr">C</span> Solve for the general solution analytically</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-rec-1',false,'mc-1-rec-1-fb')"><span class="mc-ltr">D</span> Take the Laplace transform of both sides</div>
+        </div>
+        <div class="mc-mcq-fb" id="mc-1-rec-1-fb"></div>
+      </div>
+      <div class="mc-reveal-item">
+        <div class="mc-q">Once you have the recurrence relation, what happens when you set \(x = 0\) and the ODE has the form \((1+x^2)y_{n+2} + 2(n+1)xy_{n+1} + (n^2+n-5)y_n = 0\)?</div>
+        <button class="mc-reveal-btn" onclick="mcReveal(this)">Reveal Answer</button>
+        <div class="mc-answer">At \(x = 0\), all terms multiplied by \(x\) vanish. The relation simplifies to \(y_{n+2} = (5 - n^2 - n)y_n\). This gives a much simpler two-step recurrence that lets you compute even-indexed derivatives from \(y_0\) and odd-indexed derivatives from \(y_1\), step by step.</div>
+      </div>
+    </div>
+
+    <!-- TOPIC 1 ACTIVE RECALL -->
+    <div class="recall-section">
+      <div class="recall-label">Topic 1 Active Recall</div>
+      <div class="recall-card">
+        <div class="recall-badge badge-def">Definition</div>
+        <div class="recall-q">State the Leibnitz Theorem formula for the nth derivative of a product \(y = uv\).</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer">
+          \[ y_n = u_n v + n u_{n-1} v_1 + \frac{n(n-1)}{2!} u_{n-2} v_2 + \frac{n(n-1)(n-2)}{3!} u_{n-3} v_3 + \cdots \]
+          The coefficients are binomial coefficients \(\binom{n}{k}\). Terms stop once you exhaust the non-zero derivatives of either \(u\) or \(v\).
+        </div>
+      </div>
+      <div class="recall-card">
+        <div class="recall-badge badge-mech">Mechanism</div>
+        <div class="recall-q">When applying Leibnitz to \((1+x^2)y''\), what happens to derivatives of \(u = 1+x^2\) beyond \(u_2\)?</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer">They vanish. \(u = 1+x^2\), \(u_1 = 2x\), \(u_2 = 2\), and \(u_k = 0\) for all \(k \geq 3\). This is why the Leibnitz expansion for this term only produces <strong>three non-zero terms</strong>, not an infinite series — making the computation tractable.</div>
+      </div>
+      <div class="recall-card">
+        <div class="recall-badge badge-app">Application</div>
+        <div class="recall-q">For \((1+x^2)y_{n+2} + 2(n+1)xy_{n+1} + (n^2+n-5)y_n = 0\), what does the recurrence relation become at \(x = 0\)?</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer">At \(x = 0\), the terms containing \(x\) vanish: \[ y_{n+2} = (5 - n^2 - n)y_n \] This simplified recurrence lets you compute \(y_2, y_4, y_6, \ldots\) step by step from \(y_0\), and \(y_3, y_5, \ldots\) step by step from \(y_1\).</div>
+      </div>
+      <div class="recall-card">
+        <div class="recall-badge badge-comp">Computation</div>
+        <div class="recall-q">If \(y_0 = 1\), \(y_1 = 0\) and the recurrence is \(y_{n+2} = (5-n^2-n)y_n\), what is \(y_4\)?</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer">
+          First compute \(y_2\): \(y_2 = (5 - 0 - 0)(1) = 5\)<br><br>
+          Then compute \(y_4\): \(y_4 = (5 - 4 - 2)(5) = (-1)(5) = -5\)
+        </div>
+      </div>
+    </div>
+  </div><!-- /topic-1 -->
+
+  <!-- PULSE CHECK ① -->
+  <div class="pulse-check" id="pulse1">
+    <div class="pc-title">Pulse Check ①</div>
+    <div class="pc-sub">End of Topic 1 — quick ungraded check.</div>
+    <div class="pc-question">
+      <div class="pc-q-text">When differentiating \(u = 1+x^2\) n times, how many non-zero derivatives does it produce?</div>
+      <div class="pc-options" id="pc1-1-opts">
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-1',false)"><span class="pc-letter">A</span> One (only \(u_1\))</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-1',false)"><span class="pc-letter">B</span> Infinite derivatives</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-1',true)"><span class="pc-letter">C</span> Three: \(u_0 = 1+x^2\), \(u_1 = 2x\), \(u_2 = 2\)</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-1',false)"><span class="pc-letter">D</span> Two: \(u_1 = 2x\), \(u_2 = 2x^2\)</div>
+      </div>
+      <div class="pc-feedback" id="pc1-1-fb"></div>
+    </div>
+    <div class="pc-question">
+      <div class="pc-q-text">The coefficients in the Leibnitz formula \(\left(1, n, \frac{n(n-1)}{2!}, \ldots\right)\) are called:</div>
+      <div class="pc-options" id="pc1-2-opts">
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-2',false)"><span class="pc-letter">A</span> Fourier coefficients</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-2',true)"><span class="pc-letter">B</span> Binomial coefficients</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-2',false)"><span class="pc-letter">C</span> Taylor coefficients</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-2',false)"><span class="pc-letter">D</span> Maclaurin coefficients</div>
+      </div>
+      <div class="pc-feedback" id="pc1-2-fb"></div>
+    </div>
+    <div class="pc-question">
+      <div class="pc-q-text">Fill in the blank: The Leibnitz Theorem is used to find the nth derivative of a ________ of two functions.</div>
+      <div class="pc-fitb">
+        <input type="text" id="pc1-3-input" placeholder="Type your answer...">
+        <br>
+        <button class="pc-check-btn" onclick="pcFitb('pc1-3',['product','product of two functions'])">Check</button>
+      </div>
+      <div class="pc-feedback" id="pc1-3-fb"></div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       TOPIC 2: WORKED EXAMPLES
+  ════════════════════════════════════════════════════════ -->
+  <div class="topic-block" id="topic-2">
+    <div class="section-label">Topic 2</div>
+    <div class="section-title">Worked Examples</div>
+
+    <!-- Example 1 -->
+    <div class="worked-example">
+      <div class="we-label">Example 1</div>
+      <div class="we-q">If \((1+x^2)y'' + 2xy' - 5y = 0\), show that \((1+x^2)y_{n+2} + 2(n+1)xy_{n+1} + (n^2+n-5)y_n = 0\)</div>
+
+      <p class="we-note">We apply Leibnitz theorem to each product term in the ODE. Let \(P = (1+x^2)y''\), \(Q = 2xy'\), \(W = 5y\).</p>
+
+      <div class="we-step">
+        <div class="we-step-num">1</div>
+        <div class="we-step-text">
+          <strong>Differentiate \(P = (1+x^2)y''\) n times.</strong><br>
+          Let \(u = 1+x^2\), \(v = y''\). Then \(u_1 = 2x\), \(u_2 = 2\), \(u_k = 0\) for \(k \geq 3\).<br>
+          By Leibnitz: \[ P_n = u_n v + n u_{n-1} v_1 + \frac{n(n-1)}{2!} u_{n-2} v_2 \]
+          \[ P_n = (1+x^2)y_{n+2} + n(2x)y_{n+1} + \frac{n(n-1)}{2}(2)y_n \]
+          \[ P_n = (1+x^2)y_{n+2} + 2nx \cdot y_{n+1} + n(n-1)y_n \]
+        </div>
+      </div>
+
+      <div class="we-step">
+        <div class="we-step-num">2</div>
+        <div class="we-step-text">
+          <strong>Differentiate \(Q = 2xy'\) n times.</strong><br>
+          Let \(u = 2x\), \(v = y'\). Then \(u_1 = 2\), \(u_k = 0\) for \(k \geq 2\).<br>
+          \[ Q_n = (2x)y_{n+1} + n(2)y_n = 2xy_{n+1} + 2ny_n \]
+        </div>
+      </div>
+
+      <div class="we-step">
+        <div class="we-step-num">3</div>
+        <div class="we-step-text">
+          <strong>Differentiate \(W = 5y\) n times.</strong><br>
+          \[ W_n = 5y_n \]
+        </div>
+      </div>
+
+      <div class="we-step">
+        <div class="we-step-num">4</div>
+        <div class="we-step-text">
+          <strong>Combine: \(P_n + Q_n - W_n = 0\)</strong>
+          \[ (1+x^2)y_{n+2} + 2nx \cdot y_{n+1} + n(n-1)y_n + 2xy_{n+1} + 2ny_n - 5y_n = 0 \]
+          \[ (1+x^2)y_{n+2} + 2(n+1)xy_{n+1} + [n(n-1) + 2n - 5]y_n = 0 \]
+        </div>
+      </div>
+
+      <div class="we-result">
+        \[ (1+x^2)y_{n+2} + 2(n+1)xy_{n+1} + (n^2 + n - 5)y_n = 0 \]
+      </div>
+    </div>
+
+    <!-- Example 2 -->
+    <div class="worked-example">
+      <div class="we-label">Example 2</div>
+      <div class="we-q">Using the recurrence from Example 1, find \(y_n\) at \(x = 0\) given \(y_0 = 1\), \(y_1 = 0\).</div>
+
+      <p class="we-note">From Example 1, the recurrence relation at \(x = 0\) becomes:</p>
+
+      <div class="we-step">
+        <div class="we-step-num">1</div>
+        <div class="we-step-text">
+          At \(x = 0\): \((1+0)y_{n+2} + 0 + (n^2+n-5)y_n = 0\)
+          \[ y_{n+2} = -(n^2+n-5)y_n = (5-n^2-n)y_n \]
+        </div>
+      </div>
+
+      <div class="we-step">
+        <div class="we-step-num">2</div>
+        <div class="we-step-text">
+          <strong>Compute values step by step using even \(n\) (since \(y_1 = 0\) kills odd terms):</strong><br>
+          \(n=0\): \(y_2 = (5-0-0)y_0 = 5(1) = 5\)<br>
+          \(n=2\): \(y_4 = (5-4-2)y_2 = (-1)(5) = -5\)<br>
+          \(n=4\): \(y_6 = (5-16-4)y_4 = (-15)(-5) = 75\)
+        </div>
+      </div>
+
+      <div class="note-box">
+        <strong>Pattern check:</strong>
+        <p>All odd derivatives \(y_1, y_3, y_5, \ldots = 0\) because \(y_1 = 0\) propagates through odd-indexed terms via the recurrence \(y_{n+2} \propto y_n\). Only even derivatives survive.</p>
+      </div>
+    </div>
+
+    <!-- Example 3 -->
+    <div class="worked-example">
+      <div class="we-label">Example 3</div>
+      <div class="we-q">If \(x^2y'' + xy' + y = 0\), apply Leibnitz theorem and find the nth derivative recurrence.</div>
+
+      <div class="we-step">
+        <div class="we-step-num">1</div>
+        <div class="we-step-text">
+          <strong>Let \(P = x^2 y''\), \(Q = xy'\), \(W = y\).</strong><br>
+          For \(P\): \(u = x^2\), \(u_1 = 2x\), \(u_2 = 2\), \(u_k = 0\) for \(k \geq 3\).
+          \[ P_n = x^2 y_{n+2} + n(2x)y_{n+1} + \frac{n(n-1)}{2}(2)y_n = x^2 y_{n+2} + 2nx\,y_{n+1} + n(n-1)y_n \]
+        </div>
+      </div>
+
+      <div class="we-step">
+        <div class="we-step-num">2</div>
+        <div class="we-step-text">
+          For \(Q = xy'\): \(u = x\), \(u_1 = 1\), \(u_k = 0\) for \(k \geq 2\).
+          \[ Q_n = xy_{n+1} + ny_n \]
+        </div>
+      </div>
+
+      <div class="we-step">
+        <div class="we-step-num">3</div>
+        <div class="we-step-text">
+          \(W_n = y_n\). Summing \(P_n + Q_n + W_n = 0\):
+          \[ x^2 y_{n+2} + (2n+1)xy_{n+1} + (n^2+1)y_n = 0 \]
+        </div>
+      </div>
+
+      <div class="we-result">
+        Recurrence: \[ y_{n+2} = \frac{-(n^2+1)y_n - (2n+1)xy_{n+1}}{x^2} \]
+        At \(x = 0\), use L'Hôpital's rule or series methods to handle the singularity.
+      </div>
+    </div>
+
+    <!-- Exercise -->
+    <div class="subtopic-heading">
+      <span class="subtopic-num">Ex</span>
+      <h3>Exercise</h3>
+    </div>
+    <div class="topic-card">
+      <p>If \(x^2y'' + 2y' + y = 0\), show that \(x^2y_{n+2} + 2(n+1)xy_{n+1} + (n^2+n+1)y_n = 0\).</p>
+      <p style="color:var(--text3); font-size:13px;">Hint: Follow the same three-step process — treat each term as a product, apply Leibnitz, then combine and simplify coefficients of \(y_n\).</p>
+    </div>
+
+    <!-- MINI CHECK Topic 2 -->
+    <div class="mini-check">
+      <div class="mini-check-header">
+        <span class="mini-check-icon">⚡</span>
+        <span class="mini-check-title">Quick Check — Worked Examples</span>
+        <span class="mini-check-sub">2 questions</span>
+      </div>
+      <div class="mc-mcq-item">
+        <div class="mc-q">From the ODE \((1+x^2)y'' + 2xy' - 5y = 0\), the recurrence relation at \(x = 0\) simplifies to:</div>
+        <div class="mc-mcq-opts" id="mc-2-ex-1">
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2-ex-1',false,'mc-2-ex-1-fb')"><span class="mc-ltr">A</span> \(y_{n+2} = (5 + n^2 + n)y_n\)</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2-ex-1',true,'mc-2-ex-1-fb')"><span class="mc-ltr">B</span> \(y_{n+2} = (5 - n^2 - n)y_n\)</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2-ex-1',false,'mc-2-ex-1-fb')"><span class="mc-ltr">C</span> \(y_{n+2} = -5y_n\)</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2-ex-1',false,'mc-2-ex-1-fb')"><span class="mc-ltr">D</span> \(y_{n+2} = n^2 y_n\)</div>
+        </div>
+        <div class="mc-mcq-fb" id="mc-2-ex-1-fb"></div>
+      </div>
+      <div class="mc-reveal-item">
+        <div class="mc-q">In Example 2, why do all odd-indexed derivatives \(y_1, y_3, y_5, \ldots\) vanish when \(y_1(0) = 0\)?</div>
+        <button class="mc-reveal-btn" onclick="mcReveal(this)">Reveal Answer</button>
+        <div class="mc-answer">Because the recurrence at \(x = 0\) links \(y_{n+2}\) only to \(y_n\) (same parity). Once \(y_1 = 0\), this forces \(y_3 = 0\), then \(y_5 = 0\), and so on — the zero propagates through all odd-indexed terms. Even derivatives are seeded by \(y_0 = 1\) and so survive.</div>
+      </div>
+    </div>
+
+    <!-- TOPIC 2 ACTIVE RECALL -->
+    <div class="recall-section">
+      <div class="recall-label">Topic 2 Active Recall</div>
+      <div class="recall-card">
+        <div class="recall-badge badge-mech">Mechanism</div>
+        <div class="recall-q">In Example 1, why does differentiating \((1+x^2)y''\) using Leibnitz produce exactly three non-zero terms?</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer">Because \(u = 1+x^2\) is a polynomial of degree 2. Its derivatives are \(u_0 = 1+x^2\), \(u_1 = 2x\), \(u_2 = 2\), and \(u_k = 0\) for \(k \geq 3\). The Leibnitz sum \(\sum_{k=0}^{n}\binom{n}{k}u_{n-k}v_k\) only contributes when \(u_{n-k} \neq 0\), i.e. when \(n-k \leq 2\). So there are at most three contributing terms.</div>
+      </div>
+      <div class="recall-card">
+        <div class="recall-badge badge-comp">Computation</div>
+        <div class="recall-q">Using the recurrence \(y_{n+2} = (5-n^2-n)y_n\) with \(y_0 = 1\), \(y_1 = 0\), compute \(y_6\).</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer">
+          \(n=0\): \(y_2 = (5-0-0)(1) = 5\)<br><br>
+          \(n=2\): \(y_4 = (5-4-2)(5) = (-1)(5) = -5\)<br><br>
+          \(n=4\): \(y_6 = (5-16-4)(-5) = (-15)(-5) = 75\)
+        </div>
+      </div>
+    </div>
+  </div><!-- /topic-2 -->
+
+  <!-- PULSE CHECK ② -->
+  <div class="pulse-check" id="pulse2">
+    <div class="pc-title">Pulse Check ②</div>
+    <div class="pc-sub">End of Topic 2 — quick ungraded check.</div>
+    <div class="pc-question">
+      <div class="pc-q-text">The nth derivative of \((2x)y'\) using Leibnitz (where \(u = 2x\), \(u_1 = 2\), \(u_k=0\) for \(k\geq 2\)) gives:</div>
+      <div class="pc-options" id="pc2-1-opts">
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-1',false)"><span class="pc-letter">A</span> \(2x\,y_{n+1}\)</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-1',true)"><span class="pc-letter">B</span> \(2x\,y_{n+1} + 2n\,y_n\)</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-1',false)"><span class="pc-letter">C</span> \(2y_{n+1}\)</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-1',false)"><span class="pc-letter">D</span> \(2xy_{n+2} + ny_{n+1}\)</div>
+      </div>
+      <div class="pc-feedback" id="pc2-1-fb"></div>
+    </div>
+    <div class="pc-question">
+      <div class="pc-q-text">With \(y_0 = 1\), \(y_1 = 0\) and recurrence \(y_{n+2} = (5-n^2-n)y_n\), what is \(y_3\)?</div>
+      <div class="pc-options" id="pc2-2-opts">
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-2',true)"><span class="pc-letter">A</span> 0</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-2',false)"><span class="pc-letter">B</span> 5</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-2',false)"><span class="pc-letter">C</span> 3</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-2',false)"><span class="pc-letter">D</span> Cannot be determined</div>
+      </div>
+      <div class="pc-feedback" id="pc2-2-fb"></div>
+    </div>
+    <div class="pc-question">
+      <div class="pc-q-text">Fill in the blank: When \(x = 0\) is substituted into the full recurrence, the terms containing ________ vanish, leaving a simpler two-term relation.</div>
+      <div class="pc-fitb">
+        <input type="text" id="pc2-3-input" placeholder="Type your answer...">
+        <br>
+        <button class="pc-check-btn" onclick="pcFitb('pc2-3',['x','the variable x','powers of x'])">Check</button>
+      </div>
+      <div class="pc-feedback" id="pc2-3-fb"></div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       END-OF-WEEK QUIZ
+  ════════════════════════════════════════════════════════ -->
+  <div class="eoq" id="eoq">
+    <div class="eoq-eyebrow">End of Week Assessment</div>
+    <div class="eoq-title">Week 1 Quiz</div>
+    <div class="eoq-sub">10 questions — 8 MCQ, 2 fill-in-the-blank. 60% to pass (6/10). Answer all before submitting.</div>
+
+    <!-- Q1 MCQ -->
+    <div class="eoq-question" data-q="1" data-type="mcq" data-correct="B">
+      <div class="eoq-qnum">Question 1 of 10</div>
+      <div class="eoq-q-text">The Leibnitz theorem gives the nth derivative of:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,1,'A')"><span class="eoq-letter">A</span> A sum of two functions</div>
+        <div class="eoq-option" onclick="eoqSelect(this,1,'B')"><span class="eoq-letter">B</span> A product of two functions</div>
+        <div class="eoq-option" onclick="eoqSelect(this,1,'C')"><span class="eoq-letter">C</span> A composite function</div>
+        <div class="eoq-option" onclick="eoqSelect(this,1,'D')"><span class="eoq-letter">D</span> A ratio of two functions</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-1"></div>
+    </div>
+
+    <!-- Q2 MCQ -->
+    <div class="eoq-question" data-q="2" data-type="mcq" data-correct="C">
+      <div class="eoq-qnum">Question 2 of 10</div>
+      <div class="eoq-q-text">For \(u = x^3\), how many non-zero successive derivatives does \(u\) have (including \(u_0\))?</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,2,'A')"><span class="eoq-letter">A</span> 2</div>
+        <div class="eoq-option" onclick="eoqSelect(this,2,'B')"><span class="eoq-letter">B</span> 3</div>
+        <div class="eoq-option" onclick="eoqSelect(this,2,'C')"><span class="eoq-letter">C</span> 4 (including \(u_0\))</div>
+        <div class="eoq-option" onclick="eoqSelect(this,2,'D')"><span class="eoq-letter">D</span> Infinite</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-2"></div>
+    </div>
+
+    <!-- Q3 MCQ -->
+    <div class="eoq-question" data-q="3" data-type="mcq" data-correct="B">
+      <div class="eoq-qnum">Question 3 of 10</div>
+      <div class="eoq-q-text">The nth derivative of \(P = (1+x^2)y''\) using Leibnitz gives how many non-zero product terms?</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,3,'A')"><span class="eoq-letter">A</span> 2</div>
+        <div class="eoq-option" onclick="eoqSelect(this,3,'B')"><span class="eoq-letter">B</span> 3</div>
+        <div class="eoq-option" onclick="eoqSelect(this,3,'C')"><span class="eoq-letter">C</span> 4</div>
+        <div class="eoq-option" onclick="eoqSelect(this,3,'D')"><span class="eoq-letter">D</span> 5</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-3"></div>
+    </div>
+
+    <!-- Q4 MCQ -->
+    <div class="eoq-question" data-q="4" data-type="mcq" data-correct="B">
+      <div class="eoq-qnum">Question 4 of 10</div>
+      <div class="eoq-q-text">Differentiating \((2x)y'\) n times using Leibnitz, the result is:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,4,'A')"><span class="eoq-letter">A</span> \(2x\,y_{n+1}\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,4,'B')"><span class="eoq-letter">B</span> \(2x\,y_{n+1} + 2n\,y_n\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,4,'C')"><span class="eoq-letter">C</span> \(2y_{n+1}\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,4,'D')"><span class="eoq-letter">D</span> \(2xy_{n+2} + ny_{n+1}\)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-4"></div>
+    </div>
+
+    <!-- Q5 MCQ -->
+    <div class="eoq-question" data-q="5" data-type="mcq" data-correct="B">
+      <div class="eoq-qnum">Question 5 of 10</div>
+      <div class="eoq-q-text">From the ODE \((1+x^2)y'' + 2xy' - 5y = 0\), the recurrence at \(x=0\) is:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,5,'A')"><span class="eoq-letter">A</span> \(y_{n+2} = (5+n)y_n\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,5,'B')"><span class="eoq-letter">B</span> \(y_{n+2} = (5-n^2-n)y_n\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,5,'C')"><span class="eoq-letter">C</span> \(y_{n+2} = -5y_n\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,5,'D')"><span class="eoq-letter">D</span> \(y_{n+2} = n^2\,y_n\)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-5"></div>
+    </div>
+
+    <!-- Q6 MCQ -->
+    <div class="eoq-question" data-q="6" data-type="mcq" data-correct="B">
+      <div class="eoq-qnum">Question 6 of 10</div>
+      <div class="eoq-q-text">With \(y_0 = 1\), \(y_1 = 0\) and recurrence \(y_{n+2} = (5-n^2-n)y_n\), what is \(y_2\)?</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,6,'A')"><span class="eoq-letter">A</span> 1</div>
+        <div class="eoq-option" onclick="eoqSelect(this,6,'B')"><span class="eoq-letter">B</span> 5</div>
+        <div class="eoq-option" onclick="eoqSelect(this,6,'C')"><span class="eoq-letter">C</span> -5</div>
+        <div class="eoq-option" onclick="eoqSelect(this,6,'D')"><span class="eoq-letter">D</span> 0</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-6"></div>
+    </div>
+
+    <!-- Q7 MCQ -->
+    <div class="eoq-question" data-q="7" data-type="mcq" data-correct="B">
+      <div class="eoq-qnum">Question 7 of 10</div>
+      <div class="eoq-q-text">What is \(y_4\) using the recurrence from Question 6?</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,7,'A')"><span class="eoq-letter">A</span> 25</div>
+        <div class="eoq-option" onclick="eoqSelect(this,7,'B')"><span class="eoq-letter">B</span> -5</div>
+        <div class="eoq-option" onclick="eoqSelect(this,7,'C')"><span class="eoq-letter">C</span> 5</div>
+        <div class="eoq-option" onclick="eoqSelect(this,7,'D')"><span class="eoq-letter">D</span> -25</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-7"></div>
+    </div>
+
+    <!-- Q8 MCQ -->
+    <div class="eoq-question" data-q="8" data-type="mcq" data-correct="B">
+      <div class="eoq-qnum">Question 8 of 10</div>
+      <div class="eoq-q-text">Why do all odd-indexed derivatives vanish in Example 1 when \(y_1(0) = 0\)?</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,8,'A')"><span class="eoq-letter">A</span> Because \(y_0 = 1\) forces them to zero</div>
+        <div class="eoq-option" onclick="eoqSelect(this,8,'B')"><span class="eoq-letter">B</span> The recurrence links \(y_{n+2}\) only to \(y_n\), so odd terms stay zero once \(y_1 = 0\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,8,'C')"><span class="eoq-letter">C</span> The equation has no odd-powered terms</div>
+        <div class="eoq-option" onclick="eoqSelect(this,8,'D')"><span class="eoq-letter">D</span> Leibnitz theorem only applies to even derivatives</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-8"></div>
+    </div>
+
+    <!-- Q9 FITB -->
+    <div class="eoq-question" data-q="9" data-type="fitb" data-correct="binomial,binomial coefficients">
+      <div class="eoq-qnum">Question 9 of 10 — Fill in the blank</div>
+      <div class="eoq-q-text">The coefficients \(\binom{n}{k}\) in the Leibnitz formula are called ________ coefficients.</div>
+      <div class="eoq-fitb">
+        <input type="text" id="eoq-input-9" placeholder="e.g. binomial…">
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-9"></div>
+    </div>
+
+    <!-- Q10 FITB -->
+    <div class="eoq-question" data-q="10" data-type="fitb" data-correct="0,zero">
+      <div class="eoq-qnum">Question 10 of 10 — Fill in the blank</div>
+      <div class="eoq-q-text">For \(u = x^2\), the third derivative \(u_3\) equals ________.</div>
+      <div class="eoq-fitb">
+        <input type="text" id="eoq-input-10" placeholder="Enter a number…">
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-10"></div>
+    </div>
+
+    <button class="eoq-submit" id="eoq-submit-btn" onclick="eoqSubmit()">Submit Week 1 Quiz</button>
+
+    <div class="eoq-result" id="eoq-result">
+      <div class="result-score" id="result-score"></div>
+      <div id="result-pill"></div>
+      <div class="result-msg" id="result-msg"></div>
+      <div id="result-extra"></div>
+    </div>
+  </div><!-- /eoq -->
+
+</div><!-- /wrapper -->
+
+<script>
+// ─── DARK MODE ───
+(function() {
+  const saved = localStorage.getItem('unify-theme');
+  if (saved === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('dark-toggle');
+      if (btn) btn.textContent = '☀️';
+    });
+  }
+})();
+
+function toggleDark() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('dark-toggle').textContent = isDark ? '🌙' : '☀️';
+  localStorage.setItem('unify-theme', isDark ? 'light' : 'dark');
+}
+
+// ─── PROGRESS BAR + TRACKER ───
+window.addEventListener('scroll', () => {
+  const doc = document.documentElement;
+  const scrolled = doc.scrollTop || document.body.scrollTop;
+  const max = doc.scrollHeight - doc.clientHeight;
+  const pct = max > 0 ? (scrolled / max) * 100 : 0;
+  document.getElementById('progress-bar').style.width = pct + '%';
+
+  const t1   = document.getElementById('topic-1');
+  const t2   = document.getElementById('topic-2');
+  const eoq  = document.getElementById('eoq');
+  const mid  = scrolled + window.innerHeight / 2;
+  const getTop = el => el.getBoundingClientRect().top + scrolled;
+
+  let label = 'Topic 1: Leibnitz Theorem';
+  if (mid >= getTop(eoq))       label = 'Week 1 Quiz';
+  else if (mid >= getTop(t2))   label = 'Topic 2: Worked Examples';
+
+  document.getElementById('tracker-text').textContent = label;
+
+  // step pills
+  ['step-1','step-2','step-quiz'].forEach(id => {
+    document.getElementById(id).classList.remove('done','active');
+  });
+  if (mid >= getTop(eoq)) {
+    ['step-1','step-2'].forEach(id => document.getElementById(id).classList.add('done'));
+    document.getElementById('step-quiz').classList.add('active');
+  } else if (mid >= getTop(t2)) {
+    document.getElementById('step-1').classList.add('done');
+    document.getElementById('step-2').classList.add('active');
+  } else {
+    document.getElementById('step-1').classList.add('active');
+  }
+});
+
+// ─── REVEAL ANSWER (Active Recall) ───
+function toggleAnswer(btn) {
+  const ans = btn.nextElementSibling;
+  const showing = ans.classList.contains('show');
+  ans.classList.toggle('show', !showing);
+  btn.textContent = showing ? 'Reveal Answer' : 'Hide Answer';
+}
+
+// ─── MINI CHECK — REVEAL ───
+function mcReveal(btn) {
+  const ans = btn.nextElementSibling;
+  const showing = ans.classList.contains('show');
+  ans.classList.toggle('show', !showing);
+  btn.textContent = showing ? 'Reveal Answer' : 'Hide Answer';
+}
+
+// ─── MINI CHECK — MCQ ───
+const mcLocked = {};
+function mcMcq(el, groupId, correct, fbId) {
+  if (mcLocked[groupId]) return;
+  mcLocked[groupId] = true;
+  const opts = document.getElementById(groupId).querySelectorAll('.mc-mcq-opt');
+  opts.forEach(o => { o.classList.add('mc-locked'); });
+  el.classList.add(correct ? 'mc-correct' : 'mc-wrong');
+  if (!correct) {
+    opts.forEach(o => {
+      const attr = o.getAttribute('onclick') || '';
+      if (attr.includes(',true,')) o.classList.add('mc-correct');
+    });
+  }
+  const fb = document.getElementById(fbId);
+  fb.style.display = 'block';
+  fb.style.color = correct ? 'var(--green-deep)' : '#b91c1c';
+  fb.textContent = correct ? '✓ Correct!' : '✗ Not quite — the correct answer is highlighted.';
+}
+
+// ─── MINI CHECK — FITB ───
+function mcFitb(inputId, fbId, answers) {
+  const input = document.getElementById(inputId);
+  const val = input.value.trim().toLowerCase();
+  const correct = answers.some(a => val === a.toLowerCase());
+  const fb = document.getElementById(fbId);
+  fb.style.display = 'block';
+  fb.style.fontWeight = '600';
+  if (correct) {
+    fb.textContent = '✓ Correct!';
+    fb.style.color = 'var(--green-deep)';
+    input.style.borderColor = 'var(--green)';
+  } else {
+    fb.textContent = '✗ Not quite. Correct: ' + answers[0];
+    fb.style.color = '#b91c1c';
+    input.style.borderColor = '#ef4444';
+  }
+  input.disabled = true;
+  input.nextElementSibling.disabled = true;
+}
+
+// ─── PULSE CHECK MCQ ───
+const pcLocked = {};
+function pcAnswer(el, id, correct) {
+  if (pcLocked[id]) return;
+  pcLocked[id] = true;
+  const opts = document.getElementById(id + '-opts').querySelectorAll('.pc-option');
+  opts.forEach(o => o.classList.remove('correct','wrong'));
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) {
+    opts.forEach(o => {
+      if ((o.getAttribute('onclick') || '').includes(',true)')) o.classList.add('correct');
+    });
+  }
+  const fb = document.getElementById(id + '-fb');
+  fb.style.display = 'block';
+  fb.style.fontWeight = '600';
+  fb.textContent = correct ? '✓ Correct!' : '✗ Not quite — the correct answer is highlighted.';
+  fb.style.color = correct ? '#166534' : '#991b1b';
+}
+
+// ─── PULSE CHECK FITB ───
+function pcFitb(id, answers) {
+  const input = document.getElementById(id + '-input');
+  const val = input.value.trim().toLowerCase();
+  const correct = answers.some(a => val === a.toLowerCase());
+  const fb = document.getElementById(id + '-fb');
+  fb.style.display = 'block';
+  fb.style.fontWeight = '600';
+  if (correct) {
+    fb.textContent = '✓ Correct!';
+    fb.style.color = '#166534';
+    input.style.borderColor = '#16a34a';
+  } else {
+    fb.textContent = '✗ Not quite. Correct: ' + answers[0];
+    fb.style.color = '#991b1b';
+    input.style.borderColor = '#ef4444';
+  }
+  input.disabled = true;
+}
+
+// ─── EOQ ───
+const eoqAnswers = {};
+const eoqLocked  = {};
+const totalQ     = 10;
+
+const eoqFeedbacks = {
+  1:  { correct: "Correct. The Leibnitz theorem gives the nth derivative of a product of two functions.", wrong: "Incorrect. The Leibnitz theorem specifically handles the nth derivative of a product \(y = u \\cdot v\)." },
+  2:  { correct: "Correct. \(u_0 = x^3\), \(u_1 = 3x^2\), \(u_2 = 6x\), \(u_3 = 6\), then \(u_k = 0\) for \(k \\geq 4\) — so four non-zero derivatives.", wrong: "Incorrect. For \(u = x^3\): \(u_0, u_1 = 3x^2, u_2 = 6x, u_3 = 6\) are all non-zero — that's 4, then \(u_4 = 0\)." },
+  3:  { correct: "Correct. Since \(u = 1+x^2\) has only three non-zero derivatives (\(u_0, u_1, u_2\)), only three terms in the Leibnitz sum are non-zero.", wrong: "Incorrect. \(u = 1+x^2\) gives \(u_0 = 1+x^2\), \(u_1 = 2x\), \(u_2 = 2\), and \(u_k = 0\) for \(k \\geq 3\), so exactly 3 non-zero terms." },
+  4:  { correct: "Correct. With \(u = 2x\), \(u_1 = 2\), the Leibnitz expansion gives \(2x\\,y_{n+1} + n(2)y_n = 2x\\,y_{n+1} + 2n\\,y_n\).", wrong: "Incorrect. Apply Leibnitz with \(u=2x\), \(v=y'\): \((2x)y_{n+1} + n(2)y_n = 2x\\,y_{n+1} + 2n\\,y_n\)." },
+  5:  { correct: "Correct. At \(x=0\) the cross-terms with \(x\) vanish, leaving \(y_{n+2} = (5 - n^2 - n)y_n\).", wrong: "Incorrect. At \(x=0\): \(y_{n+2} + (n^2+n-5)y_n = 0\), so \(y_{n+2} = (5-n^2-n)y_n\)." },
+  6:  { correct: "Correct. \(n=0\): \(y_2 = (5-0-0)(1) = 5\).", wrong: "Incorrect. At \(n=0\): \(y_2 = (5-0-0)y_0 = 5 \\times 1 = 5\)." },
+  7:  { correct: "Correct. \(n=2\): \(y_4 = (5-4-2)(5) = (-1)(5) = -5\).", wrong: "Incorrect. \(n=2\): \(y_4 = (5-4-2)y_2 = (-1)(5) = -5\)." },
+  8:  { correct: "Correct. The recurrence links \(y_{n+2}\) to \(y_n\) only, so odd terms inherit from \(y_1 = 0\) and all stay zero.", wrong: "Incorrect. The recurrence at \(x=0\) is \(y_{n+2} = (5-n^2-n)y_n\), linking same-parity terms. Since \(y_1 = 0\), all odd derivatives are zero." },
+  9:  { correct: "Correct. The coefficients \(\\binom{n}{k}\) in the Leibnitz formula are the binomial coefficients.", wrong: "Incorrect. The coefficients in the Leibnitz formula are the binomial coefficients \(\\binom{n}{k}\)." },
+  10: { correct: "Correct. \(u = x^2\), \(u_1 = 2x\), \(u_2 = 2\), \(u_3 = 0\).", wrong: "Incorrect. For \(u = x^2\): \(u_1 = 2x\), \(u_2 = 2\), \(u_3 = 0\). The third derivative is 0." }
+};
+
+function eoqSelect(el, qNum, choice) {
+  if (eoqLocked[qNum]) return;
+  const qBlock = el.closest('.eoq-question');
+  qBlock.querySelectorAll('.eoq-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  eoqAnswers[qNum] = choice;
+}
+
+function eoqSubmit() {
+  let score = 0;
+  const questions = document.querySelectorAll('.eoq-question');
+  questions.forEach(q => {
+    const qNum    = parseInt(q.getAttribute('data-q'));
+    const type    = q.getAttribute('data-type');
+    const correct = q.getAttribute('data-correct');
+    const fb      = document.getElementById('eoq-fb-' + qNum);
+
+    if (type === 'mcq') {
+      const selected   = eoqAnswers[qNum];
+      const isCorrect  = selected === correct;
+      if (isCorrect) score++;
+      q.querySelectorAll('.eoq-option').forEach(o => {
+        o.classList.add('locked');
+        const letter = o.querySelector('.eoq-letter').textContent.trim();
+        if (letter === correct) o.classList.add('correct-reveal');
+        else if (letter === selected && !isCorrect) o.classList.add('wrong-reveal');
+      });
+      fb.style.display = 'block';
+      fb.className = 'eoq-feedback ' + (isCorrect ? 'correct-fb' : 'wrong-fb');
+      fb.textContent = isCorrect ? '✓ ' + eoqFeedbacks[qNum].correct : '✗ ' + eoqFeedbacks[qNum].wrong;
+    } else if (type === 'fitb') {
+      const input    = document.getElementById('eoq-input-' + qNum);
+      const val      = input ? input.value.trim().toLowerCase() : '';
+      const accepted = correct.split(',');
+      const isCorrect = accepted.some(a => val === a.trim().toLowerCase());
+      if (isCorrect) score++;
+      if (input) {
+        input.disabled = true;
+        input.classList.add(isCorrect ? 'correct-input' : 'wrong-input');
+      }
+      fb.style.display = 'block';
+      fb.className = 'eoq-feedback ' + (isCorrect ? 'correct-fb' : 'wrong-fb');
+      fb.textContent = isCorrect ? '✓ ' + eoqFeedbacks[qNum].correct : '✗ ' + eoqFeedbacks[qNum].wrong;
+    }
+  });
+
+  document.getElementById('eoq-submit-btn').disabled = true;
+  const pct    = Math.round((score / totalQ) * 100);
+  const passed = pct >= 60;
+  const result = document.getElementById('eoq-result');
+  result.style.display = 'block';
+  result.className = 'eoq-result ' + (passed ? 'pass' : 'fail');
+  document.getElementById('result-score').textContent = score + '/' + totalQ;
+  const pill = document.getElementById('result-pill');
+  pill.innerHTML = '<span class="result-pill ' + (passed ? 'pill-pass' : 'pill-fail') + '">' + pct + '% — ' + (passed ? 'PASSED' : 'NOT YET') + '</span>';
+  const msg = document.getElementById('result-msg');
+  msg.textContent = passed
+    ? 'Solid understanding of Leibnitz theorem and recurrence relations. Ready for Week 2.'
+    : 'Not there yet. Review the recurrence relation section and the worked examples, then retake.';
+
+  const extra = document.getElementById('result-extra');
+  if (passed) {
+    extra.innerHTML = '<div class="unlock-banner">✓ Week 2 unlocked — Applications of Leibnitz &amp; Further ODE Methods</div>';
+  } else {
+    const topicMap = {
+      1: 'Topic 1.1 — Leibnitz Theorem: Definition',
+      2: 'Topic 1.1 — Polynomial Derivatives (termination)',
+      3: 'Topic 1.1 — Non-zero terms in Leibnitz expansion',
+      4: 'Topic 1.2 — Applying Leibnitz to linear products',
+      5: 'Topic 1.2 — Recurrence at x=0',
+      6: 'Topic 2 — Computing y₂ from recurrence',
+      7: 'Topic 2 — Computing y₄ from recurrence',
+      8: 'Topic 2 — Why odd derivatives vanish',
+      9: 'Topic 1.1 — Binomial coefficients',
+      10: 'Topic 1.1 — Derivatives of polynomials'
+    };
+    const missed = [];
+    questions.forEach(q => {
+      const qNum = parseInt(q.getAttribute('data-q'));
+      const type = q.getAttribute('data-type');
+      const correct = q.getAttribute('data-correct');
+      let isCorrect = false;
+      if (type === 'mcq') isCorrect = eoqAnswers[qNum] === correct;
+      else {
+        const input = document.getElementById('eoq-input-' + qNum);
+        const val = input ? input.value.trim().toLowerCase() : '';
+        isCorrect = correct.split(',').some(a => val === a.trim().toLowerCase());
+      }
+      if (!isCorrect && topicMap[qNum]) missed.push(topicMap[qNum]);
+    });
+    extra.innerHTML = '<div class="review-nudge"><p>Topics to review:</p><ul>' + [...new Set(missed)].map(t => '<li>' + t + '</li>').join('') + '</ul></div>';
+  }
+  result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>

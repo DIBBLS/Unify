@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHE 352 — Week 7: Boundary Conditions &amp; FDM | Unify Learn</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<script>MathJax = { chtml: { scale: 0.95 }, options: { skipHtmlTags: ["script","noscript","style","textarea","pre"] } };</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  :root {
+    --bg: #f5f4f0; --surface: #ffffff; --surface2: #f8f7f3;
+    --border: #e0deda; --text: #0a0a0a; --text2: #555555; --text3: #999999;
+    --green: #4ade80; --green-deep: #16a34a; --green-bg: rgba(74,222,128,0.1);
+    --fd: 'Playfair Display', serif; --fb: 'DM Sans', sans-serif;
+    --radius: 12px; --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  [data-theme="dark"] {
+    --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #222222;
+    --border: #2a2a2a; --text: #f0efeb; --text2: #aaa; --text3: #666;
+    --shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--fb); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; transition: background 0.3s, color 0.3s; }
+  #progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--green); width: 0%; z-index: 1000; transition: width 0.2s; }
+  .topbar { position: fixed; top: 3px; left: 0; right: 0; height: 52px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 999; transition: background 0.3s, border-color 0.3s; }
+  .topbar-wordmark { font-family: var(--fd); font-weight: 900; font-size: 18px; color: var(--text); letter-spacing: -0.5px; }
+  .topbar-wordmark span { color: var(--green); }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .course-pill { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--text3); }
+  #dark-toggle { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: all 0.2s; }
+  #dark-toggle:hover { background: var(--surface2); }
+  .progress-tracker { position: fixed; bottom: 20px; right: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; font-size: 11px; font-weight: 600; color: var(--text2); box-shadow: var(--shadow); z-index: 998; display: flex; align-items: center; gap: 8px; transition: background 0.3s, border-color 0.3s; }
+  .tracker-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+  .wrapper { max-width: 780px; margin: 0 auto; padding: 88px 20px 100px; }
+  .hero { background: #0a0a0a; color: #f5f4f0; border-radius: var(--radius); padding: 40px 36px; margin-bottom: 32px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -40px; right: -40px; width: 200px; height: 200px; border-radius: 50%; background: rgba(74,222,128,0.07); pointer-events: none; }
+  .hero-eyebrow { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #4ade80; margin-bottom: 12px; }
+  .hero-title { font-family: var(--fd); font-size: 32px; font-weight: 900; letter-spacing: -1px; line-height: 1.15; color: #f5f4f0; margin-bottom: 8px; }
+  .hero-subtitle { font-family: var(--fd); font-size: 17px; font-weight: 400; font-style: italic; color: rgba(245,244,240,0.7); margin-bottom: 24px; line-height: 1.4; }
+  .hero-outcome { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.25); border-radius: 8px; padding: 14px 18px; font-size: 13px; color: rgba(245,244,240,0.9); line-height: 1.6; margin-bottom: 24px; }
+  .hero-outcome strong { color: #4ade80; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; }
+  .meta-chip { font-size: 11px; font-weight: 500; padding: 4px 12px; border-radius: 20px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: rgba(245,244,240,0.7); }
+  .topic-progress { margin-bottom: 32px; }
+  .tp-label { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+  .tp-steps { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tp-step { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text3); }
+  .tp-step.done { background: var(--green-bg); border-color: rgba(74,222,128,0.35); color: var(--green-deep); }
+  .tp-step.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .tp-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .tags-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+  .tag { font-family: var(--fb); font-size: 11px; font-weight: 500; padding: 5px 13px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: default; }
+  .tag.green { background: var(--green-bg); border-color: rgba(74,222,128,0.3); color: var(--green-deep); }
+  .section-label { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green-deep); margin-bottom: 6px; }
+  .section-title { font-family: var(--fd); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); margin-bottom: 20px; line-height: 1.25; }
+  .subtopic-heading { display: flex; align-items: center; gap: 10px; margin: 32px 0 14px; }
+  .subtopic-heading h3 { font-family: var(--fd); font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+  .subtopic-num { font-family: var(--fb); font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; background: var(--green-bg); border: 1px solid rgba(74,222,128,0.3); color: var(--green-deep); letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+  .topic-block { margin-bottom: 56px; }
+  .topic-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 28px; margin-bottom: 0px; box-shadow: var(--shadow); }
+  .topic-card p { max-width: 66ch; color: var(--text2); font-size: 14px; line-height: 1.8; margin-bottom: 12px; overflow-x: auto; }
+  .topic-card ul, .topic-card ol { max-width: 66ch; padding-left: 20px; color: var(--text2); font-size: 14px; line-height: 1.8; margin-bottom: 12px; }
+  .topic-card li { margin-bottom: 6px; }
+  .topic-card strong { color: var(--text); }
+  .topic-card p:last-child, .topic-card ul:last-child { margin-bottom: 0; }
+  .formula-block { border-left: 4px solid var(--green); background: var(--green-bg); border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; margin: 1rem 0; overflow-x: auto; }
+  .formula-block .f-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--green-deep); margin-bottom: 0.5rem; font-family: var(--fb); }
+  .formula-block .vars { font-size: 0.82rem; color: var(--text2); margin-top: 0.4rem; }
+  .note-box { background: var(--green-bg); border: 1px solid rgba(74,222,128,0.3); border-radius: var(--radius); padding: 1rem 1.25rem; margin: 1rem 0; }
+  .note-box strong { color: var(--green-deep); display: block; margin-bottom: 0.3rem; }
+  .note-box p { font-size: 14px; color: var(--text2); line-height: 1.7; margin: 0; }
+  .bc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+  @media(max-width: 600px) { .bc-grid { grid-template-columns: 1fr; } }
+  .bc-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; box-shadow: var(--shadow); }
+  .bc-type { font-family: var(--fb); font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--green-deep); margin-bottom: 4px; }
+  .bc-name { font-family: var(--fd); font-size: 1rem; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+  .bc-desc { font-size: 13px; color: var(--text2); margin-top: 6px; }
+  .bc-diagram { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin: 1rem 0; font-family: monospace; font-size: 0.82rem; overflow-x: auto; }
+  .bc-diagram pre { white-space: pre; color: var(--text); line-height: 1.6; }
+  .divider { height: 1px; background: var(--border); margin: 40px 0; }
+  .mini-check { background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--green); border-radius: 0 var(--radius) var(--radius) 0; padding: 20px 24px; margin: 0 0 24px 0; }
+  .mini-check-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .mini-check-icon { font-size: 14px; }
+  .mini-check-title { font-family: var(--fb); font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--green-deep); }
+  .mini-check-sub { font-size: 11px; color: var(--text3); margin-left: auto; }
+  .mc-reveal-item { margin-bottom: 14px; }
+  .mc-q { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 8px; max-width: 66ch; line-height: 1.6; }
+  .mc-reveal-btn { font-family: var(--fb); font-size: 10px; font-weight: 600; padding: 5px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); cursor: pointer; transition: all 0.2s; }
+  .mc-reveal-btn:hover { background: var(--green-bg); border-color: rgba(74,222,128,0.3); color: var(--green-deep); }
+  .mc-answer { display: none; margin-top: 8px; padding: 10px 14px; background: var(--surface); border-left: 2px solid var(--green); border-radius: 0 6px 6px 0; font-size: 12px; color: var(--text2); line-height: 1.7; max-width: 66ch; }
+  .mc-answer.show { display: block; }
+  .mc-mcq-item { margin-bottom: 14px; }
+  .mc-mcq-opts { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; max-width: 52ch; }
+  .mc-mcq-opt { display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; padding: 7px 12px; border-radius: 7px; background: var(--surface); border: 1px solid var(--border); color: var(--text2); transition: all 0.15s; user-select: none; }
+  .mc-mcq-opt:hover:not(.mc-locked) { background: var(--green-bg); border-color: rgba(74,222,128,0.3); }
+  .mc-mcq-opt.mc-correct { background: var(--green-bg); border-color: rgba(74,222,128,0.4); color: var(--green-deep); font-weight: 600; }
+  .mc-mcq-opt.mc-wrong { background: rgba(239,68,68,0.07); border-color: rgba(239,68,68,0.3); color: #b91c1c; }
+  .mc-ltr { font-weight: 700; font-size: 10px; width: 20px; height: 20px; border-radius: 50%; background: var(--surface2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .mc-mcq-fb { display: none; margin-top: 7px; font-size: 11px; font-weight: 600; }
+  .mc-fitb-item { margin-bottom: 14px; }
+  .mc-fitb-row { display: flex; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
+  .mc-fitb-input { font-family: var(--fb); font-size: 12px; padding: 7px 12px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); color: var(--text); outline: none; width: 220px; transition: border-color 0.2s; }
+  .mc-fitb-input:focus { border-color: var(--green); }
+  .mc-fitb-btn { font-family: var(--fb); font-size: 10px; font-weight: 700; padding: 7px 14px; border-radius: 7px; border: none; background: var(--text); color: var(--bg); cursor: pointer; white-space: nowrap; }
+  .mc-fitb-fb { display: none; margin-top: 7px; font-size: 11px; font-weight: 600; }
+  .recall-section { margin-top: 24px; }
+  .recall-label { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green-deep); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .recall-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .recall-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin-bottom: 10px; }
+  .recall-badge { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 9px; border-radius: 20px; margin-bottom: 10px; }
+  .badge-def { background: rgba(74,222,128,0.15); color: var(--green-deep); border: 1px solid rgba(74,222,128,0.3); }
+  .badge-mech { background: rgba(251,191,36,0.15); color: #b45309; border: 1px solid rgba(251,191,36,0.3); }
+  .badge-app { background: rgba(59,130,246,0.1); color: #1d4ed8; border: 1px solid rgba(59,130,246,0.2); }
+  .badge-comp { background: rgba(139,92,246,0.1); color: #6d28d9; border: 1px solid rgba(139,92,246,0.2); }
+  .recall-q { font-size: 14px; font-weight: 500; color: var(--text); max-width: 66ch; line-height: 1.6; margin-bottom: 12px; }
+  .reveal-btn { font-family: var(--fb); font-size: 11px; font-weight: 600; padding: 6px 16px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: pointer; transition: all 0.2s; }
+  .reveal-btn:hover { background: var(--green-bg); border-color: rgba(74,222,128,0.3); color: var(--green-deep); }
+  .recall-answer { display: none; margin-top: 12px; padding: 14px 16px; background: var(--surface2); border-left: 3px solid var(--green); border-radius: 0 8px 8px 0; font-size: 13px; color: var(--text2); line-height: 1.7; max-width: 66ch; overflow-x: auto; }
+  .recall-answer.show { display: block; }
+  .pulse-check { background: var(--green); border-radius: var(--radius); padding: 28px; margin: 40px 0; }
+  .pulse-check .pc-title { font-family: var(--fd); font-size: 20px; font-weight: 900; color: #0a0a0a; margin-bottom: 4px; }
+  .pulse-check .pc-sub { font-size: 12px; color: rgba(10,10,10,0.6); margin-bottom: 20px; }
+  .pc-question { background: rgba(255,255,255,0.35); border-radius: 10px; padding: 16px 18px; margin-bottom: 12px; }
+  .pc-q-text { font-size: 14px; font-weight: 500; color: #0a0a0a; margin-bottom: 10px; max-width: 66ch; line-height: 1.6; }
+  .pc-options { display: flex; flex-direction: column; gap: 6px; }
+  .pc-option { display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer; padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.5); color: #0a0a0a; transition: all 0.15s; max-width: 66ch; }
+  .pc-option:hover { background: rgba(255,255,255,0.65); }
+  .pc-option.correct { background: #fff; border-color: #16a34a; }
+  .pc-option.wrong { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.5); }
+  .pc-letter { font-weight: 700; font-size: 11px; width: 22px; height: 22px; border-radius: 50%; background: rgba(10,10,10,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .pc-feedback { margin-top: 8px; font-size: 12px; font-weight: 500; display: none; color: #0a0a0a; }
+  .eoq { background: var(--text); border-radius: var(--radius); padding: 32px; margin-top: 48px; }
+  .eoq-eyebrow { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green); margin-bottom: 6px; }
+  .eoq-title { font-family: var(--fd); font-size: 24px; font-weight: 900; color: #f5f4f0; margin-bottom: 4px; letter-spacing: -0.5px; }
+  .eoq-sub { font-size: 12px; color: rgba(240,239,235,0.5); margin-bottom: 24px; }
+  .eoq-question { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 18px 20px; margin-bottom: 14px; }
+  .eoq-qnum { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: rgba(240,239,235,0.4); margin-bottom: 6px; }
+  .eoq-q-text { font-size: 14px; font-weight: 500; color: #f0efeb; max-width: 66ch; line-height: 1.6; margin-bottom: 12px; }
+  .eoq-options { display: flex; flex-direction: column; gap: 6px; }
+  .eoq-option { display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer; padding: 10px 14px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(240,239,235,0.8); transition: all 0.15s; max-width: 66ch; user-select: none; }
+  .eoq-option:hover:not(.locked) { background: rgba(255,255,255,0.1); }
+  .eoq-option.selected { border-color: var(--green); background: rgba(74,222,128,0.1); }
+  .eoq-option.correct-reveal { border-color: var(--green); background: rgba(74,222,128,0.15); color: #f0efeb; }
+  .eoq-option.wrong-reveal { border-color: rgba(239,68,68,0.5); background: rgba(239,68,68,0.1); color: rgba(240,239,235,0.6); }
+  .eoq-letter { font-weight: 700; font-size: 11px; width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: rgba(240,239,235,0.7); }
+  .eoq-feedback { display: none; margin-top: 10px; font-size: 12px; line-height: 1.6; padding: 10px 14px; border-radius: 6px; max-width: 66ch; }
+  .eoq-feedback.correct-fb { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.25); color: #86efac; }
+  .eoq-feedback.wrong-fb { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #fca5a5; }
+  .eoq-submit { margin-top: 24px; width: 100%; padding: 14px; border-radius: 8px; border: none; background: var(--green); color: #0a0a0a; font-family: var(--fb); font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+  .eoq-submit:hover { opacity: 0.88; }
+  .eoq-result { display: none; margin-top: 24px; padding: 24px; border-radius: 10px; text-align: center; }
+  .eoq-result.pass { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); }
+  .eoq-result.fail { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); }
+  .result-score { font-family: var(--fd); font-size: 40px; font-weight: 900; color: #f0efeb; margin-bottom: 6px; }
+  .result-pill { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 5px 16px; border-radius: 20px; margin-bottom: 14px; }
+  .pill-pass { background: var(--green); color: #0a0a0a; }
+  .pill-fail { background: rgba(239,68,68,0.3); color: #fca5a5; border: 1px solid rgba(239,68,68,0.4); }
+  .result-msg { font-size: 13px; color: rgba(240,239,235,0.7); line-height: 1.6; max-width: 52ch; margin: 0 auto 16px; }
+  .complete-banner { background: rgba(74,222,128,0.15); border: 1px solid rgba(74,222,128,0.3); border-radius: 8px; padding: 16px 20px; font-size: 14px; color: var(--green); font-weight: 600; margin-top: 16px; line-height: 1.6; }
+  .review-nudge { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 14px 16px; margin-top: 12px; text-align: left; }
+  .review-nudge p { font-size: 12px; color: rgba(240,239,235,0.6); margin-bottom: 8px; }
+  .review-nudge ul { padding-left: 16px; font-size: 12px; color: #fca5a5; line-height: 1.8; }
+  @media (max-width: 600px) {
+    .wrapper { padding: 72px 14px 100px; }
+    .hero { padding: 28px 20px; } .hero-title { font-size: 24px; }
+    .topic-card { padding: 18px 16px; } .eoq { padding: 22px 16px; }
+    .pulse-check { padding: 20px 16px; } .mini-check { padding: 16px 18px; }
+    .progress-tracker { display: none; }
+  }
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<nav class="topbar">
+  <div class="topbar-wordmark">Unify<span>.</span></div>
+  <div class="topbar-right">
+    <span class="course-pill">CHE 352</span>
+    <button id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode">🌙</button>
+  </div>
+</nav>
+<div class="progress-tracker">
+  <div class="tracker-dot"></div>
+  <span id="tracker-text">Scroll to begin</span>
+</div>
+
+<div class="wrapper">
+
+  <header class="hero">
+    <div class="hero-eyebrow">CHE 352 · Week 7 · LASU Faculty of Engineering</div>
+    <h1 class="hero-title">Boundary Conditions &amp; Intro to FDM</h1>
+    <p class="hero-subtitle">Dirichlet, Neumann, Cauchy/Mixed &amp; the Finite Difference Method</p>
+    <div class="hero-outcome">
+      <strong>By the end of this week, you should be able to</strong> state and distinguish the three types of boundary conditions — Dirichlet, Neumann, and Cauchy/Mixed — write them in mathematical form, identify which applies in a given physical scenario, and describe the role of the Finite Difference Method in solving PDEs numerically.
+    </div>
+    <div class="hero-meta">
+      <span class="meta-chip">📅 Week 7 of 7</span>
+      <span class="meta-chip">🎓 Dr. Lukumon Salami</span>
+      <span class="meta-chip">📍 Lagos State University</span>
+    </div>
+  </header>
+
+  <div class="topic-progress">
+    <div class="tp-label">Topics this week</div>
+    <div class="tp-steps">
+      <div class="tp-step active"><div class="tp-dot"></div> T1 · What Are Boundary Conditions</div>
+      <div class="tp-step"><div class="tp-dot"></div> T2 · The Three Types</div>
+      <div class="tp-step"><div class="tp-dot"></div> T3 · Introduction to FDM</div>
+    </div>
+  </div>
+
+  <div class="tags-row">
+    <span class="tag green">Boundary Conditions</span>
+    <span class="tag green">Dirichlet Condition</span>
+    <span class="tag green">Neumann Condition</span>
+    <span class="tag green">Cauchy / Mixed Condition</span>
+    <span class="tag green">FDM — Finite Difference Method</span>
+    <span class="tag">PDE</span>
+    <span class="tag">Temperature / Concentration</span>
+  </div>
+
+  <!-- ══════════════════════════════════
+       TOPIC 1 — WHAT ARE BOUNDARY CONDITIONS
+       ══════════════════════════════════ -->
+  <div class="topic-block" id="topic1">
+    <div class="section-label">Topic 1</div>
+    <div class="section-title">What Are Boundary Conditions?</div>
+
+    <div class="subtopic-heading">
+      <span class="subtopic-num">1.1</span>
+      <h3>Definition &amp; Purpose</h3>
+    </div>
+
+    <div class="topic-card">
+      <p>When you solve a partial differential equation (PDE) — such as the heat equation, diffusion equation, or wave equation — the general solution contains arbitrary functions or constants. <strong>Boundary conditions (BCs)</strong> are additional constraints that specify what happens at the edges (boundaries) of the domain. They turn the general solution into a unique, physically meaningful one.</p>
+      <p>Think of it this way: solving a PDE without boundary conditions is like solving a second-order ODE without initial conditions — you get a family of solutions. BCs pick the one that actually describes your physical situation.</p>
+      <p>In engineering, variables like temperature \(T\), concentration \(c\), and displacement are governed by PDEs. The domain has physical boundaries (walls, surfaces, edges) and the BCs tell us: <em>what is the value of the variable there?</em> or <em>what is the flux there?</em></p>
+    </div>
+
+    <div class="note-box">
+      <strong>Physical context</strong>
+      <p>For a variable \(c(x, t)\) (e.g. concentration, temperature) in a region from \(x = x_0\) to \(x = x_L\) — the boundary conditions specify behaviour at \(x = x_0\) and \(x = x_L\). The initial condition specifies the state at \(t = t_0\).</p>
+    </div>
+
+    <div class="topic-card" style="margin-top:16px;">
+      <p>The three types of boundary conditions, each capturing a different physical scenario:</p>
+      <ul>
+        <li><strong>Dirichlet:</strong> the value of \(c\) is prescribed at the boundary</li>
+        <li><strong>Neumann:</strong> the derivative of \(c\) (the flux) is prescribed at the boundary</li>
+        <li><strong>Cauchy / Mixed:</strong> a linear combination of value and flux is prescribed</li>
+      </ul>
+    </div>
+
+    <!-- Mini Check 1.1 -->
+    <div class="mini-check">
+      <div class="mini-check-header">
+        <span class="mini-check-icon">⚡</span>
+        <span class="mini-check-title">Quick Check — What Are Boundary Conditions</span>
+        <span class="mini-check-sub">2 questions</span>
+      </div>
+      <div class="mc-reveal-item">
+        <div class="mc-q">Why are boundary conditions needed when solving a PDE?</div>
+        <button class="mc-reveal-btn" onclick="mcReveal(this)">Reveal Answer</button>
+        <div class="mc-answer">The general solution of a PDE contains <strong>arbitrary functions or constants</strong> — it describes a whole family of solutions. Boundary conditions provide the additional constraints that select the unique solution matching the actual physical situation.</div>
+      </div>
+      <div class="mc-mcq-item">
+        <div class="mc-q">Boundary conditions specify behaviour at the:</div>
+        <div class="mc-mcq-opts" id="mc-1a">
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1a',false,'mc-1a-fb')"><span class="mc-ltr">A</span> Initial time \(t = t_0\)</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1a',true,'mc-1a-fb')"><span class="mc-ltr">B</span> Spatial boundaries of the domain</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1a',false,'mc-1a-fb')"><span class="mc-ltr">C</span> Interior grid points only</div>
+        </div>
+        <div class="mc-mcq-fb" id="mc-1a-fb"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ══════════════════════════════════
+       TOPIC 2 — THE THREE TYPES
+       ══════════════════════════════════ -->
+  <div class="topic-block" id="topic2">
+    <div class="section-label">Topic 2</div>
+    <div class="section-title">The Three Types of Boundary Conditions</div>
+
+    <div class="subtopic-heading">
+      <span class="subtopic-num">2.1</span>
+      <h3>Dirichlet Boundary Condition (Type 1)</h3>
+    </div>
+
+    <div class="topic-card">
+      <p>The <strong>Dirichlet condition</strong> specifies the value of the primary variable at the boundary. If a wall is held at a fixed temperature, or a container has a fixed concentration at its surface — that is a Dirichlet condition.</p>
+    </div>
+
+    <div class="formula-block">
+      <div class="f-label">Dirichlet Condition (Type 1)</div>
+      \[ c(x_0, t) = c_0 \quad \text{and/or} \quad c(x_L, t) = c_L \]
+      <div class="vars">The variable \(c\) is set to a known constant value at the boundary. Also called a "first-kind" boundary condition.</div>
+    </div>
+
+    <div class="bc-diagram">
+      <pre>
+  c₀ ←──────────────────────────→ cL
+  |                                |
+  x₀ ←──────── domain ──────────→ xL
+
+  c(x₀, t) = c₀        c(xL, t) = cL
+   (fixed left)          (fixed right)
+      </pre>
+    </div>
+
+    <div class="topic-card" style="margin-top:12px;">
+      <p><strong>Real-world examples:</strong></p>
+      <ul>
+        <li>A metal rod held at 100°C at one end and 20°C at the other</li>
+        <li>A tank with fixed salt concentration at its inlet</li>
+        <li>A chemical reactor with prescribed reactant concentration at the feed boundary</li>
+      </ul>
+    </div>
+
+    <!-- Mini Check 2.1 -->
+    <div class="mini-check">
+      <div class="mini-check-header">
+        <span class="mini-check-icon">⚡</span>
+        <span class="mini-check-title">Quick Check — Dirichlet Condition</span>
+        <span class="mini-check-sub">2 questions</span>
+      </div>
+      <div class="mc-mcq-item">
+        <div class="mc-q">A metal rod held at 100°C at one end and 20°C at the other has:</div>
+        <div class="mc-mcq-opts" id="mc-2a">
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2a',true,'mc-2a-fb')"><span class="mc-ltr">A</span> Dirichlet conditions at both ends</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2a',false,'mc-2a-fb')"><span class="mc-ltr">B</span> Neumann conditions at both ends</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2a',false,'mc-2a-fb')"><span class="mc-ltr">C</span> Cauchy conditions at both ends</div>
+        </div>
+        <div class="mc-mcq-fb" id="mc-2a-fb"></div>
+      </div>
+      <div class="mc-fitb-item">
+        <div class="mc-q">The Dirichlet condition is also called a "___-kind" boundary condition.</div>
+        <div class="mc-fitb-row">
+          <input class="mc-fitb-input" id="fitb-2b" type="text" placeholder="your answer">
+          <button class="mc-fitb-btn" onclick="mcFitb('fitb-2b',['first','1st'],'fitb-2b-fb')">Check</button>
+        </div>
+        <div class="mc-fitb-fb" id="fitb-2b-fb"></div>
+      </div>
+    </div>
+
+    <div class="subtopic-heading">
+      <span class="subtopic-num">2.2</span>
+      <h3>Neumann Boundary Condition (Type 2)</h3>
+    </div>
+
+    <div class="topic-card">
+      <p>The <strong>Neumann condition</strong> specifies the <em>derivative</em> of the variable at the boundary — it prescribes the flux. An insulated wall has zero heat flux, so \(\frac{\partial T}{\partial x} = 0\) there.</p>
+    </div>
+
+    <div class="formula-block">
+      <div class="f-label">Neumann Condition (Type 2)</div>
+      \[ \left.\frac{\partial c}{\partial x}\right|_{x=x_0} = c_0 \quad \text{and/or} \quad \left.\frac{\partial c}{\partial x}\right|_{x=x_L} = c_L \]
+      <div class="vars">The normal derivative of \(c\) is prescribed at the boundary. Also called a "second-kind" boundary condition. Here \(c_0\) and \(c_L\) represent prescribed derivative values (not concentration values).</div>
+    </div>
+
+    <div class="topic-card" style="margin-top:12px;">
+      <p><strong>Real-world examples:</strong></p>
+      <ul>
+        <li>An insulated end of a rod: \(\frac{\partial T}{\partial x} = 0\) (no heat escapes)</li>
+        <li>A prescribed flux at a membrane surface</li>
+        <li>A symmetry condition at the centreline of a symmetric domain</li>
+      </ul>
+    </div>
+
+    <!-- Mini Check 2.2 -->
+    <div class="mini-check">
+      <div class="mini-check-header">
+        <span class="mini-check-icon">⚡</span>
+        <span class="mini-check-title">Quick Check — Neumann Condition</span>
+        <span class="mini-check-sub">2 questions</span>
+      </div>
+      <div class="mc-mcq-item">
+        <div class="mc-q">An insulated end of a metal rod (no heat flux) is modelled by:</div>
+        <div class="mc-mcq-opts" id="mc-2c">
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2c',false,'mc-2c-fb')"><span class="mc-ltr">A</span> Dirichlet: \(T = 0\)</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2c',true,'mc-2c-fb')"><span class="mc-ltr">B</span> Neumann: \(\partial T/\partial x = 0\)</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2c',false,'mc-2c-fb')"><span class="mc-ltr">C</span> Cauchy: \(T + \partial T/\partial x = 0\)</div>
+        </div>
+        <div class="mc-mcq-fb" id="mc-2c-fb"></div>
+      </div>
+      <div class="mc-reveal-item">
+        <div class="mc-q">What quantity does the Neumann condition prescribe at the boundary?</div>
+        <button class="mc-reveal-btn" onclick="mcReveal(this)">Reveal Answer</button>
+        <div class="mc-answer">The <strong>derivative</strong> of the variable — i.e. the <strong>flux</strong>. Specifically: \(\frac{\partial c}{\partial x}\big|_{\text{boundary}}\). This is in contrast to Dirichlet (which prescribes the value of \(c\) itself).</div>
+      </div>
+    </div>
+
+    <div class="subtopic-heading">
+      <span class="subtopic-num">2.3</span>
+      <h3>Cauchy / Mixed Boundary Condition (Type 3)</h3>
+    </div>
+
+    <div class="topic-card">
+      <p>The <strong>Cauchy (or Mixed) condition</strong> combines both: it prescribes a <em>linear combination</em> of the value of \(c\) and its derivative. This arises naturally in convective heat transfer — where the surface condition relates the temperature gradient to the temperature difference.</p>
+    </div>
+
+    <div class="formula-block">
+      <div class="f-label">Cauchy / Mixed Condition (Type 3)</div>
+      \[ a\,c + b_k \left.\frac{\partial c}{\partial x}\right|_{x=x_0} = v_0 \quad \text{and} \quad a\,c + b_k \left.\frac{\partial c}{\partial x}\right|_{x=x_L} = v_L \]
+      <div class="vars">A linear combination of \(c\) and \(\frac{\partial c}{\partial x}\) is prescribed at the boundary. Also called a "third-kind" or Robin boundary condition.</div>
+    </div>
+
+    <div class="topic-card" style="margin-top:12px;">
+      <p><strong>Real-world examples:</strong></p>
+      <ul>
+        <li>Newton's law of cooling: \(-k\dfrac{\partial T}{\partial x} = h(T - T_\infty)\) — flux proportional to temperature difference</li>
+        <li>Robin boundary conditions in diffusion with reaction</li>
+        <li>Mixed conditions in structural mechanics: part fixed (Dirichlet), part with prescribed force (Neumann)</li>
+      </ul>
+    </div>
+
+    <!-- Summary grid -->
+    <div class="bc-grid" style="margin-top:24px;">
+      <div class="bc-card">
+        <div class="bc-type">Type 1</div>
+        <div class="bc-name">Dirichlet</div>
+        <div style="font-size:13px;color:var(--text2);">\(c = \text{prescribed}\)</div>
+        <div class="bc-desc">Fixed value at boundary. Temperature, concentration.</div>
+      </div>
+      <div class="bc-card">
+        <div class="bc-type">Type 2</div>
+        <div class="bc-name">Neumann</div>
+        <div style="font-size:13px;color:var(--text2);">\(\dfrac{\partial c}{\partial x} = \text{prescribed}\)</div>
+        <div class="bc-desc">Flux prescribed at boundary. Insulated walls, symmetry.</div>
+      </div>
+      <div class="bc-card" style="grid-column: 1 / -1;">
+        <div class="bc-type">Type 3</div>
+        <div class="bc-name">Cauchy / Mixed</div>
+        <div style="font-size:13px;color:var(--text2);">\(a\,c + b\,\dfrac{\partial c}{\partial x} = v\)</div>
+        <div class="bc-desc">Combination of value and flux. Convective transfer, Robin conditions.</div>
+      </div>
+    </div>
+
+    <!-- Mini Check 2.3 -->
+    <div class="mini-check">
+      <div class="mini-check-header">
+        <span class="mini-check-icon">⚡</span>
+        <span class="mini-check-title">Quick Check — Cauchy / Mixed Condition</span>
+        <span class="mini-check-sub">2 questions</span>
+      </div>
+      <div class="mc-mcq-item">
+        <div class="mc-q">Newton's law of cooling \(-k\dfrac{\partial T}{\partial x} = h(T - T_\infty)\) at a surface is a:</div>
+        <div class="mc-mcq-opts" id="mc-2d">
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2d',false,'mc-2d-fb')"><span class="mc-ltr">A</span> Dirichlet condition</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2d',false,'mc-2d-fb')"><span class="mc-ltr">B</span> Neumann condition</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2d',true,'mc-2d-fb')"><span class="mc-ltr">C</span> Cauchy / Mixed condition</div>
+        </div>
+        <div class="mc-mcq-fb" id="mc-2d-fb"></div>
+      </div>
+      <div class="mc-reveal-item">
+        <div class="mc-q">In one sentence, what distinguishes each of the three BC types?</div>
+        <button class="mc-reveal-btn" onclick="mcReveal(this)">Reveal Answer</button>
+        <div class="mc-answer"><strong>Dirichlet = value</strong> prescribed; <strong>Neumann = derivative (flux)</strong> prescribed; <strong>Cauchy/Mixed = linear combination</strong> of value and derivative prescribed.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ══════════════════════════════════
+       TOPIC 3 — FDM
+       ══════════════════════════════════ -->
+  <div class="topic-block" id="topic3">
+    <div class="section-label">Topic 3</div>
+    <div class="section-title">Introduction to the Finite Difference Method (FDM)</div>
+
+    <div class="subtopic-heading">
+      <span class="subtopic-num">3.1</span>
+      <h3>How FDM Works (Conceptual)</h3>
+    </div>
+
+    <div class="topic-card">
+      <p>The <strong>Finite Difference Method (FDM)</strong> is a numerical technique for solving PDEs. Instead of finding an exact analytical solution, FDM approximates the derivatives in the PDE using differences between values at discrete grid points. The continuous domain is replaced by a mesh of points, and the PDE becomes a system of algebraic equations — one per grid point — that can be solved computationally.</p>
+    </div>
+
+    <div class="topic-card" style="margin-top:12px;">
+      <ol>
+        <li><strong>Discretise the domain.</strong> Divide \([x_0, x_L]\) into \(N\) equally spaced points with spacing \(\Delta x = \frac{x_L - x_0}{N}\).</li>
+        <li><strong>Replace derivatives with finite differences.</strong> The first derivative \(\frac{dc}{dx}\) at \(x_i\) becomes \(\frac{c_{i+1} - c_{i-1}}{2\Delta x}\). The second derivative \(\frac{d^2c}{dx^2}\) becomes \(\frac{c_{i+1} - 2c_i + c_{i-1}}{(\Delta x)^2}\).</li>
+        <li><strong>Apply boundary conditions.</strong> Substitute the Dirichlet, Neumann, or Mixed conditions at the boundary nodes.</li>
+        <li><strong>Solve the algebraic system.</strong> The result is a set of linear equations (a matrix system) solvable by standard methods.</li>
+      </ol>
+    </div>
+
+    <div class="formula-block">
+      <div class="f-label">Key Finite Difference Approximations</div>
+      \[ \frac{dc}{dx}\bigg|_i \approx \frac{c_{i+1} - c_{i-1}}{2\Delta x} \quad \text{(central difference, 1st order)} \]
+      \[ \frac{d^2c}{dx^2}\bigg|_i \approx \frac{c_{i+1} - 2c_i + c_{i-1}}{(\Delta x)^2} \quad \text{(central difference, 2nd order)} \]
+      <div class="vars">These replace exact derivatives in the PDE at each interior grid point, converting the PDE into a system of algebraic equations.</div>
+    </div>
+
+    <div class="subtopic-heading">
+      <span class="subtopic-num">3.2</span>
+      <h3>How Boundary Conditions Enter FDM</h3>
+    </div>
+
+    <div class="topic-card">
+      <p>Each BC type translates directly into the FDM framework:</p>
+      <ul>
+        <li><strong>Dirichlet:</strong> Set \(c_0 = c_0^{\text{prescribed}}\) and \(c_N = c_N^{\text{prescribed}}\) directly — no equation needed at boundary nodes.</li>
+        <li><strong>Neumann:</strong> Use \(\frac{c_1 - c_{-1}}{2\Delta x} = \left.\frac{dc}{dx}\right|_0\) — introduce a ghost point \(c_{-1}\) and eliminate it using the BC.</li>
+        <li><strong>Mixed:</strong> Substitute the combined condition \(ac + b\frac{\partial c}{\partial x} = v\) into the difference equation at the boundary node.</li>
+      </ul>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 Why this matters for CHE352</strong>
+      <p>FDM is the bridge between the analytical methods you have studied all semester — power series, Legendre, Bessel, numerical integration — and real engineering computation. In practice, most PDEs governing heat, mass, and momentum transfer don't have clean analytical solutions. FDM (and related methods: FEM, FVM) are how engineers actually solve them.</p>
+    </div>
+
+    <!-- Mini Check 3.2 -->
+    <div class="mini-check">
+      <div class="mini-check-header">
+        <span class="mini-check-icon">⚡</span>
+        <span class="mini-check-title">Quick Check — FDM</span>
+        <span class="mini-check-sub">2 questions</span>
+      </div>
+      <div class="mc-mcq-item">
+        <div class="mc-q">FDM converts a PDE into:</div>
+        <div class="mc-mcq-opts" id="mc-3a">
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-3a',false,'mc-3a-fb')"><span class="mc-ltr">A</span> A power series solution</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-3a',true,'mc-3a-fb')"><span class="mc-ltr">B</span> A system of algebraic equations at discrete grid points</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-3a',false,'mc-3a-fb')"><span class="mc-ltr">C</span> An ODE that is easier to solve</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-3a',false,'mc-3a-fb')"><span class="mc-ltr">D</span> A Legendre polynomial expansion</div>
+        </div>
+        <div class="mc-mcq-fb" id="mc-3a-fb"></div>
+      </div>
+      <div class="mc-reveal-item">
+        <div class="mc-q">Write the central difference approximation for \(\dfrac{d^2c}{dx^2}\) at grid point \(i\).</div>
+        <button class="mc-reveal-btn" onclick="mcReveal(this)">Reveal Answer</button>
+        <div class="mc-answer">\[\frac{d^2c}{dx^2}\bigg|_i \approx \frac{c_{i+1} - 2c_i + c_{i-1}}{(\Delta x)^2}\] This uses three consecutive grid points and is the standard second-order central difference formula.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       ACTIVE RECALL
+       ══════════════════════════════════ -->
+  <div class="topic-block">
+    <div class="section-label">Active Recall</div>
+    <div class="section-title">Test Yourself</div>
+    <div class="recall-section">
+      <div class="recall-label">Recall Questions</div>
+
+      <div class="recall-card">
+        <div class="recall-badge badge-def">Definition</div>
+        <div class="recall-q">State the three types of boundary conditions and what each prescribes.</div>
+        <button class="reveal-btn" onclick="rcReveal(this)">Reveal Answer</button>
+        <div class="recall-answer">
+          <strong>Dirichlet (Type 1):</strong> prescribes the value of \(c\) at the boundary. \(c(x_0, t) = c_0\).<br><br>
+          <strong>Neumann (Type 2):</strong> prescribes the derivative (flux). \(\frac{\partial c}{\partial x}\big|_{x_0} = c_0\).<br><br>
+          <strong>Cauchy/Mixed (Type 3):</strong> prescribes a linear combination of value and derivative. \(ac + b\frac{\partial c}{\partial x} = v\).
+        </div>
+      </div>
+
+      <div class="recall-card">
+        <div class="recall-badge badge-app">Application</div>
+        <div class="recall-q">An insulated end of a metal rod has no heat flux. Which boundary condition type applies, and what is its mathematical form?</div>
+        <button class="reveal-btn" onclick="rcReveal(this)">Reveal Answer</button>
+        <div class="recall-answer"><strong>Neumann (Type 2).</strong> No heat flux means no gradient: \(\dfrac{\partial T}{\partial x}\bigg|_{\text{wall}} = 0\). The derivative of temperature is zero at the insulated end.</div>
+      </div>
+
+      <div class="recall-card">
+        <div class="recall-badge badge-mech">Mechanism</div>
+        <div class="recall-q">How does FDM convert a PDE into something solvable on a computer?</div>
+        <button class="reveal-btn" onclick="rcReveal(this)">Reveal Answer</button>
+        <div class="recall-answer">FDM replaces the continuous derivatives in the PDE with algebraic approximations (finite differences) evaluated at discrete grid points. This turns the PDE into a system of linear algebraic equations — one per interior grid point — which can be assembled into a matrix and solved numerically.</div>
+      </div>
+
+      <div class="recall-card">
+        <div class="recall-badge badge-comp">Computation</div>
+        <div class="recall-q">Write the central difference approximation for \(\dfrac{d^2c}{dx^2}\) at grid point \(i\).</div>
+        <button class="reveal-btn" onclick="rcReveal(this)">Reveal Answer</button>
+        <div class="recall-answer">
+          \[\frac{d^2c}{dx^2}\bigg|_i \approx \frac{c_{i+1} - 2c_i + c_{i-1}}{(\Delta x)^2}\]
+          This is the standard second-order central difference formula, using values at three consecutive grid points.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       PULSE CHECK
+       ══════════════════════════════════ -->
+  <div class="pulse-check">
+    <div class="pc-title">Pulse Check ①</div>
+    <div class="pc-sub">End of Week 7 — quick ungraded check.</div>
+
+    <div class="pc-question">
+      <div class="pc-q-text">A reactor wall is held at a constant temperature of 80°C. This is a:</div>
+      <div class="pc-options" id="pc1-opts">
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-opts',true)"><span class="pc-letter">A</span> Dirichlet boundary condition</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-opts',false)"><span class="pc-letter">B</span> Neumann boundary condition</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-opts',false)"><span class="pc-letter">C</span> Cauchy boundary condition</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-opts',false)"><span class="pc-letter">D</span> Initial condition</div>
+      </div>
+      <div class="pc-feedback" id="pc1-fb"></div>
+    </div>
+
+    <div class="pc-question">
+      <div class="pc-q-text">A Neumann condition at \(x = x_0\) prescribes:</div>
+      <div class="pc-options" id="pc2-opts">
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-opts',false)"><span class="pc-letter">A</span> The value of \(c\)</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-opts',true)"><span class="pc-letter">B</span> The derivative \(\dfrac{\partial c}{\partial x}\)</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-opts',false)"><span class="pc-letter">C</span> Both \(c\) and its derivative</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-opts',false)"><span class="pc-letter">D</span> The second derivative of \(c\)</div>
+      </div>
+      <div class="pc-feedback" id="pc2-fb"></div>
+    </div>
+
+    <div class="pc-question">
+      <div class="pc-q-text">In FDM, the PDE is converted into:</div>
+      <div class="pc-options" id="pc3-opts">
+        <div class="pc-option" onclick="pcAnswer(this,'pc3-opts',false)"><span class="pc-letter">A</span> A power series solution</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc3-opts',true)"><span class="pc-letter">B</span> A system of algebraic equations at discrete grid points</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc3-opts',false)"><span class="pc-letter">C</span> An ODE that is easier to solve</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc3-opts',false)"><span class="pc-letter">D</span> A Legendre polynomial expansion</div>
+      </div>
+      <div class="pc-feedback" id="pc3-fb"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       EOQ
+       ══════════════════════════════════ -->
+  <div class="eoq">
+    <div class="eoq-eyebrow">End of Week Quiz — Final Week</div>
+    <div class="eoq-title">Week 7 — Boundary Conditions &amp; FDM</div>
+    <div class="eoq-sub">10 questions · Select your answer for each, then submit · Pass mark: 6/10</div>
+
+    <div class="eoq-question">
+      <div class="eoq-qnum">Question 1</div>
+      <div class="eoq-q-text">Boundary conditions are needed to solve a PDE because:</div>
+      <div class="eoq-options" id="eoq-1">
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-1','A')"><span class="eoq-letter">A</span> They make the PDE simpler</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-1','B')"><span class="eoq-letter">B</span> They uniquely determine the solution from the family of general solutions</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-1','C')"><span class="eoq-letter">C</span> PDEs cannot be solved without them in any form</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-1','D')"><span class="eoq-letter">D</span> They convert PDEs into ODEs</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-1-fb"></div>
+    </div>
+
+    <div class="eoq-question">
+      <div class="eoq-qnum">Question 2</div>
+      <div class="eoq-q-text">A Dirichlet boundary condition prescribes:</div>
+      <div class="eoq-options" id="eoq-2">
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-2','A')"><span class="eoq-letter">A</span> The value of the variable \(c\) at the boundary</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-2','B')"><span class="eoq-letter">B</span> The flux \(\dfrac{\partial c}{\partial x}\) at the boundary</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-2','C')"><span class="eoq-letter">C</span> A combination of \(c\) and its flux</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-2','D')"><span class="eoq-letter">D</span> The second derivative of \(c\)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-2-fb"></div>
+    </div>
+
+    <div class="eoq-question">
+      <div class="eoq-qnum">Question 3</div>
+      <div class="eoq-q-text">The mathematical form of a Dirichlet condition at \(x = x_L\) is:</div>
+      <div class="eoq-options" id="eoq-3">
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-3','A')"><span class="eoq-letter">A</span> \(\dfrac{\partial c}{\partial x}\big|_{x_L} = c_L\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-3','B')"><span class="eoq-letter">B</span> \(c(x_L, t) = c_L\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-3','C')"><span class="eoq-letter">C</span> \(c + \dfrac{\partial c}{\partial x} = c_L\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-3','D')"><span class="eoq-letter">D</span> \(\dfrac{\partial^2 c}{\partial x^2} = 0\)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-3-fb"></div>
+    </div>
+
+    <div class="eoq-question">
+      <div class="eoq-qnum">Question 4</div>
+      <div class="eoq-q-text">An insulated wall (no heat flow) is modelled by a:</div>
+      <div class="eoq-options" id="eoq-4">
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-4','A')"><span class="eoq-letter">A</span> Dirichlet condition \(T = 0\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-4','B')"><span class="eoq-letter">B</span> Neumann condition \(\dfrac{\partial T}{\partial x} = 0\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-4','C')"><span class="eoq-letter">C</span> Mixed condition</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-4','D')"><span class="eoq-letter">D</span> Initial condition</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-4-fb"></div>
+    </div>
+
+    <div class="eoq-question">
+      <div class="eoq-qnum">Question 5</div>
+      <div class="eoq-q-text">Newton's law of cooling \(-k\dfrac{\partial T}{\partial x} = h(T - T_\infty)\) at a surface is a:</div>
+      <div class="eoq-options" id="eoq-5">
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-5','A')"><span class="eoq-letter">A</span> Dirichlet condition</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-5','B')"><span class="eoq-letter">B</span> Neumann condition</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-5','C')"><span class="eoq-letter">C</span> Cauchy / Mixed condition</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-5','D')"><span class="eoq-letter">D</span> None of the above</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-5-fb"></div>
+    </div>
+
+    <div class="eoq-question">
+      <div class="eoq-qnum">Question 6</div>
+      <div class="eoq-q-text">How many types of boundary conditions does Dr. Salami define in this course?</div>
+      <div class="eoq-options" id="eoq-6">
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-6','A')"><span class="eoq-letter">A</span> 2</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-6','B')"><span class="eoq-letter">B</span> 3</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-6','C')"><span class="eoq-letter">C</span> 4</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-6','D')"><span class="eoq-letter">D</span> 5</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-6-fb"></div>
+    </div>
+
+    <div class="eoq-question">
+      <div class="eoq-qnum">Question 7</div>
+      <div class="eoq-q-text">The central difference approximation for the first derivative \(\dfrac{dc}{dx}\) at grid point \(i\) is:</div>
+      <div class="eoq-options" id="eoq-7">
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-7','A')"><span class="eoq-letter">A</span> \(\dfrac{c_{i+1} - c_i}{\Delta x}\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-7','B')"><span class="eoq-letter">B</span> \(\dfrac{c_{i+1} - c_{i-1}}{2\Delta x}\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-7','C')"><span class="eoq-letter">C</span> \(\dfrac{c_i - c_{i-1}}{\Delta x}\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-7','D')"><span class="eoq-letter">D</span> \(\dfrac{c_{i+1} + c_{i-1}}{2\Delta x}\)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-7-fb"></div>
+    </div>
+
+    <div class="eoq-question">
+      <div class="eoq-qnum">Question 8</div>
+      <div class="eoq-q-text">For a Dirichlet condition in FDM, the boundary node value is:</div>
+      <div class="eoq-options" id="eoq-8">
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-8','A')"><span class="eoq-letter">A</span> Solved as part of the linear system</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-8','B')"><span class="eoq-letter">B</span> Known and directly substituted — no equation needed</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-8','C')"><span class="eoq-letter">C</span> Approximated using ghost points</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-8','D')"><span class="eoq-letter">D</span> Set to zero by convention</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-8-fb"></div>
+    </div>
+
+    <div class="eoq-question">
+      <div class="eoq-qnum">Question 9</div>
+      <div class="eoq-q-text">The Finite Difference Method replaces continuous derivatives with:</div>
+      <div class="eoq-options" id="eoq-9">
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-9','A')"><span class="eoq-letter">A</span> Power series expansions</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-9','B')"><span class="eoq-letter">B</span> Analytical integrals</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-9','C')"><span class="eoq-letter">C</span> Algebraic differences between values at discrete grid points</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-9','D')"><span class="eoq-letter">D</span> Fourier coefficients</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-9-fb"></div>
+    </div>
+
+    <div class="eoq-question">
+      <div class="eoq-qnum">Question 10</div>
+      <div class="eoq-q-text">The second-order central difference formula for \(\dfrac{d^2c}{dx^2}\) at point \(i\) is:</div>
+      <div class="eoq-options" id="eoq-10">
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-10','A')"><span class="eoq-letter">A</span> \(\dfrac{c_{i+1} - c_{i-1}}{(\Delta x)^2}\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-10','B')"><span class="eoq-letter">B</span> \(\dfrac{c_{i+1} - 2c_i + c_{i-1}}{(\Delta x)^2}\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-10','C')"><span class="eoq-letter">C</span> \(\dfrac{c_{i+1} + 2c_i - c_{i-1}}{(\Delta x)^2}\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,'eoq-10','D')"><span class="eoq-letter">D</span> \(\dfrac{c_{i+1} - c_i}{(\Delta x)^2}\)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-10-fb"></div>
+    </div>
+
+    <button class="eoq-submit" onclick="eoqSubmit()">Submit Quiz</button>
+
+    <div class="eoq-result" id="eoq-result">
+      <div class="result-score" id="eoq-score"></div>
+      <div class="result-pill" id="eoq-pill"></div>
+      <div class="result-msg" id="eoq-msg"></div>
+      <div class="complete-banner" id="eoq-complete" style="display:none">
+        🎓 CHE352 Complete. You've covered all 7 weeks — Leibnitz, Power Series, Bessel, Legendre, Interpolation, Numerical Integration, and Boundary Conditions. Go write that exam.
+      </div>
+      <div class="review-nudge" id="eoq-nudge" style="display:none">
+        <p>Key distinction to review:</p>
+        <ul>
+          <li>Dirichlet = value prescribed at boundary</li>
+          <li>Neumann = derivative (flux) prescribed at boundary</li>
+          <li>Cauchy/Mixed = linear combination of value and derivative</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+
+<footer style="text-align:center;padding:2rem 1rem;font-size:11px;color:var(--text3);border-top:1px solid var(--border);margin-top:40px;">
+  CHE352 — Engineering Mathematics IV · Unify Learn · LASU Faculty of Engineering
+</footer>
+
+<script>
+window.addEventListener('scroll', () => {
+  const s = document.scrollingElement;
+  const pct = s.scrollTop / (s.scrollHeight - s.clientHeight) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+  const labels = ['Scroll to begin','Topic 1: What Are BCs','Topic 2: The Three Types','Topic 3: FDM','Active Recall','Pulse Check','Week 7 Quiz'];
+  const idx = Math.min(Math.floor(pct / 15), labels.length - 1);
+  document.getElementById('tracker-text').textContent = labels[idx];
+});
+
+function toggleDark() {
+  const h = document.documentElement;
+  h.setAttribute('data-theme', h.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  document.getElementById('dark-toggle').textContent = h.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+}
+
+function mcReveal(btn) {
+  const ans = btn.nextElementSibling;
+  ans.classList.toggle('show');
+  btn.textContent = ans.classList.contains('show') ? 'Hide Answer' : 'Reveal Answer';
+}
+
+function mcMcq(opt, groupId, correct, fbId) {
+  const opts = document.getElementById(groupId).querySelectorAll('.mc-mcq-opt');
+  opts.forEach(o => o.classList.add('mc-locked'));
+  opt.classList.add(correct ? 'mc-correct' : 'mc-wrong');
+  const fb = document.getElementById(fbId);
+  fb.style.display = 'block';
+  fb.style.color = correct ? 'var(--green-deep)' : '#b91c1c';
+  fb.textContent = correct ? '✓ Correct!' : '✗ Not quite — review the notes.';
+}
+
+function mcFitb(inputId, answers, fbId) {
+  const val = document.getElementById(inputId).value.trim().toLowerCase();
+  const correct = answers.some(a => val === a.toLowerCase());
+  const fb = document.getElementById(fbId);
+  fb.style.display = 'block';
+  fb.style.color = correct ? 'var(--green-deep)' : '#b91c1c';
+  fb.textContent = correct ? '✓ Correct!' : '✗ Expected: ' + answers[0];
+}
+
+function rcReveal(btn) {
+  const ans = btn.nextElementSibling;
+  ans.classList.toggle('show');
+  btn.textContent = ans.classList.contains('show') ? 'Hide' : 'Reveal Answer';
+}
+
+function pcAnswer(opt, groupId, correct) {
+  const opts = document.getElementById(groupId).querySelectorAll('.pc-option');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  opt.classList.add(correct ? 'correct' : 'wrong');
+  const qEl = opt.closest('.pc-question');
+  const fb = qEl.querySelector('.pc-feedback');
+  fb.style.display = 'block';
+  fb.textContent = correct ? '✓ Correct!' : '✗ Not quite — review the section above.';
+}
+
+const eoqSelections = {};
+const eoqAnswers = { 'eoq-1':'B','eoq-2':'A','eoq-3':'B','eoq-4':'B','eoq-5':'C','eoq-6':'B','eoq-7':'B','eoq-8':'B','eoq-9':'C','eoq-10':'B' };
+const eoqFeedbacks = {
+  'eoq-1':  { correct: 'Correct. BCs select the unique solution matching the physical situation from the family of general solutions.', wrong: 'BCs are needed to uniquely determine the solution — the general solution of a PDE has arbitrary functions that BCs pin down.' },
+  'eoq-2':  { correct: 'Correct. Dirichlet = value of c prescribed at the boundary.', wrong: 'Dirichlet (Type 1) prescribes the value of c itself. Neumann prescribes the derivative. Cauchy prescribes both.' },
+  'eoq-3':  { correct: 'Correct. c(x_L, t) = c_L is the standard form of a Dirichlet condition.', wrong: 'A Dirichlet condition sets the value: c(x_L, t) = c_L. The derivative form is Neumann.' },
+  'eoq-4':  { correct: 'Correct. No heat flow ⟹ no gradient ⟹ ∂T/∂x = 0 — a Neumann condition.', wrong: 'No heat flux means zero gradient: ∂T/∂x = 0. This is a Neumann (Type 2) condition.' },
+  'eoq-5':  { correct: 'Correct. Newton\'s cooling mixes T (value) and ∂T/∂x (derivative) — that is a Cauchy/Mixed condition.', wrong: 'This equation combines T and ∂T/∂x in one expression → Cauchy/Mixed (Type 3).' },
+  'eoq-6':  { correct: 'Correct. Three types: Dirichlet, Neumann, Cauchy/Mixed.', wrong: 'Three types are defined: Dirichlet (Type 1), Neumann (Type 2), Cauchy/Mixed (Type 3).' },
+  'eoq-7':  { correct: 'Correct. (c_{i+1} − c_{i−1}) / (2Δx) is the central difference for the first derivative.', wrong: 'The central difference for dc/dx at i is (c_{i+1} − c_{i−1}) / (2Δx). It uses both neighbours.' },
+  'eoq-8':  { correct: 'Correct. Dirichlet values are known and substituted directly — no algebraic equation is written at boundary nodes.', wrong: 'For Dirichlet, the boundary value is known and directly inserted — no equation needed at that node.' },
+  'eoq-9':  { correct: 'Correct. FDM replaces derivatives with algebraic differences between values at discrete grid points.', wrong: 'FDM converts derivatives into algebraic differences: e.g. dc/dx ≈ (c_{i+1}−c_{i−1})/(2Δx). This turns the PDE into a linear system.' },
+  'eoq-10': { correct: 'Correct. (c_{i+1} − 2c_i + c_{i−1}) / (Δx)² is the central difference for the second derivative.', wrong: 'The second-order central difference formula is (c_{i+1} − 2c_i + c_{i−1}) / (Δx)². Remember the −2c_i in the middle.' }
+};
+
+function eoqSelect(opt, groupId, letter) {
+  document.getElementById(groupId).querySelectorAll('.eoq-option').forEach(o => o.classList.remove('selected'));
+  opt.classList.add('selected');
+  eoqSelections[groupId] = letter;
+}
+
+function eoqSubmit() {
+  let score = 0;
+  for (let i = 1; i <= 10; i++) {
+    const gid = 'eoq-' + i;
+    const sel = eoqSelections[gid];
+    const correct = eoqAnswers[gid];
+    const fb = document.getElementById(gid + '-fb');
+    const opts = document.getElementById(gid).querySelectorAll('.eoq-option');
+    opts.forEach(o => {
+      o.classList.add('locked');
+      const ltr = o.querySelector('.eoq-letter').textContent;
+      if (ltr === correct) o.classList.add('correct-reveal');
+      else if (ltr === sel && sel !== correct) o.classList.add('wrong-reveal');
+    });
+    const isCorrect = sel === correct;
+    if (isCorrect) score++;
+    fb.className = 'eoq-feedback ' + (isCorrect ? 'correct-fb' : 'wrong-fb');
+    fb.textContent = eoqFeedbacks[gid][isCorrect ? 'correct' : 'wrong'];
+    fb.style.display = 'block';
+  }
+  const passed = score >= 6;
+  const result = document.getElementById('eoq-result');
+  result.className = 'eoq-result ' + (passed ? 'pass' : 'fail');
+  document.getElementById('eoq-score').textContent = score + ' / 10';
+  const pill = document.getElementById('eoq-pill');
+  pill.textContent = passed ? 'Passed' : 'Not yet';
+  pill.className = 'result-pill ' + (passed ? 'pill-pass' : 'pill-fail');
+  document.getElementById('eoq-msg').textContent = passed
+    ? 'Solid. You can distinguish and apply all three boundary condition types.'
+    : 'Review the definitions of each BC type — focus on what each one prescribes and a real-world example of each.';
+  document.getElementById('eoq-complete').style.display = passed ? 'block' : 'none';
+  document.getElementById('eoq-nudge').style.display = passed ? 'none' : 'block';
+  result.style.display = 'block';
+  result.scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

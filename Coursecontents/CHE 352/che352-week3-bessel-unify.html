@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHE 352 — Week 3: Bessel Equation | Unify Learn</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+<!--
+  PAGE OUTLINE
+  ─────────────────────────────────
+  TOPIC 1: Bessel Equation — Standard Form & Bessel Functions
+    1.1 Standard Form & Bessel Functions (intro + Jv formula)  → Mini Check (2 q: MCQ + FITB)
+    1.2 Bessel Functions (Jv and J-v formulas)                 → Mini Check (1 q: Reveal)
+    [Topic 1 Active Recall: 3 cards]
+  [Pulse Check ①]
+
+  TOPIC 2: When v = n (Integer) — Jₙ, J₀, J₁
+    2.1 Integer Order — Jₙ, J₀, J₁                           → Mini Check (2 q: MCQ + FITB)
+    [Topic 2 Active Recall: 3 cards]
+
+  [End-of-Week Quiz: 9 questions — 7 MCQ, 2 FITB]
+-->
+
+<!-- MathJax -->
+<script>
+  MathJax = {
+    tex: { inlineMath: [['\\(','\\)'], ['$','$']], displayMath: [['\\[','\\]'],['$$','$$']] },
+    options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f8f7f3;
+    --border: #e0deda;
+    --text: #0a0a0a;
+    --text2: #555555;
+    --text3: #999999;
+    --green: #4ade80;
+    --green-deep: #16a34a;
+    --green-bg: rgba(74,222,128,0.1);
+    --yellow: #fbbf24;
+    --fd: 'Playfair Display', serif;
+    --fb: 'DM Sans', sans-serif;
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  [data-theme="dark"] {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #222222;
+    --border: #2a2a2a;
+    --text: #f0efeb;
+    --text2: #aaa;
+    --text3: #666;
+    --shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--fb); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; transition: background 0.3s, color 0.3s; }
+
+  /* PROGRESS BAR */
+  #progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--green); width: 0%; z-index: 1000; transition: width 0.2s; }
+
+  /* TOPBAR */
+  .topbar { position: fixed; top: 3px; left: 0; right: 0; height: 52px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 999; transition: background 0.3s, border-color 0.3s; }
+  .topbar-wordmark { font-family: var(--fd); font-weight: 900; font-size: 18px; color: var(--text); letter-spacing: -0.5px; }
+  .topbar-wordmark span { color: var(--green); }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .course-pill { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--text3); }
+  #dark-toggle { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: all 0.2s; }
+  #dark-toggle:hover { background: var(--surface2); }
+
+  /* PROGRESS TRACKER */
+  .progress-tracker { position: fixed; bottom: 20px; right: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; font-size: 11px; font-weight: 600; color: var(--text2); box-shadow: var(--shadow); z-index: 998; display: flex; align-items: center; gap: 8px; transition: background 0.3s, border-color 0.3s; }
+  .tracker-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+  .tracker-label { font-family: var(--fb); }
+
+  /* MAIN WRAPPER */
+  .wrapper { max-width: 780px; margin: 0 auto; padding: 88px 20px 100px; }
+
+  /* HERO */
+  .hero { background: #0a0a0a; color: #f5f4f0; border-radius: var(--radius); padding: 40px 36px; margin-bottom: 32px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -40px; right: -40px; width: 200px; height: 200px; border-radius: 50%; background: rgba(74,222,128,0.07); pointer-events: none; }
+  .hero-eyebrow { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #4ade80; margin-bottom: 12px; }
+  .hero-title { font-family: var(--fd); font-size: 32px; font-weight: 900; letter-spacing: -1px; line-height: 1.15; color: #f5f4f0; margin-bottom: 8px; }
+  .hero-subtitle { font-family: var(--fd); font-size: 17px; font-weight: 400; font-style: italic; color: rgba(245,244,240,0.7); margin-bottom: 24px; line-height: 1.4; }
+  .hero-outcome { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.25); border-radius: 8px; padding: 14px 18px; font-size: 13px; color: rgba(245,244,240,0.9); line-height: 1.6; margin-bottom: 24px; }
+  .hero-outcome strong { color: #4ade80; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; }
+  .meta-chip { font-size: 11px; font-weight: 500; padding: 4px 12px; border-radius: 20px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: rgba(245,244,240,0.7); }
+
+  /* TOPIC PROGRESS */
+  .topic-progress { margin-bottom: 32px; }
+  .tp-label { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+  .tp-steps { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tp-step { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text3); }
+  .tp-step.done { background: var(--green-bg); border-color: rgba(74,222,128,0.35); color: var(--green-deep); }
+  .tp-step.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .tp-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* TAGS */
+  .tags-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+  .tag { font-family: var(--fb); font-size: 11px; font-weight: 500; padding: 5px 13px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: default; }
+  .tag.green { background: var(--green-bg); border-color: rgba(74,222,128,0.3); color: var(--green-deep); }
+
+  /* SECTION LABELS */
+  .section-label { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green-deep); margin-bottom: 6px; }
+  .section-title { font-family: var(--fd); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); margin-bottom: 20px; line-height: 1.25; }
+
+  /* SUBTOPIC HEADING */
+  .subtopic-heading { display: flex; align-items: center; gap: 10px; margin: 32px 0 14px; }
+  .subtopic-heading h3 { font-family: var(--fd); font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+  .subtopic-num { font-family: var(--fb); font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; background: var(--green-bg); border: 1px solid rgba(74,222,128,0.3); color: var(--green-deep); letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+
+  /* TOPIC BLOCK */
+  .topic-block { margin-bottom: 56px; }
+  .topic-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 28px; margin-bottom: 0px; box-shadow: var(--shadow); }
+  .topic-card p { max-width: 66ch; color: var(--text2); font-size: 14px; line-height: 1.8; margin-bottom: 12px; }
+  .topic-card ul { max-width: 66ch; padding-left: 20px; color: var(--text2); font-size: 14px; line-height: 1.8; margin-bottom: 12px; }
+  .topic-card ol { max-width: 66ch; padding-left: 20px; color: var(--text2); font-size: 14px; line-height: 1.8; margin-bottom: 12px; }
+  .topic-card ol li, .topic-card ul li { margin-bottom: 6px; }
+  .topic-card strong { color: var(--text); }
+  .topic-card p:last-child, .topic-card ul:last-child, .topic-card ol:last-child { margin-bottom: 0; }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--border); margin: 40px 0; }
+
+  /* MINI CHECK */
+  .mini-check { background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--green); border-radius: 0 var(--radius) var(--radius) 0; padding: 20px 24px; margin: 0 0 24px 0; }
+  .mini-check-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .mini-check-icon { font-size: 14px; }
+  .mini-check-title { font-family: var(--fb); font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--green-deep); }
+  .mini-check-sub { font-size: 11px; color: var(--text3); margin-left: auto; }
+
+  /* MINI CHECK — REVEAL */
+  .mc-reveal-item { margin-bottom: 14px; }
+  .mc-q { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 8px; max-width: 66ch; line-height: 1.6; }
+  .mc-reveal-btn { font-family: var(--fb); font-size: 10px; font-weight: 600; padding: 5px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); cursor: pointer; transition: all 0.2s; }
+  .mc-reveal-btn:hover { background: var(--green-bg); border-color: rgba(74,222,128,0.3); color: var(--green-deep); }
+  .mc-answer { display: none; margin-top: 8px; padding: 10px 14px; background: var(--surface); border-left: 2px solid var(--green); border-radius: 0 6px 6px 0; font-size: 12px; color: var(--text2); line-height: 1.7; max-width: 66ch; }
+  .mc-answer.show { display: block; }
+
+  /* MINI CHECK — MCQ */
+  .mc-mcq-item { margin-bottom: 14px; }
+  .mc-mcq-opts { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; max-width: 56ch; }
+  .mc-mcq-opt { display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; padding: 7px 12px; border-radius: 7px; background: var(--surface); border: 1px solid var(--border); color: var(--text2); transition: all 0.15s; user-select: none; }
+  .mc-mcq-opt:hover:not(.mc-locked) { background: var(--green-bg); border-color: rgba(74,222,128,0.3); }
+  .mc-mcq-opt.mc-correct { background: var(--green-bg); border-color: rgba(74,222,128,0.4); color: var(--green-deep); font-weight: 600; }
+  .mc-mcq-opt.mc-wrong { background: rgba(239,68,68,0.07); border-color: rgba(239,68,68,0.3); color: #b91c1c; }
+  .mc-ltr { font-weight: 700; font-size: 10px; width: 20px; height: 20px; border-radius: 50%; background: var(--surface2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .mc-mcq-fb { display: none; margin-top: 7px; font-size: 11px; font-weight: 600; }
+
+  /* MINI CHECK — FITB */
+  .mc-fitb-item { margin-bottom: 14px; }
+  .mc-fitb-row { display: flex; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
+  .mc-fitb-input { font-family: var(--fb); font-size: 12px; padding: 7px 12px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); color: var(--text); outline: none; width: 220px; transition: border-color 0.2s; }
+  .mc-fitb-input:focus { border-color: var(--green); }
+  .mc-fitb-btn { font-family: var(--fb); font-size: 10px; font-weight: 700; padding: 7px 14px; border-radius: 7px; border: none; background: var(--text); color: var(--bg); cursor: pointer; white-space: nowrap; }
+  .mc-fitb-fb { display: none; margin-top: 7px; font-size: 11px; font-weight: 600; }
+
+  /* ACTIVE RECALL */
+  .recall-section { margin-top: 24px; }
+  .recall-label { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green-deep); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .recall-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .recall-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin-bottom: 10px; }
+  .recall-badge { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 9px; border-radius: 20px; margin-bottom: 10px; }
+  .badge-def { background: rgba(74,222,128,0.15); color: var(--green-deep); border: 1px solid rgba(74,222,128,0.3); }
+  .badge-mech { background: rgba(251,191,36,0.15); color: #b45309; border: 1px solid rgba(251,191,36,0.3); }
+  .badge-app { background: rgba(59,130,246,0.1); color: #1d4ed8; border: 1px solid rgba(59,130,246,0.2); }
+  .badge-comp { background: rgba(139,92,246,0.1); color: #6d28d9; border: 1px solid rgba(139,92,246,0.2); }
+  .recall-q { font-size: 14px; font-weight: 500; color: var(--text); max-width: 66ch; line-height: 1.6; margin-bottom: 12px; }
+  .reveal-btn { font-family: var(--fb); font-size: 11px; font-weight: 600; padding: 6px 16px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: pointer; transition: all 0.2s; }
+  .reveal-btn:hover { background: var(--green-bg); border-color: rgba(74,222,128,0.3); color: var(--green-deep); }
+  .recall-answer { display: none; margin-top: 12px; padding: 14px 16px; background: var(--surface2); border-left: 3px solid var(--green); border-radius: 0 8px 8px 0; font-size: 13px; color: var(--text2); line-height: 1.7; max-width: 66ch; }
+  .recall-answer.show { display: block; }
+
+  /* PULSE CHECK — FULL GREEN BACKGROUND */
+  .pulse-check { background: var(--green); border-radius: var(--radius); padding: 28px; margin: 40px 0; }
+  .pulse-check .pc-title { font-family: var(--fd); font-size: 20px; font-weight: 900; color: #0a0a0a; margin-bottom: 4px; }
+  .pulse-check .pc-sub { font-size: 12px; color: rgba(10,10,10,0.6); margin-bottom: 20px; }
+  .pc-question { background: rgba(255,255,255,0.35); border-radius: 10px; padding: 16px 18px; margin-bottom: 12px; }
+  .pc-q-text { font-size: 14px; font-weight: 500; color: #0a0a0a; margin-bottom: 10px; max-width: 66ch; line-height: 1.6; }
+  .pc-options { display: flex; flex-direction: column; gap: 6px; }
+  .pc-option { display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer; padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.5); color: #0a0a0a; transition: all 0.15s; max-width: 66ch; }
+  .pc-option:hover { background: rgba(255,255,255,0.65); }
+  .pc-option.correct { background: #fff; border-color: #16a34a; }
+  .pc-option.wrong { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.5); }
+  .pc-letter { font-weight: 700; font-size: 11px; width: 22px; height: 22px; border-radius: 50%; background: rgba(10,10,10,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .pc-fitb input { background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.7); border-radius: 6px; padding: 8px 12px; font-family: var(--fb); font-size: 13px; color: #0a0a0a; width: 100%; max-width: 300px; outline: none; }
+  .pc-fitb input:focus { background: #fff; }
+  .pc-check-btn { margin-top: 8px; font-family: var(--fb); font-size: 11px; font-weight: 700; padding: 6px 16px; border-radius: 6px; border: none; background: #0a0a0a; color: #f5f4f0; cursor: pointer; }
+  .pc-feedback { margin-top: 8px; font-size: 12px; font-weight: 500; display: none; color: #0a0a0a; }
+
+  /* EOQ */
+  .eoq { background: var(--text); border-radius: var(--radius); padding: 32px; margin-top: 48px; }
+  .eoq-eyebrow { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green); margin-bottom: 6px; }
+  .eoq-title { font-family: var(--fd); font-size: 24px; font-weight: 900; color: #f5f4f0; margin-bottom: 4px; letter-spacing: -0.5px; }
+  .eoq-sub { font-size: 12px; color: rgba(240,239,235,0.5); margin-bottom: 24px; }
+  .eoq-question { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 18px 20px; margin-bottom: 14px; }
+  .eoq-qnum { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: rgba(240,239,235,0.4); margin-bottom: 6px; }
+  .eoq-q-text { font-size: 14px; font-weight: 500; color: #f0efeb; max-width: 66ch; line-height: 1.6; margin-bottom: 12px; }
+  .eoq-options { display: flex; flex-direction: column; gap: 6px; }
+  .eoq-option { display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer; padding: 10px 14px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(240,239,235,0.8); transition: all 0.15s; max-width: 66ch; user-select: none; }
+  .eoq-option:hover:not(.locked) { background: rgba(255,255,255,0.1); }
+  .eoq-option.selected { border-color: var(--green); background: rgba(74,222,128,0.1); }
+  .eoq-option.correct-reveal { border-color: var(--green); background: rgba(74,222,128,0.15); color: #f0efeb; }
+  .eoq-option.wrong-reveal { border-color: rgba(239,68,68,0.5); background: rgba(239,68,68,0.1); color: rgba(240,239,235,0.6); }
+  .eoq-letter { font-weight: 700; font-size: 11px; width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: rgba(240,239,235,0.7); }
+  .eoq-fitb input { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 9px 14px; font-family: var(--fb); font-size: 13px; color: #f0efeb; width: 100%; max-width: 320px; outline: none; transition: border-color 0.2s; }
+  .eoq-fitb input:focus { border-color: var(--green); }
+  .eoq-fitb input.correct-input { border-color: var(--green); background: rgba(74,222,128,0.1); }
+  .eoq-fitb input.wrong-input { border-color: rgba(239,68,68,0.5); background: rgba(239,68,68,0.08); }
+  .eoq-feedback { display: none; margin-top: 10px; font-size: 12px; line-height: 1.6; padding: 10px 14px; border-radius: 6px; max-width: 66ch; }
+  .eoq-feedback.correct-fb { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.25); color: #86efac; }
+  .eoq-feedback.wrong-fb { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #fca5a5; }
+  .eoq-submit { margin-top: 24px; width: 100%; padding: 14px; border-radius: 8px; border: none; background: var(--green); color: #0a0a0a; font-family: var(--fb); font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+  .eoq-submit:hover { opacity: 0.88; }
+  .eoq-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+  .eoq-result { display: none; margin-top: 24px; padding: 24px; border-radius: 10px; text-align: center; }
+  .eoq-result.pass { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); }
+  .eoq-result.fail { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); }
+  .result-score { font-family: var(--fd); font-size: 40px; font-weight: 900; color: #f0efeb; margin-bottom: 6px; }
+  .result-pill { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 5px 16px; border-radius: 20px; margin-bottom: 14px; }
+  .pill-pass { background: var(--green); color: #0a0a0a; }
+  .pill-fail { background: rgba(239,68,68,0.3); color: #fca5a5; border: 1px solid rgba(239,68,68,0.4); }
+  .result-msg { font-size: 13px; color: rgba(240,239,235,0.7); line-height: 1.6; max-width: 52ch; margin: 0 auto 16px; }
+  .unlock-banner { background: rgba(74,222,128,0.15); border: 1px solid rgba(74,222,128,0.3); border-radius: 8px; padding: 12px 16px; font-size: 13px; color: var(--green); font-weight: 500; margin-top: 12px; }
+  .review-nudge { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 14px 16px; margin-top: 12px; text-align: left; }
+  .review-nudge p { font-size: 12px; color: rgba(240,239,235,0.6); margin-bottom: 8px; }
+  .review-nudge ul { padding-left: 16px; font-size: 12px; color: #fca5a5; line-height: 1.8; }
+
+  /* CHE352-SPECIFIC: FORMULA BLOCK */
+  .formula-block {
+    border-left: 4px solid var(--green);
+    background: var(--green-bg);
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    margin: 14px 0;
+  }
+  .f-label {
+    font-family: var(--fb);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--green-deep);
+    margin-bottom: 8px;
+  }
+  .formula-block .eq {
+    font-family: var(--fd);
+    font-size: 15px;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 6px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .formula-block .eq:last-of-type { margin-bottom: 0; }
+  .formula-block .eq-divider { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
+  .formula-block .vars {
+    font-size: 12px;
+    color: var(--text2);
+    font-style: italic;
+    margin-top: 4px;
+  }
+
+  /* CHE352-SPECIFIC: WORKED EXAMPLE */
+  .worked-example {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin: 14px 0;
+  }
+  .we-label {
+    font-family: var(--fb);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--green-deep);
+    margin-bottom: 10px;
+  }
+  .we-q {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 14px;
+    max-width: 66ch;
+    line-height: 1.6;
+  }
+  .we-step {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 10px;
+    align-items: flex-start;
+  }
+  .we-step-num {
+    font-family: var(--fb);
+    font-size: 10px;
+    font-weight: 700;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--green-bg);
+    border: 1px solid rgba(74,222,128,0.3);
+    color: var(--green-deep);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .we-step-text {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.7;
+    flex: 1;
+  }
+  .we-result {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border-left: 3px solid var(--green);
+    border-radius: 0 6px 6px 0;
+    font-size: 13px;
+    color: var(--text2);
+    font-weight: 500;
+  }
+
+  /* CHE352-SPECIFIC: NOTE BOX */
+  .note-box {
+    background: var(--green-bg);
+    border: 1px solid rgba(74,222,128,0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+  .note-box strong {
+    color: var(--green-deep);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  @media (max-width: 600px) {
+    .wrapper { padding: 72px 14px 100px; }
+    .hero { padding: 28px 20px; }
+    .hero-title { font-size: 24px; }
+    .topic-card { padding: 18px 16px; }
+    .eoq { padding: 22px 16px; }
+    .pulse-check { padding: 20px 16px; }
+    .mini-check { padding: 16px 18px; }
+    .progress-tracker { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<nav class="topbar">
+  <div class="topbar-wordmark">Unify<span>.</span></div>
+  <div class="topbar-right">
+    <span class="course-pill">CHE 352</span>
+    <button id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode">🌙</button>
+  </div>
+</nav>
+
+<div class="progress-tracker">
+  <div class="tracker-dot"></div>
+  <span class="tracker-label" id="tracker-text">Scroll to begin</span>
+</div>
+
+<div class="wrapper">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-eyebrow">CHE 352 · Week 3 · LASU Faculty of Engineering</div>
+    <h1 class="hero-title">Bessel Equation</h1>
+    <p class="hero-subtitle">Bessel Functions, Series Expansions &amp; Special Cases</p>
+    <div class="hero-outcome">
+      <strong>By the end of this week, you should be able to</strong> state the standard form of the Bessel differential equation, identify the conditions under which Jᵥ(x) and J₋ᵥ(x) are valid, and write out the series expansions for the particular cases J₀(x) and J₁(x).
+    </div>
+    <div class="hero-meta">
+      <span class="meta-chip">Week 3 of 7</span>
+      <span class="meta-chip">🎓 Dr. Lukumon Salami</span>
+      <span class="meta-chip">📍 Lagos State University</span>
+    </div>
+  </header>
+
+  <!-- TOPIC PROGRESS -->
+  <div class="topic-progress">
+    <div class="tp-label">Your Progress</div>
+    <div class="tp-steps">
+      <div class="tp-step active" id="step-1"><span class="tp-dot"></span> Topic 1: Bessel Equation</div>
+      <div class="tp-step" id="step-2"><span class="tp-dot"></span> Topic 2: J₀(x) and J₁(x)</div>
+      <div class="tp-step" id="step-quiz"><span class="tp-dot"></span> Week 3 Quiz</div>
+    </div>
+  </div>
+
+  <!-- TAGS -->
+  <div class="tags-row">
+    <span class="tag green">Bessel Equation</span>
+    <span class="tag green">Bessel Functions Jᵥ(x)</span>
+    <span class="tag green">J₋ᵥ(x)</span>
+    <span class="tag green">Integer Order Jₙ(x)</span>
+    <span class="tag green">J₀(x)</span>
+    <span class="tag green">J₁(x)</span>
+    <span class="tag">Gamma Function</span>
+    <span class="tag">Second Order ODE</span>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       TOPIC 1: BESSEL EQUATION — STANDARD FORM & BESSEL FUNCTIONS
+  ════════════════════════════════════════════════════════ -->
+  <div class="topic-block" id="topic-1">
+    <div class="section-label">Topic 1</div>
+    <div class="section-title">Bessel Equation — Standard Form &amp; Bessel Functions</div>
+
+    <!-- ── SUBTOPIC 1.1 ── -->
+    <div class="subtopic-heading">
+      <span class="subtopic-num">1.1</span>
+      <h3>Standard Form &amp; Bessel Functions</h3>
+    </div>
+    <div class="topic-card">
+      <p>A second order differential equation that occurs frequently in branches of technology is the <strong>Bessel equation</strong>, which is of the form:</p>
+
+      <div class="formula-block">
+        <div class="f-label">Bessel Equation — Standard Form</div>
+        <span class="eq">x²y″ + xy′ + (x² − v²)y = 0</span>
+        <hr class="eq-divider"/>
+        <span class="vars">where v is a real constant</span>
+      </div>
+
+      <p>Expressing the solution in terms of gamma functions, the <strong>Bessel function of the first kind of order v</strong>, denoted Jᵥ(x), is:</p>
+
+      <div class="formula-block">
+        <div class="f-label">Bessel Function Jᵥ(x)</div>
+        <span class="eq">Jᵥ(x) = (x/2)ᵛ · [ 1/Γ(v+1) − x²/[2¹·(1!)·Γ(v+2)] + x⁴/[2⁴·(2!)·Γ(v+3)] − ··· ]</span>
+        <hr class="eq-divider"/>
+        <span class="vars">Valid for v not a negative integer.</span>
+      </div>
+    </div>
+
+    <!-- MINI CHECK 1.1 -->
+    <div class="mini-check">
+      <div class="mini-check-header">
+        <span class="mini-check-icon">⚡</span>
+        <span class="mini-check-title">Quick Check — Standard Form &amp; Bessel Functions</span>
+        <span class="mini-check-sub">2 questions</span>
+      </div>
+      <div class="mc-mcq-item">
+        <div class="mc-q">Which of the following is the correct standard form of the Bessel equation?</div>
+        <div class="mc-mcq-opts" id="mc-1-std-1">
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-std-1',false,'mc-1-std-1-fb')"><span class="mc-ltr">A</span> x²y″ + xy′ + (x² + v²)y = 0</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-std-1',true,'mc-1-std-1-fb')"><span class="mc-ltr">B</span> x²y″ + xy′ + (x² − v²)y = 0</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-std-1',false,'mc-1-std-1-fb')"><span class="mc-ltr">C</span> x²y″ − xy′ + (x² − v²)y = 0</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-std-1',false,'mc-1-std-1-fb')"><span class="mc-ltr">D</span> xy″ + y′ + (x − v)y = 0</div>
+        </div>
+        <div class="mc-mcq-fb" id="mc-1-std-1-fb"></div>
+      </div>
+      <div class="mc-fitb-item">
+        <div class="mc-q">Jᵥ(x) is valid provided v is not a ________ integer.</div>
+        <div class="mc-fitb-row">
+          <input class="mc-fitb-input" id="mc-1-std-2-inp" placeholder="Your answer…" type="text">
+          <button class="mc-fitb-btn" onclick="mcFitb('mc-1-std-2-inp','mc-1-std-2-fb',['negative'])">Check</button>
+        </div>
+        <div class="mc-fitb-fb" id="mc-1-std-2-fb"></div>
+      </div>
+    </div>
+
+    <!-- ── SUBTOPIC 1.2 ── -->
+    <div class="subtopic-heading">
+      <span class="subtopic-num">1.2</span>
+      <h3>Bessel Functions</h3>
+    </div>
+    <div class="topic-card">
+      <p>The complementary Bessel function of order −v is defined by replacing v with −v in the series expansion:</p>
+
+      <div class="formula-block">
+        <div class="f-label">Bessel Function J₋ᵥ(x)</div>
+        <span class="eq">J₋ᵥ(x) = (x/2)⁻ᵛ · [ 1/Γ(1−v) − x²/[2·(1!)·Γ(2−v)] + x⁴/[2·(2!)·Γ(3−v)] − ··· ]</span>
+        <hr class="eq-divider"/>
+        <span class="vars">Valid provided v is not a positive integer.</span>
+      </div>
+
+      <p>When Jᵥ(x) and J₋ᵥ(x) are <strong>linearly independent</strong> (i.e., when v is not an integer), the general solution of the Bessel equation is:</p>
+      <p style="font-weight:600; color:var(--text);">y = A·Jᵥ(x) + B·J₋ᵥ(x)</p>
+    </div>
+
+    <!-- MINI CHECK 1.2 -->
+    <div class="mini-check">
+      <div class="mini-check-header">
+        <span class="mini-check-icon">⚡</span>
+        <span class="mini-check-title">Quick Check — Bessel Functions</span>
+        <span class="mini-check-sub">1 question</span>
+      </div>
+      <div class="mc-reveal-item">
+        <div class="mc-q">What is the key structural difference between Jᵥ(x) and J₋ᵥ(x)?</div>
+        <button class="mc-reveal-btn" onclick="mcReveal(this)">Reveal Answer</button>
+        <div class="mc-answer">Jᵥ(x) carries a leading factor of <strong>(x/2)ᵛ</strong> and uses <strong>Γ(v+1), Γ(v+2), …</strong> in its denominators; it is valid when v is <em>not a negative integer</em>. J₋ᵥ(x) carries <strong>(x/2)⁻ᵛ</strong> and uses <strong>Γ(1−v), Γ(2−v), …</strong>; it is valid when v is <em>not a positive integer</em>. Their leading powers and gamma-function arguments are mirror images of each other, and their validity conditions are opposite.</div>
+      </div>
+    </div>
+
+    <!-- TOPIC 1 ACTIVE RECALL -->
+    <div class="recall-section">
+      <div class="recall-label">Topic 1 Active Recall</div>
+      <div class="recall-card">
+        <div class="recall-badge badge-def">Definition</div>
+        <div class="recall-q">What is the standard form of the Bessel differential equation, and what does the symbol v represent?</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer">The standard form is <strong>x²y″ + xy′ + (x² − v²)y = 0</strong>, where <strong>v is a real constant</strong>. The equation is second order and arises frequently in applied mathematics and engineering — particularly in problems with cylindrical symmetry.</div>
+      </div>
+      <div class="recall-card">
+        <div class="recall-badge badge-mech">Mechanism</div>
+        <div class="recall-q">According to the notes, what are the specific conditions required for the Bessel functions Jᵥ(x) and J₋ᵥ(x) to be valid?</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer">Jᵥ(x) is valid provided <strong>v is not a negative integer</strong>. Conversely, J₋ᵥ(x) is valid provided <strong>v is not a positive integer</strong>. These restrictions arise from the gamma function: Γ(n) is undefined when n is zero or a negative integer, so certain terms in the series would blow up if the condition were violated.</div>
+      </div>
+      <div class="recall-card">
+        <div class="recall-badge badge-comp">Comparison</div>
+        <div class="recall-q">What is the key structural difference between Jᵥ(x) and J₋ᵥ(x) in their series expansions?</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer">Jᵥ(x) carries a leading factor of <strong>(x/2)ᵛ</strong> and uses <strong>Γ(v+1), Γ(v+2), …</strong> in its denominators. J₋ᵥ(x) carries <strong>(x/2)⁻ᵛ</strong> and uses <strong>Γ(1−v), Γ(2−v), …</strong> Their validity conditions are also opposite: Jᵥ requires v not a negative integer; J₋ᵥ requires v not a positive integer.</div>
+      </div>
+    </div>
+  </div><!-- /topic-1 -->
+
+  <!-- PULSE CHECK ① -->
+  <div class="pulse-check" id="pulse1">
+    <div class="pc-title">Pulse Check ①</div>
+    <div class="pc-sub">End of Topic 1 — quick ungraded check.</div>
+    <div class="pc-question">
+      <div class="pc-q-text">What is the correct standard form of the Bessel equation?</div>
+      <div class="pc-options" id="pc1-1-opts">
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-1',false)"><span class="pc-letter">A</span> x²y″ + xy′ + (x² + v²)y = 0</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-1',true)"><span class="pc-letter">B</span> x²y″ + xy′ + (x² − v²)y = 0</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-1',false)"><span class="pc-letter">C</span> xy″ + y′ + (x − v)y = 0</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-1',false)"><span class="pc-letter">D</span> x²y″ − xy′ + (x² − v²)y = 0</div>
+      </div>
+      <div class="pc-feedback" id="pc1-1-fb"></div>
+    </div>
+    <div class="pc-question">
+      <div class="pc-q-text">What type of constant is v in the Bessel equation?</div>
+      <div class="pc-options" id="pc1-2-opts">
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-2',false)"><span class="pc-letter">A</span> A complex constant</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-2',true)"><span class="pc-letter">B</span> A real constant</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-2',false)"><span class="pc-letter">C</span> A positive integer only</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-2',false)"><span class="pc-letter">D</span> An imaginary constant</div>
+      </div>
+      <div class="pc-feedback" id="pc1-2-fb"></div>
+    </div>
+    <div class="pc-question">
+      <div class="pc-q-text">Fill in the blank: Jᵥ(x) is valid provided v is not a ________ integer.</div>
+      <div class="pc-fitb">
+        <input type="text" id="pc1-3-input" placeholder="Type your answer...">
+        <br>
+        <button class="pc-check-btn" onclick="pcFitb('pc1-3',['negative'])">Check</button>
+      </div>
+      <div class="pc-feedback" id="pc1-3-fb"></div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       TOPIC 2: INTEGER ORDER — Jₙ, J₀, J₁
+  ════════════════════════════════════════════════════════ -->
+  <div class="topic-block" id="topic-2">
+    <div class="section-label">Topic 2</div>
+    <div class="section-title">When v = n (Integer) — Jₙ(x), J₀(x) and J₁(x)</div>
+
+    <!-- ── SUBTOPIC 2.1 ── -->
+    <div class="subtopic-heading">
+      <span class="subtopic-num">2.1</span>
+      <h3>Integer Order — Jₙ, J₀, J₁</h3>
+    </div>
+    <div class="topic-card">
+      <p>When v = n, where n is a non-negative integer, the gamma functions in the series reduce to factorial expressions, yielding a cleaner form:</p>
+
+      <div class="formula-block">
+        <div class="f-label">Integer-Order Bessel Function Jₙ(x)</div>
+        <span class="eq">Jₙ(x) = (x/2)ⁿ · [ 1/n! − 1/(n+1)!·(x/2)² + 1/[2!·(n+2)!]·(x/2)⁴ − 1/[3!·(n+3)!]·(x/2)⁶ ··· ]</span>
+      </div>
+
+      <p>In particular, setting n = 0 gives <strong>J₀(x)</strong>:</p>
+
+      <div class="formula-block">
+        <div class="f-label">J₀(x) — Zeroth Order Bessel Function</div>
+        <span class="eq">J₀(x) = 1 − 1/(1!)²·(x/2)² + 1/(2!)²·(x/2)⁴ − 1/(3!)²·(x/2)⁶ + ···</span>
+      </div>
+
+      <p>And setting n = 1 gives <strong>J₁(x)</strong>:</p>
+
+      <div class="formula-block">
+        <div class="f-label">J₁(x) — First Order Bessel Function</div>
+        <span class="eq">J₁(x) = (x/2) · [ 1 − 1/[(1!)(2!)]·(x/2)² + 1/[(2!)(3!)]·(x/2)⁴ − 1/[(3!)(4!)]·(x/2)⁶ + ··· ]</span>
+      </div>
+
+      <div class="note-box">
+        <strong>Note</strong>
+        1! = 1. This is worth remembering when evaluating terms like (1!)² = 1 in J₀(x), and (1!)(2!) = 2 in J₁(x), to avoid arithmetic errors.
+      </div>
+    </div>
+
+    <!-- MINI CHECK 2.1 -->
+    <div class="mini-check">
+      <div class="mini-check-header">
+        <span class="mini-check-icon">⚡</span>
+        <span class="mini-check-title">Quick Check — Integer Order Jₙ, J₀, J₁</span>
+        <span class="mini-check-sub">2 questions</span>
+      </div>
+      <div class="mc-mcq-item">
+        <div class="mc-q">What is the leading factor outside the bracket in J₁(x)?</div>
+        <div class="mc-mcq-opts" id="mc-2-j1-1">
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2-j1-1',false,'mc-2-j1-1-fb')"><span class="mc-ltr">A</span> 1</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2-j1-1',true,'mc-2-j1-1-fb')"><span class="mc-ltr">B</span> (x/2)</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2-j1-1',false,'mc-2-j1-1-fb')"><span class="mc-ltr">C</span> (x/2)²</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2-j1-1',false,'mc-2-j1-1-fb')"><span class="mc-ltr">D</span> x</div>
+        </div>
+        <div class="mc-mcq-fb" id="mc-2-j1-1-fb"></div>
+      </div>
+      <div class="mc-fitb-item">
+        <div class="mc-q">J₋ᵥ(x) is valid provided v is not a ________ integer.</div>
+        <div class="mc-fitb-row">
+          <input class="mc-fitb-input" id="mc-2-jv-2-inp" placeholder="Your answer…" type="text">
+          <button class="mc-fitb-btn" onclick="mcFitb('mc-2-jv-2-inp','mc-2-jv-2-fb',['positive'])">Check</button>
+        </div>
+        <div class="mc-fitb-fb" id="mc-2-jv-2-fb"></div>
+      </div>
+    </div>
+
+    <!-- TOPIC 2 ACTIVE RECALL -->
+    <div class="recall-section">
+      <div class="recall-label">Topic 2 Active Recall</div>
+      <div class="recall-card">
+        <div class="recall-badge badge-app">Application</div>
+        <div class="recall-q">When v is an integer n, what does the first term inside the bracket of the series expansion for Jₙ(x) simplify to?</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer">It simplifies to <strong>1/n!</strong>. For example, in J₀(x) the first term simplifies to 1 (since 1/0! = 1/1 = 1), and in J₁(x) the leading factor (x/2)¹ is outside the bracket while the first term inside is also 1 (since 1/1! = 1).</div>
+      </div>
+      <div class="recall-card">
+        <div class="recall-badge badge-comp">Comparison</div>
+        <div class="recall-q">How does the structure of J₀(x) differ from J₁(x) in terms of leading factor and denominator pattern?</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer"><strong>J₀(x)</strong> has no leading (x/2) factor outside the bracket and uses <strong>squared factorials</strong> — (1!)², (2!)², (3!)² — in its denominators.<br><br><strong>J₁(x)</strong> carries a leading <strong>(x/2)</strong> factor outside the bracket and uses <strong>products of consecutive factorials</strong> — (1!)(2!), (2!)(3!), (3!)(4!) — in its denominators. This arises directly from setting n = 1 in the general Jₙ(x) formula.</div>
+      </div>
+      <div class="recall-card">
+        <div class="recall-badge badge-mech">Mechanism</div>
+        <div class="recall-q">Why does the lecturer specifically note that 1! = 1, and why is this relevant to the Bessel series?</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer">The note clarifies 1! = 1 to help students correctly evaluate denominator terms like <strong>(1!)² = 1</strong> in J₀(x) and <strong>(1!)(2!) = 2</strong> in J₁(x). Without this reminder, students might incorrectly compute these as larger values, leading to errors in the series coefficients. It is a small but critical arithmetic anchor for the calculations.</div>
+      </div>
+    </div>
+  </div><!-- /topic-2 -->
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       END-OF-WEEK QUIZ
+  ════════════════════════════════════════════════════════ -->
+  <div class="eoq" id="eoq">
+    <div class="eoq-eyebrow">End of Week Assessment</div>
+    <div class="eoq-title">Week 3 Quiz</div>
+    <div class="eoq-sub">9 questions — 7 MCQ, 2 fill-in-the-blank. 60% to pass. Answer all before submitting.</div>
+
+    <!-- Q1 MCQ -->
+    <div class="eoq-question" data-q="1" data-type="mcq" data-correct="B">
+      <div class="eoq-qnum">Question 1 of 9</div>
+      <div class="eoq-q-text">What is the standard form of the Bessel differential equation?</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,1,'A')"><span class="eoq-letter">A</span> x²y″ − xy′ + (x² − v²)y = 0</div>
+        <div class="eoq-option" onclick="eoqSelect(this,1,'B')"><span class="eoq-letter">B</span> x²y″ + xy′ + (x² − v²)y = 0</div>
+        <div class="eoq-option" onclick="eoqSelect(this,1,'C')"><span class="eoq-letter">C</span> x²y″ + xy′ + (x² + v²)y = 0</div>
+        <div class="eoq-option" onclick="eoqSelect(this,1,'D')"><span class="eoq-letter">D</span> xy″ + y′ + (x − v)y = 0</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-1"></div>
+    </div>
+
+    <!-- Q2 MCQ -->
+    <div class="eoq-question" data-q="2" data-type="mcq" data-correct="C">
+      <div class="eoq-qnum">Question 2 of 9</div>
+      <div class="eoq-q-text">In which field does the Bessel equation occur frequently?</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,2,'A')"><span class="eoq-letter">A</span> Pure number theory</div>
+        <div class="eoq-option" onclick="eoqSelect(this,2,'B')"><span class="eoq-letter">B</span> Abstract algebra</div>
+        <div class="eoq-option" onclick="eoqSelect(this,2,'C')"><span class="eoq-letter">C</span> Branches of technology / engineering</div>
+        <div class="eoq-option" onclick="eoqSelect(this,2,'D')"><span class="eoq-letter">D</span> Classical literature</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-2"></div>
+    </div>
+
+    <!-- Q3 MCQ -->
+    <div class="eoq-question" data-q="3" data-type="mcq" data-correct="A">
+      <div class="eoq-qnum">Question 3 of 9</div>
+      <div class="eoq-q-text">What is the leading factor outside the bracket in the series expansion for Jᵥ(x)?</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,3,'A')"><span class="eoq-letter">A</span> (x/2)ᵛ</div>
+        <div class="eoq-option" onclick="eoqSelect(this,3,'B')"><span class="eoq-letter">B</span> (2/x)ᵛ</div>
+        <div class="eoq-option" onclick="eoqSelect(this,3,'C')"><span class="eoq-letter">C</span> xᵛ</div>
+        <div class="eoq-option" onclick="eoqSelect(this,3,'D')"><span class="eoq-letter">D</span> (x/2)⁻ᵛ</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-3"></div>
+    </div>
+
+    <!-- Q4 MCQ -->
+    <div class="eoq-question" data-q="4" data-type="mcq" data-correct="B">
+      <div class="eoq-qnum">Question 4 of 9</div>
+      <div class="eoq-q-text">Which of the following correctly represents J₀(x)?</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,4,'A')"><span class="eoq-letter">A</span> J₀(x) = (x/2)[1 − 1/(1!)²·(x/2)² + ···]</div>
+        <div class="eoq-option" onclick="eoqSelect(this,4,'B')"><span class="eoq-letter">B</span> J₀(x) = 1 − 1/(1!)²·(x/2)² + 1/(2!)²·(x/2)⁴ − 1/(3!)²·(x/2)⁶ + ···</div>
+        <div class="eoq-option" onclick="eoqSelect(this,4,'C')"><span class="eoq-letter">C</span> J₀(x) = 1 − (x/2)² + (x/2)⁴ − ···</div>
+        <div class="eoq-option" onclick="eoqSelect(this,4,'D')"><span class="eoq-letter">D</span> J₀(x) = (x/2)[1 − (x/2)² + ···]</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-4"></div>
+    </div>
+
+    <!-- Q5 MCQ -->
+    <div class="eoq-question" data-q="5" data-type="mcq" data-correct="C">
+      <div class="eoq-qnum">Question 5 of 9</div>
+      <div class="eoq-q-text">Which of the following correctly represents J₁(x)?</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,5,'A')"><span class="eoq-letter">A</span> J₁(x) = [1 − 1/(1!)²·(x/2)² + ···]</div>
+        <div class="eoq-option" onclick="eoqSelect(this,5,'B')"><span class="eoq-letter">B</span> J₁(x) = (x/2)[1/1! − 1/2!·(x/2)² + ···]</div>
+        <div class="eoq-option" onclick="eoqSelect(this,5,'C')"><span class="eoq-letter">C</span> J₁(x) = (x/2)[1 − 1/[(1!)(2!)]·(x/2)² + 1/[(2!)(3!)]·(x/2)⁴ − ···]</div>
+        <div class="eoq-option" onclick="eoqSelect(this,5,'D')"><span class="eoq-letter">D</span> J₁(x) = (x/2)²[1 − (x/2)² + ···]</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-5"></div>
+    </div>
+
+    <!-- Q6 MCQ -->
+    <div class="eoq-question" data-q="6" data-type="mcq" data-correct="B">
+      <div class="eoq-qnum">Question 6 of 9</div>
+      <div class="eoq-q-text">When v = n (an integer), the first term inside the bracket of the series expansion for Jₙ(x) is:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,6,'A')"><span class="eoq-letter">A</span> 1/(n+1)!</div>
+        <div class="eoq-option" onclick="eoqSelect(this,6,'B')"><span class="eoq-letter">B</span> 1/n!</div>
+        <div class="eoq-option" onclick="eoqSelect(this,6,'C')"><span class="eoq-letter">C</span> n!</div>
+        <div class="eoq-option" onclick="eoqSelect(this,6,'D')"><span class="eoq-letter">D</span> 1/Γ(n)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-6"></div>
+    </div>
+
+    <!-- Q7 MCQ -->
+    <div class="eoq-question" data-q="7" data-type="mcq" data-correct="A">
+      <div class="eoq-qnum">Question 7 of 9</div>
+      <div class="eoq-q-text">What is the leading factor outside the bracket in J₋ᵥ(x)?</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,7,'A')"><span class="eoq-letter">A</span> (x/2)⁻ᵛ</div>
+        <div class="eoq-option" onclick="eoqSelect(this,7,'B')"><span class="eoq-letter">B</span> (x/2)ᵛ</div>
+        <div class="eoq-option" onclick="eoqSelect(this,7,'C')"><span class="eoq-letter">C</span> (2/x)ᵛ</div>
+        <div class="eoq-option" onclick="eoqSelect(this,7,'D')"><span class="eoq-letter">D</span> xᵛ</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-7"></div>
+    </div>
+
+    <!-- Q8 FITB -->
+    <div class="eoq-question" data-q="8" data-type="fitb" data-correct="negative">
+      <div class="eoq-qnum">Question 8 of 9 — Fill in the blank</div>
+      <div class="eoq-q-text">Jᵥ(x) is valid provided v is not a ________ integer.</div>
+      <div class="eoq-fitb">
+        <input type="text" id="eoq-input-8" placeholder="Type your answer…">
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-8"></div>
+    </div>
+
+    <!-- Q9 FITB -->
+    <div class="eoq-question" data-q="9" data-type="fitb" data-correct="positive">
+      <div class="eoq-qnum">Question 9 of 9 — Fill in the blank</div>
+      <div class="eoq-q-text">J₋ᵥ(x) is valid provided v is not a ________ integer.</div>
+      <div class="eoq-fitb">
+        <input type="text" id="eoq-input-9" placeholder="Type your answer…">
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-9"></div>
+    </div>
+
+    <button class="eoq-submit" id="eoq-submit-btn" onclick="eoqSubmit()">Submit Week 3 Quiz</button>
+
+    <div class="eoq-result" id="eoq-result">
+      <div class="result-score" id="result-score"></div>
+      <div id="result-pill"></div>
+      <div class="result-msg" id="result-msg"></div>
+      <div id="result-extra"></div>
+    </div>
+  </div><!-- /eoq -->
+
+</div><!-- /wrapper -->
+
+<script>
+// ─── DARK MODE ───
+(function() {
+  const saved = localStorage.getItem('unify-theme');
+  if (saved === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('dark-toggle');
+      if (btn) btn.textContent = '☀️';
+    });
+  }
+})();
+
+function toggleDark() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('dark-toggle').textContent = isDark ? '🌙' : '☀️';
+  localStorage.setItem('unify-theme', isDark ? 'light' : 'dark');
+}
+
+// ─── PROGRESS BAR + TRACKER ───
+window.addEventListener('scroll', () => {
+  const doc = document.documentElement;
+  const scrolled = doc.scrollTop || document.body.scrollTop;
+  const max = doc.scrollHeight - doc.clientHeight;
+  const pct = max > 0 ? (scrolled / max) * 100 : 0;
+  document.getElementById('progress-bar').style.width = pct + '%';
+
+  const t1  = document.getElementById('topic-1');
+  const t2  = document.getElementById('topic-2');
+  const eq  = document.getElementById('eoq');
+  const mid = scrolled + window.innerHeight / 2;
+  const getTop = el => el.getBoundingClientRect().top + scrolled;
+
+  let label = 'Topic 1: Bessel Equation';
+  if (mid >= getTop(eq))  label = 'Week 3 Quiz';
+  else if (mid >= getTop(t2)) label = 'Topic 2: J₀(x) and J₁(x)';
+
+  document.getElementById('tracker-text').textContent = label;
+
+  // step pills
+  ['step-1','step-2','step-quiz'].forEach(id => {
+    document.getElementById(id).classList.remove('done','active');
+  });
+  if (mid >= getTop(eq)) {
+    ['step-1','step-2'].forEach(id => document.getElementById(id).classList.add('done'));
+    document.getElementById('step-quiz').classList.add('active');
+  } else if (mid >= getTop(t2)) {
+    document.getElementById('step-1').classList.add('done');
+    document.getElementById('step-2').classList.add('active');
+  } else {
+    document.getElementById('step-1').classList.add('active');
+  }
+});
+
+// ─── REVEAL ANSWER (Active Recall) ───
+function toggleAnswer(btn) {
+  const ans = btn.nextElementSibling;
+  const showing = ans.classList.contains('show');
+  ans.classList.toggle('show', !showing);
+  btn.textContent = showing ? 'Reveal Answer' : 'Hide Answer';
+}
+
+// ─── MINI CHECK — REVEAL ───
+function mcReveal(btn) {
+  const ans = btn.nextElementSibling;
+  const showing = ans.classList.contains('show');
+  ans.classList.toggle('show', !showing);
+  btn.textContent = showing ? 'Reveal Answer' : 'Hide Answer';
+}
+
+// ─── MINI CHECK — MCQ ───
+const mcLocked = {};
+function mcMcq(el, groupId, correct, fbId) {
+  if (mcLocked[groupId]) return;
+  mcLocked[groupId] = true;
+  const opts = document.getElementById(groupId).querySelectorAll('.mc-mcq-opt');
+  opts.forEach(o => { o.classList.add('mc-locked'); });
+  el.classList.add(correct ? 'mc-correct' : 'mc-wrong');
+  if (!correct) {
+    opts.forEach(o => {
+      const attr = o.getAttribute('onclick') || '';
+      if (attr.includes(',true,')) o.classList.add('mc-correct');
+    });
+  }
+  const fb = document.getElementById(fbId);
+  fb.style.display = 'block';
+  fb.style.color = correct ? 'var(--green-deep)' : '#b91c1c';
+  fb.textContent = correct ? '✓ Correct!' : '✗ Not quite — the correct answer is highlighted.';
+}
+
+// ─── MINI CHECK — FITB ───
+function mcFitb(inputId, fbId, answers) {
+  const input = document.getElementById(inputId);
+  const val = input.value.trim().toLowerCase();
+  const correct = answers.some(a => val === a.toLowerCase());
+  const fb = document.getElementById(fbId);
+  fb.style.display = 'block';
+  fb.style.fontWeight = '600';
+  if (correct) {
+    fb.textContent = '✓ Correct!';
+    fb.style.color = 'var(--green-deep)';
+    input.style.borderColor = 'var(--green)';
+  } else {
+    fb.textContent = '✗ Not quite. Correct: ' + answers[0];
+    fb.style.color = '#b91c1c';
+    input.style.borderColor = '#ef4444';
+  }
+  input.disabled = true;
+  input.nextElementSibling.disabled = true;
+}
+
+// ─── PULSE CHECK MCQ ───
+const pcLocked = {};
+function pcAnswer(el, id, correct) {
+  if (pcLocked[id]) return;
+  pcLocked[id] = true;
+  const opts = document.getElementById(id + '-opts').querySelectorAll('.pc-option');
+  opts.forEach(o => o.classList.remove('correct','wrong'));
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) {
+    opts.forEach(o => {
+      if ((o.getAttribute('onclick') || '').includes(',true)')) o.classList.add('correct');
+    });
+  }
+  const fb = document.getElementById(id + '-fb');
+  fb.style.display = 'block';
+  fb.style.fontWeight = '600';
+  fb.textContent = correct ? '✓ Correct!' : '✗ Not quite — the correct answer is highlighted.';
+  fb.style.color = correct ? '#166534' : '#991b1b';
+}
+
+// ─── PULSE CHECK FITB ───
+function pcFitb(id, answers) {
+  const input = document.getElementById(id + '-input');
+  const val = input.value.trim().toLowerCase();
+  const correct = answers.some(a => val === a.toLowerCase());
+  const fb = document.getElementById(id + '-fb');
+  fb.style.display = 'block';
+  fb.style.fontWeight = '600';
+  if (correct) {
+    fb.textContent = '✓ Correct!';
+    fb.style.color = '#166534';
+    input.style.borderColor = '#16a34a';
+  } else {
+    fb.textContent = '✗ Not quite. Correct: ' + answers[0];
+    fb.style.color = '#991b1b';
+    input.style.borderColor = '#ef4444';
+  }
+  input.disabled = true;
+}
+
+// ─── EOQ ───
+const eoqAnswers = {};
+const eoqLocked  = {};
+const totalQ     = 9;
+
+const eoqFeedbacks = {
+  1: { correct: "Correct. The Bessel equation is x²y″ + xy′ + (x² − v²)y = 0.", wrong: "Incorrect. The correct form is x²y″ + xy′ + (x² − v²)y = 0. Note: the xy′ term is positive, and the bracket contains (x² − v²)." },
+  2: { correct: "Correct. The Bessel equation occurs frequently in branches of technology and engineering.", wrong: "Incorrect. The Bessel equation arises frequently in applied mathematics and branches of technology / engineering." },
+  3: { correct: "Correct. The leading factor for Jᵥ(x) is (x/2)ᵛ.", wrong: "Incorrect. The leading factor for Jᵥ(x) is (x/2)ᵛ — not (2/x)ᵛ or any other form." },
+  4: { correct: "Correct. J₀(x) has no leading (x/2) factor and uses squared factorials in its denominators.", wrong: "Incorrect. J₀(x) = 1 − 1/(1!)²·(x/2)² + 1/(2!)²·(x/2)⁴ − ··· There is no leading (x/2) factor outside." },
+  5: { correct: "Correct. J₁(x) carries a leading (x/2) and uses products of consecutive factorials in denominators.", wrong: "Incorrect. J₁(x) = (x/2)[1 − 1/[(1!)(2!)]·(x/2)² + 1/[(2!)(3!)]·(x/2)⁴ − ···]." },
+  6: { correct: "Correct. The first term inside the bracket of Jₙ(x) is 1/n!.", wrong: "Incorrect. When v = n, the gamma functions reduce so the first term inside the bracket is 1/n!." },
+  7: { correct: "Correct. The leading factor for J₋ᵥ(x) is (x/2)⁻ᵛ.", wrong: "Incorrect. J₋ᵥ(x) carries (x/2)⁻ᵛ as its leading factor — the negative exponent reflects the order −v." },
+  8: { correct: "Correct. Jᵥ(x) is valid provided v is not a negative integer.", wrong: "Incorrect. Jᵥ(x) is valid when v is NOT a negative integer — the gamma function Γ(v+1) is undefined at zero or negative integer arguments." },
+  9: { correct: "Correct. J₋ᵥ(x) is valid provided v is not a positive integer.", wrong: "Incorrect. J₋ᵥ(x) requires v to NOT be a positive integer — because Γ(1−v) breaks down when v is a positive integer." }
+};
+
+function eoqSelect(el, qNum, choice) {
+  if (eoqLocked[qNum]) return;
+  const qBlock = el.closest('.eoq-question');
+  qBlock.querySelectorAll('.eoq-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  eoqAnswers[qNum] = choice;
+}
+
+function eoqSubmit() {
+  let score = 0;
+  const questions = document.querySelectorAll('.eoq-question');
+  questions.forEach(q => {
+    const qNum    = parseInt(q.getAttribute('data-q'));
+    const type    = q.getAttribute('data-type');
+    const correct = q.getAttribute('data-correct');
+    const fb      = document.getElementById('eoq-fb-' + qNum);
+
+    if (type === 'mcq') {
+      const selected  = eoqAnswers[qNum];
+      const isCorrect = selected === correct;
+      if (isCorrect) score++;
+      q.querySelectorAll('.eoq-option').forEach(o => {
+        o.classList.add('locked');
+        const letter = o.querySelector('.eoq-letter').textContent.trim();
+        if (letter === correct) o.classList.add('correct-reveal');
+        else if (letter === selected && !isCorrect) o.classList.add('wrong-reveal');
+      });
+      fb.style.display = 'block';
+      fb.className = 'eoq-feedback ' + (isCorrect ? 'correct-fb' : 'wrong-fb');
+      fb.textContent = isCorrect ? '✓ ' + eoqFeedbacks[qNum].correct : '✗ ' + eoqFeedbacks[qNum].wrong;
+    } else if (type === 'fitb') {
+      const input    = document.getElementById('eoq-input-' + qNum);
+      const val      = input ? input.value.trim().toLowerCase() : '';
+      const accepted = correct.split(',');
+      const isCorrect = accepted.some(a => val === a.trim().toLowerCase());
+      if (isCorrect) score++;
+      if (input) {
+        input.disabled = true;
+        input.classList.add(isCorrect ? 'correct-input' : 'wrong-input');
+      }
+      fb.style.display = 'block';
+      fb.className = 'eoq-feedback ' + (isCorrect ? 'correct-fb' : 'wrong-fb');
+      fb.textContent = isCorrect ? '✓ ' + eoqFeedbacks[qNum].correct : '✗ ' + eoqFeedbacks[qNum].wrong;
+    }
+  });
+
+  document.getElementById('eoq-submit-btn').disabled = true;
+  const pct    = Math.round((score / totalQ) * 100);
+  const passed = pct >= 60;
+  const result = document.getElementById('eoq-result');
+  result.style.display = 'block';
+  result.className = 'eoq-result ' + (passed ? 'pass' : 'fail');
+  document.getElementById('result-score').textContent = score + '/' + totalQ;
+  const pill = document.getElementById('result-pill');
+  pill.innerHTML = '<span class="result-pill ' + (passed ? 'pill-pass' : 'pill-fail') + '">' + pct + '% — ' + (passed ? 'PASSED' : 'NOT YET') + '</span>';
+  const msg = document.getElementById('result-msg');
+  msg.textContent = passed
+    ? 'Good work. You have a solid understanding of Bessel functions and their series expansions. Ready for Week 4.'
+    : 'Not there yet. Review the topics listed below, then retake. A solid grasp of Bessel functions is essential for the rest of the course.';
+
+  const extra = document.getElementById('result-extra');
+  if (passed) {
+    extra.innerHTML = '<div class="unlock-banner">✓ Week 4 unlocked — Legendre\'s Equation</div>';
+  } else {
+    const topicMap = {
+      1: 'Topic 1.1 — Standard Form of the Bessel Equation',
+      2: 'Topic 1.1 — Applications of the Bessel Equation',
+      3: 'Topic 1.2 — Leading Factor of Jᵥ(x)',
+      4: 'Topic 2.1 — J₀(x) Series Expansion',
+      5: 'Topic 2.1 — J₁(x) Series Expansion',
+      6: 'Topic 2.1 — Integer-Order Series First Term',
+      7: 'Topic 1.2 — Leading Factor of J₋ᵥ(x)',
+      8: 'Topic 1.1 — Validity Condition for Jᵥ(x)',
+      9: 'Topic 1.2 — Validity Condition for J₋ᵥ(x)'
+    };
+    const missed = [];
+    questions.forEach(q => {
+      const qNum = parseInt(q.getAttribute('data-q'));
+      const type = q.getAttribute('data-type');
+      const correct = q.getAttribute('data-correct');
+      let isCorrect = false;
+      if (type === 'mcq') isCorrect = eoqAnswers[qNum] === correct;
+      else {
+        const input = document.getElementById('eoq-input-' + qNum);
+        const val = input ? input.value.trim().toLowerCase() : '';
+        isCorrect = correct.split(',').some(a => val === a.trim().toLowerCase());
+      }
+      if (!isCorrect && topicMap[qNum]) missed.push(topicMap[qNum]);
+    });
+    extra.innerHTML = '<div class="review-nudge"><p>Topics to review:</p><ul>' + [...new Set(missed)].map(t => '<li>' + t + '</li>').join('') + '</ul></div>';
+  }
+  result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>
