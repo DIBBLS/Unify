@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="auto">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,138 +10,167 @@
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/responsive.css">
 <script src="js/theme.js"></script>
-
-    <link rel="stylesheet" href="css/pages/profile.styles.css">
+<link rel="stylesheet" href="css/pages/profile.styles.css">
+<link rel="stylesheet" href="css/pages/dashboard-v2.styles.css">
 </head>
 <body>
+
 <div class="ld" id="loadingOverlay">
   <div class="ld-logo">Unify</div>
   <div class="ld-sub">Loading…</div>
 </div>
 
-<nav>
-  <a href="dashboard.html" class="nav-logo">Unify</a>
-  <div class="nav-links">
-    <a href="dashboard.html" class="nl">Dashboard</a>
-    <a href="timetable.html" class="nl">Timetable</a>
-    <a href="profile.html" class="nl on">Profile</a>
-  </div>
-  <div class="nav-r">
-    <button class="nbtn" onclick="toggleTheme()" id="themeToggle">Dark mode</button>
-    <button class="nbtn" id="signOutBtn">Sign out</button>
-  </div>
-</nav>
+<div class="toast" id="toast"></div>
 
-<nav class="mobile-nav">
-  <div class="mobile-nav-inner">
-    <a href="dashboard.html" class="mobile-nav-btn">
-      <span class="mobile-nav-label">Dashboard</span>
-      <div class="mobile-nav-dot"></div>
-    </a>
-    <a href="timetable.html" class="mobile-nav-btn">
-      <span class="mobile-nav-label">Timetable</span>
-      <div class="mobile-nav-dot"></div>
-    </a>
-    <a href="profile.html" class="mobile-nav-btn active">
-      <span class="mobile-nav-label">Profile</span>
-      <div class="mobile-nav-dot"></div>
-    </a>
-  </div>
-</nav>
+<!-- APP LAYOUT -->
+<div class="app-layout">
+  <div class="app-sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-<div class="page">
-  <div class="profile-header">
-    <div class="av" id="heroAvatar">U</div>
-    <div class="profile-info">
-      <div class="profile-name-row">
-        <div class="profile-name" id="heroName">—</div>
-        <button class="btn-edit" onclick="openDrawer()">Edit profile</button>
-      </div>
-      <div class="profile-stats">
-        <div class="pstat"><div class="pstat-n" id="statPosts">0</div><div class="pstat-l">posts</div></div>
-        <div class="pstat"><div class="pstat-n" id="statWork">0</div><div class="pstat-l">projects</div></div>
-        <div class="pstat"><div class="pstat-n" id="statCollabs">0</div><div class="pstat-l">collabs</div></div>
-      </div>
-      <div class="profile-headline" id="heroHeadline" style="display:none"></div>
-      <div class="profile-bio empty" id="heroBio">What are you building?</div>
-      <div class="profile-tags" id="heroTags"></div>
+  <aside class="app-sidebar" id="appSidebar">
+    <div class="app-sidebar-top">
+      <span class="app-sidebar-wordmark">Unify</span>
+      <button class="app-sidebar-close" onclick="closeSidebar()" aria-label="Close menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
-  </div>
+    <div class="app-sidebar-user">
+      <div class="app-sidebar-avatar">U</div>
+      <div class="app-sidebar-user-name" id="navUserName"></div>
+      <div class="app-sidebar-user-meta" id="sidebarMeta"></div>
+    </div>
+    <div class="app-sidebar-nav">
+      <div class="app-sidebar-section-label">Main</div>
+      <a href="index.html" class="app-sidebar-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <span class="app-sidebar-link-text">Dashboard</span>
+      </a>
+      <a href="timetable.html" class="app-sidebar-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span class="app-sidebar-link-text">Timetable</span>
+      </a>
+      <a href="study.html" class="app-sidebar-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <span class="app-sidebar-link-text">Study Plan</span>
+      </a>
+      <a href="predictor.html" class="app-sidebar-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span class="app-sidebar-link-text">Analytics</span>
+      </a>
+      <a href="profile.html" class="app-sidebar-link active">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="app-sidebar-link-text">Profile</span>
+      </a>
+    </div>
+    <div class="app-sidebar-bottom">
+      <button class="app-sidebar-theme-btn" onclick="toggleTheme()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <span class="app-sidebar-link-text"><span id="themeToggle">🌙 Dark</span></span>
+      </button>
+      <button class="app-sidebar-signout" id="signOutBtn">Sign out</button>
+    </div>
+  </aside>
 
-  <hr class="hdiv">
+  <div class="app-main">
+    <div class="app-topbar" id="appTopbar">
+      <button class="app-hamburger" onclick="openSidebar()" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+      <span class="app-topbar-wordmark">Unify</span>
+      <div class="app-topbar-right"></div>
+    </div>
 
-  <div class="tabs">
-    <button class="tab on" onclick="switchTab('posts',this)">Posts</button>
-    <button class="tab" onclick="switchTab('work',this)">Work</button>
-    <button class="tab" onclick="switchTab('about',this)">About</button>
-  </div>
+    <!-- PROFILE CONTENT -->
+    <div class="prof-page">
 
-  <!-- POSTS -->
-  <div class="pane on" id="pane-posts">
-    <div class="composer-box">
-      <div class="composer-top">
-        <div class="c-av" id="composerAv">U</div>
-        <textarea class="c-input" id="postInput" placeholder="Share what you're working on…" rows="2"></textarea>
-      </div>
-      <div class="composer-foot">
-        <div class="c-tags">
-          <button class="c-tag" onclick="toggleCTag(this,'Project')">Project</button>
-          <button class="c-tag" onclick="toggleCTag(this,'Win')">Win</button>
-          <button class="c-tag" onclick="toggleCTag(this,'Idea')">Idea</button>
-          <button class="c-tag" onclick="toggleCTag(this,'Question')">Question</button>
+      <!-- Hero: avatar + name -->
+      <div class="prof-hero">
+        <div class="prof-avatar" id="heroAvatar">U</div>
+        <div class="prof-hero-info">
+          <h1 class="prof-name" id="heroName">—</h1>
+          <button class="prof-edit-btn" onclick="openDrawer()">Edit profile</button>
         </div>
-        <button class="post-btn" onclick="submitPost()">Post</button>
       </div>
-    </div>
-    <div id="postsFeed"></div>
-  </div>
 
-  <!-- WORK -->
-  <div class="pane" id="pane-work">
-    <div class="work-header">
-      <span class="work-header-sub">Things you've built or are building.</span>
-      <button class="add-btn" onclick="openWorkForm()">+ Add project</button>
-    </div>
-    <div class="work-form" id="workForm">
-      <div class="fg"><label class="fl">Project name</label><input class="fi" id="wName" placeholder="e.g. Soil Moisture Monitor"></div>
-      <div class="fg"><label class="fl">What is it?</label><textarea class="fta" id="wDesc" rows="3" placeholder="Describe it briefly…"></textarea></div>
-      <div class="fg"><label class="fl">Status</label>
-        <select class="fs" id="wStatus">
-          <option value="wip">In progress</option>
-          <option value="done">Completed</option>
-          <option value="idea">Idea</option>
-        </select>
+      <!-- Academic tags (populated by profile.js via heroTags) -->
+      <div class="prof-info-section">
+        <div class="prof-tags-row" id="heroTags"></div>
+        <!-- kept for JS but not shown -->
+        <div id="heroHeadline" style="display:none"></div>
+        <div id="heroBio" style="display:none"></div>
       </div>
-      <div class="fg"><label class="fl">Skills / tags (comma separated)</label><input class="fi" id="wTags" placeholder="e.g. Arduino, Python, IoT"></div>
-      <div class="fg"><label class="fl">Collaborators (comma separated)</label><input class="fi" id="wCollabs" placeholder="e.g. Temi A., Kola B."></div>
-      <div class="drawer-actions">
-        <button class="fsub" onclick="saveWork()">Save</button>
-        <button class="fcan" onclick="closeWorkForm()">Cancel</button>
-      </div>
-    </div>
-    <div id="workList"></div>
-  </div>
 
-  <!-- ABOUT -->
-  <div class="pane" id="pane-about">
-    <div class="about-section">
-      <span class="about-label">Bio</span>
-      <p class="about-bio empty" id="aboutBio">No bio yet.</p>
+      <!-- Settings rows -->
+      <div class="prof-settings">
+        <span class="prof-settings-label">Account</span>
+        <a href="onboarding.html?edit=1" class="prof-setting-row">
+          <span class="row-label">University &amp; Level</span>
+          <span class="row-arrow">›</span>
+        </a>
+        <a href="predictor.html" class="prof-setting-row">
+          <span class="row-label">CGPA Predictor</span>
+          <span class="row-arrow">›</span>
+        </a>
+        <button class="prof-setting-row" onclick="toggleTheme()">
+          <span class="row-label">Appearance</span>
+          <span class="row-value">Theme</span>
+        </button>
+        <button class="prof-signout-btn" id="profSignOut">
+          <span>Sign out</span>
+          <span style="font-size:16px;">→</span>
+        </button>
+      </div>
+
+    </div><!-- end prof-page -->
+
+    <!-- Hidden JS hooks (profile.js relies on these) -->
+    <div style="display:none;" aria-hidden="true">
+      <div id="statPosts">0</div>
+      <div id="statWork">0</div>
+      <div id="statCollabs">0</div>
+      <textarea id="postInput"></textarea>
+      <div id="postsFeed"></div>
+      <div id="workList"></div>
+      <div id="workForm"></div>
+      <input id="wName"><textarea id="wDesc"></textarea>
+      <select id="wStatus"><option value="wip">In progress</option></select>
+      <input id="wTags"><input id="wCollabs">
+      <div id="pane-posts"></div>
+      <div id="pane-work"></div>
+      <div id="pane-about"></div>
+      <p id="aboutBio"></p>
+      <div id="aboutInterests"></div>
+      <div id="aboutLinks"></div>
+      <div id="composerAv"></div>
     </div>
-    <div class="about-divider"></div>
-    <div class="about-section">
-      <span class="about-label">Focus areas</span>
-      <div class="interest-list" id="aboutInterests"><span style="font-size:12px;color:var(--text3)">Nothing added yet.</span></div>
-    </div>
-    <div class="about-divider"></div>
-    <div class="about-section">
-      <span class="about-label">Links</span>
-      <div class="about-links" id="aboutLinks"><span style="font-size:12px;color:var(--text3)">No links added.</span></div>
-    </div>
+
   </div>
 </div>
 
-<!-- EDIT DRAWER -->
+<!-- BOTTOM NAV — Profile active -->
+<div class="app-bottom-nav">
+  <a href="index.html" class="app-bnav-item">
+    <svg width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    <span>Dashboard</span>
+  </a>
+  <a href="timetable.html" class="app-bnav-item">
+    <svg width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span>Timetable</span>
+  </a>
+  <a href="study.html" class="app-bnav-item">
+    <svg width="22" height="22" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    <span>Study Plan</span>
+  </a>
+  <a href="predictor.html" class="app-bnav-item">
+    <svg width="22" height="22" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <span>Analytics</span>
+  </a>
+  <a href="profile.html" class="app-bnav-item active">
+    <svg width="22" height="22" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>Profile</span>
+  </a>
+</div>
+
+<!-- EDIT DRAWER (kept for profile.js) -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer">
   <div class="drawer-title">Edit profile <button class="drawer-close" onclick="closeDrawer()">×</button></div>
@@ -161,7 +190,43 @@
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<script>
+  function openSidebar() {
+    document.getElementById('appSidebar').classList.add('open');
+    document.getElementById('sidebarOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    document.getElementById('appSidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  window.addEventListener('scroll', function() {
+    var tb = document.getElementById('appTopbar');
+    if (tb) tb.classList.toggle('scrolled', window.scrollY > 8);
+  }, { passive: true });
+  // Wire the visible sign-out button to the hidden one that profile.js hooked
+  document.addEventListener('DOMContentLoaded', function() {
+    var profSO = document.getElementById('profSignOut');
+    var realSO = document.getElementById('signOutBtn');
+    if (profSO && realSO) profSO.addEventListener('click', function() { realSO.click(); });
+  });
+  (function() {
+    var nameEl = document.getElementById('navUserName');
+    if (!nameEl) return;
+    function syncAvatar() {
+      var n = nameEl.textContent.trim();
+      var av = document.getElementById('heroAvatar');
+      var sav = document.querySelector('.app-sidebar-avatar');
+      if (n) {
+        var initial = n.charAt(0).toUpperCase();
+        if (av) av.textContent = initial;
+        if (sav) sav.textContent = initial;
+      }
+    }
+    new MutationObserver(syncAvatar).observe(nameEl, {childList:true,characterData:true,subtree:true});
+  })();
+</script>
 
 <script type="module" src="js/pages/profile.js"></script>
 </body>
