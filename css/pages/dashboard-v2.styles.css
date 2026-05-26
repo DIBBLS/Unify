@@ -538,41 +538,70 @@
 
 /* override course grid → flex column list */
 .dash-courses-list #courses {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 8px !important;
-  grid-template-columns: unset !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 10px !important;
+  flex-direction: unset !important;
 }
 
-/* restyle cards as rows */
-.dash-courses-list .course-item { border-radius: 12px; }
+/* box-style cards */
+.dash-courses-list .course-item {
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  overflow: hidden;
+}
 .dash-courses-list .course-item:hover {
-  transform: none !important;
-  box-shadow: 0 2px 12px rgba(0,0,0,.07);
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,.08) !important;
+  border-color: var(--green-d);
+}
+.dash-courses-list .course-item.active-card {
+  border-color: var(--green) !important;
+  box-shadow: 0 0 0 2px var(--green-bg) !important;
 }
 .dash-courses-list .course-card-inner {
-  flex-direction: row;
-  align-items: center;
-  padding: 12px 14px;
-  gap: 12px;
-  border-radius: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 13px 14px 11px;
+  gap: 6px;
+  border-radius: 0;
+  position: relative;
+  height: 100%;
+  box-sizing: border-box;
 }
 .dash-courses-list .course-accent { display: none; }
 
-/* course code text: green */
+/* course code: bold, green */
 .dash-courses-list .course-card-code {
-  font-size: 11px;
-  min-width: 70px;
+  font-size: 12px;
+  font-weight: 800;
+  min-width: unset;
   margin-right: 0;
+  letter-spacing: .3px;
   color: var(--green-d) !important;
 }
 [data-theme="dark"] .dash-courses-list .course-card-code {
   color: var(--green) !important;
 }
 
-.dash-courses-list .course-card-name { font-size: 13px; flex: 1; }
-.dash-courses-list .course-progress-wrap { min-width: 70px; max-width: 90px; }
+.dash-courses-list .course-card-name {
+  font-size: 11px;
+  color: var(--text2);
+  flex: unset;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.dash-courses-list .course-progress-wrap { min-width: unset; max-width: unset; width: 100%; }
+.dash-courses-list .course-card-footer { width: 100%; margin-top: auto; }
 .dash-courses-list .course-card-tap { display: none; }
+.dash-courses-list .course-rm-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
 
 /* ── MANUAL ADD (collapsible) ── */
 .dash-manual-add {
