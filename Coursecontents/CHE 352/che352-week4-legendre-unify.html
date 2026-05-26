@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHE 352 — Week 4: Legendre's Equation &amp; Polynomials | Unify Learn</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<script>MathJax = { chtml: { scale: 0.95 }, options: { skipHtmlTags: ["script","noscript","style","textarea","pre"] } };</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  :root {
+    --bg: #f5f4f0; --surface: #ffffff; --surface2: #f8f7f3;
+    --border: #e0deda; --text: #0a0a0a; --text2: #555555; --text3: #999999;
+    --green: #4ade80; --green-deep: #16a34a; --green-bg: rgba(74,222,128,0.1);
+    --fd: 'Playfair Display', serif; --fb: 'DM Sans', sans-serif;
+    --radius: 12px; --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  [data-theme="dark"] {
+    --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #222222;
+    --border: #2a2a2a; --text: #f0efeb; --text2: #aaa; --text3: #666;
+    --shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--fb); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; transition: background 0.3s, color 0.3s; }
+  #progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--green); width: 0%; z-index: 1000; transition: width 0.2s; }
+  .topbar { position: fixed; top: 3px; left: 0; right: 0; height: 52px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 999; transition: background 0.3s, border-color 0.3s; }
+  .topbar-wordmark { font-family: var(--fd); font-weight: 900; font-size: 18px; color: var(--text); letter-spacing: -0.5px; }
+  .topbar-wordmark span { color: var(--green); }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .course-pill { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--text3); }
+  #dark-toggle { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: all 0.2s; }
+  #dark-toggle:hover { background: var(--surface2); }
+  .progress-tracker { position: fixed; bottom: 20px; right: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; font-size: 11px; font-weight: 600; color: var(--text2); box-shadow: var(--shadow); z-index: 998; display: flex; align-items: center; gap: 8px; transition: background 0.3s, border-color 0.3s; }
+  .tracker-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+  .wrapper { max-width: 780px; margin: 0 auto; padding: 88px 20px 100px; }
+  .hero { background: #0a0a0a; color: #f5f4f0; border-radius: var(--radius); padding: 40px 36px; margin-bottom: 32px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -40px; right: -40px; width: 200px; height: 200px; border-radius: 50%; background: rgba(74,222,128,0.07); pointer-events: none; }
+  .hero-eyebrow { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #4ade80; margin-bottom: 12px; }
+  .hero-title { font-family: var(--fd); font-size: 32px; font-weight: 900; letter-spacing: -1px; line-height: 1.15; color: #f5f4f0; margin-bottom: 8px; }
+  .hero-subtitle { font-family: var(--fd); font-size: 17px; font-weight: 400; font-style: italic; color: rgba(245,244,240,0.7); margin-bottom: 24px; line-height: 1.4; }
+  .hero-outcome { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.25); border-radius: 8px; padding: 14px 18px; font-size: 13px; color: rgba(245,244,240,0.9); line-height: 1.6; margin-bottom: 24px; }
+  .hero-outcome strong { color: #4ade80; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; }
+  .meta-chip { font-size: 11px; font-weight: 500; padding: 4px 12px; border-radius: 20px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: rgba(245,244,240,0.7); }
+  .topic-progress { margin-bottom: 32px; }
+  .tp-label { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+  .tp-steps { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tp-step { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text3); }
+  .tp-step.done { background: var(--green-bg); border-color: rgba(74,222,128,0.35); color: var(--green-deep); }
+  .tp-step.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .tp-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .tags-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+  .tag { font-family: var(--fb); font-size: 11px; font-weight: 500; padding: 5px 13px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: default; }
+  .tag.green { background: var(--green-bg); border-color: rgba(74,222,128,0.3); color: var(--green-deep); }
+  .section-label { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green-deep); margin-bottom: 6px; }
+  .section-title { font-family: var(--fd); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); margin-bottom: 20px; line-height: 1.25; }
+  .subtopic-heading { display: flex; align-items: center; gap: 10px; margin: 32px 0 14px; }
+  .subtopic-heading h3 { font-family: var(--fd); font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+  .subtopic-num { font-family: var(--fb); font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; background: var(--green-bg); border: 1px solid rgba(74,222,128,0.3); color: var(--green-deep); letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+  .topic-block { margin-bottom: 56px; }
+  .topic-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 28px; margin-bottom: 0px; box-shadow: var(--shadow); }
+  .topic-card p { max-width: 66ch; color: var(--text2); font-size: 14px; line-height: 1.8; margin-bottom: 12px; overflow-x: auto; }
+  .topic-card ul, .topic-card ol { max-width: 66ch; padding-left: 20px; color: var(--text2); font-size: 14px; line-height: 1.8; margin-bottom: 12px; }
+  .topic-card li { margin-bottom: 6px; }
+  .topic-card strong { color: var(--text); }
+  .topic-card p:last-child, .topic-card ul:last-child { margin-bottom: 0; }
+  .formula-block { border-left: 4px solid var(--green); background: var(--green-bg); border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; margin: 1rem 0; overflow-x: auto; }
+  .formula-block .f-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--green-deep); margin-bottom: 0.5rem; font-family: var(--fb); }
+  .formula-block .vars { font-size: 0.82rem; color: var(--text2); margin-top: 0.4rem; }
+  .worked-example { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin: 1.25rem 0; overflow-x: auto; box-shadow: var(--shadow); }
+  .we-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; background: #0a0a0a; color: #f5f4f0; display: inline-block; padding: 3px 9px; border-radius: 4px; margin-bottom: 0.75rem; }
+  [data-theme="dark"] .we-label { background: var(--green); color: #0a0a0a; }
+  .we-q { font-family: var(--fd); font-size: 1.05rem; margin-bottom: 1rem; font-style: italic; color: var(--text); }
+  .we-step { display: flex; gap: 0.75rem; margin-bottom: 0.6rem; align-items: flex-start; }
+  .we-step-num { background: var(--green); color: #0a0a0a; border-radius: 50%; width: 1.4rem; height: 1.4rem; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex-shrink: 0; margin-top: 0.1rem; }
+  .we-step-text { font-size: 0.92rem; overflow-x: auto; color: var(--text2); line-height: 1.7; }
+  .we-step-text strong { color: var(--text); }
+  .we-result { margin-top: 0.75rem; padding: 0.75rem 1rem; background: var(--green-bg); border: 1px solid rgba(74,222,128,0.3); border-radius: 8px; font-weight: 600; font-size: 0.95rem; color: var(--text); overflow-x: auto; }
+  .note-box { background: var(--green-bg); border: 1px solid rgba(74,222,128,0.3); border-radius: var(--radius); padding: 1rem 1.25rem; margin: 1rem 0; }
+  .note-box strong { color: var(--green-deep); display: block; margin-bottom: 0.3rem; }
+  .note-box p { font-size: 14px; color: var(--text2); line-height: 1.7; margin: 0; }
+  .poly-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+  @media(max-width:600px){ .poly-grid { grid-template-columns: 1fr; } }
+  .poly-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; box-shadow: var(--shadow); overflow-x: auto; }
+  .poly-card .poly-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--green-deep); margin-bottom: 0.4rem; font-family: var(--fb); }
+  .divider { height: 1px; background: var(--border); margin: 40px 0; }
+  .mini-check { background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--green); border-radius: 0 var(--radius) var(--radius) 0; padding: 20px 24px; margin: 0 0 24px 0; }
+  .mini-check-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .mini-check-icon { font-size: 14px; }
+  .mini-check-title { font-family: var(--fb); font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--green-deep); }
+  .mini-check-sub { font-size: 11px; color: var(--text3); margin-left: auto; }
+  .mc-reveal-item { margin-bottom: 14px; }
+  .mc-q { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 8px; max-width: 66ch; line-height: 1.6; }
+  .mc-reveal-btn { font-family: var(--fb); font-size: 10px; font-weight: 600; padding: 5px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); cursor: pointer; transition: all 0.2s; }
+  .mc-reveal-btn:hover { background: var(--green-bg); border-color: rgba(74,222,128,0.3); color: var(--green-deep); }
+  .mc-answer { display: none; margin-top: 8px; padding: 10px 14px; background: var(--surface); border-left: 2px solid var(--green); border-radius: 0 6px 6px 0; font-size: 12px; color: var(--text2); line-height: 1.7; max-width: 66ch; }
+  .mc-answer.show { display: block; }
+  .mc-mcq-item { margin-bottom: 14px; }
+  .mc-mcq-opts { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; max-width: 52ch; }
+  .mc-mcq-opt { display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; padding: 7px 12px; border-radius: 7px; background: var(--surface); border: 1px solid var(--border); color: var(--text2); transition: all 0.15s; user-select: none; }
+  .mc-mcq-opt:hover:not(.mc-locked) { background: var(--green-bg); border-color: rgba(74,222,128,0.3); }
+  .mc-mcq-opt.mc-correct { background: var(--green-bg); border-color: rgba(74,222,128,0.4); color: var(--green-deep); font-weight: 600; }
+  .mc-mcq-opt.mc-wrong { background: rgba(239,68,68,0.07); border-color: rgba(239,68,68,0.3); color: #b91c1c; }
+  .mc-ltr { font-weight: 700; font-size: 10px; width: 20px; height: 20px; border-radius: 50%; background: var(--surface2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .mc-mcq-fb { display: none; margin-top: 7px; font-size: 11px; font-weight: 600; }
+  .mc-fitb-item { margin-bottom: 14px; }
+  .mc-fitb-row { display: flex; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
+  .mc-fitb-input { font-family: var(--fb); font-size: 12px; padding: 7px 12px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); color: var(--text); outline: none; width: 220px; transition: border-color 0.2s; }
+  .mc-fitb-input:focus { border-color: var(--green); }
+  .mc-fitb-btn { font-family: var(--fb); font-size: 10px; font-weight: 700; padding: 7px 14px; border-radius: 7px; border: none; background: var(--text); color: var(--bg); cursor: pointer; white-space: nowrap; }
+  .mc-fitb-fb { display: none; margin-top: 7px; font-size: 11px; font-weight: 600; }
+  .recall-section { margin-top: 24px; }
+  .recall-label { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green-deep); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .recall-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .recall-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin-bottom: 10px; }
+  .recall-badge { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 9px; border-radius: 20px; margin-bottom: 10px; }
+  .badge-def { background: rgba(74,222,128,0.15); color: var(--green-deep); border: 1px solid rgba(74,222,128,0.3); }
+  .badge-mech { background: rgba(251,191,36,0.15); color: #b45309; border: 1px solid rgba(251,191,36,0.3); }
+  .badge-app { background: rgba(59,130,246,0.1); color: #1d4ed8; border: 1px solid rgba(59,130,246,0.2); }
+  .badge-comp { background: rgba(139,92,246,0.1); color: #6d28d9; border: 1px solid rgba(139,92,246,0.2); }
+  .recall-q { font-size: 14px; font-weight: 500; color: var(--text); max-width: 66ch; line-height: 1.6; margin-bottom: 12px; }
+  .reveal-btn { font-family: var(--fb); font-size: 11px; font-weight: 600; padding: 6px 16px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: pointer; transition: all 0.2s; }
+  .reveal-btn:hover { background: var(--green-bg); border-color: rgba(74,222,128,0.3); color: var(--green-deep); }
+  .recall-answer { display: none; margin-top: 12px; padding: 14px 16px; background: var(--surface2); border-left: 3px solid var(--green); border-radius: 0 8px 8px 0; font-size: 13px; color: var(--text2); line-height: 1.7; max-width: 66ch; overflow-x: auto; }
+  .recall-answer.show { display: block; }
+  .pulse-check { background: var(--green); border-radius: var(--radius); padding: 28px; margin: 40px 0; }
+  .pulse-check .pc-title { font-family: var(--fd); font-size: 20px; font-weight: 900; color: #0a0a0a; margin-bottom: 4px; }
+  .pulse-check .pc-sub { font-size: 12px; color: rgba(10,10,10,0.6); margin-bottom: 20px; }
+  .pc-question { background: rgba(255,255,255,0.35); border-radius: 10px; padding: 16px 18px; margin-bottom: 12px; }
+  .pc-q-text { font-size: 14px; font-weight: 500; color: #0a0a0a; margin-bottom: 10px; max-width: 66ch; line-height: 1.6; }
+  .pc-options { display: flex; flex-direction: column; gap: 6px; }
+  .pc-option { display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer; padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.5); color: #0a0a0a; transition: all 0.15s; max-width: 66ch; }
+  .pc-option:hover { background: rgba(255,255,255,0.65); }
+  .pc-option.correct { background: #fff; border-color: #16a34a; }
+  .pc-option.wrong { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.5); }
+  .pc-letter { font-weight: 700; font-size: 11px; width: 22px; height: 22px; border-radius: 50%; background: rgba(10,10,10,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .pc-fitb input { background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.7); border-radius: 6px; padding: 8px 12px; font-family: var(--fb); font-size: 13px; color: #0a0a0a; width: 100%; max-width: 300px; outline: none; }
+  .pc-fitb input:focus { background: #fff; }
+  .pc-check-btn { margin-top: 8px; font-family: var(--fb); font-size: 11px; font-weight: 700; padding: 6px 16px; border-radius: 6px; border: none; background: #0a0a0a; color: #f5f4f0; cursor: pointer; }
+  .pc-feedback { margin-top: 8px; font-size: 12px; font-weight: 500; display: none; color: #0a0a0a; }
+  .eoq { background: var(--text); border-radius: var(--radius); padding: 32px; margin-top: 48px; }
+  .eoq-eyebrow { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green); margin-bottom: 6px; }
+  .eoq-title { font-family: var(--fd); font-size: 24px; font-weight: 900; color: #f5f4f0; margin-bottom: 4px; letter-spacing: -0.5px; }
+  .eoq-sub { font-size: 12px; color: rgba(240,239,235,0.5); margin-bottom: 24px; }
+  .eoq-question { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 18px 20px; margin-bottom: 14px; }
+  .eoq-qnum { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: rgba(240,239,235,0.4); margin-bottom: 6px; }
+  .eoq-q-text { font-size: 14px; font-weight: 500; color: #f0efeb; max-width: 66ch; line-height: 1.6; margin-bottom: 12px; }
+  .eoq-options { display: flex; flex-direction: column; gap: 6px; }
+  .eoq-option { display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer; padding: 10px 14px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(240,239,235,0.8); transition: all 0.15s; max-width: 66ch; user-select: none; }
+  .eoq-option:hover:not(.locked) { background: rgba(255,255,255,0.1); }
+  .eoq-option.selected { border-color: var(--green); background: rgba(74,222,128,0.1); }
+  .eoq-option.correct-reveal { border-color: var(--green); background: rgba(74,222,128,0.15); color: #f0efeb; }
+  .eoq-option.wrong-reveal { border-color: rgba(239,68,68,0.5); background: rgba(239,68,68,0.1); color: rgba(240,239,235,0.6); }
+  .eoq-letter { font-weight: 700; font-size: 11px; width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: rgba(240,239,235,0.7); }
+  .eoq-feedback { display: none; margin-top: 10px; font-size: 12px; line-height: 1.6; padding: 10px 14px; border-radius: 6px; max-width: 66ch; }
+  .eoq-feedback.correct-fb { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.25); color: #86efac; }
+  .eoq-feedback.wrong-fb { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #fca5a5; }
+  .eoq-submit { margin-top: 24px; width: 100%; padding: 14px; border-radius: 8px; border: none; background: var(--green); color: #0a0a0a; font-family: var(--fb); font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+  .eoq-submit:hover { opacity: 0.88; }
+  .eoq-result { display: none; margin-top: 24px; padding: 24px; border-radius: 10px; text-align: center; }
+  .eoq-result.pass { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); }
+  .eoq-result.fail { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); }
+  .result-score { font-family: var(--fd); font-size: 40px; font-weight: 900; color: #f0efeb; margin-bottom: 6px; }
+  .result-pill { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 5px 16px; border-radius: 20px; margin-bottom: 14px; }
+  .pill-pass { background: var(--green); color: #0a0a0a; }
+  .pill-fail { background: rgba(239,68,68,0.3); color: #fca5a5; border: 1px solid rgba(239,68,68,0.4); }
+  .result-msg { font-size: 13px; color: rgba(240,239,235,0.7); line-height: 1.6; max-width: 52ch; margin: 0 auto 16px; }
+  .unlock-banner { background: rgba(74,222,128,0.15); border: 1px solid rgba(74,222,128,0.3); border-radius: 8px; padding: 12px 16px; font-size: 13px; color: var(--green); font-weight: 500; margin-top: 12px; }
+  .review-nudge { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 14px 16px; margin-top: 12px; text-align: left; }
+  .review-nudge p { font-size: 12px; color: rgba(240,239,235,0.6); margin-bottom: 8px; }
+  .review-nudge ul { padding-left: 16px; font-size: 12px; color: #fca5a5; line-height: 1.8; }
+  @media (max-width: 600px) {
+    .wrapper { padding: 72px 14px 100px; }
+    .hero { padding: 28px 20px; } .hero-title { font-size: 24px; }
+    .topic-card { padding: 18px 16px; } .eoq { padding: 22px 16px; }
+    .pulse-check { padding: 20px 16px; } .mini-check { padding: 16px 18px; }
+    .progress-tracker { display: none; }
+  }
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<nav class="topbar">
+  <div class="topbar-wordmark">Unify<span>.</span></div>
+  <div class="topbar-right">
+    <span class="course-pill">CHE 352</span>
+    <button id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode">🌙</button>
+  </div>
+</nav>
+<div class="progress-tracker">
+  <div class="tracker-dot"></div>
+  <span class="tracker-label" id="tracker-text">Scroll to begin</span>
+</div>
+
+<div class="wrapper">
+
+  <header class="hero">
+    <div class="hero-eyebrow">CHE 352 · Week 4 · LASU Faculty of Engineering</div>
+    <h1 class="hero-title">Legendre's Equation &amp; Legendre Polynomials</h1>
+    <p class="hero-subtitle">Power Series Solution, Termination &amp; \(P_k(x)\)</p>
+    <div class="hero-outcome">
+      <strong>By the end of this week, you should be able to</strong> state Legendre's equation, solve it using the power series method, identify when the series terminates to give a polynomial, and derive and write \(P_0(x)\), \(P_1(x)\), \(P_2(x)\), and \(P_3(x)\) explicitly.
+    </div>
+    <div class="hero-meta">
+      <span class="meta-chip">📅 Week 4 of 7</span>
+      <span class="meta-chip">🎓 Dr. Lukumon Salami</span>
+      <span class="meta-chip">📍 Lagos State University</span>
+    </div>
+  </header>
+
+  <div class="topic-progress">
+    <div class="tp-label">Your Progress</div>
+    <div class="tp-steps">
+      <div class="tp-step active" id="step-1"><span class="tp-dot"></span> Topic 1: Legendre's Equation</div>
+      <div class="tp-step" id="step-2"><span class="tp-dot"></span> Topic 2: Legendre Polynomials</div>
+      <div class="tp-step" id="step-3"><span class="tp-dot"></span> Topic 3: Worked Examples</div>
+      <div class="tp-step" id="step-quiz"><span class="tp-dot"></span> Week 4 Quiz</div>
+    </div>
+  </div>
+
+  <div class="tags-row">
+    <span class="tag green">Legendre's Equation</span>
+    <span class="tag green">Legendre Polynomials P_k(x)</span>
+    <span class="tag green">Power Series Solution</span>
+    <span class="tag green">Terminating Series</span>
+    <span class="tag">P₀(x) to P₃(x)</span>
+    <span class="tag">Even/Odd Polynomials</span>
+  </div>
+
+  <!-- ═══ TOPIC 1 ═══ -->
+  <div class="topic-block" id="topic-1">
+    <div class="section-label">Topic 1</div>
+    <div class="section-title">Legendre's Differential Equation</div>
+
+    <div class="topic-card">
+      <p>Legendre's equation appears in many physical problems — heat conduction in spheres, gravitational fields, quantum mechanics. It is a second-order linear ODE with a polynomial coefficient:</p>
+    </div>
+
+    <div class="formula-block">
+      <div class="f-label">Legendre's Equation</div>
+      \[ (1-x^2)y'' - 2xy' + k(k+1)y = 0 \]
+      <div class="vars">where \(k\) is a non-negative integer. The equation has an ordinary point at \(x = 0\), so the power series method applies.</div>
+    </div>
+
+    <div class="subtopic-heading">
+      <span class="subtopic-num">1.1</span>
+      <h3>The Series Solution &amp; Coefficient Recurrence</h3>
+    </div>
+
+    <div class="topic-card">
+      <p>The solution to Legendre's equation is a power series. When \(k\) is a non-negative integer, the series <strong>terminates</strong> — it stops after a finite number of terms and becomes a polynomial. These are called the <strong>Legendre polynomials</strong>, denoted \(P_k(x)\).</p>
+      <p>The convention is to normalise each polynomial so that \(P_k(1) = 1\). This fixes the arbitrary constant and gives clean, standard forms.</p>
+    </div>
+
+    <div class="formula-block">
+      <div class="f-label">Coefficient Recurrence for Legendre's Equation</div>
+      \[ a_{n+2} = -\frac{(k-n)(k+n+1)}{(n+1)(n+2)}\, a_n \]
+      <div class="vars">Even-indexed coefficients build from \(a_0\); odd-indexed from \(a_1\). When \(n = k\), the numerator becomes zero — the series terminates.</div>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 Why does the series terminate?</strong>
+      <p>The recurrence multiplies each term by \((k-n)\). When \(n\) reaches \(k\), this factor becomes zero — so \(a_{k+2} = 0\), and all subsequent coefficients vanish. The infinite series becomes a finite polynomial of degree \(k\).</p>
+    </div>
+
+    <!-- MINI CHECK 1.1 -->
+    <div class="mini-check">
+      <div class="mini-check-header">
+        <span class="mini-check-icon">⚡</span>
+        <span class="mini-check-title">Quick Check — Legendre's Equation</span>
+        <span class="mini-check-sub">2 questions</span>
+      </div>
+      <div class="mc-mcq-item">
+        <div class="mc-q">In Legendre's equation \((1-x^2)y'' - 2xy' + k(k+1)y = 0\), the parameter \(k\) must be a:</div>
+        <div class="mc-mcq-opts" id="mc-4-leg-1">
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-4-leg-1',false,'mc-4-leg-1-fb')"><span class="mc-ltr">A</span> Positive real number</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-4-leg-1',true,'mc-4-leg-1-fb')"><span class="mc-ltr">B</span> Non-negative integer</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-4-leg-1',false,'mc-4-leg-1-fb')"><span class="mc-ltr">C</span> Any complex number</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-4-leg-1',false,'mc-4-leg-1-fb')"><span class="mc-ltr">D</span> A negative integer</div>
+        </div>
+        <div class="mc-mcq-fb" id="mc-4-leg-1-fb"></div>
+      </div>
+      <div class="mc-reveal-item">
+        <div class="mc-q">In the recurrence \(a_{n+2} = -\frac{(k-n)(k+n+1)}{(n+1)(n+2)} a_n\), why does the series terminate when \(k\) is a non-negative integer?</div>
+        <button class="mc-reveal-btn" onclick="mcReveal(this)">Reveal Answer</button>
+        <div class="mc-answer">When \(n = k\), the factor \((k - n) = 0\) in the numerator makes \(a_{k+2} = 0\). All subsequent coefficients are also zero, so the infinite series collapses to a finite polynomial of degree \(k\).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TOPIC 2 ═══ -->
+  <div class="topic-block" id="topic-2">
+    <div class="section-label">Topic 2</div>
+    <div class="section-title">The Legendre Polynomials \(P_k(x)\)</div>
+
+    <div class="subtopic-heading">
+      <span class="subtopic-num">2.1</span>
+      <h3>Explicit Forms of \(P_0\) through \(P_3\)</h3>
+    </div>
+
+    <div class="topic-card">
+      <p>By convention: when \(k\) is even, set \(a_1 = 0\) and choose \(a_0\) so that \(P_k(1) = 1\). When \(k\) is odd, set \(a_0 = 0\) and choose \(a_1\) so that \(P_k(1) = 1\).</p>
+    </div>
+
+    <div class="poly-grid">
+      <div class="poly-card">
+        <div class="poly-label">P₀(x) — degree 0</div>
+        \[ P_0(x) = 1 \]
+      </div>
+      <div class="poly-card">
+        <div class="poly-label">P₁(x) — degree 1</div>
+        \[ P_1(x) = x \]
+      </div>
+      <div class="poly-card">
+        <div class="poly-label">P₂(x) — degree 2</div>
+        \[ P_2(x) = \tfrac{1}{2}(3x^2 - 1) \]
+      </div>
+      <div class="poly-card">
+        <div class="poly-label">P₃(x) — degree 3</div>
+        \[ P_3(x) = \tfrac{1}{2}(5x^3 - 3x) \]
+      </div>
+    </div>
+
+    <div class="note-box">
+      <strong>Key pattern:</strong>
+      <p>Even-degree polynomials (\(P_0, P_2, P_4, \ldots\)) contain only even powers of \(x\). Odd-degree ones (\(P_1, P_3, P_5, \ldots\)) contain only odd powers. The two independent series never mix — even from \(a_0\), odd from \(a_1\).</p>
+    </div>
+
+    <!-- MINI CHECK 2.1 -->
+    <div class="mini-check">
+      <div class="mini-check-header">
+        <span class="mini-check-icon">⚡</span>
+        <span class="mini-check-title">Quick Check — The Polynomials</span>
+        <span class="mini-check-sub">2 questions</span>
+      </div>
+      <div class="mc-mcq-item">
+        <div class="mc-q">The value of \(P_k(1)\) for any non-negative integer \(k\) is:</div>
+        <div class="mc-mcq-opts" id="mc-4-pk-1">
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-4-pk-1',false,'mc-4-pk-1-fb')"><span class="mc-ltr">A</span> 0</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-4-pk-1',true,'mc-4-pk-1-fb')"><span class="mc-ltr">B</span> 1</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-4-pk-1',false,'mc-4-pk-1-fb')"><span class="mc-ltr">C</span> \(k\)</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-4-pk-1',false,'mc-4-pk-1-fb')"><span class="mc-ltr">D</span> \(k+1\)</div>
+        </div>
+        <div class="mc-mcq-fb" id="mc-4-pk-1-fb"></div>
+      </div>
+      <div class="mc-fitb-item">
+        <div class="mc-q">For even degree \(k\), which coefficient is set to zero to isolate the polynomial series?</div>
+        <div class="mc-fitb-row">
+          <input class="mc-fitb-input" id="mc-4-pk-2-inp" placeholder="Your answer…" type="text">
+          <button class="mc-fitb-btn" onclick="mcFitb('mc-4-pk-2-inp','mc-4-pk-2-fb',['a1','a_1'])">Check</button>
+        </div>
+        <div class="mc-fitb-fb" id="mc-4-pk-2-fb"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TOPIC 3 ═══ -->
+  <div class="topic-block" id="topic-3">
+    <div class="section-label">Topic 3</div>
+    <div class="section-title">Worked Examples — Deriving the Polynomials</div>
+
+    <div class="subtopic-heading">
+      <span class="subtopic-num">3.1</span>
+      <h3>Finding \(P_1(x)\) and \(P_2(x)\)</h3>
+    </div>
+
+    <div class="worked-example">
+      <div class="we-label">Example 1 — Finding P₁(x) and P₂(x)</div>
+      <div class="we-q">From the solution series of Legendre's equation, find \(P_1(x)\) and \(P_2(x)\) explicitly.</div>
+
+      <div class="we-step">
+        <div class="we-step-num">1</div>
+        <div class="we-step-text">
+          <strong>For \(k = 1\) (odd), set \(a_0 = 0\), use \(a_1\) as the free constant.</strong><br>
+          Recurrence at \(n=1\): \(a_3 = -\frac{(1-1)(3)}{2 \times 3} a_1 = 0\). Series terminates!<br>
+          So: \(y = a_1 x\). Normalising: \(P_1(1) = a_1 = 1 \Rightarrow a_1 = 1\)
+        </div>
+      </div>
+      <div class="we-result">\[ P_1(x) = x \]</div>
+
+      <div class="we-step" style="margin-top:1rem;">
+        <div class="we-step-num">2</div>
+        <div class="we-step-text">
+          <strong>For \(k = 2\) (even), set \(a_1 = 0\), use \(a_0\) as the free constant.</strong><br>
+          At \(n=0\): \(a_2 = -\frac{(2)(3)}{2} a_0 = -3a_0\)<br>
+          At \(n=2\): \(a_4 = -\frac{(0)(5)}{12} a_2 = 0\). Terminates.<br>
+          Series: \(y = a_0(1 - 3x^2)\). Normalising at \(x=1\): \(a_0(1-3) = 1 \Rightarrow a_0 = -\frac{1}{2}\)
+        </div>
+      </div>
+      <div class="we-result">\[ P_2(x) = -\tfrac{1}{2}(1 - 3x^2) = \tfrac{1}{2}(3x^2 - 1) \]</div>
+    </div>
+
+    <div class="subtopic-heading">
+      <span class="subtopic-num">3.2</span>
+      <h3>Finding \(P_3(x)\)</h3>
+    </div>
+
+    <div class="worked-example">
+      <div class="we-label">Example 2 — Finding P₃(x)</div>
+      <div class="we-q">Derive \(P_3(x)\) using the power series recurrence for \(k = 3\) (odd, so use \(a_0 = 0\)).</div>
+
+      <div class="we-step">
+        <div class="we-step-num">1</div>
+        <div class="we-step-text">
+          For \(k=3\), \(a_0 = 0\), free constant is \(a_1\).<br>
+          At \(n=1\): \(a_3 = -\frac{(3-1)(3+1+1)}{2 \times 3} a_1 = -\frac{2 \times 5}{6} a_1 = -\frac{5}{3} a_1\)<br>
+          At \(n=3\): \(a_5 = 0\). Series: \(y = a_1\left(x - \frac{5}{3}x^3\right)\)
+        </div>
+      </div>
+
+      <div class="we-step">
+        <div class="we-step-num">2</div>
+        <div class="we-step-text">
+          Normalise: \(P_3(1) = a_1\left(1 - \frac{5}{3}\right) = a_1\left(-\frac{2}{3}\right) = 1 \Rightarrow a_1 = -\frac{3}{2}\)
+        </div>
+      </div>
+
+      <div class="we-result">\[ P_3(x) = -\tfrac{3}{2}\!\left(x - \tfrac{5}{3}x^3\right) = \tfrac{1}{2}(5x^3 - 3x) \]</div>
+    </div>
+
+    <div class="topic-card">
+      <p><strong>Verification at x = 1</strong> — every Legendre polynomial satisfies \(P_k(1) = 1\) by construction:</p>
+      <ul>
+        <li>\(P_0(1) = 1\) ✓</li>
+        <li>\(P_1(1) = 1\) ✓</li>
+        <li>\(P_2(1) = \frac{1}{2}(3-1) = 1\) ✓</li>
+        <li>\(P_3(1) = \frac{1}{2}(5-3) = 1\) ✓</li>
+      </ul>
+    </div>
+
+    <!-- MINI CHECK 3 -->
+    <div class="mini-check">
+      <div class="mini-check-header">
+        <span class="mini-check-icon">⚡</span>
+        <span class="mini-check-title">Quick Check — Worked Examples</span>
+        <span class="mini-check-sub">2 questions</span>
+      </div>
+      <div class="mc-mcq-item">
+        <div class="mc-q">For \(k=2\), the recurrence gives \(a_2 =\):</div>
+        <div class="mc-mcq-opts" id="mc-4-we-1">
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-4-we-1',false,'mc-4-we-1-fb')"><span class="mc-ltr">A</span> \(3a_0\)</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-4-we-1',true,'mc-4-we-1-fb')"><span class="mc-ltr">B</span> \(-3a_0\)</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-4-we-1',false,'mc-4-we-1-fb')"><span class="mc-ltr">C</span> \(2a_0\)</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-4-we-1',false,'mc-4-we-1-fb')"><span class="mc-ltr">D</span> \(-2a_0\)</div>
+        </div>
+        <div class="mc-mcq-fb" id="mc-4-we-1-fb"></div>
+      </div>
+      <div class="mc-mcq-item">
+        <div class="mc-q">\(P_2(0)\) equals:</div>
+        <div class="mc-mcq-opts" id="mc-4-we-2">
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-4-we-2',false,'mc-4-we-2-fb')"><span class="mc-ltr">A</span> 1</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-4-we-2',false,'mc-4-we-2-fb')"><span class="mc-ltr">B</span> 0</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-4-we-2',true,'mc-4-we-2-fb')"><span class="mc-ltr">C</span> \(-\frac{1}{2}\)</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-4-we-2',false,'mc-4-we-2-fb')"><span class="mc-ltr">D</span> \(\frac{1}{2}\)</div>
+        </div>
+        <div class="mc-mcq-fb" id="mc-4-we-2-fb"></div>
+      </div>
+    </div>
+
+    <!-- ACTIVE RECALL -->
+    <div class="recall-section">
+      <div class="recall-label">Topic Active Recall</div>
+      <div class="recall-card">
+        <div class="recall-badge badge-def">Definition</div>
+        <div class="recall-q">State Legendre's differential equation in standard form.</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer">\[(1-x^2)y'' - 2xy' + k(k+1)y = 0\] where \(k\) is a non-negative integer. This is the standard form you must be able to write from memory.</div>
+      </div>
+      <div class="recall-card">
+        <div class="recall-badge badge-mech">Mechanism</div>
+        <div class="recall-q">Why does the power series solution terminate when \(k\) is a non-negative integer?</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer">The recurrence is \(a_{n+2} = -\frac{(k-n)(k+n+1)}{(n+1)(n+2)} a_n\). When \(n = k\), the factor \((k-n) = 0\), making \(a_{k+2} = 0\). All subsequent coefficients are also zero — the infinite series becomes a finite polynomial of degree \(k\).</div>
+      </div>
+      <div class="recall-card">
+        <div class="recall-badge badge-comp">Computation</div>
+        <div class="recall-q">Write \(P_2(x)\) and verify \(P_2(1) = 1\).</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer">\(P_2(x) = \frac{1}{2}(3x^2 - 1)\)<br><br>Checking: \(P_2(1) = \frac{1}{2}(3 - 1) = \frac{1}{2}(2) = 1\) ✓</div>
+      </div>
+      <div class="recall-card">
+        <div class="recall-badge badge-app">Application</div>
+        <div class="recall-q">How do you decide whether to set \(a_0 = 0\) or \(a_1 = 0\) when finding a Legendre polynomial?</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer">If \(k\) is even → set \(a_1 = 0\), keep \(a_0\) as the free constant (even powers only). If \(k\) is odd → set \(a_0 = 0\), keep \(a_1\) as the free constant (odd powers only). Then normalise so that \(P_k(1) = 1\).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PULSE CHECK -->
+  <div class="pulse-check" id="pulse1">
+    <div class="pc-title">Pulse Check ①</div>
+    <div class="pc-sub">End of Topics 1–3 — quick ungraded check.</div>
+    <div class="pc-question">
+      <div class="pc-q-text">\(P_2(x)\) is equal to:</div>
+      <div class="pc-options" id="pc1-1-opts">
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-1',false)"><span class="pc-letter">A</span> \(3x^2 - 1\)</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-1',true)"><span class="pc-letter">B</span> \(\frac{1}{2}(3x^2 - 1)\)</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-1',false)"><span class="pc-letter">C</span> \(\frac{1}{2}(x^2 - 1)\)</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-1',false)"><span class="pc-letter">D</span> \(x^2\)</div>
+      </div>
+      <div class="pc-feedback" id="pc1-1-fb"></div>
+    </div>
+    <div class="pc-question">
+      <div class="pc-q-text">The normalisation condition for all Legendre polynomials is \(P_k(\underline{\quad}) = 1\). Fill the blank.</div>
+      <div class="pc-fitb">
+        <input type="text" id="pc1-2-input" placeholder="Type your answer...">
+        <br>
+        <button class="pc-check-btn" onclick="pcFitb('pc1-2',['1'])">Check</button>
+      </div>
+      <div class="pc-feedback" id="pc1-2-fb"></div>
+    </div>
+    <div class="pc-question">
+      <div class="pc-q-text">\(P_3(x)\) contains only:</div>
+      <div class="pc-options" id="pc1-3-opts">
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-3',false)"><span class="pc-letter">A</span> Even powers of \(x\)</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-3',true)"><span class="pc-letter">B</span> Odd powers of \(x\)</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-3',false)"><span class="pc-letter">C</span> Both even and odd powers</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-3',false)"><span class="pc-letter">D</span> A constant term only</div>
+      </div>
+      <div class="pc-feedback" id="pc1-3-fb"></div>
+    </div>
+  </div>
+
+  <!-- EOQ -->
+  <div class="eoq" id="eoq">
+    <div class="eoq-eyebrow">End of Week Assessment</div>
+    <div class="eoq-title">Week 4 Quiz</div>
+    <div class="eoq-sub">10 questions · Pass mark: 6/10 · Select one answer per question, then submit.</div>
+
+    <div class="eoq-question" data-q="1" data-correct="B">
+      <div class="eoq-qnum">Question 1 of 10</div>
+      <div class="eoq-q-text">Legendre's equation in standard form is:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,1,'A')"><span class="eoq-letter">A</span> \((1+x^2)y'' - 2xy' + k(k+1)y = 0\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,1,'B')"><span class="eoq-letter">B</span> \((1-x^2)y'' - 2xy' + k(k+1)y = 0\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,1,'C')"><span class="eoq-letter">C</span> \(x^2y'' - 2xy' + ky = 0\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,1,'D')"><span class="eoq-letter">D</span> \((1-x)y'' - xy' + ky = 0\)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-1"></div>
+    </div>
+
+    <div class="eoq-question" data-q="2" data-correct="B">
+      <div class="eoq-qnum">Question 2 of 10</div>
+      <div class="eoq-q-text">The series solution terminates when \(k\) is a non-negative integer because:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,2,'A')"><span class="eoq-letter">A</span> The denominator of the recurrence becomes zero</div>
+        <div class="eoq-option" onclick="eoqSelect(this,2,'B')"><span class="eoq-letter">B</span> The factor \((k-n)\) in the numerator becomes zero when \(n = k\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,2,'C')"><span class="eoq-letter">C</span> The equation becomes homogeneous</div>
+        <div class="eoq-option" onclick="eoqSelect(this,2,'D')"><span class="eoq-letter">D</span> The series always diverges beyond degree \(k\)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-2"></div>
+    </div>
+
+    <div class="eoq-question" data-q="3" data-correct="B">
+      <div class="eoq-qnum">Question 3 of 10</div>
+      <div class="eoq-q-text">\(P_0(x)\) equals:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,3,'A')"><span class="eoq-letter">A</span> \(x\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,3,'B')"><span class="eoq-letter">B</span> \(1\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,3,'C')"><span class="eoq-letter">C</span> \(0\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,3,'D')"><span class="eoq-letter">D</span> \(x^2\)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-3"></div>
+    </div>
+
+    <div class="eoq-question" data-q="4" data-correct="A">
+      <div class="eoq-qnum">Question 4 of 10</div>
+      <div class="eoq-q-text">For even degree \(k\), which coefficient is set to zero?</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,4,'A')"><span class="eoq-letter">A</span> \(a_1\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,4,'B')"><span class="eoq-letter">B</span> \(a_0\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,4,'C')"><span class="eoq-letter">C</span> Both \(a_0\) and \(a_1\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,4,'D')"><span class="eoq-letter">D</span> \(a_2\)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-4"></div>
+    </div>
+
+    <div class="eoq-question" data-q="5" data-correct="B">
+      <div class="eoq-qnum">Question 5 of 10</div>
+      <div class="eoq-q-text">\(P_2(1)\) equals:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,5,'A')"><span class="eoq-letter">A</span> 2</div>
+        <div class="eoq-option" onclick="eoqSelect(this,5,'B')"><span class="eoq-letter">B</span> 1</div>
+        <div class="eoq-option" onclick="eoqSelect(this,5,'C')"><span class="eoq-letter">C</span> 0</div>
+        <div class="eoq-option" onclick="eoqSelect(this,5,'D')"><span class="eoq-letter">D</span> \(\frac{1}{2}\)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-5"></div>
+    </div>
+
+    <div class="eoq-question" data-q="6" data-correct="B">
+      <div class="eoq-qnum">Question 6 of 10</div>
+      <div class="eoq-q-text">The explicit form of \(P_3(x)\) is:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,6,'A')"><span class="eoq-letter">A</span> \(5x^3 - 3x\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,6,'B')"><span class="eoq-letter">B</span> \(\frac{1}{2}(5x^3 - 3x)\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,6,'C')"><span class="eoq-letter">C</span> \(\frac{1}{2}(3x^3 - 5x)\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,6,'D')"><span class="eoq-letter">D</span> \(x^3\)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-6"></div>
+    </div>
+
+    <div class="eoq-question" data-q="7" data-correct="B">
+      <div class="eoq-qnum">Question 7 of 10</div>
+      <div class="eoq-q-text">Which is true about \(P_2(x)\)?</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,7,'A')"><span class="eoq-letter">A</span> It contains only odd powers of \(x\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,7,'B')"><span class="eoq-letter">B</span> It contains only even powers of \(x\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,7,'C')"><span class="eoq-letter">C</span> It is a polynomial of degree 3</div>
+        <div class="eoq-option" onclick="eoqSelect(this,7,'D')"><span class="eoq-letter">D</span> \(P_2(0) = 1\)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-7"></div>
+    </div>
+
+    <div class="eoq-question" data-q="8" data-correct="B">
+      <div class="eoq-qnum">Question 8 of 10</div>
+      <div class="eoq-q-text">The normalisation condition for Legendre polynomials is:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,8,'A')"><span class="eoq-letter">A</span> \(P_k(0) = 1\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,8,'B')"><span class="eoq-letter">B</span> \(P_k(1) = 1\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,8,'C')"><span class="eoq-letter">C</span> \(P_k(-1) = 0\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,8,'D')"><span class="eoq-letter">D</span> \(P_k(0) = 0\) for even \(k\)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-8"></div>
+    </div>
+
+    <div class="eoq-question" data-q="9" data-correct="B">
+      <div class="eoq-qnum">Question 9 of 10</div>
+      <div class="eoq-q-text">For \(k=3\) with \(a_0 = 0\), the recurrence gives \(a_3 =\):</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,9,'A')"><span class="eoq-letter">A</span> \(\frac{5}{3}a_1\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,9,'B')"><span class="eoq-letter">B</span> \(-\frac{5}{3}a_1\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,9,'C')"><span class="eoq-letter">C</span> \(3a_1\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,9,'D')"><span class="eoq-letter">D</span> \(-3a_1\)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-9"></div>
+    </div>
+
+    <div class="eoq-question" data-q="10" data-correct="C">
+      <div class="eoq-qnum">Question 10 of 10</div>
+      <div class="eoq-q-text">\(P_2(0)\) equals:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,10,'A')"><span class="eoq-letter">A</span> 1</div>
+        <div class="eoq-option" onclick="eoqSelect(this,10,'B')"><span class="eoq-letter">B</span> 0</div>
+        <div class="eoq-option" onclick="eoqSelect(this,10,'C')"><span class="eoq-letter">C</span> \(-\frac{1}{2}\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,10,'D')"><span class="eoq-letter">D</span> \(\frac{1}{2}\)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-10"></div>
+    </div>
+
+    <button class="eoq-submit" id="eoq-submit-btn" onclick="eoqSubmit()">Submit Quiz</button>
+
+    <div class="eoq-result" id="eoq-result">
+      <div class="result-score" id="result-score"></div>
+      <div id="result-pill"></div>
+      <div class="result-msg" id="result-msg"></div>
+      <div id="result-extra"></div>
+    </div>
+  </div>
+
+</div><!-- /wrapper -->
+
+<footer style="text-align:center;padding:2rem 1rem;font-size:11px;color:var(--text3);border-top:1px solid var(--border);">CHE352 — Engineering Mathematics IV · Unify Learn · LASU Faculty of Engineering</footer>
+
+<script>
+window.addEventListener('scroll',()=>{
+  const s=document.scrollingElement;
+  document.getElementById('progress-bar').style.width=(s.scrollTop/(s.scrollHeight-s.clientHeight)*100)+'%';
+  const topics=[{id:'topic-1',label:'Topic 1: Legendre\'s Equation'},{id:'topic-2',label:'Topic 2: Polynomials'},{id:'topic-3',label:'Topic 3: Examples'},{id:'eoq',label:'Week 4 Quiz'}];
+  let current=topics[0].label;
+  for(const t of topics){const el=document.getElementById(t.id);if(el&&el.getBoundingClientRect().top<200)current=t.label;}
+  document.getElementById('tracker-text').textContent=current;
+});
+function toggleDark(){const h=document.documentElement;h.setAttribute('data-theme',h.getAttribute('data-theme')==='dark'?'light':'dark');document.getElementById('dark-toggle').textContent=h.getAttribute('data-theme')==='dark'?'☀️':'🌙';}
+function toggleAnswer(btn){const a=btn.nextElementSibling;a.classList.toggle('show');}
+function mcReveal(btn){const a=btn.nextElementSibling;a.classList.toggle('show');btn.textContent=a.classList.contains('show')?'Hide Answer':'Reveal Answer';}
+function mcMcq(opt,grpId,correct,fbId){const grp=document.getElementById(grpId);if(grp.querySelector('.mc-correct,.mc-wrong'))return;grp.querySelectorAll('.mc-mcq-opt').forEach(o=>o.classList.add('mc-locked'));opt.classList.add(correct?'mc-correct':'mc-wrong');const fb=document.getElementById(fbId);fb.style.display='block';fb.style.color=correct?'var(--green-deep)':'#b91c1c';fb.textContent=correct?'✓ Correct!':'✗ Not quite — review the notes above.';}
+function mcFitb(inpId,fbId,answers){const val=document.getElementById(inpId).value.trim().toLowerCase();const ok=answers.some(a=>val===a.toLowerCase());const fb=document.getElementById(fbId);fb.style.display='block';fb.style.color=ok?'var(--green-deep)':'#b91c1c';fb.textContent=ok?'✓ Correct!':'✗ Try again — check the notes.';}
+function pcAnswer(opt,qid,correct){const container=opt.closest('.pc-options');if(container.querySelector('.correct,.wrong'))return;container.querySelectorAll('.pc-option').forEach(o=>{o.style.pointerEvents='none';});opt.classList.add(correct?'correct':'wrong');const fb=document.getElementById(qid+'-fb');fb.style.display='block';fb.textContent=correct?'✓ Correct!':'✗ Not quite — review above.';}
+function pcFitb(qid,answers){const inp=document.getElementById(qid+'-input');const val=inp.value.trim().toLowerCase();const ok=answers.some(a=>val===a.toLowerCase());const fb=document.getElementById(qid+'-fb');fb.style.display='block';fb.textContent=ok?'✓ Correct!':'✗ Try again.';}
+const eoqSelections={};
+const eoqFeedbacks={
+  1:{correct:'Correct. The \(1-x^2\) coefficient distinguishes Legendre from similar equations.',wrong:'Legendre\'s equation has \((1-x^2)y\'\' - 2xy\' + k(k+1)y = 0\) — note the minus sign.'},
+  2:{correct:'Correct. When \(n=k\), the factor \((k-n)=0\) kills \(a_{k+2}\) and all subsequent terms.',wrong:'It\'s the numerator factor \((k-n)\) that vanishes at \(n=k\), not the denominator.'},
+  3:{correct:'Correct. \(P_0(x) = 1\) — the degree-0 polynomial, a constant.',wrong:'\(P_0(x) = 1\). The degree-0 Legendre polynomial is just the constant 1.'},
+  4:{correct:'Correct. For even \(k\), set \(a_1=0\) to suppress odd-power terms.',wrong:'For even degree, \(a_1\) is set to zero so the series runs through even powers only.'},
+  5:{correct:'Correct. \(P_2(1)=\\frac{1}{2}(3-1)=1\) — all Legendre polynomials equal 1 at x=1.',wrong:'All Legendre polynomials satisfy \(P_k(1)=1\) by the normalisation convention.'},
+  6:{correct:'Correct. \(P_3(x) = \\frac{1}{2}(5x^3-3x)\).',wrong:'\(P_3(x) = \\frac{1}{2}(5x^3 - 3x)\). The factor of ½ comes from normalisation.'},
+  7:{correct:'Correct. \(P_2\) is an even-degree polynomial, so it contains only even powers of x.',wrong:'\(P_2(x) = \\frac{1}{2}(3x^2 - 1)\) — only even powers (x² and x⁰).'},
+  8:{correct:'Correct. \(P_k(1)=1\) is the standard normalisation for all Legendre polynomials.',wrong:'The normalisation condition is \(P_k(1)=1\) — this determines the arbitrary constant.'},
+  9:{correct:'Correct. At n=1: \(a_3 = -\\frac{(3-1)(5)}{6}a_1 = -\\frac{5}{3}a_1\).',wrong:'Substitute k=3, n=1 into the recurrence: \(a_3 = -\\frac{2 \\times 5}{6}a_1 = -\\frac{5}{3}a_1\).'},
+  10:{correct:'Correct. \(P_2(0)=\\frac{1}{2}(0-1)=-\\frac{1}{2}\).',wrong:'\(P_2(0)=\\frac{1}{2}(3\\cdot0-1)=-\\frac{1}{2}\).'}
+};
+function eoqSelect(opt,qNum,letter){const q=opt.closest('.eoq-question');if(q.querySelector('.locked'))return;q.querySelectorAll('.eoq-option').forEach(o=>o.classList.remove('selected'));opt.classList.add('selected');eoqSelections[qNum]=letter;}
+function eoqSubmit(){let score=0;const missed=[];document.querySelectorAll('.eoq-question').forEach(q=>{const qn=parseInt(q.dataset.q);const correct=q.dataset.correct;const selected=eoqSelections[qn];q.querySelectorAll('.eoq-option').forEach(o=>o.classList.add('locked'));const fb=document.getElementById('eoq-fb-'+qn);if(selected===correct){score++;q.querySelectorAll('.eoq-option').forEach(o=>{if(o.textContent.trim().startsWith(correct))o.classList.add('correct-reveal');});if(fb){fb.className='eoq-feedback correct-fb';fb.textContent=eoqFeedbacks[qn].correct;fb.style.display='block';}}else{q.querySelectorAll('.eoq-option').forEach(o=>{if(o.textContent.trim().startsWith(correct))o.classList.add('correct-reveal');if(selected&&o.textContent.trim().startsWith(selected))o.classList.add('wrong-reveal');});if(fb){fb.className='eoq-feedback wrong-fb';fb.textContent=eoqFeedbacks[qn].wrong;fb.style.display='block';}missed.push(qn);}});const passed=score>=6;const res=document.getElementById('eoq-result');res.className='eoq-result '+(passed?'pass':'fail');document.getElementById('result-score').textContent=score+' / 10';document.getElementById('result-pill').innerHTML='<span class="result-pill '+(passed?'pill-pass':'pill-fail')+'">'+(passed?'Passed':'Not Yet')+'</span>';document.getElementById('result-msg').textContent=passed?'You have a solid grip on Legendre polynomials. Ready for Week 5: Interpolation.':'Review the termination condition and work through deriving P₂ and P₃ manually.';const extra=document.getElementById('result-extra');extra.innerHTML=passed?'<div class="unlock-banner">✓ Week 4 complete. Move to Week 5: Interpolation →</div>':missed.length?'<div class="review-nudge"><p>Topics to review:</p><ul>'+missed.map(n=>`<li>Question ${n}: ${eoqFeedbacks[n].wrong}</li>`).join('')+'</ul></div>':'';res.style.display='block';res.scrollIntoView({behavior:'smooth'});document.getElementById('eoq-submit-btn').disabled=true;}
+</script>
+</body>
+</html>

@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHE 352 — Week 2: Power Series Solution of ODEs | Unify Learn</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+<!--
+  PAGE OUTLINE
+  ─────────────────────────────────
+  TOPIC 1: The Maclaurin Series
+    1.1 The Maclaurin Series Formula          → Mini Check (2 q)
+    1.2 The Leibnitz-Maclaurin Method         → Mini Check (2 q)
+    [Topic 1 Active Recall: 4 cards]
+  [Pulse Check ①]
+
+  TOPIC 2: Worked Examples
+    2.1 Full Example — a²y''+xy'+y=0         → Mini Check (2 q)
+    2.2 Example 2 — x²y''+xy'+y=0 (singular)
+    2.3 Example 3 — Full numerical solution
+    [Topic 2 Active Recall: 3 cards]
+  [Pulse Check ②]
+
+  [End-of-Week Quiz: 10 questions]
+-->
+
+<script>MathJax = { chtml: { scale: 0.95 }, options: { skipHtmlTags: ["script","noscript","style","textarea","pre"] } };</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f8f7f3;
+    --border: #e0deda;
+    --text: #0a0a0a;
+    --text2: #555555;
+    --text3: #999999;
+    --green: #4ade80;
+    --green-deep: #16a34a;
+    --green-bg: rgba(74,222,128,0.1);
+    --yellow: #fbbf24;
+    --fd: 'Playfair Display', serif;
+    --fb: 'DM Sans', sans-serif;
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  [data-theme="dark"] {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #222222;
+    --border: #2a2a2a;
+    --text: #f0efeb;
+    --text2: #aaa;
+    --text3: #666;
+    --shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--fb); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; transition: background 0.3s, color 0.3s; }
+
+  /* PROGRESS BAR */
+  #progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--green); width: 0%; z-index: 1000; transition: width 0.2s; }
+
+  /* TOPBAR */
+  .topbar { position: fixed; top: 3px; left: 0; right: 0; height: 52px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 999; transition: background 0.3s, border-color 0.3s; }
+  .topbar-wordmark { font-family: var(--fd); font-weight: 900; font-size: 18px; color: var(--text); letter-spacing: -0.5px; }
+  .topbar-wordmark span { color: var(--green); }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .course-pill { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--text3); }
+  #dark-toggle { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: all 0.2s; }
+  #dark-toggle:hover { background: var(--surface2); }
+
+  /* PROGRESS TRACKER */
+  .progress-tracker { position: fixed; bottom: 20px; right: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; font-size: 11px; font-weight: 600; color: var(--text2); box-shadow: var(--shadow); z-index: 998; display: flex; align-items: center; gap: 8px; transition: background 0.3s, border-color 0.3s; }
+  .tracker-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+  .tracker-label { font-family: var(--fb); }
+
+  /* MAIN WRAPPER */
+  .wrapper { max-width: 780px; margin: 0 auto; padding: 88px 20px 100px; }
+
+  /* HERO */
+  .hero { background: #0a0a0a; color: #f5f4f0; border-radius: var(--radius); padding: 40px 36px; margin-bottom: 32px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -40px; right: -40px; width: 200px; height: 200px; border-radius: 50%; background: rgba(74,222,128,0.07); pointer-events: none; }
+  .hero-eyebrow { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #4ade80; margin-bottom: 12px; }
+  .hero-title { font-family: var(--fd); font-size: 32px; font-weight: 900; letter-spacing: -1px; line-height: 1.15; color: #f5f4f0; margin-bottom: 8px; }
+  .hero-subtitle { font-family: var(--fd); font-size: 17px; font-weight: 400; font-style: italic; color: rgba(245,244,240,0.7); margin-bottom: 24px; line-height: 1.4; }
+  .hero-outcome { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.25); border-radius: 8px; padding: 14px 18px; font-size: 13px; color: rgba(245,244,240,0.9); line-height: 1.6; margin-bottom: 24px; }
+  .hero-outcome strong { color: #4ade80; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; }
+  .meta-chip { font-size: 11px; font-weight: 500; padding: 4px 12px; border-radius: 20px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: rgba(245,244,240,0.7); }
+
+  /* TOPIC PROGRESS */
+  .topic-progress { margin-bottom: 32px; }
+  .tp-label { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+  .tp-steps { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tp-step { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text3); }
+  .tp-step.done { background: var(--green-bg); border-color: rgba(74,222,128,0.35); color: var(--green-deep); }
+  .tp-step.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .tp-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* TAGS */
+  .tags-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+  .tag { font-family: var(--fb); font-size: 11px; font-weight: 500; padding: 5px 13px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: default; }
+  .tag.green { background: var(--green-bg); border-color: rgba(74,222,128,0.3); color: var(--green-deep); }
+
+  /* SECTION LABELS */
+  .section-label { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green-deep); margin-bottom: 6px; }
+  .section-title { font-family: var(--fd); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); margin-bottom: 20px; line-height: 1.25; }
+
+  /* SUBTOPIC HEADING */
+  .subtopic-heading { display: flex; align-items: center; gap: 10px; margin: 32px 0 14px; }
+  .subtopic-heading h3 { font-family: var(--fd); font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+  .subtopic-num { font-family: var(--fb); font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; background: var(--green-bg); border: 1px solid rgba(74,222,128,0.3); color: var(--green-deep); letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+
+  /* TOPIC BLOCK */
+  .topic-block { margin-bottom: 56px; }
+  .topic-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 28px; margin-bottom: 0px; box-shadow: var(--shadow); }
+  .topic-card p { max-width: 66ch; color: var(--text2); font-size: 14px; line-height: 1.8; margin-bottom: 12px; }
+  .topic-card ul { max-width: 66ch; padding-left: 20px; color: var(--text2); font-size: 14px; line-height: 1.8; margin-bottom: 12px; }
+  .topic-card ol { max-width: 66ch; padding-left: 20px; color: var(--text2); font-size: 14px; line-height: 1.8; margin-bottom: 12px; }
+  .topic-card ol li, .topic-card ul li { margin-bottom: 6px; }
+  .topic-card strong { color: var(--text); }
+  .topic-card p:last-child, .topic-card ul:last-child, .topic-card ol:last-child { margin-bottom: 0; }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--border); margin: 40px 0; }
+
+  /* MINI CHECK */
+  .mini-check { background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--green); border-radius: 0 var(--radius) var(--radius) 0; padding: 20px 24px; margin: 0 0 24px 0; }
+  .mini-check-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .mini-check-icon { font-size: 14px; }
+  .mini-check-title { font-family: var(--fb); font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--green-deep); }
+  .mini-check-sub { font-size: 11px; color: var(--text3); margin-left: auto; }
+
+  /* MINI CHECK — REVEAL */
+  .mc-reveal-item { margin-bottom: 14px; }
+  .mc-q { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 8px; max-width: 66ch; line-height: 1.6; }
+  .mc-reveal-btn { font-family: var(--fb); font-size: 10px; font-weight: 600; padding: 5px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); cursor: pointer; transition: all 0.2s; }
+  .mc-reveal-btn:hover { background: var(--green-bg); border-color: rgba(74,222,128,0.3); color: var(--green-deep); }
+  .mc-answer { display: none; margin-top: 8px; padding: 10px 14px; background: var(--surface); border-left: 2px solid var(--green); border-radius: 0 6px 6px 0; font-size: 12px; color: var(--text2); line-height: 1.7; max-width: 66ch; }
+  .mc-answer.show { display: block; }
+
+  /* MINI CHECK — MCQ */
+  .mc-mcq-item { margin-bottom: 14px; }
+  .mc-mcq-opts { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; max-width: 52ch; }
+  .mc-mcq-opt { display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; padding: 7px 12px; border-radius: 7px; background: var(--surface); border: 1px solid var(--border); color: var(--text2); transition: all 0.15s; user-select: none; }
+  .mc-mcq-opt:hover:not(.mc-locked) { background: var(--green-bg); border-color: rgba(74,222,128,0.3); }
+  .mc-mcq-opt.mc-correct { background: var(--green-bg); border-color: rgba(74,222,128,0.4); color: var(--green-deep); font-weight: 600; }
+  .mc-mcq-opt.mc-wrong { background: rgba(239,68,68,0.07); border-color: rgba(239,68,68,0.3); color: #b91c1c; }
+  .mc-ltr { font-weight: 700; font-size: 10px; width: 20px; height: 20px; border-radius: 50%; background: var(--surface2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .mc-mcq-fb { display: none; margin-top: 7px; font-size: 11px; font-weight: 600; }
+
+  /* MINI CHECK — FITB */
+  .mc-fitb-item { margin-bottom: 14px; }
+  .mc-fitb-row { display: flex; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
+  .mc-fitb-input { font-family: var(--fb); font-size: 12px; padding: 7px 12px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); color: var(--text); outline: none; width: 220px; transition: border-color 0.2s; }
+  .mc-fitb-input:focus { border-color: var(--green); }
+  .mc-fitb-btn { font-family: var(--fb); font-size: 10px; font-weight: 700; padding: 7px 14px; border-radius: 7px; border: none; background: var(--text); color: var(--bg); cursor: pointer; white-space: nowrap; }
+  .mc-fitb-fb { display: none; margin-top: 7px; font-size: 11px; font-weight: 600; }
+
+  /* ACTIVE RECALL */
+  .recall-section { margin-top: 24px; }
+  .recall-label { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green-deep); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .recall-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .recall-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin-bottom: 10px; }
+  .recall-badge { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 9px; border-radius: 20px; margin-bottom: 10px; }
+  .badge-def { background: rgba(74,222,128,0.15); color: var(--green-deep); border: 1px solid rgba(74,222,128,0.3); }
+  .badge-mech { background: rgba(251,191,36,0.15); color: #b45309; border: 1px solid rgba(251,191,36,0.3); }
+  .badge-app { background: rgba(59,130,246,0.1); color: #1d4ed8; border: 1px solid rgba(59,130,246,0.2); }
+  .badge-comp { background: rgba(139,92,246,0.1); color: #6d28d9; border: 1px solid rgba(139,92,246,0.2); }
+  .recall-q { font-size: 14px; font-weight: 500; color: var(--text); max-width: 66ch; line-height: 1.6; margin-bottom: 12px; }
+  .reveal-btn { font-family: var(--fb); font-size: 11px; font-weight: 600; padding: 6px 16px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: pointer; transition: all 0.2s; }
+  .reveal-btn:hover { background: var(--green-bg); border-color: rgba(74,222,128,0.3); color: var(--green-deep); }
+  .recall-answer { display: none; margin-top: 12px; padding: 14px 16px; background: var(--surface2); border-left: 3px solid var(--green); border-radius: 0 8px 8px 0; font-size: 13px; color: var(--text2); line-height: 1.7; max-width: 66ch; }
+  .recall-answer.show { display: block; }
+
+  /* PULSE CHECK — full green ECE350 style */
+  .pulse-check { background: var(--green); border-radius: var(--radius); padding: 28px; margin: 40px 0; }
+  .pulse-check .pc-title { font-family: var(--fd); font-size: 20px; font-weight: 900; color: #0a0a0a; margin-bottom: 4px; }
+  .pulse-check .pc-sub { font-size: 12px; color: rgba(10,10,10,0.6); margin-bottom: 20px; }
+  .pc-question { background: rgba(255,255,255,0.35); border-radius: 10px; padding: 16px 18px; margin-bottom: 12px; }
+  .pc-q-text { font-size: 14px; font-weight: 500; color: #0a0a0a; margin-bottom: 10px; max-width: 66ch; line-height: 1.6; }
+  .pc-options { display: flex; flex-direction: column; gap: 6px; }
+  .pc-option { display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer; padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.5); color: #0a0a0a; transition: all 0.15s; max-width: 66ch; }
+  .pc-option:hover { background: rgba(255,255,255,0.65); }
+  .pc-option.correct { background: #fff; border-color: #16a34a; }
+  .pc-option.wrong { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.5); }
+  .pc-letter { font-weight: 700; font-size: 11px; width: 22px; height: 22px; border-radius: 50%; background: rgba(10,10,10,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .pc-fitb input { background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.7); border-radius: 6px; padding: 8px 12px; font-family: var(--fb); font-size: 13px; color: #0a0a0a; width: 100%; max-width: 300px; outline: none; }
+  .pc-fitb input:focus { background: #fff; }
+  .pc-check-btn { margin-top: 8px; font-family: var(--fb); font-size: 11px; font-weight: 700; padding: 6px 16px; border-radius: 6px; border: none; background: #0a0a0a; color: #f5f4f0; cursor: pointer; }
+  .pc-feedback { margin-top: 8px; font-size: 12px; font-weight: 500; display: none; color: #0a0a0a; }
+
+  /* EOQ */
+  .eoq { background: var(--text); border-radius: var(--radius); padding: 32px; margin-top: 48px; }
+  .eoq-eyebrow { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green); margin-bottom: 6px; }
+  .eoq-title { font-family: var(--fd); font-size: 24px; font-weight: 900; color: #f5f4f0; margin-bottom: 4px; letter-spacing: -0.5px; }
+  .eoq-sub { font-size: 12px; color: rgba(240,239,235,0.5); margin-bottom: 24px; }
+  .eoq-question { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 18px 20px; margin-bottom: 14px; }
+  .eoq-qnum { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: rgba(240,239,235,0.4); margin-bottom: 6px; }
+  .eoq-q-text { font-size: 14px; font-weight: 500; color: #f0efeb; max-width: 66ch; line-height: 1.6; margin-bottom: 12px; }
+  .eoq-options { display: flex; flex-direction: column; gap: 6px; }
+  .eoq-option { display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer; padding: 10px 14px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(240,239,235,0.8); transition: all 0.15s; max-width: 66ch; user-select: none; }
+  .eoq-option:hover:not(.locked) { background: rgba(255,255,255,0.1); }
+  .eoq-option.selected { border-color: var(--green); background: rgba(74,222,128,0.1); }
+  .eoq-option.correct-reveal { border-color: var(--green); background: rgba(74,222,128,0.15); color: #f0efeb; }
+  .eoq-option.wrong-reveal { border-color: rgba(239,68,68,0.5); background: rgba(239,68,68,0.1); color: rgba(240,239,235,0.6); }
+  .eoq-letter { font-weight: 700; font-size: 11px; width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: rgba(240,239,235,0.7); }
+  .eoq-fitb input { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 9px 14px; font-family: var(--fb); font-size: 13px; color: #f0efeb; width: 100%; max-width: 320px; outline: none; transition: border-color 0.2s; }
+  .eoq-fitb input:focus { border-color: var(--green); }
+  .eoq-fitb input.correct-input { border-color: var(--green); background: rgba(74,222,128,0.1); }
+  .eoq-fitb input.wrong-input { border-color: rgba(239,68,68,0.5); background: rgba(239,68,68,0.08); }
+  .eoq-feedback { display: none; margin-top: 10px; font-size: 12px; line-height: 1.6; padding: 10px 14px; border-radius: 6px; max-width: 66ch; }
+  .eoq-feedback.correct-fb { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.25); color: #86efac; }
+  .eoq-feedback.wrong-fb { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #fca5a5; }
+  .eoq-submit { margin-top: 24px; width: 100%; padding: 14px; border-radius: 8px; border: none; background: var(--green); color: #0a0a0a; font-family: var(--fb); font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+  .eoq-submit:hover { opacity: 0.88; }
+  .eoq-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+  .eoq-result { display: none; margin-top: 24px; padding: 24px; border-radius: 10px; text-align: center; }
+  .eoq-result.pass { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); }
+  .eoq-result.fail { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); }
+  .result-score { font-family: var(--fd); font-size: 40px; font-weight: 900; color: #f0efeb; margin-bottom: 6px; }
+  .result-pill { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 5px 16px; border-radius: 20px; margin-bottom: 14px; }
+  .pill-pass { background: var(--green); color: #0a0a0a; }
+  .pill-fail { background: rgba(239,68,68,0.3); color: #fca5a5; border: 1px solid rgba(239,68,68,0.4); }
+  .result-msg { font-size: 13px; color: rgba(240,239,235,0.7); line-height: 1.6; max-width: 52ch; margin: 0 auto 16px; }
+  .unlock-banner { background: rgba(74,222,128,0.15); border: 1px solid rgba(74,222,128,0.3); border-radius: 8px; padding: 12px 16px; font-size: 13px; color: var(--green); font-weight: 500; margin-top: 12px; }
+  .review-nudge { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 14px 16px; margin-top: 12px; text-align: left; }
+  .review-nudge p { font-size: 12px; color: rgba(240,239,235,0.6); margin-bottom: 8px; }
+  .review-nudge ul { padding-left: 16px; font-size: 12px; color: #fca5a5; line-height: 1.8; }
+
+  /* ── CHE352-SPECIFIC PRESERVED STYLES ── */
+  .formula-block { border-left: 4px solid var(--green); background: var(--green-bg); border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 16px 0; overflow-x: auto; }
+  [data-theme="dark"] .formula-block { background: rgba(74,222,128,0.06); }
+  .formula-block .f-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--green-deep); margin-bottom: 8px; }
+  .formula-block .vars { font-size: 12px; color: var(--text2); margin-top: 6px; }
+  .worked-example { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 28px; margin: 20px 0; overflow-x: auto; box-shadow: var(--shadow); }
+  .we-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; background: #0a0a0a; color: #f5f4f0; display: inline-block; padding: 3px 10px; border-radius: 4px; margin-bottom: 12px; }
+  [data-theme="dark"] .we-label { background: var(--green); color: #0a0a0a; }
+  .we-q { font-family: var(--fd); font-size: 16px; margin-bottom: 16px; font-style: italic; color: var(--text); }
+  .we-step { display: flex; gap: 12px; margin-bottom: 10px; align-items: flex-start; }
+  .we-step-num { background: var(--green); color: #0a0a0a; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+  .we-step-text { font-size: 13px; overflow-x: auto; color: var(--text2); line-height: 1.8; }
+  .we-step-text strong { color: var(--text); }
+  .we-result { margin-top: 12px; padding: 12px 16px; background: var(--green-bg); border-radius: 8px; font-weight: 600; font-size: 14px; color: var(--text); overflow-x: auto; }
+  [data-theme="dark"] .we-result { background: rgba(74,222,128,0.06); }
+  .note-box { background: var(--green-bg); border: 1px solid rgba(74,222,128,0.35); border-radius: var(--radius); padding: 16px 20px; margin: 16px 0; }
+  [data-theme="dark"] .note-box { background: rgba(74,222,128,0.05); }
+  .note-box strong { color: var(--green-deep); display: block; margin-bottom: 5px; }
+  .note-box p, .note-box { font-size: 13px; color: var(--text2); line-height: 1.7; }
+
+  @media (max-width: 600px) {
+    .wrapper { padding: 72px 14px 100px; }
+    .hero { padding: 28px 20px; }
+    .hero-title { font-size: 24px; }
+    .topic-card { padding: 18px 16px; }
+    .eoq { padding: 22px 16px; }
+    .pulse-check { padding: 20px 16px; }
+    .mini-check { padding: 16px 18px; }
+    .worked-example { padding: 18px 16px; }
+    .progress-tracker { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<nav class="topbar">
+  <div class="topbar-wordmark">Unify<span>.</span></div>
+  <div class="topbar-right">
+    <span class="course-pill">CHE 352</span>
+    <button id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode">🌙</button>
+  </div>
+</nav>
+
+<div class="progress-tracker">
+  <div class="tracker-dot"></div>
+  <span class="tracker-label" id="tracker-text">Scroll to begin</span>
+</div>
+
+<div class="wrapper">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-eyebrow">CHE 352 · Week 2 · LASU Faculty of Engineering</div>
+    <h1 class="hero-title">Power Series Solution of 2nd Order ODEs</h1>
+    <p class="hero-subtitle">Maclaurin Series &amp; Leibnitz-Maclaurin Method</p>
+    <div class="hero-outcome">
+      <strong>By the end of this week, you should be able to</strong> write a Maclaurin series expansion for \(y = f(x)\), use the Leibnitz-Maclaurin method to express \(y\) as a power series, and derive explicit series solutions for second-order linear ODEs about \(x = 0\).
+    </div>
+    <div class="hero-meta">
+      <span class="meta-chip">Week 2 of 7</span>
+      <span class="meta-chip">🎓 Dr. Lukumon Salami</span>
+      <span class="meta-chip">📍 Lagos State University</span>
+    </div>
+  </header>
+
+  <!-- TOPIC PROGRESS -->
+  <div class="topic-progress">
+    <div class="tp-label">Your Progress</div>
+    <div class="tp-steps">
+      <div class="tp-step active" id="step-1"><span class="tp-dot"></span> Topic 1: Maclaurin Series</div>
+      <div class="tp-step" id="step-2"><span class="tp-dot"></span> Topic 2: Worked Examples</div>
+      <div class="tp-step" id="step-quiz"><span class="tp-dot"></span> Week 2 Quiz</div>
+    </div>
+  </div>
+
+  <!-- TAGS -->
+  <div class="tags-row">
+    <span class="tag green">Maclaurin Series</span>
+    <span class="tag green">Power Series Solution</span>
+    <span class="tag green">Leibnitz-Maclaurin Method</span>
+    <span class="tag green">Series Coefficients</span>
+    <span class="tag">Ordinary Point</span>
+    <span class="tag">Second-Order ODE</span>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       TOPIC 1: THE MACLAURIN SERIES
+  ════════════════════════════════════════════════════════ -->
+  <div class="topic-block" id="topic-1">
+    <div class="section-label">Topic 1</div>
+    <div class="section-title">The Maclaurin Series</div>
+
+    <!-- ── SUBTOPIC 1.1 ── -->
+    <div class="subtopic-heading">
+      <span class="subtopic-num">1.1</span>
+      <h3>The Maclaurin Series Formula</h3>
+    </div>
+    <div class="topic-card">
+      <p>The <strong>Maclaurin series</strong> is a special case of the Taylor series where the expansion is centred at \(x = 0\). For a function \(y = f(x)\), if \(f\) is infinitely differentiable at \(x = 0\), we can write:</p>
+    </div>
+
+    <div class="formula-block">
+      <div class="f-label">Maclaurin Series for y = f(x)</div>
+      <div>\[ y = y_0 + x\,y_1(0) + \frac{x^2}{2!}\,y_2(0) + \frac{x^3}{3!}\,y_3(0) + \frac{x^4}{4!}\,y_4(0) + \cdots \]</div>
+      <div class="vars">where \(y_r(0)\) denotes the value of \(\dfrac{d^r y}{dx^r}\) evaluated at \(x = 0\).</div>
+    </div>
+
+    <div class="topic-card">
+      <p>The idea is simple: <strong>once you know all the derivatives of \(y\) at \(x = 0\)</strong>, you can reconstruct the full function as an infinite polynomial (the power series). This is powerful because for many ODEs, computing those derivatives is exactly what we can do — step by step via the recurrence relation from Week 1.</p>
+    </div>
+
+    <!-- MINI CHECK 1.1 -->
+    <div class="mini-check">
+      <div class="mini-check-header">
+        <span class="mini-check-icon">⚡</span>
+        <span class="mini-check-title">Quick Check — Maclaurin Series</span>
+        <span class="mini-check-sub">2 questions</span>
+      </div>
+      <div class="mc-mcq-item">
+        <div class="mc-q">The Maclaurin series is a special case of the Taylor series. What distinguishes it from a general Taylor series?</div>
+        <div class="mc-mcq-opts" id="mc-1-mac-1">
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-mac-1',false,'mc-1-mac-1-fb')"><span class="mc-ltr">A</span> It uses only even-numbered derivatives</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-mac-1',true,'mc-1-mac-1-fb')"><span class="mc-ltr">B</span> It is centred at \(x = 0\), so all derivatives are evaluated at zero</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-mac-1',false,'mc-1-mac-1-fb')"><span class="mc-ltr">C</span> It only works for polynomial functions</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-mac-1',false,'mc-1-mac-1-fb')"><span class="mc-ltr">D</span> It requires the function to be periodic</div>
+        </div>
+        <div class="mc-mcq-fb" id="mc-1-mac-1-fb"></div>
+      </div>
+      <div class="mc-fitb-item">
+        <div class="mc-q">In the Maclaurin series, all derivatives of \(y\) are evaluated at \(x =\) ________.</div>
+        <div class="mc-fitb-row">
+          <input class="mc-fitb-input" id="mc-1-mac-2-inp" placeholder="Your answer…" type="text">
+          <button class="mc-fitb-btn" onclick="mcFitb('mc-1-mac-2-inp','mc-1-mac-2-fb',['0','x=0','zero'])">Check</button>
+        </div>
+        <div class="mc-fitb-fb" id="mc-1-mac-2-fb"></div>
+      </div>
+    </div>
+
+    <!-- ── SUBTOPIC 1.2 ── -->
+    <div class="subtopic-heading">
+      <span class="subtopic-num">1.2</span>
+      <h3>The Leibnitz-Maclaurin Method — How It Works</h3>
+    </div>
+    <div class="topic-card">
+      <p>The Leibnitz-Maclaurin method turns any second-order ODE (at an ordinary point) into a computable power series solution. The five steps are:</p>
+      <ol>
+        <li>Start with the second-order ODE \(f(x)y'' + g(x)y' + h(x)y = 0\)</li>
+        <li>Differentiate the equation \(n\) times using Leibnitz theorem (Week 1)</li>
+        <li>Set \(x = 0\) to get the recurrence relation in terms of \(y_n(0)\)</li>
+        <li>Use initial conditions \(y_0 = y(0)\) and \(y_1 = y'(0)\) to find all \(y_n(0)\)</li>
+        <li>Substitute into the Maclaurin series — this is your power series solution</li>
+      </ol>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 Why power series?</strong>
+      Many ODEs don't have solutions in terms of standard functions like \(\sin x\) or \(e^x\). But they can always be solved as a power series — an infinite sum of \(x^n\) terms — as long as the equation has an <em>ordinary point</em> at \(x = 0\) (i.e. the coefficients don't blow up there). Bessel's equation and Legendre's equation (Weeks 3 and 4) are famous examples.
+    </div>
+
+    <!-- MINI CHECK 1.2 -->
+    <div class="mini-check">
+      <div class="mini-check-header">
+        <span class="mini-check-icon">⚡</span>
+        <span class="mini-check-title">Quick Check — Leibnitz-Maclaurin Method</span>
+        <span class="mini-check-sub">2 questions</span>
+      </div>
+      <div class="mc-mcq-item">
+        <div class="mc-q">In the Leibnitz-Maclaurin method, what do you do after differentiating the ODE \(n\) times?</div>
+        <div class="mc-mcq-opts" id="mc-1-lm-1">
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-lm-1',false,'mc-1-lm-1-fb')"><span class="mc-ltr">A</span> Immediately substitute into the Maclaurin series</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-lm-1',true,'mc-1-lm-1-fb')"><span class="mc-ltr">B</span> Set \(x = 0\) to obtain the recurrence relation for \(y_n(0)\)</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-lm-1',false,'mc-1-lm-1-fb')"><span class="mc-ltr">C</span> Solve the characteristic equation</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-lm-1',false,'mc-1-lm-1-fb')"><span class="mc-ltr">D</span> Convert to a system of first-order ODEs</div>
+        </div>
+        <div class="mc-mcq-fb" id="mc-1-lm-1-fb"></div>
+      </div>
+      <div class="mc-reveal-item">
+        <div class="mc-q">What does it mean for \(x = 0\) to be an "ordinary point" of an ODE, and why does it matter for this method?</div>
+        <button class="mc-reveal-btn" onclick="mcReveal(this)">Reveal Answer</button>
+        <div class="mc-answer">An <strong>ordinary point</strong> is a value of \(x\) where the leading coefficient of the ODE does not vanish (is not zero). It matters because the Leibnitz-Maclaurin method requires setting \(x = 0\) to obtain a useful recurrence — if the leading coefficient is zero there, the recurrence becomes degenerate (you get \(0 = 0\)) and the method fails. At a singular point you would need the Frobenius method instead.</div>
+      </div>
+    </div>
+
+    <!-- TOPIC 1 ACTIVE RECALL -->
+    <div class="recall-section">
+      <div class="recall-label">Topic 1 Active Recall</div>
+      <div class="recall-card">
+        <div class="recall-badge badge-def">Definition</div>
+        <div class="recall-q">Write the Maclaurin series formula for \(y = f(x)\) up to the 4th-degree term. What do the denominators represent?</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer">
+          \[ y = y_0 + x\,y_1(0) + \frac{x^2}{2!}\,y_2(0) + \frac{x^3}{3!}\,y_3(0) + \frac{x^4}{4!}\,y_4(0) + \cdots \]
+          The denominators are <strong>factorials</strong> (\(n!\)). The numerator coefficients are the \(n\)th derivatives of \(y\) evaluated at \(x = 0\).
+        </div>
+      </div>
+      <div class="recall-card">
+        <div class="recall-badge badge-mech">Mechanism</div>
+        <div class="recall-q">State the 5 steps of the Leibnitz-Maclaurin method in order.</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer">
+          1. Write the ODE.<br>
+          2. Differentiate the ODE \(n\) times using Leibnitz theorem.<br>
+          3. Set \(x = 0\) to get the recurrence relation for \(y_n(0)\).<br>
+          4. Use initial conditions \(y_0\) and \(y_1\) to compute all \(y_n(0)\).<br>
+          5. Substitute into the Maclaurin series to obtain the power series solution.
+        </div>
+      </div>
+      <div class="recall-card">
+        <div class="recall-badge badge-app">Application</div>
+        <div class="recall-q">Why does the power series solution of a 2nd order ODE split into two separate series — one involving \(y_0\) and one involving \(y_1\)?</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer">Because second-order ODEs have <strong>two linearly independent solutions</strong>. The recurrence links \(y_{n+2}\) to \(y_n\), so even-indexed terms (\(y_0, y_2, y_4, \ldots\)) build from the initial value \(y_0\), and odd-indexed terms (\(y_1, y_3, y_5, \ldots\)) build from the initial slope \(y_1\). These form two independent series that combine into the general solution — satisfying both arbitrary constants of the 2nd order ODE.</div>
+      </div>
+      <div class="recall-card">
+        <div class="recall-badge badge-comp">Computation</div>
+        <div class="recall-q">For the recurrence \(y_{n+2}(0) = -(n+1)\,y_n(0)\) with \(y_0 = 1\), what is \(y_6(0)\)?</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer">
+          Step through the recurrence:<br>
+          \(n=0\): \(y_2(0) = -(1)(1) = -1\)<br>
+          \(n=2\): \(y_4(0) = -(3)(-1) = 3\)<br>
+          \(n=4\): \(y_6(0) = -(5)(3) = -15\)<br><br>
+          So \(y_6(0) = \mathbf{-15}\).
+        </div>
+      </div>
+    </div>
+  </div><!-- /topic-1 -->
+
+  <!-- PULSE CHECK ① -->
+  <div class="pulse-check" id="pulse1">
+    <div class="pc-title">Pulse Check ①</div>
+    <div class="pc-sub">End of Topic 1 — quick ungraded check.</div>
+    <div class="pc-question">
+      <div class="pc-q-text">In the Maclaurin series, the coefficient of \(x^3\) is:</div>
+      <div class="pc-options" id="pc1-1-opts">
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-1',false)"><span class="pc-letter">A</span> \(y_3(0)\)</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-1',true)"><span class="pc-letter">B</span> \(\dfrac{y_3(0)}{3!}\)</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-1',false)"><span class="pc-letter">C</span> \(\dfrac{y_3(0)}{3}\)</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-1',false)"><span class="pc-letter">D</span> \(3!\,y_3(0)\)</div>
+      </div>
+      <div class="pc-feedback" id="pc1-1-fb"></div>
+    </div>
+    <div class="pc-question">
+      <div class="pc-q-text">The Leibnitz-Maclaurin method fails at a singular point because:</div>
+      <div class="pc-options" id="pc1-2-opts">
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-2',false)"><span class="pc-letter">A</span> The series diverges for all \(x\)</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-2',true)"><span class="pc-letter">B</span> The leading coefficient vanishes at \(x = 0\), making the recurrence degenerate</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-2',false)"><span class="pc-letter">C</span> Leibnitz theorem doesn't apply to products</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1-2',false)"><span class="pc-letter">D</span> The Maclaurin formula requires odd derivatives only</div>
+      </div>
+      <div class="pc-feedback" id="pc1-2-fb"></div>
+    </div>
+    <div class="pc-question">
+      <div class="pc-q-text">Fill in the blank: After differentiating the ODE \(n\) times using Leibnitz, the next step is to set \(x =\) ________ to obtain the recurrence relation.</div>
+      <div class="pc-fitb">
+        <input type="text" id="pc1-3-input" placeholder="Type your answer...">
+        <br>
+        <button class="pc-check-btn" onclick="pcFitb('pc1-3',['0','zero'])">Check</button>
+      </div>
+      <div class="pc-feedback" id="pc1-3-fb"></div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       TOPIC 2: WORKED EXAMPLES
+  ════════════════════════════════════════════════════════ -->
+  <div class="topic-block" id="topic-2">
+    <div class="section-label">Topic 2</div>
+    <div class="section-title">Worked Examples — Maclaurin Series Solutions</div>
+
+    <!-- ── SUBTOPIC 2.1 ── -->
+    <div class="subtopic-heading">
+      <span class="subtopic-num">2.1</span>
+      <h3>Full Example — \(a^2y'' + xy' + y = 0\)</h3>
+    </div>
+
+    <div class="worked-example">
+      <div class="we-label">Full Example</div>
+      <div class="we-q">Solve \(a^2 y'' + xy' + y = 0\) using the Leibnitz-Maclaurin method, given \(y(0) = y_0\) and \(y'(0) = y_1\).</div>
+
+      <div class="we-step">
+        <div class="we-step-num">1</div>
+        <div class="we-step-text">
+          <strong>Differentiate the ODE \(n\) times using Leibnitz.</strong><br>
+          The equation is \(a^2 y'' + xy' + y = 0\).<br>
+          — Term \(a^2 y''\): differentiates simply to \(a^2 y_{n+2}\)<br>
+          — Term \(xy'\): Leibnitz gives \(xy_{n+1} + ny_n\)<br>
+          — Term \(y\): differentiates to \(y_n\)<br>
+          So: \[ a^2 y_{n+2} + x y_{n+1} + n y_n + y_n = 0 \]
+          \[ a^2 y_{n+2} + x y_{n+1} + (n+1) y_n = 0 \]
+        </div>
+      </div>
+
+      <div class="we-step">
+        <div class="we-step-num">2</div>
+        <div class="we-step-text">
+          <strong>Set \(x = 0\) to get the recurrence.</strong>
+          \[ a^2 y_{n+2}(0) + (n+1)y_n(0) = 0 \]
+          \[ \boxed{y_{n+2}(0) = -\frac{(n+1)}{a^2} y_n(0)} \]
+        </div>
+      </div>
+
+      <div class="we-step">
+        <div class="we-step-num">3</div>
+        <div class="we-step-text">
+          <strong>Compute even-indexed derivatives (from \(y_0\)):</strong><br>
+          \(n=0\): \(y_2(0) = -\dfrac{1}{a^2} y_0\)<br>
+          \(n=2\): \(y_4(0) = -\dfrac{3}{a^2} y_2(0) = -\dfrac{3}{a^2} \cdot \left(-\dfrac{1}{a^2} y_0\right) = \dfrac{3}{a^4} y_0\)<br>
+          \(n=4\): \(y_6(0) = -\dfrac{5}{a^2} y_4(0) = -\dfrac{15}{a^6} y_0\)
+        </div>
+      </div>
+
+      <div class="we-step">
+        <div class="we-step-num">4</div>
+        <div class="we-step-text">
+          <strong>Compute odd-indexed derivatives (from \(y_1\)):</strong><br>
+          \(n=1\): \(y_3(0) = -\dfrac{2}{a^2} y_1\)<br>
+          \(n=3\): \(y_5(0) = -\dfrac{4}{a^2} y_3(0) = \dfrac{8}{a^4} y_1\)<br>
+          \(n=5\): \(y_7(0) = -\dfrac{6}{a^2} y_5(0) = -\dfrac{48}{a^6} y_1\)
+        </div>
+      </div>
+
+      <div class="we-step">
+        <div class="we-step-num">5</div>
+        <div class="we-step-text">
+          <strong>Substitute into the Maclaurin series:</strong>
+          \[ y = y_0 + y_1 x + \frac{y_2(0)}{2!}x^2 + \frac{y_3(0)}{3!}x^3 + \frac{y_4(0)}{4!}x^4 + \cdots \]
+        </div>
+      </div>
+
+      <div class="we-result">
+        \[ y = y_0\left[1 - \frac{x^2}{2!\,a^2} + \frac{3x^4}{4!\,a^4} - \frac{15x^6}{6!\,a^6} + \cdots\right] + y_1\left[x - \frac{2x^3}{3!\,a^2} + \frac{8x^5}{5!\,a^4} - \cdots\right] \]
+        This is the general power series solution — two linearly independent parts, one multiplied by \(y_0\), one by \(y_1\).
+      </div>
+    </div>
+
+    <!-- MINI CHECK 2.1 -->
+    <div class="mini-check">
+      <div class="mini-check-header">
+        <span class="mini-check-icon">⚡</span>
+        <span class="mini-check-title">Quick Check — Series Coefficients</span>
+        <span class="mini-check-sub">2 questions</span>
+      </div>
+      <div class="mc-mcq-item">
+        <div class="mc-q">From the recurrence \(y_{n+2}(0) = -\dfrac{(n+1)}{a^2}\,y_n(0)\) with \(y_0\) given, which formula correctly gives \(y_4(0)\)?</div>
+        <div class="mc-mcq-opts" id="mc-2-coef-1">
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2-coef-1',false,'mc-2-coef-1-fb')"><span class="mc-ltr">A</span> \(-\dfrac{1}{a^4}\,y_0\)</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2-coef-1',true,'mc-2-coef-1-fb')"><span class="mc-ltr">B</span> \(\dfrac{3}{a^4}\,y_0\)</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2-coef-1',false,'mc-2-coef-1-fb')"><span class="mc-ltr">C</span> \(-\dfrac{3}{a^4}\,y_0\)</div>
+          <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2-coef-1',false,'mc-2-coef-1-fb')"><span class="mc-ltr">D</span> \(\dfrac{1}{a^2}\,y_0\)</div>
+        </div>
+        <div class="mc-mcq-fb" id="mc-2-coef-1-fb"></div>
+      </div>
+      <div class="mc-fitb-item">
+        <div class="mc-q">For Example 3 (\(y'' + xy' + y = 0\), \(y_0=1\), \(y_1=0\)), the value of \(y_6(0)\) is ________.</div>
+        <div class="mc-fitb-row">
+          <input class="mc-fitb-input" id="mc-2-ex3-inp" placeholder="Your answer…" type="text">
+          <button class="mc-fitb-btn" onclick="mcFitb('mc-2-ex3-inp','mc-2-ex3-fb',['-15','-15 ','minus 15'])">Check</button>
+        </div>
+        <div class="mc-fitb-fb" id="mc-2-ex3-fb"></div>
+      </div>
+    </div>
+
+    <!-- ── SUBTOPIC 2.2 ── -->
+    <div class="subtopic-heading">
+      <span class="subtopic-num">2.2</span>
+      <h3>Example 2 — \(x^2y'' + xy' + y = 0\) (Singular Point)</h3>
+    </div>
+
+    <div class="worked-example">
+      <div class="we-label">Example 2 — From notes (14/07/2025)</div>
+      <div class="we-q">Solve \(x^2 y'' + xy' + y = 0\) using the power series method. Find \(y_n\) given initial conditions.</div>
+
+      <div class="we-step">
+        <div class="we-step-num">1</div>
+        <div class="we-step-text">
+          Differentiating \(n\) times: for \(x^2 y''\), Leibnitz gives \(x^2 y_{n+2} + 2nx\,y_{n+1} + n(n-1)y_n\).<br>
+          For \(xy'\): \(xy_{n+1} + ny_n\). For \(y\): \(y_n\).<br>
+          Combined: \[ x^2 y_{n+2} + (2n+1)x\,y_{n+1} + (n^2+1)y_n = 0 \]
+        </div>
+      </div>
+
+      <div class="we-step">
+        <div class="we-step-num">2</div>
+        <div class="we-step-text">
+          At \(x = 0\): the equation becomes \(0 = 0\), which is a <strong>singular point</strong>. The Leibnitz-Maclaurin method breaks down here — you must use the Frobenius method instead (not covered in this week). This is why the equation type matters before choosing a method.
+        </div>
+      </div>
+
+      <div class="note-box">
+        <strong>⚠️ Ordinary vs Singular Points</strong>
+        The Leibnitz-Maclaurin method only works at an <strong>ordinary point</strong> — where the ODE's leading coefficient doesn't vanish. If \(x = 0\) is a singular point (leading coefficient = 0 there), use Frobenius. For CHE352, Dr. Salami focuses on ordinary points where the method applies cleanly.
+      </div>
+    </div>
+
+    <!-- ── SUBTOPIC 2.3 ── -->
+    <div class="subtopic-heading">
+      <span class="subtopic-num">2.3</span>
+      <h3>Example 3 — Full Numerical Solution</h3>
+    </div>
+
+    <div class="worked-example">
+      <div class="we-label">Example 3 — Full numerical solution</div>
+      <div class="we-q">For \(y'' + xy' + y = 0\) with \(y(0) = 1\), \(y'(0) = 0\), find the power series solution up to \(x^6\).</div>
+
+      <div class="we-step">
+        <div class="we-step-num">1</div>
+        <div class="we-step-text">
+          Differentiate \(n\) times: \(y_{n+2} + xy_{n+1} + (n+1)y_n = 0\)<br>
+          At \(x = 0\): \[ y_{n+2}(0) = -(n+1)y_n(0) \]
+        </div>
+      </div>
+
+      <div class="we-step">
+        <div class="we-step-num">2</div>
+        <div class="we-step-text">
+          With \(y_0 = 1\), \(y_1 = 0\):<br>
+          \(n=0\): \(y_2(0) = -(1)(1) = -1\)<br>
+          \(n=2\): \(y_4(0) = -(3)(-1) = 3\)<br>
+          \(n=4\): \(y_6(0) = -(5)(3) = -15\)<br>
+          All odd terms: zero (since \(y_1 = 0\))
+        </div>
+      </div>
+
+      <div class="we-result">
+        \[ y = 1 - \frac{x^2}{2!} + \frac{3x^4}{4!} - \frac{15x^6}{6!} + \cdots \]
+        \[ y = 1 - \frac{x^2}{2} + \frac{x^4}{8} - \frac{x^6}{48} + \cdots \]
+      </div>
+    </div>
+
+    <!-- TOPIC 2 ACTIVE RECALL -->
+    <div class="recall-section">
+      <div class="recall-label">Topic 2 Active Recall</div>
+      <div class="recall-card">
+        <div class="recall-badge badge-comp">Computation</div>
+        <div class="recall-q">For \(y'' + xy' + y = 0\) with \(y_0 = 1\), \(y_1 = 0\), write out the first three non-zero terms of the series solution explicitly (with numerical coefficients, not factorial notation).</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer">
+          Using \(y_2 = -1\), \(y_4 = 3\), \(y_6 = -15\):<br><br>
+          \[ y = 1 - \frac{x^2}{2} + \frac{x^4}{8} - \frac{x^6}{48} + \cdots \]<br>
+          Check: \(\dfrac{3}{4!} = \dfrac{3}{24} = \dfrac{1}{8}\) ✓ and \(\dfrac{-15}{6!} = \dfrac{-15}{720} = \dfrac{-1}{48}\) ✓
+        </div>
+      </div>
+      <div class="recall-card">
+        <div class="recall-badge badge-mech">Mechanism</div>
+        <div class="recall-q">Why does the equation \(x^2 y'' + xy' + y = 0\) cause the Leibnitz-Maclaurin method to fail at \(x = 0\)?</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer">
+          At \(x = 0\), the leading coefficient \(x^2\) vanishes, making \(x = 0\) a <strong>singular point</strong>. When you differentiate \(n\) times and set \(x = 0\), every term containing \(x\) disappears and the equation collapses to \(0 = 0\) — a trivial identity that gives no recurrence relation. You need the <strong>Frobenius method</strong> for singular points.
+        </div>
+      </div>
+      <div class="recall-card">
+        <div class="recall-badge badge-app">Application</div>
+        <div class="recall-q">In the general solution of \(a^2 y'' + xy' + y = 0\), why are there two separate series — one in even powers of \(x\) and one in odd powers?</div>
+        <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+        <div class="recall-answer">
+          The recurrence \(y_{n+2}(0) = -\dfrac{n+1}{a^2}\,y_n(0)\) links every term to the term <strong>two indices earlier</strong>. This means:<br><br>
+          — Even-indexed derivatives \(y_0, y_2, y_4, \ldots\) form a chain starting from \(y_0\).<br>
+          — Odd-indexed derivatives \(y_1, y_3, y_5, \ldots\) form a separate chain starting from \(y_1\).<br><br>
+          The two chains never interact, so the solution naturally splits into an <em>even-power series</em> (multiplied by \(y_0\)) and an <em>odd-power series</em> (multiplied by \(y_1\)) — corresponding to the two linearly independent solutions of the 2nd order ODE.
+        </div>
+      </div>
+    </div>
+  </div><!-- /topic-2 -->
+
+  <!-- PULSE CHECK ② -->
+  <div class="pulse-check" id="pulse2">
+    <div class="pc-title">Pulse Check ②</div>
+    <div class="pc-sub">End of Topic 2 — quick ungraded check.</div>
+    <div class="pc-question">
+      <div class="pc-q-text">For the recurrence \(y_{n+2}(0) = -(n+1)\,y_n(0)\) with \(y_0 = 1\), \(y_1 = 0\), which powers of \(x\) appear in the solution?</div>
+      <div class="pc-options" id="pc2-1-opts">
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-1',false)"><span class="pc-letter">A</span> Only odd powers of \(x\)</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-1',true)"><span class="pc-letter">B</span> Only even powers of \(x\)</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-1',false)"><span class="pc-letter">C</span> All powers of \(x\)</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-1',false)"><span class="pc-letter">D</span> Only the constant term</div>
+      </div>
+      <div class="pc-feedback" id="pc2-1-fb"></div>
+    </div>
+    <div class="pc-question">
+      <div class="pc-q-text">The Leibnitz-Maclaurin method is applicable only at:</div>
+      <div class="pc-options" id="pc2-2-opts">
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-2',false)"><span class="pc-letter">A</span> Singular points of the ODE</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-2',true)"><span class="pc-letter">B</span> Ordinary points of the ODE</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-2',false)"><span class="pc-letter">C</span> All points equally</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc2-2',false)"><span class="pc-letter">D</span> Only when the solution is a polynomial</div>
+      </div>
+      <div class="pc-feedback" id="pc2-2-fb"></div>
+    </div>
+    <div class="pc-question">
+      <div class="pc-q-text">Fill in the blank: For \(y'' + xy' + y = 0\), \(y_0=1\), \(y_1=0\), the series coefficient of \(x^4\) (with factorial simplified) is ________.</div>
+      <div class="pc-fitb">
+        <input type="text" id="pc2-3-input" placeholder="e.g. 1/8">
+        <br>
+        <button class="pc-check-btn" onclick="pcFitb('pc2-3',['1/8','0.125','1/8 '])">Check</button>
+      </div>
+      <div class="pc-feedback" id="pc2-3-fb"></div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       END-OF-WEEK QUIZ
+  ════════════════════════════════════════════════════════ -->
+  <div class="eoq" id="eoq">
+    <div class="eoq-eyebrow">End of Week Assessment</div>
+    <div class="eoq-title">Week 2 Quiz</div>
+    <div class="eoq-sub">10 questions — 8 MCQ, 2 fill-in-the-blank. 60% to pass (6/10). Answer all before submitting.</div>
+
+    <!-- Q1 MCQ -->
+    <div class="eoq-question" data-q="1" data-type="mcq" data-correct="B">
+      <div class="eoq-qnum">Question 1 of 10</div>
+      <div class="eoq-q-text">The Maclaurin series is a Taylor series expanded about:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,1,'A')"><span class="eoq-letter">A</span> \(x = 1\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,1,'B')"><span class="eoq-letter">B</span> \(x = 0\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,1,'C')"><span class="eoq-letter">C</span> \(x = \infty\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,1,'D')"><span class="eoq-letter">D</span> Any arbitrary point</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-1"></div>
+    </div>
+
+    <!-- Q2 MCQ -->
+    <div class="eoq-question" data-q="2" data-type="mcq" data-correct="B">
+      <div class="eoq-qnum">Question 2 of 10</div>
+      <div class="eoq-q-text">The coefficient of \(x^4\) in the Maclaurin series for \(y = f(x)\) is:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,2,'A')"><span class="eoq-letter">A</span> \(y_4(0)\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,2,'B')"><span class="eoq-letter">B</span> \(\dfrac{y_4(0)}{4!}\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,2,'C')"><span class="eoq-letter">C</span> \(\dfrac{y_4(0)}{4}\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,2,'D')"><span class="eoq-letter">D</span> \(4!\,y_4(0)\)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-2"></div>
+    </div>
+
+    <!-- Q3 MCQ -->
+    <div class="eoq-question" data-q="3" data-type="mcq" data-correct="B">
+      <div class="eoq-qnum">Question 3 of 10</div>
+      <div class="eoq-q-text">For ODE \(y'' + xy' + y = 0\), differentiating \(n\) times and setting \(x = 0\) gives the recurrence:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,3,'A')"><span class="eoq-letter">A</span> \(y_{n+2}(0) = n\,y_n(0)\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,3,'B')"><span class="eoq-letter">B</span> \(y_{n+2}(0) = -(n+1)\,y_n(0)\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,3,'C')"><span class="eoq-letter">C</span> \(y_{n+2}(0) = (n-1)\,y_n(0)\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,3,'D')"><span class="eoq-letter">D</span> \(y_{n+2}(0) = -y_n(0)\)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-3"></div>
+    </div>
+
+    <!-- Q4 MCQ -->
+    <div class="eoq-question" data-q="4" data-type="mcq" data-correct="B">
+      <div class="eoq-qnum">Question 4 of 10</div>
+      <div class="eoq-q-text">With recurrence \(y_{n+2}(0) = -(n+1)\,y_n(0)\) and \(y_0 = 1\), what is \(y_4(0)\)?</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,4,'A')"><span class="eoq-letter">A</span> \(-3\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,4,'B')"><span class="eoq-letter">B</span> \(3\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,4,'C')"><span class="eoq-letter">C</span> \(-1\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,4,'D')"><span class="eoq-letter">D</span> \(1\)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-4"></div>
+    </div>
+
+    <!-- Q5 MCQ -->
+    <div class="eoq-question" data-q="5" data-type="mcq" data-correct="B">
+      <div class="eoq-qnum">Question 5 of 10</div>
+      <div class="eoq-q-text">The general power series solution of a 2nd order ODE has how many arbitrary constants?</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,5,'A')"><span class="eoq-letter">A</span> 1</div>
+        <div class="eoq-option" onclick="eoqSelect(this,5,'B')"><span class="eoq-letter">B</span> 2</div>
+        <div class="eoq-option" onclick="eoqSelect(this,5,'C')"><span class="eoq-letter">C</span> 3</div>
+        <div class="eoq-option" onclick="eoqSelect(this,5,'D')"><span class="eoq-letter">D</span> 0</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-5"></div>
+    </div>
+
+    <!-- Q6 MCQ -->
+    <div class="eoq-question" data-q="6" data-type="mcq" data-correct="B">
+      <div class="eoq-qnum">Question 6 of 10</div>
+      <div class="eoq-q-text">If \(y_1(0) = 0\) and the recurrence links every other term, which powers of \(x\) appear in the series solution?</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,6,'A')"><span class="eoq-letter">A</span> Odd powers only</div>
+        <div class="eoq-option" onclick="eoqSelect(this,6,'B')"><span class="eoq-letter">B</span> Even powers only</div>
+        <div class="eoq-option" onclick="eoqSelect(this,6,'C')"><span class="eoq-letter">C</span> All powers</div>
+        <div class="eoq-option" onclick="eoqSelect(this,6,'D')"><span class="eoq-letter">D</span> No powers at all</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-6"></div>
+    </div>
+
+    <!-- Q7 MCQ -->
+    <div class="eoq-question" data-q="7" data-type="mcq" data-correct="B">
+      <div class="eoq-qnum">Question 7 of 10</div>
+      <div class="eoq-q-text">For \(y'' + xy' + y = 0\), \(y_0=1\), \(y_1=0\), the term in \(x^6\) of the solution is:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,7,'A')"><span class="eoq-letter">A</span> \(-\dfrac{15x^6}{6}\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,7,'B')"><span class="eoq-letter">B</span> \(-\dfrac{15x^6}{6!}\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,7,'C')"><span class="eoq-letter">C</span> \(\dfrac{15x^6}{6!}\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,7,'D')"><span class="eoq-letter">D</span> \(-\dfrac{x^6}{6!}\)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-7"></div>
+    </div>
+
+    <!-- Q8 MCQ -->
+    <div class="eoq-question" data-q="8" data-type="mcq" data-correct="B">
+      <div class="eoq-qnum">Question 8 of 10</div>
+      <div class="eoq-q-text">The Leibnitz-Maclaurin method is applicable only at:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,8,'A')"><span class="eoq-letter">A</span> Singular points of the ODE</div>
+        <div class="eoq-option" onclick="eoqSelect(this,8,'B')"><span class="eoq-letter">B</span> Ordinary points of the ODE</div>
+        <div class="eoq-option" onclick="eoqSelect(this,8,'C')"><span class="eoq-letter">C</span> All points equally</div>
+        <div class="eoq-option" onclick="eoqSelect(this,8,'D')"><span class="eoq-letter">D</span> Only when the solution is a polynomial</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-8"></div>
+    </div>
+
+    <!-- Q9 FITB -->
+    <div class="eoq-question" data-q="9" data-type="fitb" data-correct="-15,minus 15,-15 ">
+      <div class="eoq-qnum">Question 9 of 10 — Fill in the blank</div>
+      <div class="eoq-q-text">For the recurrence \(y_{n+2}(0) = -(n+1)\,y_n(0)\) with \(y_0 = 1\), the value of \(y_6(0)\) is ________.</div>
+      <div class="eoq-fitb">
+        <input type="text" id="eoq-input-9" placeholder="e.g. -15">
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-9"></div>
+    </div>
+
+    <!-- Q10 FITB -->
+    <div class="eoq-question" data-q="10" data-type="fitb" data-correct="frobenius,frobenius method,the frobenius method">
+      <div class="eoq-qnum">Question 10 of 10 — Fill in the blank</div>
+      <div class="eoq-q-text">When \(x = 0\) is a singular point of an ODE, the Leibnitz-Maclaurin method fails and you must use the ________ method instead.</div>
+      <div class="eoq-fitb">
+        <input type="text" id="eoq-input-10" placeholder="Name of the method…">
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-10"></div>
+    </div>
+
+    <button class="eoq-submit" id="eoq-submit-btn" onclick="eoqSubmit()">Submit Week 2 Quiz</button>
+
+    <div class="eoq-result" id="eoq-result">
+      <div class="result-score" id="result-score"></div>
+      <div id="result-pill"></div>
+      <div class="result-msg" id="result-msg"></div>
+      <div id="result-extra"></div>
+    </div>
+  </div><!-- /eoq -->
+
+</div><!-- /wrapper -->
+
+<script>
+// ─── DARK MODE ───
+(function() {
+  const saved = localStorage.getItem('unify-theme');
+  if (saved === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('dark-toggle').textContent = '☀️';
+    });
+  }
+})();
+
+function toggleDark() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('dark-toggle').textContent = isDark ? '🌙' : '☀️';
+  localStorage.setItem('unify-theme', isDark ? 'light' : 'dark');
+}
+
+// ─── PROGRESS BAR + TRACKER ───
+window.addEventListener('scroll', () => {
+  const doc = document.documentElement;
+  const scrolled = doc.scrollTop || document.body.scrollTop;
+  const max = doc.scrollHeight - doc.clientHeight;
+  const pct = max > 0 ? (scrolled / max) * 100 : 0;
+  document.getElementById('progress-bar').style.width = pct + '%';
+
+  const t1  = document.getElementById('topic-1');
+  const t2  = document.getElementById('topic-2');
+  const eoq = document.getElementById('eoq');
+  const mid = scrolled + window.innerHeight / 2;
+  const getTop = el => el.getBoundingClientRect().top + scrolled;
+
+  let label = 'Topic 1: Maclaurin Series';
+  if (mid >= getTop(eoq))  label = 'Week 2 Quiz';
+  else if (mid >= getTop(t2)) label = 'Topic 2: Worked Examples';
+
+  document.getElementById('tracker-text').textContent = label;
+
+  // step pills
+  ['step-1','step-2','step-quiz'].forEach(id => {
+    document.getElementById(id).classList.remove('done','active');
+  });
+  if (mid >= getTop(eoq)) {
+    ['step-1','step-2'].forEach(id => document.getElementById(id).classList.add('done'));
+    document.getElementById('step-quiz').classList.add('active');
+  } else if (mid >= getTop(t2)) {
+    document.getElementById('step-1').classList.add('done');
+    document.getElementById('step-2').classList.add('active');
+  } else {
+    document.getElementById('step-1').classList.add('active');
+  }
+});
+
+// ─── REVEAL ANSWER (Active Recall) ───
+function toggleAnswer(btn) {
+  const ans = btn.nextElementSibling;
+  const showing = ans.classList.contains('show');
+  ans.classList.toggle('show', !showing);
+  btn.textContent = showing ? 'Reveal Answer' : 'Hide Answer';
+}
+
+// ─── MINI CHECK — REVEAL ───
+function mcReveal(btn) {
+  const ans = btn.nextElementSibling;
+  const showing = ans.classList.contains('show');
+  ans.classList.toggle('show', !showing);
+  btn.textContent = showing ? 'Reveal Answer' : 'Hide Answer';
+}
+
+// ─── MINI CHECK — MCQ ───
+const mcLocked = {};
+function mcMcq(el, groupId, correct, fbId) {
+  if (mcLocked[groupId]) return;
+  mcLocked[groupId] = true;
+  const opts = document.getElementById(groupId).querySelectorAll('.mc-mcq-opt');
+  opts.forEach(o => { o.classList.add('mc-locked'); });
+  el.classList.add(correct ? 'mc-correct' : 'mc-wrong');
+  if (!correct) {
+    opts.forEach(o => {
+      const attr = o.getAttribute('onclick') || '';
+      if (attr.includes(',true,')) o.classList.add('mc-correct');
+    });
+  }
+  const fb = document.getElementById(fbId);
+  fb.style.display = 'block';
+  fb.style.color = correct ? 'var(--green-deep)' : '#b91c1c';
+  fb.textContent = correct ? '✓ Correct!' : '✗ Not quite — the correct answer is highlighted.';
+}
+
+// ─── MINI CHECK — FITB ───
+function mcFitb(inputId, fbId, answers) {
+  const input = document.getElementById(inputId);
+  const val = input.value.trim().toLowerCase();
+  const correct = answers.some(a => val === a.toLowerCase());
+  const fb = document.getElementById(fbId);
+  fb.style.display = 'block';
+  fb.style.fontWeight = '600';
+  if (correct) {
+    fb.textContent = '✓ Correct!';
+    fb.style.color = 'var(--green-deep)';
+    input.style.borderColor = 'var(--green)';
+  } else {
+    fb.textContent = '✗ Not quite. Correct: ' + answers[0];
+    fb.style.color = '#b91c1c';
+    input.style.borderColor = '#ef4444';
+  }
+  input.disabled = true;
+  input.nextElementSibling.disabled = true;
+}
+
+// ─── PULSE CHECK MCQ ───
+const pcLocked = {};
+function pcAnswer(el, id, correct) {
+  if (pcLocked[id]) return;
+  pcLocked[id] = true;
+  const opts = document.getElementById(id + '-opts').querySelectorAll('.pc-option');
+  opts.forEach(o => o.classList.remove('correct','wrong'));
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) {
+    opts.forEach(o => {
+      if ((o.getAttribute('onclick') || '').includes(',true)')) o.classList.add('correct');
+    });
+  }
+  const fb = document.getElementById(id + '-fb');
+  fb.style.display = 'block';
+  fb.style.fontWeight = '600';
+  fb.textContent = correct ? '✓ Correct!' : '✗ Not quite — the correct answer is highlighted.';
+  fb.style.color = correct ? '#166534' : '#991b1b';
+}
+
+// ─── PULSE CHECK FITB ───
+function pcFitb(id, answers) {
+  const input = document.getElementById(id + '-input');
+  const val = input.value.trim().toLowerCase();
+  const correct = answers.some(a => val === a.toLowerCase());
+  const fb = document.getElementById(id + '-fb');
+  fb.style.display = 'block';
+  fb.style.fontWeight = '600';
+  if (correct) {
+    fb.textContent = '✓ Correct!';
+    fb.style.color = '#166534';
+    input.style.borderColor = '#16a34a';
+  } else {
+    fb.textContent = '✗ Not quite. Correct: ' + answers[0];
+    fb.style.color = '#991b1b';
+    input.style.borderColor = '#ef4444';
+  }
+  input.disabled = true;
+}
+
+// ─── EOQ ───
+const eoqAnswers = {};
+const eoqLocked  = {};
+const totalQ     = 10;
+
+const eoqFeedbacks = {
+  1:  { correct: "Correct. The Maclaurin series is the Taylor series centred at x = 0 — all derivatives are evaluated there.", wrong: "Incorrect. The Maclaurin series is specifically centred at x = 0, not at x = 1 or any other point." },
+  2:  { correct: "Correct. The coefficient of x^n in the Maclaurin series is y_n(0) divided by n! (the nth factorial).", wrong: "Incorrect. The coefficient of x^4 is y₄(0)/4! — you must divide by the factorial, not just n." },
+  3:  { correct: "Correct. Differentiating n times and setting x = 0 gives y_{n+2}(0) = -(n+1)y_n(0) for this ODE.", wrong: "Incorrect. For y'' + xy' + y = 0, the recurrence at x = 0 is y_{n+2}(0) = -(n+1)y_n(0)." },
+  4:  { correct: "Correct. y₂ = -1, y₄ = -(3)(-1) = 3.", wrong: "Incorrect. Step through: y₂(0) = -(1)(1) = -1, then y₄(0) = -(3)(-1) = 3." },
+  5:  { correct: "Correct. A 2nd order ODE has two linearly independent solutions — represented by the two arbitrary constants y₀ and y₁.", wrong: "Incorrect. A 2nd order ODE always has exactly 2 arbitrary constants in its general solution." },
+  6:  { correct: "Correct. When y₁ = 0, all odd-indexed derivatives are zero — only even powers of x survive.", wrong: "Incorrect. Since y₁ = 0 and the recurrence links y₃ to y₁, all odd-indexed terms vanish — only even powers remain." },
+  7:  { correct: "Correct. y₆(0) = -15, so the x⁶ term is -15x⁶/6! (the factorial denominator is essential).", wrong: "Incorrect. The x⁶ term is -15x⁶/6! — y₆(0) = -15 divided by 6! = 720." },
+  8:  { correct: "Correct. The Leibnitz-Maclaurin method requires an ordinary point at x = 0 — where the leading coefficient is non-zero.", wrong: "Incorrect. The method only applies at ordinary points. At singular points, the Frobenius method is needed." },
+  9:  { correct: "Correct. y₂ = -1, y₄ = 3, y₆ = -(5)(3) = -15.", wrong: "Incorrect. y₂ = -1, y₄ = 3, then y₆(0) = -(5)(3) = -15." },
+  10: { correct: "Correct. At a singular point, the Frobenius method (series with a power offset) is required.", wrong: "Incorrect. The Frobenius method is used when x = 0 is a singular point of the ODE." }
+};
+
+function eoqSelect(el, qNum, choice) {
+  if (eoqLocked[qNum]) return;
+  const qBlock = el.closest('.eoq-question');
+  qBlock.querySelectorAll('.eoq-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  eoqAnswers[qNum] = choice;
+}
+
+function eoqSubmit() {
+  let score = 0;
+  const questions = document.querySelectorAll('.eoq-question');
+  questions.forEach(q => {
+    const qNum    = parseInt(q.getAttribute('data-q'));
+    const type    = q.getAttribute('data-type');
+    const correct = q.getAttribute('data-correct');
+    const fb      = document.getElementById('eoq-fb-' + qNum);
+
+    if (type === 'mcq') {
+      const selected  = eoqAnswers[qNum];
+      const isCorrect = selected === correct;
+      if (isCorrect) score++;
+      q.querySelectorAll('.eoq-option').forEach(o => {
+        o.classList.add('locked');
+        const letter = o.querySelector('.eoq-letter').textContent.trim();
+        if (letter === correct) o.classList.add('correct-reveal');
+        else if (letter === selected && !isCorrect) o.classList.add('wrong-reveal');
+      });
+      fb.style.display = 'block';
+      fb.className = 'eoq-feedback ' + (isCorrect ? 'correct-fb' : 'wrong-fb');
+      fb.textContent = isCorrect ? '✓ ' + eoqFeedbacks[qNum].correct : '✗ ' + eoqFeedbacks[qNum].wrong;
+    } else if (type === 'fitb') {
+      const input    = document.getElementById('eoq-input-' + qNum);
+      const val      = input ? input.value.trim().toLowerCase() : '';
+      const accepted = correct.split(',');
+      const isCorrect = accepted.some(a => val === a.trim().toLowerCase());
+      if (isCorrect) score++;
+      if (input) {
+        input.disabled = true;
+        input.classList.add(isCorrect ? 'correct-input' : 'wrong-input');
+      }
+      fb.style.display = 'block';
+      fb.className = 'eoq-feedback ' + (isCorrect ? 'correct-fb' : 'wrong-fb');
+      fb.textContent = isCorrect ? '✓ ' + eoqFeedbacks[qNum].correct : '✗ ' + eoqFeedbacks[qNum].wrong;
+    }
+  });
+
+  document.getElementById('eoq-submit-btn').disabled = true;
+  const pct    = Math.round((score / totalQ) * 100);
+  const passed = pct >= 60;
+  const result = document.getElementById('eoq-result');
+  result.style.display = 'block';
+  result.className = 'eoq-result ' + (passed ? 'pass' : 'fail');
+  document.getElementById('result-score').textContent = score + '/' + totalQ;
+  const pill = document.getElementById('result-pill');
+  pill.innerHTML = '<span class="result-pill ' + (passed ? 'pill-pass' : 'pill-fail') + '">' + pct + '% — ' + (passed ? 'PASSED' : 'NOT YET') + '</span>';
+  const msg = document.getElementById('result-msg');
+  msg.textContent = passed
+    ? 'Good work. You understand how the Maclaurin series carries the recurrence relation into a full power series solution. Ready for Week 3.'
+    : 'Not there yet. Review the topics listed below, then retake. A solid grasp of the recurrence and factorial coefficients is essential for Bessel and Legendre equations ahead.';
+
+  const extra = document.getElementById('result-extra');
+  if (passed) {
+    extra.innerHTML = '<div class="unlock-banner">✓ Week 3 unlocked — Bessel Equation</div>';
+  } else {
+    const topicMap = {
+      1:  'Topic 1.1 — Maclaurin Series definition (centred at x = 0)',
+      2:  'Topic 1.1 — Coefficient formula y_n(0)/n!',
+      3:  'Topic 2.1 — Leibnitz differentiation &amp; recurrence derivation',
+      4:  'Topic 2.3 — Computing even-indexed derivatives step by step',
+      5:  'Topic 1.2 — Two arbitrary constants in 2nd order ODEs',
+      6:  'Topic 2.3 — Effect of y₁ = 0 on odd-power terms',
+      7:  'Topic 2.3 — x⁶ term of Example 3 solution',
+      8:  'Topic 1.2 — Ordinary vs singular points',
+      9:  'Topic 2.3 — y₆(0) computation via recurrence',
+      10: 'Topic 2.2 — Frobenius method for singular points'
+    };
+    const missed = [];
+    questions.forEach(q => {
+      const qNum = parseInt(q.getAttribute('data-q'));
+      const type = q.getAttribute('data-type');
+      const correct = q.getAttribute('data-correct');
+      let isCorrect = false;
+      if (type === 'mcq') isCorrect = eoqAnswers[qNum] === correct;
+      else {
+        const input = document.getElementById('eoq-input-' + qNum);
+        const val = input ? input.value.trim().toLowerCase() : '';
+        isCorrect = correct.split(',').some(a => val === a.trim().toLowerCase());
+      }
+      if (!isCorrect && topicMap[qNum]) missed.push(topicMap[qNum]);
+    });
+    extra.innerHTML = '<div class="review-nudge"><p>Topics to review:</p><ul>' + [...new Set(missed)].map(t => '<li>' + t + '</li>').join('') + '</ul></div>';
+  }
+  result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>
