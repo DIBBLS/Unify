@@ -4,6 +4,31 @@
    classes, does not remove or break existing ones.
 ═══════════════════════════════════════════════ */
 
+/* ── COLOR TOKEN OVERRIDES
+   dashboard.styles.css re-declares :root {} after variables.css,
+   so we re-apply the correct warm-beige palette here (we load last). ── */
+:root {
+  --bg: #f0efe9;
+  --surface: #ffffff;
+  --surface2: #f5f4ef;
+  --border: #e6e4de;
+  --text: #111410;
+  --text2: #555;
+  --text3: #999;
+  --sidebar-w: 240px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+[data-theme="dark"] {
+  --bg: #111410;
+  --surface: #1c1e1a;
+  --surface2: #242620;
+  --border: #2a2c27;
+  --text: #f0efe9;
+  --text2: #a0a09a;
+  --text3: #55554f;
+  --shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
 /* ── APP LAYOUT SHELL ── */
 .app-layout {
   display: flex;
@@ -231,9 +256,8 @@
 }
 .app-topbar.scrolled { border-bottom-color: var(--border); }
 
-/* Hide hamburger on desktop — sidebar is always visible */
+/* On desktop the topbar gets more padding (no hamburger visible) */
 @media (min-width: 769px) {
-  .app-hamburger { display: none !important; }
   .app-topbar { padding: 12px 40px 8px; }
 }
 
@@ -252,6 +276,8 @@
 .app-hamburger span:nth-child(2) { width: 14px; }
 .app-hamburger span:nth-child(3) { width: 22px; }
 
+/* .mobile-only is handled by responsive.css — hides on ≥769px with !important */
+
 .app-topbar-wordmark {
   font-family: var(--font-display);
   font-weight: 900;
@@ -259,7 +285,6 @@
   color: var(--text);
   letter-spacing: -0.5px;
 }
-@media (min-width: 769px) { .app-topbar-wordmark { display: none; } }
 
 .app-topbar-right {
   display: flex; align-items: center; gap: 10px;
@@ -433,20 +458,20 @@
   line-height: 1.4;
 }
 .dash-two-col .streak-action {
-  background: var(--green);
-  color: #111410;
+  background: var(--green) !important;
+  color: #111410 !important;
   font-size: 12px;
   font-weight: 700;
-  padding: 8px 14px;
-  border-radius: 20px;
+  padding: 8px 14px !important;
+  border-radius: 20px !important;
   flex-shrink: 0;
   align-self: flex-start;
   margin-top: 2px;
   white-space: nowrap;
 }
 .dash-two-col .streak-nudge.completed .streak-action {
-  background: var(--green);
-  color: #111410;
+  background: var(--green) !important;
+  color: #111410 !important;
 }
 
 /* ── MOTIVATION BANNER ── */
@@ -477,9 +502,6 @@
 .dash-motivation-ahead { font-size: 13px; color: #f0efe9; line-height: 1.4; margin-bottom: 8px; }
 .dash-motivation-ahead strong { color: var(--green); font-weight: 700; }
 .dash-sparkline { width: 80px; height: 28px; display: block; }
-
-/* ── HIDE study planner from dashboard (has its own page) ── */
-#plannerWrap { display: none !important; }
 
 /* ── GOAL CARD / planner wrap inside new layout ── */
 .app-page-content .goal-card-wrap {
