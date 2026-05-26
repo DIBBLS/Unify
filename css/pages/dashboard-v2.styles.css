@@ -1,8 +1,8 @@
-/* ═══════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════
    Unify Dashboard v2 — new layout layer
    Loaded after dashboard.styles.css; only adds new
    classes, does not remove or break existing ones.
-═══════════════════════════════════════════════════ */
+═══════════════════════════════════════════════ */
 
 /* ── APP LAYOUT SHELL ── */
 .app-layout {
@@ -231,6 +231,12 @@
 }
 .app-topbar.scrolled { border-bottom-color: var(--border); }
 
+/* Hide hamburger on desktop — sidebar is always visible */
+@media (min-width: 769px) {
+  .app-hamburger { display: none !important; }
+  .app-topbar { padding: 12px 40px 8px; }
+}
+
 .app-hamburger {
   width: 36px; height: 36px;
   display: flex; flex-direction: column;
@@ -267,7 +273,6 @@
   .app-page-content {
     padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
   }
-  /* override old body padding rule */
   body { padding-bottom: 0 !important; }
 }
 
@@ -378,7 +383,6 @@
   letter-spacing: .5px;
   white-space: nowrap;
 }
-/* force green fill on progress inside new layout */
 .dash-progress-track {
   flex: 1;
   height: 4px;
@@ -403,9 +407,46 @@
     margin: 0 40px 8px;
   }
 }
-/* streak card inside two-col needs no extra outer padding */
+
+/* ── STREAK CARD inside two-col: compact layout ── */
 .dash-two-col .streak-nudge {
   margin: 0;
+  padding: 16px;
+  gap: 12px;
+  align-items: flex-start;
+}
+.dash-two-col .streak-fire {
+  font-size: 26px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.dash-two-col .streak-info {
+  flex: 1;
+  min-width: 0;
+}
+.dash-two-col .streak-message {
+  font-size: 13px;
+  word-break: break-word;
+}
+.dash-two-col .streak-sub {
+  font-size: 11px;
+  line-height: 1.4;
+}
+.dash-two-col .streak-action {
+  background: var(--green);
+  color: #111410;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+.dash-two-col .streak-nudge.completed .streak-action {
+  background: var(--green);
+  color: #111410;
 }
 
 /* ── MOTIVATION BANNER ── */
@@ -437,23 +478,17 @@
 .dash-motivation-ahead strong { color: var(--green); font-weight: 700; }
 .dash-sparkline { width: 80px; height: 28px; display: block; }
 
-/* ── GOAL / PLANNER / STREAK inside new layout ── */
+/* ── HIDE study planner from dashboard (has its own page) ── */
+#plannerWrap { display: none !important; }
+
+/* ── GOAL CARD / planner wrap inside new layout ── */
 .app-page-content .goal-card-wrap {
   padding-left: 16px;
   padding-right: 16px;
   padding-top: 0;
 }
-.app-page-content .planner-wrap {
-  padding-left: 16px;
-  padding-right: 16px;
-  margin-top: 4px;
-}
 @media (min-width: 769px) {
   .app-page-content .goal-card-wrap {
-    padding-left: 40px;
-    padding-right: 40px;
-  }
-  .app-page-content .planner-wrap {
     padding-left: 40px;
     padding-right: 40px;
   }
@@ -488,9 +523,7 @@
 }
 
 /* restyle cards as rows */
-.dash-courses-list .course-item {
-  border-radius: 12px;
-}
+.dash-courses-list .course-item { border-radius: 12px; }
 .dash-courses-list .course-item:hover {
   transform: none !important;
   box-shadow: 0 2px 12px rgba(0,0,0,.07);
@@ -503,20 +536,20 @@
   border-radius: 12px;
 }
 .dash-courses-list .course-accent { display: none; }
+
+/* course code text: green */
 .dash-courses-list .course-card-code {
   font-size: 11px;
   min-width: 70px;
   margin-right: 0;
-  color: var(--text3);
+  color: var(--green-d) !important;
 }
-.dash-courses-list .course-card-name {
-  font-size: 13px;
-  flex: 1;
+[data-theme="dark"] .dash-courses-list .course-card-code {
+  color: var(--green) !important;
 }
-.dash-courses-list .course-progress-wrap {
-  min-width: 70px;
-  max-width: 90px;
-}
+
+.dash-courses-list .course-card-name { font-size: 13px; flex: 1; }
+.dash-courses-list .course-progress-wrap { min-width: 70px; max-width: 90px; }
 .dash-courses-list .course-card-tap { display: none; }
 
 /* ── MANUAL ADD (collapsible) ── */
@@ -545,13 +578,8 @@
 .dash-manual-summary::before { content: '▶'; font-size: 9px; transition: transform .2s; }
 .dash-manual-add[open] .dash-manual-summary::before { transform: rotate(90deg); }
 .dash-manual-summary:hover { background: var(--surface2); }
-.dash-manual-add[open] .dash-manual-summary {
-  border-bottom: 1px solid var(--border);
-}
-.dash-manual-body {
-  padding: 16px;
-  background: var(--bg);
-}
+.dash-manual-add[open] .dash-manual-summary { border-bottom: 1px solid var(--border); }
+.dash-manual-body { padding: 16px; background: var(--bg); }
 
 /* ── BOTTOM NAV (5 items with icons) ── */
 .app-bottom-nav {
@@ -565,9 +593,7 @@
   justify-content: space-around;
   transition: background .25s, border-color .25s;
 }
-@media (max-width: 768px) {
-  .app-bottom-nav { display: flex; }
-}
+@media (max-width: 768px) { .app-bottom-nav { display: flex; } }
 
 .app-bnav-item {
   display: flex;
@@ -595,5 +621,155 @@
 .app-bnav-item.active { color: var(--green-d); }
 [data-theme="dark"] .app-bnav-item.active { color: var(--green); }
 
-/* hide old mobile nav so it never flashes */
+/* hide old mobile nav */
 .mobile-nav { display: none !important; }
+
+/* ═══════════════════════════════════════
+   PROFILE PAGE v2
+═══════════════════════════════════════ */
+.prof-page {
+  padding: 0 0 40px;
+}
+
+.prof-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+@media (min-width: 769px) { .prof-hero { padding: 28px 40px 24px; } }
+
+.prof-avatar {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--green-bg);
+  border: 2px solid var(--green);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+  color: var(--green-d);
+  flex-shrink: 0;
+  user-select: none;
+}
+[data-theme="dark"] .prof-avatar { color: var(--green); }
+
+.prof-hero-info { flex: 1; min-width: 0; }
+.prof-name {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text);
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+.prof-edit-btn {
+  padding: 7px 16px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all .15s;
+}
+.prof-edit-btn:hover { border-color: var(--text); color: var(--text); }
+
+.prof-info-section {
+  padding: 16px 16px 4px;
+  border-bottom: 1px solid var(--border);
+}
+@media (min-width: 769px) { .prof-info-section { padding: 16px 40px 4px; } }
+
+.prof-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.prof-tag {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text2);
+}
+
+.prof-settings {
+  padding: 20px 16px;
+}
+@media (min-width: 769px) { .prof-settings { padding: 20px 40px; } }
+
+.prof-settings-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.prof-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  text-decoration: none;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: border-color .15s;
+  width: 100%;
+  text-align: left;
+}
+.prof-setting-row:hover { border-color: var(--text3); }
+.prof-setting-row .row-label { color: var(--text); }
+.prof-setting-row .row-value {
+  font-size: 12px;
+  color: var(--text3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.prof-setting-row .row-arrow { color: var(--text3); font-size: 14px; }
+
+.prof-signout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-top: 16px;
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: border-color .15s, background .15s;
+  width: 100%;
+  text-align: left;
+}
+.prof-signout-btn:hover { border-color: #ef4444; background: rgba(239,68,68,.05); }
+
+/* ── TIMETABLE page: bottom padding for nav ── */
+@media (max-width: 768px) {
+  .app-main .timetable-body,
+  .app-main .add-class-section {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  }
+}
