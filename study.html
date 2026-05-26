@@ -1,0 +1,714 @@
+<!doctype html>
+<html lang="en" data-theme="auto">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Unify — Study Plan</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <link rel="stylesheet" href="css/pages/dashboard.styles.css" />
+    <link rel="stylesheet" href="css/pages/dashboard-v2.styles.css?v=2" />
+    <link rel="stylesheet" href="css/pages/study.styles.css" />
+    <script src="js/theme.js"></script>
+  </head>
+  <body>
+
+    <!-- LOADING OVERLAY -->
+    <div class="ld" id="loadingOverlay"><div class="ld-spin"></div></div>
+
+    <!-- APP LAYOUT -->
+    <div class="app-layout">
+
+      <!-- SIDEBAR OVERLAY -->
+      <div class="app-sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+      <!-- SIDEBAR -->
+      <aside class="app-sidebar" id="appSidebar">
+        <div class="app-sidebar-top">
+          <span class="app-sidebar-wordmark">Unify</span>
+          <button class="app-sidebar-close" onclick="closeSidebar()" aria-label="Close menu">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div class="app-sidebar-user">
+          <div class="app-sidebar-avatar" id="sidebarAvatar">U</div>
+          <div class="app-sidebar-user-name" id="navUserName"></div>
+          <div class="app-sidebar-user-meta" id="sidebarMeta"></div>
+        </div>
+
+        <div class="app-sidebar-nav">
+          <div class="app-sidebar-section-label">Main</div>
+          <a href="index.html" class="app-sidebar-link">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            <span class="app-sidebar-link-text">Dashboard</span>
+          </a>
+          <a href="timetable.html" class="app-sidebar-link">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span class="app-sidebar-link-text">Timetable</span>
+          </a>
+          <a href="study.html" class="app-sidebar-link active">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            <span class="app-sidebar-link-text">Study Plan</span>
+          </a>
+          <a href="predictor.html" class="app-sidebar-link">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            <span class="app-sidebar-link-text">Analytics</span>
+          </a>
+          <a href="profile.html" class="app-sidebar-link">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span class="app-sidebar-link-text">Profile</span>
+          </a>
+        </div>
+
+        <div class="app-sidebar-bottom">
+          <!-- STREAK WIDGET -->
+          <div class="sp-streak-widget">
+            <div class="sp-streak-top">
+              <span class="sp-streak-fire">🔥</span>
+              <div class="sp-streak-info">
+                <span class="sp-streak-label">Study Streak</span>
+                <span class="sp-streak-count" id="streakCount">0 days</span>
+              </div>
+            </div>
+            <div class="sp-streak-days" id="streakDays"></div>
+          </div>
+
+          <button class="app-sidebar-theme-btn" onclick="toggleTheme()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <span class="app-sidebar-link-text"><span id="themeToggle">🌙 Dark</span></span>
+          </button>
+          <button class="app-sidebar-signout" id="signOutBtn">Sign out</button>
+        </div>
+      </aside>
+
+      <!-- MAIN AREA -->
+      <div class="app-main" id="appMain">
+
+        <!-- TOP BAR -->
+        <div class="app-topbar" id="appTopbar">
+          <button class="app-hamburger mobile-only" onclick="openSidebar()" aria-label="Open menu">
+            <span></span><span></span><span></span>
+          </button>
+          <span class="app-topbar-wordmark mobile-only">Unify</span>
+          <div class="app-topbar-right">
+          </div>
+        </div>
+
+        <!-- PAGE CONTENT -->
+        <div class="app-page-content">
+
+          <!-- HERO SECTION -->
+          <div class="sp-hero">
+            <div class="sp-hero-text">
+              <p class="sp-eyebrow">Study Plan</p>
+              <h1 class="sp-hero-title">A plan today,<br>a better <em>tomorrow.</em></h1>
+              <p class="sp-hero-sub">Organize your week. Focus your time. <strong>Build</strong> your future.</p>
+            </div>
+            <div class="sp-hero-art" aria-hidden="true">
+              <div class="sp-hero-box">
+                <span class="sp-hero-box-u">U</span>
+              </div>
+              <div class="sp-hero-lines">
+                <div class="sp-hero-line"></div>
+                <div class="sp-hero-line"></div>
+                <div class="sp-hero-line"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STATS BAR -->
+          <div class="sp-stats">
+            <div class="sp-stat">
+              <span class="sp-stat-icon">⏱</span>
+              <div class="sp-stat-body">
+                <div class="sp-stat-label">Planned Hours</div>
+                <div class="sp-stat-val" id="statHours">0h 0m</div>
+                <div class="sp-stat-sub">This week</div>
+              </div>
+            </div>
+            <div class="sp-stat">
+              <span class="sp-stat-icon">🎯</span>
+              <div class="sp-stat-body">
+                <div class="sp-stat-label">Focus Score</div>
+                <div class="sp-stat-val" id="statFocus">0%</div>
+                <div class="sp-stat-sub green" id="statFocusSub">Keep it up!</div>
+              </div>
+            </div>
+            <div class="sp-stat">
+              <span class="sp-stat-icon">☑</span>
+              <div class="sp-stat-body">
+                <div class="sp-stat-label">Tasks Planned</div>
+                <div class="sp-stat-val" id="statTasks">0</div>
+                <div class="sp-stat-sub">This week</div>
+              </div>
+            </div>
+            <div class="sp-stat">
+              <span class="sp-stat-icon">📈</span>
+              <div class="sp-stat-body">
+                <div class="sp-stat-label">Consistency</div>
+                <div class="sp-stat-val" id="statConsistency">0%</div>
+                <div class="sp-stat-sub">7-day average</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TWO-COLUMN LAYOUT -->
+          <div class="sp-two-col">
+
+            <!-- CENTER COLUMN -->
+            <div class="sp-center">
+
+              <!-- THIS WEEK SECTION -->
+              <div class="sp-week-section">
+                <div class="sp-section-header">
+                  <span class="sp-section-title">This Week</span>
+                  <button class="sp-section-btn">Weekly View ▾</button>
+                </div>
+                <div id="weekStrip"></div>
+              </div>
+
+              <!-- DAY VIEW SECTION -->
+              <div class="sp-day-section">
+                <div class="sp-day-header">
+                  <span class="sp-day-title-text" id="dayTitle">Today</span>
+                  <span class="sp-day-total" id="dayTotal">0h 0m planned</span>
+                </div>
+                <div id="spBlocks"></div>
+                <button class="sp-add-block-btn" onclick="openAddBlock()">+ Add Study Block</button>
+              </div>
+
+              <!-- UPCOMING DEADLINES SECTION -->
+              <div class="sp-deadlines-section">
+                <div class="sp-section-header">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:18px;">📅</span>
+                    <span class="sp-section-title">Upcoming Deadlines</span>
+                  </div>
+                  <a href="timetable.html" class="sp-section-header-link">View Calendar</a>
+                </div>
+                <div id="deadlineCards"></div>
+              </div>
+
+            </div><!-- end sp-center -->
+
+            <!-- RIGHT PANEL -->
+            <div class="sp-right">
+
+              <!-- FOCUS OF THE WEEK CARD -->
+              <div class="sp-focus-card">
+                <div class="sp-focus-hd">
+                  <span class="sp-focus-hd-icon">🎯</span>
+                  <span>Focus of the Week</span>
+                </div>
+                <div class="sp-focus-qq">"</div>
+                <div class="sp-focus-text" id="focusQuote">Master the basics so the advanced becomes easy.</div>
+                <div class="sp-focus-bar"></div>
+                <div class="sp-focus-deco" aria-hidden="true">U</div>
+              </div>
+
+              <!-- TOP PRIORITIES CARD -->
+              <div class="sp-right-card">
+                <div class="sp-right-hd">
+                  <span class="sp-right-hd-icon">🏆</span>
+                  <span class="sp-right-title">Top Priorities</span>
+                </div>
+                <div id="prioritiesList">
+                  <div style="font-size:12px;color:var(--text3)">Loading priorities…</div>
+                </div>
+                <a href="dashboard.html" class="sp-view-link">View all tasks →</a>
+              </div>
+
+              <!-- PLAN INSIGHTS CARD -->
+              <div class="sp-right-card">
+                <div class="sp-right-hd">
+                  <span class="sp-right-hd-icon">💡</span>
+                  <span class="sp-right-title">Plan Insights</span>
+                </div>
+                <div id="insightsList">
+                  <div style="font-size:12px;color:var(--text3)">Loading insights…</div>
+                </div>
+                <a href="predictor.html" class="sp-view-link">View detailed insights →</a>
+              </div>
+
+            </div><!-- end sp-right -->
+
+          </div><!-- end sp-two-col -->
+
+        </div><!-- end app-page-content -->
+      </div><!-- end app-main -->
+    </div><!-- end app-layout -->
+
+    <!-- BOTTOM NAV -->
+    <div class="app-bottom-nav">
+      <a href="index.html" class="app-bnav-item" id="mob-tab-personal">
+        <svg width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="timetable.html" class="app-bnav-item">
+        <svg width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Timetable</span>
+      </a>
+      <a href="study.html" class="app-bnav-item active">
+        <svg width="22" height="22" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <span>Study Plan</span>
+      </a>
+      <a href="predictor.html" class="app-bnav-item">
+        <svg width="22" height="22" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Analytics</span>
+      </a>
+      <a href="profile.html" class="app-bnav-item">
+        <svg width="22" height="22" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Profile</span>
+      </a>
+    </div>
+
+    <!-- ADD BLOCK MODAL -->
+    <div class="sp-modal-overlay" id="modalOverlay" onclick="closeAddBlock()">
+      <div class="sp-modal" onclick="event.stopPropagation()">
+        <div class="sp-modal-header">
+          <span>Add Study Block</span>
+          <button onclick="closeAddBlock()">×</button>
+        </div>
+        <input id="blkTitle" type="text" placeholder="Course or activity (e.g. MEE 306 – Thermodynamics)" />
+        <input id="blkSub" type="text" placeholder="Topic or note (optional)" />
+        <div class="sp-modal-row">
+          <label>From <input id="blkStart" type="time" value="09:00"></label>
+          <label>To <input id="blkEnd" type="time" value="10:30"></label>
+        </div>
+        <div class="sp-modal-row sp-color-row">
+          <button class="sp-cbtn on" data-c="green" onclick="pickColor(this)"></button>
+          <button class="sp-cbtn" data-c="yellow" onclick="pickColor(this)"></button>
+          <button class="sp-cbtn" data-c="purple" onclick="pickColor(this)"></button>
+          <button class="sp-cbtn" data-c="gray" onclick="pickColor(this)"></button>
+        </div>
+        <div class="sp-modal-footer">
+          <button class="sp-modal-cancel" onclick="closeAddBlock()">Cancel</button>
+          <button class="sp-modal-save" onclick="saveBlock()">Add Block</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIDEBAR / UI HELPERS -->
+    <script>
+      function openSidebar() {
+        document.getElementById('appSidebar').classList.add('open');
+        document.getElementById('sidebarOverlay').classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeSidebar() {
+        document.getElementById('appSidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('active');
+        document.body.style.overflow = '';
+      }
+      window.addEventListener('scroll', function() {
+        var tb = document.getElementById('appTopbar');
+        if (tb) tb.classList.toggle('scrolled', window.scrollY > 8);
+      }, { passive: true });
+
+      function toggleTheme() {
+        var html = document.documentElement;
+        var cur = html.getAttribute('data-theme');
+        var next = cur === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('unify-theme', next);
+        var tog = document.getElementById('themeToggle');
+        if (tog) tog.textContent = next === 'dark' ? '☀️ Light' : '🌙 Dark';
+      }
+      (function() {
+        var saved = localStorage.getItem('unify-theme');
+        if (saved) {
+          document.documentElement.setAttribute('data-theme', saved);
+          var tog = document.getElementById('themeToggle');
+          if (tog) tog.textContent = saved === 'dark' ? '☀️ Light' : '🌙 Dark';
+        }
+      })();
+
+      // Add Block modal helpers (non-module, referenced by HTML)
+      window.openAddBlock = function() {
+        document.getElementById('modalOverlay').classList.add('open');
+        document.getElementById('blkTitle').focus();
+      };
+      window.closeAddBlock = function() {
+        document.getElementById('modalOverlay').classList.remove('open');
+      };
+      window.pickColor = function(btn) {
+        document.querySelectorAll('.sp-cbtn').forEach(function(b) { b.classList.remove('on'); });
+        btn.classList.add('on');
+      };
+      // saveBlock and removeBlock are defined in the module but assigned to window there
+    </script>
+
+    <!-- MODULE: Firebase auth + data -->
+    <script type="module">
+      import { auth, db } from './js/firebase-config.js';
+      import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+      import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+      const QUOTES = [
+        "Master the basics so the advanced becomes easy.",
+        "Consistency beats intensity every time.",
+        "Every hour planned is an hour owned.",
+        "Small steps daily lead to giant leaps yearly.",
+        "Build the habit. Trust the process.",
+        "Your future self is watching. Study well.",
+        "Discipline today. Excellence tomorrow.",
+      ];
+
+      const DAY_NAMES   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const LONG_DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      const LONG_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+      function getWeekDates(refDate) {
+        const d = new Date(refDate);
+        const day = d.getDay(); // 0=Sun
+        const monday = new Date(d);
+        monday.setDate(d.getDate() - ((day + 6) % 7));
+        const dates = [];
+        for (let i = 0; i < 7; i++) {
+          const nd = new Date(monday);
+          nd.setDate(monday.getDate() + i);
+          dates.push(nd);
+        }
+        return dates;
+      }
+
+      function toKey(date) {
+        return date.toISOString().split('T')[0];
+      }
+
+      function getBlocks(dateKey) {
+        try {
+          const raw = localStorage.getItem('unify-study-blocks');
+          if (!raw) return [];
+          return JSON.parse(raw)[dateKey] || [];
+        } catch { return []; }
+      }
+
+      function saveBlocks(dateKey, blocks) {
+        try {
+          const raw = localStorage.getItem('unify-study-blocks');
+          const all = raw ? JSON.parse(raw) : {};
+          all[dateKey] = blocks;
+          localStorage.setItem('unify-study-blocks', JSON.stringify(all));
+        } catch {}
+      }
+
+      function getDeadlines() {
+        try {
+          return JSON.parse(localStorage.getItem('unify-deadlines') || '[]');
+        } catch { return []; }
+      }
+
+      function blockDurationMins(b) {
+        const [sh, sm] = (b.start || '00:00').split(':').map(Number);
+        const [eh, em] = (b.end   || '00:00').split(':').map(Number);
+        return Math.max(0, (eh * 60 + em) - (sh * 60 + sm));
+      }
+
+      function minsToLabel(mins) {
+        const h = Math.floor(mins / 60);
+        const m = mins % 60;
+        return h > 0 ? `${h}h ${m}m` : `${m}m`;
+      }
+
+      let selectedDate = new Date();
+
+      function buildWeekStrip() {
+        const strip = document.getElementById('weekStrip');
+        if (!strip) return;
+        const dates = getWeekDates(selectedDate);
+        const todayKey = toKey(new Date());
+        const selKey   = toKey(selectedDate);
+        strip.innerHTML = '';
+        const row = document.createElement('div');
+        row.className = 'sp-week-days';
+        dates.forEach(d => {
+          const key    = toKey(d);
+          const blocks = getBlocks(key);
+          const mins   = blocks.reduce((s, b) => s + blockDurationMins(b), 0);
+          const shortNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+          const btn = document.createElement('button');
+          btn.className = 'sp-day-btn' +
+            (key === todayKey ? ' today' : '') +
+            (key === selKey && key !== todayKey ? ' selected' : '') +
+            (blocks.length > 0 ? ' has-blocks' : '');
+          btn.innerHTML = `<span class="sp-day-name">${shortNames[d.getDay()]}</span>
+            <span class="sp-day-num">${d.getDate()}</span>
+            <span class="sp-day-hrs">${mins > 0 ? minsToLabel(mins) : '—'}</span>`;
+          btn.onclick = () => { selectedDate = d; buildWeekStrip(); renderDayView(); };
+          row.appendChild(btn);
+        });
+        strip.appendChild(row);
+      }
+
+      const BLOCK_ICONS = { green: '📖', yellow: '✏️', purple: '🔬', gray: '☕' };
+
+      function renderDayView() {
+        const key     = toKey(selectedDate);
+        const d       = selectedDate;
+        const titleEl = document.getElementById('dayTitle');
+        const totalEl = document.getElementById('dayTotal');
+        const blocksEl = document.getElementById('spBlocks');
+        if (!titleEl || !blocksEl) return;
+
+        titleEl.textContent = `${LONG_DAYS[d.getDay()]}, ${d.getDate()} ${LONG_MONTHS[d.getMonth()]}`;
+        const blocks    = getBlocks(key);
+        const totalMins = blocks.reduce((s, b) => s + blockDurationMins(b), 0);
+        totalEl.textContent = totalMins > 0 ? `${minsToLabel(totalMins)} planned` : 'No blocks yet';
+
+        if (!blocks.length) {
+          blocksEl.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text3);font-size:13px;">No study blocks for this day.<br>Tap <strong>+ Add Study Block</strong> to plan your session.</div>';
+          return;
+        }
+
+        blocksEl.innerHTML = '';
+        blocks.forEach((b, idx) => {
+          const dur     = blockDurationMins(b);
+          const isBreak = b.color === 'gray' || b.title.toLowerCase().includes('break');
+          const div = document.createElement('div');
+          div.className = 'sp-block';
+          div.innerHTML = `
+            <div class="sp-block-time">${b.start}<br>– ${b.end}</div>
+            <div class="sp-block-icon ${b.color || 'gray'}">${BLOCK_ICONS[b.color] || '📖'}</div>
+            <div class="sp-block-info">
+              <div class="sp-block-title">${b.title}</div>
+              ${b.sub ? `<div class="sp-block-sub">${b.sub}</div>` : ''}
+            </div>
+            ${!isBreak ? `<span class="sp-block-dur ${b.color || 'gray'}">${minsToLabel(dur)}</span>` : '<span></span>'}
+            <button class="sp-block-menu" onclick="window.removeBlock('${key}',${idx})">⋮</button>`;
+          blocksEl.appendChild(div);
+        });
+      }
+
+      window.removeBlock = function(key, idx) {
+        const blocks = getBlocks(key);
+        blocks.splice(idx, 1);
+        saveBlocks(key, blocks);
+        renderDayView();
+        buildWeekStrip();
+        renderStats();
+      };
+
+      function renderDeadlines(courses) {
+        const container = document.getElementById('deadlineCards');
+        if (!container) return;
+        const deadlines = getDeadlines();
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+
+        container.innerHTML = '';
+        const row = document.createElement('div');
+        row.className = 'sp-deadline-row';
+
+        deadlines.slice(0, 4).forEach(dl => {
+          const dlDate   = new Date(dl.date + 'T00:00:00');
+          const daysLeft = Math.round((dlDate - today) / 86400000);
+          const colorClass = daysLeft <= 2 ? 'red' : daysLeft <= 5 ? 'yellow' : 'green';
+          const card = document.createElement('div');
+          card.className = 'sp-deadline-card';
+          card.innerHTML = `
+            <div class="sp-dl-date">
+              <span class="sp-dl-day">${dlDate.getDate()}</span>
+              <span class="sp-dl-month">${MONTH_NAMES[dlDate.getMonth()]}</span>
+            </div>
+            <div class="sp-dl-course">${dl.course}</div>
+            <div class="sp-dl-title">${dl.title}</div>
+            <div class="sp-dl-left ${colorClass}">${daysLeft <= 0 ? 'Today!' : daysLeft + ' days left'}</div>`;
+          row.appendChild(card);
+        });
+
+        if (!deadlines.length) {
+          const empty = document.createElement('div');
+          empty.style.cssText = 'font-size:13px;color:var(--text3);padding:8px 0;';
+          empty.textContent = 'No deadlines yet. Add one below.';
+          row.appendChild(empty);
+        }
+
+        const addBtn = document.createElement('button');
+        addBtn.className = 'sp-dl-add';
+        addBtn.onclick = window.openAddDeadline;
+        addBtn.innerHTML = `<span>+</span><span>Add deadline</span>`;
+        row.appendChild(addBtn);
+        container.appendChild(row);
+      }
+
+      function renderPriorities(courses) {
+        const el = document.getElementById('prioritiesList');
+        if (!el) return;
+        const deadlines = getDeadlines();
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+
+        const ranked = (courses || []).slice(0, 3).map(c => {
+          const code = c.course || c;
+          const dl = deadlines.filter(d => d.course === code).sort((a, b) => a.date.localeCompare(b.date))[0];
+          const daysLeft = dl ? Math.round((new Date(dl.date + 'T00:00:00') - today) / 86400000) : null;
+          return { code, dlTitle: dl?.title, daysLeft };
+        });
+
+        if (!ranked.length) {
+          el.innerHTML = '<div style="font-size:12px;color:var(--text3)">Add courses on the dashboard first.</div>';
+          return;
+        }
+
+        el.innerHTML = ranked.map((r, i) => `
+          <div class="sp-priority">
+            <div class="sp-priority-num">${i + 1}</div>
+            <div>
+              <div class="sp-priority-name">${r.code}</div>
+              <div class="sp-priority-sub">${r.daysLeft != null ? (r.dlTitle || 'Deadline') + ' in ' + r.daysLeft + ' days' : 'Focus course'}</div>
+            </div>
+          </div>`).join('');
+      }
+
+      function renderInsights() {
+        const el = document.getElementById('insightsList');
+        if (!el) return;
+        const insights = [
+          { text: 'You study best in the morning', icon: '☀️' },
+          { text: 'Your average session is 1h 45m', icon: '⏰' },
+          { text: 'Try adding more practice sessions', icon: '📊' },
+        ];
+        el.innerHTML = insights.map(ins => `
+          <div class="sp-insight">
+            <span class="sp-insight-text">${ins.text}</span>
+            <span class="sp-insight-icon">${ins.icon}</span>
+          </div>`).join('');
+      }
+
+      function renderStats() {
+        const dates = getWeekDates(new Date());
+        let totalMins = 0, taskCount = 0;
+        dates.forEach(d => {
+          const blocks = getBlocks(toKey(d));
+          taskCount  += blocks.length;
+          totalMins  += blocks.reduce((s, b) => s + blockDurationMins(b), 0);
+        });
+
+        try {
+          const s = JSON.parse(localStorage.getItem('unify-streak') || '{}');
+          const weekDays = Array.isArray(s.weekDays) ? s.weekDays : [];
+          const focusPct = Math.min(100, Math.round(weekDays.length / 7 * 100));
+          const consistency = s.count ? Math.min(100, Math.round(s.count / 14 * 100)) : 0;
+          const fEl = document.getElementById('statFocus');
+          if (fEl) fEl.textContent = focusPct + '%';
+          const fSubEl = document.getElementById('statFocusSub');
+          if (fSubEl) fSubEl.textContent = focusPct >= 80 ? 'Keep it up!' : 'Stay consistent';
+          const cEl = document.getElementById('statConsistency');
+          if (cEl) cEl.textContent = consistency + '%';
+        } catch {}
+
+        const h = Math.floor(totalMins / 60), m = totalMins % 60;
+        const hEl = document.getElementById('statHours');
+        if (hEl) hEl.textContent = `${h}h ${m}m`;
+        const tEl = document.getElementById('statTasks');
+        if (tEl) tEl.textContent = taskCount;
+      }
+
+      function renderStreak() {
+        try {
+          const s       = JSON.parse(localStorage.getItem('unify-streak') || '{}');
+          const count   = s.count || 0;
+          const weekDays = Array.isArray(s.weekDays) ? s.weekDays : [];
+          const countEl = document.getElementById('streakCount');
+          if (countEl) countEl.textContent = count + (count === 1 ? ' day' : ' days');
+          const daysEl = document.getElementById('streakDays');
+          if (!daysEl) return;
+          const SHORT = ['M','T','W','T','F','S','S'];
+          const FULL  = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+          const todayIdx = (new Date().getDay() + 6) % 7;
+          daysEl.innerHTML = SHORT.map((letter, i) => {
+            const done    = weekDays.includes(FULL[i]);
+            const isToday = i === todayIdx;
+            return `<div class="sp-streak-day">
+              <span class="sp-streak-day-name">${letter}</span>
+              <span class="sp-streak-dot ${done ? 'done' : isToday ? 'today-dot' : ''}"></span>
+            </div>`;
+          }).join('');
+        } catch {}
+      }
+
+      // Set focus quote by day of week
+      const quoteEl = document.getElementById('focusQuote');
+      if (quoteEl) quoteEl.textContent = QUOTES[new Date().getDay()];
+
+      // Global saveBlock (needs module-scope helpers)
+      window.saveBlock = function() {
+        const title = document.getElementById('blkTitle').value.trim();
+        if (!title) { document.getElementById('blkTitle').focus(); return; }
+        const sub   = document.getElementById('blkSub').value.trim();
+        const start = document.getElementById('blkStart').value || '09:00';
+        const end   = document.getElementById('blkEnd').value   || '10:30';
+        const color = document.querySelector('.sp-cbtn.on')?.dataset.c || 'green';
+        const key   = toKey(selectedDate);
+        const blocks = getBlocks(key);
+        blocks.push({ id: Date.now().toString(36), title, sub, start, end, color });
+        blocks.sort((a, b) => a.start.localeCompare(b.start));
+        saveBlocks(key, blocks);
+        window.closeAddBlock();
+        document.getElementById('blkTitle').value = '';
+        document.getElementById('blkSub').value   = '';
+        renderDayView();
+        buildWeekStrip();
+        renderStats();
+      };
+
+      // Add deadline global
+      window.openAddDeadline = function() {
+        const course  = prompt('Course code (e.g. MEE 306):');
+        if (!course)  return;
+        const title   = prompt('Task (e.g. CA 1, Quiz):');
+        if (!title)   return;
+        const dateStr = prompt('Date (YYYY-MM-DD):');
+        if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return;
+        const deadlines = getDeadlines();
+        deadlines.push({ id: Date.now().toString(36), course: course.trim().toUpperCase(), title: title.trim(), date: dateStr });
+        localStorage.setItem('unify-deadlines', JSON.stringify(deadlines));
+        renderDeadlines();
+      };
+
+      // Firebase auth + data load
+      onAuthStateChanged(auth, async user => {
+        if (!user) { window.location.href = 'Auth.html'; return; }
+        let courses = [];
+        try {
+          const snap = await getDoc(doc(db, 'users', user.uid));
+          if (snap.exists()) {
+            const data = snap.data();
+            if (!data.university) { window.location.href = 'Onboarding.html'; return; }
+            const nameEl = document.getElementById('navUserName');
+            if (nameEl) nameEl.textContent = data.firstName || '';
+            const av = document.getElementById('sidebarAvatar');
+            if (av && data.firstName) av.textContent = data.firstName[0].toUpperCase();
+            courses = data.courses || [];
+          }
+        } catch (e) { console.error(e); }
+
+        renderStats();
+        renderStreak();
+        buildWeekStrip();
+        renderDayView();
+        renderDeadlines(courses);
+        renderPriorities(courses);
+        renderInsights();
+
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) overlay.style.display = 'none';
+      });
+
+      // Sign out
+      document.getElementById('signOutBtn').addEventListener('click', async () => {
+        const { signOut } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+        await signOut(auth);
+        window.location.href = 'Auth.html';
+      });
+    </script>
+
+  </body>
+</html>
