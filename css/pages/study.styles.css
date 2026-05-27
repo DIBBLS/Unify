@@ -883,5 +883,20 @@
   .sp-day-section,
   .sp-deadlines-section {
     border-radius: 10px;
+    padding: 14px;
   }
+  .sp-hero { padding: 16px 16px 12px; gap: 12px; }
+  .sp-hero-title { font-size: 26px; }
+  .sp-hero-sub { font-size: 13px; }
+  .sp-stats { margin: 0 0 14px; border-radius: 10px; }
+  .sp-stat { padding: 12px 14px; gap: 10px; }
+  .sp-stat-icon { font-size: 18px; }
+  .sp-stat-val { font-size: 18px; }
+  .sp-two-col { padding: 0 0 80px; gap: 12px; }
+  .sp-section-title { font-size: 15px; }
+  .sp-day-btn { padding: 6px 2px; }
+  .sp-day-num { font-size: 15px; }
+  .sp-block { grid-template-columns: 66px 32px 1fr auto 24px; gap: 8px; padding: 8px 0; }
+  .sp-block-title { font-size: 12px; }
+  .sp-focus-text { font-size: 17px; }
 }

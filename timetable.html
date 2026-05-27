@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="css/responsive.css">
 <script src="js/theme.js"></script>
 <link rel="stylesheet" href="css/pages/timetable.styles.css">
-<link rel="stylesheet" href="css/pages/dashboard-v2.styles.css">
+<link rel="stylesheet" href="css/pages/dashboard-v2.styles.css?v=2">
 </head>
 <body>
 
@@ -93,7 +93,7 @@
     </div>
     <div class="app-sidebar-nav">
       <div class="app-sidebar-section-label">Main</div>
-      <a href="index.html" class="app-sidebar-link">
+      <a href="dashboard.html" class="app-sidebar-link">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         <span class="app-sidebar-link-text">Dashboard</span>
       </a>
@@ -125,10 +125,10 @@
 
   <div class="app-main">
     <div class="app-topbar" id="appTopbar">
-      <button class="app-hamburger" onclick="openSidebar()" aria-label="Open menu">
+      <button class="app-hamburger mobile-only" onclick="openSidebar()" aria-label="Open menu">
         <span></span><span></span><span></span>
       </button>
-      <span class="app-topbar-wordmark">Unify</span>
+      <span class="app-topbar-wordmark mobile-only">Unify</span>
       <div class="app-topbar-right">
         <span class="admin-badge" id="adminBadge" style="display:none;">Course Rep</span>
         <button class="notif-bell-btn" id="notifBell" onclick="toggleNotifDrawer()" title="Updates">
@@ -218,7 +218,7 @@
 
 <!-- BOTTOM NAV — Timetable active -->
 <div class="app-bottom-nav">
-  <a href="index.html" class="app-bnav-item">
+  <a href="dashboard.html" class="app-bnav-item">
     <svg width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
     <span>Dashboard</span>
   </a>
