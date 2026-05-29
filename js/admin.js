@@ -1172,70 +1172,122 @@ window.uploadCourseContent = async function () {
   btn.textContent = "Upload →";
 };
 
-// ── EXAM TIMETABLE ────────────────────────────────────────────────────────────
+// ── EXAM TIMETABLE SHEET ──────────────────────────────────────────────────────
 
-window.saveExamTimetable = async function () {
-  const dept = document.getElementById('etDept').value.trim();
-  const semester = document.getElementById('etSemester').value.trim();
-  const url = document.getElementById('etUrl').value.trim();
-  const feedback = document.getElementById('etFeedback');
+let etSavedRows = [];
+let etDraftRows = [];
 
-  if (!dept || !url) {
-    feedback.textContent = 'Please select a department and enter a URL.';
-    feedback.style.color = 'var(--red)';
-    return;
-  }
-  feedback.textContent = 'Saving…';
-  feedback.style.color = 'var(--text3)';
-  try {
-    await setDoc(doc(db, 'examTimetables', dept), {
-      url,
-      semester: semester || '',
-      uploadedAt: serverTimestamp(),
-      uploadedBy: auth.currentUser?.uid || '',
-    });
-    feedback.textContent = 'Timetable saved successfully.';
-    feedback.style.color = 'var(--green-deep)';
-    document.getElementById('etUrl').value = '';
-    document.getElementById('etDept').value = '';
-    document.getElementById('etSemester').value = '';
-    loadExamTimetables();
-  } catch (e) {
-    feedback.textContent = 'Error: ' + (e.message || 'unknown');
-    feedback.style.color = 'var(--red)';
-  }
+function getETTarget() {
+  return {
+    dept: document.getElementById('etDept')?.value.trim() || '',
+    sem: document.getElementById('etSemester')?.value.trim() || '',
+  };
+}
+
+window.onETTargetChange = function () {
+  etSavedRows = [];
+  etDraftRows = [];
+  renderETSheet();
+  const { dept } = getETTarget();
+  if (dept) loadETRows();
 };
 
-async function loadExamTimetables() {
-  const list = document.getElementById('etList');
-  if (!list) return;
-  list.innerHTML = '<div style="color:var(--text3);font-size:13px">Loading…</div>';
+async function loadETRows() {
+  const { dept } = getETTarget();
+  if (!dept) return;
   try {
-    const snap = await getDocs(collection(db, 'examTimetables'));
-    if (snap.empty) {
-      list.innerHTML = '<div style="color:var(--text3);font-size:13px">No timetables uploaded yet.</div>';
-      return;
+    const snap = await getDoc(doc(db, 'examTimetables', dept));
+    if (snap.exists()) {
+      const data = snap.data();
+      etSavedRows = (data.entries || []).map((r, i) => ({ ...r, _id: i }));
+      const semSel = document.getElementById('etSemester');
+      if (semSel && !semSel.value && data.semester) semSel.value = data.semester;
+    } else {
+      etSavedRows = [];
     }
-    list.innerHTML = snap.docs.map(d => {
-      const data = d.data();
-      const ts = data.uploadedAt ? new Date(data.uploadedAt.seconds * 1000).toLocaleString() : '—';
-      return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:6px">
-        <div style="font-weight:600;font-size:14px;color:var(--text)">${d.id}</div>
-        ${data.semester ? `<div style="font-size:12px;color:var(--text3)">${data.semester}</div>` : ''}
-        <a href="${data.url}" target="_blank" rel="noopener" style="font-size:12px;color:var(--green-deep);word-break:break-all">${data.url}</a>
-        <div style="font-size:11px;color:var(--text3)">Uploaded ${ts}</div>
-        <button class="btn" style="width:fit-content;margin-top:4px;font-size:12px;color:var(--red);background:transparent;border:1px solid var(--red-border);padding:4px 10px;border-radius:6px;cursor:pointer" onclick="deleteExamTimetable('${d.id}')">Delete</button>
-      </div>`;
-    }).join('');
+    etDraftRows = [];
+    renderETSheet();
   } catch (e) {
-    list.innerHTML = `<div style="color:var(--red);font-size:13px">Error loading: ${e.message}</div>`;
+    console.error('loadETRows', e);
   }
 }
 
-window.deleteExamTimetable = async function (dept) {
-  if (!confirm(`Delete exam timetable for "${dept}"?`)) return;
-  await deleteDoc(doc(db, 'examTimetables', dept));
-  loadExamTimetables();
+window.addETDraftRow = function () {
+  const { dept } = getETTarget();
+  if (!dept) { alert('Select a department first.'); return; }
+  etDraftRows.push({ course: '', date: '', startTime: '', endTime: '', venue: '', _draftId: Date.now() + Math.random() });
+  renderETSheet();
+  document.getElementById('etSaveAllBtn').style.display = '';
+};
+
+window.updateETRow = function (type, id, field, value) {
+  const arr = type === 'draft' ? etDraftRows : etSavedRows;
+  const key = type === 'draft' ? '_draftId' : '_id';
+  const row = arr.find(r => String(r[key]) === String(id));
+  if (row) { row[field] = value; document.getElementById('etSaveAllBtn').style.display = ''; }
+};
+
+window.deleteETRow = function (type, id) {
+  if (type === 'draft') {
+    etDraftRows = etDraftRows.filter(r => String(r._draftId) !== String(id));
+  } else {
+    etSavedRows = etSavedRows.filter(r => String(r._id) !== String(id));
+  }
+  renderETSheet();
+  document.getElementById('etSaveAllBtn').style.display = '';
+};
+
+function renderETSheet() {
+  const tbody = document.getElementById('etSheetBody');
+  if (!tbody) return;
+  const saved = etSavedRows.map(r => ({ ...r, _type: 'saved' }));
+  const drafts = etDraftRows.map(r => ({ ...r, _type: 'draft' }));
+  const all = [...saved, ...drafts];
+  const countEl = document.getElementById('etCount');
+  if (countEl) countEl.textContent = `${all.length} entr${all.length === 1 ? 'y' : 'ies'}`;
+  if (all.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3);font-size:13px">No exams yet. Click "+ Add row" to begin.</td></tr>`;
+    document.getElementById('etSaveAllBtn').style.display = 'none';
+    return;
+  }
+  const e = s => String(s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  tbody.innerHTML = all.map(r => {
+    const id = r._type === 'draft' ? r._draftId : r._id;
+    return `<tr>
+      <td><input class="tt-cell-input" value="${e(r.course)}" placeholder="ECE 301" oninput="updateETRow('${r._type}','${id}','course',this.value)"></td>
+      <td><input class="tt-cell-input" type="date" value="${e(r.date)}" oninput="updateETRow('${r._type}','${id}','date',this.value)"></td>
+      <td><input class="tt-cell-input" type="time" value="${e(r.startTime)}" oninput="updateETRow('${r._type}','${id}','startTime',this.value)"></td>
+      <td><input class="tt-cell-input" type="time" value="${e(r.endTime)}" oninput="updateETRow('${r._type}','${id}','endTime',this.value)"></td>
+      <td><input class="tt-cell-input" value="${e(r.venue)}" placeholder="Eng. Hall A" oninput="updateETRow('${r._type}','${id}','venue',this.value)"></td>
+      <td><button class="tt-del-btn" onclick="deleteETRow('${r._type}','${id}')">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+window.saveETRows = async function () {
+  const { dept, sem } = getETTarget();
+  if (!dept) { alert('Select a department first.'); return; }
+  const hint = document.getElementById('etDraftHint');
+  hint.textContent = 'Saving…';
+  const entries = [
+    ...etSavedRows.map(({ _id, _type, ...r }) => r),
+    ...etDraftRows.map(({ _draftId, _type, _draft, ...r }) => r),
+  ].filter(r => r.course || r.date);
+  try {
+    await setDoc(doc(db, 'examTimetables', dept), {
+      entries,
+      semester: sem || '',
+      updatedAt: serverTimestamp(),
+      updatedBy: auth.currentUser?.uid || '',
+    });
+    hint.textContent = `Saved ${entries.length} exam entr${entries.length === 1 ? 'y' : 'ies'}.`;
+    setTimeout(() => { if (hint) hint.textContent = ''; }, 3000);
+    document.getElementById('etSaveAllBtn').style.display = 'none';
+    etDraftRows = [];
+    await loadETRows();
+  } catch (e) {
+    hint.textContent = 'Error: ' + e.message;
+  }
 };
 
 // ── FEEDBACK INBOX ────────────────────────────────────────────────────────────
@@ -1289,7 +1341,7 @@ window.resolveFeedback = async function (id) {
 // Auto-load exam timetables and feedback when admin panel initialises
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
-    if (document.getElementById('etList')) loadExamTimetables();
+    if (document.getElementById('etSheetBody')) renderETSheet();
     if (document.getElementById('fbList')) loadFeedback();
   }, 1500);
 });

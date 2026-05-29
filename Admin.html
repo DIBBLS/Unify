@@ -581,51 +581,65 @@
         </details>
 
         <!-- EXAM TIMETABLE UPLOAD -->
-        <section class="panel" id="exam-timetable">
+        <section class="panel panel-feature" id="exam-timetable">
           <div class="panel-head">
             <div>
               <h2 class="panel-title">Exam Timetable</h2>
-              <p class="panel-sub">Upload the exam timetable for each department. Students in that department will see it automatically.</p>
+              <p class="panel-sub">Enter the exam schedule row by row. Students in that department will see it automatically on their Exam Timetable page.</p>
+            </div>
+            <div class="panel-actions">
+              <span class="panel-pill" id="etCount">0 entries</span>
             </div>
           </div>
-          <div class="panel-body">
-            <div class="card card-flush">
-              <div class="card-title">Upload / Update Timetable</div>
-              <div class="form-row two">
-                <div class="form-group">
-                  <label class="form-label">Department</label>
-                  <select class="form-select" id="etDept">
-                    <option value="">Select department…</option>
-                    <option value="Electronic &amp; Computer Engineering">Electronic &amp; Computer Engineering</option>
-                    <option value="Mechanical Engineering">Mechanical Engineering</option>
-                    <option value="Industrial &amp; Petroleum Engineering">Industrial &amp; Petroleum Engineering</option>
-                    <option value="Chemical &amp; Polymer Engineering">Chemical &amp; Polymer Engineering</option>
-                    <option value="Civil Engineering">Civil Engineering</option>
-                    <option value="Aerospace Engineering">Aerospace Engineering</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Semester</label>
-                  <select class="form-select" id="etSemester">
-                    <option value="">Select semester…</option>
-                    <option value="First Semester">First Semester</option>
-                    <option value="Second Semester">Second Semester</option>
-                  </select>
-                </div>
+
+          <div class="tt-target-bar">
+            <div class="form-row two">
+              <div class="form-group">
+                <label class="form-label">Department</label>
+                <select class="form-select" id="etDept" onchange="onETTargetChange()">
+                  <option value="">Select department…</option>
+                  <option value="Electronic &amp; Computer Engineering">Electronic &amp; Computer Engineering</option>
+                  <option value="Mechanical Engineering">Mechanical Engineering</option>
+                  <option value="Industrial &amp; Petroleum Engineering">Industrial &amp; Petroleum Engineering</option>
+                  <option value="Chemical &amp; Polymer Engineering">Chemical &amp; Polymer Engineering</option>
+                  <option value="Civil Engineering">Civil Engineering</option>
+                  <option value="Aerospace Engineering">Aerospace Engineering</option>
+                </select>
               </div>
               <div class="form-group">
-                <label class="form-label">Timetable URL</label>
-                <input class="form-input" id="etUrl" placeholder="Google Drive link or direct image/PDF URL" type="url">
-                <div style="font-size:12px;color:var(--text3);margin-top:4px">Paste a Google Drive share link, or a direct link to a PNG/JPG/PDF. Make sure the file is set to &ldquo;Anyone with the link can view&rdquo;.</div>
-              </div>
-              <div class="card-foot">
-                <div id="etFeedback" class="feedback"></div>
-                <button class="btn btn-green" onclick="saveExamTimetable()">Save Timetable →</button>
+                <label class="form-label">Semester</label>
+                <select class="form-select" id="etSemester" onchange="onETTargetChange()">
+                  <option value="">Select semester…</option>
+                  <option value="First Semester">First Semester</option>
+                  <option value="Second Semester">Second Semester</option>
+                </select>
               </div>
             </div>
+          </div>
 
-            <div class="sub-section-label">Currently Uploaded Timetables</div>
-            <div id="etList" style="display:flex;flex-direction:column;gap:10px"></div>
+          <div class="tt-sheet-wrap">
+            <table class="tt-sheet">
+              <thead>
+                <tr>
+                  <th class="th-code">Course</th>
+                  <th style="min-width:130px">Date</th>
+                  <th class="th-time">Start</th>
+                  <th class="th-time">End</th>
+                  <th>Venue</th>
+                  <th class="th-act"></th>
+                </tr>
+              </thead>
+              <tbody id="etSheetBody">
+                <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3);font-size:13px">Select a department to load or enter exam entries.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tt-sheet-foot">
+            <button class="tt-add-row-btn" id="etAddRowBtn" type="button" onclick="addETDraftRow()">+ Add row</button>
+            <div class="tt-sheet-actions">
+              <span class="tt-draft-hint" id="etDraftHint"></span>
+              <button class="btn btn-primary" id="etSaveAllBtn" type="button" onclick="saveETRows()" style="display:none">Save</button>
+            </div>
           </div>
         </section>
 
