@@ -2,6 +2,31 @@
   import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+  const RL_KEY = 'unify-auth-rl';
+  const RL_MAX = 5;
+  const RL_WINDOW = 15 * 60 * 1000;
+
+  function getRl() {
+    try { return JSON.parse(localStorage.getItem(RL_KEY)) || { count: 0, lockUntil: 0 }; }
+    catch { return { count: 0, lockUntil: 0 }; }
+  }
+  function checkRl() {
+    const { lockUntil } = getRl();
+    if (lockUntil > Date.now()) {
+      const mins = Math.ceil((lockUntil - Date.now()) / 60000);
+      return `Too many failed attempts. Try again in ${mins} minute${mins !== 1 ? 's' : ''}.`;
+    }
+    return null;
+  }
+  function recordFail() {
+    const rl = getRl();
+    if (rl.lockUntil > Date.now()) return;
+    rl.count = (rl.count || 0) + 1;
+    if (rl.count >= RL_MAX) { rl.lockUntil = Date.now() + RL_WINDOW; rl.count = 0; }
+    localStorage.setItem(RL_KEY, JSON.stringify(rl));
+  }
+  function clearRl() { localStorage.removeItem(RL_KEY); }
+
   // If already logged in → check if onboarded
   onAuthStateChanged(auth, async user => {
     if (!user) return;
@@ -43,6 +68,8 @@
 
   window.signIn = async function(e) {
     e.preventDefault(); clearMessages();
+    const blocked = checkRl();
+    if (blocked) { showError(blocked); return; }
     const btn = document.getElementById('signinBtn');
     btn.disabled = true; btn.textContent = 'Signing in...';
     try {
@@ -50,15 +77,20 @@
         document.getElementById('signinEmail').value,
         document.getElementById('signinPassword').value
       );
+      clearRl();
       window.location.href = 'dashboard.html';
     } catch(err) {
-      showError(friendlyError(err.code));
+      recordFail();
+      const blocked2 = checkRl();
+      showError(blocked2 || friendlyError(err.code));
       btn.disabled = false; btn.textContent = 'Sign In →';
     }
   }
 
   window.signUp = async function(e) {
     e.preventDefault(); clearMessages();
+    const blocked = checkRl();
+    if (blocked) { showError(blocked); return; }
     const btn = document.getElementById('signupBtn');
     btn.disabled = true; btn.textContent = 'Creating account...';
     try {
@@ -66,21 +98,27 @@
         document.getElementById('signupEmail').value,
         document.getElementById('signupPassword').value
       );
-      // New user → onboarding. Existing user → dashboard
+      clearRl();
       updateProfile(cred.user, { displayName: document.getElementById('signupName').value });
       window.location.href = 'Onboarding.html';
     } catch(err) {
-      showError(friendlyError(err.code));
+      recordFail();
+      const blocked2 = checkRl();
+      showError(blocked2 || friendlyError(err.code));
       btn.disabled = false; btn.textContent = 'Create Account →';
     }
   }
 
   window.signInWithGoogle = async function() {
     clearMessages();
+    const blocked = checkRl();
+    if (blocked) { showError(blocked); return; }
     try {
       await signInWithPopup(auth, provider);
+      clearRl();
       window.location.href = 'dashboard.html';
     } catch(err) {
+      if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') recordFail();
       // If this email already exists with email/password, sign them in then link Google
       if (err.code === 'auth/account-exists-with-different-credential') {
         const email = err.customData?.email;
