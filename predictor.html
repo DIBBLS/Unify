@@ -9,9 +9,10 @@
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/responsive.css">
+<link rel="stylesheet" href="css/pages/dashboard.styles.css">
+<link rel="stylesheet" href="css/pages/dashboard-v2.styles.css?v=2">
+<link rel="stylesheet" href="css/pages/predictor.styles.css">
 <script src="js/theme.js"></script>
-
-    <link rel="stylesheet" href="css/pages/predictor.styles.css">
 </head>
 <body>
 
@@ -20,248 +21,317 @@
   <div class="loader-spin"></div>
 </div>
 
-<nav class="top-nav">
-  <a href="dashboard.html" class="nav-logo">Unify</a>
-  <div class="nav-links">
-    <a href="dashboard.html" class="nav-link">Dashboard</a>
-    <a href="timetable.html" class="nav-link">Timetable</a>
-    <a href="profile.html" class="nav-link">Profile</a>
-  </div>
-  <div class="nav-right">
-    <button class="theme-btn" id="themeToggle" onclick="toggleTheme()">🌙 Dark</button>
-    <button class="signout-btn" id="signOutBtn">Sign out</button>
-  </div>
-</nav>
+<div class="app-layout">
 
-<nav class="mobile-nav">
-  <div class="mob-inner">
-    <a href="dashboard.html" class="mob-btn">
-      <span class="mob-label">Dashboard</span>
-      <div class="mob-dot"></div>
-    </a>
-    <a href="timetable.html" class="mob-btn">
-      <span class="mob-label">Timetable</span>
-      <div class="mob-dot"></div>
-    </a>
-    <a href="profile.html" class="mob-btn">
-      <span class="mob-label">Profile</span>
-      <div class="mob-dot"></div>
-    </a>
-  </div>
-</nav>
+  <div class="app-sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-<main class="page-wrap">
-  <h1 class="page-title">Grade Planner</h1>
-  <p class="page-sub">Map your academic trajectory — from today to graduation.</p>
-
-  <div class="steps-bar" id="stepsBar">
-    <div class="step-node active" id="snode-1">
-      <div class="step-circle" id="sc-1">1</div>
-      <span class="step-label">Setup</span>
-    </div>
-    <div class="step-node" id="snode-2">
-      <div class="step-circle" id="sc-2">2</div>
-      <span class="step-label">Plan</span>
-    </div>
-  </div>
-
-  <div class="step-panel active" id="step-1">
-    <span class="sec-lbl">Your Department</span>
-
-    <div class="dept-grid">
-      <button class="dept-btn" data-dept="ECE" onclick="pickDept(this)">
-        <div class="dept-code">ECE</div>
-        <div class="dept-name">Electronic &amp; Computer</div>
-      </button>
-      <button class="dept-btn" data-dept="MEE" onclick="pickDept(this)">
-        <div class="dept-code">MEE</div>
-        <div class="dept-name">Mechanical Engineering</div>
-      </button>
-      <button class="dept-btn" data-dept="CPE" onclick="pickDept(this)">
-        <div class="dept-code">CPE</div>
-        <div class="dept-name">Chemical &amp; Polymer</div>
-      </button>
-      <button class="dept-btn" data-dept="CVE" onclick="pickDept(this)">
-        <div class="dept-code">CVE</div>
-        <div class="dept-name">Civil Engineering</div>
-      </button>
-      <button class="dept-btn" data-dept="ASE" onclick="pickDept(this)">
-        <div class="dept-code">ASE</div>
-        <div class="dept-name">Aerospace Engineering</div>
-      </button>
-      <button class="dept-btn" data-dept="IPE" onclick="pickDept(this)">
-        <div class="dept-code">IPE</div>
-        <div class="dept-name">Industrial &amp; Petroleum</div>
+  <aside class="app-sidebar" id="appSidebar">
+    <div class="app-sidebar-top">
+      <span class="app-sidebar-wordmark">Unify</span>
+      <button class="app-sidebar-close" onclick="closeSidebar()" aria-label="Close menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
+    <div class="app-sidebar-user">
+      <div class="app-sidebar-avatar" id="sidebarAvatar">U</div>
+      <div class="app-sidebar-user-name" id="navUserName"></div>
+    </div>
+    <div class="app-sidebar-nav">
+      <div class="app-sidebar-section-label">Main</div>
+      <a href="dashboard.html" class="app-sidebar-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <span class="app-sidebar-link-text">Dashboard</span>
+      </a>
+      <a href="timetable.html" class="app-sidebar-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span class="app-sidebar-link-text">Timetable</span>
+      </a>
+      <a href="study.html" class="app-sidebar-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <span class="app-sidebar-link-text">Study Plan</span>
+      </a>
+      <a href="predictor.html" class="app-sidebar-link active">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span class="app-sidebar-link-text">Analytics</span>
+      </a>
+      <a href="profile.html" class="app-sidebar-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="app-sidebar-link-text">Profile</span>
+      </a>
+    </div>
+    <div class="app-sidebar-bottom">
+      <button class="app-sidebar-theme-btn" onclick="toggleTheme()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <span class="app-sidebar-link-text"><span id="themeToggle">🌙 Dark</span></span>
+      </button>
+      <button class="app-sidebar-signout" id="signOutBtn">Sign out</button>
+    </div>
+  </aside>
 
-    <div id="semSection" style="display:none">
-      <span class="sec-lbl">Results are out for</span>
-      <div class="sem-chips" id="semChips"></div>
+  <div class="app-main" id="appMain">
+    <div class="app-topbar" id="appTopbar">
+      <button class="app-hamburger mobile-only" onclick="openSidebar()" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+      <span class="app-topbar-wordmark mobile-only">Unify</span>
+      <div class="app-topbar-right"></div>
     </div>
 
-    <div class="unit-bar" id="unitBar" style="display:none">
-      <div class="unit-grp">
-        <div class="unit-num"><span id="uGraded">0</span> <span class="hi">units</span></div>
-        <div class="unit-lbl">Graded ✓</div>
-      </div>
-      <div class="unit-div"></div>
-      <div class="unit-grp">
-        <div class="unit-num" id="uPending">0</div>
-        <div class="unit-lbl">Pending ⏳</div>
-      </div>
-      <div class="unit-div"></div>
-      <div class="unit-grp">
-        <div class="unit-num" id="uMissing">0</div>
-        <div class="unit-lbl">Missing ✗</div>
-      </div>
-      <div class="unit-div"></div>
-      <div class="unit-grp">
-        <div class="unit-num" id="uTotal">0</div>
-        <div class="unit-lbl">Total</div>
-      </div>
-    </div>
+    <div class="app-page-content active">
+      <main class="page-wrap">
+        <h1 class="page-title">Grade Planner</h1>
+        <p class="page-sub">Map your academic trajectory — from today to graduation.</p>
 
-    <div id="accordions"></div>
-
-    <div id="bottomSection" style="display:none">
-      <hr class="divider">
-      <span class="sec-lbl">Your Numbers</span>
-
-      <div class="form-row">
-        <div>
-          <label class="field-lbl">Completed units (graded)</label>
-          <input class="field-input" id="unitsDisplay" type="number" readonly placeholder="0" style="opacity:0.6;cursor:default">
+        <div class="steps-bar" id="stepsBar">
+          <div class="step-node active" id="snode-1">
+            <div class="step-circle" id="sc-1">1</div>
+            <span class="step-label">Setup</span>
+          </div>
+          <div class="step-node" id="snode-2">
+            <div class="step-circle" id="sc-2">2</div>
+            <span class="step-label">Plan</span>
+          </div>
         </div>
-        <div>
-          <label class="field-lbl" for="cgpaIn">Current CGPA</label>
-          <input class="field-input" id="cgpaIn" type="number" min="0" max="5" step="0.01" placeholder="e.g. 3.42">
+
+        <div class="step-panel active" id="step-1">
+          <span class="sec-lbl">Your Department</span>
+
+          <div class="dept-grid">
+            <button class="dept-btn" data-dept="ECE" onclick="pickDept(this)">
+              <div class="dept-code">ECE</div>
+              <div class="dept-name">Electronic &amp; Computer</div>
+            </button>
+            <button class="dept-btn" data-dept="MEE" onclick="pickDept(this)">
+              <div class="dept-code">MEE</div>
+              <div class="dept-name">Mechanical Engineering</div>
+            </button>
+            <button class="dept-btn" data-dept="CPE" onclick="pickDept(this)">
+              <div class="dept-code">CPE</div>
+              <div class="dept-name">Chemical &amp; Polymer</div>
+            </button>
+            <button class="dept-btn" data-dept="CVE" onclick="pickDept(this)">
+              <div class="dept-code">CVE</div>
+              <div class="dept-name">Civil Engineering</div>
+            </button>
+            <button class="dept-btn" data-dept="ASE" onclick="pickDept(this)">
+              <div class="dept-code">ASE</div>
+              <div class="dept-name">Aerospace Engineering</div>
+            </button>
+            <button class="dept-btn" data-dept="IPE" onclick="pickDept(this)">
+              <div class="dept-code">IPE</div>
+              <div class="dept-name">Industrial &amp; Petroleum</div>
+            </button>
+          </div>
+
+          <div id="semSection" style="display:none">
+            <span class="sec-lbl">Results are out for</span>
+            <div class="sem-chips" id="semChips"></div>
+          </div>
+
+          <div class="unit-bar" id="unitBar" style="display:none">
+            <div class="unit-grp">
+              <div class="unit-num"><span id="uGraded">0</span> <span class="hi">units</span></div>
+              <div class="unit-lbl">Graded ✓</div>
+            </div>
+            <div class="unit-div"></div>
+            <div class="unit-grp">
+              <div class="unit-num" id="uPending">0</div>
+              <div class="unit-lbl">Pending ⏳</div>
+            </div>
+            <div class="unit-div"></div>
+            <div class="unit-grp">
+              <div class="unit-num" id="uMissing">0</div>
+              <div class="unit-lbl">Missing ✗</div>
+            </div>
+            <div class="unit-div"></div>
+            <div class="unit-grp">
+              <div class="unit-num" id="uTotal">0</div>
+              <div class="unit-lbl">Total</div>
+            </div>
+          </div>
+
+          <div id="accordions"></div>
+
+          <div id="bottomSection" style="display:none">
+            <hr class="divider">
+            <span class="sec-lbl">Your Numbers</span>
+
+            <div class="form-row">
+              <div>
+                <label class="field-lbl">Completed units (graded)</label>
+                <input class="field-input" id="unitsDisplay" type="number" readonly placeholder="0" style="opacity:0.6;cursor:default">
+              </div>
+              <div>
+                <label class="field-lbl" for="cgpaIn">Current CGPA</label>
+                <input class="field-input" id="cgpaIn" type="number" min="0" max="5" step="0.01" placeholder="e.g. 3.42">
+              </div>
+            </div>
+
+            <hr class="divider">
+            <span class="sec-lbl">Graduation Target</span>
+
+            <div class="target-grid">
+              <button class="tgt-btn" data-cls="first"  data-cgpa="4.50" onclick="pickTarget(this)">
+                <div class="tgt-name">First Class</div>
+                <div class="tgt-range">CGPA ≥ 4.50</div>
+              </button>
+              <button class="tgt-btn" data-cls="upper"  data-cgpa="3.50" onclick="pickTarget(this)">
+                <div class="tgt-name">2nd Class Upper</div>
+                <div class="tgt-range">CGPA ≥ 3.50</div>
+              </button>
+              <button class="tgt-btn" data-cls="lower"  data-cgpa="2.40" onclick="pickTarget(this)">
+                <div class="tgt-name">2nd Class Lower</div>
+                <div class="tgt-range">CGPA ≥ 2.40</div>
+              </button>
+              <button class="tgt-btn" data-cls="pass"   data-cgpa="1.50" onclick="pickTarget(this)">
+                <div class="tgt-name">Pass</div>
+                <div class="tgt-range">CGPA ≥ 1.50</div>
+              </button>
+            </div>
+
+            <div class="specific-row">
+              <label for="specIn">Or specific target:</label>
+              <input class="field-input" id="specIn" type="number" min="0" max="5" step="0.01" placeholder="0.00 – 5.00">
+            </div>
+
+            <div class="profile-card" id="profileCard">
+              <div class="pc-row">
+                <span class="pc-key">Your target</span>
+                <span class="pc-val" id="pc-target">—</span>
+              </div>
+              <div class="pc-row">
+                <span class="pc-key">Current CGPA</span>
+                <span class="pc-val" id="pc-current">—</span>
+              </div>
+              <div class="pc-row">
+                <span class="pc-key">Gap to close</span>
+                <span class="pc-val" id="pc-gap">—</span>
+              </div>
+              <div class="pc-row">
+                <span class="pc-key">What this requires</span>
+                <span class="pc-val note" id="pc-req">—</span>
+              </div>
+              <div class="pc-row">
+                <span class="pc-key">Academic mode</span>
+                <span class="pc-val" id="pc-mode">—</span>
+              </div>
+            </div>
+
+            <div class="reflect-wrap" id="reflectWrap">
+              <p class="reflect-q">What's driving this target?</p>
+              <div class="radio-opt" data-why="career"      onclick="pickWhy(this)"><div class="radio-dot"></div>I want a strong career start</div>
+              <div class="radio-opt" data-why="scholarship" onclick="pickWhy(this)"><div class="radio-dot"></div>I'm aiming for a scholarship or postgrad</div>
+              <div class="radio-opt" data-why="prove"       onclick="pickWhy(this)"><div class="radio-dot"></div>I want to prove something to myself</div>
+              <div class="radio-opt" data-why="family"      onclick="pickWhy(this)"><div class="radio-dot"></div>Family or personal expectations</div>
+              <div class="radio-opt" data-why="habit"       onclick="pickWhy(this)"><div class="radio-dot"></div>I just want to build a good habit</div>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn primary" id="planBtn" onclick="goStep(2)" style="display:none">See My Plan →</button>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <hr class="divider">
-      <span class="sec-lbl">Graduation Target</span>
+        <div class="step-panel" id="step-2">
+          <div class="feas-banner" id="feasBanner">
+            <span id="feasIcon">🎯</span>
+            <span id="feasText">Calculating…</span>
+          </div>
 
-      <div class="target-grid">
-        <button class="tgt-btn" data-cls="first"  data-cgpa="4.50" onclick="pickTarget(this)">
-          <div class="tgt-name">First Class</div>
-          <div class="tgt-range">CGPA ≥ 4.50</div>
-        </button>
-        <button class="tgt-btn" data-cls="upper"  data-cgpa="3.50" onclick="pickTarget(this)">
-          <div class="tgt-name">2nd Class Upper</div>
-          <div class="tgt-range">CGPA ≥ 3.50</div>
-        </button>
-        <button class="tgt-btn" data-cls="lower"  data-cgpa="2.40" onclick="pickTarget(this)">
-          <div class="tgt-name">2nd Class Lower</div>
-          <div class="tgt-range">CGPA ≥ 2.40</div>
-        </button>
-        <button class="tgt-btn" data-cls="pass"   data-cgpa="1.50" onclick="pickTarget(this)">
-          <div class="tgt-name">Pass</div>
-          <div class="tgt-range">CGPA ≥ 1.50</div>
-        </button>
-      </div>
+          <div class="avg-card">
+            <div class="avg-num" id="avgNum">—</div>
+            <div class="avg-right">
+              <div class="avg-title">Required average GP / semester</div>
+              <div class="avg-desc" id="avgDesc">—</div>
+            </div>
+          </div>
 
-      <div class="specific-row">
-        <label for="specIn">Or specific target:</label>
-        <input class="field-input" id="specIn" type="number" min="0" max="5" step="0.01" placeholder="0.00 – 5.00">
-      </div>
+          <span class="sec-lbl">Semester Roadmap</span>
+          <div class="roadmap" id="roadmap"></div>
 
-      <div class="profile-card" id="profileCard">
-        <div class="pc-row">
-          <span class="pc-key">Your target</span>
-          <span class="pc-val" id="pc-target">—</span>
+          <span class="sec-lbl" style="margin-top:36px;">What-If Analysis</span>
+          <div class="tabs">
+            <button class="tab-btn on" id="tbn-this" onclick="switchTab('this',this)">This Semester</button>
+            <button class="tab-btn"    id="tbn-long" onclick="switchTab('long',this)">Long Term</button>
+          </div>
+
+          <div class="tab-pane on" id="tab-this">
+            <p class="info-note">Adjust grades for your next semester — see projected CGPA update live.</p>
+            <div id="thisCourses"></div>
+            <div class="proj-box">
+              <div class="proj-grp">
+                <div class="proj-lbl">Projected CGPA</div>
+                <div class="proj-num" id="projNum">—</div>
+              </div>
+              <div class="proj-grp" style="text-align:right">
+                <div class="proj-lbl">Ceiling this semester</div>
+                <div class="ceil-num" id="ceilNum">—</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-pane" id="tab-long">
+            <p class="info-note">Remaining courses sorted by unit weight — your highest-leverage opportunities.</p>
+            <div id="levList"></div>
+          </div>
+
+          <div class="save-area">
+            <button class="btn green" id="saveBtn" onclick="savePlan()">Save My Plan</button>
+            <p class="save-note">Saves to your Unify profile for next time.</p>
+            <p class="save-ok" id="saveOk">✓ Saved successfully</p>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn ghost" onclick="goStep(1)">← Adjust Setup</button>
+          </div>
         </div>
-        <div class="pc-row">
-          <span class="pc-key">Current CGPA</span>
-          <span class="pc-val" id="pc-current">—</span>
-        </div>
-        <div class="pc-row">
-          <span class="pc-key">Gap to close</span>
-          <span class="pc-val" id="pc-gap">—</span>
-        </div>
-        <div class="pc-row">
-          <span class="pc-key">What this requires</span>
-          <span class="pc-val note" id="pc-req">—</span>
-        </div>
-        <div class="pc-row">
-          <span class="pc-key">Academic mode</span>
-          <span class="pc-val" id="pc-mode">—</span>
-        </div>
-      </div>
+      </main>
+    </div><!-- end app-page-content -->
+  </div><!-- end app-main -->
+</div><!-- end app-layout -->
 
-      <div class="reflect-wrap" id="reflectWrap">
-        <p class="reflect-q">What's driving this target?</p>
-        <div class="radio-opt" data-why="career"      onclick="pickWhy(this)"><div class="radio-dot"></div>I want a strong career start</div>
-        <div class="radio-opt" data-why="scholarship" onclick="pickWhy(this)"><div class="radio-dot"></div>I'm aiming for a scholarship or postgrad</div>
-        <div class="radio-opt" data-why="prove"       onclick="pickWhy(this)"><div class="radio-dot"></div>I want to prove something to myself</div>
-        <div class="radio-opt" data-why="family"      onclick="pickWhy(this)"><div class="radio-dot"></div>Family or personal expectations</div>
-        <div class="radio-opt" data-why="habit"       onclick="pickWhy(this)"><div class="radio-dot"></div>I just want to build a good habit</div>
-      </div>
+<!-- BOTTOM NAV -->
+<div class="app-bottom-nav">
+  <a href="dashboard.html" class="app-bnav-item">
+    <svg width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    <span>Dashboard</span>
+  </a>
+  <a href="timetable.html" class="app-bnav-item">
+    <svg width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span>Timetable</span>
+  </a>
+  <a href="study.html" class="app-bnav-item">
+    <svg width="22" height="22" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    <span>Study Plan</span>
+  </a>
+  <a href="predictor.html" class="app-bnav-item active">
+    <svg width="22" height="22" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <span>Analytics</span>
+  </a>
+  <a href="profile.html" class="app-bnav-item">
+    <svg width="22" height="22" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>Profile</span>
+  </a>
+</div>
 
-      <div class="btn-row">
-        <button class="btn primary" id="planBtn" onclick="goStep(2)" style="display:none">See My Plan →</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="step-panel" id="step-2">
-
-    <div class="feas-banner" id="feasBanner">
-      <span id="feasIcon">🎯</span>
-      <span id="feasText">Calculating…</span>
-    </div>
-
-    <div class="avg-card">
-      <div class="avg-num" id="avgNum">—</div>
-      <div class="avg-right">
-        <div class="avg-title">Required average GP / semester</div>
-        <div class="avg-desc" id="avgDesc">—</div>
-      </div>
-    </div>
-
-    <span class="sec-lbl">Semester Roadmap</span>
-    <div class="roadmap" id="roadmap"></div>
-
-    <span class="sec-lbl" style="margin-top:36px;">What-If Analysis</span>
-    <div class="tabs">
-      <button class="tab-btn on" id="tbn-this" onclick="switchTab('this',this)">This Semester</button>
-      <button class="tab-btn"    id="tbn-long" onclick="switchTab('long',this)">Long Term</button>
-    </div>
-
-    <div class="tab-pane on" id="tab-this">
-      <p class="info-note">Adjust grades for your next semester — see projected CGPA update live.</p>
-      <div id="thisCourses"></div>
-      <div class="proj-box">
-        <div class="proj-grp">
-          <div class="proj-lbl">Projected CGPA</div>
-          <div class="proj-num" id="projNum">—</div>
-        </div>
-        <div class="proj-grp" style="text-align:right">
-          <div class="proj-lbl">Ceiling this semester</div>
-          <div class="ceil-num" id="ceilNum">—</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="tab-pane" id="tab-long">
-      <p class="info-note">Remaining courses sorted by unit weight — your highest-leverage opportunities.</p>
-      <div id="levList"></div>
-    </div>
-
-    <div class="save-area">
-      <button class="btn green" id="saveBtn" onclick="savePlan()">Save My Plan</button>
-      <p class="save-note">Saves to your Unify profile for next time.</p>
-      <p class="save-ok" id="saveOk">✓ Saved successfully</p>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn ghost" onclick="goStep(1)">← Adjust Setup</button>
-    </div>
-  </div>
-</main>
+<script>
+  function openSidebar() {
+    document.getElementById('appSidebar').classList.add('open');
+    document.getElementById('sidebarOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    document.getElementById('appSidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  window.addEventListener('scroll', function() {
+    var tb = document.getElementById('appTopbar');
+    if (tb) tb.classList.toggle('scrolled', window.scrollY > 8);
+  }, { passive: true });
+</script>
 
 <script src="js/pages/predictor.js"></script>
-
 <script type="module" src="js/pages/predictor-2.js"></script>
 </body>
 </html>
