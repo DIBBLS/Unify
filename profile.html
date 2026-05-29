@@ -65,6 +65,15 @@
       <div class="profile-headline" id="heroHeadline" style="display:none"></div>
       <div class="profile-bio empty" id="heroBio">What are you building?</div>
       <div class="profile-tags" id="heroTags"></div>
+      <!-- Quick actions -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+        <a href="feedback.html" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;color:var(--text2);text-decoration:none;transition:all 0.15s;" onmouseover="this.style.borderColor='#4ade80';this.style.color='#4ade80'" onmouseout="this.style.borderColor='';this.style.color='var(--text2)'">
+          📣 Send Feedback
+        </a>
+        <a href="exam-timetable.html" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;color:var(--text2);text-decoration:none;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--text)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='';this.style.color='var(--text2)'">
+          📅 Exam Timetable
+        </a>
+      </div>
     </div>
   </div>
 
@@ -144,9 +153,9 @@
 <!-- EDIT DRAWER -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer">
-  <div class="drawer-title">Edit profile <button class="drawer-close" onclick="closeDrawer()">×</button></div>
+  <div class="drawer-title">Edit profile <button class="drawer-close" onclick="closeDrawer()">&#215;</button></div>
   <div class="fg"><label class="fl">Name</label><input class="fi" id="dName"></div>
-  <div class="fg"><label class="fl">Headline</label><input class="fi" id="dHeadline" placeholder="e.g. Building in ECE · Open to collab"></div>
+  <div class="fg"><label class="fl">Headline</label><input class="fi" id="dHeadline" placeholder="e.g. Building in ECE &#183; Open to collab"></div>
   <div class="fg"><label class="fl">Bio</label><textarea class="fta" id="dBio" rows="4" placeholder="What are you working on?"></textarea></div>
   <div class="fg"><label class="fl">Focus areas (comma separated)</label><input class="fi" id="dInterests" placeholder="e.g. Embedded Systems, IoT, ML"></div>
   <div class="fg"><label class="fl">GitHub / Portfolio</label><input class="fi" id="dLink1" placeholder="https://github.com/..."></div>

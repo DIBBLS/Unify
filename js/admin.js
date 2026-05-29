@@ -118,6 +118,7 @@ onAuthStateChanged(auth, async (user) => {
   if (canManageCourses(myRole)) loadCourses();
   if (canManageTimetable(myRole)) initTimetableSection(myRole, myProfile);
   if (canUploadContent(myRole)) loadContentCourseList();
+  initExamTimetableSection();
 });
 
 document.getElementById("signOutBtn").addEventListener("click", async () => {
@@ -132,7 +133,7 @@ function hide(id) {
   if (link) link.style.display = "none";
 }
 
-// ── HERO + STATS ─────────────────────────────────────────
+// ── HERO + STATS ───────────────────────────────────────────
 function hydrateHero(user) {
   const firstName = (myProfile.firstName || myProfile.name || user.email.split("@")[0] || "Builder").split(" ")[0];
   const displayName = myProfile.name || myProfile.firstName || user.email;
@@ -316,7 +317,7 @@ window.postUpdate = async function () {
   btn.textContent = "Post →";
 };
 
-// ── ACTIVITY FEED (live) ─────────────────────────────────
+// ── ACTIVITY FEED (live) ────────────────────────────────────────
 function listenToUpdates() {
   const q = query(collection(db, "courseUpdates"), orderBy("postedAt", "desc"));
   onSnapshot(q, (snap) => {
@@ -367,7 +368,7 @@ function renderActivity(snap) {
               ${u.message ? `<div class="update-msg">${escapeHtml(u.message)}</div>` : ""}
               <div class="update-meta">Posted by ${escapeHtml(u.postedBy || "—")} · ${timeStr}</div>
             </div>
-            <button class="btn-icon" onclick="delUpdate('${d.id}')" title="Delete">✕</button>
+            <button class="btn-icon" onclick="delUpdate('${d.id}')" title="Delete">&#x2715;</button>
           </div>`;
         }
 
@@ -386,7 +387,7 @@ function renderActivity(snap) {
             ${details ? `<div class="update-detail">${details}</div>` : ""}
             <div class="update-meta">Posted by ${escapeHtml(u.postedBy || "—")} · ${timeStr}</div>
           </div>
-          <button class="btn-icon" onclick="delUpdate('${d.id}')" title="Delete">✕</button>
+          <button class="btn-icon" onclick="delUpdate('${d.id}')" title="Delete">&#x2715;</button>
         </div>`;
       })
       .join("") +
@@ -436,7 +437,7 @@ window.delUpdate = async function (id) {
   }
 };
 
-// ── GRANT / REVOKE ADMIN ─────────────────────────────────
+// ── GRANT / REVOKE ADMIN ───────────────────────────────────────
 window.grantAdmin = async function () {
   const email = document.getElementById("grantEmail").value.trim().toLowerCase();
   const role = document.getElementById("grantRole")?.value || "academic_lead";
@@ -586,16 +587,9 @@ window.toggleTheme = function () {
   if (btn) btn.textContent = nxt === "dark" ? "☀ Light" : "☾ Dark";
 };
 
-// ── MANAGE COURSES ───────────────────────────────────────
+// ── MANAGE COURSES ───────────────────────────────────────────
 const CADD_FIELDS = [
-  "cAddCode",
-  "cAddTitle",
-  "cAddFaculty",
-  "cAddDept",
-  "cAddLevel",
-  "cAddSemester",
-  "cAddUnits",
-  "cAddDesc",
+  "cAddCode","cAddTitle","cAddFaculty","cAddDept","cAddLevel","cAddSemester","cAddUnits","cAddDesc",
 ];
 let editingCourseCode = null;
 
@@ -609,16 +603,8 @@ window.saveCourse = async function () {
   const units = parseInt(document.getElementById("cAddUnits").value, 10) || 3;
   const description = document.getElementById("cAddDesc").value.trim();
   const fb = document.getElementById("cAddFeedback");
-  if (!code) {
-    fb.style.color = "var(--red)";
-    fb.textContent = "Course code is required.";
-    return;
-  }
-  if (!title) {
-    fb.style.color = "var(--red)";
-    fb.textContent = "Course title is required.";
-    return;
-  }
+  if (!code) { fb.style.color = "var(--red)"; fb.textContent = "Course code is required."; return; }
+  if (!title) { fb.style.color = "var(--red)"; fb.textContent = "Course title is required."; return; }
   const btn = document.getElementById("cAddBtn");
   btn.disabled = true;
   btn.textContent = "Saving…";
@@ -657,10 +643,7 @@ function resetCourseForm() {
 
 window.editCourse = async function (code) {
   const c = await getCourse(code);
-  if (!c) {
-    showToast("Course not found");
-    return;
-  }
+  if (!c) { showToast("Course not found"); return; }
   document.getElementById("cAddCode").value = c.code || "";
   document.getElementById("cAddTitle").value = c.title || "";
   document.getElementById("cAddFaculty").value = c.faculty || "";
@@ -698,10 +681,9 @@ async function loadCourses() {
     }
     el.innerHTML =
       `<div class="update-log">` +
-      courses
-        .map((c) => {
-          const meta = [c.department, c.level, c.semester].filter(Boolean).join(" · ");
-          return `<div class="update-item">
+      courses.map((c) => {
+        const meta = [c.department, c.level, c.semester].filter(Boolean).join(" · ");
+        return `<div class="update-item">
             <div class="update-course-code">${escapeHtml(c.code)}</div>
             <div>
               <div style="font-weight:600;font-size:14px;">${escapeHtml(c.title || "—")}</div>
@@ -710,11 +692,10 @@ async function loadCourses() {
             </div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
               <button class="btn-icon" style="border-color:var(--border);color:var(--text2);" onclick="editCourse('${escapeHtml(c.code)}')" title="Edit">Edit</button>
-              <button class="btn-icon" onclick="removeCourseDoc('${escapeHtml(c.code)}')" title="Delete">✕</button>
+              <button class="btn-icon" onclick="removeCourseDoc('${escapeHtml(c.code)}')" title="Delete">&#x2715;</button>
             </div>
           </div>`;
-        })
-        .join("") +
+      }).join("") +
       `</div>`;
   } catch (e) {
     console.error(e);
@@ -731,14 +712,14 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove("show"), 3000);
 }
 
-// ── GRANT FORM ROLE TOGGLE ───────────────────────────────
+// ── GRANT FORM ROLE TOGGLE ───────────────────────────────────
 window.onGrantRoleChange = function () {
   const role = document.getElementById("grantRole")?.value;
   const fields = document.getElementById("grantAssignmentFields");
   if (fields) fields.style.display = role === "class_rep" ? "block" : "none";
 };
 
-// ── TIMETABLE MANAGER (day-card grid) ────────────────────
+// ── TIMETABLE MANAGER ─────────────────────────────────────────
 window.onTTTargetChange = function () {
   _ttTarget = {
     faculty: document.getElementById("ttFaculty")?.value || "",
@@ -750,7 +731,7 @@ window.onTTTargetChange = function () {
     loadTimetableEntries(_ttTarget);
     populateTTCodeSuggestions(_ttTarget);
   } else {
-    renderTimetableGrid([]); // pre-class state
+    renderTimetableGrid([]);
   }
 };
 
@@ -773,10 +754,8 @@ window.initTimetableSection = async function (role, profile) {
         sub.textContent = `${txt} — durations are flexible (set any start & end time).`;
       }
     } else {
-      // No complete assignment — show the picker so they can still scope it
       if (sel) sel.style.display = "block";
       if (sub) sub.textContent = "Your class assignment is incomplete. Pick the class below, or ask a super admin to set your assignment.";
-      // Pre-fill any partial values onto the selectors
       const setVal = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
       setVal("ttFaculty", _ttTarget.faculty);
       setVal("ttDept", _ttTarget.department);
@@ -836,7 +815,6 @@ function renderTimetableSheet(entries) {
   const tbody = document.getElementById("ttSheetBody");
   if (!tbody) return;
 
-  // Stats
   const countEl = document.getElementById("ttCount");
   if (countEl) countEl.textContent = `${entries.length} entr${entries.length === 1 ? "y" : "ies"}`;
   const sEntries = document.getElementById("statEntries");
@@ -846,7 +824,6 @@ function renderTimetableSheet(entries) {
   const addBtn = document.getElementById("ttAddRowBtn");
   if (addBtn) addBtn.disabled = !targetReady;
 
-  // Strip saved-entry rows but preserve any in-progress draft rows
   Array.from(tbody.querySelectorAll("tr:not([data-draft])")).forEach((r) => r.remove());
 
   const todayName = DAYS[(new Date().getDay() + 6) % 7] || "";
@@ -875,10 +852,7 @@ function renderTimetableSheet(entries) {
     const tr = document.createElement("tr");
     tr.dataset.id = e.id;
     if (e.day === todayName) tr.classList.add("row-today");
-    if (e.day !== lastDay) {
-      tr.classList.add("row-day-start");
-      lastDay = e.day;
-    }
+    if (e.day !== lastDay) { tr.classList.add("row-day-start"); lastDay = e.day; }
     tr.innerHTML = `
       <td><span class="tt-day-pill">${escapeHtml(e.day || "—")}</span></td>
       <td class="tt-code-cell">${escapeHtml(e.courseCode || "—")}</td>
@@ -886,15 +860,12 @@ function renderTimetableSheet(entries) {
       <td class="tt-time-cell">${escapeHtml(e.endTime || "")}</td>
       <td class="tt-meta-cell">${escapeHtml(e.venue || "")}</td>
       <td class="tt-meta-cell">${escapeHtml(e.lecturer || "")}</td>
-      <td class="tt-act-cell"><button class="tt-del-btn" onclick="deleteTimetableEntry('${e.id}','${escapeHtml(e.courseCode || "")}')" title="Remove">✕</button></td>`;
+      <td class="tt-act-cell"><button class="tt-del-btn" onclick="deleteTimetableEntry('${e.id}','${escapeHtml(e.courseCode || "")}')" title="Remove">&#x2715;</button></td>`;
     tbody.insertBefore(tr, firstDraft);
   });
 }
 
-// Backwards-compat alias
-function renderTimetableGrid(entries) {
-  renderTimetableSheet(entries);
-}
+function renderTimetableGrid(entries) { renderTimetableSheet(entries); }
 
 window.addTTDraftRow = function () {
   if (!(_ttTarget.department && _ttTarget.level && _ttTarget.semester)) {
@@ -929,7 +900,7 @@ window.addTTDraftRow = function () {
     <td><input class="tt-cell-input tt-cell-time" data-f="endTime" type="time" /></td>
     <td><input class="tt-cell-input" data-f="venue" placeholder="e.g. LT1" /></td>
     <td><input class="tt-cell-input" data-f="lecturer" placeholder="e.g. Dr. Adeyemi" /></td>
-    <td class="tt-act-cell"><button class="tt-del-btn" onclick="removeTTDraftRow('${uid}')" title="Remove draft">✕</button></td>`;
+    <td class="tt-act-cell"><button class="tt-del-btn" onclick="removeTTDraftRow('${uid}')" title="Remove draft">&#x2715;</button></td>`;
   tbody.appendChild(tr);
   updateTTSaveBtn();
   tr.querySelector("select")?.focus();
@@ -964,10 +935,7 @@ window.saveTTDraftRows = async function () {
   if (!drafts.length) return;
 
   const btn = document.getElementById("ttSaveAllBtn");
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = "Saving…";
-  }
+  if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
 
   let saved = 0, skipped = 0, errors = 0;
   for (const tr of drafts) {
@@ -1027,16 +995,14 @@ window.deleteTimetableEntry = async function (id, code) {
   }
 };
 
-// ── COURSE CONTENT ───────────────────────────────────────
+// ── COURSE CONTENT ───────────────────────────────────────────
 async function loadContentCourseList() {
   try {
     const courses = await listCourses();
     const dl = document.getElementById("ccCodeSuggestions");
     if (!dl) return;
     dl.innerHTML = courses.map(c => `<option value="${c.code}">`).join("");
-  } catch (e) {
-    // Datalist is non-critical; silently skip if courses can't load
-  }
+  } catch (e) {}
   initContentFilePicker();
 }
 
@@ -1059,7 +1025,6 @@ function initContentFilePicker() {
       const html = String(e.target.result || "");
       textarea.value = html;
       sub.innerHTML = `<strong>${file.name}</strong> loaded · ${(file.size / 1024).toFixed(1)} KB`;
-      // Auto-fill the title from <title> if blank
       if (!titleInp.value) {
         const m = html.match(/<title>([^<]+)<\/title>/i);
         if (m) titleInp.value = m[1].split(/[—|·:-]/).pop().trim();
@@ -1070,20 +1035,11 @@ function initContentFilePicker() {
   }
 
   input.addEventListener("change", (e) => handleFile(e.target.files[0]));
-
   ["dragenter", "dragover"].forEach(ev =>
-    zone.addEventListener(ev, (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      zone.classList.add("cc-drop-zone-active");
-    })
+    zone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); zone.classList.add("cc-drop-zone-active"); })
   );
   ["dragleave", "drop"].forEach(ev =>
-    zone.addEventListener(ev, (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      zone.classList.remove("cc-drop-zone-active");
-    })
+    zone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); zone.classList.remove("cc-drop-zone-active"); })
   );
   zone.addEventListener("drop", (e) => {
     const file = e.dataTransfer?.files?.[0];
@@ -1092,10 +1048,7 @@ function initContentFilePicker() {
 }
 
 window.uploadCourseContent = async function () {
-  if (!canUploadContent(myRole)) {
-    showToast("Permission denied");
-    return;
-  }
+  if (!canUploadContent(myRole)) { showToast("Permission denied"); return; }
 
   const btn = document.getElementById("ccUploadBtn");
   const courseCode = document.getElementById("ccCode").value.trim().toUpperCase().replace(/\s+/g, " ");
@@ -1106,14 +1059,9 @@ window.uploadCourseContent = async function () {
 
   if (!courseCode) { showToast("Enter a course code"); return; }
   if (!weekRaw) { showToast("Select a week"); return; }
-  if (!htmlContent && !youtubeUrl) {
-    showToast("Add either HTML notes, a YouTube link, or both");
-    return;
-  }
+  if (!htmlContent && !youtubeUrl) { showToast("Add either HTML notes, a YouTube link, or both"); return; }
 
   const week = parseInt(weekRaw, 10);
-  // Deterministic ID per (course, week). setDoc + merge means re-uploading
-  // partial fields (e.g. just the YouTube link) doesn't wipe out the rest.
   const docId = courseCode.replace(/\s+/g, "_") + "_W" + week;
 
   btn.disabled = true;
@@ -1123,11 +1071,8 @@ window.uploadCourseContent = async function () {
     const existing = await getDoc(ref);
     const now = serverTimestamp();
 
-    // Build payload — only include fields the user actually filled in,
-    // so a YouTube-only update doesn't blank out existing HTML/title.
     const payload = {
-      courseCode,
-      week,
+      courseCode, week,
       updatedAt: now,
       updatedBy: me.uid,
       updatedByName: myProfile?.name || myProfile?.firstName || me.email,
@@ -1143,31 +1088,149 @@ window.uploadCourseContent = async function () {
 
     await setDoc(ref, payload, { merge: true });
 
-    // Clear form
     document.getElementById("ccCode").value = "";
     document.getElementById("ccWeek").value = "";
     document.getElementById("ccTitle").value = "";
     document.getElementById("ccHtml").value = "";
     document.getElementById("ccYoutube").value = "";
 
-    showToast(
-      existing.exists()
-        ? `Week ${week} updated for ${courseCode}`
-        : `Week ${week} uploaded for ${courseCode}`
-    );
-    // Reset drop sub text
+    showToast(existing.exists() ? `Week ${week} updated for ${courseCode}` : `Week ${week} uploaded for ${courseCode}`);
     const sub = document.getElementById("ccDropSub");
     if (sub) sub.textContent = "Whole-page HTML works — styles and scripts stay isolated";
   } catch (e) {
     console.error("[uploadCourseContent]", e);
-    if (e?.code === "permission-denied") {
-      showToast("Permission denied — Firestore rules not deployed yet");
-    } else if (String(e?.message || "").includes("longer than")) {
-      showToast("Note too large for Firestore (>1MB). Trim or split it.");
-    } else {
-      showToast("Upload failed: " + (e?.message || "unknown error"));
-    }
+    if (e?.code === "permission-denied") showToast("Permission denied — Firestore rules not deployed yet");
+    else if (String(e?.message || "").includes("longer than")) showToast("Note too large for Firestore (>1MB). Trim or split it.");
+    else showToast("Upload failed: " + (e?.message || "unknown error"));
   }
+  btn.disabled = false;
+  btn.textContent = "Upload →";
+};
+
+// ── EXAM TIMETABLE ───────────────────────────────────────────
+function initExamTimetableSection() {
+  const a = getAssignment(myProfile);
+  const dept = a.department || "";
+  const level = a.level || "";
+  const targetLabel = document.getElementById("etTargetLabel");
+  if (targetLabel) {
+    targetLabel.textContent = dept && level
+      ? `${dept} · ${level}`
+      : myRole === "super_admin" ? "All departments" : "— no assignment";
+  }
+
+  // Load last updated info
+  if (dept && level) {
+    const sem = document.getElementById("etSemester")?.value || "First Semester";
+    loadExamTimetableMeta(dept, level, sem);
+  }
+
+  // File picker
+  const zone = document.getElementById("etDropZone");
+  const input = document.getElementById("etFileInput");
+  const sub = document.getElementById("etDropSub");
+  if (!zone || !input) return;
+
+  input.addEventListener("change", (e) => handleEtFile(e.target.files[0]));
+  ["dragenter", "dragover"].forEach(ev =>
+    zone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); zone.classList.add("cc-drop-zone-active"); })
+  );
+  ["dragleave", "drop"].forEach(ev =>
+    zone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); zone.classList.remove("cc-drop-zone-active"); })
+  );
+  zone.addEventListener("drop", (e) => {
+    const file = e.dataTransfer?.files?.[0];
+    if (file) handleEtFile(file);
+  });
+}
+
+let _etFileData = null;
+let _etFileType = null;
+
+function handleEtFile(file) {
+  if (!file) return;
+  const sub = document.getElementById("etDropSub");
+  const allowed = /\.(pdf|png|jpe?g)$/i.test(file.name) || file.type.match(/pdf|png|jpeg/);
+  if (!allowed) { if (sub) sub.textContent = `${file.name} — use PDF, PNG or JPG`; return; }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    _etFileData = String(e.target.result || "");
+    _etFileType = file.type;
+    if (sub) sub.innerHTML = `<strong>${file.name}</strong> · ${(file.size / 1024).toFixed(1)} KB`;
+  };
+  reader.onerror = () => { if (sub) sub.textContent = "Could not read file"; };
+  reader.readAsDataURL(file);
+}
+
+async function loadExamTimetableMeta(dept, level, sem) {
+  const lastUpdatedEl = document.getElementById("etLastUpdated");
+  if (!lastUpdatedEl) return;
+  try {
+    const docId = `${dept}_${level}_${sem}`.replace(/\s+/g, "_");
+    const snap = await getDoc(doc(db, "examTimetables", docId));
+    if (snap.exists()) {
+      const d = snap.data();
+      const ts = d.updatedAt?.toDate?.();
+      const str = ts ? ts.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "Unknown";
+      lastUpdatedEl.textContent = `Last uploaded: ${str} · Session: ${d.session || "—"}`;
+    } else {
+      lastUpdatedEl.textContent = "No timetable uploaded yet for this semester.";
+    }
+  } catch(e) { lastUpdatedEl.textContent = ""; }
+}
+
+window.uploadExamTimetable = async function () {
+  const btn = document.getElementById("etUploadBtn");
+  const semester = document.getElementById("etSemester")?.value || "First Semester";
+  const session = document.getElementById("etSession")?.value.trim() || "";
+  const urlInput = document.getElementById("etUrl")?.value.trim() || "";
+
+  if (!session) { showToast("Enter the academic session (e.g. 2024/2025)"); return; }
+
+  const a = getAssignment(myProfile);
+  const dept = a.department || "";
+  const level = a.level || "";
+
+  if (!dept || !level) {
+    showToast("No department/level assigned — contact super admin");
+    return;
+  }
+
+  const fileDataUrl = _etFileData || urlInput;
+  const fileType = _etFileType || (urlInput.match(/\.pdf$/i) ? "application/pdf" : urlInput.match(/\.(png|jpe?g)$/i) ? "image/" + urlInput.split(".").pop().toLowerCase() : "url");
+
+  if (!fileDataUrl) { showToast("Drop a file or paste a URL"); return; }
+
+  btn.disabled = true;
+  btn.textContent = "Uploading…";
+
+  try {
+    const docId = `${dept}_${level}_${semester}`.replace(/\s+/g, "_");
+    await setDoc(doc(db, "examTimetables", docId), {
+      fileDataUrl,
+      fileType,
+      session,
+      semester,
+      uploadedBy: me.uid,
+      updatedAt: serverTimestamp(),
+      dept,
+      level,
+    });
+    showToast("Exam timetable uploaded!");
+    _etFileData = null;
+    _etFileType = null;
+    const sub = document.getElementById("etDropSub");
+    if (sub) sub.textContent = "PDF, PNG, JPG or JPEG accepted";
+    const inp = document.getElementById("etFileInput");
+    if (inp) inp.value = "";
+    document.getElementById("etUrl").value = "";
+    loadExamTimetableMeta(dept, level, semester);
+  } catch(e) {
+    console.error(e);
+    showToast("Upload failed: " + (e?.message || "unknown error"));
+  }
+
   btn.disabled = false;
   btn.textContent = "Upload →";
 };
