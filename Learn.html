@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Unify — Learn</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
 <link rel="stylesheet" href="css/variables.css">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/components.css">
@@ -12,6 +13,47 @@
 <script src="js/theme.js"></script>
 
     <link rel="stylesheet" href="css/pages/Learn.styles.css">
+<style>
+/* Mobile Week Selector Bar */
+.mobile-week-bar {
+  display: none;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 12px;
+  gap: 6px;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  white-space: nowrap;
+}
+.mobile-week-bar::-webkit-scrollbar { display: none; }
+@media (max-width: 900px) {
+  .mobile-week-bar { display: flex; }
+}
+.week-pill {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  font-family: var(--font-body);
+}
+.week-pill:hover { border-color: var(--text); color: var(--text); }
+.week-pill.active {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+</style>
 </head>
 <body>
 
@@ -53,6 +95,11 @@
   <span id="sidebarToggleLabel">📋 Course Outline</span>
   <span class="sidebar-mobile-toggle-icon">▼</span>
 </button>
+
+<!-- Mobile Week Selector Bar (only visible on ≤900px) -->
+<div class="mobile-week-bar" id="mobileWeekBar">
+  <!-- Pills rendered by Learn.js -->
+</div>
 
 <div class="learn-layout">
 
@@ -167,16 +214,6 @@
           </div>
         </div>
 
-        <!-- SUMMARY -->
-        <div class="lesson-section" id="sectionSummary">
-          <div class="lesson-section-header">
-            <span class="lesson-section-icon">📌</span>
-            <span class="lesson-section-title">Key Takeaways</span>
-            <span class="lesson-section-num">3</span>
-          </div>
-          <div class="summary-card" id="summaryContent"></div>
-        </div>
-
       </div>
 
       <!-- REVIEW REMINDER (inline, above sticky bar) -->
@@ -267,6 +304,6 @@
 
 <script src="courses.js"></script>
 <script src="Coursecontent.JS"></script>
-<script type="module" src="js/pages/Learn.js?v=fs-content-4"></script>
+<script type="module" src="js/pages/Learn.js?v=fs-content-5"></script>
 </body>
 </html>

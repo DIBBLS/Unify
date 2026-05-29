@@ -38,6 +38,32 @@ window.toggleMobileSidebar = function() {
   label.textContent = isOpen ? '📋 Hide Course Outline' : '📋 Course Outline';
 };
 
+// ── MOBILE WEEK SELECTOR ───────────────────────────────
+function renderMobileWeekBar() {
+  const bar = document.getElementById('mobileWeekBar');
+  if (!bar) return;
+  const numWeeks = Math.min(courseTopics.length || 15, 15);
+  bar.innerHTML = Array.from({ length: numWeeks }, (_, wi) => {
+    const isActive = activeWeekIdx === wi;
+    return `<button class="week-pill${isActive ? ' active' : ''}" onclick="jumpToWeek(${wi})">Week ${wi + 1}</button>`;
+  }).join('');
+}
+
+window.jumpToWeek = function(wi) {
+  // Save to sessionStorage
+  try { sessionStorage.setItem('unify-last-week-' + courseCode, String(wi)); } catch(e) {}
+  toggleWeek(wi);
+  // Auto-close sidebar on mobile
+  const sidebar = document.getElementById('learnSidebar');
+  if (sidebar && window.innerWidth <= 900 && sidebar.classList.contains('sidebar-open')) {
+    sidebar.classList.remove('sidebar-open');
+    const toggle = document.getElementById('sidebarMobileToggle');
+    if (toggle) toggle.classList.remove('open');
+    const label = document.getElementById('sidebarToggleLabel');
+    if (label) label.textContent = '📋 Course Outline';
+  }
+};
+
 // ── AUTH ──────────────────────────────────────────────
 onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = 'Auth.html'; return; }
@@ -57,11 +83,27 @@ onAuthStateChanged(auth, async user => {
   if (window.generateCourseStubs) window.generateCourseStubs();
   buildCurriculum();
   renderSidebar();
+  renderMobileWeekBar();
   document.getElementById('loadingOverlay').style.display = 'none';
 
+  // Restore last week from sessionStorage
+  let autoOpened = false;
+  try {
+    const lastWi = sessionStorage.getItem('unify-last-week-' + courseCode);
+    if (lastWi !== null) {
+      const wi = parseInt(lastWi, 10);
+      if (Number.isFinite(wi) && wi >= 0 && wi < courseTopics.length) {
+        toggleWeek(wi);
+        autoOpened = true;
+      }
+    }
+  } catch(e) {}
+
   // Auto-open first incomplete topic
-  const firstIncomplete = findFirstIncomplete();
-  if (firstIncomplete) openTopic(firstIncomplete.w, firstIncomplete.t);
+  if (!autoOpened) {
+    const firstIncomplete = findFirstIncomplete();
+    if (firstIncomplete) openTopic(firstIncomplete.w, firstIncomplete.t);
+  }
 });
 
 // ── LOAD DATA ─────────────────────────────────────────
@@ -77,8 +119,6 @@ async function loadUserData() {
 }
 
 // Loads admin-uploaded weekly content from Firestore, keyed by week number.
-// Tries the normalized code first, then the spaceless variant as a fallback
-// in case the admin stored it without spaces (e.g. "ECE316" vs "ECE 316").
 async function loadFirestoreContent(code) {
   firestoreContentByWeek = {};
   if (!code) return;
@@ -90,8 +130,6 @@ async function loadFirestoreContent(code) {
       );
       console.log(`[learn] courseContent query for "${variant}": ${snap.size} doc(s)`);
       if (!snap.empty) {
-        // Sort newest-first so legacy duplicates from addDoc-era uploads
-        // resolve to the most recently saved version per week.
         const ts = (d) => {
           const v = d.updatedAt || d.createdAt;
           return v?.toMillis ? v.toMillis() : (typeof v === 'number' ? v : 0);
@@ -102,11 +140,10 @@ async function loadFirestoreContent(code) {
         docs.forEach(data => {
           const wk = Number(data.week);
           if (!Number.isFinite(wk)) return;
-          // First write (newest) wins; skip older duplicates
           if (firestoreContentByWeek[wk]) return;
           firestoreContentByWeek[wk] = data;
         });
-        break; // found results with this variant, no need to try others
+        break;
       }
     } catch (e) {
       console.warn(`[learn] Firestore content load failed for "${variant}":`, e);
@@ -131,17 +168,11 @@ async function saveProgress() {
 }
 
 // ── CURRICULUM BUILDER ───────────────────────────────
-// This builds the week-topic structure for any course.
-// When real content is added per course, this populates from a content DB.
-// ── CURRICULUM — reads from courseContent.js (shared across all departments) ──
-// ECE 203, CHE 206, ECE 351 etc. are defined once in courseContent.js and
-// reused by every department that offers them. No duplication needed.
 function buildCurriculum() {
   const entry = window.UNIFY_COURSE_CONTENT?.[courseCode];
   if (entry && entry.weeks) {
     courseTopics = entry.weeks;
   } else {
-    // Auto-stub: sensible fallback for any course not yet in courseContent.js
     const genericTopics = [
       "Introduction & Fundamentals", "Core Concepts Part 1", "Core Concepts Part 2",
       "Analysis Methods", "Design Principles", "Applications Part 1",
@@ -156,7 +187,6 @@ function buildCurriculum() {
   }
 }
 
-// Returns the rich HTML file path for a subtopic that has full reviewed content
 function getSubtopicContentFile(subtopicName) {
   return window.getTopicContentFile?.(courseCode, subtopicName) || null;
 }
@@ -201,11 +231,13 @@ function renderSidebar() {
         </div>
       </div>`;
   }).join('');
+
+  // Update mobile week bar active state
+  renderMobileWeekBar();
 }
 
 window.toggleWeek = function(wi) {
   if (activeWeekIdx === wi && activeTopicIdx === null) {
-    // Clicking same week header again collapses it
     activeWeekIdx = null;
     renderSidebar();
     showPlaceholder();
@@ -219,7 +251,6 @@ window.toggleWeek = function(wi) {
 
 window.startWeek = function() {
   if (activeWeekIdx === null) return;
-  // Find first incomplete topic in this week, or just topic 0
   const week = courseTopics[activeWeekIdx];
   let startAt = 0;
   for (let ti = 0; ti < week.subtopics.length; ti++) {
@@ -252,13 +283,11 @@ function showWeekLanding(wi) {
   document.getElementById('wlProgress').style.background = doneT === totalT ? 'rgba(74,222,128,0.15)' : '';
   document.getElementById('wlProgress').style.color = doneT === totalT ? 'var(--green)' : '';
 
-  // Week summary from courseContent if available
   const entry = window.UNIFY_COURSE_CONTENT?.[courseCode];
   const weekEntry = entry?.weeks?.[wi];
   const summary = weekEntry?.summary || 'Work through each topic below. Mark complete as you go — your progress is saved automatically.';
   document.getElementById('wlSummary').textContent = summary;
 
-  // Topic list
   document.getElementById('wlTopics').innerHTML = week.subtopics.map((sub, ti) => {
     const done = topicProgress[topicKey(wi, ti)]?.done;
     const hasRich = window.getTopicContentFile?.(courseCode, sub) != null;
@@ -273,7 +302,6 @@ function showWeekLanding(wi) {
     </div>`;
   }).join('');
 
-  // Start button text
   const allDone = doneT === totalT;
   document.getElementById('wlStartBtn').textContent = allDone ? 'Review Week →' : (doneT > 0 ? 'Continue →' : 'Start Week →');
 
@@ -378,7 +406,6 @@ function populateLesson(week, subtopic, wi, ti) {
   }
 
   // ── NOTES CARD ──────────────────────────────────────────────────────────
-  // Firestore-uploaded content (admin) takes precedence over the legacy URL.
   const fsContent = firestoreContentByWeek[week.week] || null;
   const notesUrl = weekResources.notes || '';
   const weekSummary = weekEntry?.summary || '';
@@ -389,7 +416,7 @@ function populateLesson(week, subtopic, wi, ti) {
   document.getElementById('notesCardMeta').textContent =
     courseCode + ' · Week ' + week.week + ' · ' + subtopic;
 
-  // Description — use Firestore title if uploaded, else week summary, else generic
+  // Description
   document.getElementById('notesCardDesc').textContent =
     (fsContent && fsContent.title) ||
     weekSummary ||
@@ -399,7 +426,7 @@ function populateLesson(week, subtopic, wi, ti) {
   document.getElementById('notesCardTags').innerHTML = subtopics
     .map(s => `<span class="notes-tag">${sanitise(s)}</span>`).join('');
 
-  // Action — Firestore notes (iframe modal) > legacy URL > unavailable
+  // Action
   const actionEl = document.getElementById('notesCardAction');
   if (fsContent && fsContent.htmlContent) {
     actionEl.innerHTML = `
@@ -437,7 +464,6 @@ function populateLesson(week, subtopic, wi, ti) {
   }
 
   // ── VIDEO ──────────────────────────────────────────────────────────────
-  // Firestore-uploaded YouTube link takes precedence over legacy resources.
   const videoUrl =
     (fsContent && fsContent.youtubeUrl) ||
     weekResources.video ||
@@ -452,17 +478,10 @@ function populateLesson(week, subtopic, wi, ti) {
   } else {
     videoEl.innerHTML = `<div class="video-placeholder-inner"><div class="vp-icon">▶</div><div class="vp-text">No video linked yet for this topic.</div></div>`;
   }
-
-  // ── SUMMARY ──────────────────────────────────────────────────────────
-  document.getElementById('summaryContent').innerHTML = generateSummary(subtopic);
 }
 
 
 // ── FULL LESSON RENDERER ─────────────────────────────────────────────────────
-// Renders week content natively from courseContent.js data.
-// Each week's topics are collapsible. Supports formulas, analogies,
-// mistake boxes, exam definitions, steps, diagrams, and quick checks.
-
 function renderFullLesson(weekEntry, wi) {
   if (!weekEntry) return '';
 
@@ -471,8 +490,6 @@ function renderFullLesson(weekEntry, wi) {
     ? `<div class="fl-tags">${tags.map(t => `<span class="fl-tag">${sanitise(t)}</span>`).join('')}</div>`
     : '';
 
-  // If weekEntry has rich topic data (topicData array), render it
-  // Otherwise render a clean week overview with what we have
   const topicsHtml = weekEntry.topicData
     ? weekEntry.topicData.map((topic, i) => renderTopicBlock(topic, wi, i)).join('')
     : renderWeekOverview(weekEntry, wi);
@@ -481,8 +498,6 @@ function renderFullLesson(weekEntry, wi) {
 }
 
 function renderWeekOverview(weekEntry, wi) {
-  // Renders a clean overview when full topicData isn't defined yet
-  // Uses what we have: summary, subtopics list, past questions hint
   const subtopics = weekEntry.subtopics || [];
 
   const subtopicList = subtopics.map((sub, i) => {
@@ -514,7 +529,6 @@ function renderWeekOverview(weekEntry, wi) {
 }
 
 function renderTopicBlock(topic, wi, ti) {
-  // Renders a fully specified topic object with all its sections
   let html = `
     <div class="fl-topic">
       <div class="fl-topic-header" onclick="toggleFLTopic(this)">
@@ -578,7 +592,6 @@ window.toggleFullLesson = function() {
   icon.textContent = isOpen ? '▾' : '▴';
 
   if (!isOpen) {
-    // Smooth scroll to the full lesson section
     document.getElementById('sectionFullLesson').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 }
@@ -592,17 +605,6 @@ window.toggleFLTopic = function(header) {
   if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
 }
 
-function generateExplanation(topic, code) {
-  return `
-    <p>This section covers <strong>${topic}</strong> as taught in ${code}.</p>
-    <div class="explanation-highlight">
-      📖 Peer-reviewed explanation coming soon — written by a student who sat through this course,
-      reviewed by the departmental coordinator before it goes live. Check back after coordinator review.
-    </div>
-    <p>Key concepts, definitions, formulas, and analogies will appear here once reviewed.</p>
-  `;
-}
-
 function generatePastQuestions(topic, code, wi) {
   const qs = [
     { year: '2022/23', text: `[Past exam question on ${topic} from ${code} — add via courseContent.js]` },
@@ -613,7 +615,7 @@ function generatePastQuestions(topic, code, wi) {
       <span class="question-type-badge q-exam">📄 Past Exam ${q.year}</span>
       <div class="question-text">${q.text}</div>
       <button class="show-solution-btn" onclick="toggleSolution(this)">Reveal Solution</button>
-      <div class="solution-box">Solution will be added here. Walk through each step so students can check their working.</div>
+      <div class="solution-box">Solution will be added here.</div>
     </div>`).join('');
 }
 
@@ -631,17 +633,6 @@ function generatePracticeQuestions(topic, code) {
       <button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer</button>
       <div class="reveal-answer">Answer will be added here.</div>
     </div>`).join('');
-}
-
-function generateSummary(topic) {
-  const points = [
-    `${topic} is a fundamental concept in this course — make sure you can define it clearly.`,
-    `The key formula or method for ${topic} should be memorised and understood, not just applied.`,
-    `This topic commonly appears in past exam questions — review the examples above before exams.`,
-    `If you struggled with this topic, revisit it after 2 days using the spaced repetition reminder.`,
-  ];
-  return `<div class="summary-title">Key Takeaways — ${topic}</div>
-    ${points.map(p => `<div class="summary-point"><div class="summary-dot"></div><span>${p}</span></div>`).join('')}`;
 }
 
 // ── INTERACTIONS ──────────────────────────────────────
@@ -675,7 +666,6 @@ window.setConfidence = function(val) {
   document.querySelectorAll('.conf-btn').forEach((b, i) => {
     b.classList.toggle('selected', i + 1 === val);
   });
-  // Auto-save confidence
   const key = topicKey(activeWeekIdx, activeTopicIdx);
   if (!topicProgress[key]) topicProgress[key] = {};
   topicProgress[key].confidence = val;
@@ -690,7 +680,6 @@ window.markComplete = function() {
   topicProgress[key].done = !alreadyDone;
 
   if (!alreadyDone) {
-    // Mark complete
     topicProgress[key].completedAt = Date.now();
     topicProgress[key].confidence = selectedConfidence;
     topicProgress[key].reviewDates = getReviewSchedule();
@@ -704,7 +693,6 @@ window.markComplete = function() {
 
     showToast('🎉 Topic complete! Review in 2 days.');
 
-    // Check if entire course is done
     const totalTopics = courseTopics.reduce((a, w) => a + w.subtopics.length, 0);
     const doneCount = Object.values(topicProgress).filter(t => t.done).length;
     if (doneCount >= totalTopics) {
@@ -715,7 +703,6 @@ window.markComplete = function() {
       }, 1500);
     }
   } else {
-    // Unmark
     topicProgress[key].done = false;
     const btn = document.getElementById('markCompleteBtn');
     btn.className = 'sticky-complete-btn';
@@ -769,14 +756,12 @@ function populateCourseSummary() {
     : '–';
   const strongCount = ratedTopics.filter(t => t.confidence >= 4).length;
 
-  // Stats row
   document.getElementById('ccStatDone').textContent = doneTopics.length;
   document.getElementById('ccStatWeeks').textContent = courseTopics.length;
   document.getElementById('ccStatConf').textContent = avgConf + (avgConf !== '–' ? '/5' : '');
   document.getElementById('ccStatStrong').textContent = strongCount;
   document.getElementById('ccTitle').textContent = courseName + ' — Complete!';
 
-  // Week grid
   const weekGrid = document.getElementById('ccWeekGrid');
   weekGrid.innerHTML = courseTopics.map((week, wi) => {
     const keys = week.subtopics.map((_, ti) => topicKey(wi, ti));
@@ -803,7 +788,6 @@ function populateCourseSummary() {
     </div>`;
   }).join('');
 
-  // Confidence distribution chart
   const confCounts = [0, 0, 0, 0, 0];
   doneTopics.forEach(t => { if (t.confidence >= 1 && t.confidence <= 5) confCounts[t.confidence - 1]++; });
   const maxCount = Math.max(...confCounts, 1);
@@ -818,14 +802,12 @@ function populateCourseSummary() {
     </div>`;
   }).join('');
 
-  // Confidence hint
   const hint = avgConf >= 4 ? '🔥 Strong mastery overall — well done!'
     : avgConf >= 3 ? '🙂 Good grasp of the material. Review low-confidence topics before exams.'
     : avgConf !== '–' ? '📚 Some topics need more work. Use the review list below.'
     : 'Rate topics as you review them to see your confidence score.';
   document.getElementById('ccConfHint').textContent = hint;
 
-  // Topics to review (confidence ≤ 2)
   const weakTopics = [];
   courseTopics.forEach((week, wi) => {
     week.subtopics.forEach((sub, ti) => {
@@ -890,14 +872,13 @@ window.exportCourseSummary = function() {
 }
 
 window.reviewWeakTopics = function() {
-  // Find first weak topic and navigate to it
   for (let wi = 0; wi < courseTopics.length; wi++) {
     for (let ti = 0; ti < courseTopics[wi].subtopics.length; ti++) {
       const k = topicKey(wi, ti);
       if (topicProgress[k]?.done && (topicProgress[k]?.confidence || 0) <= 2) {
         document.getElementById('courseCompletePage').classList.remove('show');
         document.getElementById('lessonView').style.display = '';
-        loadTopic(wi, ti);
+        openTopic(wi, ti);
         showToast('📌 Reviewing weak topic — ' + courseTopics[wi].subtopics[ti]);
         return;
       }
@@ -914,16 +895,18 @@ function showToast(msg) {
 }
 
 // ── FIRESTORE NOTES MODAL ─────────────────────────────────────────────
-// Wraps fragments in a minimal HTML doc so basic typography still works.
-// Full <!DOCTYPE> / <html> documents are passed through unchanged.
 function wrapIfSnippet(html) {
   const trimmed = String(html || '').trim();
   if (/^<!DOCTYPE/i.test(trimmed) || /^<html[\s>]/i.test(trimmed)) return trimmed;
   return `<!DOCTYPE html><html><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"><\/script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\\\[',right:'\\\\]',display:true},{left:'\\\\(',right:'\\\\)',display:false}]})"><\/script>
     <style>
-      body { font-family: 'DM Sans', system-ui, sans-serif; line-height: 1.7; color: #0a0a0a; padding: 28px; max-width: 760px; margin: 0 auto; }
+      body { font-family: 'DM Sans', system-ui, sans-serif; line-height: 1.7; color: #0a0a0a; padding: 28px 24px; max-width: 860px; margin: 0 auto; word-wrap: break-word; overflow-wrap: break-word; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+      @media (max-width:600px){ body { padding: 20px 14px; } }
       h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; line-height: 1.2; margin-top: 1.4em; }
       pre, code { font-family: ui-monospace, Menlo, monospace; }
       pre { background: #f5f4f0; padding: 14px; border-radius: 8px; overflow-x: auto; }
@@ -936,4 +919,3 @@ window.openNotes = function (weekNum) {
   if (!item) return;
   window.open(`notes.html?id=${encodeURIComponent(item.id)}`, '_blank', 'noopener,noreferrer');
 };
-
