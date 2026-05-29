@@ -2036,3 +2036,16 @@ footer strong { color: var(--text); }
 .wnav-btn{font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all .15s}
 .wnav-btn:hover{color:var(--text);border-color:var(--text)}.wnav-btn.disabled{opacity:.35;pointer-events:none}
 @media(max-width:700px){nav{padding:0 16px}.nav-links{display:none}.week-page{padding:20px 16px 60px}}
+/* ── MOBILE READING IMPROVEMENTS ── */
+@media(max-width:700px){
+  .week-page{padding:12px 10px 90px!important}
+  .week-header{padding:14px 14px!important}
+  .week-body{padding:14px!important}
+  .topic-body{padding:14px!important}
+  .topic-header{padding:12px 14px!important}
+  .week-block{border-radius:10px!important}
+  .formula-block{padding:14px!important}
+  .quick-check{padding:14px!important}
+  .exam-box{padding:14px 16px!important}
+  .analogy-box,.mistake-box{padding:12px 14px!important}
+}

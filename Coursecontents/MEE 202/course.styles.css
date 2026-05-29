@@ -811,3 +811,16 @@ nav{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1p
 footer{background:var(--surface);border-top:1px solid var(--border);padding:2rem;text-align:center;font-size:13px;color:var(--muted2)}
 footer strong{color:var(--text)}
 @media(max-width:700px){nav{padding:0 1rem}.nav-links{display:none}.week-page{padding-left:1rem;padding-right:1rem}.week-header{padding:1rem}.week-body{padding:1.2rem}}
+/* ── MOBILE READING IMPROVEMENTS ── */
+@media(max-width:700px){
+  .week-page{padding:12px 10px 90px!important}
+  .week-header{padding:14px 14px!important}
+  .week-body{padding:14px!important}
+  .topic-body{padding:14px!important}
+  .topic-header{padding:12px 14px!important}
+  .week-block{border-radius:10px!important}
+  .formula-block{padding:14px!important}
+  .quick-check{padding:14px!important}
+  .exam-box{padding:14px 16px!important}
+  .analogy-box,.mistake-box{padding:12px 14px!important}
+}

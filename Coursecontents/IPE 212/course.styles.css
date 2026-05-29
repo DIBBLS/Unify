@@ -743,3 +743,16 @@ main{max-width:860px;margin:0 auto;padding:40px 24px 80px}
 footer{background:var(--surface);border-top:1px solid var(--border);padding:24px 32px;text-align:center;font-size:.8rem;color:var(--muted2)}
 
 .aero-t{font-family:'DM Sans',sans-serif;font-size:12px;fill:#0a0a0a;text-anchor:middle;}
+/* ── MOBILE READING IMPROVEMENTS ── */
+@media(max-width:700px){
+  .week-page{padding:12px 10px 90px!important}
+  .week-header{padding:14px 14px!important}
+  .week-body{padding:14px!important}
+  .topic-body{padding:14px!important}
+  .topic-header{padding:12px 14px!important}
+  .week-block{border-radius:10px!important}
+  .formula-block{padding:14px!important}
+  .quick-check{padding:14px!important}
+  .exam-box{padding:14px 16px!important}
+  .analogy-box,.mistake-box{padding:12px 14px!important}
+}

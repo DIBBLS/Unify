@@ -863,3 +863,16 @@ footer strong{color:var(--muted);font-weight:500}
 
 .code-block{background:#1a1a1a;color:#e0e0e0;border-radius:8px;padding:14px 18px;font-family:'Courier New',monospace;font-size:.85rem;line-height:1.7;margin:12px 0;overflow-x:auto;white-space:pre}
 .cm{color:#6a9955}.kw{color:#c586c0}.st{color:#ce9178}.fn{color:#dcdcaa}.nm{color:#b5cea8}.out{color:#4ade80}
+/* ── MOBILE READING IMPROVEMENTS ── */
+@media(max-width:700px){
+  .week-page{padding:12px 10px 90px!important}
+  .week-header{padding:14px 14px!important}
+  .week-body{padding:14px!important}
+  .topic-body{padding:14px!important}
+  .topic-header{padding:12px 14px!important}
+  .week-block{border-radius:10px!important}
+  .formula-block{padding:14px!important}
+  .quick-check{padding:14px!important}
+  .exam-box{padding:14px 16px!important}
+  .analogy-box,.mistake-box{padding:12px 14px!important}
+}
