@@ -7,6 +7,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="course.styles.css">
+<!-- KaTeX math rendering -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\\\[',right:'\\\\]',display:true},{left:'\\\\(',right:'\\\\)',display:false}]})"></script>
+<style>
+.wk-nav-strip{display:none;overflow-x:auto;white-space:nowrap;padding:10px 12px;background:var(--surface,#fff);border-bottom:1px solid var(--border,#e5e5e5);gap:6px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.wk-nav-strip::-webkit-scrollbar{display:none}
+@media(max-width:768px){.wk-nav-strip{display:flex}}
+.wk-pill{display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:32px;padding:0 10px;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;border:1px solid var(--border,#e5e5e5);color:var(--muted,#555);background:var(--surface,#fff);transition:all .15s;flex-shrink:0}
+.wk-pill.active{background:#16a34a;color:#fff;border-color:#16a34a}
+.wk-pill:hover:not(.active){background:var(--surface2,#f8f7f3);color:var(--text,#111)}
+</style>
 </head>
 <body>
 
@@ -20,6 +32,7 @@
   </div>
   <button class="theme-toggle" onclick="toggleTheme()">Toggle Dark</button>
 </nav>
+<div class="wk-nav-strip" id="wkNavStrip"></div>
 
 <div class="week-page">
   <div class="back-bar">
@@ -187,5 +200,26 @@
 </footer>
 
 <script src="../js/shared-2175cc6d.js"></script>
+<script>
+(function(){
+  var strip=document.getElementById('wkNavStrip');
+  if(!strip)return;
+  var fname=location.pathname.split('/').pop().replace('.html','');
+  var cur=parseInt(fname.replace(/[^0-9]/g,''))||1;
+  var max=12;
+  var base=location.href.replace(/W\d+\.html/,'');
+  var frag=document.createDocumentFragment();
+  for(var i=1;i<=max;i++){
+    var a=document.createElement('a');
+    a.href=base+'W'+i+'.html';
+    a.className='wk-pill'+(i===cur?' active':'');
+    a.textContent='W'+i;
+    frag.appendChild(a);
+  }
+  strip.appendChild(frag);
+  var active=strip.querySelector('.wk-pill.active');
+  if(active)setTimeout(function(){active.scrollIntoView({inline:'center',block:'nearest'})},100);
+})();
+</script>
 </body>
 </html>

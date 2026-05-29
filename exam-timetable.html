@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exam Timetable — Unify</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/pages/dashboard-v2.styles.css?v=2">
+<script src="js/theme.js"></script>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#16a34a">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+<script src="js/register-sw.js" defer></script>
+<style>
+  .et-wrap { padding: 24px 24px 120px; max-width: 860px; margin: 0 auto; }
+  .et-header { margin-bottom: 28px; }
+  .et-title { font-family: 'Playfair Display', serif; font-size: clamp(22px, 4vw, 32px); font-weight: 900; color: var(--text); margin-bottom: 6px; }
+  .et-sub { font-size: 14px; color: var(--text3); }
+  .et-dept-badge { display: inline-block; font-size: 12px; font-weight: 500; letter-spacing: .04em; background: var(--green-bg); color: var(--green-deep); border: 1px solid var(--green-border); padding: 3px 10px; border-radius: 20px; margin-bottom: 16px; }
+
+  .et-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .et-card-head { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+  .et-card-icon { width: 36px; height: 36px; background: var(--green-bg); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .et-card-title { font-size: 15px; font-weight: 600; color: var(--text); }
+  .et-card-meta { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .et-card-body { padding: 20px; }
+
+  .et-embed { width: 100%; border: none; border-radius: 8px; display: block; min-height: 560px; background: var(--surface2); }
+  .et-img { width: 100%; border-radius: 8px; display: block; }
+
+  .et-empty { text-align: center; padding: 64px 24px; }
+  .et-empty-icon { width: 56px; height: 56px; background: var(--surface2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+  .et-empty-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .et-empty-sub { font-size: 14px; color: var(--text3); max-width: 320px; margin: 0 auto; line-height: 1.6; }
+
+  .et-semester { font-size: 12px; color: var(--text3); margin-top: 10px; }
+  .et-open-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; font-size: 13px; font-weight: 500; color: var(--green-deep); text-decoration: none; padding: 7px 14px; background: var(--green-bg); border: 1px solid var(--green-border); border-radius: 8px; }
+  .et-open-btn:hover { opacity: .85; }
+
+  .et-loading { text-align: center; padding: 64px 24px; color: var(--text3); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="app-layout">
+  <div class="app-sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <aside class="app-sidebar" id="appSidebar">
+    <div class="app-sidebar-top">
+      <span class="app-sidebar-wordmark">Unify</span>
+      <button class="app-sidebar-close" onclick="closeSidebar()" aria-label="Close menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="app-sidebar-user">
+      <div class="app-sidebar-avatar" id="sidebarAvatar">U</div>
+      <div class="app-sidebar-user-name" id="navUserName"></div>
+      <div class="app-sidebar-user-meta" id="sidebarMeta"></div>
+    </div>
+    <div class="app-sidebar-nav">
+      <div class="app-sidebar-section-label">Main</div>
+      <a href="dashboard.html" class="app-sidebar-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <span class="app-sidebar-link-text">Dashboard</span>
+      </a>
+      <a href="timetable.html" class="app-sidebar-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span class="app-sidebar-link-text">Timetable</span>
+      </a>
+      <a href="study.html" class="app-sidebar-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <span class="app-sidebar-link-text">Study Plan</span>
+      </a>
+      <a href="predictor.html" class="app-sidebar-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span class="app-sidebar-link-text">Analytics</span>
+      </a>
+      <a href="profile.html" class="app-sidebar-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="app-sidebar-link-text">Profile</span>
+      </a>
+      <div class="app-sidebar-section-label" style="margin-top:12px">More</div>
+      <a href="exam-timetable.html" class="app-sidebar-link active">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span class="app-sidebar-link-text">Exam Timetable</span>
+      </a>
+    </div>
+    <div class="app-sidebar-bottom">
+      <button class="app-sidebar-theme-btn" onclick="toggleTheme()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <span class="app-sidebar-link-text"><span id="themeToggle">🌙 Dark</span></span>
+      </button>
+      <button class="app-sidebar-signout" id="signOutBtn">Sign out</button>
+    </div>
+  </aside>
+
+  <div class="app-main" id="appMain">
+    <div class="app-topbar" id="appTopbar">
+      <button class="app-hamburger mobile-only" onclick="openSidebar()" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+      <span class="app-topbar-wordmark mobile-only">Unify</span>
+    </div>
+
+    <div class="et-wrap">
+      <div class="et-header">
+        <div class="et-title">Exam Timetable</div>
+        <div class="et-sub">Your department's official exam schedule for the current semester.</div>
+      </div>
+
+      <div id="etContent">
+        <div class="et-loading">Loading timetable…</div>
+      </div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <nav class="app-bnav">
+      <a href="dashboard.html" class="app-bnav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="timetable.html" class="app-bnav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Timetable</span>
+      </a>
+      <a href="study.html" class="app-bnav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <span>Study</span>
+      </a>
+      <a href="predictor.html" class="app-bnav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Analytics</span>
+      </a>
+      <a href="profile.html" class="app-bnav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Profile</span>
+      </a>
+    </nav>
+  </div>
+</div>
+
+<script type="module">
+import { auth, db } from './js/firebase-config.js';
+import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+function openSidebar() { document.getElementById('appSidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('visible'); }
+function closeSidebar() { document.getElementById('appSidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('visible'); }
+window.openSidebar = openSidebar;
+window.closeSidebar = closeSidebar;
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  const next = (current === 'dark') ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('unify-theme', next);
+  updateThemeBtn(next);
+}
+function updateThemeBtn(theme) {
+  const el = document.getElementById('themeToggle');
+  if (el) el.textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
+}
+window.toggleTheme = toggleTheme;
+const saved = localStorage.getItem('unify-theme');
+if (saved) { document.documentElement.setAttribute('data-theme', saved); updateThemeBtn(saved); }
+
+function renderTimetable(data, dept) {
+  const container = document.getElementById('etContent');
+  const url = data.url || '';
+  const semester = data.semester || '';
+  const uploadedAt = data.uploadedAt ? new Date(data.uploadedAt.seconds * 1000).toLocaleDateString() : '';
+
+  const isImage = /\.(png|jpg|jpeg|gif|webp)(\?.*)?$/i.test(url);
+  const isGDrive = url.includes('drive.google.com');
+
+  let embedHtml = '';
+  if (isImage) {
+    embedHtml = `<img class="et-img" src="${url}" alt="Exam timetable for ${dept}">`;
+  } else if (isGDrive) {
+    const previewUrl = url.replace('/view', '/preview').replace('?usp=sharing', '');
+    embedHtml = `<iframe class="et-embed" src="${previewUrl}" allow="autoplay"></iframe>`;
+  } else {
+    embedHtml = `<iframe class="et-embed" src="${url}"></iframe>`;
+  }
+
+  container.innerHTML = `
+    <span class="et-dept-badge">${dept}</span>
+    <div class="et-card">
+      <div class="et-card-head">
+        <div class="et-card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green-deep)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div>
+          <div class="et-card-title">Exam Timetable${semester ? ' — ' + semester : ''}</div>
+          <div class="et-card-meta">${uploadedAt ? 'Updated ' + uploadedAt : ''}</div>
+        </div>
+      </div>
+      <div class="et-card-body">
+        ${embedHtml}
+        <a class="et-open-btn" href="${url}" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Open full screen
+        </a>
+      </div>
+    </div>`;
+}
+
+function renderEmpty(dept) {
+  const container = document.getElementById('etContent');
+  const deptText = dept ? ` for ${dept}` : '';
+  container.innerHTML = `
+    <div class="et-card">
+      <div class="et-empty">
+        <div class="et-empty-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="et-empty-title">No timetable uploaded yet${deptText}</div>
+        <div class="et-empty-sub">Your exam timetable hasn't been uploaded yet. Check back closer to the exam period.</div>
+      </div>
+    </div>`;
+}
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { location.href = 'Auth.html'; return; }
+
+  const nameEl = document.getElementById('navUserName');
+  const avatarEl = document.getElementById('sidebarAvatar');
+  const metaEl = document.getElementById('sidebarMeta');
+  if (nameEl) nameEl.textContent = user.displayName || 'Student';
+  if (avatarEl) avatarEl.textContent = (user.displayName || 'U')[0].toUpperCase();
+
+  document.getElementById('signOutBtn').addEventListener('click', async () => {
+    await signOut(auth);
+    location.href = 'Auth.html';
+  });
+
+  try {
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    const profile = userDoc.exists() ? userDoc.data() : {};
+    const dept = profile.department || '';
+
+    if (metaEl) metaEl.textContent = dept || profile.level || '';
+
+    if (!dept) { renderEmpty(''); return; }
+
+    const ttDoc = await getDoc(doc(db, 'examTimetables', dept));
+    if (ttDoc.exists()) {
+      renderTimetable(ttDoc.data(), dept);
+    } else {
+      renderEmpty(dept);
+    }
+  } catch (err) {
+    console.error('exam-timetable:', err);
+    renderEmpty('');
+  }
+});
+</script>
+</body>
+</html>

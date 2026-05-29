@@ -107,6 +107,8 @@
         <a href="#content" class="anchor-link" data-anchor="content">Content</a>
         <a href="#courses" class="anchor-link" data-anchor="courses">Courses</a>
         <a href="#access" class="anchor-link" data-anchor="access">Access</a>
+        <a href="#exam-timetable" class="anchor-link" data-anchor="exam-timetable">Exam Timetable</a>
+        <a href="#feedback" class="anchor-link" data-anchor="feedback">Feedback</a>
       </nav>
 
       <main class="admin-body">
@@ -577,6 +579,86 @@
             <div class="admin-list" id="adminList"></div>
           </div>
         </details>
+
+        <!-- EXAM TIMETABLE UPLOAD -->
+        <section class="panel" id="exam-timetable">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">Exam Timetable</h2>
+              <p class="panel-sub">Upload the exam timetable for each department. Students in that department will see it automatically.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="card card-flush">
+              <div class="card-title">Upload / Update Timetable</div>
+              <div class="form-row two">
+                <div class="form-group">
+                  <label class="form-label">Department</label>
+                  <select class="form-select" id="etDept">
+                    <option value="">Select department…</option>
+                    <option value="Electronic &amp; Computer Engineering">Electronic &amp; Computer Engineering</option>
+                    <option value="Mechanical Engineering">Mechanical Engineering</option>
+                    <option value="Industrial &amp; Petroleum Engineering">Industrial &amp; Petroleum Engineering</option>
+                    <option value="Chemical &amp; Polymer Engineering">Chemical &amp; Polymer Engineering</option>
+                    <option value="Civil Engineering">Civil Engineering</option>
+                    <option value="Aerospace Engineering">Aerospace Engineering</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Semester</label>
+                  <select class="form-select" id="etSemester">
+                    <option value="">Select semester…</option>
+                    <option value="First Semester">First Semester</option>
+                    <option value="Second Semester">Second Semester</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Timetable URL</label>
+                <input class="form-input" id="etUrl" placeholder="Google Drive link or direct image/PDF URL" type="url">
+                <div style="font-size:12px;color:var(--text3);margin-top:4px">Paste a Google Drive share link, or a direct link to a PNG/JPG/PDF. Make sure the file is set to &ldquo;Anyone with the link can view&rdquo;.</div>
+              </div>
+              <div class="card-foot">
+                <div id="etFeedback" class="feedback"></div>
+                <button class="btn btn-green" onclick="saveExamTimetable()">Save Timetable →</button>
+              </div>
+            </div>
+
+            <div class="sub-section-label">Currently Uploaded Timetables</div>
+            <div id="etList" style="display:flex;flex-direction:column;gap:10px"></div>
+          </div>
+        </section>
+
+        <!-- FEEDBACK INBOX -->
+        <section class="panel" id="feedback">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">Student Feedback</h2>
+              <p class="panel-sub">Feedback submitted by students via the in-app feedback button.</p>
+            </div>
+            <div class="panel-actions">
+              <span class="panel-pill" id="fbCount">0 items</span>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+              <select class="form-select" id="fbFilterCat" onchange="loadFeedback()" style="width:auto;min-width:160px">
+                <option value="">All categories</option>
+                <option value="Bug Report">Bug Report</option>
+                <option value="Feature Request">Feature Request</option>
+                <option value="UI/UX Issue">UI/UX Issue</option>
+                <option value="Academic Issue">Academic Issue</option>
+                <option value="Other">Other</option>
+              </select>
+              <select class="form-select" id="fbFilterStatus" onchange="loadFeedback()" style="width:auto;min-width:140px">
+                <option value="">All statuses</option>
+                <option value="open">Open</option>
+                <option value="resolved">Resolved</option>
+              </select>
+            </div>
+            <div id="fbList"></div>
+          </div>
+        </section>
       </main>
     </div>
 
