@@ -1171,3 +1171,125 @@ window.uploadCourseContent = async function () {
   btn.disabled = false;
   btn.textContent = "Upload →";
 };
+
+// ── EXAM TIMETABLE ────────────────────────────────────────────────────────────
+
+window.saveExamTimetable = async function () {
+  const dept = document.getElementById('etDept').value.trim();
+  const semester = document.getElementById('etSemester').value.trim();
+  const url = document.getElementById('etUrl').value.trim();
+  const feedback = document.getElementById('etFeedback');
+
+  if (!dept || !url) {
+    feedback.textContent = 'Please select a department and enter a URL.';
+    feedback.style.color = 'var(--red)';
+    return;
+  }
+  feedback.textContent = 'Saving…';
+  feedback.style.color = 'var(--text3)';
+  try {
+    await setDoc(doc(db, 'examTimetables', dept), {
+      url,
+      semester: semester || '',
+      uploadedAt: serverTimestamp(),
+      uploadedBy: auth.currentUser?.uid || '',
+    });
+    feedback.textContent = 'Timetable saved successfully.';
+    feedback.style.color = 'var(--green-deep)';
+    document.getElementById('etUrl').value = '';
+    document.getElementById('etDept').value = '';
+    document.getElementById('etSemester').value = '';
+    loadExamTimetables();
+  } catch (e) {
+    feedback.textContent = 'Error: ' + (e.message || 'unknown');
+    feedback.style.color = 'var(--red)';
+  }
+};
+
+async function loadExamTimetables() {
+  const list = document.getElementById('etList');
+  if (!list) return;
+  list.innerHTML = '<div style="color:var(--text3);font-size:13px">Loading…</div>';
+  try {
+    const snap = await getDocs(collection(db, 'examTimetables'));
+    if (snap.empty) {
+      list.innerHTML = '<div style="color:var(--text3);font-size:13px">No timetables uploaded yet.</div>';
+      return;
+    }
+    list.innerHTML = snap.docs.map(d => {
+      const data = d.data();
+      const ts = data.uploadedAt ? new Date(data.uploadedAt.seconds * 1000).toLocaleString() : '—';
+      return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:6px">
+        <div style="font-weight:600;font-size:14px;color:var(--text)">${d.id}</div>
+        ${data.semester ? `<div style="font-size:12px;color:var(--text3)">${data.semester}</div>` : ''}
+        <a href="${data.url}" target="_blank" rel="noopener" style="font-size:12px;color:var(--green-deep);word-break:break-all">${data.url}</a>
+        <div style="font-size:11px;color:var(--text3)">Uploaded ${ts}</div>
+        <button class="btn" style="width:fit-content;margin-top:4px;font-size:12px;color:var(--red);background:transparent;border:1px solid var(--red-border);padding:4px 10px;border-radius:6px;cursor:pointer" onclick="deleteExamTimetable('${d.id}')">Delete</button>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    list.innerHTML = `<div style="color:var(--red);font-size:13px">Error loading: ${e.message}</div>`;
+  }
+}
+
+window.deleteExamTimetable = async function (dept) {
+  if (!confirm(`Delete exam timetable for "${dept}"?`)) return;
+  await deleteDoc(doc(db, 'examTimetables', dept));
+  loadExamTimetables();
+};
+
+// ── FEEDBACK INBOX ────────────────────────────────────────────────────────────
+
+window.loadFeedback = async function () {
+  const list = document.getElementById('fbList');
+  const countEl = document.getElementById('fbCount');
+  if (!list) return;
+  const catFilter = document.getElementById('fbFilterCat')?.value || '';
+  const statusFilter = document.getElementById('fbFilterStatus')?.value || '';
+
+  list.innerHTML = '<div style="color:var(--text3);font-size:13px">Loading…</div>';
+  try {
+    let q = query(collection(db, 'feedback'), orderBy('timestamp', 'desc'));
+    const snap = await getDocs(q);
+    let items = snap.docs;
+    if (catFilter) items = items.filter(d => d.data().category === catFilter);
+    if (statusFilter) items = items.filter(d => (d.data().status || 'open') === statusFilter);
+
+    if (countEl) countEl.textContent = items.length + ' item' + (items.length !== 1 ? 's' : '');
+    if (items.length === 0) {
+      list.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:16px 0">No feedback found.</div>';
+      return;
+    }
+    list.innerHTML = items.map(d => {
+      const data = d.data();
+      const ts = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleString() : '—';
+      const status = data.status || 'open';
+      const statusColor = status === 'resolved' ? 'var(--green-deep)' : 'var(--yellow)';
+      return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+          <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:12px;background:var(--surface2);color:var(--text2)">${data.category || 'Other'}</span>
+          <span style="font-size:11px;color:${statusColor};font-weight:500">${status}</span>
+          <span style="font-size:11px;color:var(--text3);margin-left:auto">${ts}</span>
+        </div>
+        <div style="font-size:14px;color:var(--text);line-height:1.5;margin-bottom:8px">${data.message || ''}</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Page: ${data.page || '—'} · UID: ${data.uid || 'anonymous'}</div>
+        ${status !== 'resolved' ? `<button class="btn" style="font-size:12px;color:var(--green-deep);background:var(--green-bg);border:1px solid var(--green-border);padding:4px 10px;border-radius:6px;cursor:pointer" onclick="resolveFeedback('${d.id}')">Mark Resolved</button>` : ''}
+      </div>`;
+    }).join('');
+  } catch (e) {
+    list.innerHTML = `<div style="color:var(--red);font-size:13px">Error: ${e.message}</div>`;
+  }
+};
+
+window.resolveFeedback = async function (id) {
+  await updateDoc(doc(db, 'feedback', id), { status: 'resolved' });
+  loadFeedback();
+};
+
+// Auto-load exam timetables and feedback when admin panel initialises
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    if (document.getElementById('etList')) loadExamTimetables();
+    if (document.getElementById('fbList')) loadFeedback();
+  }, 1500);
+});

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="auto">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,143 +10,295 @@
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/responsive.css">
 <script src="js/theme.js"></script>
-
-    <link rel="stylesheet" href="css/pages/profile.styles.css">
+<link rel="stylesheet" href="css/pages/profile.styles.css">
+<link rel="stylesheet" href="css/pages/dashboard-v2.styles.css?v=2">
+<link rel="stylesheet" href="css/pages/profile-v3.styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#16a34a">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+    <script src="js/register-sw.js" defer></script>
 </head>
 <body>
+
 <div class="ld" id="loadingOverlay">
   <div class="ld-logo">Unify</div>
   <div class="ld-sub">Loading…</div>
 </div>
 
-<nav>
-  <a href="dashboard.html" class="nav-logo">Unify</a>
-  <div class="nav-links">
-    <a href="dashboard.html" class="nl">Dashboard</a>
-    <a href="timetable.html" class="nl">Timetable</a>
-    <a href="profile.html" class="nl on">Profile</a>
-  </div>
-  <div class="nav-r">
-    <button class="nbtn" onclick="toggleTheme()" id="themeToggle">Dark mode</button>
-    <button class="nbtn" id="signOutBtn">Sign out</button>
-  </div>
-</nav>
+<div class="toast" id="toast"></div>
 
-<nav class="mobile-nav">
-  <div class="mobile-nav-inner">
-    <a href="dashboard.html" class="mobile-nav-btn">
-      <span class="mobile-nav-label">Dashboard</span>
-      <div class="mobile-nav-dot"></div>
-    </a>
-    <a href="timetable.html" class="mobile-nav-btn">
-      <span class="mobile-nav-label">Timetable</span>
-      <div class="mobile-nav-dot"></div>
-    </a>
-    <a href="profile.html" class="mobile-nav-btn active">
-      <span class="mobile-nav-label">Profile</span>
-      <div class="mobile-nav-dot"></div>
-    </a>
-  </div>
-</nav>
+<!-- APP LAYOUT -->
+<div class="app-layout">
+  <div class="app-sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-<div class="page">
-  <div class="profile-header">
-    <div class="av" id="heroAvatar">U</div>
-    <div class="profile-info">
-      <div class="profile-name-row">
-        <div class="profile-name" id="heroName">—</div>
-        <button class="btn-edit" onclick="openDrawer()">Edit profile</button>
-      </div>
-      <div class="profile-stats">
-        <div class="pstat"><div class="pstat-n" id="statPosts">0</div><div class="pstat-l">posts</div></div>
-        <div class="pstat"><div class="pstat-n" id="statWork">0</div><div class="pstat-l">projects</div></div>
-        <div class="pstat"><div class="pstat-n" id="statCollabs">0</div><div class="pstat-l">collabs</div></div>
-      </div>
-      <div class="profile-headline" id="heroHeadline" style="display:none"></div>
-      <div class="profile-bio empty" id="heroBio">What are you building?</div>
-      <div class="profile-tags" id="heroTags"></div>
+  <aside class="app-sidebar" id="appSidebar">
+    <div class="app-sidebar-top">
+      <span class="app-sidebar-wordmark">Unify</span>
+      <button class="app-sidebar-close" onclick="closeSidebar()" aria-label="Close menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
-  </div>
+    <div class="app-sidebar-user">
+      <div class="app-sidebar-avatar" id="sidebarAvatar">U</div>
+      <div class="app-sidebar-user-name" id="navUserName"></div>
+      <div class="app-sidebar-user-meta" id="sidebarMeta"></div>
+    </div>
+    <div class="app-sidebar-nav">
+      <div class="app-sidebar-section-label">Main</div>
+      <a href="dashboard.html" class="app-sidebar-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <span class="app-sidebar-link-text">Dashboard</span>
+      </a>
+      <a href="timetable.html" class="app-sidebar-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span class="app-sidebar-link-text">Timetable</span>
+      </a>
+      <a href="study.html" class="app-sidebar-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <span class="app-sidebar-link-text">Study Plan</span>
+      </a>
+      <a href="predictor.html" class="app-sidebar-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span class="app-sidebar-link-text">Analytics</span>
+      </a>
+      <a href="profile.html" class="app-sidebar-link active">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="app-sidebar-link-text">Profile</span>
+      </a>
+      <div class="app-sidebar-section-label" style="margin-top:12px">More</div>
+      <a href="exam-timetable.html" class="app-sidebar-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span class="app-sidebar-link-text">Exam Timetable</span>
+      </a>
+    </div>
+    <div class="app-sidebar-bottom">
+      <button class="app-sidebar-theme-btn" onclick="toggleTheme()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <span class="app-sidebar-link-text"><span id="themeToggle">🌙 Dark</span></span>
+      </button>
+      <button class="app-sidebar-signout" id="signOutBtn">Sign out</button>
+    </div>
+  </aside>
 
-  <hr class="hdiv">
+  <div class="app-main">
+    <div class="app-topbar" id="appTopbar">
+      <button class="app-hamburger mobile-only" onclick="openSidebar()" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+      <span class="app-topbar-wordmark mobile-only">Unify</span>
+      <div class="app-topbar-right"></div>
+    </div>
 
-  <div class="tabs">
-    <button class="tab on" onclick="switchTab('posts',this)">Posts</button>
-    <button class="tab" onclick="switchTab('work',this)">Work</button>
-    <button class="tab" onclick="switchTab('about',this)">About</button>
-  </div>
+    <!-- ── PROFILE V3 CONTENT ── -->
+    <div class="pv3-page">
 
-  <!-- POSTS -->
-  <div class="pane on" id="pane-posts">
-    <div class="composer-box">
-      <div class="composer-top">
-        <div class="c-av" id="composerAv">U</div>
-        <textarea class="c-input" id="postInput" placeholder="Share what you're working on…" rows="2"></textarea>
-      </div>
-      <div class="composer-foot">
-        <div class="c-tags">
-          <button class="c-tag" onclick="toggleCTag(this,'Project')">Project</button>
-          <button class="c-tag" onclick="toggleCTag(this,'Win')">Win</button>
-          <button class="c-tag" onclick="toggleCTag(this,'Idea')">Idea</button>
-          <button class="c-tag" onclick="toggleCTag(this,'Question')">Question</button>
+      <!-- HERO -->
+      <div class="pv3-hero">
+        <!-- Left: avatar + name + meta -->
+        <div class="pv3-hero-left">
+          <div class="pv3-avatar" id="heroAvatar">U</div>
+          <div class="pv3-hero-info">
+            <h1 class="pv3-name"><span id="heroName">—</span><span class="pv3-dot">.</span></h1>
+            <p class="pv3-tagline" id="heroHeadline">I’m here to learn and <em>build.</em></p>
+            <div class="pv3-meta" id="heroTags"></div>
+            <button class="pv3-edit-btn" onclick="openDrawer()">Edit Profile</button>
+          </div>
         </div>
-        <button class="post-btn" onclick="submitPost()">Post</button>
-      </div>
-    </div>
-    <div id="postsFeed"></div>
-  </div>
 
-  <!-- WORK -->
-  <div class="pane" id="pane-work">
-    <div class="work-header">
-      <span class="work-header-sub">Things you've built or are building.</span>
-      <button class="add-btn" onclick="openWorkForm()">+ Add project</button>
-    </div>
-    <div class="work-form" id="workForm">
-      <div class="fg"><label class="fl">Project name</label><input class="fi" id="wName" placeholder="e.g. Soil Moisture Monitor"></div>
-      <div class="fg"><label class="fl">What is it?</label><textarea class="fta" id="wDesc" rows="3" placeholder="Describe it briefly…"></textarea></div>
-      <div class="fg"><label class="fl">Status</label>
-        <select class="fs" id="wStatus">
-          <option value="wip">In progress</option>
-          <option value="done">Completed</option>
-          <option value="idea">Idea</option>
-        </select>
-      </div>
-      <div class="fg"><label class="fl">Skills / tags (comma separated)</label><input class="fi" id="wTags" placeholder="e.g. Arduino, Python, IoT"></div>
-      <div class="fg"><label class="fl">Collaborators (comma separated)</label><input class="fi" id="wCollabs" placeholder="e.g. Temi A., Kola B."></div>
-      <div class="drawer-actions">
-        <button class="fsub" onclick="saveWork()">Save</button>
-        <button class="fcan" onclick="closeWorkForm()">Cancel</button>
-      </div>
-    </div>
-    <div id="workList"></div>
-  </div>
+        <!-- Center: decorative letter -->
+        <div class="pv3-bg-deco" aria-hidden="true">
+          <div class="pv3-deco-letter">U</div>
+        </div>
 
-  <!-- ABOUT -->
-  <div class="pane" id="pane-about">
-    <div class="about-section">
-      <span class="about-label">Bio</span>
-      <p class="about-bio empty" id="aboutBio">No bio yet.</p>
+        <!-- Right: Academic Snapshot card -->
+        <div class="pv3-snapshot">
+          <div class="pv3-snapshot-header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Academic Snapshot
+          </div>
+          <div class="pv3-snapshot-grid">
+            <div class="pv3-snap-item">
+              <div class="pv3-snap-val" id="snapCGPA">—</div>
+              <div class="pv3-snap-lbl">CGPA</div>
+            </div>
+            <div class="pv3-snap-item">
+              <div class="pv3-snap-val" id="snapSemGP">—</div>
+              <div class="pv3-snap-lbl">Semester GP</div>
+            </div>
+            <div class="pv3-snap-item">
+              <div class="pv3-snap-val" id="snapTarget">—</div>
+              <div class="pv3-snap-lbl">Target CGPA</div>
+            </div>
+            <div class="pv3-snap-item">
+              <div class="pv3-snap-val" id="snapCourses">—</div>
+              <div class="pv3-snap-lbl">Courses</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB BAR -->
+      <div class="pv3-tabbar">
+        <button class="pv3-tab active" data-pane="overview">Overview</button>
+        <button class="pv3-tab" data-pane="achievements">Achievements</button>
+        <button class="pv3-tab" data-pane="statistics">Statistics</button>
+        <button class="pv3-tab" data-pane="activity">Activity</button>
+      </div>
+
+      <!-- TAB: OVERVIEW -->
+      <div class="pv3-pane active" id="prof-pane-overview">
+        <div class="pv3-overview-grid">
+
+          <!-- Column 1: About Me + motivational + quote -->
+          <div class="pv3-col-left">
+            <div class="pv3-about-card">
+              <div class="pv3-card-title">About Me</div>
+              <p class="pv3-bio" id="heroBio">What are you building?</p>
+              <div class="pv3-about-stats">
+                <div class="pv3-about-row">
+                  <span class="pv3-about-icon">📅</span>
+                  <span>Joined Unify</span>
+                  <span class="pv3-about-val" id="joinDate">—</span>
+                </div>
+                <div class="pv3-about-row">
+                  <span class="pv3-about-icon">🔥</span>
+                  <span>Study Streak</span>
+                  <span class="pv3-about-val" id="profStreakCount">0 days</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="pv3-motivate-card">
+              <div class="pv3-motivate-letter">U</div>
+              <p class="pv3-motivate-text">Discipline today,<br><strong>Excellence tomorrow.</strong></p>
+            </div>
+
+            <div class="pv3-quote-banner">
+              <span class="pv3-quote-mark">“</span>
+              <blockquote class="pv3-quote-text">Progress is built<br>one session at a time.</blockquote>
+              <div class="pv3-quote-line"></div>
+            </div>
+          </div>
+
+          <!-- Column 2: Current Focus -->
+          <div class="pv3-col-center">
+            <div class="pv3-focus-card">
+              <div class="pv3-card-title">Current Focus</div>
+              <div id="profFocusList">
+                <p class="pv3-empty">Add courses on the dashboard to see your focus here.</p>
+              </div>
+              <div class="pv3-focus-footer">Keep building. You're doing great! 🔥 ›</div>
+            </div>
+          </div>
+
+          <!-- Column 3: Achievements + Study Stats -->
+          <div class="pv3-col-right">
+            <div class="pv3-achieve-card">
+              <div class="pv3-card-header">
+                <div class="pv3-card-title">Achievements</div>
+                <a href="#" class="pv3-view-all">View all</a>
+              </div>
+              <div class="pv3-badges" id="profAchievements">
+                <!-- populated by inline JS -->
+              </div>
+            </div>
+
+            <div class="pv3-sstats-card">
+              <div class="pv3-card-header">
+                <div class="pv3-card-title">Study Statistics</div>
+                <span class="pv3-period">This Week</span>
+              </div>
+              <div id="profStudyStats">
+                <!-- populated by inline JS -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TAB: ACHIEVEMENTS -->
+      <div class="pv3-pane" id="prof-pane-achievements">
+        <div class="pv3-coming-soon">
+          <div class="pv3-cs-icon">🏆</div>
+          <div class="pv3-cs-text">Full achievements panel coming soon.</div>
+        </div>
+      </div>
+
+      <!-- TAB: STATISTICS -->
+      <div class="pv3-pane" id="prof-pane-statistics">
+        <div class="pv3-coming-soon">
+          <div class="pv3-cs-icon">📊</div>
+          <div class="pv3-cs-text">Detailed statistics coming soon.</div>
+        </div>
+      </div>
+
+      <!-- TAB: ACTIVITY -->
+      <div class="pv3-pane" id="prof-pane-activity">
+        <div class="pv3-coming-soon">
+          <div class="pv3-cs-icon">📈</div>
+          <div class="pv3-cs-text">Activity feed coming soon.</div>
+        </div>
+      </div>
+
+    </div><!-- end pv3-page -->
+
+    <!-- HIDDEN JS HOOKS (profile.js relies on these IDs) -->
+    <div style="display:none;" aria-hidden="true">
+      <div id="statPosts">0</div>
+      <div id="statWork">0</div>
+      <div id="statCollabs">0</div>
+      <textarea id="postInput"></textarea>
+      <div id="postsFeed"></div>
+      <div id="workList"></div>
+      <div id="workForm"></div>
+      <input id="wName"><textarea id="wDesc"></textarea>
+      <select id="wStatus"><option value="wip">In progress</option></select>
+      <input id="wTags"><input id="wCollabs">
+      <div id="pane-posts"></div>
+      <div id="pane-work"></div>
+      <div id="pane-about"></div>
+      <p id="aboutBio"></p>
+      <div id="aboutInterests"></div>
+      <div id="aboutLinks"></div>
+      <div id="composerAv"></div>
     </div>
-    <div class="about-divider"></div>
-    <div class="about-section">
-      <span class="about-label">Focus areas</span>
-      <div class="interest-list" id="aboutInterests"><span style="font-size:12px;color:var(--text3)">Nothing added yet.</span></div>
-    </div>
-    <div class="about-divider"></div>
-    <div class="about-section">
-      <span class="about-label">Links</span>
-      <div class="about-links" id="aboutLinks"><span style="font-size:12px;color:var(--text3)">No links added.</span></div>
-    </div>
+
   </div>
 </div>
 
-<!-- EDIT DRAWER -->
+<!-- BOTTOM NAV — Profile active -->
+<div class="app-bottom-nav">
+  <a href="dashboard.html" class="app-bnav-item">
+    <svg width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    <span>Dashboard</span>
+  </a>
+  <a href="timetable.html" class="app-bnav-item">
+    <svg width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span>Timetable</span>
+  </a>
+  <a href="study.html" class="app-bnav-item">
+    <svg width="22" height="22" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    <span>Study Plan</span>
+  </a>
+  <a href="predictor.html" class="app-bnav-item">
+    <svg width="22" height="22" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <span>Analytics</span>
+  </a>
+  <a href="profile.html" class="app-bnav-item active">
+    <svg width="22" height="22" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>Profile</span>
+  </a>
+</div>
+
+<!-- EDIT DRAWER (kept for profile.js) -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer">
   <div class="drawer-title">Edit profile <button class="drawer-close" onclick="closeDrawer()">×</button></div>
   <div class="fg"><label class="fl">Name</label><input class="fi" id="dName"></div>
-  <div class="fg"><label class="fl">Headline</label><input class="fi" id="dHeadline" placeholder="e.g. Building in ECE · Open to collab"></div>
+  <div class="fg"><label class="fl">Headline / tagline</label><input class="fi" id="dHeadline" placeholder="e.g. I study to build."></div>
   <div class="fg"><label class="fl">Bio</label><textarea class="fta" id="dBio" rows="4" placeholder="What are you working on?"></textarea></div>
   <div class="fg"><label class="fl">Focus areas (comma separated)</label><input class="fi" id="dInterests" placeholder="e.g. Embedded Systems, IoT, ML"></div>
   <div class="fg"><label class="fl">GitHub / Portfolio</label><input class="fi" id="dLink1" placeholder="https://github.com/..."></div>
@@ -161,8 +313,183 @@
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<script>
+  function openSidebar() {
+    document.getElementById('appSidebar').classList.add('open');
+    document.getElementById('sidebarOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    document.getElementById('appSidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  window.addEventListener('scroll', function() {
+    var tb = document.getElementById('appTopbar');
+    if (tb) tb.classList.toggle('scrolled', window.scrollY > 8);
+  }, { passive: true });
+  // Avatar sync
+  (function() {
+    var nameEl = document.getElementById('navUserName');
+    if (!nameEl) return;
+    function syncAvatar() {
+      var n = nameEl.textContent.trim();
+      if (!n) return;
+      var init = n.charAt(0).toUpperCase();
+      var av = document.getElementById('heroAvatar');
+      var sav = document.getElementById('sidebarAvatar');
+      if (av) av.textContent = init;
+      if (sav) sav.textContent = init;
+    }
+    new MutationObserver(syncAvatar).observe(nameEl, {childList:true, characterData:true, subtree:true});
+  })();
+</script>
+
+<!-- Profile data loader -->
+<script type="module">
+import { auth, db } from './js/firebase-config.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const GP_MAP = { A:5, B:4, C:3, D:2, E:1, F:0 };
+function toGP(g) { return GP_MAP[String(g||'').toUpperCase()] ?? null; }
+
+onAuthStateChanged(auth, async user => {
+  if (!user) return;
+
+  // Join date from auth
+  try {
+    const d = new Date(user.metadata.creationTime);
+    const el = document.getElementById('joinDate');
+    if (el) el.textContent = d.toLocaleDateString('en-GB', {month:'long', year:'numeric'});
+  } catch(e) {}
+
+  // Streak from localStorage
+  try {
+    const s = JSON.parse(localStorage.getItem('unify-streak') || '{}');
+    const el = document.getElementById('profStreakCount');
+    if (el) el.textContent = (s.count || 0) + ' days';
+  } catch(e) {}
+
+  // Firestore user doc
+  try {
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (!snap.exists()) return;
+    const d = snap.data();
+
+    // CGPA
+    const cgpaEl = document.getElementById('snapCGPA');
+    if (cgpaEl && typeof d.cgpa === 'number' && d.cgpa > 0)
+      cgpaEl.textContent = d.cgpa.toFixed(2);
+
+    // Target CGPA from gradePlanner
+    const targetEl = document.getElementById('snapTarget');
+    const target = d.gradePlanner?.target;
+    if (targetEl && target != null)
+      targetEl.textContent = Number(target).toFixed(2);
+
+    // Courses + Semester GP
+    const courses = d.courses || [];
+    const coursesEl = document.getElementById('snapCourses');
+    if (coursesEl) coursesEl.textContent = courses.length || '—';
+
+    let pts = 0, units = 0;
+    courses.forEach(c => {
+      const gp = toGP(c.grade);
+      if (gp !== null) {
+        pts += gp * (Number(c.units) || 3);
+        units += Number(c.units) || 3;
+      }
+    });
+    const semEl = document.getElementById('snapSemGP');
+    if (semEl) semEl.textContent = units > 0 ? (pts / units).toFixed(2) : '—';
+
+    // Render sections
+    renderFocus(courses);
+    renderAchievements(courses);
+    renderStudyStats(d, courses);
+  } catch(e) { console.warn('[pv3]', e); }
+});
+
+function renderFocus(courses) {
+  const list = document.getElementById('profFocusList');
+  if (!list) return;
+  if (!courses.length) {
+    list.innerHTML = '<p class="pv3-empty">Add courses on the dashboard to see focus here.</p>';
+    return;
+  }
+  list.innerHTML = courses.slice(0, 5).map(c => {
+    const gp = toGP(c.grade);
+    const pct = gp != null ? Math.round((gp / 5) * 100) : 0;
+    const barColor = pct >= 80 ? '#4ade80' : pct >= 60 ? '#facc15' : pct > 0 ? '#f87171' : '#666';
+    return `<div class="pv3-focus-row">
+      <div class="pv3-focus-top">
+        <span class="pv3-focus-code">${c.code || 'Course'}</span>
+        <span class="pv3-focus-pct">${pct}%</span>
+      </div>
+      <div class="pv3-focus-track">
+        <div class="pv3-focus-fill" style="width:${pct}%; background:${barColor}"></div>
+      </div>
+      <div class="pv3-focus-meta">Grade: <strong>${(c.grade||'—').toUpperCase()}</strong>&nbsp;&middot;&nbsp;${c.units||3} units</div>
+    </div>`;
+  }).join('');
+}
+
+function renderAchievements(courses) {
+  const wrap = document.getElementById('profAchievements');
+  if (!wrap) return;
+  const s = JSON.parse(localStorage.getItem('unify-streak') || '{}');
+  const sc = s.count || 0;
+  const badges = [
+    { icon: '🔥', label: 'Consistent', sub: sc + '-day streak', earned: sc >= 3 },
+    { icon: '📊', label: 'On Track', sub: courses.length + ' courses', earned: courses.length >= 3 },
+    { icon: '📚', label: 'Dedicated', sub: '20+ study hrs', earned: false },
+    { icon: '🚀', label: 'Starter', sub: 'Joined Early', earned: true },
+  ];
+  wrap.innerHTML = badges.map(b => `
+    <div class="pv3-badge ${b.earned ? 'pv3-badge-earned' : 'pv3-badge-locked'}">
+      <div class="pv3-badge-icon">${b.icon}</div>
+      <div class="pv3-badge-label">${b.label}</div>
+      <div class="pv3-badge-sub">${b.sub}</div>
+    </div>`).join('');
+}
+
+function renderStudyStats(d, courses) {
+  const wrap = document.getElementById('profStudyStats');
+  if (!wrap) return;
+  const s = JSON.parse(localStorage.getItem('unify-streak') || '{}');
+  const hrs = ((s.count || 0) * 1.5).toFixed(1);
+  const topics = Object.keys(d.weekProgress || {}).length;
+  const rows = [
+    { label: 'Study Hours',    val: hrs + ' hrs',       pct: Math.min(100, parseFloat(hrs) / 20 * 100) },
+    { label: 'Courses Active', val: courses.length,     pct: Math.min(100, courses.length / 6 * 100) },
+    { label: 'Topics Covered', val: topics + ' topics', pct: Math.min(100, topics / 50 * 100) },
+  ];
+  wrap.innerHTML = rows.map(r => `
+    <div class="pv3-sstat-row">
+      <div class="pv3-sstat-top">
+        <span class="pv3-sstat-label">${r.label}</span>
+        <span class="pv3-sstat-val">${r.val}</span>
+      </div>
+      <div class="pv3-sstat-track">
+        <div class="pv3-sstat-fill" style="width:${r.pct}%"></div>
+      </div>
+    </div>`).join('');
+}
+
+// Tab switching
+document.querySelectorAll('.pv3-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.pv3-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.pv3-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const el = document.getElementById('prof-pane-' + btn.dataset.pane);
+    if (el) el.classList.add('active');
+  });
+});
+</script>
 
 <script type="module" src="js/pages/profile.js"></script>
+<script type="module" src="js/feedback.js"></script>
 </body>
 </html>

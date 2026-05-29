@@ -554,3 +554,9 @@ nav {
     border-radius: 0;
   }
 }
+
+/* Hide old text nav links — replaced by bottom nav */
+.nav-links { display: none !important; }
+
+/* Bottom padding so content clears the fixed bottom nav */
+.course-page { padding-bottom: 80px; }

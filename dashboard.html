@@ -13,10 +13,17 @@
     <link rel="stylesheet" href="css/components.css" />
     <link rel="stylesheet" href="css/responsive.css" />
     <script src="js/theme.js"></script>
-
     <link rel="stylesheet" href="css/pages/dashboard.styles.css?v=goal-5" />
-  </head>
+    <link rel="stylesheet" href="css/pages/dashboard-v2.styles.css?v=2" />
+      <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#16a34a">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+    <script src="js/register-sw.js" defer></script>
+</head>
   <body>
+
     <!-- LOADING -->
     <div class="loading-overlay" id="loadingOverlay">
       <div class="loading-logo">Unify</div>
@@ -28,27 +35,6 @@
       <span class="toast-icon">🎉</span>
       <span id="milestoneText">Milestone reached!</span>
     </div>
-
-    <!-- ── DESKTOP NAV ── -->
-    <nav>
-      <a href="index.html" class="nav-logo">Unify</a>
-      <div class="nav-tabs">
-        <button class="nav-tab active" id="tab-personal">Dashboard</button>
-        <a href="timetable.html" class="nav-tab">Timetable</a>
-        <a href="profile.html" class="nav-tab">Profile</a>
-      </div>
-      <div class="nav-right">
-        <span class="nav-user-name" id="navUserName"></span>
-        <button class="notif-bell-btn" id="notifBell" onclick="toggleNotifDrawer()" title="Updates">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          <span class="notif-badge" id="notifBadge" style="display:none;"></span>
-        </button>
-        <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
-          🌙 Dark
-        </button>
-        <button class="nav-signout" id="signOutBtn">Sign out</button>
-      </div>
-    </nav>
 
     <!-- NOTIFICATION OVERLAY -->
     <div class="notif-overlay" id="notifOverlay" onclick="closeNotifDrawer()"></div>
@@ -67,375 +53,290 @@
       </div>
     </div>
 
-    <!-- ── SPACE 1: PERSONAL ── -->
-    <div class="space active" id="space-personal">
-      <!-- NAME NUDGE BANNER -->
-      <div
-        id="nameNudge"
-        style="
-          display: none;
-          padding: 12px 20px;
-          background: var(--surface);
-          border-bottom: 1px solid var(--border);
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-          flex-wrap: wrap;
-        "
-      >
-        <span style="font-size: 13px; color: var(--text2)"
-          >👋 We never got your name — your profile might look off.</span
-        >
-        <div
-          style="display: flex; gap: 8px; align-items: center; flex-shrink: 0"
-        >
-          <a
-            href="onboarding.html?edit=1"
-            style="
-              font-size: 12px;
-              font-weight: 600;
-              padding: 6px 14px;
-              background: var(--text);
-              color: var(--bg);
-              border-radius: 6px;
-              text-decoration: none;
-            "
-            >Set my name →</a
-          >
-          <button
-            onclick="
-              document.getElementById('nameNudge').style.display = 'none'
-            "
-            style="
-              background: none;
-              border: none;
-              font-size: 18px;
-              cursor: pointer;
-              color: var(--text3);
-              line-height: 1;
-            "
-          >
-            ×
-          </button>
+    <!-- PLANNER SETUP MODAL -->
+    <div class="planner-modal-overlay" id="plannerModalOverlay">
+      <div class="planner-modal">
+        <button class="planner-modal-close" onclick="closePlannerSetup()">&#x2715; Close</button>
+        <div class="planner-modal-title">Build Your Study Plan</div>
+        <div class="planner-modal-sub">We'll generate a daily schedule around your courses.</div>
+        <label class="planner-modal-label">How long can you study per session?</label>
+        <div class="planner-chips" id="durationChips">
+          <button class="planner-chip" data-val="20" onclick="selectChip(this,'duration')">20 min</button>
+          <button class="planner-chip" data-val="30" onclick="selectChip(this,'duration')">30 min</button>
+          <button class="planner-chip selected" data-val="60" onclick="selectChip(this,'duration')">1 hour</button>
+          <button class="planner-chip" data-val="90" onclick="selectChip(this,'duration')">1.5 hrs</button>
+        </div>
+        <label class="planner-modal-label">How many sessions per day?</label>
+        <div class="planner-chips" id="sessionsChips">
+          <button class="planner-chip" data-val="1" onclick="selectChip(this,'sessions')">1</button>
+          <button class="planner-chip selected" data-val="2" onclick="selectChip(this,'sessions')">2</button>
+          <button class="planner-chip" data-val="3" onclick="selectChip(this,'sessions')">3</button>
+        </div>
+        <label class="planner-modal-label">Preferred study time?</label>
+        <div class="planner-chips" id="timeChips">
+          <button class="planner-chip" data-val="morning" onclick="selectChip(this,'time')">🌅 Morning</button>
+          <button class="planner-chip selected" data-val="afternoon" onclick="selectChip(this,'time')">☀️ Afternoon</button>
+          <button class="planner-chip" data-val="night" onclick="selectChip(this,'time')">🌙 Night</button>
+        </div>
+        <button class="planner-modal-save" onclick="savePlannerSetup()">Generate My Plan →</button>
+      </div>
+    </div>
+
+    <!-- REVIEW MODAL -->
+    <div class="review-modal-overlay" id="reviewModalOverlay" onclick="closeReviewOnOverlay(event)">
+      <div class="review-modal">
+        <div class="review-modal-header">
+          <span class="review-modal-badge" id="reviewModalBadge">Quick Review</span>
+          <button class="review-modal-close" onclick="closeReview()">&#x2715;</button>
+        </div>
+        <div class="review-modal-topic" id="reviewModalTopic">Topic Name</div>
+        <div class="review-modal-course" id="reviewModalCourse">Course · Week</div>
+        <div class="review-question" id="reviewQuestion">Loading question...</div>
+        <div class="review-options" id="reviewOptions"></div>
+        <div class="review-result" id="reviewResult">
+          <div class="review-result-title" id="reviewResultTitle"></div>
+          <div id="reviewResultBody"></div>
+        </div>
+        <div class="review-modal-actions">
+          <button class="review-done-btn" id="reviewDoneBtn" onclick="finishReview()">Done ✓</button>
+          <button class="review-skip-btn" onclick="closeReview()">Later</button>
         </div>
       </div>
+    </div>
 
-      <div class="personal-hero">
-        <div>
-          <p class="hero-greeting" id="heroTag">Your Dashboard</p>
-          <h1 class="hero-name" id="heroName">
-            Good to have you, <em id="heroFirstName">Builder.</em>
-          </h1>
-          <p class="hero-dept" id="heroDept"></p>
-          <div class="save-indicator" id="saveIndicator">✓ Saved</div>
+    <!-- APP LAYOUT -->
+    <div class="app-layout">
+
+      <!-- SIDEBAR OVERLAY -->
+      <div class="app-sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+      <!-- SIDEBAR -->
+      <aside class="app-sidebar" id="appSidebar">
+        <div class="app-sidebar-top">
+          <span class="app-sidebar-wordmark">Unify</span>
+          <button class="app-sidebar-close" onclick="closeSidebar()" aria-label="Close menu">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
         </div>
-        <div class="hero-stats">
-          <button class="stats-eye-btn" id="statsEyeBtn" onclick="toggleStatsVisibility()" title="Hide/show stats">🙈</button>
-          <a href="predictor.html" class="hero-stat hero-stat-link" title="View full CGPA plan">
-            <div class="hero-stat-val" id="statTarget">—</div>
-            <div class="hero-stat-label">Target</div>
+
+        <div class="app-sidebar-user">
+          <div class="app-sidebar-avatar" id="sidebarAvatar">U</div>
+          <div class="app-sidebar-user-name" id="navUserName"></div>
+          <div class="app-sidebar-user-meta" id="sidebarMeta"></div>
+        </div>
+
+        <div class="app-sidebar-nav">
+          <div class="app-sidebar-section-label">Main</div>
+          <a href="dashboard.html" class="app-sidebar-link active">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            <span class="app-sidebar-link-text">Dashboard</span>
           </a>
-          <div class="hero-stat">
-            <div class="hero-stat-val" id="statSemGP">—</div>
-            <div class="hero-stat-label">Sem GP</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-val" id="statCGPA">—</div>
-            <div class="hero-stat-label">CGPA</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-val" id="statCourses">0</div>
-            <div class="hero-stat-label">Courses</div>
-          </div>
+          <a href="timetable.html" class="app-sidebar-link">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span class="app-sidebar-link-text">Timetable</span>
+          </a>
+          <a href="study.html" class="app-sidebar-link">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            <span class="app-sidebar-link-text">Study Plan</span>
+          </a>
+          <a href="predictor.html" class="app-sidebar-link">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            <span class="app-sidebar-link-text">Analytics</span>
+          </a>
+          <a href="profile.html" class="app-sidebar-link">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span class="app-sidebar-link-text">Profile</span>
+          </a>
+          <div class="app-sidebar-section-label" style="margin-top:12px">More</div>
+          <a href="exam-timetable.html" class="app-sidebar-link">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <span class="app-sidebar-link-text">Exam Timetable</span>
+          </a>
         </div>
-      </div>
 
-      <div class="progress-bar-wrap">
-        <span class="progress-label">Semester Progress</span>
-        <div class="progress-bar">
-          <div class="progress-fill" id="progressFill"></div>
-        </div>
-        <span class="progress-pct" id="progressPct">0%</span>
-      </div>
-
-      <!-- ── GOAL CARD ── -->
-      <div class="goal-card-wrap">
-        <div class="goal-card" id="goalCard"></div>
-      </div>
-
-      <!-- ── STREAK + DAILY NUDGE ── -->
-      <div class="streak-nudge-wrap">
-        <div class="streak-nudge" id="streakNudge" onclick="openReview()">
-          <div class="streak-fire" id="streakFire">🔥</div>
-          <div class="streak-info">
-            <div class="streak-count">
-              <span class="streak-days-val" id="streakDaysVal">0</span>
-              <span>day streak</span>
-            </div>
-            <div class="streak-message" id="streakMessage">
-              Start your streak today
-            </div>
-            <div class="streak-sub" id="streakSub">
-              One quick question. 2 minutes max.
-            </div>
-            <div class="streak-dots" id="streakDots"></div>
-          </div>
-          <button class="streak-action" id="streakActionBtn">Let's go →</button>
-        </div>
-      </div>
-
-      <!-- ── STUDY PLANNER ── -->
-      <div class="planner-wrap" id="plannerWrap">
-        <div class="planner-header">
-          <div class="planner-title">📚 Today's Study Plan</div>
-          <button class="planner-setup-link" onclick="openPlannerSetup()">
-            ⚙ Customise
+        <div class="app-sidebar-bottom">
+          <button class="app-sidebar-theme-btn" onclick="toggleTheme()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <span class="app-sidebar-link-text"><span id="themeToggle">🌙 Dark</span></span>
           </button>
+          <button class="app-sidebar-signout" id="signOutBtn">Sign out</button>
         </div>
-        <div class="planner-sessions" id="plannerSessions">
-          <div class="planner-empty" id="plannerEmpty">
-            Set up your study preferences and we'll build a personalised daily
-            plan.
-            <br /><a
-              href="#"
-              onclick="
-                openPlannerSetup();
-                return false;
-              "
-              >Get started →</a
-            >
-          </div>
-        </div>
-      </div>
+      </aside>
 
-      <!-- PLANNER SETUP MODAL -->
-      <div class="planner-modal-overlay" id="plannerModalOverlay">
-        <div class="planner-modal">
-          <button class="planner-modal-close" onclick="closePlannerSetup()">
-            ✕ Close
+      <!-- MAIN AREA -->
+      <div class="app-main" id="appMain">
+
+        <!-- TOP BAR -->
+        <div class="app-topbar" id="appTopbar">
+          <button class="app-hamburger mobile-only" onclick="openSidebar()" aria-label="Open menu">
+            <span></span><span></span><span></span>
           </button>
-          <div class="planner-modal-title">Build Your Study Plan</div>
-          <div class="planner-modal-sub">
-            We'll generate a daily schedule around your courses.
+          <span class="app-topbar-wordmark mobile-only">Unify</span>
+          <div class="app-topbar-right">
+            <button class="notif-bell-btn" id="notifBell" onclick="toggleNotifDrawer()" title="Updates">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span class="notif-badge" id="notifBadge" style="display:none;"></span>
+            </button>
           </div>
+        </div>
 
-          <label class="planner-modal-label"
-            >How long can you study per session?</label
+        <!-- PAGE CONTENT -->
+        <div class="app-page-content space active" id="space-personal">
+
+          <!-- NAME NUDGE -->
+          <div
+            id="nameNudge"
+            style="display:none; padding:12px 20px; background:var(--surface); border-bottom:1px solid var(--border); align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;"
           >
-          <div class="planner-chips" id="durationChips">
-            <button
-              class="planner-chip"
-              data-val="20"
-              onclick="selectChip(this, 'duration')"
-            >
-              20 min
-            </button>
-            <button
-              class="planner-chip"
-              data-val="30"
-              onclick="selectChip(this, 'duration')"
-            >
-              30 min
-            </button>
-            <button
-              class="planner-chip selected"
-              data-val="60"
-              onclick="selectChip(this, 'duration')"
-            >
-              1 hour
-            </button>
-            <button
-              class="planner-chip"
-              data-val="90"
-              onclick="selectChip(this, 'duration')"
-            >
-              1.5 hrs
-            </button>
+            <span style="font-size:13px; color:var(--text2)">👋 We never got your name — your profile might look off.</span>
+            <div style="display:flex; gap:8px; align-items:center; flex-shrink:0">
+              <a href="onboarding.html?edit=1" style="font-size:12px; font-weight:600; padding:6px 14px; background:var(--text); color:var(--bg); border-radius:6px; text-decoration:none;">Set my name →</a>
+              <button onclick="document.getElementById('nameNudge').style.display='none'" style="background:none; border:none; font-size:18px; cursor:pointer; color:var(--text3); line-height:1;">×</button>
+            </div>
           </div>
 
-          <label class="planner-modal-label">How many sessions per day?</label>
-          <div class="planner-chips" id="sessionsChips">
-            <button
-              class="planner-chip"
-              data-val="1"
-              onclick="selectChip(this, 'sessions')"
-            >
-              1
-            </button>
-            <button
-              class="planner-chip selected"
-              data-val="2"
-              onclick="selectChip(this, 'sessions')"
-            >
-              2
-            </button>
-            <button
-              class="planner-chip"
-              data-val="3"
-              onclick="selectChip(this, 'sessions')"
-            >
-              3
-            </button>
+          <!-- GREETING -->
+          <div class="dash-greeting">
+            <p class="dash-greeting-eyebrow" id="heroTag">Your Dashboard</p>
+            <h1 class="dash-greeting-name" id="heroName">
+              Good to have you, <em id="heroFirstName">Builder.</em>
+            </h1>
+            <p class="dash-greeting-dept" id="heroDept"></p>
+            <div class="save-indicator" id="saveIndicator">✓ Saved</div>
           </div>
 
-          <label class="planner-modal-label">Preferred study time?</label>
-          <div class="planner-chips" id="timeChips">
-            <button
-              class="planner-chip"
-              data-val="morning"
-              onclick="selectChip(this, 'time')"
-            >
-              🌅 Morning
-            </button>
-            <button
-              class="planner-chip selected"
-              data-val="afternoon"
-              onclick="selectChip(this, 'time')"
-            >
-              ☀️ Afternoon
-            </button>
-            <button
-              class="planner-chip"
-              data-val="night"
-              onclick="selectChip(this, 'time')"
-            >
-              🌙 Night
-            </button>
+          <!-- STATS CARD -->
+          <div class="dash-stats-card">
+            <button class="stats-eye-btn" id="statsEyeBtn" onclick="toggleStatsVisibility()" title="Hide/show stats">🙈</button>
+            <a href="predictor.html" class="dash-stat-item dash-stat-link" title="View full CGPA plan">
+              <div class="dash-stat-val" id="statTarget">—</div>
+              <div class="dash-stat-label">Target</div>
+            </a>
+            <div class="dash-stat-item">
+              <div class="dash-stat-val" id="statSemGP">—</div>
+              <div class="dash-stat-label">Sem GP</div>
+            </div>
+            <div class="dash-stat-item">
+              <div class="dash-stat-val" id="statCGPA">—</div>
+              <div class="dash-stat-label">CGPA</div>
+            </div>
+            <div class="dash-stat-item">
+              <div class="dash-stat-val" id="statCourses">0</div>
+              <div class="dash-stat-label">Courses</div>
+            </div>
           </div>
 
-          <button class="planner-modal-save" onclick="savePlannerSetup()">
-            Generate My Plan →
-          </button>
-        </div>
-      </div>
-
-      <!-- ── REVIEW MODAL ── -->
-      <div
-        class="review-modal-overlay"
-        id="reviewModalOverlay"
-        onclick="closeReviewOnOverlay(event)"
-      >
-        <div class="review-modal">
-          <div class="review-modal-header">
-            <span class="review-modal-badge" id="reviewModalBadge"
-              >Quick Review</span
-            >
-            <button class="review-modal-close" onclick="closeReview()">
-              ✕
-            </button>
-          </div>
-          <div class="review-modal-topic" id="reviewModalTopic">Topic Name</div>
-          <div class="review-modal-course" id="reviewModalCourse">
-            Course · Week
-          </div>
-          <div class="review-question" id="reviewQuestion">
-            Loading question...
-          </div>
-          <div class="review-options" id="reviewOptions"></div>
-          <div class="review-result" id="reviewResult">
-            <div class="review-result-title" id="reviewResultTitle"></div>
-            <div id="reviewResultBody"></div>
-          </div>
-          <div class="review-modal-actions">
-            <button
-              class="review-done-btn"
-              id="reviewDoneBtn"
-              onclick="finishReview()"
-            >
-              Done ✓
-            </button>
-            <button class="review-skip-btn" onclick="closeReview()">
-              Later
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="personal-body">
-        <div class="sidebar">
-          <div class="sidebar-section">
-            <span class="sidebar-title">Semester</span>
-            <select id="semester">
-              <option>First Semester</option>
-              <option>Second Semester</option>
-            </select>
-            <button class="btn" onclick="switchSemester()">
-              Load Semester
-            </button>
-          </div>
-          <div class="sidebar-section">
-            <a href="onboarding.html?edit=1" class="sidebar-link"
-              >Change university / level →</a
-            >
+          <!-- SEMESTER PROGRESS -->
+          <div class="dash-progress-wrap">
+            <span class="dash-progress-label">Semester Progress</span>
+            <div class="dash-progress-track">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <span class="progress-pct" id="progressPct">0%</span>
           </div>
 
-        </div>
+          <!-- GOAL CARD -->
+          <div class="goal-card-wrap">
+            <div class="goal-card" id="goalCard"></div>
+          </div>
 
-        <div style="display: flex; min-width: 0; position: relative">
-          <div class="main-content" style="flex: 1; min-width: 0">
-            <div class="content-header">
-              <h2 class="content-title">Your Courses</h2>
-              <div style="display: flex; align-items: center; gap: 8px">
-                <span class="content-count" id="coursesCount">0 courses</span>
-                <button class="add-course-toggle" onclick="toggleAddCourse()">
-                  + Add
-                </button>
+          <!-- TWO-COL: Motivation + Streak -->
+          <div class="dash-two-col">
+            <div class="dash-motivation-banner">
+              <div class="dash-motivation-left">
+                <div class="dash-motivation-crown">👑</div>
+                <p class="dash-motivation-title">Keep up the momentum</p>
+                <small class="dash-motivation-sub">You're on track this semester</small>
+              </div>
+              <div class="dash-motivation-right">
+                <p class="dash-motivation-ahead">Ahead <strong>this week</strong></p>
+                <svg class="dash-sparkline" viewBox="0 0 80 28" xmlns="http://www.w3.org/2000/svg">
+                  <polyline points="0,24 20,18 40,13 60,8 80,3" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                </svg>
               </div>
             </div>
+
+            <div class="streak-nudge" id="streakNudge" onclick="openReview()">
+              <div class="streak-fire" id="streakFire">🔥</div>
+              <div class="streak-info">
+                <div class="streak-count">
+                  <span class="streak-days-val" id="streakDaysVal">0</span>
+                  <span>day streak</span>
+                </div>
+                <div class="streak-message" id="streakMessage">Start your streak today</div>
+                <div class="streak-sub" id="streakSub">One quick question. 2 minutes max.</div>
+                <div class="streak-dots" id="streakDots"></div>
+              </div>
+              <button class="streak-action" id="streakActionBtn">Let's go →</button>
+            </div>
+          </div>
+
+          <!-- STUDY PLANNER (hidden — has its own page via Study Plan nav) -->
+          <div class="planner-wrap" id="plannerWrap" hidden style="display:none">
+            <div class="planner-header">
+              <div class="planner-title">📚 Today's Study Plan</div>
+              <button class="planner-setup-link" onclick="openPlannerSetup()">⚙ Customise</button>
+            </div>
+            <div class="planner-sessions" id="plannerSessions">
+              <div class="planner-empty" id="plannerEmpty">
+                Set up your study preferences and we'll build a personalised daily plan.
+                <br /><a href="#" onclick="openPlannerSetup(); return false;">Get started →</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- COURSES -->
+          <div class="dash-courses-section">
+            <div class="dash-courses-header">
+              <h2 class="dash-courses-title">Your Courses</h2>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="content-count" id="coursesCount">0 courses</span>
+                <button class="add-course-toggle" onclick="toggleAddCourse()">+ Add</button>
+              </div>
+            </div>
+
             <div class="add-course-row" id="addCourseRow">
               <div class="add-course-inputs">
-                <input
-                  type="text"
-                  class="add-course-inp"
-                  id="addCourseCode"
-                  placeholder="Course code (e.g. ECE 301)"
-                  onkeydown="if (event.key === 'Enter') addCourseInline();"
-                />
-                <input
-                  type="number"
-                  class="add-units-inp"
-                  id="addCourseUnits"
-                  min="1"
-                  max="6"
-                  placeholder="Units"
-                  onkeydown="if (event.key === 'Enter') addCourseInline();"
-                />
-                <button class="add-course-sub" onclick="addCourseInline()">
-                  Add
-                </button>
+                <input type="text" class="add-course-inp" id="addCourseCode" placeholder="Course code (e.g. ECE 301)" onkeydown="if(event.key==='Enter')addCourseInline();" />
+                <input type="number" class="add-units-inp" id="addCourseUnits" min="1" max="6" placeholder="Units" onkeydown="if(event.key==='Enter')addCourseInline();" />
+                <button class="add-course-sub" onclick="addCourseInline()">Add</button>
               </div>
               <div id="coursePickerList"></div>
             </div>
+
             <div class="empty-state" id="emptyState">
               <div class="empty-icon">📚</div>
-              <p class="empty-text">
-                No courses loaded yet.<br />Select a semester and tap "Load
-                Semester",<br />or add courses manually.
-              </p>
-            </div>
-            <ul id="courses"></ul>
-
-            <div class="sidebar-section">
-              <span class="sidebar-title">Add Course Manually</span>
-              <input
-                id="courseInput"
-                placeholder="Course code (e.g. ECE 301)"
-              />
-              <input id="gradeInput" placeholder="Grade (A, B, C, D, E, F)" />
-              <input
-                id="unitsInput"
-                type="number"
-                min="1"
-                max="6"
-                placeholder="Credit units"
-              />
-              <button class="btn" onclick="addCourse()">Add Course</button>
-              <button class="btn btn-outline" onclick="clearCourses()">
-                Clear All
-              </button>
+              <p class="empty-text">No courses loaded yet.<br />Select a semester and tap "Load Semester",<br />or add courses manually.</p>
             </div>
 
+            <div class="dash-courses-list">
+              <ul id="courses"></ul>
+            </div>
 
+            <details class="dash-manual-add">
+              <summary class="dash-manual-summary">Semester &amp; manual options</summary>
+              <div class="dash-manual-body">
+                <div class="sidebar-section">
+                  <span class="sidebar-title">Semester</span>
+                  <select id="semester">
+                    <option>First Semester</option>
+                    <option>Second Semester</option>
+                  </select>
+                  <button class="btn" onclick="switchSemester()">Load Semester</button>
+                </div>
+                <div class="sidebar-section">
+                  <a href="onboarding.html?edit=1" class="sidebar-link">Change university / level →</a>
+                </div>
+                <div class="sidebar-section">
+                  <span class="sidebar-title">Add Course Manually</span>
+                  <input id="courseInput" placeholder="Course code (e.g. ECE 301)" />
+                  <input id="gradeInput" placeholder="Grade (A, B, C, D, E, F)" />
+                  <input id="unitsInput" type="number" min="1" max="6" placeholder="Credit units" />
+                  <button class="btn" onclick="addCourse()">Add Course</button>
+                  <button class="btn btn-outline" onclick="clearCourses()">Clear All</button>
+                </div>
+              </div>
+            </details>
           </div>
 
           <!-- RESOURCE PANEL -->
@@ -443,88 +344,87 @@
             <div class="resource-panel-inner">
               <div class="resource-panel-header">
                 <div>
-                  <h3 class="resource-panel-title" id="resourcePanelTitle">
-                    Course
-                  </h3>
-                  <div
-                    style="
-                      font-size: 11px;
-                      color: var(--text3);
-                      margin-top: 3px;
-                    "
-                    id="resourcePanelMeta"
-                  ></div>
+                  <h3 class="resource-panel-title" id="resourcePanelTitle">Course</h3>
+                  <div style="font-size:11px; color:var(--text3); margin-top:3px;" id="resourcePanelMeta"></div>
                 </div>
-                <div
-                  style="
-                    display: flex;
-                    gap: 8px;
-                    flex-shrink: 0;
-                    align-items: center;
-                  "
-                >
-                  <a
-                    class="panel-learn-btn"
-                    id="coursePageBtn"
-                    href="#"
-                    style="padding: 8px 16px; font-size: 12px"
-                    >Course Page →</a
-                  >
-                  <a
-                    class="panel-learn-btn"
-                    id="learnPageBtn"
-                    href="#"
-                    style="
-                      padding: 8px 14px;
-                      font-size: 12px;
-                      background: transparent;
-                      color: var(--text3);
-                      border: 1px solid var(--border);
-                    "
-                    >Legacy Learn</a
-                  >
-                  <button
-                    class="resource-panel-close"
-                    onclick="closeResourcePanel()"
-                  >
-                    ✕
-                  </button>
+                <div style="display:flex; gap:8px; flex-shrink:0; align-items:center;">
+                  <a class="panel-learn-btn" id="coursePageBtn" href="#" style="padding:8px 16px; font-size:12px;">Course Page →</a>
+                  <a class="panel-learn-btn" id="learnPageBtn" href="#" style="padding:8px 14px; font-size:12px; background:transparent; color:var(--text3); border:1px solid var(--border);">Legacy Learn</a>
+                  <button class="resource-panel-close" onclick="closeResourcePanel()">&#x2715;</button>
                 </div>
               </div>
-              <!-- WEEK ACCORDION (full panel) -->
               <div class="week-accordion" id="weekAccordion"></div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- Hidden aspiration store — keeps renderAspirations working -->
-      <div style="display: none">
-        <input id="aspirationInput" />
-        <div id="aspirationList"></div>
-      </div>
+          <!-- Hidden aspiration store — keeps renderAspirations working -->
+          <div style="display:none;">
+            <input id="aspirationInput" />
+            <div id="aspirationList"></div>
+          </div>
+
+          <!-- Hidden compat element for JS tab switching -->
+          <button id="tab-personal" style="display:none;"></button>
+
+        </div><!-- end app-page-content -->
+      </div><!-- end app-main -->
+    </div><!-- end app-layout -->
+
+    <!-- BOTTOM NAV (5 items with SVG icons) -->
+    <div class="app-bottom-nav">
+      <a href="dashboard.html" class="app-bnav-item active" id="mob-tab-personal">
+        <svg width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="timetable.html" class="app-bnav-item">
+        <svg width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Timetable</span>
+      </a>
+      <a href="study.html" class="app-bnav-item">
+        <svg width="22" height="22" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <span>Study Plan</span>
+      </a>
+      <a href="predictor.html" class="app-bnav-item">
+        <svg width="22" height="22" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Analytics</span>
+      </a>
+      <a href="profile.html" class="app-bnav-item">
+        <svg width="22" height="22" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Profile</span>
+      </a>
     </div>
 
-    <!-- ── MOBILE BOTTOM NAV ── -->
-    <nav class="mobile-nav">
-      <div class="mobile-nav-inner">
-        <button class="mobile-nav-btn active" id="mob-tab-personal">
-          <span class="mobile-nav-label">Dashboard</span>
-          <div class="mobile-nav-dot"></div>
-        </button>
-        <a href="timetable.html" class="mobile-nav-btn">
-          <span class="mobile-nav-label">Timetable</span>
-          <div class="mobile-nav-dot"></div>
-        </a>
-        <a href="profile.html" class="mobile-nav-btn">
-          <span class="mobile-nav-label">Profile</span>
-          <div class="mobile-nav-dot"></div>
-        </a>
-      </div>
-    </nav>
+    <script>
+      function openSidebar() {
+        document.getElementById('appSidebar').classList.add('open');
+        document.getElementById('sidebarOverlay').classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeSidebar() {
+        document.getElementById('appSidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('active');
+        document.body.style.overflow = '';
+      }
+      window.addEventListener('scroll', function() {
+        var tb = document.getElementById('appTopbar');
+        if (tb) tb.classList.toggle('scrolled', window.scrollY > 8);
+      }, { passive: true });
+      // Sync sidebar avatar initial from navUserName
+      (function() {
+        var nameEl = document.getElementById('navUserName');
+        if (!nameEl) return;
+        function syncAvatar() {
+          var n = nameEl.textContent.trim();
+          var av = document.getElementById('sidebarAvatar');
+          if (av && n) av.textContent = n.charAt(0).toUpperCase();
+        }
+        new MutationObserver(syncAvatar).observe(nameEl, {childList:true,characterData:true,subtree:true});
+      })();
+    </script>
 
     <script src="courses.js?v=step1-deptfix"></script>
     <script src="Coursecontent.JS?v=step1-deptfix"></script>
     <script type="module" src="js/pages/dashboard.js?v=goal-5"></script>
-  </body>
+  <script type="module" src="js/feedback.js"></script>
+</body>
 </html>

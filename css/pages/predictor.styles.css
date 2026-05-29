@@ -1269,3 +1269,76 @@ hr.divider {
   background: var(--green-bg);
   color: var(--green);
 }
+
+/* ── ADD ELECTIVE ROW ── */
+.add-elective-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+  flex-wrap: wrap;
+}
+.elective-code-input {
+  flex: 1;
+  min-width: 130px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--fb);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  transition: border-color .15s;
+}
+.elective-code-input:focus {
+  outline: none;
+  border-color: var(--green);
+}
+.elective-units-input {
+  width: 60px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--fb);
+  font-size: 12px;
+  text-align: center;
+  transition: border-color .15s;
+}
+.elective-units-input:focus {
+  outline: none;
+  border-color: var(--green);
+}
+.elective-add-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--green);
+  background: var(--green-bg);
+  color: var(--green);
+  font-family: var(--fb);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.elective-add-btn:hover {
+  background: var(--green);
+  color: #111410;
+}
+.elective-badge {
+  font-size: 10px;
+  color: var(--green-d);
+  background: var(--green-bg);
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-weight: 700;
+  letter-spacing: .3px;
+}
+[data-theme="dark"] .elective-badge { color: var(--green); }
+.elective-row { background: color-mix(in srgb, var(--green-bg) 40%, transparent); }
