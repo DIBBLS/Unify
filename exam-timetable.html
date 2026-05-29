@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>Unify — Exam Timetable</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/responsive.css">
+<script src="js/theme.js"></script>
+<style>
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); }
+
+  .page-header {
+    background: linear-gradient(135deg, #0a0a0a 0%, #0f2318 100%);
+    border-left: 4px solid #4ade80;
+    color: #f5f4f0;
+    padding: 32px 48px;
+  }
+
+  .page-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #4ade80;
+    margin-bottom: 6px;
+  }
+
+  .page-title {
+    font-family: var(--font-display);
+    font-size: clamp(24px, 3vw, 36px);
+    font-weight: 900;
+    letter-spacing: -1px;
+    color: #4ade80;
+    margin-bottom: 4px;
+  }
+
+  .page-sub {
+    font-size: 13px;
+    color: #aaa;
+  }
+
+  .sem-tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 48px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky;
+    top: 60px;
+    z-index: 90;
+  }
+
+  .sem-tab {
+    padding: 14px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text3);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-family: var(--font-body);
+    transition: all 0.15s;
+  }
+
+  .sem-tab:hover { color: var(--text); }
+  .sem-tab.active { color: #4ade80; border-bottom-color: #4ade80; }
+
+  .content-body {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 32px 48px 80px;
+  }
+
+  .timetable-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .meta-info {
+    font-size: 13px;
+    color: var(--text2);
+  }
+
+  .meta-session {
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .last-updated {
+    font-size: 12px;
+    color: var(--text3);
+  }
+
+  .download-btn {
+    padding: 8px 18px;
+    background: rgba(74,222,128,0.1);
+    color: #4ade80;
+    border: 1px solid rgba(74,222,128,0.3);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-body);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+  }
+  .download-btn:hover { background: rgba(74,222,128,0.2); }
+
+  .timetable-display {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .timetable-image {
+    width: 100%;
+    display: block;
+    touch-action: pan-x pan-y pinch-zoom;
+  }
+
+  .timetable-pdf-frame {
+    width: 100%;
+    height: 70vh;
+    border: none;
+    display: block;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 64px 24px;
+    color: var(--text3);
+  }
+
+  .empty-icon { font-size: 40px; margin-bottom: 14px; opacity: 0.3; }
+  .empty-title { font-size: 16px; font-weight: 700; color: var(--text2); margin-bottom: 8px; }
+  .empty-sub { font-size: 13px; line-height: 1.7; }
+
+  .loading-state {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--text3);
+    font-size: 14px;
+  }
+
+  @media (max-width: 768px) {
+    .page-header { padding: 24px 20px; }
+    .sem-tabs { padding: 0 16px; }
+    .content-body { padding: 24px 16px 80px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="dashboard.html" class="nav-logo">← Unify</a>
+  <div class="nav-right">
+    <button class="nav-btn" onclick="toggleTheme()" id="themeToggle">Dark</button>
+    <a href="dashboard.html" class="nav-btn">Dashboard</a>
+  </div>
+</nav>
+
+<nav class="mobile-nav">
+  <div class="mobile-nav-inner">
+    <a href="dashboard.html" class="mobile-nav-btn">
+      <span class="mobile-nav-label">Dashboard</span>
+      <div class="mobile-nav-dot"></div>
+    </a>
+    <a href="timetable.html" class="mobile-nav-btn">
+      <span class="mobile-nav-label">Timetable</span>
+      <div class="mobile-nav-dot"></div>
+    </a>
+    <a href="profile.html" class="mobile-nav-btn">
+      <span class="mobile-nav-label">Profile</span>
+      <div class="mobile-nav-dot"></div>
+    </a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="page-eyebrow">Examinations</div>
+  <div class="page-title">Exam Timetable</div>
+  <div class="page-sub" id="headerSub">Loading your department’s exam schedule…</div>
+</div>
+
+<div class="sem-tabs">
+  <button class="sem-tab active" id="tab-first" onclick="switchSem('First Semester')">First Semester</button>
+  <button class="sem-tab" id="tab-second" onclick="switchSem('Second Semester')">Second Semester</button>
+</div>
+
+<div class="content-body">
+  <div id="timetableArea">
+    <div class="loading-state">Loading exam timetable…</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { auth, db } from './js/firebase-config.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+let userProfile = {};
+let currentSem = 'First Semester';
+let _docData = {};
+
+onAuthStateChanged(auth, async user => {
+  if (!user) { window.location.href = 'Auth.html'; return; }
+
+  try {
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (snap.exists()) userProfile = snap.data();
+  } catch(e) { console.error(e); }
+
+  const dept = userProfile.department || userProfile.assignedDepartment || '';
+  const level = userProfile.level || userProfile.assignedLevel || '';
+
+  document.getElementById('headerSub').textContent =
+    dept && level ? `${dept} · ${level}` : 'Set your department in Profile to see your timetable';
+
+  if (!dept || !level) {
+    renderEmpty('Profile incomplete', 'Set your department and level in your profile to see the exam timetable.');
+    return;
+  }
+
+  await loadTimetable(dept, level, currentSem);
+});
+
+window.switchSem = async function(sem) {
+  currentSem = sem;
+  document.getElementById('tab-first').classList.toggle('active', sem === 'First Semester');
+  document.getElementById('tab-second').classList.toggle('active', sem === 'Second Semester');
+
+  const dept = userProfile.department || userProfile.assignedDepartment || '';
+  const level = userProfile.level || userProfile.assignedLevel || '';
+  if (dept && level) await loadTimetable(dept, level, sem);
+};
+
+async function loadTimetable(dept, level, sem) {
+  const area = document.getElementById('timetableArea');
+  area.innerHTML = '<div class="loading-state">Loading…</div>';
+
+  const docId = `${dept}_${level}_${sem}`.replace(/\s+/g, '_');
+  try {
+    const snap = await getDoc(doc(db, 'examTimetables', docId));
+    if (!snap.exists()) {
+      renderEmpty('No timetable uploaded yet', `The exam timetable for ${dept} · ${level} · ${sem} hasn’t been uploaded yet. Check back soon.`);
+      return;
+    }
+    const data = snap.data();
+    renderTimetable(data);
+  } catch(e) {
+    console.error(e);
+    renderEmpty('Failed to load', 'Check your connection and try refreshing.');
+  }
+}
+
+function renderTimetable(data) {
+  const area = document.getElementById('timetableArea');
+  const updatedAt = data.updatedAt?.toDate?.();
+  const updatedStr = updatedAt
+    ? updatedAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) +
+      ' at ' + updatedAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+    : 'Unknown';
+
+  const isImage = data.fileType && (data.fileType.includes('png') || data.fileType.includes('jpg') || data.fileType.includes('jpeg') || data.fileType.includes('image'));
+  const isPdf = data.fileType && data.fileType.includes('pdf');
+
+  let displayHtml = '';
+  if (isImage) {
+    displayHtml = `<div class="timetable-display"><img class="timetable-image" src="${data.fileDataUrl}" alt="Exam Timetable" /></div>`;
+  } else if (isPdf) {
+    displayHtml = `<div class="timetable-display"><iframe class="timetable-pdf-frame" src="${data.fileDataUrl}" title="Exam Timetable PDF"></iframe></div>`;
+  } else if (data.fileDataUrl) {
+    displayHtml = `<div class="timetable-display"><iframe class="timetable-pdf-frame" src="${data.fileDataUrl}" title="Exam Timetable"></iframe></div>`;
+  } else {
+    displayHtml = '<div class="loading-state">Timetable data unavailable.</div>';
+  }
+
+  area.innerHTML = `
+    <div class="timetable-meta">
+      <div>
+        <div class="meta-info">Session: <span class="meta-session">${escHtml(data.session || '—')}</span> &middot; ${escHtml(data.semester || '')}</div>
+        <div class="last-updated">Last updated: ${updatedStr}</div>
+      </div>
+      <a class="download-btn" href="${data.fileDataUrl}" download="exam-timetable" target="_blank" rel="noopener noreferrer">
+        ↓ Download
+      </a>
+    </div>
+    ${displayHtml}
+  `;
+}
+
+function renderEmpty(title, sub) {
+  document.getElementById('timetableArea').innerHTML = `
+    <div class="empty-state">
+      <div class="empty-icon">📅</div>
+      <div class="empty-title">${escHtml(title)}</div>
+      <div class="empty-sub">${escHtml(sub)}</div>
+    </div>`;
+}
+
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>

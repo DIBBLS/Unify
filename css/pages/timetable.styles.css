@@ -97,20 +97,21 @@ nav {
 
 /* ── PAGE HEADER ── */
 .page-header {
-  background: var(--invert-bg); color: var(--invert-text);
+  background: linear-gradient(135deg, #0a0a0a 0%, #0f2318 100%);
+  border-left: 4px solid #4ade80;
+  color: var(--invert-text);
   padding: 32px 48px; display: flex; align-items: flex-end;
   justify-content: space-between; gap: 24px; flex-wrap: wrap;
-  transition: background 0.25s;
 }
 .page-header-left {}
-.page-title { font-family: var(--font-display); font-size: clamp(24px, 2.5vw, 36px); font-weight: 900; letter-spacing: -1px; margin-bottom: 6px; }
+.page-title { font-family: var(--font-display); font-size: clamp(24px, 2.5vw, 36px); font-weight: 900; letter-spacing: -1px; margin-bottom: 6px; color: #4ade80; }
 .page-sub { font-size: 13px; color: var(--invert-sub); }
 .today-date { font-size: 13px; color: var(--invert-sub); text-align: right; }
 .today-day { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--invert-text); letter-spacing: -0.5px; }
 
 /* ── TODAY BANNER ── */
 .today-banner {
-  background: var(--yellow-bg); border-bottom: 1px solid var(--yellow-border);
+  background: rgba(74,222,128,0.08); border-bottom: 1px solid rgba(74,222,128,0.25);
   padding: 12px 48px; display: flex; align-items: center; gap: 12px;
   font-size: 13px; color: var(--text2);
 }
@@ -141,12 +142,12 @@ nav {
   white-space: nowrap; min-width: 80px;
 }
 .day-tab:hover { color: var(--text); }
-.day-tab.active { color: var(--text); border-bottom-color: var(--text); }
+.day-tab.active { color: #4ade80; border-bottom-color: #4ade80; }
 .day-tab.today { color: var(--text); }
 .day-tab-name { font-size: 13px; font-weight: 600; }
 .day-tab-date { font-size: 10px; color: var(--text3); }
-.day-tab.today .day-tab-date { color: var(--yellow); }
-.day-tab-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--yellow); margin-top: 2px; opacity: 0; }
+.day-tab.today .day-tab-date { color: #4ade80; }
+.day-tab-dot { width: 5px; height: 5px; border-radius: 50%; background: #4ade80; margin-top: 2px; opacity: 0; }
 .day-tab.today .day-tab-dot { opacity: 1; }
 
 /* ── TIMETABLE BODY ── */
