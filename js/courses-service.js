@@ -25,8 +25,7 @@
  *   match /courses/{code} {
  *     allow read: if request.auth != null;
  *     allow write: if request.auth != null
- *       && (request.auth.token.email == "olotuchjosh@gmail.com"
- *           || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true);
+ *       && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
  *   }
  */
 

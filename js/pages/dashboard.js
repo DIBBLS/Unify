@@ -402,35 +402,36 @@ async function autoLoadCourses(dept, level) {
 }
 
 // ── SAVE ──────────────────────────────────────────────
-// ── FIX: save CGPA as a top-level field so the hero can read it on next load ──
-window.saveUserData = function () {
+async function _doSave() {
+  if (!currentUser) return;
+  try {
+    let pts = 0, units = 0;
+    window.courses.forEach((c) => {
+      const p = gradeToPoint(c.grade);
+      if (p !== null && c.units) {
+        pts += p * Number(c.units);
+        units += Number(c.units);
+      }
+    });
+    const cgpa = units > 0 ? parseFloat((pts / units).toFixed(2)) : 0;
+    await setDoc(
+      doc(db, "users", currentUser.uid),
+      { courses: window.courses, aspirations, weekProgress, cgpa },
+      { merge: true },
+    );
+    const ind = document.getElementById("saveIndicator");
+    if (ind) { ind.classList.add("visible"); setTimeout(() => ind.classList.remove("visible"), 2000); }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+// immediate=true → skip debounce (used for add/remove so navigating away doesn't lose data)
+window.saveUserData = function (immediate = false) {
   if (!currentUser) return;
   clearTimeout(saveTimeout);
-  saveTimeout = setTimeout(async () => {
-    try {
-      // Calculate CGPA to persist alongside the courses array
-      let pts = 0, units = 0;
-      window.courses.forEach((c) => {
-        const p = gradeToPoint(c.grade);
-        if (p !== null && c.units) {
-          pts += p * Number(c.units);
-          units += Number(c.units);
-        }
-      });
-      const cgpa = units > 0 ? parseFloat((pts / units).toFixed(2)) : 0;
-
-      await setDoc(
-        doc(db, "users", currentUser.uid),
-        { courses: window.courses, aspirations, weekProgress, cgpa },
-        { merge: true },
-      );
-      const ind = document.getElementById("saveIndicator");
-      ind.classList.add("visible");
-      setTimeout(() => ind.classList.remove("visible"), 2000);
-    } catch (e) {
-      console.error(e);
-    }
-  }, 800);
+  if (immediate) { _doSave(); }
+  else { saveTimeout = setTimeout(_doSave, 600); }
 };
 
 // ── STATS ─────────────────────────────────────────────
@@ -828,7 +829,7 @@ window.switchSemester = async function () {
   activeCourseId = null;
   closeResourcePanel();
   displayCourses();
-  saveUserData();
+  saveUserData(true);
   renderPlanner();
 };
 
@@ -845,7 +846,7 @@ window.addCourse = function () {
   }
   window.courses.push({ course: name, grade: grade || "-", units });
   displayCourses();
-  saveUserData();
+  saveUserData(true);
   ["courseInput", "gradeInput", "unitsInput"].forEach(
     (id) => (document.getElementById(id).value = ""),
   );
@@ -879,7 +880,7 @@ window.addCourseInline = function () {
   if (!code) return;
   window.courses.push({ course: code, grade: "-", units });
   displayCourses();
-  saveUserData();
+  saveUserData(true);
   document.getElementById("addCourseCode").value = "";
   document.getElementById("addCourseUnits").value = "";
   document.getElementById("addCourseRow").classList.remove("open");
@@ -964,7 +965,7 @@ window.addPickerCourse = function (code, units) {
   }
   window.courses.push({ course: code, grade: "-", units: units || 3 });
   displayCourses();
-  saveUserData();
+  saveUserData(true);
   loadCoursePickerList();
   if (window.courses.length === 1) showMilestone("📚 First course added!");
   else showMilestone(`${code} added.`);
@@ -980,7 +981,7 @@ window.removeCourse = function (event, idx) {
     closeResourcePanel();
   } else if (activeCourseId > idx) activeCourseId--;
   displayCourses();
-  saveUserData();
+  saveUserData(true);
   showMilestone(`${name} removed from your list.`);
 };
 

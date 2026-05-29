@@ -1,0 +1,539 @@
+/* ================================================
+   Profile V3 — matches reference design
+   Loaded after profile.styles.css and dashboard-v2.styles.css
+================================================ */
+
+.pv3-page {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 769px) { .pv3-page { padding-bottom: 60px; } }
+
+/* ── HERO ── */
+.pv3-hero {
+  position: relative;
+  padding: 32px 40px 28px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 28px;
+  overflow: hidden;
+  min-height: 200px;
+  background: var(--bg);
+}
+@media (max-width: 768px) {
+  .pv3-hero {
+    padding: 20px 16px;
+    flex-direction: column;
+    gap: 16px;
+    min-height: auto;
+  }
+}
+
+.pv3-hero-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  flex: 1;
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+}
+
+.pv3-avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 3px solid var(--border);
+  box-shadow: 0 2px 12px rgba(0,0,0,.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 34px;
+  color: var(--green-d);
+  flex-shrink: 0;
+  user-select: none;
+}
+[data-theme="dark"] .pv3-avatar { color: var(--green); }
+
+.pv3-hero-info { flex: 1; min-width: 0; }
+
+.pv3-name {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 46px);
+  font-weight: 900;
+  letter-spacing: -1.5px;
+  color: var(--text);
+  line-height: 1.05;
+  margin-bottom: 8px;
+}
+.pv3-dot { color: var(--green-d); }
+[data-theme="dark"] .pv3-dot { color: var(--green); }
+
+.pv3-tagline {
+  font-size: 15px;
+  color: var(--text2);
+  font-style: italic;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+.pv3-tagline em { color: var(--green-d); font-style: italic; }
+[data-theme="dark"] .pv3-tagline em { color: var(--green); }
+
+.pv3-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.pv3-meta .ptag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: var(--text2);
+  font-weight: 500;
+}
+
+.pv3-edit-btn {
+  padding: 8px 18px;
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text2);
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all .15s;
+}
+.pv3-edit-btn:hover { border-color: var(--text); color: var(--text); }
+
+/* Decorative background letter */
+.pv3-bg-deco {
+  flex-shrink: 0;
+  width: 160px;
+  height: 160px;
+  border-radius: 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+@media (max-width: 900px) { .pv3-bg-deco { display: none; } }
+
+.pv3-deco-letter {
+  font-family: var(--font-display);
+  font-size: 120px;
+  font-weight: 900;
+  color: var(--border);
+  line-height: 1;
+  letter-spacing: -4px;
+  user-select: none;
+}
+[data-theme="dark"] .pv3-deco-letter { color: var(--surface2); opacity: 0.6; }
+
+/* Academic Snapshot card */
+.pv3-snapshot {
+  flex-shrink: 0;
+  width: 220px;
+  background: #111410;
+  border-radius: 16px;
+  padding: 18px 20px;
+  color: #f0efe9;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 4px 20px rgba(0,0,0,.2);
+}
+[data-theme="dark"] .pv3-snapshot { background: #0d0f0c; box-shadow: 0 4px 20px rgba(0,0,0,.5); }
+@media (max-width: 768px) { .pv3-snapshot { width: 100%; } }
+
+.pv3-snapshot-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4ade80;
+  margin-bottom: 16px;
+  letter-spacing: 0.3px;
+}
+.pv3-snapshot-header svg { stroke: #4ade80; }
+
+.pv3-snapshot-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.pv3-snap-item {}
+.pv3-snap-val {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 900;
+  color: #f0efe9;
+  letter-spacing: -0.5px;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.pv3-snap-lbl {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+  font-weight: 500;
+}
+
+/* ── TAB BAR ── */
+.pv3-tabbar {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  background: var(--bg);
+  position: sticky;
+  top: 57px;
+  z-index: 50;
+}
+@media (max-width: 768px) { .pv3-tabbar { padding: 0 16px; top: 50px; } }
+
+.pv3-tab {
+  padding: 14px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text3);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all .15s;
+  white-space: nowrap;
+}
+.pv3-tab:hover { color: var(--text2); }
+.pv3-tab.active {
+  color: var(--text);
+  border-bottom-color: var(--text);
+  font-weight: 600;
+}
+
+/* ── PANES ── */
+.pv3-pane { display: none; }
+.pv3-pane.active { display: block; }
+
+/* ── OVERVIEW GRID ── */
+.pv3-overview-grid {
+  display: grid;
+  grid-template-columns: 260px 1fr 280px;
+  gap: 20px;
+  padding: 24px 40px;
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .pv3-overview-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .pv3-col-left { grid-column: 1 / -1; }
+}
+@media (max-width: 768px) {
+  .pv3-overview-grid {
+    grid-template-columns: 1fr;
+    padding: 16px;
+    gap: 14px;
+  }
+}
+
+/* ── CARD BASE ── */
+.pv3-about-card,
+.pv3-focus-card,
+.pv3-achieve-card,
+.pv3-sstats-card,
+.pv3-motivate-card,
+.pv3-quote-banner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+}
+.pv3-col-left > * + * { margin-top: 14px; }
+.pv3-col-right > * + * { margin-top: 14px; }
+
+.pv3-card-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+.pv3-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.pv3-view-all {
+  font-size: 12px;
+  color: var(--text3);
+  text-decoration: none;
+  transition: color .15s;
+}
+.pv3-view-all:hover { color: var(--text); }
+.pv3-period {
+  font-size: 11px;
+  color: var(--text3);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 10px;
+}
+
+/* ── ABOUT CARD ── */
+.pv3-bio {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+.pv3-about-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pv3-about-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text2);
+}
+.pv3-about-icon { font-size: 14px; flex-shrink: 0; }
+.pv3-about-val {
+  margin-left: auto;
+  font-weight: 600;
+  color: var(--text);
+  font-size: 12px;
+}
+
+/* ── MOTIVATIONAL CARD ── */
+.pv3-motivate-card {
+  background: #151a12 !important;
+  border-color: rgba(74,222,128,.2) !important;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+}
+[data-theme="dark"] .pv3-motivate-card { background: #1a2116 !important; }
+
+.pv3-motivate-letter {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 900;
+  color: rgba(74,222,128,.3);
+  line-height: 1;
+  flex-shrink: 0;
+  user-select: none;
+}
+.pv3-motivate-text {
+  font-size: 13px;
+  color: #a0b89a;
+  line-height: 1.5;
+}
+.pv3-motivate-text strong { color: #f0efe9; }
+
+/* ── QUOTE BANNER ── */
+.pv3-quote-banner {
+  background: #1a2116 !important;
+  border-color: rgba(74,222,128,.15) !important;
+  padding: 20px 20px 16px;
+}
+[data-theme="light"] .pv3-quote-banner { background: #151a12 !important; }
+
+.pv3-quote-mark {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--green-d);
+  line-height: 0.8;
+  display: block;
+  margin-bottom: 6px;
+}
+[data-theme="dark"] .pv3-quote-mark { color: var(--green); }
+
+.pv3-quote-text {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  font-style: italic;
+  color: #f0efe9;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.pv3-quote-line {
+  width: 32px;
+  height: 2px;
+  background: var(--green-d);
+  border-radius: 1px;
+}
+[data-theme="dark"] .pv3-quote-line { background: var(--green); }
+
+/* ── CURRENT FOCUS ── */
+.pv3-focus-card { height: 100%; }
+
+.pv3-focus-row {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.pv3-focus-row:last-child { border-bottom: none; }
+
+.pv3-focus-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.pv3-focus-code {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.2px;
+}
+.pv3-focus-pct {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+}
+.pv3-focus-track {
+  height: 5px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+.pv3-focus-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width .5s ease;
+}
+.pv3-focus-meta {
+  font-size: 11px;
+  color: var(--text3);
+}
+.pv3-focus-footer {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--green-d);
+  font-weight: 500;
+  cursor: pointer;
+}
+[data-theme="dark"] .pv3-focus-footer { color: var(--green); }
+
+/* ── ACHIEVEMENTS ── */
+.pv3-badges {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.pv3-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 12px 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  gap: 4px;
+  transition: border-color .15s;
+}
+.pv3-badge:hover { border-color: var(--text3); }
+.pv3-badge-earned {
+  border-color: rgba(74,222,128,.3);
+  background: rgba(74,222,128,.06);
+}
+.pv3-badge-locked { opacity: .5; }
+
+.pv3-badge-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin-bottom: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+.pv3-badge-earned .pv3-badge-icon {
+  background: #111410;
+  border-color: rgba(74,222,128,.3);
+}
+.pv3-badge-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+}
+.pv3-badge-sub {
+  font-size: 10px;
+  color: var(--text3);
+}
+
+/* ── STUDY STATS ── */
+.pv3-sstat-row {
+  margin-bottom: 14px;
+}
+.pv3-sstat-row:last-child { margin-bottom: 0; }
+
+.pv3-sstat-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.pv3-sstat-label { font-size: 12px; color: var(--text2); }
+.pv3-sstat-val { font-size: 12px; font-weight: 600; color: var(--text); }
+
+.pv3-sstat-track {
+  height: 5px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.pv3-sstat-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 3px;
+  transition: width .6s ease;
+}
+
+/* ── EMPTY & COMING SOON ── */
+.pv3-empty {
+  font-size: 13px;
+  color: var(--text3);
+  padding: 16px 0;
+  line-height: 1.6;
+}
+.pv3-coming-soon {
+  text-align: center;
+  padding: 60px 24px;
+  color: var(--text3);
+}
+.pv3-cs-icon { font-size: 32px; margin-bottom: 12px; opacity: .4; }
+.pv3-cs-text { font-size: 14px; line-height: 1.6; }

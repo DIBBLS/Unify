@@ -300,8 +300,15 @@ nav {
 .loading-sub { font-size: 13px; color: var(--text3); }
 
 @media (max-width: 768px) {
-  .page-header { padding: 24px 20px; }
-  .today-banner { padding: 12px 20px; }
-  .day-tabs-wrap { padding: 0 16px; }
-  .timetable-body { padding: 20px 16px; }
+  .page-header { padding: 18px 16px; gap: 12px; }
+  .page-title { font-size: 22px; }
+  .today-banner { padding: 10px 16px; font-size: 12px; }
+  .day-tabs-wrap { padding: 0 12px; }
+  .day-tab { padding: 10px 12px; font-size: 12px; }
+  .timetable-body { padding: 14px 12px; }
+  .class-card { padding: 12px; gap: 10px; }
+  .class-code { font-size: 14px; }
+  .class-title { font-size: 12px; }
+  .class-meta { gap: 6px; font-size: 11px; }
+  .add-class-section { margin-top: 16px; }
 }

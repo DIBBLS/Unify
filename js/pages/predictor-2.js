@@ -125,6 +125,7 @@ let S = {
   dept: '', lastIdx: -1,
   states: {},         // { 'semKey': { code: 'graded'|'pending'|'missing' } }
   removedCourses: {}, // { 'semKey': { code: true } }
+  addedCourses: {},   // { 'semKey': [{ code, units }] } — user-added electives
   cgpa: null, targetCgpa: null, targetCls: '',
   why: '', mode: '', neededAvg: null,
 };
@@ -159,6 +160,13 @@ function calcUnits() {
       else if (st === 'pending') p += u;
       else m += u;
     }
+    for (const { code, units: u } of (S.addedCourses[sem] || [])) {
+      const st = (S.states[sem] || {})[code] || 'graded';
+      t += u;
+      if (st === 'graded')  g += u;
+      else if (st === 'pending') p += u;
+      else m += u;
+    }
   }
   return { g, p, m, t };
 }
@@ -179,7 +187,7 @@ window.pickDept = function(btn) {
   document.querySelectorAll('.dept-btn').forEach(b => b.classList.remove('on'));
   btn.classList.add('on');
   const dept = btn.dataset.dept;
-  S.dept = dept; S.states = {}; S.removedCourses = {}; S.lastIdx = -1;
+  S.dept = dept; S.states = {}; S.removedCourses = {}; S.addedCourses = {}; S.lastIdx = -1;
   document.getElementById('unitBar').style.display = 'none';
   document.getElementById('accordions').innerHTML = '';
   document.getElementById('bottomSection').style.display = 'none';
@@ -207,6 +215,7 @@ window.pickSem = function(btn) {
   S.lastIdx = idx;
   S.states = {};
   S.removedCourses = {};
+  S.addedCourses = {};
   ensureStates(S.dept, idx, 'graded'); // default all to graded — results are out
   document.getElementById('unitBar').style.display = 'flex';
   refreshUnitBar();
@@ -229,7 +238,9 @@ function buildAccordions() {
     const removed  = S.removedCourses[sem] || {};
     const active   = allCourses.filter(c => !removed[c]);
     const inactive = allCourses.filter(c => removed[c]);
-    const semUnits = active.reduce((s, c) => s + unitOf(c), 0);
+    const added    = S.addedCourses[sem] || [];
+    const semUnits = active.reduce((s, c) => s + unitOf(c), 0)
+                   + added.reduce((s, a) => s + a.units, 0);
 
     const section = document.createElement('div');
     section.className = 'acc-section';
@@ -263,6 +274,23 @@ function buildAccordions() {
       body.appendChild(row);
     }
 
+    // Custom electives added by the user
+    for (const { code, units: u } of added) {
+      const st = (S.states[sem] || {})[code] || 'graded';
+      const row = document.createElement('div');
+      row.className = 'course-row elective-row';
+      row.innerHTML = `
+        <span class="course-code">${code}</span>
+        <span class="course-u elective-badge">${u}u · elective</span>
+        <div class="state-btns">
+          <button class="st-btn ${st==='graded'?'on':''}"  data-sem="${sem}" data-code="${code}" data-st="graded"  onclick="setCS(this)">✓ <span class="st-text">Graded</span></button>
+          <button class="st-btn ${st==='pending'?'on':''}" data-sem="${sem}" data-code="${code}" data-st="pending" onclick="setCS(this)">⏳ <span class="st-text">Pending</span></button>
+          <button class="st-btn ${st==='missing'?'on':''}" data-sem="${sem}" data-code="${code}" data-st="missing" onclick="setCS(this)">✗ <span class="st-text">Missing</span></button>
+        </div>
+        <button class="rm-course-btn" title="Remove elective" onclick="removeAddedCS('${sem}','${code}')">×</button>`;
+      body.appendChild(row);
+    }
+
     if (inactive.length > 0) {
       const restoreSection = document.createElement('div');
       restoreSection.className = 'restore-section';
@@ -277,6 +305,15 @@ function buildAccordions() {
       });
       body.appendChild(restoreSection);
     }
+
+    // Add-elective input row
+    const addRow = document.createElement('div');
+    addRow.className = 'add-elective-row';
+    addRow.innerHTML = `
+      <input class="elective-code-input" type="text" placeholder="Course code e.g. GNS 301" maxlength="12" />
+      <input class="elective-units-input" type="number" placeholder="Units" min="1" max="6" value="3" />
+      <button class="elective-add-btn" onclick="addCS('${sem}',this)">+ Add elective</button>`;
+    body.appendChild(addRow);
 
     hd.addEventListener('click', () => {
       const open = hd.classList.toggle('open');
@@ -310,6 +347,41 @@ window.restoreCS = function(sem, code) {
   if (S.removedCourses[sem]) delete S.removedCourses[sem][code];
   if (!S.states[sem]) S.states[sem] = {};
   S.states[sem][code] = 'graded';
+  buildAccordions();
+  refreshUnitBar();
+};
+
+window.addCS = function(sem, btn) {
+  const row = btn.closest('.add-elective-row');
+  const codeEl  = row.querySelector('.elective-code-input');
+  const unitsEl = row.querySelector('.elective-units-input');
+  const code  = codeEl.value.trim().toUpperCase();
+  const units = Math.max(1, Math.min(6, parseInt(unitsEl.value) || 3));
+  if (!code) { codeEl.focus(); return; }
+
+  const allStd = (COURSES[S.dept] || {})[sem] || [];
+  const alreadyStd = allStd.includes(code);
+  const alreadyAdded = (S.addedCourses[sem] || []).some(a => a.code === code);
+  if (alreadyStd || alreadyAdded) {
+    codeEl.value = '';
+    codeEl.placeholder = `${code} already listed`;
+    setTimeout(() => { codeEl.placeholder = 'Course code e.g. GNS 301'; }, 2000);
+    return;
+  }
+
+  if (!S.addedCourses[sem]) S.addedCourses[sem] = [];
+  S.addedCourses[sem].push({ code, units });
+  if (!S.states[sem]) S.states[sem] = {};
+  S.states[sem][code] = 'graded';
+  buildAccordions();
+  refreshUnitBar();
+};
+
+window.removeAddedCS = function(sem, code) {
+  if (S.addedCourses[sem]) {
+    S.addedCourses[sem] = S.addedCourses[sem].filter(a => a.code !== code);
+  }
+  if (S.states[sem]) delete S.states[sem][code];
   buildAccordions();
   refreshUnitBar();
 };
@@ -623,6 +695,7 @@ window.savePlan = async function() {
         neededAvg:      S.neededAvg,
         courseStates:   S.states,
         removedCourses: S.removedCourses,
+        addedCourses:   S.addedCourses,
         updatedAt:      serverTimestamp(),
       }
     }, { merge: true });
@@ -674,7 +747,15 @@ async function loadSaved() {
         const semBtn = document.querySelector(`.sem-chip[data-idx="${idx}"]`);
         if (semBtn) pickSem(semBtn);
         if (gp.removedCourses && typeof gp.removedCourses === 'object') S.removedCourses = gp.removedCourses;
+        if (gp.addedCourses  && typeof gp.addedCourses  === 'object') S.addedCourses  = gp.addedCourses;
         if (gp.courseStates && typeof gp.courseStates === 'object') S.states = gp.courseStates;
+        // Ensure added electives have a default state if missing
+        for (const [sem, list] of Object.entries(S.addedCourses)) {
+          for (const { code } of list) {
+            if (!S.states[sem]) S.states[sem] = {};
+            if (!S.states[sem][code]) S.states[sem][code] = 'graded';
+          }
+        }
         refreshUnitBar();
         buildAccordions();
       }
