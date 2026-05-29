@@ -1,4 +1,4 @@
-const CACHE = 'unify-v1';
+const CACHE = 'unify-v3';
 
 const SHELL = [
   './css/variables.css',
