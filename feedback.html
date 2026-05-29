@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unify — Feedback</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/responsive.css">
+<script src="js/theme.js"></script>
+<style>
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); }
+
+  .page-wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  .page-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #4ade80;
+    margin-bottom: 8px;
+  }
+
+  .page-title {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 900;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    margin-bottom: 10px;
+  }
+
+  .page-sub {
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.6;
+    margin-bottom: 36px;
+  }
+
+  .feedback-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  .form-input,
+  .form-select,
+  .form-textarea {
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .form-input:focus,
+  .form-select:focus,
+  .form-textarea:focus {
+    border-color: #4ade80;
+  }
+
+  .form-textarea {
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.6;
+  }
+
+  .form-hint {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 2px;
+  }
+
+  .submit-btn {
+    padding: 13px 28px;
+    background: #4ade80;
+    color: #0a0a0a;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: opacity 0.15s;
+    align-self: flex-start;
+  }
+
+  .submit-btn:hover { opacity: 0.85; }
+  .submit-btn:disabled { opacity: 0.5; cursor: default; }
+
+  .success-box {
+    display: none;
+    background: rgba(74,222,128,0.08);
+    border: 1px solid rgba(74,222,128,0.3);
+    border-radius: 14px;
+    padding: 28px;
+    text-align: center;
+  }
+
+  .success-icon { font-size: 36px; margin-bottom: 12px; }
+  .success-title { font-family: var(--font-display); font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .success-sub { font-size: 14px; color: var(--text2); line-height: 1.6; }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text2);
+    text-decoration: none;
+    margin-top: 16px;
+    transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--text); }
+
+  @media (max-width: 600px) {
+    .page-wrap { padding: 32px 16px 80px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="dashboard.html" class="nav-logo">← Unify</a>
+  <div class="nav-right">
+    <button class="nav-btn" onclick="toggleTheme()" id="themeToggle">Dark</button>
+    <a href="dashboard.html" class="nav-btn">Dashboard</a>
+  </div>
+</nav>
+
+<nav class="mobile-nav">
+  <div class="mobile-nav-inner">
+    <a href="dashboard.html" class="mobile-nav-btn">
+      <span class="mobile-nav-label">Dashboard</span>
+      <div class="mobile-nav-dot"></div>
+    </a>
+    <a href="timetable.html" class="mobile-nav-btn">
+      <span class="mobile-nav-label">Timetable</span>
+      <div class="mobile-nav-dot"></div>
+    </a>
+    <a href="profile.html" class="mobile-nav-btn">
+      <span class="mobile-nav-label">Profile</span>
+      <div class="mobile-nav-dot"></div>
+    </a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+  <div class="page-eyebrow">Feedback</div>
+  <div class="page-title">Tell us what you think</div>
+  <div class="page-sub">Report bugs, suggest features, or flag anything that feels off. Every submission goes directly to the team.</div>
+
+  <div class="feedback-form" id="feedbackForm">
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <select class="form-select" id="fbCategory">
+        <option value="">Select a category…</option>
+        <option value="Bug Report">Bug Report</option>
+        <option value="Feature Request">Feature Request</option>
+        <option value="UI/UX Issue">UI/UX Issue</option>
+        <option value="Academic Issue">Academic Issue</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Title</label>
+      <input class="form-input" id="fbTitle" placeholder="Brief summary of your feedback" maxlength="120" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <textarea class="form-textarea" id="fbDesc" placeholder="Describe the issue or idea in detail. Include steps to reproduce if it’s a bug."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Screenshot URL <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+      <input class="form-input" id="fbScreenshot" type="url" placeholder="https://…" />
+      <div class="form-hint">Upload to Imgur or similar and paste the link here.</div>
+    </div>
+
+    <button class="submit-btn" id="submitBtn" onclick="submitFeedback()">Submit Feedback →</button>
+  </div>
+
+  <div class="success-box" id="successBox">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">Thanks for the feedback!</div>
+    <div class="success-sub">We’ve received your submission and will review it soon.<br>Your input helps make Unify better for everyone.</div>
+    <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { auth, db } from './js/firebase-config.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+let currentUser = null;
+
+onAuthStateChanged(auth, user => {
+  if (!user) { window.location.href = 'Auth.html'; return; }
+  currentUser = user;
+});
+
+window.submitFeedback = async function() {
+  const category = document.getElementById('fbCategory').value;
+  const title = document.getElementById('fbTitle').value.trim();
+  const description = document.getElementById('fbDesc').value.trim();
+  const screenshotUrl = document.getElementById('fbScreenshot').value.trim();
+
+  if (!category) { showToast('Please select a category'); return; }
+  if (!title) { showToast('Please enter a title'); return; }
+  if (!description) { showToast('Please enter a description'); return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+
+  try {
+    await addDoc(collection(db, 'feedback'), {
+      uid: currentUser.uid,
+      email: currentUser.email,
+      category,
+      title,
+      description,
+      screenshotUrl: screenshotUrl || null,
+      createdAt: serverTimestamp(),
+      status: 'open',
+    });
+
+    document.getElementById('feedbackForm').style.display = 'none';
+    document.getElementById('successBox').style.display = 'block';
+  } catch(e) {
+    console.error(e);
+    showToast('Failed to submit — check your connection and try again');
+    btn.disabled = false;
+    btn.textContent = 'Submit Feedback →';
+  }
+};
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>
