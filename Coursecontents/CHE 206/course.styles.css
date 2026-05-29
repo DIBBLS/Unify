@@ -852,3 +852,19 @@ footer strong{color:var(--muted);font-weight:500}
   .exam-box{padding:14px 16px!important}
   .analogy-box,.mistake-box{padding:12px 14px!important}
 }
+
+/* Hide old text nav links — replaced by clean topbar + bottom nav */
+.nav-links{display:none!important}
+nav{padding:0 16px!important;gap:0!important}
+.nav-logo{font-size:18px}
+.theme-toggle{margin-left:auto}
+
+/* Bottom nav for course week pages */
+.c-bnav{position:fixed;bottom:0;left:0;right:0;height:64px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;z-index:200;padding-bottom:env(safe-area-inset-bottom)}
+.c-bnav a{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;font-size:10px;font-weight:500;color:var(--muted);min-width:52px;padding:6px 0}
+.c-bnav a svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.c-bnav a.active,.c-bnav a:hover{color:var(--accent-deep)}
+
+/* Extra bottom padding so content isn't hidden behind bottom nav */
+.week-page{padding-bottom:80px!important}
+.page{padding-bottom:80px!important}
