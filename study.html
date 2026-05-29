@@ -295,6 +295,25 @@
       </div>
     </div>
 
+    <!-- ADD DEADLINE MODAL -->
+    <div class="sp-modal-overlay" id="dlModalOverlay" onclick="closeDlModal()">
+      <div class="sp-modal" onclick="event.stopPropagation()">
+        <div class="sp-modal-header">
+          <span>Add Deadline</span>
+          <button onclick="closeDlModal()">×</button>
+        </div>
+        <input id="dlCourse" type="text" placeholder="Course code (e.g. MEE 306)" style="text-transform:uppercase" />
+        <input id="dlTitle" type="text" placeholder="Task (e.g. CA 1, Quiz, Assignment)" />
+        <div class="sp-modal-row">
+          <label style="flex:1">Date<input id="dlDate" type="date" /></label>
+        </div>
+        <div class="sp-modal-footer">
+          <button class="sp-modal-cancel" onclick="closeDlModal()">Cancel</button>
+          <button class="sp-modal-save" onclick="saveDeadline()">Add Deadline</button>
+        </div>
+      </div>
+    </div>
+
     <!-- SIDEBAR / UI HELPERS -->
     <script>
       function openSidebar() {
@@ -659,17 +678,29 @@
         renderStats();
       };
 
-      // Add deadline global
+      // Deadline modal
       window.openAddDeadline = function() {
-        const course  = prompt('Course code (e.g. MEE 306):');
-        if (!course)  return;
-        const title   = prompt('Task (e.g. CA 1, Quiz):');
-        if (!title)   return;
-        const dateStr = prompt('Date (YYYY-MM-DD):');
-        if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return;
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('dlDate').value = today;
+        document.getElementById('dlCourse').value = '';
+        document.getElementById('dlTitle').value = '';
+        document.getElementById('dlModalOverlay').classList.add('open');
+        setTimeout(() => document.getElementById('dlCourse').focus(), 60);
+      };
+      window.closeDlModal = function() {
+        document.getElementById('dlModalOverlay').classList.remove('open');
+      };
+      window.saveDeadline = function() {
+        const course  = document.getElementById('dlCourse').value.trim().toUpperCase();
+        const title   = document.getElementById('dlTitle').value.trim();
+        const dateStr = document.getElementById('dlDate').value;
+        if (!course) { document.getElementById('dlCourse').focus(); return; }
+        if (!title)  { document.getElementById('dlTitle').focus(); return; }
+        if (!dateStr) { document.getElementById('dlDate').focus(); return; }
         const deadlines = getDeadlines();
-        deadlines.push({ id: Date.now().toString(36), course: course.trim().toUpperCase(), title: title.trim(), date: dateStr });
+        deadlines.push({ id: Date.now().toString(36), course, title, date: dateStr });
         localStorage.setItem('unify-deadlines', JSON.stringify(deadlines));
+        closeDlModal();
         renderDeadlines();
       };
 
