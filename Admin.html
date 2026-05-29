@@ -14,19 +14,511 @@
     <link rel="stylesheet" href="css/responsive.css" />
     <script src="js/theme.js"></script>
     <link rel="stylesheet" href="css/pages/Admin.styles.css?v=mobile-1" />
-      <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#16a34a">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
     <script src="js/register-sw.js" defer></script>
-</head>
+
+    <style>
+      /* ── ADMIN SHELL LAYOUT ─────────────────────────────────── */
+      *, *::before, *::after { box-sizing: border-box; }
+
+      body { margin: 0; font-family: 'DM Sans', sans-serif; background: #f0efe9; }
+
+      .loading-screen {
+        position: fixed; inset: 0; display: flex; flex-direction: column;
+        align-items: center; justify-content: center; background: #0a0a0a; z-index: 9999;
+      }
+      .loading-logo { font-family: 'Playfair Display', serif; font-size: 32px; color: #fff; }
+      .loading-sub { color: #666; margin-top: 8px; font-size: 14px; }
+
+      .denied-wrap {
+        display: none; flex-direction: column; align-items: center; justify-content: center;
+        min-height: 100vh; padding: 40px; text-align: center;
+      }
+      .denied-title { font-family: 'Playfair Display', serif; font-size: 28px; margin-bottom: 12px; }
+      .denied-sub { color: #666; max-width: 480px; line-height: 1.6; margin-bottom: 24px; }
+      .denied-back { color: #4ade80; text-decoration: none; font-weight: 500; }
+
+      /* Shell */
+      .admin-shell {
+        display: flex; min-height: 100vh;
+      }
+
+      /* ── SIDEBAR ─────────────────────────────────────────────── */
+      .admin-sidebar {
+        width: 220px; flex-shrink: 0; background: #0e0e0e;
+        display: flex; flex-direction: column;
+        position: fixed; top: 0; left: 0; height: 100vh;
+        overflow-y: auto; z-index: 100;
+      }
+
+      .sidebar-brand {
+        padding: 22px 20px 16px;
+        display: flex; align-items: center; gap: 8px;
+      }
+      .sidebar-logo {
+        font-family: 'Playfair Display', serif; font-size: 22px;
+        color: #fff; font-weight: 700; line-height: 1;
+      }
+      .sidebar-admin-badge {
+        background: #4ade80; color: #0a0a0a; font-size: 9px; font-weight: 700;
+        padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; text-transform: uppercase;
+      }
+
+      .sidebar-section-label {
+        padding: 10px 20px 4px;
+        font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase;
+        color: #444; font-weight: 600;
+      }
+
+      .sidebar-nav { padding: 0 10px; flex: 1; }
+
+      .sidebar-item {
+        display: flex; align-items: center; gap: 10px;
+        padding: 9px 12px; border-radius: 8px; cursor: pointer;
+        color: #888; font-size: 13.5px; font-weight: 500;
+        transition: background 0.15s, color 0.15s;
+        border: none; background: none; width: 100%; text-align: left;
+        text-decoration: none; margin-bottom: 2px;
+      }
+      .sidebar-item:hover { background: #1a1a1a; color: #ccc; }
+      .sidebar-item.active { color: #4ade80; background: #0f1f14; }
+      .sidebar-item svg { flex-shrink: 0; opacity: 0.7; }
+      .sidebar-item.active svg { opacity: 1; }
+
+      .sidebar-spacer { height: 14px; }
+
+      /* Mascot box at bottom */
+      .sidebar-mascot {
+        margin: 12px; border-radius: 12px; background: #1a1408;
+        border: 1px solid #2a2010; padding: 16px; text-align: center;
+      }
+      .mascot-figure {
+        width: 56px; height: 56px; margin: 0 auto 8px;
+        position: relative; display: flex; align-items: center; justify-content: center;
+      }
+      .mascot-body {
+        width: 40px; height: 38px; background: #8B6914; border-radius: 6px 6px 4px 4px;
+        position: absolute; bottom: 0;
+      }
+      .mascot-head {
+        width: 36px; height: 30px; background: #C49A28; border-radius: 4px;
+        position: absolute; top: 0; display: flex; align-items: center; justify-content: center;
+        flex-direction: column; gap: 3px;
+      }
+      .mascot-eyes { display: flex; gap: 8px; }
+      .mascot-eye { width: 5px; height: 5px; background: #0a0a0a; border-radius: 50%; }
+      .mascot-mouth { width: 12px; height: 2px; background: #0a0a0a; border-radius: 2px; }
+      .mascot-quote {
+        font-size: 10.5px; color: #7a6530; line-height: 1.5;
+        font-style: italic;
+      }
+
+      /* ── MAIN AREA ───────────────────────────────────────────── */
+      .admin-main {
+        margin-left: 220px; flex: 1; min-width: 0;
+        display: flex; flex-direction: column;
+      }
+
+      /* Topbar */
+      .admin-topbar {
+        background: #fff; border-bottom: 1px solid #e8e6e0;
+        padding: 0 24px; height: 60px;
+        display: flex; align-items: center; gap: 12px;
+        position: sticky; top: 0; z-index: 50;
+      }
+      .topbar-search {
+        flex: 1; max-width: 340px;
+        background: #f5f4f0; border: 1.5px solid #e8e6e0;
+        border-radius: 8px; padding: 8px 14px 8px 36px;
+        font-size: 13px; color: #0a0a0a; outline: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: 12px center;
+      }
+      .topbar-search:focus { border-color: #4ade80; }
+      .topbar-right {
+        margin-left: auto; display: flex; align-items: center; gap: 14px;
+      }
+      .topbar-bell {
+        width: 36px; height: 36px; border-radius: 50%; background: #f5f4f0;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; border: none; color: #666;
+      }
+      .topbar-bell:hover { background: #e8e6e0; }
+      .topbar-avatar {
+        width: 36px; height: 36px; border-radius: 50%;
+        background: #4ade80; color: #0a0a0a;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 14px; flex-shrink: 0;
+      }
+      .topbar-user { display: flex; flex-direction: column; }
+      .topbar-user-name { font-size: 13px; font-weight: 600; color: #0a0a0a; line-height: 1.2; }
+      .topbar-user-role { font-size: 11px; color: #888; }
+      #themeBtn {
+        background: #f5f4f0; border: 1.5px solid #e8e6e0; border-radius: 8px;
+        padding: 6px 12px; font-size: 12px; cursor: pointer; color: #555; font-family: inherit;
+      }
+      #themeBtn:hover { background: #e8e6e0; }
+      #signOutBtn {
+        background: none; border: 1.5px solid #e8e6e0; border-radius: 8px;
+        padding: 6px 14px; font-size: 12px; cursor: pointer; color: #666; font-family: inherit;
+      }
+      #signOutBtn:hover { border-color: #ff6b6b; color: #ff6b6b; }
+
+      /* Content area */
+      .admin-content { padding: 28px 28px 60px; flex: 1; }
+
+      /* Admin sections (shown/hidden by sidebar nav) */
+      .admin-section { display: none; }
+      .admin-section.active { display: block; }
+
+      /* ── OVERVIEW SECTION ────────────────────────────────────── */
+      .ov-header {
+        display: flex; align-items: flex-start; justify-content: space-between;
+        margin-bottom: 28px; gap: 20px;
+      }
+      .ov-header-left { flex: 1; }
+      .ov-eyebrow {
+        font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+        color: #4ade80; font-weight: 700; margin-bottom: 6px;
+      }
+      .ov-title {
+        font-family: 'Playfair Display', serif; font-size: 30px;
+        color: #0a0a0a; margin: 0 0 8px; line-height: 1.2;
+      }
+      .ov-title em { font-style: italic; color: #4ade80; }
+      .ov-sub { font-size: 14px; color: #666; }
+      .ov-mascot-badge {
+        background: #0e0e0e; border-radius: 16px; padding: 16px 20px;
+        display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+      }
+      .ov-mascot-mini { font-size: 28px; }
+      .ov-mascot-text { font-size: 11px; color: #888; max-width: 120px; line-height: 1.5; }
+
+      /* Stat cards row */
+      .ov-stats {
+        display: grid; grid-template-columns: repeat(5, 1fr);
+        gap: 14px; margin-bottom: 24px;
+      }
+      .ov-stat {
+        background: #fff; border-radius: 14px;
+        padding: 18px 16px; border: 1px solid #e8e6e0;
+      }
+      .ov-stat-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+      .ov-stat-val { font-size: 26px; font-weight: 700; color: #0a0a0a; line-height: 1; }
+      .ov-stat-sub { font-size: 11px; color: #aaa; margin-top: 4px; }
+      .ov-stat-health { color: #4ade80; }
+
+      /* Two-column overview body */
+      .ov-body {
+        display: grid; grid-template-columns: 1fr 300px;
+        gap: 20px; align-items: start;
+      }
+
+      /* Chart card */
+      .ov-card {
+        background: #fff; border-radius: 14px;
+        border: 1px solid #e8e6e0; overflow: hidden;
+      }
+      .ov-card-head {
+        padding: 18px 20px 12px; border-bottom: 1px solid #f0efe9;
+        display: flex; align-items: center; justify-content: space-between;
+      }
+      .ov-card-title { font-size: 14px; font-weight: 600; color: #0a0a0a; }
+      .ov-card-sub { font-size: 11px; color: #aaa; }
+      .ov-card-body { padding: 16px 20px 20px; }
+
+      /* SVG Chart */
+      .ov-chart-wrap { width: 100%; height: 140px; }
+      .ov-chart-wrap svg { width: 100%; height: 100%; }
+
+      .ov-chart-legend {
+        display: flex; gap: 16px; margin-top: 12px;
+        font-size: 11px; color: #888;
+      }
+      .ov-legend-dot {
+        width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px;
+      }
+
+      /* Mini stat row under chart */
+      .ov-mini-stats {
+        display: grid; grid-template-columns: repeat(4, 1fr);
+        gap: 10px; margin-top: 16px;
+      }
+      .ov-mini-stat {
+        background: #f5f4f0; border-radius: 10px; padding: 12px;
+        text-align: center;
+      }
+      .ov-mini-stat-val { font-size: 18px; font-weight: 700; color: #0a0a0a; }
+      .ov-mini-stat-label { font-size: 10px; color: #888; margin-top: 2px; }
+
+      /* Recent activities table */
+      .ov-activity-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      .ov-activity-table th {
+        text-align: left; padding: 8px 12px; font-size: 10px;
+        color: #aaa; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+        border-bottom: 1px solid #f0efe9;
+      }
+      .ov-activity-table td {
+        padding: 10px 12px; border-bottom: 1px solid #f5f4f0; color: #444; vertical-align: top;
+      }
+      .ov-activity-table tr:last-child td { border-bottom: none; }
+      .act-tag {
+        display: inline-block; padding: 2px 8px; border-radius: 20px;
+        font-size: 10px; font-weight: 600; text-transform: uppercase;
+      }
+      .act-tag-ann { background: #dcfce7; color: #16a34a; }
+      .act-tag-tt { background: #dbeafe; color: #1d4ed8; }
+      .act-tag-sys { background: #fef3c7; color: #92400e; }
+
+      /* Right column */
+      .ov-right { display: flex; flex-direction: column; gap: 16px; }
+
+      /* Donut chart */
+      .ov-donut-wrap {
+        display: flex; flex-direction: column; align-items: center; padding: 20px 16px 16px;
+      }
+      .ov-donut {
+        width: 120px; height: 120px; border-radius: 50%;
+        background: conic-gradient(
+          #4ade80 0% 45%,
+          #60a5fa 45% 70%,
+          #f59e0b 70% 85%,
+          #f87171 85% 100%
+        );
+        display: flex; align-items: center; justify-content: center;
+        position: relative;
+      }
+      .ov-donut-hole {
+        width: 72px; height: 72px; border-radius: 50%; background: #fff;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+      }
+      .ov-donut-center-val { font-size: 18px; font-weight: 700; color: #0a0a0a; }
+      .ov-donut-center-label { font-size: 9px; color: #aaa; text-align: center; line-height: 1.3; }
+      .ov-donut-legend { width: 100%; margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
+      .ov-donut-legend-item {
+        display: flex; align-items: center; justify-content: space-between;
+        font-size: 12px; color: #555;
+      }
+      .ov-donut-legend-left { display: flex; align-items: center; gap: 7px; }
+      .ov-donut-legend-val { font-weight: 600; color: #0a0a0a; }
+
+      /* Announcements list */
+      .ov-ann-list { padding: 0 16px 16px; }
+      .ov-ann-item {
+        padding: 10px 0; border-bottom: 1px solid #f5f4f0;
+        display: flex; gap: 10px; align-items: flex-start;
+      }
+      .ov-ann-item:last-child { border-bottom: none; }
+      .ov-ann-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; margin-top: 5px; flex-shrink: 0; }
+      .ov-ann-text { font-size: 12.5px; color: #333; line-height: 1.4; }
+      .ov-ann-time { font-size: 10px; color: #aaa; margin-top: 2px; }
+
+      /* Quick actions */
+      .ov-qa-grid {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+        padding: 4px 16px 16px;
+      }
+      .ov-qa-btn {
+        background: #f5f4f0; border: 1px solid #e8e6e0; border-radius: 10px;
+        padding: 10px 8px; font-size: 11.5px; color: #444; font-weight: 500;
+        cursor: pointer; transition: all 0.15s; text-align: center;
+        font-family: inherit;
+      }
+      .ov-qa-btn:hover { background: #0e0e0e; color: #4ade80; border-color: #0e0e0e; }
+
+      /* ── PANEL SECTIONS ─────────────────────────────────────── */
+      .panel {
+        background: #fff; border-radius: 16px; border: 1px solid #e8e6e0;
+        padding: 24px; margin-bottom: 20px;
+      }
+      .panel-feature { border-left: 4px solid #4ade80; }
+      .panel-head {
+        display: flex; align-items: flex-start; justify-content: space-between;
+        margin-bottom: 20px; gap: 12px;
+      }
+      .panel-title { font-size: 17px; font-weight: 700; color: #0a0a0a; margin: 0 0 4px; }
+      .panel-sub { font-size: 13px; color: #888; margin: 0; line-height: 1.5; }
+      .panel-pill {
+        background: #f5f4f0; color: #666; font-size: 11px; font-weight: 600;
+        padding: 3px 10px; border-radius: 20px; white-space: nowrap;
+      }
+      .panel-actions { display: flex; align-items: center; gap: 8px; }
+
+      .panel-collapsible { padding: 0; }
+      .panel-head-summary {
+        padding: 24px; cursor: pointer; list-style: none; border-radius: 16px;
+      }
+      .panel-head-summary::-webkit-details-marker { display: none; }
+      .panel-chev { font-size: 18px; color: #aaa; }
+      details.panel-collapsible[open] .panel-head-summary { border-radius: 16px 16px 0 0; }
+      .panel-body { padding: 0 24px 24px; }
+
+      /* Form elements */
+      .form-row { margin-bottom: 16px; }
+      .form-row.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .form-group { display: flex; flex-direction: column; gap: 6px; }
+      .form-label { font-size: 12px; font-weight: 600; color: #555; }
+      .form-label-hint { font-weight: 400; color: #aaa; }
+      .form-input, .form-select, .form-textarea {
+        border: 1.5px solid #e8e6e0; border-radius: 8px; padding: 9px 12px;
+        font-size: 13.5px; color: #0a0a0a; font-family: inherit;
+        background: #fff; outline: none; transition: border-color 0.15s;
+      }
+      .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #4ade80; }
+      .form-textarea { resize: vertical; min-height: 90px; }
+      .form-select { cursor: pointer; }
+
+      /* Seg control */
+      .seg-control {
+        display: flex; gap: 4px; background: #f5f4f0; border-radius: 10px;
+        padding: 4px; margin-bottom: 20px; width: fit-content;
+      }
+      .seg {
+        padding: 7px 18px; border-radius: 7px; border: none; background: none;
+        font-size: 13px; font-weight: 500; cursor: pointer; color: #888;
+        font-family: inherit; display: flex; align-items: center; gap: 6px;
+        transition: all 0.15s;
+      }
+      .seg.active { background: #fff; color: #0a0a0a; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+      .seg-dot {
+        width: 6px; height: 6px; border-radius: 50%;
+        background: currentColor; opacity: 0.5;
+      }
+
+      /* Ann fields */
+      .ann-fields { }
+      .ann-foot {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-top: 16px; padding-top: 16px; border-top: 1px solid #f0efe9;
+      }
+      .ann-meta { font-size: 12px; color: #aaa; }
+      .ann-meta-strong { font-weight: 600; color: #0a0a0a; }
+      .ann-meta-aud { margin-left: 6px; }
+
+      /* Buttons */
+      .btn {
+        padding: 9px 20px; border-radius: 8px; font-size: 13.5px;
+        font-weight: 600; cursor: pointer; font-family: inherit;
+        border: none; transition: all 0.15s;
+      }
+      .btn-primary { background: #0a0a0a; color: #fff; }
+      .btn-primary:hover { background: #222; }
+      .btn-green { background: #4ade80; color: #0a0a0a; }
+      .btn-green:hover { background: #22c55e; }
+
+      /* Timetable sheet */
+      .tt-target-bar { margin-bottom: 16px; }
+      .tt-sheet-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid #e8e6e0; }
+      .tt-sheet { width: 100%; border-collapse: collapse; font-size: 13px; }
+      .tt-sheet th {
+        background: #f5f4f0; padding: 10px 12px; text-align: left;
+        font-size: 11px; color: #888; font-weight: 600; text-transform: uppercase;
+        letter-spacing: 0.5px; white-space: nowrap;
+      }
+      .tt-sheet td { padding: 8px 10px; border-top: 1px solid #f0efe9; }
+      .th-day { min-width: 100px; }
+      .th-code { min-width: 110px; }
+      .th-time { min-width: 80px; }
+      .th-act { width: 40px; }
+      .tt-sheet-foot {
+        display: flex; align-items: center; justify-content: space-between;
+        padding-top: 12px; gap: 12px;
+      }
+      .tt-sheet-actions { display: flex; align-items: center; gap: 10px; }
+      .tt-add-row-btn {
+        background: none; border: 1.5px dashed #d0cec8; color: #888;
+        border-radius: 8px; padding: 6px 14px; font-size: 13px;
+        cursor: pointer; font-family: inherit;
+      }
+      .tt-add-row-btn:hover { border-color: #4ade80; color: #4ade80; }
+      .tt-draft-hint { font-size: 12px; color: #aaa; }
+
+      /* Cards inside panels */
+      .card-flush { margin-bottom: 20px; }
+      .card-title { font-size: 15px; font-weight: 700; color: #0a0a0a; margin-bottom: 4px; }
+      .card-sub { font-size: 13px; color: #888; margin-bottom: 16px; line-height: 1.5; }
+      .card-foot {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-top: 16px; padding-top: 16px; border-top: 1px solid #f0efe9;
+      }
+      .feedback { font-size: 13px; color: #888; }
+      .sub-section-label {
+        font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+        color: #aaa; font-weight: 600; margin: 20px 0 10px;
+      }
+      .admin-list { }
+
+      /* Dropzone */
+      .cc-drop-zone {
+        border: 2px dashed #d0cec8; border-radius: 10px; padding: 24px;
+        text-align: center; cursor: pointer; transition: all 0.15s;
+      }
+      .cc-drop-zone:hover { border-color: #4ade80; background: #f0fdf4; }
+      .cc-drop-icon { font-size: 28px; margin-bottom: 8px; }
+      .cc-drop-text { font-size: 13.5px; color: #444; }
+      .cc-drop-sub { font-size: 11px; color: #aaa; margin-top: 4px; }
+
+      /* Empty state */
+      .empty-state { text-align: center; padding: 40px 20px; }
+      .empty-icon { font-size: 32px; margin-bottom: 10px; }
+      .empty-text { font-size: 14px; color: #aaa; }
+
+      /* Toast */
+      .toast {
+        position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+        background: #0a0a0a; color: #fff; padding: 12px 24px; border-radius: 100px;
+        font-size: 13.5px; font-weight: 500; z-index: 9999;
+        opacity: 0; pointer-events: none; transition: opacity 0.25s;
+        white-space: nowrap;
+      }
+      .toast.visible { opacity: 1; }
+
+      /* Feedback (panel) filters */
+      .fb-filters { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+
+      /* Hidden IDs kept for admin.js */
+      #navUser { display: none; }
+      #heroGreeting, #heroName, #roleBadge, #heroClass, #heroEmail { }
+
+      /* Mobile tweaks */
+      @media (max-width: 768px) {
+        .admin-sidebar { transform: translateX(-100%); transition: transform 0.25s; }
+        .admin-sidebar.open { transform: translateX(0); }
+        .admin-main { margin-left: 0; }
+        .sidebar-overlay {
+          display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99;
+        }
+        .sidebar-overlay.active { display: block; }
+        .ov-stats { grid-template-columns: repeat(2, 1fr); }
+        .ov-body { grid-template-columns: 1fr; }
+        .ov-right { }
+        .form-row.two { grid-template-columns: 1fr; }
+        .admin-content { padding: 16px 14px 60px; }
+        .admin-topbar { padding: 0 14px; }
+        .hamburger-btn {
+          background: none; border: none; cursor: pointer; padding: 8px;
+          color: #444; display: flex; flex-direction: column; gap: 4px;
+        }
+        .hamburger-btn span { display: block; width: 20px; height: 2px; background: currentColor; border-radius: 2px; }
+      }
+      @media (min-width: 769px) {
+        .hamburger-btn { display: none; }
+        .sidebar-overlay { display: none !important; }
+      }
+    </style>
+  </head>
   <body>
+    <!-- LOADING -->
     <div class="loading-screen" id="loadingScreen">
       <div class="loading-logo">Unify</div>
       <div class="loading-sub">Verifying access…</div>
     </div>
 
+    <!-- ACCESS DENIED -->
     <div class="denied-wrap" id="accessDenied">
       <div class="denied-title">Access Restricted</div>
       <div class="denied-sub">
@@ -36,647 +528,966 @@
       <a href="dashboard.html" class="denied-back">← Back to Dashboard</a>
     </div>
 
+    <!-- MAIN CONTENT (shown by admin.js after auth) -->
     <div id="mainContent" style="display:none">
-      <!-- TOP NAV -->
-      <nav class="admin-nav">
-        <a href="dashboard.html" class="nav-logo">
-          Unify
-          <span class="nav-admin-badge">Console</span>
-        </a>
-        <div class="nav-right">
-          <button class="btn-nav" id="themeBtn" onclick="toggleTheme()">☾ Dark</button>
-          <span class="nav-user" id="navUser"></span>
-          <button class="btn-nav" id="signOutBtn">Sign out</button>
-        </div>
-      </nav>
+      <div class="admin-shell">
 
-      <!-- HERO -->
-      <header class="admin-hero">
-        <div class="hero-inner">
-          <div class="hero-left">
-            <div class="hero-eyebrow">
-              <span class="status-pulse"><span class="dot"></span> Active session</span>
-              <span class="hero-divider">·</span>
-              <span class="hero-eyebrow-text">Restricted Console</span>
-            </div>
-            <h1 class="hero-title">
-              <span id="heroGreeting">Welcome back,</span>
-              <em id="heroName">—</em>
-            </h1>
-            <div class="hero-meta">
-              <span class="role-badge" id="roleBadge">—</span>
-              <span class="hero-class" id="heroClass">—</span>
-            </div>
-          </div>
-          <div class="hero-right">
-            <div class="hero-email-label">Signed in as</div>
-            <div class="hero-email" id="heroEmail">—</div>
-          </div>
-        </div>
-      </header>
-
-      <!-- QUICK STATS -->
-      <section class="stats-row">
-        <div class="stat-card">
-          <div class="stat-label">Timetable Entries</div>
-          <div class="stat-value" id="statEntries">0</div>
-          <div class="stat-sub" id="statEntriesSub">Across the week</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Announcements (7d)</div>
-          <div class="stat-value" id="statUpdates">0</div>
-          <div class="stat-sub">Posted this week</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Assigned Class</div>
-          <div class="stat-value stat-value--text" id="statClass">—</div>
-          <div class="stat-sub" id="statClassSub">—</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Last Update</div>
-          <div class="stat-value stat-value--text" id="statLast">—</div>
-          <div class="stat-sub" id="statLastSub">No activity yet</div>
-        </div>
-      </section>
-
-      <!-- IN-PAGE NAV -->
-      <nav class="anchor-nav" id="anchorNav">
-        <a href="#announcements" class="anchor-link" data-anchor="announcements">Announcements</a>
-        <a href="#timetable" class="anchor-link" data-anchor="timetable">Timetable</a>
-        <a href="#activity" class="anchor-link" data-anchor="activity">Activity</a>
-        <a href="#content" class="anchor-link" data-anchor="content">Content</a>
-        <a href="#courses" class="anchor-link" data-anchor="courses">Courses</a>
-        <a href="#access" class="anchor-link" data-anchor="access">Access</a>
-        <a href="#exam-timetable" class="anchor-link" data-anchor="exam-timetable">Exam Timetable</a>
-        <a href="#feedback" class="anchor-link" data-anchor="feedback">Feedback</a>
-      </nav>
-
-      <main class="admin-body">
-        <!-- ANNOUNCEMENTS -->
-        <section class="panel" id="announcements">
-          <div class="panel-head">
-            <div>
-              <h2 class="panel-title">Announcements</h2>
-              <p class="panel-sub">
-                Reach your class instantly. Use <strong>General</strong> for broad updates, or
-                <strong>Course-specific</strong> to flag a class change.
-              </p>
-            </div>
+        <!-- SIDEBAR -->
+        <aside class="admin-sidebar" id="adminSidebar">
+          <div class="sidebar-brand">
+            <span class="sidebar-logo">Unify.</span>
+            <span class="sidebar-admin-badge">Admin</span>
           </div>
 
-          <div class="seg-control" role="tablist">
-            <button type="button" class="seg active" data-kind="general" onclick="setAnnKind('general')">
-              <span class="seg-dot"></span> General
+          <nav class="sidebar-nav">
+            <div class="sidebar-section-label">Main</div>
+
+            <button class="sidebar-item active" data-section="overview">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              Overview
             </button>
-            <button type="button" class="seg" data-kind="course" onclick="setAnnKind('course')">
-              <span class="seg-dot"></span> Course-specific
+
+            <button class="sidebar-item" data-section="announcements">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10.5V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8"/><polyline points="16 2 16 6"/><polyline points="8 2 8 6"/><path d="M3 10h18"/><path d="M18 21l4-4-4-4"/><path d="M22 17H13"/></svg>
+              Announcements
             </button>
-          </div>
 
-          <!-- GENERAL FIELDS -->
-          <div class="ann-fields" id="annGeneralFields">
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Title</label>
-                <input
-                  class="form-input"
-                  id="annTitle"
-                  placeholder="e.g. Test fix-up class on Saturday"
-                />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Message</label>
-                <textarea
-                  class="form-textarea"
-                  id="annMessage"
-                  placeholder="What do you want to tell your class?"
-                ></textarea>
-              </div>
-            </div>
-          </div>
+            <button class="sidebar-item" data-section="activity">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1"/><circle cx="3" cy="12" r="1"/><circle cx="3" cy="18" r="1"/></svg>
+              Activity
+            </button>
 
-          <!-- COURSE-SPECIFIC FIELDS -->
-          <div class="ann-fields" id="annCourseFields" style="display:none">
-            <div class="form-row two">
-              <div class="form-group">
-                <label class="form-label">Course Code</label>
-                <input
-                  class="form-input"
-                  id="upCode"
-                  placeholder="e.g. ECE 308"
-                  oninput="this.value = this.value.toUpperCase()"
-                  list="ttCodeSuggestions"
-                />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Status</label>
-                <select class="form-select" id="upStatus">
-                  <option value="confirmed">Confirmed — class is holding</option>
-                  <option value="postponed">Postponed — rescheduled</option>
-                  <option value="cancelled">Cancelled — class won't hold</option>
-                  <option value="venue_change">Venue change only</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-row two">
-              <div class="form-group">
-                <label class="form-label">Lecturer</label>
-                <input class="form-input" id="upLecturer" placeholder="e.g. Dr. Adeyemi" />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Venue</label>
-                <input class="form-input" id="upVenue" placeholder="e.g. ECE Block, LT1" />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Message <span class="form-label-hint">(optional)</span></label>
-                <textarea
-                  class="form-textarea"
-                  id="upMessage"
-                  placeholder="e.g. Venue changed to Main Auditorium. Bring textbook."
-                ></textarea>
-              </div>
-            </div>
-          </div>
+            <button class="sidebar-item" data-section="courses">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              Courses
+            </button>
 
-          <div class="ann-foot">
-            <div class="ann-meta">
-              Posting as <span id="postedAsLabel" class="ann-meta-strong">—</span>
-              <span id="annAudience" class="ann-meta-aud"></span>
-            </div>
-            <button class="btn btn-primary" id="postBtn" onclick="postUpdate()">Post →</button>
-          </div>
-        </section>
+            <button class="sidebar-item" data-section="access">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Access &amp; Roles
+            </button>
 
-        <!-- TIMETABLE -->
-        <section class="panel panel-feature" id="timetable">
-          <div class="panel-head">
-            <div>
-              <h2 class="panel-title">Weekly Timetable</h2>
-              <p class="panel-sub" id="ttClassSub">
-                Set the whole week at once. Add as many rows as you need, then click <strong>Save</strong>.
-              </p>
-            </div>
-            <div class="panel-actions">
-              <span class="panel-pill" id="ttCount">0 entries</span>
-            </div>
-          </div>
+            <button class="sidebar-item" data-section="feedback">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+              Reports &amp; Feedback
+            </button>
 
-          <!-- super_admin target selectors -->
-          <div id="ttTargetSelectors" class="tt-target-bar" style="display:none">
-            <div class="form-row two">
-              <div class="form-group">
-                <label class="form-label">Faculty</label>
-                <select class="form-select" id="ttFaculty" onchange="onTTTargetChange()">
-                  <option value="">Select faculty…</option>
-                  <option value="Faculty of Engineering">Faculty of Engineering</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Department</label>
-                <select class="form-select" id="ttDept" onchange="onTTTargetChange()">
-                  <option value="">Select department…</option>
-                  <option value="Electronic &amp; Computer Engineering">Electronic &amp; Computer Engineering</option>
-                  <option value="Mechanical Engineering">Mechanical Engineering</option>
-                  <option value="Industrial &amp; Petroleum Engineering">Industrial &amp; Petroleum Engineering</option>
-                  <option value="Chemical &amp; Polymer Engineering">Chemical &amp; Polymer Engineering</option>
-                  <option value="Civil Engineering">Civil Engineering</option>
-                  <option value="Aerospace Engineering">Aerospace Engineering</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-row two">
-              <div class="form-group">
-                <label class="form-label">Level</label>
-                <select class="form-select" id="ttLevel" onchange="onTTTargetChange()">
-                  <option value="">Select level…</option>
-                  <option value="100 Level">100 Level</option>
-                  <option value="200 Level">200 Level</option>
-                  <option value="300 Level">300 Level</option>
-                  <option value="400 Level">400 Level</option>
-                  <option value="500 Level">500 Level</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Semester</label>
-                <select class="form-select" id="ttSemester" onchange="onTTTargetChange()">
-                  <option value="">Select semester…</option>
-                  <option value="First Semester">First Semester</option>
-                  <option value="Second Semester">Second Semester</option>
-                </select>
-              </div>
-            </div>
-          </div>
+            <div class="sidebar-section-label" style="margin-top:14px">Academics</div>
 
-          <datalist id="ttCodeSuggestions"></datalist>
+            <button class="sidebar-item" data-section="timetable">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Timetable
+            </button>
 
-          <div class="tt-sheet-wrap">
-            <table class="tt-sheet">
-              <thead>
-                <tr>
-                  <th class="th-day">Day</th>
-                  <th class="th-code">Course</th>
-                  <th class="th-time">Start</th>
-                  <th class="th-time">End</th>
-                  <th>Venue</th>
-                  <th>Lecturer</th>
-                  <th class="th-act"></th>
-                </tr>
-              </thead>
-              <tbody id="ttSheetBody">
-                <!-- Rendered by admin.js renderTimetableSheet() -->
-              </tbody>
-            </table>
-          </div>
-          <div class="tt-sheet-foot">
-            <button class="tt-add-row-btn" id="ttAddRowBtn" type="button" onclick="addTTDraftRow()">+ Add row</button>
-            <div class="tt-sheet-actions">
-              <span class="tt-draft-hint" id="ttDraftHint"></span>
-              <button class="btn btn-primary" id="ttSaveAllBtn" type="button" onclick="saveTTDraftRows()" style="display:none">Save</button>
-            </div>
-          </div>
-        </section>
+            <button class="sidebar-item" data-section="content">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+              Course Content
+            </button>
 
-        <!-- ACTIVITY -->
-        <section class="panel" id="activity">
-          <div class="panel-head">
-            <div>
-              <h2 class="panel-title">Recent Activity</h2>
-              <p class="panel-sub">Live feed of announcements and class changes.</p>
-            </div>
-          </div>
-          <div id="updateLog">
-            <div class="empty-state">
-              <div class="empty-icon">📋</div>
-              <div class="empty-text">No activity yet.</div>
-            </div>
-          </div>
-        </section>
+            <button class="sidebar-item" data-section="exam-timetable">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              Exam Timetable
+            </button>
 
-        <!-- COURSE CONTENT -->
-        <section class="panel" id="content">
-          <div class="panel-head">
-            <div>
-              <h2 class="panel-title">Course Content</h2>
-              <p class="panel-sub">Upload notes and/or YouTube links per week. Re-uploading the same week updates only the fields you fill in — leave HTML blank to update just the video, or vice versa.</p>
-            </div>
-          </div>
+            <div class="sidebar-section-label" style="margin-top:14px">System</div>
 
-          <div class="form-row two">
-            <div class="form-group">
-              <label class="form-label">Course Code</label>
-              <input
-                class="form-input"
-                id="ccCode"
-                placeholder="e.g. ECE 309"
-                oninput="this.value = this.value.toUpperCase()"
-                list="ccCodeSuggestions"
-              />
-              <datalist id="ccCodeSuggestions"></datalist>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Week</label>
-              <select class="form-select" id="ccWeek">
-                <option value="">Select week…</option>
-                <option value="1">Week 1</option>
-                <option value="2">Week 2</option>
-                <option value="3">Week 3</option>
-                <option value="4">Week 4</option>
-                <option value="5">Week 5</option>
-                <option value="6">Week 6</option>
-                <option value="7">Week 7</option>
-                <option value="8">Week 8</option>
-                <option value="9">Week 9</option>
-                <option value="10">Week 10</option>
-                <option value="11">Week 11</option>
-                <option value="12">Week 12</option>
-                <option value="13">Week 13</option>
-                <option value="14">Week 14</option>
-                <option value="15">Week 15</option>
-              </select>
-            </div>
-          </div>
+            <a href="dashboard.html" class="sidebar-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+              Settings
+            </a>
+          </nav>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Week Title</label>
-              <input class="form-input" id="ccTitle" placeholder="e.g. Introduction to Signals" />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Notes <span class="form-label-hint">(optional — leave blank to keep existing notes)</span></label>
-              <div class="cc-drop-zone" id="ccDropZone" onclick="document.getElementById('ccFileInput').click()">
-                <div class="cc-drop-icon">📄</div>
-                <div class="cc-drop-text"><strong>Drop a .html file here</strong> or click to browse</div>
-                <div class="cc-drop-sub" id="ccDropSub">Whole-page HTML works — styles and scripts stay isolated</div>
-              </div>
-              <input type="file" id="ccFileInput" accept=".html,.htm,text/html" style="display:none" />
-              <textarea
-                class="form-textarea"
-                id="ccHtml"
-                placeholder="…or paste HTML directly here"
-                style="min-height: 140px; font-family: ui-monospace, monospace; font-size: 12px; margin-top: 10px;"
-              ></textarea>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">YouTube URL <span class="form-label-hint">(optional)</span></label>
-              <input class="form-input" id="ccYoutube" placeholder="https://youtube.com/watch?v=…" type="url" />
-            </div>
-          </div>
-
-          <div class="ann-foot">
-            <div class="ann-meta">
-              Uploading as <span id="contentPostedAsLabel" class="ann-meta-strong">—</span>
-            </div>
-            <button class="btn btn-primary" id="ccUploadBtn" onclick="uploadCourseContent()">Upload →</button>
-          </div>
-        </section>
-
-        <!-- MANAGE COURSES (collapsible) -->
-        <details class="panel panel-collapsible" id="courses">
-          <summary class="panel-head panel-head-summary">
-            <div>
-              <h2 class="panel-title">Manage Courses</h2>
-              <p class="panel-sub">Add or edit the courses students can pick. Rarely needed.</p>
-            </div>
-            <span class="panel-chev">▾</span>
-          </summary>
-          <div class="panel-body" id="manageCoursesSection">
-            <div class="card card-flush">
-              <div class="card-title">Add or edit a course</div>
-              <div class="card-sub">
-                Courses added here become available to students immediately. No redeployment.
-              </div>
-              <div class="form-row two">
-                <div class="form-group">
-                  <label class="form-label">Course Code</label>
-                  <input class="form-input" id="cAddCode" placeholder="e.g. ECE 301" oninput="this.value = this.value.toUpperCase()" />
+          <!-- Mascot -->
+          <div class="sidebar-mascot">
+            <div class="mascot-figure">
+              <div class="mascot-body"></div>
+              <div class="mascot-head">
+                <div class="mascot-eyes">
+                  <div class="mascot-eye"></div>
+                  <div class="mascot-eye"></div>
                 </div>
-                <div class="form-group">
-                  <label class="form-label">Course Title</label>
-                  <input class="form-input" id="cAddTitle" placeholder="e.g. Signals & Systems" />
-                </div>
-              </div>
-              <div class="form-row two">
-                <div class="form-group">
-                  <label class="form-label">Faculty</label>
-                  <select class="form-select" id="cAddFaculty">
-                    <option value="">Select faculty…</option>
-                    <option value="Faculty of Engineering">Faculty of Engineering</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Department</label>
-                  <select class="form-select" id="cAddDept">
-                    <option value="">Select department…</option>
-                    <option value="Electronic &amp; Computer Engineering">Electronic &amp; Computer Engineering</option>
-                    <option value="Mechanical Engineering">Mechanical Engineering</option>
-                    <option value="Industrial &amp; Petroleum Engineering">Industrial &amp; Petroleum Engineering</option>
-                    <option value="Chemical &amp; Polymer Engineering">Chemical &amp; Polymer Engineering</option>
-                    <option value="Civil Engineering">Civil Engineering</option>
-                    <option value="Aerospace Engineering">Aerospace Engineering</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-row two">
-                <div class="form-group">
-                  <label class="form-label">Level</label>
-                  <select class="form-select" id="cAddLevel">
-                    <option value="">Select level…</option>
-                    <option value="100 Level">100 Level</option>
-                    <option value="200 Level">200 Level</option>
-                    <option value="300 Level">300 Level</option>
-                    <option value="400 Level">400 Level</option>
-                    <option value="500 Level">500 Level</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Semester</label>
-                  <select class="form-select" id="cAddSemester">
-                    <option value="">Select semester…</option>
-                    <option value="First Semester">First Semester</option>
-                    <option value="Second Semester">Second Semester</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-row two">
-                <div class="form-group">
-                  <label class="form-label">Units</label>
-                  <input class="form-input" id="cAddUnits" type="number" min="1" max="6" value="3" />
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Description <span class="form-label-hint">(optional)</span></label>
-                  <input class="form-input" id="cAddDesc" placeholder="One-line summary" />
-                </div>
-              </div>
-              <div class="card-foot">
-                <div id="cAddFeedback" class="feedback"></div>
-                <button class="btn btn-primary" id="cAddBtn" onclick="saveCourse()">Save Course →</button>
+                <div class="mascot-mouth"></div>
               </div>
             </div>
+            <div class="mascot-quote">"Discipline today,<br>Excellence tomorrow."</div>
+          </div>
+        </aside>
 
-            <div class="sub-section-label">Existing Courses</div>
-            <div id="courseList">
-              <div class="empty-state">
-                <div class="empty-icon">📚</div>
-                <div class="empty-text">Loading courses…</div>
+        <!-- Overlay for mobile -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+        <!-- MAIN -->
+        <div class="admin-main">
+
+          <!-- TOPBAR -->
+          <div class="admin-topbar">
+            <button class="hamburger-btn" onclick="openSidebar()" aria-label="Open menu">
+              <span></span><span></span><span></span>
+            </button>
+            <input class="topbar-search" type="text" placeholder="Search sections…" />
+            <div class="topbar-right">
+              <button class="topbar-bell" title="Notifications">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              </button>
+              <div class="topbar-avatar" id="topbarAvatar">A</div>
+              <div class="topbar-user">
+                <div class="topbar-user-name" id="navUser"></div>
+                <div class="topbar-user-role" id="topbarRole">Admin</div>
               </div>
+              <button id="themeBtn" onclick="toggleTheme()">☾ Dark</button>
+              <button id="signOutBtn">Sign out</button>
             </div>
           </div>
-        </details>
 
-        <!-- ACCESS (collapsible, super_admin only) -->
-        <details class="panel panel-collapsible" id="access">
-          <summary class="panel-head panel-head-summary">
-            <div>
-              <h2 class="panel-title">Access &amp; Roles</h2>
-              <p class="panel-sub">Grant admin or class rep access to other staff.</p>
-            </div>
-            <span class="panel-chev">▾</span>
-          </summary>
-          <div class="panel-body" id="adminAccessSection">
-            <div class="card card-flush">
-              <div class="card-title">Grant access</div>
-              <div class="card-sub">
-                The person must have signed into Unify at least once. Enter their registered
-                email — they'll see this console on their next login.
-              </div>
-              <div class="form-row two">
-                <div class="form-group">
-                  <label class="form-label">Email Address</label>
-                  <input class="form-input" id="grantEmail" placeholder="e.g. hod.ece@lasu.edu.ng" type="email" />
+          <!-- CONTENT -->
+          <div class="admin-content">
+
+            <!-- Hidden elements that admin.js reads -->
+            <span id="heroGreeting" style="display:none"></span>
+            <span id="heroName" style="display:none"></span>
+            <span id="roleBadge" style="display:none"></span>
+            <span id="heroClass" style="display:none"></span>
+            <span id="heroEmail" style="display:none"></span>
+
+            <!-- ── OVERVIEW SECTION ── -->
+            <div class="admin-section active" data-section="overview">
+
+              <div class="ov-header">
+                <div class="ov-header-left">
+                  <div class="ov-eyebrow">Admin Dashboard</div>
+                  <h1 class="ov-title">Welcome back, <em id="ovName">—</em>.</h1>
+                  <div class="ov-sub">Here's what's happening across Unify today.</div>
                 </div>
-                <div class="form-group">
-                  <label class="form-label">Role</label>
-                  <select class="form-select" id="grantRole" onchange="onGrantRoleChange()">
-                    <option value="academic_lead">Academic Lead (HOD/Coordinator)</option>
-                    <option value="class_rep">Class Rep</option>
-                    <option value="super_admin">Super Admin</option>
-                  </select>
+                <div class="ov-mascot-badge">
+                  <span class="ov-mascot-mini">📦</span>
+                  <div class="ov-mascot-text">Discipline today, Excellence tomorrow.</div>
                 </div>
               </div>
 
-              <div id="grantAssignmentFields" style="display:none">
+              <!-- 5 stat cards -->
+              <div class="ov-stats">
+                <div class="ov-stat">
+                  <div class="ov-stat-label">Total Users</div>
+                  <div class="ov-stat-val">—</div>
+                  <div class="ov-stat-sub">Registered</div>
+                </div>
+                <div class="ov-stat">
+                  <div class="ov-stat-label">Active Courses</div>
+                  <div class="ov-stat-val" id="statUpdates">0</div>
+                  <div class="ov-stat-sub">This semester</div>
+                </div>
+                <div class="ov-stat">
+                  <div class="ov-stat-label">Departments</div>
+                  <div class="ov-stat-val">8</div>
+                  <div class="ov-stat-sub">Faculties served</div>
+                </div>
+                <div class="ov-stat">
+                  <div class="ov-stat-label">Open Reports</div>
+                  <div class="ov-stat-val">—</div>
+                  <div class="ov-stat-sub">Pending review</div>
+                </div>
+                <div class="ov-stat">
+                  <div class="ov-stat-label">System Health</div>
+                  <div class="ov-stat-val ov-stat-health">OK</div>
+                  <div class="ov-stat-sub">All services up</div>
+                </div>
+              </div>
+
+              <div class="ov-body">
+                <!-- Left column -->
+                <div>
+                  <!-- Line chart -->
+                  <div class="ov-card" style="margin-bottom:16px">
+                    <div class="ov-card-head">
+                      <div>
+                        <div class="ov-card-title">System Overview</div>
+                        <div class="ov-card-sub">Registrations &amp; active users — last 30 days</div>
+                      </div>
+                    </div>
+                    <div class="ov-card-body">
+                      <div class="ov-chart-wrap">
+                        <svg viewBox="0 0 400 140" preserveAspectRatio="none">
+                          <defs>
+                            <linearGradient id="chartGrad1" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stop-color="#4ade80" stop-opacity="0.18"/>
+                              <stop offset="100%" stop-color="#4ade80" stop-opacity="0"/>
+                            </linearGradient>
+                            <linearGradient id="chartGrad2" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.14"/>
+                              <stop offset="100%" stop-color="#60a5fa" stop-opacity="0"/>
+                            </linearGradient>
+                          </defs>
+                          <!-- Registrations area -->
+                          <path d="M0,100 C30,90 50,60 80,55 C110,50 130,70 160,60 C190,50 210,30 240,28 C270,26 290,40 320,35 C350,30 380,20 400,15 L400,140 L0,140 Z" fill="url(#chartGrad1)"/>
+                          <!-- Registrations line -->
+                          <path d="M0,100 C30,90 50,60 80,55 C110,50 130,70 160,60 C190,50 210,30 240,28 C270,26 290,40 320,35 C350,30 380,20 400,15" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round"/>
+                          <!-- Active users area -->
+                          <path d="M0,120 C30,115 50,100 80,95 C110,90 130,105 160,100 C190,95 210,80 240,78 C270,76 290,85 320,80 C350,75 380,65 400,60 L400,140 L0,140 Z" fill="url(#chartGrad2)"/>
+                          <!-- Active users line -->
+                          <path d="M0,120 C30,115 50,100 80,95 C110,90 130,105 160,100 C190,95 210,80 240,78 C270,76 290,85 320,80 C350,75 380,65 400,60" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-dasharray="none"/>
+                          <!-- Grid lines -->
+                          <line x1="0" y1="35" x2="400" y2="35" stroke="#f0efe9" stroke-width="1"/>
+                          <line x1="0" y1="70" x2="400" y2="70" stroke="#f0efe9" stroke-width="1"/>
+                          <line x1="0" y1="105" x2="400" y2="105" stroke="#f0efe9" stroke-width="1"/>
+                        </svg>
+                      </div>
+                      <div class="ov-chart-legend">
+                        <span><span class="ov-legend-dot" style="background:#4ade80"></span>Registrations</span>
+                        <span><span class="ov-legend-dot" style="background:#60a5fa"></span>Active Users</span>
+                      </div>
+                      <div class="ov-mini-stats">
+                        <div class="ov-mini-stat">
+                          <div class="ov-mini-stat-val" id="statEntries">0</div>
+                          <div class="ov-mini-stat-label">New Users</div>
+                        </div>
+                        <div class="ov-mini-stat">
+                          <div class="ov-mini-stat-val" id="statEntriesSub">—</div>
+                          <div class="ov-mini-stat-label">Active Users</div>
+                        </div>
+                        <div class="ov-mini-stat">
+                          <div class="ov-mini-stat-val" id="statClass">—</div>
+                          <div class="ov-mini-stat-label">Returning</div>
+                        </div>
+                        <div class="ov-mini-stat">
+                          <div class="ov-mini-stat-val" id="statClassSub">—</div>
+                          <div class="ov-mini-stat-label">Engagement</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Recent activities -->
+                  <div class="ov-card">
+                    <div class="ov-card-head">
+                      <div class="ov-card-title">Recent Activities</div>
+                      <div class="ov-card-sub" id="statLast">—</div>
+                    </div>
+                    <div class="ov-card-body" style="padding-top:0">
+                      <table class="ov-activity-table">
+                        <thead>
+                          <tr>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>User</th>
+                            <th>Time</th>
+                          </tr>
+                        </thead>
+                        <tbody id="ovActivityBody">
+                          <tr>
+                            <td><span class="act-tag act-tag-ann">Announce</span></td>
+                            <td>No activities recorded yet</td>
+                            <td>—</td>
+                            <td style="color:#aaa;font-size:11px">—</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right column -->
+                <div class="ov-right">
+                  <!-- Role donut -->
+                  <div class="ov-card">
+                    <div class="ov-card-head">
+                      <div class="ov-card-title">Role Distribution</div>
+                    </div>
+                    <div class="ov-donut-wrap">
+                      <div class="ov-donut">
+                        <div class="ov-donut-hole">
+                          <div class="ov-donut-center-val" id="statLastSub">—</div>
+                          <div class="ov-donut-center-label">Total<br>Admins</div>
+                        </div>
+                      </div>
+                      <div class="ov-donut-legend">
+                        <div class="ov-donut-legend-item">
+                          <span class="ov-donut-legend-left"><span class="ov-legend-dot" style="background:#4ade80"></span>Super Admin</span>
+                          <span class="ov-donut-legend-val">45%</span>
+                        </div>
+                        <div class="ov-donut-legend-item">
+                          <span class="ov-donut-legend-left"><span class="ov-legend-dot" style="background:#60a5fa"></span>Class Rep</span>
+                          <span class="ov-donut-legend-val">25%</span>
+                        </div>
+                        <div class="ov-donut-legend-item">
+                          <span class="ov-donut-legend-left"><span class="ov-legend-dot" style="background:#f59e0b"></span>Academic Lead</span>
+                          <span class="ov-donut-legend-val">15%</span>
+                        </div>
+                        <div class="ov-donut-legend-item">
+                          <span class="ov-donut-legend-left"><span class="ov-legend-dot" style="background:#f87171"></span>Student</span>
+                          <span class="ov-donut-legend-val">15%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Recent announcements -->
+                  <div class="ov-card">
+                    <div class="ov-card-head">
+                      <div class="ov-card-title">Recent Announcements</div>
+                    </div>
+                    <div class="ov-ann-list" id="ovAnnList">
+                      <div class="ov-ann-item">
+                        <div class="ov-ann-dot"></div>
+                        <div>
+                          <div class="ov-ann-text">No announcements yet.</div>
+                          <div class="ov-ann-time">—</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Quick actions -->
+                  <div class="ov-card">
+                    <div class="ov-card-head">
+                      <div class="ov-card-title">Quick Actions</div>
+                    </div>
+                    <div class="ov-qa-grid">
+                      <button class="ov-qa-btn" onclick="showSection('announcements')">Post Announcement</button>
+                      <button class="ov-qa-btn" onclick="showSection('courses')">Manage Courses</button>
+                      <button class="ov-qa-btn" onclick="showSection('announcements')">Send Update</button>
+                      <button class="ov-qa-btn" onclick="showSection('feedback')">View Reports</button>
+                      <button class="ov-qa-btn" onclick="showSection('access')" style="grid-column:span 2">Access &amp; Roles</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- end overview -->
+
+            <!-- ── ANNOUNCEMENTS SECTION ── -->
+            <div class="admin-section" data-section="announcements">
+              <div class="panel">
+                <div class="panel-head">
+                  <div>
+                    <h2 class="panel-title">Announcements</h2>
+                    <p class="panel-sub">
+                      Reach your class instantly. Use <strong>General</strong> for broad updates, or
+                      <strong>Course-specific</strong> to flag a class change.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="seg-control" role="tablist">
+                  <button type="button" class="seg active" data-kind="general" onclick="setAnnKind('general')">
+                    <span class="seg-dot"></span> General
+                  </button>
+                  <button type="button" class="seg" data-kind="course" onclick="setAnnKind('course')">
+                    <span class="seg-dot"></span> Course-specific
+                  </button>
+                </div>
+
+                <div class="ann-fields" id="annGeneralFields">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label">Title</label>
+                      <input class="form-input" id="annTitle" placeholder="e.g. Test fix-up class on Saturday" />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label">Message</label>
+                      <textarea class="form-textarea" id="annMessage" placeholder="What do you want to tell your class?"></textarea>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="ann-fields" id="annCourseFields" style="display:none">
+                  <div class="form-row two">
+                    <div class="form-group">
+                      <label class="form-label">Course Code</label>
+                      <input class="form-input" id="upCode" placeholder="e.g. ECE 308"
+                        oninput="this.value = this.value.toUpperCase()" list="ttCodeSuggestions" />
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Status</label>
+                      <select class="form-select" id="upStatus">
+                        <option value="confirmed">Confirmed — class is holding</option>
+                        <option value="postponed">Postponed — rescheduled</option>
+                        <option value="cancelled">Cancelled — class won't hold</option>
+                        <option value="venue_change">Venue change only</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-row two">
+                    <div class="form-group">
+                      <label class="form-label">Lecturer</label>
+                      <input class="form-input" id="upLecturer" placeholder="e.g. Dr. Adeyemi" />
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Venue</label>
+                      <input class="form-input" id="upVenue" placeholder="e.g. ECE Block, LT1" />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label">Message <span class="form-label-hint">(optional)</span></label>
+                      <textarea class="form-textarea" id="upMessage" placeholder="e.g. Venue changed to Main Auditorium. Bring textbook."></textarea>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="ann-foot">
+                  <div class="ann-meta">
+                    Posting as <span id="postedAsLabel" class="ann-meta-strong">—</span>
+                    <span id="annAudience" class="ann-meta-aud"></span>
+                  </div>
+                  <button class="btn btn-primary" id="postBtn" onclick="postUpdate()">Post →</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── TIMETABLE SECTION ── -->
+            <div class="admin-section" data-section="timetable">
+              <section class="panel panel-feature" id="timetable">
+                <div class="panel-head">
+                  <div>
+                    <h2 class="panel-title">Weekly Timetable</h2>
+                    <p class="panel-sub" id="ttClassSub">
+                      Set the whole week at once. Add as many rows as you need, then click <strong>Save</strong>.
+                    </p>
+                  </div>
+                  <div class="panel-actions">
+                    <span class="panel-pill" id="ttCount">0 entries</span>
+                  </div>
+                </div>
+
+                <div id="ttTargetSelectors" class="tt-target-bar" style="display:none">
+                  <div class="form-row two">
+                    <div class="form-group">
+                      <label class="form-label">Faculty</label>
+                      <select class="form-select" id="ttFaculty" onchange="onTTTargetChange()">
+                        <option value="">Select faculty…</option>
+                        <option value="Faculty of Engineering">Faculty of Engineering</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Department</label>
+                      <select class="form-select" id="ttDept" onchange="onTTTargetChange()">
+                        <option value="">Select department…</option>
+                        <option value="Electronic &amp; Computer Engineering">Electronic &amp; Computer Engineering</option>
+                        <option value="Mechanical Engineering">Mechanical Engineering</option>
+                        <option value="Industrial &amp; Petroleum Engineering">Industrial &amp; Petroleum Engineering</option>
+                        <option value="Chemical &amp; Polymer Engineering">Chemical &amp; Polymer Engineering</option>
+                        <option value="Civil Engineering">Civil Engineering</option>
+                        <option value="Aerospace Engineering">Aerospace Engineering</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-row two">
+                    <div class="form-group">
+                      <label class="form-label">Level</label>
+                      <select class="form-select" id="ttLevel" onchange="onTTTargetChange()">
+                        <option value="">Select level…</option>
+                        <option value="100 Level">100 Level</option>
+                        <option value="200 Level">200 Level</option>
+                        <option value="300 Level">300 Level</option>
+                        <option value="400 Level">400 Level</option>
+                        <option value="500 Level">500 Level</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Semester</label>
+                      <select class="form-select" id="ttSemester" onchange="onTTTargetChange()">
+                        <option value="">Select semester…</option>
+                        <option value="First Semester">First Semester</option>
+                        <option value="Second Semester">Second Semester</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <datalist id="ttCodeSuggestions"></datalist>
+
+                <div class="tt-sheet-wrap">
+                  <table class="tt-sheet">
+                    <thead>
+                      <tr>
+                        <th class="th-day">Day</th>
+                        <th class="th-code">Course</th>
+                        <th class="th-time">Start</th>
+                        <th class="th-time">End</th>
+                        <th>Venue</th>
+                        <th>Lecturer</th>
+                        <th class="th-act"></th>
+                      </tr>
+                    </thead>
+                    <tbody id="ttSheetBody"></tbody>
+                  </table>
+                </div>
+                <div class="tt-sheet-foot">
+                  <button class="tt-add-row-btn" id="ttAddRowBtn" type="button" onclick="addTTDraftRow()">+ Add row</button>
+                  <div class="tt-sheet-actions">
+                    <span class="tt-draft-hint" id="ttDraftHint"></span>
+                    <button class="btn btn-primary" id="ttSaveAllBtn" type="button" onclick="saveTTDraftRows()" style="display:none">Save</button>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <!-- ── ACTIVITY SECTION ── -->
+            <div class="admin-section" data-section="activity">
+              <section class="panel" id="activity">
+                <div class="panel-head">
+                  <div>
+                    <h2 class="panel-title">Recent Activity</h2>
+                    <p class="panel-sub">Live feed of announcements and class changes.</p>
+                  </div>
+                </div>
+                <div id="updateLog">
+                  <div class="empty-state">
+                    <div class="empty-icon">📋</div>
+                    <div class="empty-text">No activity yet.</div>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <!-- ── COURSE CONTENT SECTION ── -->
+            <div class="admin-section" data-section="content">
+              <section class="panel" id="content">
+                <div class="panel-head">
+                  <div>
+                    <h2 class="panel-title">Course Content</h2>
+                    <p class="panel-sub">Upload notes and/or YouTube links per week. Re-uploading the same week updates only the fields you fill in.</p>
+                  </div>
+                </div>
+
                 <div class="form-row two">
                   <div class="form-group">
-                    <label class="form-label">Assigned Faculty</label>
-                    <select class="form-select" id="grantFaculty">
-                      <option value="">Select faculty…</option>
-                      <option value="Faculty of Engineering">Faculty of Engineering</option>
-                    </select>
+                    <label class="form-label">Course Code</label>
+                    <input class="form-input" id="ccCode" placeholder="e.g. ECE 309"
+                      oninput="this.value = this.value.toUpperCase()" list="ccCodeSuggestions" />
+                    <datalist id="ccCodeSuggestions"></datalist>
                   </div>
                   <div class="form-group">
-                    <label class="form-label">Assigned Department</label>
-                    <select class="form-select" id="grantDept">
-                      <option value="">Select department…</option>
-                      <option value="Electronic &amp; Computer Engineering">Electronic &amp; Computer Engineering</option>
-                      <option value="Mechanical Engineering">Mechanical Engineering</option>
-                      <option value="Industrial &amp; Petroleum Engineering">Industrial &amp; Petroleum Engineering</option>
-                      <option value="Chemical &amp; Polymer Engineering">Chemical &amp; Polymer Engineering</option>
-                      <option value="Civil Engineering">Civil Engineering</option>
-                      <option value="Aerospace Engineering">Aerospace Engineering</option>
+                    <label class="form-label">Week</label>
+                    <select class="form-select" id="ccWeek">
+                      <option value="">Select week…</option>
+                      <option value="1">Week 1</option><option value="2">Week 2</option>
+                      <option value="3">Week 3</option><option value="4">Week 4</option>
+                      <option value="5">Week 5</option><option value="6">Week 6</option>
+                      <option value="7">Week 7</option><option value="8">Week 8</option>
+                      <option value="9">Week 9</option><option value="10">Week 10</option>
+                      <option value="11">Week 11</option><option value="12">Week 12</option>
+                      <option value="13">Week 13</option><option value="14">Week 14</option>
+                      <option value="15">Week 15</option>
                     </select>
                   </div>
                 </div>
-                <div class="form-row two">
+
+                <div class="form-row">
                   <div class="form-group">
-                    <label class="form-label">Assigned Level</label>
-                    <select class="form-select" id="grantLevel">
-                      <option value="">Select level…</option>
-                      <option value="100 Level">100 Level</option>
-                      <option value="200 Level">200 Level</option>
-                      <option value="300 Level">300 Level</option>
-                      <option value="400 Level">400 Level</option>
-                      <option value="500 Level">500 Level</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Assigned Semester</label>
-                    <select class="form-select" id="grantSemester">
-                      <option value="">Select semester…</option>
-                      <option value="First Semester">First Semester</option>
-                      <option value="Second Semester">Second Semester</option>
-                    </select>
+                    <label class="form-label">Week Title</label>
+                    <input class="form-input" id="ccTitle" placeholder="e.g. Introduction to Signals" />
                   </div>
                 </div>
-              </div>
 
-              <div class="card-foot">
-                <div id="grantFeedback" class="feedback"></div>
-                <button class="btn btn-green" onclick="grantAdmin()">Grant Access</button>
-              </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Notes <span class="form-label-hint">(optional)</span></label>
+                    <div class="cc-drop-zone" id="ccDropZone" onclick="document.getElementById('ccFileInput').click()">
+                      <div class="cc-drop-icon">📄</div>
+                      <div class="cc-drop-text"><strong>Drop a .html file here</strong> or click to browse</div>
+                      <div class="cc-drop-sub" id="ccDropSub">Whole-page HTML works — styles and scripts stay isolated</div>
+                    </div>
+                    <input type="file" id="ccFileInput" accept=".html,.htm,text/html" style="display:none" />
+                    <textarea class="form-textarea" id="ccHtml" placeholder="…or paste HTML directly here"
+                      style="min-height:140px;font-family:ui-monospace,monospace;font-size:12px;margin-top:10px;"></textarea>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">YouTube URL <span class="form-label-hint">(optional)</span></label>
+                    <input class="form-input" id="ccYoutube" placeholder="https://youtube.com/watch?v=…" type="url" />
+                  </div>
+                </div>
+
+                <div class="ann-foot">
+                  <div class="ann-meta">
+                    Uploading as <span id="contentPostedAsLabel" class="ann-meta-strong">—</span>
+                  </div>
+                  <button class="btn btn-primary" id="ccUploadBtn" onclick="uploadCourseContent()">Upload →</button>
+                </div>
+              </section>
             </div>
 
-            <div class="sub-section-label">Current Admins &amp; Reps</div>
-            <div class="admin-list" id="adminList"></div>
-          </div>
-        </details>
+            <!-- ── COURSES SECTION ── -->
+            <div class="admin-section" data-section="courses">
+              <details class="panel panel-collapsible" id="courses" open>
+                <summary class="panel-head panel-head-summary">
+                  <div>
+                    <h2 class="panel-title">Manage Courses</h2>
+                    <p class="panel-sub">Add or edit the courses students can pick. Rarely needed.</p>
+                  </div>
+                  <span class="panel-chev">▾</span>
+                </summary>
+                <div class="panel-body" id="manageCoursesSection">
+                  <div class="card-flush">
+                    <div class="card-title">Add or edit a course</div>
+                    <div class="card-sub">Courses added here become available to students immediately.</div>
+                    <div class="form-row two">
+                      <div class="form-group">
+                        <label class="form-label">Course Code</label>
+                        <input class="form-input" id="cAddCode" placeholder="e.g. ECE 301" oninput="this.value = this.value.toUpperCase()" />
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label">Course Title</label>
+                        <input class="form-input" id="cAddTitle" placeholder="e.g. Signals &amp; Systems" />
+                      </div>
+                    </div>
+                    <div class="form-row two">
+                      <div class="form-group">
+                        <label class="form-label">Faculty</label>
+                        <select class="form-select" id="cAddFaculty">
+                          <option value="">Select faculty…</option>
+                          <option value="Faculty of Engineering">Faculty of Engineering</option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label">Department</label>
+                        <select class="form-select" id="cAddDept">
+                          <option value="">Select department…</option>
+                          <option value="Electronic &amp; Computer Engineering">Electronic &amp; Computer Engineering</option>
+                          <option value="Mechanical Engineering">Mechanical Engineering</option>
+                          <option value="Industrial &amp; Petroleum Engineering">Industrial &amp; Petroleum Engineering</option>
+                          <option value="Chemical &amp; Polymer Engineering">Chemical &amp; Polymer Engineering</option>
+                          <option value="Civil Engineering">Civil Engineering</option>
+                          <option value="Aerospace Engineering">Aerospace Engineering</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-row two">
+                      <div class="form-group">
+                        <label class="form-label">Level</label>
+                        <select class="form-select" id="cAddLevel">
+                          <option value="">Select level…</option>
+                          <option value="100 Level">100 Level</option>
+                          <option value="200 Level">200 Level</option>
+                          <option value="300 Level">300 Level</option>
+                          <option value="400 Level">400 Level</option>
+                          <option value="500 Level">500 Level</option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label">Semester</label>
+                        <select class="form-select" id="cAddSemester">
+                          <option value="">Select semester…</option>
+                          <option value="First Semester">First Semester</option>
+                          <option value="Second Semester">Second Semester</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-row two">
+                      <div class="form-group">
+                        <label class="form-label">Units</label>
+                        <input class="form-input" id="cAddUnits" type="number" min="1" max="6" value="3" />
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label">Description <span class="form-label-hint">(optional)</span></label>
+                        <input class="form-input" id="cAddDesc" placeholder="One-line summary" />
+                      </div>
+                    </div>
+                    <div class="card-foot">
+                      <div id="cAddFeedback" class="feedback"></div>
+                      <button class="btn btn-primary" id="cAddBtn" onclick="saveCourse()">Save Course →</button>
+                    </div>
+                  </div>
 
-        <!-- EXAM TIMETABLE UPLOAD -->
-        <section class="panel panel-feature" id="exam-timetable">
-          <div class="panel-head">
-            <div>
-              <h2 class="panel-title">Exam Timetable</h2>
-              <p class="panel-sub">Enter the exam schedule row by row. Students in that department will see it automatically on their Exam Timetable page.</p>
+                  <div class="sub-section-label">Existing Courses</div>
+                  <div id="courseList">
+                    <div class="empty-state">
+                      <div class="empty-icon">📚</div>
+                      <div class="empty-text">Loading courses…</div>
+                    </div>
+                  </div>
+                </div>
+              </details>
             </div>
-            <div class="panel-actions">
-              <span class="panel-pill" id="etCount">0 entries</span>
-            </div>
-          </div>
 
-          <div class="tt-target-bar">
-            <div class="form-row two">
-              <div class="form-group">
-                <label class="form-label">Department</label>
-                <select class="form-select" id="etDept" onchange="onETTargetChange()">
-                  <option value="">Select department…</option>
-                  <option value="Electronic &amp; Computer Engineering">Electronic &amp; Computer Engineering</option>
-                  <option value="Mechanical Engineering">Mechanical Engineering</option>
-                  <option value="Industrial &amp; Petroleum Engineering">Industrial &amp; Petroleum Engineering</option>
-                  <option value="Chemical &amp; Polymer Engineering">Chemical &amp; Polymer Engineering</option>
-                  <option value="Civil Engineering">Civil Engineering</option>
-                  <option value="Aerospace Engineering">Aerospace Engineering</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Semester</label>
-                <select class="form-select" id="etSemester" onchange="onETTargetChange()">
-                  <option value="">Select semester…</option>
-                  <option value="First Semester">First Semester</option>
-                  <option value="Second Semester">Second Semester</option>
-                </select>
-              </div>
+            <!-- ── ACCESS & ROLES SECTION ── -->
+            <div class="admin-section" data-section="access">
+              <details class="panel panel-collapsible" id="access" open>
+                <summary class="panel-head panel-head-summary">
+                  <div>
+                    <h2 class="panel-title">Access &amp; Roles</h2>
+                    <p class="panel-sub">Grant admin or class rep access to other staff.</p>
+                  </div>
+                  <span class="panel-chev">▾</span>
+                </summary>
+                <div class="panel-body" id="adminAccessSection">
+                  <div class="card-flush">
+                    <div class="card-title">Grant access</div>
+                    <div class="card-sub">
+                      The person must have signed into Unify at least once. Enter their registered
+                      email — they'll see this console on their next login.
+                    </div>
+                    <div class="form-row two">
+                      <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input class="form-input" id="grantEmail" placeholder="e.g. hod.ece@lasu.edu.ng" type="email" />
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label">Role</label>
+                        <select class="form-select" id="grantRole" onchange="onGrantRoleChange()">
+                          <option value="academic_lead">Academic Lead (HOD/Coordinator)</option>
+                          <option value="class_rep">Class Rep</option>
+                          <option value="super_admin">Super Admin</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div id="grantAssignmentFields" style="display:none">
+                      <div class="form-row two">
+                        <div class="form-group">
+                          <label class="form-label">Assigned Faculty</label>
+                          <select class="form-select" id="grantFaculty">
+                            <option value="">Select faculty…</option>
+                            <option value="Faculty of Engineering">Faculty of Engineering</option>
+                          </select>
+                        </div>
+                        <div class="form-group">
+                          <label class="form-label">Assigned Department</label>
+                          <select class="form-select" id="grantDept">
+                            <option value="">Select department…</option>
+                            <option value="Electronic &amp; Computer Engineering">Electronic &amp; Computer Engineering</option>
+                            <option value="Mechanical Engineering">Mechanical Engineering</option>
+                            <option value="Industrial &amp; Petroleum Engineering">Industrial &amp; Petroleum Engineering</option>
+                            <option value="Chemical &amp; Polymer Engineering">Chemical &amp; Polymer Engineering</option>
+                            <option value="Civil Engineering">Civil Engineering</option>
+                            <option value="Aerospace Engineering">Aerospace Engineering</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="form-row two">
+                        <div class="form-group">
+                          <label class="form-label">Assigned Level</label>
+                          <select class="form-select" id="grantLevel">
+                            <option value="">Select level…</option>
+                            <option value="100 Level">100 Level</option>
+                            <option value="200 Level">200 Level</option>
+                            <option value="300 Level">300 Level</option>
+                            <option value="400 Level">400 Level</option>
+                            <option value="500 Level">500 Level</option>
+                          </select>
+                        </div>
+                        <div class="form-group">
+                          <label class="form-label">Assigned Semester</label>
+                          <select class="form-select" id="grantSemester">
+                            <option value="">Select semester…</option>
+                            <option value="First Semester">First Semester</option>
+                            <option value="Second Semester">Second Semester</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-foot">
+                      <div id="grantFeedback" class="feedback"></div>
+                      <button class="btn btn-green" onclick="grantAdmin()">Grant Access</button>
+                    </div>
+                  </div>
+                  <div class="sub-section-label">Current Admins &amp; Reps</div>
+                  <div class="admin-list" id="adminList"></div>
+                </div>
+              </details>
             </div>
-          </div>
 
-          <div class="tt-sheet-wrap">
-            <table class="tt-sheet">
-              <thead>
-                <tr>
-                  <th class="th-code">Course</th>
-                  <th style="min-width:130px">Date</th>
-                  <th class="th-time">Start</th>
-                  <th class="th-time">End</th>
-                  <th>Venue</th>
-                  <th class="th-act"></th>
-                </tr>
-              </thead>
-              <tbody id="etSheetBody">
-                <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3);font-size:13px">Select a department to load or enter exam entries.</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="tt-sheet-foot">
-            <button class="tt-add-row-btn" id="etAddRowBtn" type="button" onclick="addETDraftRow()">+ Add row</button>
-            <div class="tt-sheet-actions">
-              <span class="tt-draft-hint" id="etDraftHint"></span>
-              <button class="btn btn-primary" id="etSaveAllBtn" type="button" onclick="saveETRows()" style="display:none">Save</button>
-            </div>
-          </div>
-        </section>
+            <!-- ── EXAM TIMETABLE SECTION ── -->
+            <div class="admin-section" data-section="exam-timetable">
+              <section class="panel panel-feature" id="exam-timetable">
+                <div class="panel-head">
+                  <div>
+                    <h2 class="panel-title">Exam Timetable</h2>
+                    <p class="panel-sub">Enter the exam schedule row by row. Students in that department will see it automatically.</p>
+                  </div>
+                  <div class="panel-actions">
+                    <span class="panel-pill" id="etCount">0 entries</span>
+                  </div>
+                </div>
 
-        <!-- FEEDBACK INBOX -->
-        <section class="panel" id="feedback">
-          <div class="panel-head">
-            <div>
-              <h2 class="panel-title">Student Feedback</h2>
-              <p class="panel-sub">Feedback submitted by students via the in-app feedback button.</p>
+                <div class="tt-target-bar">
+                  <div class="form-row two">
+                    <div class="form-group">
+                      <label class="form-label">Department</label>
+                      <select class="form-select" id="etDept" onchange="onETTargetChange()">
+                        <option value="">Select department…</option>
+                        <option value="Electronic &amp; Computer Engineering">Electronic &amp; Computer Engineering</option>
+                        <option value="Mechanical Engineering">Mechanical Engineering</option>
+                        <option value="Industrial &amp; Petroleum Engineering">Industrial &amp; Petroleum Engineering</option>
+                        <option value="Chemical &amp; Polymer Engineering">Chemical &amp; Polymer Engineering</option>
+                        <option value="Civil Engineering">Civil Engineering</option>
+                        <option value="Aerospace Engineering">Aerospace Engineering</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Semester</label>
+                      <select class="form-select" id="etSemester" onchange="onETTargetChange()">
+                        <option value="">Select semester…</option>
+                        <option value="First Semester">First Semester</option>
+                        <option value="Second Semester">Second Semester</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="tt-sheet-wrap">
+                  <table class="tt-sheet">
+                    <thead>
+                      <tr>
+                        <th class="th-code">Course</th>
+                        <th style="min-width:130px">Date</th>
+                        <th class="th-time">Start</th>
+                        <th class="th-time">End</th>
+                        <th>Venue</th>
+                        <th class="th-act"></th>
+                      </tr>
+                    </thead>
+                    <tbody id="etSheetBody">
+                      <tr><td colspan="6" style="text-align:center;padding:24px;color:#aaa;font-size:13px">Select a department to load or enter exam entries.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="tt-sheet-foot">
+                  <button class="tt-add-row-btn" id="etAddRowBtn" type="button" onclick="addETDraftRow()">+ Add row</button>
+                  <div class="tt-sheet-actions">
+                    <span class="tt-draft-hint" id="etDraftHint"></span>
+                    <button class="btn btn-primary" id="etSaveAllBtn" type="button" onclick="saveETRows()" style="display:none">Save</button>
+                  </div>
+                </div>
+              </section>
             </div>
-            <div class="panel-actions">
-              <span class="panel-pill" id="fbCount">0 items</span>
+
+            <!-- ── FEEDBACK SECTION ── -->
+            <div class="admin-section" data-section="feedback">
+              <section class="panel" id="feedback">
+                <div class="panel-head">
+                  <div>
+                    <h2 class="panel-title">Student Feedback</h2>
+                    <p class="panel-sub">Feedback submitted by students via the in-app feedback button.</p>
+                  </div>
+                  <div class="panel-actions">
+                    <span class="panel-pill" id="fbCount">0 items</span>
+                  </div>
+                </div>
+                <div class="panel-body">
+                  <div class="fb-filters">
+                    <select class="form-select" id="fbFilterCat" onchange="loadFeedback()" style="width:auto;min-width:160px">
+                      <option value="">All categories</option>
+                      <option value="Bug Report">Bug Report</option>
+                      <option value="Feature Request">Feature Request</option>
+                      <option value="UI/UX Issue">UI/UX Issue</option>
+                      <option value="Academic Issue">Academic Issue</option>
+                      <option value="Other">Other</option>
+                    </select>
+                    <select class="form-select" id="fbFilterStatus" onchange="loadFeedback()" style="width:auto;min-width:140px">
+                      <option value="">All statuses</option>
+                      <option value="open">Open</option>
+                      <option value="resolved">Resolved</option>
+                    </select>
+                  </div>
+                  <div id="fbList"></div>
+                </div>
+              </section>
             </div>
-          </div>
-          <div class="panel-body">
-            <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-              <select class="form-select" id="fbFilterCat" onchange="loadFeedback()" style="width:auto;min-width:160px">
-                <option value="">All categories</option>
-                <option value="Bug Report">Bug Report</option>
-                <option value="Feature Request">Feature Request</option>
-                <option value="UI/UX Issue">UI/UX Issue</option>
-                <option value="Academic Issue">Academic Issue</option>
-                <option value="Other">Other</option>
-              </select>
-              <select class="form-select" id="fbFilterStatus" onchange="loadFeedback()" style="width:auto;min-width:140px">
-                <option value="">All statuses</option>
-                <option value="open">Open</option>
-                <option value="resolved">Resolved</option>
-              </select>
+
+            <!-- anchorNav kept as hidden for admin.js compat -->
+            <nav id="anchorNav" style="display:none">
+              <a href="#announcements" data-anchor="announcements">Announcements</a>
+              <a href="#timetable" data-anchor="timetable">Timetable</a>
+              <a href="#activity" data-anchor="activity">Activity</a>
+              <a href="#content" data-anchor="content">Content</a>
+              <a href="#courses" data-anchor="courses">Courses</a>
+              <a href="#access" data-anchor="access">Access</a>
+              <a href="#exam-timetable" data-anchor="exam-timetable">Exam Timetable</a>
+              <a href="#feedback" data-anchor="feedback">Feedback</a>
+            </nav>
+
+            <!-- Hidden stat fields used by admin.js -->
+            <div style="display:none">
+              <span id="statEntriesSub"></span>
+              <span id="statLast"></span>
+              <span id="statLastSub"></span>
             </div>
-            <div id="fbList"></div>
-          </div>
-        </section>
-      </main>
-    </div>
+
+          </div><!-- end admin-content -->
+        </div><!-- end admin-main -->
+      </div><!-- end admin-shell -->
+    </div><!-- end mainContent -->
 
     <div class="toast" id="toast"></div>
+
+    <script>
+      // ── Sidebar navigation ──────────────────────────────────────
+      function showSection(sectionName) {
+        document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+
+        var target = document.querySelector('.admin-section[data-section="' + sectionName + '"]');
+        if (target) target.classList.add('active');
+
+        var navBtn = document.querySelector('.sidebar-item[data-section="' + sectionName + '"]');
+        if (navBtn) navBtn.classList.add('active');
+
+        // Scroll to top of content
+        var content = document.querySelector('.admin-content');
+        if (content) content.scrollTop = 0;
+      }
+
+      // Wire up sidebar nav buttons
+      document.querySelectorAll('.sidebar-item[data-section]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          showSection(this.dataset.section);
+        });
+      });
+
+      // Mobile sidebar
+      function openSidebar() {
+        document.getElementById('adminSidebar').classList.add('open');
+        document.getElementById('sidebarOverlay').classList.add('active');
+      }
+      function closeSidebar() {
+        document.getElementById('adminSidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('active');
+      }
+
+      // Sync topbar avatar/name when admin.js sets navUser
+      var _navUserObs = new MutationObserver(function() {
+        var navUser = document.getElementById('navUser');
+        var name = navUser ? navUser.textContent.trim() : '';
+        var av = document.getElementById('topbarAvatar');
+        if (av && name) av.textContent = name.charAt(0).toUpperCase();
+        var ovName = document.getElementById('ovName');
+        if (ovName && name) ovName.textContent = name;
+        // Also sync hero name
+        var heroName = document.getElementById('heroName');
+        if (heroName && heroName.textContent && !document.getElementById('ovName').textContent) {
+          var hn = heroName.textContent;
+          if (ovName) ovName.textContent = hn;
+        }
+      });
+      var _navUserEl = document.getElementById('navUser');
+      if (_navUserEl) _navUserObs.observe(_navUserEl, { childList: true, characterData: true, subtree: true });
+
+      // Sync heroName -> ovName
+      var _heroNameObs = new MutationObserver(function() {
+        var heroName = document.getElementById('heroName');
+        var ovName = document.getElementById('ovName');
+        if (heroName && ovName) {
+          var txt = heroName.textContent.trim();
+          if (txt && txt !== '—') ovName.textContent = txt;
+        }
+      });
+      var _heroNameEl = document.getElementById('heroName');
+      if (_heroNameEl) _heroNameObs.observe(_heroNameEl, { childList: true, characterData: true, subtree: true });
+
+      // Sync roleBadge -> topbarRole
+      var _roleBadgeObs = new MutationObserver(function() {
+        var rb = document.getElementById('roleBadge');
+        var tr = document.getElementById('topbarRole');
+        if (rb && tr && rb.textContent.trim()) tr.textContent = rb.textContent.trim();
+      });
+      var _rbEl = document.getElementById('roleBadge');
+      if (_rbEl) _roleBadgeObs.observe(_rbEl, { childList: true, characterData: true, subtree: true });
+    </script>
 
     <script type="module" src="js/admin.js?v=content-3"></script>
   </body>

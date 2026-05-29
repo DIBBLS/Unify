@@ -174,6 +174,13 @@ async function loadUserData() {
       } catch (e) { /* non-fatal */ }
     }
 
+    // Show Admin Console link for non-student roles
+    const userRole = d.role || (d.isAdmin ? 'super_admin' : 'student');
+    if (userRole !== 'student') {
+      const adminLink = document.getElementById('adminNavLink');
+      if (adminLink) adminLink.style.display = 'flex';
+    }
+
     userProfile = {
       university: d.university,
       faculty: d.faculty,
