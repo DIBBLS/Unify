@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unify — Upgrade</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/responsive.css">
+<script src="js/theme.js"></script>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#16a34a">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+<script src="js/register-sw.js" defer></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* NAV */
+.pay-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 2rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.pay-nav-logo {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--text);
+  text-decoration: none;
+}
+.pay-nav-back {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--text2);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.pay-nav-back:hover { color: var(--text); }
+.pay-nav-back svg { width: 16px; height: 16px; }
+
+/* HERO */
+.pay-hero {
+  text-align: center;
+  padding: 3.5rem 1.5rem 2.5rem;
+}
+.pay-hero-eyebrow {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green-deep);
+  background: var(--green-bg);
+  border: 1px solid var(--green-border);
+  border-radius: 99px;
+  padding: 0.28rem 0.9rem;
+  margin-bottom: 1rem;
+}
+.pay-hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 5vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1.15;
+  margin-bottom: 0.75rem;
+}
+.pay-hero h1 em { font-style: italic; color: var(--green-deep); }
+.pay-hero p {
+  color: var(--text2);
+  font-size: 1rem;
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* BILLING TOGGLE */
+.billing-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 2rem auto 2.5rem;
+}
+.billing-label {
+  font-size: 0.875rem;
+  color: var(--text2);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.billing-label.active { color: var(--text); font-weight: 500; }
+.toggle-track {
+  position: relative;
+  width: 46px;
+  height: 26px;
+  background: var(--border);
+  border-radius: 99px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.toggle-track.on { background: var(--green-deep); }
+.toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle-track.on .toggle-thumb { transform: translateX(20px); }
+.save-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--green-deep);
+  background: var(--green-bg);
+  border: 1px solid var(--green-border);
+  border-radius: 99px;
+  padding: 0.15rem 0.55rem;
+}
+
+/* PLANS GRID */
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1.5rem 3rem;
+}
+
+.plan-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.plan-card:hover {
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+.plan-card.featured {
+  border-color: var(--green-deep);
+  box-shadow: 0 0 0 1px var(--green-deep), 0 4px 24px rgba(22,163,74,0.12);
+}
+
+.plan-badge {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--green-deep);
+  color: #fff;
+  border-radius: 99px;
+  padding: 0.25rem 0.9rem;
+  white-space: nowrap;
+}
+
+.plan-header { display: flex; flex-direction: column; gap: 0.35rem; }
+.plan-name {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+.plan-desc { font-size: 0.85rem; color: var(--text2); line-height: 1.5; }
+
+.plan-price { display: flex; align-items: baseline; gap: 0.25rem; }
+.plan-currency { font-size: 1.1rem; color: var(--text2); }
+.plan-amount {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  font-weight: 900;
+  line-height: 1;
+}
+.plan-period { font-size: 0.82rem; color: var(--text3); }
+.plan-price-note { font-size: 0.78rem; color: var(--text3); margin-top: 0.2rem; }
+
+.plan-features { list-style: none; display: flex; flex-direction: column; gap: 0.7rem; flex: 1; }
+.plan-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.875rem;
+  color: var(--text2);
+}
+.plan-feature.included { color: var(--text); }
+.feature-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
+.feature-icon.check { color: var(--green-deep); }
+.feature-icon.cross { color: var(--text3); }
+
+.plan-cta {
+  display: block;
+  width: 100%;
+  padding: 0.85rem 1.5rem;
+  border-radius: 10px;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.plan-cta:hover {
+  background: var(--surface2);
+  border-color: var(--text3);
+}
+.plan-cta.primary {
+  background: var(--green-deep);
+  border-color: var(--green-deep);
+  color: #fff;
+}
+.plan-cta.primary:hover { background: #15803d; border-color: #15803d; }
+.plan-cta:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* COURSE UNLOCK SECTION */
+.unlock-section {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1.5rem 4rem;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+.section-sub {
+  font-size: 0.875rem;
+  color: var(--text2);
+  margin-bottom: 1.5rem;
+}
+.courses-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.85rem;
+}
+.course-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  transition: box-shadow 0.15s;
+}
+.course-item:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+.course-info { display: flex; flex-direction: column; gap: 0.15rem; }
+.course-code { font-weight: 600; font-size: 0.875rem; }
+.course-name { font-size: 0.78rem; color: var(--text2); }
+.course-price-tag {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--green-deep);
+  background: var(--green-bg);
+  border: 1px solid var(--green-border);
+  border-radius: 6px;
+  padding: 0.2rem 0.55rem;
+  white-space: nowrap;
+}
+.course-btn {
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.38rem 0.85rem;
+  border-radius: 7px;
+  border: 1.5px solid var(--green-deep);
+  background: transparent;
+  color: var(--green-deep);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.course-btn:hover { background: var(--green-deep); color: #fff; }
+.course-btn.owned {
+  border-color: var(--border);
+  color: var(--text3);
+  cursor: default;
+}
+.course-btn.owned:hover { background: transparent; color: var(--text3); }
+
+/* PAYMENT MODAL */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 440px;
+  position: relative;
+  animation: modal-in 0.2s ease;
+}
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.97) translateY(8px); }
+  to   { opacity: 1; transform: scale(1)   translateY(0); }
+}
+
+.modal-close {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.1rem;
+  background: var(--surface2);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text2);
+  font-size: 1rem;
+  transition: background 0.15s;
+}
+.modal-close:hover { background: var(--border); }
+
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+.modal-sub { font-size: 0.85rem; color: var(--text2); margin-bottom: 1.5rem; }
+
+.order-summary {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.5rem;
+}
+.order-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  padding: 0.3rem 0;
+}
+.order-row.total {
+  border-top: 1px solid var(--border);
+  margin-top: 0.5rem;
+  padding-top: 0.7rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.order-row-label { color: var(--text2); }
+.order-row-value { font-weight: 500; }
+.order-row.total .order-row-value { color: var(--green-deep); }
+
+.form-group { margin-bottom: 1rem; }
+.form-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text2);
+  margin-bottom: 0.4rem;
+}
+.form-input {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.form-input:focus { border-color: var(--green-deep); }
+
+.pay-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.9rem 1.5rem;
+  background: var(--green-deep);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 0.5rem;
+}
+.pay-btn:hover { background: #15803d; }
+.pay-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.powered-by {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  color: var(--text3);
+}
+.flw-logo {
+  height: 16px;
+  filter: grayscale(1) opacity(0.5);
+}
+
+/* SUCCESS STATE */
+.success-state {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+.success-state.show { display: flex; }
+.success-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--green-bg);
+  border: 2px solid var(--green-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+}
+.success-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+.success-sub { font-size: 0.875rem; color: var(--text2); line-height: 1.6; }
+.success-actions { display: flex; gap: 0.75rem; width: 100%; flex-wrap: wrap; }
+.success-actions a, .success-actions button {
+  flex: 1;
+  padding: 0.75rem;
+  border-radius: 9px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+.success-actions .btn-outline {
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text);
+}
+.success-actions .btn-filled {
+  border: none;
+  background: var(--green-deep);
+  color: #fff;
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--text);
+  color: var(--bg);
+  font-size: 0.875rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: 99px;
+  z-index: 200;
+  transition: transform 0.3s;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .pay-nav { padding: 1rem 1.25rem; }
+  .plans-grid, .unlock-section { padding-left: 1rem; padding-right: 1rem; }
+  .plan-card { padding: 1.5rem 1.25rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="pay-nav">
+  <a href="index.html" class="pay-nav-logo">Unify</a>
+  <a href="dashboard.html" class="pay-nav-back">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Back to Dashboard
+  </a>
+</nav>
+
+<!-- HERO -->
+<div class="pay-hero">
+  <span class="pay-hero-eyebrow">Upgrade your learning</span>
+  <h1>Unlock everything<br>Unify has to <em>offer.</em></h1>
+  <p>Get full access to all course materials, study tools, and career resources — built for LASU Engineering students.</p>
+</div>
+
+<!-- BILLING TOGGLE -->
+<div class="billing-toggle">
+  <span class="billing-label active" id="label-monthly" onclick="setBilling('monthly')">Monthly</span>
+  <div class="toggle-track" id="billingToggle" onclick="toggleBilling()">
+    <div class="toggle-thumb"></div>
+  </div>
+  <span class="billing-label" id="label-annual" onclick="setBilling('annual')">Annual</span>
+  <span class="save-badge">Save 30%</span>
+</div>
+
+<!-- PLANS -->
+<div class="plans-grid">
+
+  <!-- FREE -->
+  <div class="plan-card">
+    <div class="plan-header">
+      <div class="plan-name">Free</div>
+      <div class="plan-desc">Get started with the basics. No card required.</div>
+    </div>
+    <div>
+      <div class="plan-price">
+        <span class="plan-currency">₦</span>
+        <span class="plan-amount">0</span>
+        <span class="plan-period">/ forever</span>
+      </div>
+    </div>
+    <ul class="plan-features">
+      <li class="plan-feature included">
+        <svg class="feature-icon check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        CGPA calculator & predictor
+      </li>
+      <li class="plan-feature included">
+        <svg class="feature-icon check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Weekly timetable
+      </li>
+      <li class="plan-feature included">
+        <svg class="feature-icon check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Social profile & feed
+      </li>
+      <li class="plan-feature">
+        <svg class="feature-icon cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Full course library (week-by-week)
+      </li>
+      <li class="plan-feature">
+        <svg class="feature-icon cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Past questions & resources
+      </li>
+      <li class="plan-feature">
+        <svg class="feature-icon cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Career tools & opportunities
+      </li>
+    </ul>
+    <button class="plan-cta" disabled>Current plan</button>
+  </div>
+
+  <!-- PRO (FEATURED) -->
+  <div class="plan-card featured">
+    <div class="plan-badge">Most Popular</div>
+    <div class="plan-header">
+      <div class="plan-name">Pro</div>
+      <div class="plan-desc">Everything you need to ace every semester.</div>
+    </div>
+    <div>
+      <div class="plan-price">
+        <span class="plan-currency">₦</span>
+        <span class="plan-amount" id="pro-price">2,500</span>
+        <span class="plan-period" id="pro-period">/ month</span>
+      </div>
+      <div class="plan-price-note" id="pro-note">Billed monthly · Cancel anytime</div>
+    </div>
+    <ul class="plan-features">
+      <li class="plan-feature included">
+        <svg class="feature-icon check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Everything in Free
+      </li>
+      <li class="plan-feature included">
+        <svg class="feature-icon check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Full course library (all 12 weeks)
+      </li>
+      <li class="plan-feature included">
+        <svg class="feature-icon check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Past questions & PDF resources
+      </li>
+      <li class="plan-feature included">
+        <svg class="feature-icon check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Career tools & job listings
+      </li>
+      <li class="plan-feature included">
+        <svg class="feature-icon check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Priority support
+      </li>
+    </ul>
+    <button class="plan-cta primary" onclick="openModal('pro')">Get Pro →</button>
+  </div>
+
+  <!-- DEPARTMENT PASS -->
+  <div class="plan-card">
+    <div class="plan-header">
+      <div class="plan-name">Department Pass</div>
+      <div class="plan-desc">All courses for your specific department, one semester.</div>
+    </div>
+    <div>
+      <div class="plan-price">
+        <span class="plan-currency">₦</span>
+        <span class="plan-amount" id="dept-price">5,000</span>
+        <span class="plan-period">/ semester</span>
+      </div>
+      <div class="plan-price-note">One-time · No renewal</div>
+    </div>
+    <ul class="plan-features">
+      <li class="plan-feature included">
+        <svg class="feature-icon check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        All courses for your department
+      </li>
+      <li class="plan-feature included">
+        <svg class="feature-icon check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Week-by-week study content
+      </li>
+      <li class="plan-feature included">
+        <svg class="feature-icon check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Past questions & resources
+      </li>
+      <li class="plan-feature">
+        <svg class="feature-icon cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Career tools
+      </li>
+      <li class="plan-feature">
+        <svg class="feature-icon cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Priority support
+      </li>
+    </ul>
+    <button class="plan-cta" onclick="openModal('dept')">Get Department Pass →</button>
+  </div>
+
+</div>
+
+<!-- COURSE UNLOCKS -->
+<div class="unlock-section">
+  <div class="section-title">Buy individual courses</div>
+  <div class="section-sub">Only need a specific course? Unlock it once and keep it for the semester.</div>
+
+  <div class="courses-list" id="coursesList">
+    <!-- populated by JS -->
+  </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">&#x2715;</button>
+
+    <!-- FORM STATE -->
+    <div id="formState">
+      <div class="modal-title" id="modalTitle">Upgrade to Pro</div>
+      <div class="modal-sub" id="modalSub">Enter your details to continue with Flutterwave.</div>
+
+      <div class="order-summary" id="orderSummary">
+        <div class="order-row">
+          <span class="order-row-label" id="summaryItem">Pro Plan (Monthly)</span>
+          <span class="order-row-value" id="summaryPrice">₦2,500</span>
+        </div>
+        <div class="order-row total">
+          <span class="order-row-label">Total</span>
+          <span class="order-row-value" id="summaryTotal">₦2,500</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input class="form-input" type="text" id="payerName" placeholder="Your full name" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" type="email" id="payerEmail" placeholder="you@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input class="form-input" type="tel" id="payerPhone" placeholder="080XXXXXXXX" autocomplete="tel">
+      </div>
+
+      <button class="pay-btn" id="payBtn" onclick="initiatePayment()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Pay with Flutterwave
+      </button>
+
+      <div class="powered-by">
+        Secured by Flutterwave
+      </div>
+    </div>
+
+    <!-- SUCCESS STATE -->
+    <div class="success-state" id="successState">
+      <div class="success-icon">✓</div>
+      <div class="success-title">Payment successful!</div>
+      <div class="success-sub" id="successMsg">Your Pro plan is now active. Enjoy full access to everything Unify has to offer.</div>
+      <div class="success-actions">
+        <button class="btn-outline" onclick="closeModal()">Close</button>
+        <a class="btn-filled" href="Learn.html">Go to Library →</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ─── Configuration ────────────────────────────────────────────────────────
+  // Replace with your actual Flutterwave public key
+  const FLW_PUBLIC_KEY = 'FLWPUBK_TEST-XXXXXXXXXXXXXXXXXXXX-X';
+
+  const PRICES = {
+    monthly: { pro: 2500, dept: 5000 },
+    annual:  { pro: 21000, dept: 5000 }
+  };
+
+  const COURSES = [
+    { code: 'CHE 206', name: 'Chemical Engineering Thermodynamics', price: 800 },
+    { code: 'ECE 210', name: 'Circuit Theory', price: 800 },
+    { code: 'ECE 351', name: 'Signals & Systems', price: 800 },
+    { code: 'MAT 101', name: 'Engineering Mathematics I', price: 600 },
+    { code: 'MEE 301', name: 'Engineering Mechanics', price: 800 },
+    { code: 'CVE 201', name: 'Strength of Materials', price: 800 },
+  ];
+
+  // ─── State ────────────────────────────────────────────────────────────────
+  let billing = 'monthly';
+  let currentOrder = null;
+
+  // ─── Billing Toggle ───────────────────────────────────────────────────────
+  function toggleBilling() {
+    setBilling(billing === 'monthly' ? 'annual' : 'monthly');
+  }
+
+  function setBilling(mode) {
+    billing = mode;
+    const track = document.getElementById('billingToggle');
+    const lm = document.getElementById('label-monthly');
+    const la = document.getElementById('label-annual');
+    if (mode === 'annual') {
+      track.classList.add('on');
+      lm.classList.remove('active');
+      la.classList.add('active');
+      document.getElementById('pro-price').textContent = '21,000';
+      document.getElementById('pro-period').textContent = '/ year';
+      document.getElementById('pro-note').textContent = 'Billed annually · Saves ₦9,000';
+    } else {
+      track.classList.remove('on');
+      lm.classList.add('active');
+      la.classList.remove('active');
+      document.getElementById('pro-price').textContent = '2,500';
+      document.getElementById('pro-period').textContent = '/ month';
+      document.getElementById('pro-note').textContent = 'Billed monthly · Cancel anytime';
+    }
+  }
+
+  // ─── Course List ──────────────────────────────────────────────────────────
+  function renderCourses() {
+    const owned = JSON.parse(localStorage.getItem('unify_owned_courses') || '[]');
+    const list = document.getElementById('coursesList');
+    list.innerHTML = COURSES.map(c => `
+      <div class="course-item">
+        <div class="course-info">
+          <span class="course-code">${c.code}</span>
+          <span class="course-name">${c.name}</span>
+        </div>
+        ${owned.includes(c.code)
+          ? `<button class="course-btn owned" disabled>Owned</button>`
+          : `<span class="course-price-tag">₦${c.price.toLocaleString()}</span>
+             <button class="course-btn" onclick="openModal('course', ${JSON.stringify(c).replace(/"/g, '&quot;')})">Unlock</button>`
+        }
+      </div>
+    `).join('');
+  }
+
+  // ─── Modal ────────────────────────────────────────────────────────────────
+  function openModal(type, courseData) {
+    let title, sub, item, price, amount;
+
+    if (type === 'pro') {
+      const isAnnual = billing === 'annual';
+      amount = isAnnual ? PRICES.annual.pro : PRICES.monthly.pro;
+      title = 'Upgrade to Pro';
+      sub = 'Enter your details to continue with Flutterwave.';
+      item = `Pro Plan (${isAnnual ? 'Annual' : 'Monthly'})`;
+      price = `₦${amount.toLocaleString()}`;
+      currentOrder = { type: 'pro', amount, label: item };
+    } else if (type === 'dept') {
+      amount = PRICES.monthly.dept;
+      title = 'Get Department Pass';
+      sub = 'One-time payment for your department this semester.';
+      item = 'Department Pass (Semester)';
+      price = `₦${amount.toLocaleString()}`;
+      currentOrder = { type: 'dept', amount, label: item };
+    } else if (type === 'course') {
+      amount = courseData.price;
+      title = `Unlock ${courseData.code}`;
+      sub = `One-time access to all ${courseData.code} study content.`;
+      item = courseData.name;
+      price = `₦${amount.toLocaleString()}`;
+      currentOrder = { type: 'course', amount, label: item, code: courseData.code };
+    }
+
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalSub').textContent = sub;
+    document.getElementById('summaryItem').textContent = item;
+    document.getElementById('summaryPrice').textContent = price;
+    document.getElementById('summaryTotal').textContent = price;
+
+    document.getElementById('formState').style.display = '';
+    document.getElementById('successState').classList.remove('show');
+
+    document.getElementById('modalOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  }
+
+  // ─── Payment ──────────────────────────────────────────────────────────────
+  function initiatePayment() {
+    const name  = document.getElementById('payerName').value.trim();
+    const email = document.getElementById('payerEmail').value.trim();
+    const phone = document.getElementById('payerPhone').value.trim();
+
+    if (!name || !email) {
+      showToast('Please fill in your name and email.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showToast('Please enter a valid email address.');
+      return;
+    }
+
+    const btn = document.getElementById('payBtn');
+    btn.disabled = true;
+    btn.textContent = 'Loading…';
+
+    // Load Flutterwave SDK if not already loaded
+    loadFlutterwaveSDK(() => {
+      FlutterwaveCheckout({
+        public_key: FLW_PUBLIC_KEY,
+        tx_ref: `unify-${Date.now()}`,
+        amount: currentOrder.amount,
+        currency: 'NGN',
+        payment_options: 'card, banktransfer, ussd',
+        customer: { email, phone_number: phone || undefined, name },
+        customizations: {
+          title: 'Unify',
+          description: currentOrder.label,
+          logo: window.location.origin + '/icons/apple-touch-icon.png',
+        },
+        callback: function(response) {
+          btn.disabled = false;
+          btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pay with Flutterwave`;
+          if (response.status === 'successful' || response.status === 'completed') {
+            handlePaymentSuccess(response);
+          } else {
+            showToast('Payment was not completed. Please try again.');
+          }
+        },
+        onclose: function() {
+          btn.disabled = false;
+          btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pay with Flutterwave`;
+        }
+      });
+    });
+  }
+
+  function loadFlutterwaveSDK(cb) {
+    if (window.FlutterwaveCheckout) { cb(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://checkout.flutterwave.com/v3.js';
+    s.onload = cb;
+    document.head.appendChild(s);
+  }
+
+  function handlePaymentSuccess(response) {
+    // Persist access locally (replace with server verification in production)
+    if (currentOrder.type === 'course') {
+      const owned = JSON.parse(localStorage.getItem('unify_owned_courses') || '[]');
+      if (!owned.includes(currentOrder.code)) owned.push(currentOrder.code);
+      localStorage.setItem('unify_owned_courses', JSON.stringify(owned));
+    } else {
+      localStorage.setItem('unify_plan', currentOrder.type === 'pro' ? 'pro' : 'dept');
+      localStorage.setItem('unify_plan_expiry', Date.now() + (billing === 'annual' ? 365 : 30) * 86400000);
+    }
+
+    document.getElementById('formState').style.display = 'none';
+    document.getElementById('successMsg').textContent =
+      currentOrder.type === 'course'
+        ? `${currentOrder.code} is now unlocked. Start studying anytime.`
+        : `Your ${currentOrder.type === 'pro' ? 'Pro plan' : 'Department Pass'} is now active. Enjoy full access.`;
+    document.getElementById('successState').classList.add('show');
+
+    renderCourses();
+  }
+
+  // ─── Toast ────────────────────────────────────────────────────────────────
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ─── Init ─────────────────────────────────────────────────────────────────
+  renderCourses();
+</script>
+</body>
+</html>
