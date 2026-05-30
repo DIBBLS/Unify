@@ -137,6 +137,7 @@
         window.location.href = 'dashboard.html';
       }
     } catch(err) {
+      console.error('[Google sign-in error]', err.code, err.message);
       if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') recordFail();
       if (err.code === 'auth/account-exists-with-different-credential') {
         const email = err.customData?.email;
