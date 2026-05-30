@@ -3,8 +3,8 @@
   import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const RL_KEY = 'unify-auth-rl';
-  const RL_MAX = 5;
-  const RL_WINDOW = 15 * 60 * 1000;
+  const RL_MAX = 10;
+  const RL_WINDOW = 7 * 60 * 1000;
 
   function getRl() {
     try { return JSON.parse(localStorage.getItem(RL_KEY)) || { count: 0, lockUntil: 0 }; }
