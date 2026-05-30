@@ -162,5 +162,8 @@
     if (code === 'auth/popup-closed-by-user') return 'Google sign-in was cancelled.';
     if (code === 'auth/popup-blocked') return 'Popup was blocked. Please allow popups for this site.';
     if (code === 'auth/cancelled-popup-request') return '';
+    if (code === 'auth/unauthorized-domain') return 'Google sign-in is not enabled for this domain yet. Please try email/password sign-in.';
+    if (code === 'auth/operation-not-allowed') return 'Google sign-in is not enabled. Please contact support.';
+    if (code === 'auth/network-request-failed') return 'Network error. Check your connection and try again.';
     return 'Something went wrong. Please try again.';
   }
