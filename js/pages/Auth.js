@@ -1,5 +1,5 @@
   import { auth, db, provider } from '../firebase-config.js';
-  import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, signInWithRedirect, getRedirectResult, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const RL_KEY = 'unify-auth-rl';
@@ -109,22 +109,39 @@
     }
   }
 
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+
+  // Handle redirect result on page load (for mobile Google sign-in)
+  getRedirectResult(auth).then(result => {
+    if (result?.user) {
+      clearRl();
+      window.location.href = 'dashboard.html';
+    }
+  }).catch(err => {
+    if (err.code && err.code !== 'auth/cancelled-popup-request') {
+      showError(friendlyError(err.code));
+    }
+  });
+
   window.signInWithGoogle = async function() {
     clearMessages();
     const blocked = checkRl();
     if (blocked) { showError(blocked); return; }
     try {
-      await signInWithPopup(auth, provider);
-      clearRl();
-      window.location.href = 'dashboard.html';
+      if (isMobile) {
+        // Redirect flow — avoids popup blocking on mobile browsers
+        await signInWithRedirect(auth, provider);
+      } else {
+        await signInWithPopup(auth, provider);
+        clearRl();
+        window.location.href = 'dashboard.html';
+      }
     } catch(err) {
       if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') recordFail();
-      // If this email already exists with email/password, sign them in then link Google
       if (err.code === 'auth/account-exists-with-different-credential') {
         const email = err.customData?.email;
         if (email) {
           showError('This email is registered with a password. Sign in with your password first, then link Google in settings.');
-          // Auto-switch to sign in tab and pre-fill email
           switchTab('signin');
           document.getElementById('signinEmail').value = email;
         } else {
