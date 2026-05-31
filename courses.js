@@ -65,7 +65,7 @@ var coursesDatabase = {
       },
       "300 Level": {
         "First Semester": ["ECE 351","MEE 301","MEE 305","MEE 351","MEE 353","MEE 355","MEE 357"],
-        "Second Semester": ["MEE 304","MEE 306","MEE 308","MEE 310","MEE 322","MEE 352","ECE 351","ENT 312","GNS 312"]
+        "Second Semester": ["ECE 352", "ECE 316","CHE 352", "MEE 354","MEE 352","ECE 351","ENT 312","GNS 312"]
       },
       "400 Level": {
         "First Semester": ["MEE 401","MEE 403","MEE 405","MEE 407","MEE 409","MEE 411","MEE 413"],
@@ -86,8 +86,8 @@ var coursesDatabase = {
         "Second Semester": ["IPE 202","IPE 204","IPE 206","IPE 208","MEE 202","CHE 206","GNS 212"]
       },
       "300 Level": {
-        "First Semester": ["IPE 301","IPE 303","IPE 309","IPE 311","IPE 315","ECE 351","MEE 301","MEE 351"],
-        "Second Semester": ["IPE 302","IPE 304","IPE 306","IPE 308","IPE 310","IPE 322","IPE 352","ECE 351","ENT 312","GNS 312"]
+        "First Semester": ["IPE 301","IPE 311","IPE 317","ECE 351","MEE 301","MEE 351"],
+        "Second Semester": ["ECE 352","ECE 351", "ECE 316", "IPE","CHE 352", "MEE 352","ENT 312","GNS 312"]
       },
       "400 Level": {
         "First Semester": ["IPE 401","IPE 403","IPE 405","IPE 407","IPE 409","IPE 411","IPE 413"],
@@ -109,7 +109,7 @@ var coursesDatabase = {
       },
       "300 Level": {
         "First Semester": ["CHE 301","CHE 303","CHE 305","CHE 307","CHE 309","CHE 311","CHE 313","CHE 315","ECE 351"],
-        "Second Semester": ["CPE 302","CPE 304","CPE 306","CPE 308","CPE 310","CPE 312","CPE 314","ECE 351","ENT 312","GNS 312"]
+        "Second Semester": ["ECE 352","ECE 351", "CHE 314","CHE 312","MEE 352","ENT 312","GNS 312"]
       },
       "400 Level": {
         "First Semester": ["CPE 401","CPE 403","CPE 405","CPE 407","CPE 409","CPE 411","CPE 413"],
@@ -126,8 +126,8 @@ var coursesDatabase = {
         "Second Semester": ["CVE 202","CVE 204","CVE 206","CVE 208","MEE 202","MEE 204","CHE 206","GNS 212"]
       },
       "300 Level": {
-        "First Semester": ["CVE 301","CVE 303","CVE 305","CVE 307","CVE 309","ECE 351","MEE 301","MEE 351"],
-        "Second Semester": ["CVE 302","CVE 304","CVE 306","CVE 308","CVE 310","CVE 322","CVE 352","ECE 351","ENT 312","GNS 312"]
+        "First Semester": ["CVE 301","CVE 307","CVE 309","ECE 351","MEE 301","MEE 351"],
+        "Second Semester": ["ECE 352","ECE 351" "CHE 352","CVE 304","CVE 308","CVE 308","CVE 310","ENT 312","GNS 312"]
       },
       "400 Level": {
         "First Semester": ["CVE 401","CVE 403","CVE 405","CVE 407","CVE 409","CVE 411","CVE 413"],
@@ -148,8 +148,8 @@ var coursesDatabase = {
         "Second Semester": ["ASE 202","ASE 204","MEE 202","MEE 204","MEE 208","ECE 202","ECE 210","CHE 206","GNS 212"]
       },
       "300 Level": {
-        "First Semester": ["ASE 351","ASE 353","ASE 355","ASE 357","MEE 301","MEE 351","ECE 351"],
-        "Second Semester": ["ASE 302","ASE 304","ASE 306","ASE 308","ASE 310","ASE 322","ASE 352","ECE 351","ENT 312","GNS 312"]
+        "First Semester": ["MEE 301","MEE 351","ECE 351"],
+        "Second Semester": ["ASE 363","ASE 366 ","ECE 351","ENT 312","GNS 312"]
       },
       "400 Level": {
         "First Semester": ["ASE 401","ASE 403","ASE 405","ASE 407","ASE 409","ASE 411","ASE 413"],
