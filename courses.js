@@ -126,8 +126,8 @@ var coursesDatabase = {
         "Second Semester": ["CVE 202","CVE 204","CVE 206","CVE 208","MEE 202","MEE 204","CHE 206","GNS 212"]
       },
       "300 Level": {
-        "First Semester": ["CVE 301","CVE 307","CVE 309","ECE 351","MEE 301","MEE 351"],
-        "Second Semester": ["ECE 352","ECE 351" "CHE 352","CVE 304","CVE 308","CVE 308","CVE 310","ENT 312","GNS 312"]
+        "First Semester": ["CVE 301", "CVE 307", "CVE 309", "ECE 351", "MEE 301", "MEE 351"],
+        "Second Semester": ["ECE 352", "ECE 351" "CHE 352", "CVE 304", "CVE 308", "CVE 308", "CVE 310", "ENT 312", "GNS 312"]
       },
       "400 Level": {
         "First Semester": ["CVE 401","CVE 403","CVE 405","CVE 407","CVE 409","CVE 411","CVE 413"],
