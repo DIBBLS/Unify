@@ -744,23 +744,9 @@ function generateWeekStructure(code) {
       subtopics: w.subtopics,
     }));
   }
-  const topics = [
-    "Introduction & Fundamentals",
-    "Core Principles I",
-    "Core Principles II",
-    "Methods & Techniques I",
-    "Methods & Techniques II",
-    "Analysis & Problem Solving",
-    "Applications I",
-    "Applications II",
-    "Advanced Topics I",
-    "Advanced Topics II",
-    "Integration & Design",
-    "Revision & Past Questions",
-  ];
-  return topics.map((title) => ({
-    title,
-    subtopics: [title + " — Theory", title + " — Practice"],
+  return Array.from({length: 12}, (_, i) => ({
+    title: "",
+    subtopics: [],
   }));
 }
 
