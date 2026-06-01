@@ -1,4 +1,4 @@
-const CACHE = 'unify-v3';
+const CACHE = 'unify-v4';
 
 const SHELL = [
   './css/variables.css',
@@ -41,8 +41,10 @@ self.addEventListener('fetch', e => {
   if (url.origin !== location.origin) return;
 
   const isHTML = request.destination === 'document' || url.pathname.endsWith('.html') || url.pathname === '/';
+  // Data files that change frequently — always fetch fresh
+  const isDataFile = /\/(Coursecontent\.JS|courses\.js|course2\.js|script\.js)$/i.test(url.pathname);
 
-  if (isHTML) {
+  if (isHTML || isDataFile) {
     // Network-first for pages so users always get fresh auth state
     e.respondWith(
       fetch(request)
