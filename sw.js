@@ -1,78 +1,74 @@
-const CACHE = 'unify-v4';
+const CACHE = 'unify-v5';
 
+// Only truly static, versioned assets go in the cache
 const SHELL = [
   './css/variables.css',
   './css/base.css',
   './css/components.css',
   './css/responsive.css',
   './css/layout.css',
-  './css/pages/dashboard.styles.css',
   './css/pages/dashboard-v2.styles.css',
   './css/pages/Auth.styles.css',
   './js/theme.js',
-  './js/firebase-config.js',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
 ];
 
-// Install: pre-cache the app shell
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())
   );
 });
 
-// Activate: delete old caches
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim().then(() => {
-      // Tell all open tabs to reload so they get the fresh version
-      self.clients.matchAll({ type: 'window' }).then(clients => {
-        clients.forEach(c => c.navigate(c.url));
-      });
-    }))
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
+      .then(() => {
+        // Tell all tabs to reload so they get fresh content
+        self.clients.matchAll({ type: 'window' }).then(clients => {
+          clients.forEach(c => c.postMessage({ type: 'SW_UPDATED' }));
+        });
+      })
   );
 });
 
-// Fetch: network-first for HTML, cache-first for assets
 self.addEventListener('fetch', e => {
   const { request } = e;
   const url = new URL(request.url);
 
-  // Only handle same-origin requests
   if (url.origin !== location.origin) return;
 
-  const isHTML = request.destination === 'document' || url.pathname.endsWith('.html') || url.pathname === '/';
-  // Data files that change frequently — always fetch fresh
-  const isDataFile = /\/(Coursecontent\.JS|courses\.js|course2\.js|script\.js)$/i.test(url.pathname);
+  const path = url.pathname;
 
-  if (isHTML || isDataFile) {
-    // Network-first for pages so users always get fresh auth state
+  // NEVER cache: HTML pages, JS data files, firebase config
+  const neverCache =
+    request.destination === 'document' ||
+    path.endsWith('.html') ||
+    path === '/' ||
+    /\/(Coursecontent\.JS|courses\.js|course2\.js|script\.js|firebase-config\.js)$/i.test(path);
+
+  if (neverCache) {
+    // Network only — always fresh
     e.respondWith(
-      fetch(request)
-        .then(res => {
+      fetch(request).catch(() => caches.match(request))
+    );
+    return;
+  }
+
+  // Cache-first for static assets (CSS, images, fonts, versioned JS)
+  e.respondWith(
+    caches.match(request).then(cached => {
+      if (cached) return cached;
+      return fetch(request).then(res => {
+        if (res.ok) {
           const clone = res.clone();
           caches.open(CACHE).then(c => c.put(request, clone));
-          return res;
-        })
-        .catch(() => caches.match(request))
-    );
-  } else {
-    // Cache-first for CSS/JS/images/fonts
-    e.respondWith(
-      caches.match(request).then(cached => {
-        if (cached) return cached;
-        return fetch(request).then(res => {
-          if (res.ok) {
-            const clone = res.clone();
-            caches.open(CACHE).then(c => c.put(request, clone));
-          }
-          return res;
-        });
-      })
-    );
-  }
+        }
+        return res;
+      });
+    })
+  );
 });
