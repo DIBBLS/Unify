@@ -176,22 +176,22 @@ const UNIFY_COURSE_CONTENT = {
     ]
   },
 
-  // ── ECE 351: Shared across ECE, MEE, CVE, IPE, ASE ──────────
+  // ── ECE 351: Artificial Intelligence & Machine Learning ──────────
   "ECE 351": {
-    title: "Electrical Technology",
+    title: "Artificial Intelligence & Machine Learning",
     weeks: [
-      { week:1, topic:"DC Circuit Analysis", subtopics:["Ohm's Law & KVL/KCL","Series & Parallel Circuits"], time:13 },
-      { week:2, topic:"Network Theorems", subtopics:["Thevenin & Norton","Superposition"], time:13 },
-      { week:3, topic:"Magnetic Circuits", subtopics:["MMF, Flux & Reluctance","B-H Curves"], time:13 },
-      { week:4, topic:"Transformers", subtopics:["Ideal Transformer","Transformer Efficiency"], time:13 },
-      { week:5, topic:"AC Fundamentals", subtopics:["Phasors & RMS Values","Power Factor"], time:14 },
-      { week:6, topic:"AC Circuit Analysis", subtopics:["Series & Parallel AC","Resonance"], time:14 },
-      { week:7, topic:"Three-Phase Systems", subtopics:["Star & Delta Connection","Power in 3-Phase"], time:14 },
-      { week:8, topic:"DC Machines", subtopics:["DC Generator","DC Motor"], time:13 },
-      { week:9, topic:"AC Machines — Induction Motor", subtopics:["Construction & Working","Slip & Torque"], time:13 },
-      { week:10, topic:"AC Machines — Synchronous", subtopics:["Synchronous Generator","Synchronous Motor"], time:13 },
-      { week:11, topic:"Power Electronics Basics", subtopics:["Diodes & Rectifiers","Transistor Switches"], time:12 },
-      { week:12, topic:"Revision & Exam Prep", subtopics:["Past Questions","Key Formulas"], time:10 },
+      { week:1,  topic:"Introduction to AI & Machine Learning",       subtopics:["What is AI? History & Applications","Types of ML: Supervised, Unsupervised, Reinforcement"],   time:12 },
+      { week:2,  topic:"Python & Data Preprocessing",                  subtopics:["NumPy, Pandas & Matplotlib Basics","Handling Missing Data, Scaling & Encoding"],               time:14 },
+      { week:3,  topic:"Supervised Learning — Linear Regression",      subtopics:["Simple & Multiple Linear Regression","Cost Function & Gradient Descent"],                      time:14 },
+      { week:4,  topic:"Supervised Learning — Classification",         subtopics:["Logistic Regression","K-Nearest Neighbours (KNN)"],                                             time:13 },
+      { week:5,  topic:"Model Evaluation & Validation",                subtopics:["Confusion Matrix, Accuracy, Precision & Recall","Cross-Validation & Bias-Variance Tradeoff"],   time:13 },
+      { week:6,  topic:"Decision Trees & Ensemble Methods",            subtopics:["Decision Trees & Splitting Criteria","Random Forests & Boosting (XGBoost)"],                    time:14 },
+      { week:7,  topic:"Support Vector Machines",                      subtopics:["Linear SVM & Maximum Margin","Kernel Trick & Non-linear SVM"],                                  time:13 },
+      { week:8,  topic:"Unsupervised Learning — Clustering",           subtopics:["K-Means Clustering","Hierarchical Clustering & DBSCAN"],                                        time:13 },
+      { week:9,  topic:"Dimensionality Reduction",                     subtopics:["Principal Component Analysis (PCA)","Feature Selection Techniques"],                            time:13 },
+      { week:10, topic:"Artificial Neural Networks",                   subtopics:["Perceptron & Multi-Layer Networks","Backpropagation & Activation Functions"],                   time:15 },
+      { week:11, topic:"Deep Learning & Convolutional Neural Networks",subtopics:["CNN Architecture & Layers","Applications: Image Recognition & NLP Basics"],                    time:15 },
+      { week:12, topic:"AI Applications & Revision",                   subtopics:["Real-World AI in Engineering (IoT, Robotics)","Past Questions & Exam Prep"],                    time:10 },
     ]
   },
 
