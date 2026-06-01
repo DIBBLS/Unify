@@ -141,17 +141,8 @@ function buildCurriculum() {
   if (entry && entry.weeks) {
     courseTopics = entry.weeks;
   } else {
-    // Auto-stub: sensible fallback for any course not yet in courseContent.js
-    const genericTopics = [
-      "Introduction & Fundamentals", "Core Concepts Part 1", "Core Concepts Part 2",
-      "Analysis Methods", "Design Principles", "Applications Part 1",
-      "Applications Part 2", "Advanced Topics", "Case Studies",
-      "Problem Solving Techniques", "Integration & Review", "Exam Preparation"
-    ];
-    courseTopics = genericTopics.map((topic, i) => ({
-      week: i + 1, topic,
-      subtopics: [`${topic} — Theory`, `${topic} — Practice`],
-      time: 12
+    courseTopics = Array.from({length: 12}, (_, i) => ({
+      week: i + 1, topic: "", subtopics: [], time: 0
     }));
   }
 }
