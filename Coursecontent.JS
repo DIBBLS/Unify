@@ -180,18 +180,18 @@ const UNIFY_COURSE_CONTENT = {
   "ECE 351": {
     title: "Electrical Technology",
     weeks: [
-      { week:1, topic:"DC Circuit Analysis", subtopics:["Ohm's Law & KVL/KCL","Series & Parallel Circuits"], time:13 },
-      { week:2, topic:"Network Theorems", subtopics:["Thevenin & Norton","Superposition"], time:13 },
-      { week:3, topic:"Magnetic Circuits", subtopics:["MMF, Flux & Reluctance","B-H Curves"], time:13 },
-      { week:4, topic:"Transformers", subtopics:["Ideal Transformer","Transformer Efficiency"], time:13 },
-      { week:5, topic:"AC Fundamentals", subtopics:["Phasors & RMS Values","Power Factor"], time:14 },
-      { week:6, topic:"AC Circuit Analysis", subtopics:["Series & Parallel AC","Resonance"], time:14 },
-      { week:7, topic:"Three-Phase Systems", subtopics:["Star & Delta Connection","Power in 3-Phase"], time:14 },
-      { week:8, topic:"DC Machines", subtopics:["DC Generator","DC Motor"], time:13 },
-      { week:9, topic:"AC Machines — Induction Motor", subtopics:["Construction & Working","Slip & Torque"], time:13 },
-      { week:10, topic:"AC Machines — Synchronous", subtopics:["Synchronous Generator","Synchronous Motor"], time:13 },
-      { week:11, topic:"Power Electronics Basics", subtopics:["Diodes & Rectifiers","Transistor Switches"], time:12 },
-      { week:12, topic:"Revision & Exam Prep", subtopics:["Past Questions","Key Formulas"], time:10 },
+      { week:1, topic:"", subtopics:[], time:0 },
+      { week:2, topic:"", subtopics:[], time:0 },
+      { week:3, topic:"", subtopics:[], time:0 },
+      { week:4, topic:"", subtopics:[], time:0 },
+      { week:5, topic:"", subtopics:[], time:0 },
+      { week:6, topic:"", subtopics:[], time:0 },
+      { week:7, topic:"", subtopics:[], time:0 },
+      { week:8, topic:"", subtopics:[], time:0 },
+      { week:9, topic:"", subtopics:[], time:0 },
+      { week:10, topic:"", subtopics:[], time:0 },
+      { week:11, topic:"", subtopics:[], time:0 },
+      { week:12, topic:"", subtopics:[], time:0 },
     ]
   },
 
@@ -787,9 +787,9 @@ window.generateCourseStubs = function() {
       _stub: true,
       weeks: Array.from({length: 12}, (_, i) => ({
         week: i + 1,
-        topic: `Week ${i + 1} — ${code}`,
-        subtopics: [`Topic ${i + 1}.1 — Theory`, `Topic ${i + 1}.2 — Practice`],
-        time: 12
+        topic: "",
+        subtopics: [],
+        time: 0
       }))
     };
   });
