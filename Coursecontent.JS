@@ -787,9 +787,9 @@ window.generateCourseStubs = function() {
       _stub: true,
       weeks: Array.from({length: 12}, (_, i) => ({
         week: i + 1,
-        topic: `Week ${i + 1} — ${code}`,
-        subtopics: [`Topic ${i + 1}.1 — Theory`, `Topic ${i + 1}.2 — Practice`],
-        time: 12
+        topic: "",
+        subtopics: [],
+        time: 0
       }))
     };
   });
