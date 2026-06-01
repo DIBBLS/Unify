@@ -36,3 +36,19 @@
   for = "/sw.js"
   [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
+
+# Data JS files must always be fresh — content changes frequently
+[[headers]]
+  for = "/Coursecontent.JS"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/courses.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/course2.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
