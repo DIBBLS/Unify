@@ -178,8 +178,21 @@ const UNIFY_COURSE_CONTENT = {
 
   // ── ECE 351: Shared across ECE, MEE, CVE, IPE, ASE ──────────
   "ECE 351": {
-    title: "Electrical Technology",
-    weeks: []
+    title: "Artificial Intelligence & Machine Learning",
+    weeks: [
+      { week:1, topic:"Introduction to AI & ML", subtopics:["History & Overview of AI","Types of Machine Learning"], time:13 },
+      { week:2, topic:"Data Preprocessing", subtopics:["Data Cleaning & Transformation","Feature Engineering"], time:13 },
+      { week:3, topic:"Supervised Learning I", subtopics:["Linear Regression","Logistic Regression"], time:13 },
+      { week:4, topic:"Supervised Learning II", subtopics:["Decision Trees","Random Forests"], time:13 },
+      { week:5, topic:"Model Evaluation", subtopics:["Bias-Variance Tradeoff","Cross-Validation & Metrics"], time:14 },
+      { week:6, topic:"Unsupervised Learning", subtopics:["K-Means Clustering","Principal Component Analysis"], time:14 },
+      { week:7, topic:"Neural Networks Basics", subtopics:["Perceptron & Activation Functions","Backpropagation"], time:14 },
+      { week:8, topic:"Deep Learning", subtopics:["Convolutional Neural Networks","Recurrent Neural Networks"], time:13 },
+      { week:9, topic:"Natural Language Processing", subtopics:["Text Preprocessing","Sentiment Analysis"], time:13 },
+      { week:10, topic:"Reinforcement Learning", subtopics:["Markov Decision Processes","Q-Learning"], time:13 },
+      { week:11, topic:"AI Ethics & Deployment", subtopics:["Bias & Fairness in AI","Model Deployment Strategies"], time:12 },
+      { week:12, topic:"Revision & Exam Prep", subtopics:["Past Questions","Key Formulas & Concepts"], time:10 },
+    ]
   },
 
   "MEE 301": {
