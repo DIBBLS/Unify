@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AI Model Practice Questions | Dr. Ajasa | Unify Learn</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f8f7f3;--border:#e0deda;--text:#0a0a0a;--text2:#555;--text3:#999;--green:#4ade80;--green-deep:#16a34a;--green-bg:rgba(74,222,128,0.10);--fd:'Playfair Display',serif;--fb:'DM Sans',sans-serif;--radius:12px;--shadow:0 2px 12px rgba(0,0,0,0.06);}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222;--border:#2a2a2a;--text:#f0efeb;--text2:#aaa;--text3:#666;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}html{scroll-behavior:smooth;}
+body{font-family:var(--fb);background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;transition:background .3s,color .3s;}
+#progress-bar{position:fixed;top:0;left:0;height:3px;background:var(--green);width:0%;z-index:1000;transition:width .2s;}
+.topbar{position:fixed;top:3px;left:0;right:0;height:52px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:999;}
+.topbar-wordmark{font-family:var(--fd);font-weight:900;font-size:18px;color:var(--text);}
+.topbar-wordmark span{color:var(--green);}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.course-pill{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);color:var(--text3);}
+#dark-toggle{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-size:15px;}
+.progress-tracker{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;font-size:11px;font-weight:600;color:var(--text2);box-shadow:var(--shadow);z-index:998;display:flex;align-items:center;gap:8px;}
+.tracker-dot{width:8px;height:8px;border-radius:50%;background:var(--green);}
+.wrapper{max-width:780px;margin:0 auto;padding:88px 20px 100px;}
+.hero{background:#0a0a0a;color:#f5f4f0;border-radius:var(--radius);padding:40px 36px;margin-bottom:32px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(74,222,128,0.07);pointer-events:none;}
+.hero-eyebrow{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#4ade80;margin-bottom:12px;}
+.hero-title{font-family:var(--fd);font-size:28px;font-weight:900;letter-spacing:-1px;line-height:1.15;color:#f5f4f0;margin-bottom:8px;}
+.hero-subtitle{font-family:var(--fd);font-size:16px;font-style:italic;color:rgba(245,244,240,0.7);margin-bottom:24px;}
+.hero-outcome{background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.25);border-radius:8px;padding:14px 18px;font-size:13px;color:rgba(245,244,240,0.9);line-height:1.6;margin-bottom:24px;}
+.hero-outcome strong{color:#4ade80;}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px;}
+.meta-chip{font-size:11px;font-weight:500;padding:4px 12px;border-radius:20px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:rgba(245,244,240,0.7);}
+.topic-progress{margin-bottom:32px;}
+.tp-label{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
+.tp-steps{display:flex;gap:6px;flex-wrap:wrap;}
+.tp-step{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:500;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--text3);}
+.tp-step.done{background:var(--green-bg);border-color:rgba(74,222,128,0.35);color:var(--green-deep);}
+.tp-step.active{background:var(--text);color:var(--bg);border-color:var(--text);}
+.tp-dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+.tags-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:32px;}
+.tag{font-size:11px;font-weight:500;padding:5px 13px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);}
+.tag.green{background:var(--green-bg);border-color:rgba(74,222,128,0.3);color:var(--green-deep);}
+.section-label{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--green-deep);margin-bottom:6px;}
+.section-title{font-family:var(--fd);font-size:22px;font-weight:700;color:var(--text);margin-bottom:8px;}
+.section-subtitle{font-size:13px;color:var(--text3);margin-bottom:20px;font-style:italic;}
+.subtopic-heading{display:flex;align-items:center;gap:10px;margin:28px 0 12px;}
+.subtopic-heading h3{font-family:var(--fd);font-size:17px;font-weight:700;color:var(--text);}
+.subtopic-num{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:var(--green-bg);border:1px solid rgba(74,222,128,0.3);color:var(--green-deep);letter-spacing:1px;text-transform:uppercase;white-space:nowrap;}
+.topic-block{margin-bottom:52px;}
+.question-banner{background:var(--surface2);border:1px solid var(--border);border-left:4px solid var(--green);border-radius:0 var(--radius) var(--radius) 0;padding:20px 24px;margin-bottom:20px;}
+.question-banner p{max-width:66ch;color:var(--text2);font-size:14px;line-height:1.8;margin-bottom:8px;}
+.question-banner p:last-child{margin-bottom:0;}
+.question-banner strong{color:var(--text);}
+.question-banner ul{max-width:66ch;padding-left:20px;color:var(--text2);font-size:14px;line-height:1.85;}
+.question-banner li{margin-bottom:4px;}
+.step-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;box-shadow:var(--shadow);margin-bottom:12px;}
+.step-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.step-badge{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:4px 12px;border-radius:20px;background:var(--text);color:var(--bg);white-space:nowrap;}
+.step-title{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--text);}
+.step-card p{max-width:66ch;color:var(--text2);font-size:14px;line-height:1.8;margin-bottom:10px;}
+.step-card p:last-child{margin-bottom:0;}
+.step-card ul,.step-card ol{max-width:66ch;padding-left:20px;color:var(--text2);font-size:14px;line-height:1.85;margin-bottom:10px;}
+.step-card li{margin-bottom:5px;}
+.step-card strong{color:var(--text);}
+.highlight-box{background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.25);border-radius:8px;padding:14px 18px;margin-top:12px;font-size:13px;color:var(--text2);line-height:1.7;}
+.highlight-box strong{color:var(--green-deep);}
+.mini-check{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:0 var(--radius) var(--radius) 0;padding:20px 24px;margin:20px 0 0 0;}
+.mini-check-header{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.mini-check-icon{font-size:14px;}
+.mini-check-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green-deep);}
+.mini-check-sub{font-size:11px;color:var(--text3);margin-left:auto;}
+.mc-q{font-size:13px;font-weight:500;color:var(--text);margin-bottom:8px;max-width:66ch;line-height:1.6;}
+.mc-reveal-item,.mc-mcq-item,.mc-fitb-item{margin-bottom:14px;}
+.mc-reveal-btn{font-size:10px;font-weight:600;padding:5px 14px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;}
+.mc-answer{display:none;margin-top:8px;padding:10px 14px;background:var(--surface);border-left:2px solid var(--green);border-radius:0 6px 6px 0;font-size:12px;color:var(--text2);line-height:1.7;max-width:66ch;}
+.mc-answer.show{display:block;}
+.mc-mcq-opts{display:flex;flex-direction:column;gap:5px;margin-top:8px;max-width:52ch;}
+.mc-mcq-opt{display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:7px 12px;border-radius:7px;background:var(--surface);border:1px solid var(--border);color:var(--text2);transition:all .15s;user-select:none;}
+.mc-mcq-opt:hover:not(.mc-locked){background:var(--green-bg);border-color:rgba(74,222,128,0.3);}
+.mc-mcq-opt.mc-correct{background:var(--green-bg);border-color:rgba(74,222,128,0.4);color:var(--green-deep);font-weight:600;}
+.mc-mcq-opt.mc-wrong{background:rgba(239,68,68,0.07);border-color:rgba(239,68,68,0.3);color:#b91c1c;}
+.mc-ltr{font-weight:700;font-size:10px;width:20px;height:20px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mc-mcq-fb{display:none;margin-top:7px;font-size:11px;font-weight:600;}
+.mc-fitb-row{display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap;}
+.mc-fitb-input{font-size:12px;padding:7px 12px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text);outline:none;width:240px;}
+.mc-fitb-btn{font-size:10px;font-weight:700;padding:7px 14px;border-radius:7px;border:none;background:var(--text);color:var(--bg);cursor:pointer;}
+.mc-fitb-fb{display:none;margin-top:7px;font-size:11px;font-weight:600;}
+.recall-section{margin-top:24px;}
+.recall-label{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--green-deep);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.recall-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.recall-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:10px;}
+.recall-badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 9px;border-radius:20px;margin-bottom:10px;}
+.badge-def{background:rgba(74,222,128,0.15);color:var(--green-deep);border:1px solid rgba(74,222,128,0.3);}
+.badge-mech{background:rgba(251,191,36,0.15);color:#b45309;border:1px solid rgba(251,191,36,0.3);}
+.badge-app{background:rgba(59,130,246,0.1);color:#1d4ed8;border:1px solid rgba(59,130,246,0.2);}
+.badge-comp{background:rgba(139,92,246,0.1);color:#6d28d9;border:1px solid rgba(139,92,246,0.2);}
+.recall-q{font-size:14px;font-weight:500;color:var(--text);max-width:66ch;line-height:1.6;margin-bottom:12px;}
+.reveal-btn{font-size:11px;font-weight:600;padding:6px 16px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;}
+.recall-answer{display:none;margin-top:12px;padding:14px 16px;background:var(--surface2);border-left:3px solid var(--green);border-radius:0 8px 8px 0;font-size:13px;color:var(--text2);line-height:1.7;max-width:66ch;}
+.recall-answer.show{display:block;}
+.pulse-check{background:var(--green);border-radius:var(--radius);padding:28px;margin:40px 0;}
+.pulse-check .pc-title{font-family:var(--fd);font-size:20px;font-weight:900;color:#0a0a0a;margin-bottom:4px;}
+.pulse-check .pc-sub{font-size:12px;color:rgba(10,10,10,0.6);margin-bottom:20px;}
+.pc-question{background:rgba(255,255,255,0.35);border-radius:10px;padding:16px 18px;margin-bottom:12px;}
+.pc-q-text{font-size:14px;font-weight:500;color:#0a0a0a;margin-bottom:10px;max-width:66ch;line-height:1.6;}
+.pc-options{display:flex;flex-direction:column;gap:6px;}
+.pc-option{display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.5);color:#0a0a0a;transition:all .15s;max-width:66ch;}
+.pc-option:hover{background:rgba(255,255,255,0.65);}
+.pc-option.correct{background:#fff;border-color:#16a34a;}
+.pc-option.wrong{background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.5);}
+.pc-letter{font-weight:700;font-size:11px;width:22px;height:22px;border-radius:50%;background:rgba(10,10,10,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pc-fitb input{background:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.7);border-radius:6px;padding:8px 12px;font-size:13px;color:#0a0a0a;width:100%;max-width:320px;outline:none;}
+.pc-check-btn{margin-top:8px;font-size:11px;font-weight:700;padding:6px 16px;border-radius:6px;border:none;background:#0a0a0a;color:#f5f4f0;cursor:pointer;}
+.pc-feedback{margin-top:8px;font-size:12px;font-weight:500;display:none;color:#0a0a0a;}
+.eoq{background:var(--text);border-radius:var(--radius);padding:32px;margin-top:48px;}
+.eoq-eyebrow{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:6px;}
+.eoq-title{font-family:var(--fd);font-size:24px;font-weight:900;color:#f5f4f0;margin-bottom:4px;}
+.eoq-sub{font-size:12px;color:rgba(240,239,235,0.5);margin-bottom:24px;}
+.eoq-question{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:18px 20px;margin-bottom:14px;}
+.eoq-qnum{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:rgba(240,239,235,0.4);margin-bottom:6px;}
+.eoq-q-text{font-size:14px;font-weight:500;color:#f0efeb;max-width:66ch;line-height:1.6;margin-bottom:12px;}
+.eoq-options{display:flex;flex-direction:column;gap:6px;}
+.eoq-option{display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(240,239,235,0.8);transition:all .15s;max-width:66ch;user-select:none;}
+.eoq-option:hover:not(.locked){background:rgba(255,255,255,0.1);}
+.eoq-option.selected{border-color:var(--green);background:rgba(74,222,128,0.1);}
+.eoq-option.correct-reveal{border-color:var(--green);background:rgba(74,222,128,0.15);}
+.eoq-option.wrong-reveal{border-color:rgba(239,68,68,0.5);background:rgba(239,68,68,0.1);}
+.eoq-letter{font-weight:700;font-size:11px;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:rgba(240,239,235,0.7);}
+.eoq-fitb input{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:9px 14px;font-size:13px;color:#f0efeb;width:100%;max-width:340px;outline:none;}
+.eoq-fitb input.correct-input{border-color:var(--green);background:rgba(74,222,128,0.1);}
+.eoq-fitb input.wrong-input{border-color:rgba(239,68,68,0.5);background:rgba(239,68,68,0.08);}
+.eoq-feedback{display:none;margin-top:10px;font-size:12px;line-height:1.6;padding:10px 14px;border-radius:6px;max-width:66ch;}
+.eoq-feedback.correct-fb{background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.25);color:#86efac;}
+.eoq-feedback.wrong-fb{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#fca5a5;}
+.eoq-submit{margin-top:24px;width:100%;padding:14px;border-radius:8px;border:none;background:var(--green);color:#0a0a0a;font-size:14px;font-weight:700;cursor:pointer;}
+.eoq-submit:disabled{opacity:.4;cursor:not-allowed;}
+.eoq-result{display:none;margin-top:24px;padding:24px;border-radius:10px;text-align:center;}
+.eoq-result.pass{background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);}
+.eoq-result.fail{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);}
+.result-score{font-family:var(--fd);font-size:40px;font-weight:900;color:#f0efeb;margin-bottom:6px;}
+.result-pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:5px 16px;border-radius:20px;margin-bottom:14px;}
+.pill-pass{background:var(--green);color:#0a0a0a;}
+.pill-fail{background:rgba(239,68,68,0.3);color:#fca5a5;border:1px solid rgba(239,68,68,0.4);}
+.result-msg{font-size:13px;color:rgba(240,239,235,0.7);line-height:1.6;max-width:52ch;margin:0 auto 16px;}
+.unlock-banner{background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.3);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--green);font-weight:500;margin-top:12px;}
+.review-nudge{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:14px 16px;margin-top:12px;text-align:left;}
+.review-nudge p{font-size:12px;color:rgba(240,239,235,0.6);margin-bottom:8px;}
+.review-nudge ul{padding-left:16px;font-size:12px;color:#fca5a5;line-height:1.8;}
+.divider{height:1px;background:var(--border);margin:40px 0;}
+@media(max-width:600px){.wrapper{padding:72px 14px 100px;}.hero{padding:28px 20px;}.hero-title{font-size:20px;}.step-card{padding:16px 18px;}.eoq{padding:22px 16px;}.pulse-check{padding:20px 16px;}.mini-check{padding:16px 18px;}.progress-tracker{display:none;}}
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<nav class="topbar">
+  <div class="topbar-wordmark">Unify<span>.</span></div>
+  <div class="topbar-right">
+    <span class="course-pill">AI Model Practice</span>
+    <button id="dark-toggle" onclick="toggleDark()">🌙</button>
+  </div>
+</nav>
+<div class="progress-tracker"><div class="tracker-dot"></div><span id="tracker-text">Scroll to begin</span></div>
+<div class="wrapper">
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-eyebrow">Dr. Ajasa · AI Model Practice Questions · LASU Faculty of Engineering</div>
+  <h1 class="hero-title">AI Model Development — Practice Questions</h1>
+  <p class="hero-subtitle">Regression · Computer Vision · Intrusion Detection · ANN · CNN · Random Forest</p>
+  <div class="hero-outcome">
+    <strong>By the end of this module, you should be able to</strong> identify the correct problem type (regression vs classification), select the most suitable AI technique for a given engineering application, list the standard steps for AI model development, distinguish between ANN, CNN, and Random Forest, and explain preprocessing, feature extraction, training, and deployment procedures.
+  </div>
+  <div class="hero-meta">
+    <span class="meta-chip">👨‍🏫 Dr. Ajasa</span>
+    <span class="meta-chip">📍 Lagos State University</span>
+    <span class="meta-chip">🤖 Artificial Intelligence</span>
+    <span class="meta-chip">3 Practice Questions</span>
+  </div>
+</header>
+
+<!-- TOPIC PROGRESS -->
+<div class="topic-progress">
+  <div class="tp-label">Questions</div>
+  <div class="tp-steps">
+    <div class="tp-step active" id="step-1"><span class="tp-dot"></span>Q1: Concrete Strength (ANN)</div>
+    <div class="tp-step" id="step-2"><span class="tp-dot"></span>Q2: Traffic Signs (CNN)</div>
+    <div class="tp-step" id="step-3"><span class="tp-dot"></span>Q3: Intrusion Detection (RF)</div>
+    <div class="tp-step" id="step-quiz"><span class="tp-dot"></span>Final Quiz</div>
+  </div>
+</div>
+
+<!-- TAGS -->
+<div class="tags-row">
+  <span class="tag green">Regression</span>
+  <span class="tag green">Classification</span>
+  <span class="tag green">ANN</span>
+  <span class="tag green">CNN</span>
+  <span class="tag green">Random Forest</span>
+  <span class="tag">Data Preprocessing</span>
+  <span class="tag">Feature Extraction</span>
+  <span class="tag">Model Training</span>
+  <span class="tag">Model Evaluation</span>
+  <span class="tag">Deployment</span>
+  <span class="tag">Supervised Learning</span>
+  <span class="tag">Computer Vision</span>
+  <span class="tag">Cybersecurity</span>
+</div>
+
+<!-- ══════════ QUESTION 1 ══════════ -->
+<div class="topic-block" id="topic-1">
+  <div class="section-label">Question 1</div>
+  <div class="section-title">AI Model for Predicting Concrete Strength in Civil Engineering</div>
+  <div class="section-subtitle">Development of an ANN-based Regression Model</div>
+
+  <!-- THE QUESTION -->
+  <div class="question-banner">
+    <p><strong>Question:</strong> A civil engineering laboratory wants to develop an AI system capable of predicting the compressive strength of concrete based on the quantities of its constituent materials. The dataset contains:</p>
+    <ul>
+      <li>Cement content</li>
+      <li>Water content</li>
+      <li>Sand quantity</li>
+      <li>Gravel quantity</li>
+      <li>Curing age</li>
+    </ul>
+    <p>Describe how an AI model can be developed for this problem and determine the suitable learning approach.</p>
+  </div>
+
+  <!-- SOLUTION STEPS -->
+  <div class="subtopic-heading"><span class="subtopic-num">Step 1</span><h3>Problem Identification</h3></div>
+  <div class="step-card">
+    <p>The aim is to predict the <strong>numerical value</strong> of concrete compressive strength.</p>
+    <div class="highlight-box"><strong>Problem Type: Regression</strong> — because the output is a continuous numerical value (compressive strength), not a category.</div>
+  </div>
+
+  <div class="subtopic-heading"><span class="subtopic-num">Step 2</span><h3>Data Acquisition</h3></div>
+  <div class="step-card">
+    <p>Experimental data are obtained from laboratory concrete tests conducted over several months. Each record contains:</p>
+    <ul>
+      <li><strong>Input variables:</strong> Cement, Water, Sand, Gravel, Curing age</li>
+      <li><strong>Output variable:</strong> Compressive strength</li>
+    </ul>
+  </div>
+
+  <div class="subtopic-heading"><span class="subtopic-num">Step 3</span><h3>Data Preparation</h3></div>
+  <div class="step-card">
+    <p>Data preprocessing involves:</p>
+    <ul>
+      <li>Handling missing values</li>
+      <li>Removing outliers</li>
+      <li>Normalizing data values</li>
+      <li>Splitting the dataset into:
+        <ul>
+          <li><strong>Training set</strong></li>
+          <li><strong>Validation set</strong></li>
+          <li><strong>Testing set</strong></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <div class="subtopic-heading"><span class="subtopic-num">Step 4</span><h3>Selection of AI Technique</h3></div>
+  <div class="step-card">
+    <p>Suitable algorithms include:</p>
+    <ul>
+      <li>Linear Regression</li>
+      <li>Decision Tree Regression</li>
+      <li>Artificial Neural Networks</li>
+    </ul>
+    <div class="highlight-box"><strong>Best Choice: Artificial Neural Network (ANN)</strong> — highly suitable because concrete strength depends on <strong>complex nonlinear relationships</strong> among the input materials. ANN can learn these patterns from data.</div>
+  </div>
+
+  <div class="subtopic-heading"><span class="subtopic-num">Step 5</span><h3>Model Architecture</h3></div>
+  <div class="step-card">
+    <p>Example ANN structure:</p>
+    <ul>
+      <li><strong>Input layer</strong> — 5 nodes: Cement, Water, Sand, Gravel, Curing age</li>
+      <li><strong>Hidden layers</strong> — Learn relationships among variables</li>
+      <li><strong>Output layer</strong> — Predicted compressive strength (single continuous value)</li>
+    </ul>
+  </div>
+
+  <div class="subtopic-heading"><span class="subtopic-num">Step 8</span><h3>Deployment</h3></div>
+  <div class="step-card">
+    <p>The trained model can be integrated into <strong>civil engineering software</strong> to help engineers estimate concrete strength before actual production, thereby saving time and cost.</p>
+  </div>
+
+  <!-- MINI CHECK -->
+  <div class="mini-check">
+    <div class="mini-check-header"><span class="mini-check-icon">⚡</span><span class="mini-check-title">Quick Check — Question 1</span><span class="mini-check-sub">3 questions</span></div>
+    <div class="mc-mcq-item">
+      <div class="mc-q">The concrete strength prediction problem is classified as a:</div>
+      <div class="mc-mcq-opts" id="mc-1-1">
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-1',false,'mc-1-1-fb')"><span class="mc-ltr">A</span> Classification problem</div>
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-1',true,'mc-1-1-fb')"><span class="mc-ltr">B</span> Regression problem</div>
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-1',false,'mc-1-1-fb')"><span class="mc-ltr">C</span> Clustering problem</div>
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-1',false,'mc-1-1-fb')"><span class="mc-ltr">D</span> Reinforcement learning problem</div>
+      </div>
+      <div class="mc-mcq-fb" id="mc-1-1-fb"></div>
+    </div>
+    <div class="mc-mcq-item">
+      <div class="mc-q">Why is an ANN chosen over Linear Regression for this problem?</div>
+      <div class="mc-mcq-opts" id="mc-1-2">
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-2',false,'mc-1-2-fb')"><span class="mc-ltr">A</span> ANN uses fewer data points</div>
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-2',true,'mc-1-2-fb')"><span class="mc-ltr">B</span> Concrete strength has complex nonlinear relationships among materials</div>
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-2',false,'mc-1-2-fb')"><span class="mc-ltr">C</span> Linear regression cannot handle numbers</div>
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-1-2',false,'mc-1-2-fb')"><span class="mc-ltr">D</span> ANN is always the best model</div>
+      </div>
+      <div class="mc-mcq-fb" id="mc-1-2-fb"></div>
+    </div>
+    <div class="mc-fitb-item">
+      <div class="mc-q">How many input nodes does the ANN input layer have, and what are they?</div>
+      <button class="mc-reveal-btn" onclick="mcReveal(this)">Reveal Answer</button>
+      <div class="mc-answer"><strong>5 input nodes:</strong> Cement, Water, Sand, Gravel, and Curing age — one node for each input variable in the dataset.</div>
+    </div>
+  </div>
+
+  <!-- ACTIVE RECALL -->
+  <div class="recall-section">
+    <div class="recall-label">Active Recall — Question 1</div>
+    <div class="recall-card">
+      <span class="recall-badge badge-def">Definition</span>
+      <div class="recall-q">What is the difference between a regression problem and a classification problem? Which type is the concrete strength prediction?</div>
+      <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+      <div class="recall-answer">A <strong>regression problem</strong> outputs a continuous numerical value (e.g. 45.2 MPa). A <strong>classification problem</strong> assigns input to a discrete category (e.g. Strong / Weak). Concrete strength prediction is a <strong>regression problem</strong> because the output is a continuous compressive strength value.</div>
+    </div>
+    <div class="recall-card">
+      <span class="recall-badge badge-mech">Mechanism</span>
+      <div class="recall-q">List all 5 input variables and 1 output variable in the concrete strength ANN.</div>
+      <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+      <div class="recall-answer"><strong>Inputs (5):</strong> Cement content, Water content, Sand quantity, Gravel quantity, Curing age.<br><strong>Output (1):</strong> Compressive strength (predicted continuous value).</div>
+    </div>
+    <div class="recall-card">
+      <span class="recall-badge badge-mech">Mechanism</span>
+      <div class="recall-q">List the 4 data preprocessing operations applied in Step 3 of the concrete strength model.</div>
+      <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+      <div class="recall-answer">1. Handling <strong>missing values</strong> · 2. Removing <strong>outliers</strong> · 3. <strong>Normalizing</strong> data values · 4. Splitting into <strong>Training / Validation / Testing</strong> sets.</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══════════ QUESTION 2 ══════════ -->
+<div class="topic-block" id="topic-2">
+  <div class="section-label">Question 2</div>
+  <div class="section-title">AI Model for Traffic Sign Recognition in Autonomous Vehicles</div>
+  <div class="section-subtitle">Development of a CNN-based Computer Vision Classification Model</div>
+
+  <!-- THE QUESTION -->
+  <div class="question-banner">
+    <p><strong>Question:</strong> An Electronic and Computer Engineering research team intends to develop an AI system capable of recognizing traffic signs for use in autonomous vehicles. The available dataset consists of thousands of labeled images containing:</p>
+    <ul>
+      <li>Stop signs</li>
+      <li>Speed limit signs</li>
+      <li>Warning signs</li>
+      <li>Pedestrian crossing signs</li>
+      <li>Traffic lights</li>
+    </ul>
+    <p>Explain the steps involved in developing the AI model and identify the most suitable AI technique for the system.</p>
+  </div>
+
+  <!-- SOLUTION STEPS -->
+  <div class="subtopic-heading"><span class="subtopic-num">Step 1</span><h3>Problem Definition</h3></div>
+  <div class="step-card">
+    <p>The objective is to develop an AI model that can identify and classify traffic signs from images in real time.</p>
+    <div class="highlight-box"><strong>Problem Type: Computer Vision Classification</strong> — the model categorizes images into predefined classes (stop sign, speed limit sign, etc.).</div>
+  </div>
+
+  <div class="subtopic-heading"><span class="subtopic-num">Step 2</span><h3>Data Collection</h3></div>
+  <div class="step-card">
+    <p>The dataset is obtained from:</p>
+    <ul>
+      <li>Cameras mounted on vehicles</li>
+      <li>Public traffic sign databases</li>
+      <li>Road surveillance systems</li>
+    </ul>
+    <p>Each image must be <strong>labeled correctly</strong> according to the traffic sign category.</p>
+  </div>
+
+  <div class="subtopic-heading"><span class="subtopic-num">Step 3</span><h3>Data Preprocessing</h3></div>
+  <div class="step-card">
+    <p>Image preprocessing operations include:</p>
+    <ul>
+      <li>Resizing images to <strong>uniform dimensions</strong></li>
+      <li>Noise reduction</li>
+      <li>Image normalization</li>
+      <li><strong>Data augmentation:</strong>
+        <ul>
+          <li>Rotation</li>
+          <li>Flipping</li>
+          <li>Brightness adjustment</li>
+        </ul>
+      </li>
+    </ul>
+    <div class="highlight-box"><strong>Note:</strong> Data augmentation improves model <strong>robustness</strong> by artificially increasing the variety of training images.</div>
+  </div>
+
+  <div class="subtopic-heading"><span class="subtopic-num">Step 4</span><h3>Selection of AI Technique</h3></div>
+  <div class="step-card">
+    <div class="highlight-box"><strong>Best Choice: Convolutional Neural Network (CNN)</strong> — CNNs are highly effective for image recognition because they automatically extract important visual features such as <strong>edges, shapes, and patterns</strong>.</div>
+  </div>
+
+  <div class="subtopic-heading"><span class="subtopic-num">Step 5</span><h3>Model Architecture</h3></div>
+  <div class="step-card">
+    <p>Typical CNN architecture includes:</p>
+    <ul>
+      <li><strong>Input Layer</strong> — receives the image pixel data</li>
+      <li><strong>Convolutional Layers</strong> — extract features (edges, shapes)</li>
+      <li><strong>Pooling Layers</strong> — reduce spatial dimensions</li>
+      <li><strong>Fully Connected Layers</strong> — learn high-level patterns</li>
+      <li><strong>Output Layer</strong> — class probabilities</li>
+    </ul>
+    <p><strong>Example output classes:</strong> Stop sign · Speed limit sign · Traffic light · Warning sign · Pedestrian crossing</p>
+  </div>
+
+  <!-- MINI CHECK -->
+  <div class="mini-check">
+    <div class="mini-check-header"><span class="mini-check-icon">⚡</span><span class="mini-check-title">Quick Check — Question 2</span><span class="mini-check-sub">3 questions</span></div>
+    <div class="mc-mcq-item">
+      <div class="mc-q">The traffic sign recognition problem is classified as a:</div>
+      <div class="mc-mcq-opts" id="mc-2-1">
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2-1',false,'mc-2-1-fb')"><span class="mc-ltr">A</span> Regression problem</div>
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2-1',true,'mc-2-1-fb')"><span class="mc-ltr">B</span> Computer vision classification problem</div>
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2-1',false,'mc-2-1-fb')"><span class="mc-ltr">C</span> Unsupervised clustering problem</div>
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2-1',false,'mc-2-1-fb')"><span class="mc-ltr">D</span> Time series prediction problem</div>
+      </div>
+      <div class="mc-mcq-fb" id="mc-2-1-fb"></div>
+    </div>
+    <div class="mc-mcq-item">
+      <div class="mc-q">What is the correct order of layers in a typical CNN architecture?</div>
+      <div class="mc-mcq-opts" id="mc-2-2">
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2-2',false,'mc-2-2-fb')"><span class="mc-ltr">A</span> Pooling → Input → Convolutional → Output → Fully Connected</div>
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2-2',true,'mc-2-2-fb')"><span class="mc-ltr">B</span> Input → Convolutional → Pooling → Fully Connected → Output</div>
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2-2',false,'mc-2-2-fb')"><span class="mc-ltr">C</span> Input → Fully Connected → Convolutional → Output</div>
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-2-2',false,'mc-2-2-fb')"><span class="mc-ltr">D</span> Convolutional → Input → Pooling → Output</div>
+      </div>
+      <div class="mc-mcq-fb" id="mc-2-2-fb"></div>
+    </div>
+    <div class="mc-reveal-item">
+      <div class="mc-q">Name THREE data augmentation techniques used in the traffic sign model and explain why augmentation is performed.</div>
+      <button class="mc-reveal-btn" onclick="mcReveal(this)">Reveal Answer</button>
+      <div class="mc-answer"><strong>Three augmentation techniques:</strong> Rotation, Flipping, Brightness adjustment.<br><strong>Why:</strong> Data augmentation artificially increases the variety of training images, improving the model's <strong>robustness</strong> — making it perform better in real-world conditions where signs may appear at different angles, orientations, or lighting conditions.</div>
+    </div>
+  </div>
+
+  <!-- ACTIVE RECALL -->
+  <div class="recall-section">
+    <div class="recall-label">Active Recall — Question 2</div>
+    <div class="recall-card">
+      <span class="recall-badge badge-comp">Comparison</span>
+      <div class="recall-q">Compare ANN (Question 1) and CNN (Question 2). What is the key advantage of CNN for image-based tasks?</div>
+      <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+      <div class="recall-answer">Both are neural networks, but <strong>CNNs</strong> have specialised layers (Convolutional and Pooling) that <strong>automatically extract visual features</strong> such as edges, shapes, and patterns from images. An ANN treats each pixel as an independent input and doesn't capture spatial structure. CNNs are therefore far more effective for image classification tasks.</div>
+    </div>
+    <div class="recall-card">
+      <span class="recall-badge badge-app">Application</span>
+      <div class="recall-q">List the 5 traffic sign categories the CNN must classify, and the 3 data sources used to collect images.</div>
+      <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+      <div class="recall-answer"><strong>5 Categories:</strong> Stop signs, Speed limit signs, Warning signs, Pedestrian crossing signs, Traffic lights.<br><strong>3 Data Sources:</strong> Cameras mounted on vehicles, Public traffic sign databases, Road surveillance systems.</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══════════ QUESTION 3 ══════════ -->
+<div class="topic-block" id="topic-3">
+  <div class="section-label">Question 3</div>
+  <div class="section-title">AI-Based Network Intrusion Detection System</div>
+  <div class="section-subtitle">Development of a Random Forest Classifier for Cybersecurity</div>
+
+  <!-- THE QUESTION -->
+  <div class="question-banner">
+    <p><strong>Question:</strong> A Computer Engineering firm plans to develop an AI-based Intrusion Detection System (IDS) capable of detecting cyberattacks in a computer network. The dataset contains:</p>
+    <ul>
+      <li>Source IP address</li>
+      <li>Destination IP address</li>
+      <li>Packet size</li>
+      <li>Protocol type</li>
+      <li>Login attempts</li>
+      <li>Historical attack records</li>
+    </ul>
+    <p>Describe the procedure for developing the AI model and identify the appropriate machine learning method.</p>
+  </div>
+
+  <!-- SOLUTION STEPS -->
+  <div class="subtopic-heading"><span class="subtopic-num">Step 1</span><h3>Problem Identification</h3></div>
+  <div class="step-card">
+    <p>The aim is to detect malicious network activities and classify them as:</p>
+    <ul>
+      <li>Normal traffic</li>
+      <li>Suspicious traffic</li>
+      <li>Attack traffic</li>
+    </ul>
+    <div class="highlight-box"><strong>Problem Type: Classification</strong> — the model assigns each network activity to one of the defined categories.</div>
+  </div>
+
+  <div class="subtopic-heading"><span class="subtopic-num">Step 2</span><h3>Data Collection</h3></div>
+  <div class="step-card">
+    <p>Data are collected from:</p>
+    <ul>
+      <li>Routers</li>
+      <li>Firewalls</li>
+      <li>Servers</li>
+      <li>Network monitoring tools</li>
+    </ul>
+    <p>Historical cyberattack data are also included.</p>
+  </div>
+
+  <div class="subtopic-heading"><span class="subtopic-num">Step 3</span><h3>Data Preprocessing</h3></div>
+  <div class="step-card">
+    <p>Preprocessing activities include:</p>
+    <ul>
+      <li>Removal of duplicate records</li>
+      <li>Handling missing data</li>
+      <li>Feature encoding</li>
+      <li>Data normalization</li>
+    </ul>
+    <p>The dataset is divided into <strong>Training dataset</strong> and <strong>Testing dataset</strong>.</p>
+  </div>
+
+  <div class="subtopic-heading"><span class="subtopic-num">Step 4</span><h3>Selection of AI Algorithm</h3></div>
+  <div class="step-card">
+    <p>Suitable algorithms include:</p>
+    <ul>
+      <li>Random Forest</li>
+      <li>Support Vector Machine (SVM)</li>
+      <li>Deep Neural Network (DNN)</li>
+    </ul>
+    <div class="highlight-box"><strong>Best Choice: Random Forest Classifier</strong> — appropriate because it handles <strong>large network datasets efficiently</strong> and provides <strong>high detection accuracy</strong>. It also resists overfitting by averaging multiple decision trees.</div>
+  </div>
+
+  <div class="subtopic-heading"><span class="subtopic-num">Step 5</span><h3>Feature Extraction</h3></div>
+  <div class="step-card">
+    <p>Important features extracted include:</p>
+    <ul>
+      <li>Frequency of login failures</li>
+      <li>Unusual packet transmission rate</li>
+      <li>Unknown IP connections</li>
+      <li>Abnormal traffic patterns</li>
+    </ul>
+  </div>
+
+  <div class="subtopic-heading"><span class="subtopic-num">Step 6</span><h3>Model Training</h3></div>
+  <div class="step-card">
+    <p>The AI model is trained using <strong>supervised learning</strong>.</p>
+    <ul>
+      <li><strong>Inputs:</strong> Packet information, Protocol details, Connection behavior</li>
+      <li><strong>Outputs:</strong> Normal · Intrusion</li>
+    </ul>
+  </div>
+
+  <div class="subtopic-heading"><span class="subtopic-num">Step 7</span><h3>Model Evaluation</h3></div>
+  <div class="step-card">
+    <p>Performance is measured using:</p>
+    <ul>
+      <li><strong>Accuracy</strong></li>
+      <li><strong>Precision</strong></li>
+      <li><strong>Recall</strong></li>
+      <li><strong>False Positive Rate (FPR)</strong></li>
+    </ul>
+  </div>
+
+  <div class="subtopic-heading"><span class="subtopic-num">Step 8</span><h3>Deployment</h3></div>
+  <div class="step-card">
+    <p>The AI-based IDS is integrated into the <strong>network infrastructure</strong> to monitor traffic continuously and alert administrators whenever suspicious activities are detected.</p>
+  </div>
+
+  <!-- MINI CHECK -->
+  <div class="mini-check">
+    <div class="mini-check-header"><span class="mini-check-icon">⚡</span><span class="mini-check-title">Quick Check — Question 3</span><span class="mini-check-sub">3 questions</span></div>
+    <div class="mc-mcq-item">
+      <div class="mc-q">The network intrusion detection problem is classified as a:</div>
+      <div class="mc-mcq-opts" id="mc-3-1">
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-3-1',false,'mc-3-1-fb')"><span class="mc-ltr">A</span> Regression problem</div>
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-3-1',true,'mc-3-1-fb')"><span class="mc-ltr">B</span> Classification problem</div>
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-3-1',false,'mc-3-1-fb')"><span class="mc-ltr">C</span> Computer vision problem</div>
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-3-1',false,'mc-3-1-fb')"><span class="mc-ltr">D</span> Unsupervised learning problem</div>
+      </div>
+      <div class="mc-mcq-fb" id="mc-3-1-fb"></div>
+    </div>
+    <div class="mc-mcq-item">
+      <div class="mc-q">Why is Random Forest chosen for the intrusion detection system?</div>
+      <div class="mc-mcq-opts" id="mc-3-2">
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-3-2',false,'mc-3-2-fb')"><span class="mc-ltr">A</span> It works only on image data</div>
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-3-2',false,'mc-3-2-fb')"><span class="mc-ltr">B</span> It requires fewer features than other algorithms</div>
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-3-2',true,'mc-3-2-fb')"><span class="mc-ltr">C</span> It handles large network datasets efficiently and provides high detection accuracy</div>
+        <div class="mc-mcq-opt" onclick="mcMcq(this,'mc-3-2',false,'mc-3-2-fb')"><span class="mc-ltr">D</span> It is the only algorithm that can handle IP addresses</div>
+      </div>
+      <div class="mc-mcq-fb" id="mc-3-2-fb"></div>
+    </div>
+    <div class="mc-reveal-item">
+      <div class="mc-q">List the 4 performance metrics used to evaluate the intrusion detection model.</div>
+      <button class="mc-reveal-btn" onclick="mcReveal(this)">Reveal Answer</button>
+      <div class="mc-answer"><strong>1. Accuracy</strong> — overall correct classifications.<br><strong>2. Precision</strong> — of those flagged as attacks, how many actually are.<br><strong>3. Recall</strong> — of actual attacks, how many were detected.<br><strong>4. False Positive Rate (FPR)</strong> — how often normal traffic is incorrectly flagged as an attack.</div>
+    </div>
+  </div>
+
+  <!-- ACTIVE RECALL -->
+  <div class="recall-section">
+    <div class="recall-label">Active Recall — Question 3</div>
+    <div class="recall-card">
+      <span class="recall-badge badge-app">Application</span>
+      <div class="recall-q">List all 4 data sources used to collect the IDS dataset and the 4 extracted features used for training.</div>
+      <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+      <div class="recall-answer"><strong>Data Sources:</strong> Routers, Firewalls, Servers, Network monitoring tools.<br><strong>Extracted Features:</strong> Frequency of login failures, Unusual packet transmission rate, Unknown IP connections, Abnormal traffic patterns.</div>
+    </div>
+    <div class="recall-card">
+      <span class="recall-badge badge-comp">Comparison</span>
+      <div class="recall-q">Compare the preprocessing steps for Q1 (Concrete), Q2 (Traffic Signs), and Q3 (IDS). What is common to all three?</div>
+      <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+      <div class="recall-answer">All three include <strong>data normalization</strong> and <strong>handling missing/incomplete data</strong>. Q2 adds image-specific steps (resizing, augmentation). Q3 adds feature encoding and duplicate removal. Q1 adds outlier removal. The <strong>common thread</strong>: every AI model requires cleaned, normalized, and split data before training.</div>
+    </div>
+    <div class="recall-card">
+      <span class="recall-badge badge-def">Definition</span>
+      <div class="recall-q">What is supervised learning? Which of the three problems uses it explicitly?</div>
+      <button class="reveal-btn" onclick="toggleAnswer(this)">Reveal Answer</button>
+      <div class="recall-answer"><strong>Supervised learning</strong> trains a model on labeled data — each input example comes with a known correct output. The IDS (Q3) explicitly states it is trained using <strong>supervised learning</strong>. All three problems also use supervised learning implicitly, as all datasets contain labeled outputs (strength value, sign category, normal/intrusion label).</div>
+    </div>
+  </div>
+</div>
+
+<!-- PULSE CHECK -->
+<div class="pulse-check">
+  <div class="pc-title">Pulse Check — All 3 Questions</div>
+  <div class="pc-sub">6 cross-cutting questions</div>
+  <div class="pc-question">
+    <div class="pc-q-text">Which problem is a REGRESSION task (continuous output)?</div>
+    <div class="pc-options" id="pc-q1-opts">
+      <div class="pc-option" onclick="pcAnswer(this,'pc-q1',true)"><span class="pc-letter">A</span> Concrete strength prediction (Q1)</div>
+      <div class="pc-option" onclick="pcAnswer(this,'pc-q1',false)"><span class="pc-letter">B</span> Traffic sign recognition (Q2)</div>
+      <div class="pc-option" onclick="pcAnswer(this,'pc-q1',false)"><span class="pc-letter">C</span> Intrusion detection (Q3)</div>
+      <div class="pc-option" onclick="pcAnswer(this,'pc-q1',false)"><span class="pc-letter">D</span> All three</div>
+    </div>
+    <div class="pc-feedback" id="pc-q1-fb"></div>
+  </div>
+  <div class="pc-question">
+    <div class="pc-q-text">Which AI model is most suitable for image recognition tasks?</div>
+    <div class="pc-options" id="pc-q2-opts">
+      <div class="pc-option" onclick="pcAnswer(this,'pc-q2',false)"><span class="pc-letter">A</span> Random Forest</div>
+      <div class="pc-option" onclick="pcAnswer(this,'pc-q2',false)"><span class="pc-letter">B</span> Linear Regression</div>
+      <div class="pc-option" onclick="pcAnswer(this,'pc-q2',true)"><span class="pc-letter">C</span> CNN (Convolutional Neural Network)</div>
+      <div class="pc-option" onclick="pcAnswer(this,'pc-q2',false)"><span class="pc-letter">D</span> Support Vector Machine</div>
+    </div>
+    <div class="pc-feedback" id="pc-q2-fb"></div>
+  </div>
+  <div class="pc-question">
+    <div class="pc-q-text">Which model is chosen for the IDS and why is it suitable?</div>
+    <div class="pc-options" id="pc-q3-opts">
+      <div class="pc-option" onclick="pcAnswer(this,'pc-q3',false)"><span class="pc-letter">A</span> ANN — it handles images efficiently</div>
+      <div class="pc-option" onclick="pcAnswer(this,'pc-q3',false)"><span class="pc-letter">B</span> CNN — it extracts visual features</div>
+      <div class="pc-option" onclick="pcAnswer(this,'pc-q3',true)"><span class="pc-letter">C</span> Random Forest — handles large network datasets efficiently with high accuracy</div>
+      <div class="pc-option" onclick="pcAnswer(this,'pc-q3',false)"><span class="pc-letter">D</span> Linear Regression — it's the simplest model</div>
+    </div>
+    <div class="pc-feedback" id="pc-q3-fb"></div>
+  </div>
+  <div class="pc-question">
+    <div class="pc-q-text">Data augmentation (rotation, flipping, brightness) is used in which problem?</div>
+    <div class="pc-options" id="pc-q4-opts">
+      <div class="pc-option" onclick="pcAnswer(this,'pc-q4',false)"><span class="pc-letter">A</span> Concrete strength (Q1)</div>
+      <div class="pc-option" onclick="pcAnswer(this,'pc-q4',true)"><span class="pc-letter">B</span> Traffic sign recognition (Q2)</div>
+      <div class="pc-option" onclick="pcAnswer(this,'pc-q4',false)"><span class="pc-letter">C</span> Intrusion detection (Q3)</div>
+      <div class="pc-option" onclick="pcAnswer(this,'pc-q4',false)"><span class="pc-letter">D</span> All three</div>
+    </div>
+    <div class="pc-feedback" id="pc-q4-fb"></div>
+  </div>
+  <div class="pc-question">
+    <div class="pc-q-text">The IDS model evaluation metric that measures correctly identified attacks out of all actual attacks is:</div>
+    <div class="pc-options" id="pc-q5-opts">
+      <div class="pc-option" onclick="pcAnswer(this,'pc-q5',false)"><span class="pc-letter">A</span> Precision</div>
+      <div class="pc-option" onclick="pcAnswer(this,'pc-q5',true)"><span class="pc-letter">B</span> Recall</div>
+      <div class="pc-option" onclick="pcAnswer(this,'pc-q5',false)"><span class="pc-letter">C</span> Accuracy</div>
+      <div class="pc-option" onclick="pcAnswer(this,'pc-q5',false)"><span class="pc-letter">D</span> False Positive Rate</div>
+    </div>
+    <div class="pc-feedback" id="pc-q5-fb"></div>
+  </div>
+  <div class="pc-question">
+    <div class="pc-q-text">All three AI models share a common final step. What is it?</div>
+    <div class="pc-fitb">
+      <input type="text" id="pc-q6-input" placeholder="Deployment">
+      <button class="pc-check-btn" onclick="pcFitb('pc-q6',['deployment','deploy','step 8','integration','model deployment'])">Check</button>
+    </div>
+    <div class="pc-feedback" id="pc-q6-fb"></div>
+  </div>
+</div>
+
+<!-- FINAL QUIZ -->
+<div class="eoq" id="eoq">
+  <div class="eoq-eyebrow">Final Quiz</div>
+  <div class="eoq-title">AI Model Development — All 3 Questions</div>
+  <div class="eoq-sub">12 questions · 60% to pass (8/12) · Dr. Ajasa</div>
+
+  <div class="eoq-question" data-q="1" data-type="mcq" data-correct="B">
+    <div class="eoq-qnum">Question 1</div>
+    <div class="eoq-q-text">The concrete strength prediction problem is a ________ because the output is a continuous numerical value.</div>
+    <div class="eoq-options">
+      <div class="eoq-option" onclick="eoqSelect(this,1,'A')"><span class="eoq-letter">A</span> Classification problem</div>
+      <div class="eoq-option" onclick="eoqSelect(this,1,'B')"><span class="eoq-letter">B</span> Regression problem</div>
+      <div class="eoq-option" onclick="eoqSelect(this,1,'C')"><span class="eoq-letter">C</span> Clustering problem</div>
+      <div class="eoq-option" onclick="eoqSelect(this,1,'D')"><span class="eoq-letter">D</span> Reinforcement learning problem</div>
+    </div>
+    <div class="eoq-feedback" id="eoq-fb-1"></div>
+  </div>
+
+  <div class="eoq-question" data-q="2" data-type="mcq" data-correct="C">
+    <div class="eoq-qnum">Question 2</div>
+    <div class="eoq-q-text">Why is an ANN selected for concrete strength prediction rather than Linear Regression?</div>
+    <div class="eoq-options">
+      <div class="eoq-option" onclick="eoqSelect(this,2,'A')"><span class="eoq-letter">A</span> ANN needs less data</div>
+      <div class="eoq-option" onclick="eoqSelect(this,2,'B')"><span class="eoq-letter">B</span> ANN is faster to train</div>
+      <div class="eoq-option" onclick="eoqSelect(this,2,'C')"><span class="eoq-letter">C</span> Concrete strength has complex nonlinear relationships that ANN can learn</div>
+      <div class="eoq-option" onclick="eoqSelect(this,2,'D')"><span class="eoq-letter">D</span> Linear regression cannot predict numbers</div>
+    </div>
+    <div class="eoq-feedback" id="eoq-fb-2"></div>
+  </div>
+
+  <div class="eoq-question" data-q="3" data-type="mcq" data-correct="A">
+    <div class="eoq-qnum">Question 3</div>
+    <div class="eoq-q-text">The ANN for concrete strength has how many input nodes?</div>
+    <div class="eoq-options">
+      <div class="eoq-option" onclick="eoqSelect(this,3,'A')"><span class="eoq-letter">A</span> 5 (Cement, Water, Sand, Gravel, Curing age)</div>
+      <div class="eoq-option" onclick="eoqSelect(this,3,'B')"><span class="eoq-letter">B</span> 3 (Cement, Water, Curing age)</div>
+      <div class="eoq-option" onclick="eoqSelect(this,3,'C')"><span class="eoq-letter">C</span> 1 (Compressive strength)</div>
+      <div class="eoq-option" onclick="eoqSelect(this,3,'D')"><span class="eoq-letter">D</span> 4 (Cement, Water, Sand, Gravel)</div>
+    </div>
+    <div class="eoq-feedback" id="eoq-fb-3"></div>
+  </div>
+
+  <div class="eoq-question" data-q="4" data-type="mcq" data-correct="B">
+    <div class="eoq-qnum">Question 4</div>
+    <div class="eoq-q-text">The traffic sign recognition problem is classified as a:</div>
+    <div class="eoq-options">
+      <div class="eoq-option" onclick="eoqSelect(this,4,'A')"><span class="eoq-letter">A</span> Regression problem</div>
+      <div class="eoq-option" onclick="eoqSelect(this,4,'B')"><span class="eoq-letter">B</span> Computer vision classification problem</div>
+      <div class="eoq-option" onclick="eoqSelect(this,4,'C')"><span class="eoq-letter">C</span> Unsupervised clustering problem</div>
+      <div class="eoq-option" onclick="eoqSelect(this,4,'D')"><span class="eoq-letter">D</span> Reinforcement learning problem</div>
+    </div>
+    <div class="eoq-feedback" id="eoq-fb-4"></div>
+  </div>
+
+  <div class="eoq-question" data-q="5" data-type="mcq" data-correct="C">
+    <div class="eoq-qnum">Question 5</div>
+    <div class="eoq-q-text">Why is CNN the most suitable model for traffic sign recognition?</div>
+    <div class="eoq-options">
+      <div class="eoq-option" onclick="eoqSelect(this,5,'A')"><span class="eoq-letter">A</span> CNNs work best with tabular data</div>
+      <div class="eoq-option" onclick="eoqSelect(this,5,'B')"><span class="eoq-letter">B</span> CNNs require no preprocessing</div>
+      <div class="eoq-option" onclick="eoqSelect(this,5,'C')"><span class="eoq-letter">C</span> CNNs automatically extract visual features like edges, shapes and patterns from images</div>
+      <div class="eoq-option" onclick="eoqSelect(this,5,'D')"><span class="eoq-letter">D</span> CNNs are the simplest model available</div>
+    </div>
+    <div class="eoq-feedback" id="eoq-fb-5"></div>
+  </div>
+
+  <div class="eoq-question" data-q="6" data-type="mcq" data-correct="B">
+    <div class="eoq-qnum">Question 6</div>
+    <div class="eoq-q-text">What is the purpose of data augmentation in the traffic sign model?</div>
+    <div class="eoq-options">
+      <div class="eoq-option" onclick="eoqSelect(this,6,'A')"><span class="eoq-letter">A</span> To reduce the number of training images</div>
+      <div class="eoq-option" onclick="eoqSelect(this,6,'B')"><span class="eoq-letter">B</span> To improve model robustness by artificially increasing training variety</div>
+      <div class="eoq-option" onclick="eoqSelect(this,6,'C')"><span class="eoq-letter">C</span> To remove noise from images</div>
+      <div class="eoq-option" onclick="eoqSelect(this,6,'D')"><span class="eoq-letter">D</span> To reduce the number of classes</div>
+    </div>
+    <div class="eoq-feedback" id="eoq-fb-6"></div>
+  </div>
+
+  <div class="eoq-question" data-q="7" data-type="mcq" data-correct="B">
+    <div class="eoq-qnum">Question 7</div>
+    <div class="eoq-q-text">The IDS problem is classified as a:</div>
+    <div class="eoq-options">
+      <div class="eoq-option" onclick="eoqSelect(this,7,'A')"><span class="eoq-letter">A</span> Regression problem</div>
+      <div class="eoq-option" onclick="eoqSelect(this,7,'B')"><span class="eoq-letter">B</span> Classification problem</div>
+      <div class="eoq-option" onclick="eoqSelect(this,7,'C')"><span class="eoq-letter">C</span> Computer vision problem</div>
+      <div class="eoq-option" onclick="eoqSelect(this,7,'D')"><span class="eoq-letter">D</span> Unsupervised learning problem</div>
+    </div>
+    <div class="eoq-feedback" id="eoq-fb-7"></div>
+  </div>
+
+  <div class="eoq-question" data-q="8" data-type="mcq" data-correct="C">
+    <div class="eoq-qnum">Question 8</div>
+    <div class="eoq-q-text">Why is Random Forest chosen for the IDS over SVM or DNN?</div>
+    <div class="eoq-options">
+      <div class="eoq-option" onclick="eoqSelect(this,8,'A')"><span class="eoq-letter">A</span> It processes images more efficiently</div>
+      <div class="eoq-option" onclick="eoqSelect(this,8,'B')"><span class="eoq-letter">B</span> It requires no training data</div>
+      <div class="eoq-option" onclick="eoqSelect(this,8,'C')"><span class="eoq-letter">C</span> It handles large network datasets efficiently and provides high detection accuracy</div>
+      <div class="eoq-option" onclick="eoqSelect(this,8,'D')"><span class="eoq-letter">D</span> It is the only supervised learning algorithm</div>
+    </div>
+    <div class="eoq-feedback" id="eoq-fb-8"></div>
+  </div>
+
+  <div class="eoq-question" data-q="9" data-type="mcq" data-correct="D">
+    <div class="eoq-qnum">Question 9</div>
+    <div class="eoq-q-text">Which of these is NOT one of the 4 evaluation metrics for the IDS model?</div>
+    <div class="eoq-options">
+      <div class="eoq-option" onclick="eoqSelect(this,9,'A')"><span class="eoq-letter">A</span> Accuracy</div>
+      <div class="eoq-option" onclick="eoqSelect(this,9,'B')"><span class="eoq-letter">B</span> Precision</div>
+      <div class="eoq-option" onclick="eoqSelect(this,9,'C')"><span class="eoq-letter">C</span> Recall</div>
+      <div class="eoq-option" onclick="eoqSelect(this,9,'D')"><span class="eoq-letter">D</span> Normalization rate</div>
+    </div>
+    <div class="eoq-feedback" id="eoq-fb-9"></div>
+  </div>
+
+  <div class="eoq-question" data-q="10" data-type="fitb" data-correct="regression,regression problem">
+    <div class="eoq-qnum">Question 10</div>
+    <div class="eoq-q-text">Predicting a continuous numerical output (like compressive strength) is called a ________ problem.</div>
+    <div class="eoq-fitb"><input type="text" id="eoq-input-10" placeholder="Your answer…"></div>
+    <div class="eoq-feedback" id="eoq-fb-10"></div>
+  </div>
+
+  <div class="eoq-question" data-q="11" data-type="fitb" data-correct="cnn,convolutional neural network,convolutional neural networks">
+    <div class="eoq-qnum">Question 11</div>
+    <div class="eoq-q-text">The AI model selected for traffic sign recognition is a ________ (write full name or abbreviation).</div>
+    <div class="eoq-fitb"><input type="text" id="eoq-input-11" placeholder="Your answer…"></div>
+    <div class="eoq-feedback" id="eoq-fb-11"></div>
+  </div>
+
+  <div class="eoq-question" data-q="12" data-type="fitb" data-correct="random forest,random forest classifier">
+    <div class="eoq-qnum">Question 12</div>
+    <div class="eoq-q-text">The AI model selected for the intrusion detection system is a ________ (write full name).</div>
+    <div class="eoq-fitb"><input type="text" id="eoq-input-12" placeholder="Your answer…"></div>
+    <div class="eoq-feedback" id="eoq-fb-12"></div>
+  </div>
+
+  <button class="eoq-submit" id="eoq-submit-btn" onclick="eoqSubmit()">Submit Quiz</button>
+  <div class="eoq-result" id="eoq-result">
+    <div class="result-score" id="result-score"></div>
+    <div id="result-pill"></div>
+    <div class="result-msg" id="result-msg"></div>
+    <div id="result-extra"></div>
+  </div>
+</div>
+
+</div>
+<script>
+function toggleDark(){const h=document.documentElement,d=h.getAttribute('data-theme')==='dark';h.setAttribute('data-theme',d?'light':'dark');document.getElementById('dark-toggle').textContent=d?'🌙':'☀️';localStorage.setItem('unify-theme',d?'light':'dark');}
+(function(){const s=localStorage.getItem('unify-theme');if(s==='dark'){document.documentElement.setAttribute('data-theme','dark');document.getElementById('dark-toggle').textContent='☀️';}})();
+window.addEventListener('scroll',()=>{
+  const d=document.documentElement,sc=d.scrollTop||document.body.scrollTop,mx=d.scrollHeight-d.clientHeight,p=mx>0?(sc/mx)*100:0;
+  document.getElementById('progress-bar').style.width=p+'%';
+  const t1=document.getElementById('topic-1'),t2=document.getElementById('topic-2'),t3=document.getElementById('topic-3'),eq=document.getElementById('eoq');
+  const mid=sc+window.innerHeight/2,gt=e=>e.getBoundingClientRect().top+sc;
+  let lb='Q1: Concrete Strength';
+  if(mid>=gt(eq))lb='Final Quiz';
+  else if(mid>=gt(t3))lb='Q3: Intrusion Detection';
+  else if(mid>=gt(t2))lb='Q2: Traffic Signs';
+  document.getElementById('tracker-text').textContent=lb;
+  ['step-1','step-2','step-3','step-quiz'].forEach(id=>document.getElementById(id).classList.remove('done','active'));
+  if(mid>=gt(eq)){['step-1','step-2','step-3'].forEach(id=>document.getElementById(id).classList.add('done'));document.getElementById('step-quiz').classList.add('active');}
+  else if(mid>=gt(t3)){['step-1','step-2'].forEach(id=>document.getElementById(id).classList.add('done'));document.getElementById('step-3').classList.add('active');}
+  else if(mid>=gt(t2)){document.getElementById('step-1').classList.add('done');document.getElementById('step-2').classList.add('active');}
+  else{document.getElementById('step-1').classList.add('active');}
+});
+function toggleAnswer(b){const a=b.nextElementSibling,s=a.classList.contains('show');a.classList.toggle('show',!s);b.textContent=s?'Reveal Answer':'Hide Answer';}
+function mcReveal(b){const a=b.nextElementSibling,s=a.classList.contains('show');a.classList.toggle('show',!s);b.textContent=s?'Reveal Answer':'Hide Answer';}
+const mcLocked={};
+function mcMcq(el,gid,correct,fbId){if(mcLocked[gid])return;mcLocked[gid]=true;const opts=document.getElementById(gid).querySelectorAll('.mc-mcq-opt');opts.forEach(o=>o.classList.add('mc-locked'));el.classList.add(correct?'mc-correct':'mc-wrong');if(!correct){opts.forEach(o=>{if((o.getAttribute('onclick')||'').includes(',true,'))o.classList.add('mc-correct');});}const fb=document.getElementById(fbId);fb.style.display='block';fb.style.color=correct?'var(--green-deep)':'#b91c1c';fb.textContent=correct?'✓ Correct!':'✗ Not quite — correct answer highlighted.';}
+function mcFitb(inputId,fbId,answers){const input=document.getElementById(inputId),val=input.value.trim().toLowerCase(),correct=answers.some(a=>val===a.toLowerCase()),fb=document.getElementById(fbId);fb.style.display='block';fb.style.fontWeight='600';if(correct){fb.textContent='✓ Correct!';fb.style.color='var(--green-deep)';input.style.borderColor='var(--green)';}else{fb.textContent='✗ Not quite. Correct: '+answers[0];fb.style.color='#b91c1c';input.style.borderColor='#ef4444';}input.disabled=true;const btn=input.nextElementSibling;if(btn)btn.disabled=true;}
+const pcLocked={};
+function pcAnswer(el,id,correct){if(pcLocked[id])return;pcLocked[id]=true;const opts=document.getElementById(id+'-opts').querySelectorAll('.pc-option');opts.forEach(o=>o.classList.remove('correct','wrong'));el.classList.add(correct?'correct':'wrong');if(!correct){opts.forEach(o=>{if((o.getAttribute('onclick')||'').includes(',true)'))o.classList.add('correct');});}const fb=document.getElementById(id+'-fb');fb.style.display='block';fb.textContent=correct?'✓ Correct!':'✗ Not quite — correct answer highlighted.';}
+function pcFitb(id,answers){const input=document.getElementById(id+'-input'),val=input.value.trim().toLowerCase(),correct=answers.some(a=>val===a.toLowerCase()),fb=document.getElementById(id+'-fb');fb.style.display='block';fb.style.fontWeight='600';if(correct){fb.textContent='✓ Correct!';fb.style.color='#0a0a0a';}else{fb.textContent='✗ Not quite. Correct: '+answers[0];fb.style.color='#991b1b';}input.disabled=true;}
+const eoqAnswers={},totalQ=12;
+const eoqFB={
+  1:{c:'Correct. Concrete strength is a continuous value — this is a regression problem.',w:'Incorrect. The output is a continuous numerical value (e.g. 42.5 MPa) → regression.'},
+  2:{c:'Correct. Concrete strength has complex nonlinear relationships that ANN can capture.',w:'Incorrect. ANN is chosen because concrete strength depends on complex nonlinear relationships among materials that linear regression cannot model.'},
+  3:{c:'Correct. 5 input nodes: Cement, Water, Sand, Gravel, Curing age.',w:'Incorrect. There are 5 inputs in the dataset: Cement, Water, Sand, Gravel, and Curing age.'},
+  4:{c:'Correct. Traffic sign recognition is a computer vision classification problem.',w:'Incorrect. The model assigns images to predefined classes (stop, speed limit, etc.) → computer vision classification.'},
+  5:{c:'Correct. CNNs automatically extract visual features like edges, shapes, and patterns.',w:'Incorrect. CNNs are chosen specifically because they automatically extract visual features (edges, shapes, patterns) from images.'},
+  6:{c:'Correct. Data augmentation improves model robustness by increasing training variety.',w:'Incorrect. Augmentation (rotation, flipping, brightness adjustment) artificially increases training data variety → improves robustness.'},
+  7:{c:'Correct. IDS is a classification problem — normal, suspicious, or attack traffic.',w:'Incorrect. IDS classifies network activity into categories (normal, suspicious, attack) → classification.'},
+  8:{c:'Correct. Random Forest handles large datasets efficiently with high accuracy.',w:'Incorrect. Random Forest is selected because it handles large network datasets efficiently and provides high detection accuracy.'},
+  9:{c:'Correct. Normalization rate is not an evaluation metric. The 4 metrics are Accuracy, Precision, Recall, and FPR.',w:'Incorrect. The 4 evaluation metrics are: Accuracy, Precision, Recall, and False Positive Rate (FPR). Normalization is a preprocessing step, not a metric.'},
+  10:{c:'Correct. A continuous numerical output → regression problem.',w:'Incorrect. Predicting a continuous numerical output is called a regression problem.'},
+  11:{c:'Correct. CNN (Convolutional Neural Network) is used for traffic sign recognition.',w:'Incorrect. The model for traffic sign recognition is a CNN — Convolutional Neural Network.'},
+  12:{c:'Correct. Random Forest Classifier is used for intrusion detection.',w:'Incorrect. The model for the IDS is a Random Forest Classifier.'}
+};
+function eoqSelect(el,qNum,choice){const qBlock=el.closest('.eoq-question');qBlock.querySelectorAll('.eoq-option').forEach(o=>o.classList.remove('selected'));el.classList.add('selected');eoqAnswers[qNum]=choice;}
+function eoqSubmit(){let score=0;const questions=document.querySelectorAll('.eoq-question');questions.forEach(q=>{const qNum=parseInt(q.getAttribute('data-q')),type=q.getAttribute('data-type'),correct=q.getAttribute('data-correct'),fb=document.getElementById('eoq-fb-'+qNum);if(type==='mcq'){const selected=eoqAnswers[qNum],isCorrect=selected===correct;if(isCorrect)score++;q.querySelectorAll('.eoq-option').forEach(o=>{o.classList.add('locked');const letter=o.querySelector('.eoq-letter').textContent.trim();if(letter===correct)o.classList.add('correct-reveal');else if(letter===selected&&!isCorrect)o.classList.add('wrong-reveal');});fb.style.display='block';fb.className='eoq-feedback '+(isCorrect?'correct-fb':'wrong-fb');fb.textContent=(isCorrect?'✓ ':'✗ ')+eoqFB[qNum][isCorrect?'c':'w'];}else if(type==='fitb'){const input=document.getElementById('eoq-input-'+qNum),val=input?input.value.trim().toLowerCase():'',accepted=correct.split(','),isCorrect=accepted.some(a=>val===a.trim().toLowerCase());if(isCorrect)score++;if(input){input.disabled=true;input.classList.add(isCorrect?'correct-input':'wrong-input');}fb.style.display='block';fb.className='eoq-feedback '+(isCorrect?'correct-fb':'wrong-fb');fb.textContent=(isCorrect?'✓ ':'✗ ')+eoqFB[qNum][isCorrect?'c':'w'];}});
+document.getElementById('eoq-submit-btn').disabled=true;
+const pct=Math.round((score/totalQ)*100),passed=pct>=60,result=document.getElementById('eoq-result');result.style.display='block';result.className='eoq-result '+(passed?'pass':'fail');document.getElementById('result-score').textContent=score+'/'+totalQ;document.getElementById('result-pill').innerHTML='<span class="result-pill '+(passed?'pill-pass':'pill-fail')+'">'+pct+'% — '+(passed?'PASSED':'NOT YET')+'</span>';document.getElementById('result-msg').textContent=passed?'Excellent! You can correctly identify problem types, select appropriate AI models, and explain the full development pipeline for all 3 scenarios.':'Review the flagged questions and retake.';
+const extra=document.getElementById('result-extra');if(passed){extra.innerHTML='<div class="unlock-banner">🎉 All 3 Dr. Ajasa AI Practice Questions mastered! ANN ✓ | CNN ✓ | Random Forest ✓</div>';}else{extra.innerHTML='<div class="review-nudge"><p>Go back and review the questions you got wrong.</p></div>';}result.scrollIntoView({behavior:'smooth',block:'start'});}
+</script>
+</body>
+</html>
