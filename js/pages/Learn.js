@@ -59,9 +59,15 @@ onAuthStateChanged(auth, async user => {
   renderSidebar();
   document.getElementById('loadingOverlay').style.display = 'none';
 
-  // Auto-open first incomplete topic
-  const firstIncomplete = findFirstIncomplete();
-  if (firstIncomplete) openTopic(firstIncomplete.w, firstIncomplete.t);
+  // Auto-open: ?week= param (coming back from a week page) takes priority
+  const weekParam = params.get('week');
+  if (weekParam) {
+    const wi = parseInt(weekParam, 10) - 1;
+    if (wi >= 0 && wi < courseTopics.length) toggleWeek(wi);
+  } else {
+    const firstIncomplete = findFirstIncomplete();
+    if (firstIncomplete) openTopic(firstIncomplete.w, firstIncomplete.t);
+  }
 });
 
 // ── LOAD DATA ─────────────────────────────────────────
@@ -302,6 +308,14 @@ window.openTopic = function(wi, ti) {
   if (!week) { console.warn('openTopic: week', wi, 'not found in courseTopics'); return; }
   const subtopic = week.subtopics[ti];
   if (!subtopic) { console.warn('openTopic: subtopic', ti, 'not found in week', wi); return; }
+
+  // Persist study position so the dashboard can show a "continue" card
+  try {
+    localStorage.setItem('unify-lastStudied', JSON.stringify({
+      course: courseCode, name: courseName,
+      week: week.week, weekIdx: wi, topic: subtopic, ts: Date.now()
+    }));
+  } catch(e) {}
   const key = topicKey(wi, ti);
   const isDone = topicProgress[key]?.done;
 
@@ -934,6 +948,23 @@ function wrapIfSnippet(html) {
 window.openNotes = function (weekNum) {
   const item = firestoreContentByWeek[Number(weekNum)];
   if (!item) return;
-  window.open(`notes.html?id=${encodeURIComponent(item.id)}`, '_blank', 'noopener,noreferrer');
+  const overlay = document.getElementById('notesOverlay');
+  const frame   = document.getElementById('notesFrame');
+  if (overlay && frame) {
+    frame.src = `notes.html?id=${encodeURIComponent(item.id)}`;
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  } else {
+    // fallback if overlay markup is missing
+    window.open(`notes.html?id=${encodeURIComponent(item.id)}`, '_blank', 'noopener,noreferrer');
+  }
+};
+
+window.closeNotesOverlay = function() {
+  const overlay = document.getElementById('notesOverlay');
+  if (overlay) overlay.style.display = 'none';
+  const frame = document.getElementById('notesFrame');
+  if (frame) frame.src = '';
+  document.body.style.overflow = '';
 };
 

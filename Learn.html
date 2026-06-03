@@ -271,6 +271,15 @@
   </div>
 </div>
 
+<!-- IN-APP NOTES VIEWER — keeps users inside the PWA instead of opening a new browser tab -->
+<div id="notesOverlay" style="display:none;flex-direction:column;position:fixed;inset:0;z-index:9999;background:var(--bg);">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;">
+    <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:15px;color:var(--text);">Lecture Notes</span>
+    <button onclick="closeNotesOverlay()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;color:var(--text2);">✕ Close</button>
+  </div>
+  <iframe id="notesFrame" src="" style="flex:1;border:none;width:100%;height:100%;"></iframe>
+</div>
+
 <script src="courses.js"></script>
 <script src="Coursecontent.JS?v=4"></script>
 <script type="module" src="js/pages/Learn.js?v=fs-content-4"></script>
