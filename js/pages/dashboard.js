@@ -735,33 +735,10 @@ window.toggleWeekAcc = function (header) {
   body.classList.toggle("open", !isOpen);
 };
 
-function generateWeekStructure(code) {
-  if (window.generateCourseStubs) window.generateCourseStubs();
-  const entry = window.UNIFY_COURSE_CONTENT?.[code];
-  if (entry && entry.weeks) {
-    return entry.weeks.map((w) => ({
-      title: w.topic,
-      subtopics: w.subtopics,
-    }));
-  }
-  const topics = [
-    "Introduction & Fundamentals",
-    "Core Principles I",
-    "Core Principles II",
-    "Methods & Techniques I",
-    "Methods & Techniques II",
-    "Analysis & Problem Solving",
-    "Applications I",
-    "Applications II",
-    "Advanced Topics I",
-    "Advanced Topics II",
-    "Integration & Design",
-    "Revision & Past Questions",
-  ];
-  return topics.map((title) => ({
-    title,
-    subtopics: [title + " — Theory", title + " — Practice"],
-  }));
+function generateWeekStructure(_code) {
+  // Week structure now comes from Firestore via the learn page.
+  // Dashboard returns empty so no fake stubs appear on course cards.
+  return [];
 }
 
 // ── COURSE ACTIONS ────────────────────────────────────
