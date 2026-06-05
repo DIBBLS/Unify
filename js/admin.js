@@ -1071,6 +1071,14 @@ function initContentFilePicker() {
 
   input.addEventListener("change", (e) => handleFile(e.target.files[0]));
 
+  // Also auto-fill title when HTML is pasted directly into the textarea
+  textarea.addEventListener("input", () => {
+    if (titleInp.value) return;
+    const html = textarea.value;
+    const m = html.match(/<title>([^<]+)<\/title>/i);
+    if (m) titleInp.value = m[1].split(/[—|·:-]/).shift().trim();
+  });
+
   ["dragenter", "dragover"].forEach(ev =>
     zone.addEventListener(ev, (e) => {
       e.preventDefault();

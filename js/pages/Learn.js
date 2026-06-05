@@ -53,8 +53,6 @@ onAuthStateChanged(auth, async user => {
   document.getElementById('sidebarName').textContent = courseName;
 
   await Promise.all([loadUserData(), loadFirestoreContent(courseCode)]);
-  // Generate stubs for any course not manually defined in courseContent.js
-  if (window.generateCourseStubs) window.generateCourseStubs();
   buildCurriculum();
   renderSidebar();
   document.getElementById('loadingOverlay').style.display = 'none';
@@ -138,29 +136,31 @@ async function saveProgress() {
 }
 
 // ── CURRICULUM BUILDER ───────────────────────────────
-// This builds the week-topic structure for any course.
-// When real content is added per course, this populates from a content DB.
-// ── CURRICULUM — reads from courseContent.js (shared across all departments) ──
-// ECE 203, CHE 206, ECE 351 etc. are defined once in courseContent.js and
-// reused by every department that offers them. No duplication needed.
+// Builds week structure exclusively from admin-uploaded Firestore data.
+// Only shows weeks that have been uploaded — no fake stubs.
 function buildCurriculum() {
-  const entry = window.UNIFY_COURSE_CONTENT?.[courseCode];
-  if (entry && entry.weeks) {
-    courseTopics = entry.weeks;
-  } else {
-    // Auto-stub: sensible fallback for any course not yet in courseContent.js
-    const genericTopics = [
-      "Introduction & Fundamentals", "Core Concepts Part 1", "Core Concepts Part 2",
-      "Analysis Methods", "Design Principles", "Applications Part 1",
-      "Applications Part 2", "Advanced Topics", "Case Studies",
-      "Problem Solving Techniques", "Integration & Review", "Exam Preparation"
-    ];
-    courseTopics = genericTopics.map((topic, i) => ({
-      week: i + 1, topic,
-      subtopics: [topic],
-      time: 12
-    }));
+  const fsWeekNums = Object.keys(firestoreContentByWeek)
+    .map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+
+  if (fsWeekNums.length === 0) {
+    courseTopics = [];
+    return;
   }
+
+  courseTopics = fsWeekNums.map(weekNum => {
+    const fsData = firestoreContentByWeek[weekNum];
+    const topic = fsData?.title || extractTitleFromContent(fsData?.htmlContent) || `Week ${weekNum}`;
+    return { week: weekNum, topic, subtopics: [topic], time: 12 };
+  });
+}
+
+function extractTitleFromContent(html) {
+  if (!html) return null;
+  const h1 = html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
+  if (h1) return h1[1].trim();
+  const title = html.match(/<title>([^<]+)<\/title>/i);
+  if (title) return title[1].split(/[—\-·]/)[0].trim() || null;
+  return null;
 }
 
 // Returns the rich HTML file path for a subtopic that has full reviewed content
@@ -172,39 +172,36 @@ function getSubtopicContentFile(subtopicName) {
 function renderSidebar() {
   const list = document.getElementById('weekList');
   const doneCount = Object.values(topicProgress).filter(t => t.done).length;
-  const total = courseTopics.reduce((a, w) => a + w.subtopics.length, 0);
+  const total = courseTopics.length;
   const pct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
   document.getElementById('sidebarProgress').style.width = pct + '%';
   document.getElementById('sidebarProgressPct').textContent = pct + '%';
 
+  if (courseTopics.length === 0) {
+    list.innerHTML = `<div style="padding:24px 16px;color:var(--text3);font-size:13px;text-align:center;line-height:1.6;">
+      No content uploaded yet.<br>Check back soon.
+    </div>`;
+    return;
+  }
+
   list.innerHTML = courseTopics.map((week, wi) => {
-    const totalT = week.subtopics.length;
-    const doneT = week.subtopics.filter((_, ti) => topicProgress[topicKey(wi, ti)]?.done).length;
-    const allDone = doneT === totalT;
-    const isActiveWeek = activeWeekIdx === wi;
-    const someDone = doneT > 0 && !allDone;
+    const done = topicProgress[topicKey(wi, 0)]?.done;
+    const isActive = activeWeekIdx === wi;
     return `
-      <div class="week-item ${allDone ? 'done' : ''} ${isActiveWeek ? 'active' : ''}" onclick="toggleWeek(${wi})">
+      <div class="week-item ${done ? 'done' : ''} ${isActive ? 'active' : ''}" onclick="toggleWeek(${wi})">
         <div class="week-header">
-          <div class="week-check" style="${someDone ? 'border-color:var(--text3)' : ''}">${allDone ? '✓' : ''}</div>
+          <div class="week-check">${done ? '✓' : ''}</div>
           <div style="flex:1;min-width:0;">
             <div class="week-label">Week ${week.week}</div>
             <div class="week-topic">${week.topic}</div>
           </div>
-          <span class="week-progress-count">${doneT}/${totalT}</span>
+          <span class="week-progress-count">${done ? '1' : '0'}/1</span>
         </div>
         <div class="week-subtopics">
-          ${week.subtopics.map((sub, ti) => {
-            const key = topicKey(wi, ti);
-            const done = topicProgress[key]?.done;
-            const isActive = activeWeekIdx === wi && activeTopicIdx === ti;
-            const hasRich = window.getTopicContentFile?.(courseCode, sub) != null;
-            return `<div class="subtopic-item ${done ? 'done' : ''} ${isActive ? 'active' : ''}" onclick="event.stopPropagation(); openTopic(${wi}, ${ti})">
-              <div class="subtopic-dot">${done ? '✓' : ''}</div>
-              <span style="flex:1;">${sub}</span>
-              ${hasRich ? `<span style="font-size:9px;font-weight:600;letter-spacing:.04em;padding:1px 6px;border-radius:4px;background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);white-space:nowrap;flex-shrink:0;">READY</span>` : ''}
-            </div>`;
-          }).join('')}
+          <div class="subtopic-item ${done ? 'done' : ''} ${isActive && activeTopicIdx === 0 ? 'active' : ''}" onclick="event.stopPropagation(); openTopic(${wi}, 0)">
+            <div class="subtopic-dot">${done ? '✓' : ''}</div>
+            <span style="flex:1;">${week.topic}</span>
+          </div>
         </div>
       </div>`;
   }).join('');
@@ -259,22 +256,16 @@ function showWeekLanding(wi) {
   document.getElementById('wlProgress').style.background = doneT === totalT ? 'rgba(74,222,128,0.15)' : '';
   document.getElementById('wlProgress').style.color = doneT === totalT ? 'var(--green)' : '';
 
-  // Week summary from courseContent if available
-  const entry = window.UNIFY_COURSE_CONTENT?.[courseCode];
-  const weekEntry = entry?.weeks?.[wi];
-  const summary = weekEntry?.summary || 'Work through each topic below. Mark complete as you go — your progress is saved automatically.';
-  document.getElementById('wlSummary').textContent = summary;
+  document.getElementById('wlSummary').textContent = 'Work through the material below. Mark complete as you go — your progress is saved automatically.';
 
   // Topic list
   document.getElementById('wlTopics').innerHTML = week.subtopics.map((sub, ti) => {
     const done = topicProgress[topicKey(wi, ti)]?.done;
-    const hasRich = window.getTopicContentFile?.(courseCode, sub) != null;
     const conf = topicProgress[topicKey(wi, ti)]?.confidence || 0;
     const stars = conf > 0 ? '★'.repeat(conf) : '';
     return `<div class="wl-topic-row ${done ? 'done' : ''}" onclick="openTopic(${wi}, ${ti})">
       <div class="wl-topic-circle">${done ? '✓' : ''}</div>
       <span class="wl-topic-name">${sub}</span>
-      ${hasRich ? `<span class="wl-ready-badge">READY</span>` : ''}
       ${stars ? `<span style="font-size:11px;color:var(--yellow);letter-spacing:1px;">${stars}</span>` : ''}
       <span class="wl-topic-status">${done ? 'Done' : 'Not started'}</span>
     </div>`;
@@ -373,11 +364,9 @@ window.openTopic = function(wi, ti) {
 // ── POPULATE LESSON CONTENT ───────────────────────────
 function populateLesson(week, subtopic, wi, ti) {
   const resources = window.getResources ? window.getResources(courseCode) : {};
-  const weekResources = window.getWeekResources?.(courseCode, wi) || {};
-  const weekEntry = window.UNIFY_COURSE_CONTENT?.[courseCode]?.weeks?.[wi];
 
   // ── SIDEBAR: course outline link ──
-  const outlineUrl = weekResources.outline || resources['Course Outline'] || '';
+  const outlineUrl = resources['Course Outline'] || '';
   const outlineEl = document.getElementById('courseOutlineLink');
   if (outlineEl) {
     if (outlineUrl) { outlineEl.href = outlineUrl; outlineEl.classList.remove('unavailable'); }
@@ -385,10 +374,7 @@ function populateLesson(week, subtopic, wi, ti) {
   }
 
   // ── NOTES CARD ──────────────────────────────────────────────────────────
-  // Firestore-uploaded content (admin) takes precedence over the legacy URL.
   const fsContent = firestoreContentByWeek[week.week] || null;
-  const notesUrl = weekResources.notes || '';
-  const weekSummary = weekEntry?.summary || '';
   const subtopics = week.subtopics || [];
 
   // Title and meta
@@ -396,17 +382,15 @@ function populateLesson(week, subtopic, wi, ti) {
   document.getElementById('notesCardMeta').textContent =
     courseCode + ' · Week ' + week.week + ' · ' + subtopic;
 
-  // Description — use Firestore title if uploaded, else week summary, else generic
   document.getElementById('notesCardDesc').textContent =
-    (fsContent && fsContent.title) ||
-    weekSummary ||
+    fsContent?.title ||
     'Peer-reviewed notes for this week — written by students who sat through this course, reviewed by the departmental coordinator.';
 
   // Tags
   document.getElementById('notesCardTags').innerHTML = subtopics
     .map(s => `<span class="notes-tag">${sanitise(s)}</span>`).join('');
 
-  // Action — Firestore notes (iframe modal) > legacy URL > unavailable
+  // Action — Firestore notes or unavailable
   const actionEl = document.getElementById('notesCardAction');
   if (fsContent && fsContent.htmlContent) {
     actionEl.innerHTML = `
@@ -420,18 +404,6 @@ function populateLesson(week, subtopic, wi, ti) {
         </div>
         <span class="notes-read-btn-arrow">↗</span>
       </button>`;
-  } else if (notesUrl) {
-    actionEl.innerHTML = `
-      <a href="${sanitise(notesUrl)}" target="_blank" class="notes-read-btn">
-        <div class="notes-read-btn-left">
-          <span class="notes-read-btn-icon">📖</span>
-          <div>
-            <div class="notes-read-btn-text">Read full notes</div>
-            <div class="notes-read-btn-sub">Week ${week.week} — formulas, diagrams, past questions</div>
-          </div>
-        </div>
-        <span class="notes-read-btn-arrow">↗</span>
-      </a>`;
   } else {
     actionEl.innerHTML = `
       <div class="notes-unavailable">
@@ -444,12 +416,7 @@ function populateLesson(week, subtopic, wi, ti) {
   }
 
   // ── VIDEO ──────────────────────────────────────────────────────────────
-  // Firestore-uploaded YouTube link takes precedence over legacy resources.
-  const videoUrl =
-    (fsContent && fsContent.youtubeUrl) ||
-    weekResources.video ||
-    resources['Video Courses'] ||
-    '';
+  const videoUrl = fsContent?.youtubeUrl || resources['Video Courses'] || '';
   const videoEl = document.getElementById('videoContent');
   if (videoUrl && (videoUrl.includes('youtube') || videoUrl.includes('youtu.be'))) {
     const m = videoUrl.match(/(?:youtube[.]com[/]watch[?]v=|youtu[.]be[/])([a-zA-Z0-9_-]{11})/);
