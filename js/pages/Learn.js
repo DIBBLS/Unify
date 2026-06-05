@@ -507,7 +507,7 @@ function renderWeekOverview(weekEntry, wi) {
         <div class="fl-topic-body">
           ${hasContent && fileUrl
             ? `<p>This topic has a full peer-reviewed breakdown available.
-               <a href="${sanitise(fileUrl)}" target="_blank"
+               <a href="${sanitise(fileUrl)}"
                  style="color:var(--green);font-weight:600;text-decoration:none;">
                  Open full lesson ↗</a></p>`
             : `<p style="color:var(--text3);">Full peer-reviewed content coming soon — written by students
