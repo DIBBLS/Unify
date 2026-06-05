@@ -279,10 +279,14 @@ window.openNewTab = function () {
 };
 
 window.goBack = function () {
-  if (window.history.length > 1) {
+  const params = new URLSearchParams(window.location.search);
+  const back = params.get('back');
+  if (back) {
+    window.location.href = decodeURIComponent(back);
+  } else if (window.history.length > 1) {
     window.history.back();
   } else {
-    window.close();
+    window.location.href = 'dashboard.html';
   }
 };
 </script>

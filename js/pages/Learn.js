@@ -59,9 +59,16 @@ onAuthStateChanged(auth, async user => {
   renderSidebar();
   document.getElementById('loadingOverlay').style.display = 'none';
 
-  // Auto-open first incomplete topic
-  const firstIncomplete = findFirstIncomplete();
-  if (firstIncomplete) openTopic(firstIncomplete.w, firstIncomplete.t);
+  // Auto-open the week/topic from the URL if provided, otherwise first incomplete
+  const urlWeek = parseInt(params.get('week'), 10);
+  const urlTopic = parseInt(params.get('topic'), 10);
+  if (Number.isFinite(urlWeek) && urlWeek >= 0 && urlWeek < courseTopics.length) {
+    const ti = Number.isFinite(urlTopic) && urlTopic >= 0 ? urlTopic : 0;
+    openTopic(urlWeek, ti);
+  } else {
+    const firstIncomplete = findFirstIncomplete();
+    if (firstIncomplete) openTopic(firstIncomplete.w, firstIncomplete.t);
+  }
 });
 
 // ── LOAD DATA ─────────────────────────────────────────
@@ -150,7 +157,7 @@ function buildCurriculum() {
     ];
     courseTopics = genericTopics.map((topic, i) => ({
       week: i + 1, topic,
-      subtopics: [`${topic} — Theory`, `${topic} — Practice`],
+      subtopics: [topic],
       time: 12
     }));
   }
@@ -500,7 +507,7 @@ function renderWeekOverview(weekEntry, wi) {
         <div class="fl-topic-body">
           ${hasContent && fileUrl
             ? `<p>This topic has a full peer-reviewed breakdown available.
-               <a href="${sanitise(fileUrl)}" target="_blank"
+               <a href="${sanitise(fileUrl)}"
                  style="color:var(--green);font-weight:600;text-decoration:none;">
                  Open full lesson ↗</a></p>`
             : `<p style="color:var(--text3);">Full peer-reviewed content coming soon — written by students
@@ -934,6 +941,7 @@ function wrapIfSnippet(html) {
 window.openNotes = function (weekNum) {
   const item = firestoreContentByWeek[Number(weekNum)];
   if (!item) return;
-  window.open(`notes.html?id=${encodeURIComponent(item.id)}`, '_blank', 'noopener,noreferrer');
+  const back = encodeURIComponent(`learn.html?course=${encodeURIComponent(courseCode)}&name=${encodeURIComponent(courseName)}&week=${activeWeekIdx ?? 0}&topic=${activeTopicIdx ?? 0}`);
+  window.location.href = `notes.html?id=${encodeURIComponent(item.id)}&back=${back}`;
 };
 
