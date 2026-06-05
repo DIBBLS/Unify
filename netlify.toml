@@ -2,6 +2,17 @@
   publish = "."
   command = ""
 
+# Redirect root to dashboard — index.html is the old social profile page
+[[redirects]]
+  from = "/"
+  to = "/dashboard.html"
+  status = 302
+
+[[redirects]]
+  from = "/index.html"
+  to = "/dashboard.html"
+  status = 302
+
 # Security headers for all pages
 [[headers]]
   for = "/*"
@@ -19,11 +30,11 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Cache JS assets (1 year, immutable)
+# Cache JS assets (short TTL so deploys propagate quickly)
 [[headers]]
   for = "/js/*"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=300, must-revalidate"
 
 # Cache course content pages
 [[headers]]
