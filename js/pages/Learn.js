@@ -147,20 +147,27 @@ function buildCurriculum() {
   const entry = window.UNIFY_COURSE_CONTENT?.[courseCode];
   if (entry && entry.weeks) {
     courseTopics = entry.weeks;
-  } else {
-    // Auto-stub: sensible fallback for any course not yet in courseContent.js
-    const genericTopics = [
-      "Introduction & Fundamentals", "Core Concepts Part 1", "Core Concepts Part 2",
-      "Analysis Methods", "Design Principles", "Applications Part 1",
-      "Applications Part 2", "Advanced Topics", "Case Studies",
-      "Problem Solving Techniques", "Integration & Review", "Exam Preparation"
-    ];
-    courseTopics = genericTopics.map((topic, i) => ({
-      week: i + 1, topic,
-      subtopics: [topic],
-      time: 12
-    }));
+    return;
   }
+
+  const genericTopics = [
+    "Introduction & Fundamentals", "Core Concepts Part 1", "Core Concepts Part 2",
+    "Analysis Methods", "Design Principles", "Applications Part 1",
+    "Applications Part 2", "Advanced Topics", "Case Studies",
+    "Problem Solving Techniques", "Integration & Review", "Exam Preparation"
+  ];
+
+  // Use max Firestore week number to determine total weeks, default 12
+  const fsWeekNums = Object.keys(firestoreContentByWeek).map(Number).filter(Number.isFinite);
+  const weekCount = fsWeekNums.length > 0 ? Math.max(...fsWeekNums, 12) : 12;
+
+  courseTopics = Array.from({ length: weekCount }, (_, i) => {
+    const weekNum = i + 1;
+    const fsData = firestoreContentByWeek[weekNum];
+    // Use admin-uploaded title when available, otherwise fall back to generic
+    const topic = fsData?.title || genericTopics[i] || `Week ${weekNum}`;
+    return { week: weekNum, topic, subtopics: [topic], time: 12 };
+  });
 }
 
 // Returns the rich HTML file path for a subtopic that has full reviewed content
