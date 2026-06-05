@@ -155,7 +155,7 @@ function extractTopicFromHtml(html) {
 // reused by every department that offers them. No duplication needed.
 function buildCurriculum() {
   const entry = window.UNIFY_COURSE_CONTENT?.[courseCode];
-  if (entry && entry.weeks) {
+  if (entry && entry.weeks && !entry._stub) {
     courseTopics = entry.weeks;
     return;
   }
