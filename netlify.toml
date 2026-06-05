@@ -19,11 +19,11 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Cache JS assets (1 year, immutable)
+# Cache JS assets (short TTL so deploys propagate quickly)
 [[headers]]
   for = "/js/*"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=300, must-revalidate"
 
 # Cache course content pages
 [[headers]]
