@@ -137,6 +137,16 @@ async function saveProgress() {
   }, 600);
 }
 
+function extractTopicFromHtml(html) {
+  if (!html) return null;
+  // Try <h1> first, then <title> (trimming the Unify branding suffix)
+  const h1 = html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
+  if (h1) return h1[1].trim();
+  const title = html.match(/<title>([^<]+)<\/title>/i);
+  if (title) return title[1].split(/[—|\-·]/)[0].trim() || null;
+  return null;
+}
+
 // ── CURRICULUM BUILDER ───────────────────────────────
 // This builds the week-topic structure for any course.
 // When real content is added per course, this populates from a content DB.
@@ -164,8 +174,8 @@ function buildCurriculum() {
   courseTopics = Array.from({ length: weekCount }, (_, i) => {
     const weekNum = i + 1;
     const fsData = firestoreContentByWeek[weekNum];
-    // Use admin-uploaded title when available, otherwise fall back to generic
-    const topic = fsData?.title || genericTopics[i] || `Week ${weekNum}`;
+    // Use admin-uploaded title, then try to extract from HTML, then fall back to generic
+    const topic = fsData?.title || extractTopicFromHtml(fsData?.htmlContent) || genericTopics[i] || `Week ${weekNum}`;
     return { week: weekNum, topic, subtopics: [topic], time: 12 };
   });
 }
