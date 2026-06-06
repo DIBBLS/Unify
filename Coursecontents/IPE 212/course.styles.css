@@ -772,3 +772,4 @@ nav{padding:0 16px!important;gap:0!important}
 /* Extra bottom padding so content isn't hidden behind bottom nav */
 .week-page{padding-bottom:80px!important}
 .page{padding-bottom:80px!important}
+nav{display:none!important}
