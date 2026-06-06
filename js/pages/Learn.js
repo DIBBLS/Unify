@@ -200,12 +200,12 @@ function renderNotesShadow(html) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(raw, 'text/html');
 
-  // Remove elements that are page chrome, not content
-  doc.querySelectorAll('nav, header, footer, script, .nav, .navbar, .header, .footer, [class*="nav-"], [class*="header-"], [id*="nav"], [id*="header"]')
+  // Remove page chrome — nav, header, back/nav bars, week-nav strips
+  doc.querySelectorAll('nav, header, footer, script, .nav, .navbar, .header, .footer, .back-bar, .week-nav, .wk-nav-strip, [class*="nav-"], [class*="header-"], [id*="nav"], [id*="header"]')
      .forEach(el => el.remove());
 
   // Prefer a semantic content container; fall back to full body
-  const main = doc.querySelector('main, article, [role="main"], .main-content, .week-content, .lesson-content, .content-body, #content, #main');
+  const main = doc.querySelector('main, article, [role="main"], .week-body, .week-block, .week-page, .main-content, .week-content, .lesson-content, .content-body, #content, #main');
   const contentEl = main || doc.body;
 
   // Collect any <style> blocks from the original document
