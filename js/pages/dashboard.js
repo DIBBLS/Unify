@@ -7,9 +7,11 @@ import {
 import {
   doc,
   getDoc,
+  getDocs,
   setDoc,
   collection,
   query,
+  where,
   orderBy,
   onSnapshot,
   serverTimestamp,
@@ -674,14 +676,13 @@ window.openResourcePanel = function (courseName) {
   const encCode = encodeURIComponent(code);
   document.getElementById("learnPageBtn").href =
     "learn.html?course=" + enc + "&name=" + enc;
-  const cpBtn = document.getElementById("coursePageBtn");
-  if (cpBtn) cpBtn.href = "course.html?code=" + encCode;
 
   buildWeekAccordion(courseName, code);
 };
 
-function buildWeekAccordion(courseName, code) {
+async function buildWeekAccordion(courseName, code) {
   const accordion = document.getElementById("weekAccordion");
+  accordion.innerHTML = `<div style="padding:16px; color:var(--text3); font-size:13px;">Loading weeks…</div>`;
 
   let topicProgress = {};
   try {
@@ -689,40 +690,52 @@ function buildWeekAccordion(courseName, code) {
     if (stored) topicProgress = JSON.parse(stored);
   } catch (e) {}
 
-  const weeks = generateWeekStructure(code);
+  // Fetch weeks from Firestore courseContent collection
+  let weeks = [];
+  try {
+    const snap = await getDocs(
+      query(
+        collection(db, "courseContent"),
+        where("courseCode", "==", code),
+        orderBy("week", "asc"),
+      ),
+    );
+    weeks = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (e) {
+    console.warn("[dashboard] buildWeekAccordion Firestore error:", e);
+  }
 
+  if (weeks.length === 0) {
+    accordion.innerHTML = `<div style="padding:16px; color:var(--text3); font-size:13px;">No content uploaded yet for this course.</div>`;
+    return;
+  }
+
+  const enc = encodeURIComponent(courseName);
   accordion.innerHTML = weeks
     .map((week, wi) => {
-      const topics = week.subtopics || [];
-      const doneCnt = topics.filter(
-        (_, ti) => topicProgress[`w${wi}_t${ti}`]?.done,
-      ).length;
+      const weekNum = week.week ?? wi + 1;
+      const title = week.title || `Week ${weekNum}`;
+      const key = `w${wi}_t0`;
+      const p = topicProgress[key];
+      const done = p?.done;
+      const conf = p?.confidence || 0;
+      const stars = conf > 0 ? "★".repeat(conf) : "";
       const isFirst = wi === 0;
 
-      const topicsHtml = topics
-        .map((topic, ti) => {
-          const key = `w${wi}_t${ti}`;
-          const p = topicProgress[key];
-          const done = p?.done;
-          const conf = p?.confidence || 0;
-          const enc = encodeURIComponent(courseName);
-          const stars = conf > 0 ? "★".repeat(conf) : "";
-          return `<a class="topic-row" href="learn.html?course=${enc}&name=${enc}&week=${wi}&topic=${ti}">
+      const topicRow = `<a class="topic-row" href="learn.html?course=${enc}&name=${enc}&week=${wi}&topic=0">
         <div class="topic-check ${done ? "done" : ""}">✓</div>
-        <span class="topic-name">${topic}</span>
+        <span class="topic-name">${title}</span>
         ${stars ? `<span class="topic-conf">${stars}</span>` : ""}
       </a>`;
-        })
-        .join("");
 
       return `<div class="week-acc-item">
       <div class="week-acc-header ${isFirst ? "open" : ""}" onclick="toggleWeekAcc(this)">
-        <span class="week-acc-num">Wk ${wi + 1}</span>
-        <span class="week-acc-title">${week.title}</span>
-        <span class="week-acc-done">${doneCnt}/${topics.length}</span>
+        <span class="week-acc-num">Wk ${weekNum}</span>
+        <span class="week-acc-title">${title}</span>
+        <span class="week-acc-done">${done ? "1" : "0"}/1</span>
         <span class="week-acc-check">▼</span>
       </div>
-      <div class="week-acc-body ${isFirst ? "open" : ""}">${topicsHtml}</div>
+      <div class="week-acc-body ${isFirst ? "open" : ""}">${topicRow}</div>
     </div>`;
     })
     .join("");
@@ -734,12 +747,6 @@ window.toggleWeekAcc = function (header) {
   header.classList.toggle("open", !isOpen);
   body.classList.toggle("open", !isOpen);
 };
-
-function generateWeekStructure(_code) {
-  // Week structure now comes from Firestore via the learn page.
-  // Dashboard returns empty so no fake stubs appear on course cards.
-  return [];
-}
 
 // ── COURSE ACTIONS ────────────────────────────────────
 window.switchSemester = async function () {
