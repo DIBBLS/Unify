@@ -304,6 +304,9 @@ body { max-width: 480px; margin: 0 auto; }
 }
 .action-btn:hover { background: var(--green-dark); }
 .action-btn.done-state { background: var(--surface); color: var(--text3); border: 1.5px solid var(--border); }
+.action-btn-ghost { background: var(--surface); color: var(--text); border: 1.5px solid var(--border); flex: 0 0 auto; width: auto; padding: 16px 20px; }
+.action-btn-ghost:hover { background: var(--border); }
+.bottom-bar-row { display: flex; gap: 10px; }
 
 /* ── CONTENT VIEW ────────────────────────────────── */
 .content-meta {
@@ -480,7 +483,7 @@ body { max-width: 480px; margin: 0 auto; }
   </div>
 
   <div class="content-frame-wrap" id="notesWrapEl" style="display:none">
-    <iframe id="notesFrameEl" sandbox="allow-same-origin allow-popups allow-scripts" title="Course Notes"></iframe>
+    <iframe id="notesFrameEl" title="Course Notes"></iframe>
   </div>
 
   <div id="noContentEl" style="display:none">
@@ -490,8 +493,9 @@ body { max-width: 480px; margin: 0 auto; }
     </div>
   </div>
 
-  <div class="bottom-bar">
+  <div class="bottom-bar bottom-bar-row">
     <button class="action-btn" id="markCompleteBtn" onclick="toggleTopicComplete()">✓ Mark as Complete</button>
+    <button class="action-btn action-btn-ghost" id="nextTopicBtn" onclick="goToNextTopic()" style="display:none">Next →</button>
   </div>
 </div>
 
