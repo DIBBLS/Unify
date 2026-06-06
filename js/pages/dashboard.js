@@ -724,7 +724,7 @@ async function buildWeekAccordion(courseName, code) {
       const stars = conf > 0 ? "★".repeat(conf) : "";
       const isFirst = wi === 0;
 
-      const topicRow = `<a class="topic-row" href="learn.html?course=${enc}&name=${enc}&week=${wi}&topic=0">
+      const topicRow = `<a class="topic-row" href="learn.html?course=${enc}&name=${enc}&week=${wi}">
         <div class="topic-check ${done ? "done" : ""}">✓</div>
         <span class="topic-name">${title}</span>
         ${stars ? `<span class="topic-conf">${stars}</span>` : ""}
