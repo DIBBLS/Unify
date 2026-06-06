@@ -691,16 +691,18 @@ async function buildWeekAccordion(courseName, code) {
   } catch (e) {}
 
   // Fetch weeks from Firestore courseContent collection
+  // Sort client-side to avoid needing a composite index on courseCode+week
   let weeks = [];
   try {
     const snap = await getDocs(
       query(
         collection(db, "courseContent"),
         where("courseCode", "==", code),
-        orderBy("week", "asc"),
       ),
     );
-    weeks = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    weeks = snap.docs
+      .map((d) => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (a.week ?? 0) - (b.week ?? 0));
   } catch (e) {
     console.warn("[dashboard] buildWeekAccordion Firestore error:", e);
   }
