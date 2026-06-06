@@ -189,39 +189,47 @@ function getCourseIcon(code) {
   return '📚';
 }
 
-function wrapIfSnippet(html) {
-  const trimmed = String(html || '').trim();
-  if (/^<!DOCTYPE/i.test(trimmed) || /^<html[\s>]/i.test(trimmed)) return trimmed;
-  return `<!DOCTYPE html><html><head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.75; color: #111827; padding: 20px; max-width: 100%; font-size: 15px; }
-h1,h2,h3,h4 { margin-top: 1.4em; margin-bottom: 0.5em; line-height: 1.25; }
-h1 { font-size: 1.5em; } h2 { font-size: 1.25em; } h3 { font-size: 1.1em; }
-p { margin-bottom: 1em; }
-ul,ol { padding-left: 1.4em; margin-bottom: 1em; }
-li { margin-bottom: 0.3em; }
-img { max-width: 100%; height: auto; border-radius: 8px; margin: 8px 0; }
-table { width: 100%; border-collapse: collapse; margin-bottom: 1em; font-size: 14px; }
-th { background: #F3F4F6; padding: 8px 12px; text-align: left; border-bottom: 2px solid #E5E7EB; }
-td { padding: 8px 12px; border-bottom: 1px solid #F3F4F6; }
-pre,code { font-family: ui-monospace, monospace; font-size: 13px; }
-pre { background: #F8F9FA; padding: 14px; border-radius: 8px; overflow-x: auto; margin-bottom: 1em; }
-blockquote { border-left: 3px solid #22C55E; padding-left: 16px; color: #6B7280; margin: 1em 0; }
-</style></head><body>${trimmed}</body></html>`;
-}
+// Render admin HTML directly via Shadow DOM — no iframe, no CSP issues.
+function renderNotesShadow(html) {
+  const host = document.getElementById('notesWrapEl');
+  if (!host) return;
 
-function renderNotesInFrame(html) {
-  const frame = document.getElementById('notesFrameEl');
-  frame.style.height = '500px';
-  frame.srcdoc = wrapIfSnippet(html);
-  frame.onload = () => {
-    try {
-      const h = frame.contentDocument?.body?.scrollHeight;
-      if (h && h > 0) frame.style.height = (h + 40) + 'px';
-    } catch (e) {}
-  };
+  const raw = String(html || '').trim();
+
+  // Pull out any <style> blocks from the uploaded content
+  const styleBlocks = [];
+  const styleRe = /<style[^>]*>([\s\S]*?)<\/style>/gi;
+  let sm;
+  while ((sm = styleRe.exec(raw)) !== null) styleBlocks.push(sm[1]);
+
+  // Extract body content; use full string if no <body> wrapper
+  const bodyMatch = raw.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  const content = bodyMatch ? bodyMatch[1] : raw;
+
+  if (!host._shadow) host._shadow = host.attachShadow({ mode: 'open' });
+  host._shadow.innerHTML = `
+    <style>
+      :host { display: block; padding: 20px; font-family: system-ui, -apple-system, sans-serif;
+              color: #111827; font-size: 15px; line-height: 1.75; }
+      * { box-sizing: border-box; max-width: 100%; }
+      h1, h2, h3, h4 { margin-top: 1.3em; margin-bottom: 0.4em; line-height: 1.25; }
+      h1 { font-size: 1.5em; } h2 { font-size: 1.25em; } h3 { font-size: 1.1em; }
+      p { margin-bottom: 0.9em; }
+      ul, ol { padding-left: 1.4em; margin-bottom: 0.9em; }
+      li { margin-bottom: 0.3em; }
+      img { max-width: 100%; height: auto; border-radius: 6px; display: block; margin: 8px 0; }
+      table { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 1em; }
+      th { background: #F9FAFB; padding: 8px 12px; text-align: left; border-bottom: 2px solid #E5E7EB; }
+      td { padding: 8px 12px; border-bottom: 1px solid #F3F4F6; }
+      pre { background: #F8F9FA; padding: 14px; border-radius: 8px; overflow-x: auto; font-size: 13px; margin-bottom: 1em; }
+      code { font-family: ui-monospace, monospace; font-size: 0.88em; background: #F3F4F6; padding: 2px 5px; border-radius: 3px; }
+      pre code { background: none; padding: 0; }
+      a { color: #16A34A; }
+      blockquote { border-left: 3px solid #22C55E; padding-left: 14px; color: #6B7280; margin: 1em 0; }
+      ${styleBlocks.join('\n')}
+    </style>
+    ${content}
+  `;
 }
 
 function showToast(msg) {
@@ -428,7 +436,7 @@ window.showContentView = function (wi, topicType) {
   badge.style.display = isDone ? '' : 'none';
 
   const btn = document.getElementById('markCompleteBtn');
-  btn.className = 'action-btn' + (isDone ? ' done-state' : '');
+  btn.className = 'action-btn';
   btn.textContent = isDone ? '✓ Completed' : '✓ Mark as Complete';
 
   const videoWrap = document.getElementById('videoWrapEl');
@@ -449,7 +457,7 @@ window.showContentView = function (wi, topicType) {
     }
   } else if (topicType === 'notes' && fs?.htmlContent) {
     notesWrap.style.display = '';
-    renderNotesInFrame(fs.htmlContent);
+    renderNotesShadow(fs.htmlContent);
   } else {
     noContent.style.display = '';
   }
@@ -490,7 +498,7 @@ window.toggleTopicComplete = function () {
   const isDone = !wasDone;
   document.getElementById('contentStatusEl').style.display = isDone ? '' : 'none';
   const btn = document.getElementById('markCompleteBtn');
-  btn.className = 'action-btn' + (isDone ? ' done-state' : '');
+  btn.className = 'action-btn';
   btn.textContent = isDone ? '✓ Completed' : '✓ Mark as Complete';
 };
 
