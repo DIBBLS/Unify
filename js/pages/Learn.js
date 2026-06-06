@@ -189,22 +189,27 @@ function getCourseIcon(code) {
   return '📚';
 }
 
-// Render admin HTML directly via Shadow DOM — no iframe, no CSP issues.
+// Render admin HTML via Shadow DOM — strips nav/header so only note content shows.
 function renderNotesShadow(html) {
   const host = document.getElementById('notesWrapEl');
   if (!host) return;
 
   const raw = String(html || '').trim();
 
-  // Pull out any <style> blocks from the uploaded content
-  const styleBlocks = [];
-  const styleRe = /<style[^>]*>([\s\S]*?)<\/style>/gi;
-  let sm;
-  while ((sm = styleRe.exec(raw)) !== null) styleBlocks.push(sm[1]);
+  // Parse the full HTML so we can surgically remove navigation/chrome
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(raw, 'text/html');
 
-  // Extract body content; use full string if no <body> wrapper
-  const bodyMatch = raw.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-  const content = bodyMatch ? bodyMatch[1] : raw;
+  // Remove elements that are page chrome, not content
+  doc.querySelectorAll('nav, header, footer, script, .nav, .navbar, .header, .footer, [class*="nav-"], [class*="header-"], [id*="nav"], [id*="header"]')
+     .forEach(el => el.remove());
+
+  // Prefer a semantic content container; fall back to full body
+  const main = doc.querySelector('main, article, [role="main"], .main-content, .week-content, .lesson-content, .content-body, #content, #main');
+  const contentEl = main || doc.body;
+
+  // Collect any <style> blocks from the original document
+  const styles = [...doc.querySelectorAll('style')].map(s => s.textContent).join('\n');
 
   if (!host._shadow) host._shadow = host.attachShadow({ mode: 'open' });
   host._shadow.innerHTML = `
@@ -226,9 +231,9 @@ function renderNotesShadow(html) {
       pre code { background: none; padding: 0; }
       a { color: #16A34A; }
       blockquote { border-left: 3px solid #22C55E; padding-left: 14px; color: #6B7280; margin: 1em 0; }
-      ${styleBlocks.join('\n')}
+      ${styles}
     </style>
-    ${content}
+    ${contentEl.innerHTML}
   `;
 }
 
