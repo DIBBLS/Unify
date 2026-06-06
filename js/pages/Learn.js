@@ -214,17 +214,14 @@ blockquote { border-left: 3px solid #22C55E; padding-left: 16px; color: #6B7280;
 
 function renderNotesInFrame(html) {
   const frame = document.getElementById('notesFrameEl');
-  const blob = new Blob([wrapIfSnippet(html)], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
+  frame.style.height = '500px';
+  frame.srcdoc = wrapIfSnippet(html);
   frame.onload = () => {
     try {
       const h = frame.contentDocument?.body?.scrollHeight;
       if (h && h > 0) frame.style.height = (h + 40) + 'px';
     } catch (e) {}
-    URL.revokeObjectURL(url);
   };
-  frame.src = url;
-  frame.style.height = '500px'; // sensible default while loading
 }
 
 function showToast(msg) {
@@ -462,6 +459,10 @@ window.showContentView = function (wi, topicType) {
   url.searchParams.set('topic', ti);
   history.pushState({}, '', url);
 
+  // Show Next button if there's a next topic or next week
+  const nextBtn = document.getElementById('nextTopicBtn');
+  if (nextBtn) nextBtn.style.display = getNext(wi, ti) ? '' : 'none';
+
   goToView('content');
 };
 
@@ -508,6 +509,27 @@ window.markWeekComplete = function () {
   saveProgress();
   showToast(allDone ? 'Week unmarked' : '🎉 Week complete!');
   showWeekView(activeWeekIdx); // re-render week view with updated state
+};
+
+// ── NEXT NAVIGATION ──────────────────────────────────────────────
+function getNext(wi, ti) {
+  const week = courseTopics[wi];
+  if (!week) return null;
+  const weekTopics = getTopicsForWeek(week);
+  // Next topic within same week
+  if (ti + 1 < weekTopics.length) return { w: wi, t: ti + 1, type: weekTopics[ti + 1].type };
+  // First topic of next week
+  for (let nwi = wi + 1; nwi < courseTopics.length; nwi++) {
+    const nextWeekTopics = getTopicsForWeek(courseTopics[nwi]);
+    if (nextWeekTopics.length > 0) return { w: nwi, t: 0, type: nextWeekTopics[0].type };
+  }
+  return null;
+}
+
+window.goToNextTopic = function () {
+  const ti = activeTopicType === 'notes' ? 0 : 1;
+  const next = getNext(activeWeekIdx, ti);
+  if (next) showContentView(next.w, next.type);
 };
 
 // ── THEME TOGGLE ─────────────────────────────────────────────────
