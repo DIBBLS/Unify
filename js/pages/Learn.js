@@ -261,6 +261,11 @@ window.goToView = goToView;
 
 // ── COURSE VIEW ─────────────────────────────────────────────────
 function showCourseView() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete('week');
+  url.searchParams.delete('topic');
+  history.pushState({}, '', url);
+
   document.getElementById('courseCodeEl').textContent = courseCode;
   document.getElementById('courseDeptEl').textContent = courseMetadata?.dept || '';
   document.getElementById('courseIconEl').textContent = getCourseIcon(courseCode);
@@ -295,6 +300,7 @@ function showCourseView() {
   renderWeeksList();
   goToView('course');
 }
+window.showCourseView = showCourseView;
 
 function renderWeeksList() {
   const list = document.getElementById('weeksListEl');
