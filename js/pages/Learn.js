@@ -622,6 +622,263 @@ window.toggleBookmark = function () {
   showToast('🔖 Bookmarks coming soon!');
 };
 
+window.showToast = showToast;
+
+// ── EXAM PREP TAB ────────────────────────────────────────────────
+let examEntries = [];
+let examReadiness = {};
+let examDataLoaded = false;
+
+window.showExamView = async function () {
+  goToView('exam');
+  if (!examDataLoaded) {
+    document.getElementById('examScrollEl').innerHTML =
+      `<div class="empty-state" style="margin-top:60px;"><div class="loading-spinner"></div></div>`;
+    await loadExamData();
+    examDataLoaded = true;
+  }
+  renderExamView();
+  sendExamNotifications();
+};
+
+async function loadExamData() {
+  const dept = userProfile.department || userProfile.assignedDepartment || '';
+  if (!dept) return;
+  try {
+    const snap = await getDoc(doc(db, 'examTimetables', dept));
+    if (snap.exists()) examEntries = snap.data().entries || [];
+  } catch (e) {
+    console.error('[exam] load:', e);
+    return;
+  }
+
+  const uniqueCodes = [...new Set(
+    examEntries.map(e => normCode(e.course || '')).filter(Boolean)
+  )];
+
+  await Promise.all(uniqueCodes.map(async code => {
+    const progress = userProfile.topicProgress?.[code] || {};
+    const done = Object.values(progress).filter(t => t?.done).length;
+    let total = 0;
+    try {
+      const snap = await getDocs(
+        query(collection(db, 'courseContent'), where('courseCode', '==', code))
+      );
+      snap.docs.forEach(d => {
+        const data = d.data();
+        if (data.htmlContent) total++;
+        if (data.youtubeUrl) total++;
+      });
+    } catch (e) {}
+    examReadiness[code] = {
+      done,
+      total,
+      pct: total > 0 ? Math.round((done / total) * 100) : 0,
+    };
+  }));
+}
+
+function examDaysLeft(dateStr) {
+  if (!dateStr) return null;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const exam = new Date(dateStr); exam.setHours(0, 0, 0, 0);
+  return Math.round((exam - today) / 86400000);
+}
+
+function fmtExamDate(dateStr) {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleDateString('en-GB', {
+    weekday: 'short', day: 'numeric', month: 'long', year: 'numeric',
+  });
+}
+
+function fmtTime(t) {
+  if (!t) return '';
+  const [h, m] = t.split(':').map(Number);
+  const ampm = h < 12 ? 'AM' : 'PM';
+  return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${ampm}`;
+}
+
+function getReadinessInfo(pct, daysLeft, total) {
+  if (total === 0) return {
+    color: '#9CA3AF', pillClass: 'pill-warn', label: 'No content yet',
+    msg: 'Course content hasn\'t been uploaded yet. Check the resources section for past questions while you wait.',
+  };
+  if (pct >= 86) return {
+    color: '#22C55E', pillClass: 'pill-great', label: 'Looking prepared',
+    msg: `You've completed ${pct}% of this course. You're looking well-prepared — test your knowledge to confirm you're ready.`,
+  };
+  if (pct >= 61) return {
+    color: '#f59e0b', pillClass: 'pill-ok', label: 'Almost ready',
+    msg: `You're ${pct}% through the course. Push through the remaining weeks${daysLeft > 0 ? ` — ${daysLeft} day${daysLeft === 1 ? '' : 's'} to go` : ''}.`,
+  };
+  if (pct >= 31) return {
+    color: '#f59e0b', pillClass: 'pill-warn', label: 'At risk',
+    msg: `You have important topics left to cover. Focus on completing the remaining weeks — there's still time to get ready.`,
+  };
+  if (pct > 0) return {
+    color: '#ef4444', pillClass: 'pill-danger', label: 'Danger zone',
+    msg: `Only ${pct}% done.${daysLeft > 1 ? ` You have ${daysLeft} days — start reviewing now.` : daysLeft === 1 ? ' The exam is tomorrow. Study tonight.' : ' The exam is today.'}`,
+  };
+  return {
+    color: '#ef4444', pillClass: 'pill-danger', label: 'Not started',
+    msg: `You haven't started this course yet.${daysLeft > 1 ? ` Begin with Week 1 now — ${daysLeft} days left.` : daysLeft === 1 ? ' The exam is tomorrow. Start immediately.' : ' The exam is today.'}`,
+  };
+}
+
+function renderExamView() {
+  const el = document.getElementById('examScrollEl');
+  if (!el) return;
+
+  if (!examEntries.length) {
+    const dept = userProfile.department || '';
+    el.innerHTML = `<div class="empty-state" style="margin-top:60px;">
+      <div class="empty-icon">📅</div>
+      <div class="empty-text">${dept
+        ? 'No exam timetable uploaded yet for your department.<br>Check back when your admin posts the schedule.'
+        : 'Your department isn\'t set yet.<br>Complete your profile to see exam data.'
+      }</div>
+    </div>`;
+    return;
+  }
+
+  const upcoming = [], past = [];
+  examEntries.forEach(e => {
+    const d = examDaysLeft(e.date);
+    (d !== null && d < 0 ? past : upcoming).push(e);
+  });
+  upcoming.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  let html = '';
+
+  if ('Notification' in window && Notification.permission === 'default') {
+    html += `<div class="exam-notif-bar">
+      <span>🔔</span>
+      <span>Get reminders before your exams</span>
+      <button onclick="enableExamNotifs()">Enable</button>
+    </div>`;
+  }
+
+  if (upcoming.length) {
+    html += `<div class="exam-section-title">Upcoming Exams</div>`;
+    upcoming.forEach(e => {
+      const code = normCode(e.course || '');
+      const days = examDaysLeft(e.date);
+      const r = examReadiness[code] || { done: 0, total: 0, pct: 0 };
+      const info = getReadinessInfo(r.pct, days, r.total);
+
+      let cardClass = 'exam-card';
+      let badgeClass = 'exam-days-badge badge-ok';
+      let badgeText = `${days} days left`;
+      if (days === 0) { cardClass += ' exam-today'; badgeClass = 'exam-days-badge badge-today'; badgeText = 'TODAY'; }
+      else if (days === 1) { cardClass += ' exam-soon'; badgeClass = 'exam-days-badge badge-warn'; badgeText = 'Tomorrow'; }
+      else if (days <= 3) { cardClass += ' exam-soon'; badgeClass = 'exam-days-badge badge-warn'; badgeText = `${days} days left`; }
+      else if (days <= 7) { badgeClass = 'exam-days-badge badge-warn'; }
+
+      const resources = window.getResources ? (window.getResources(code) || {}) : {};
+      const pastQLink = resources['Past Questions'];
+      const learnLink = `Learn.html?course=${encodeURIComponent(code)}`;
+      const primaryLabel = r.pct >= 85 ? '🎓 Review Course' : r.pct === 0 ? '🚀 Start Course' : '📚 Continue Learning';
+
+      html += `<div class="${cardClass}">
+        <div class="exam-card-header">
+          <div class="exam-course-code">${code || e.course}</div>
+          <div class="${badgeClass}">${badgeText}</div>
+        </div>
+        <div class="exam-info-row">
+          <div class="exam-info-item">📅 ${fmtExamDate(e.date)}</div>
+          ${e.startTime ? `<div class="exam-info-item">🕐 ${fmtTime(e.startTime)}${e.endTime ? ' – ' + fmtTime(e.endTime) : ''}</div>` : ''}
+          ${e.venue ? `<div class="exam-info-item">📍 ${e.venue}</div>` : ''}
+        </div>
+        ${r.total > 0 ? `
+          <div class="readiness-label-row">
+            <span class="readiness-label">Readiness</span>
+            <span class="status-pill ${info.pillClass}">${info.label}</span>
+          </div>
+          <div class="readiness-track">
+            <div class="readiness-fill" style="width:${r.pct}%;background:${info.color}"></div>
+          </div>
+          <div class="readiness-pct">${r.pct}% · ${r.done} of ${r.total} topics complete</div>
+        ` : `
+          <div class="readiness-label-row">
+            <span class="readiness-label">Readiness</span>
+            <span class="status-pill pill-warn">Content not uploaded</span>
+          </div>
+        `}
+        <div class="exam-message">${info.msg}</div>
+        <div class="exam-actions">
+          <button class="exam-btn exam-btn-primary" onclick="window.location.href='${learnLink}'">${primaryLabel}</button>
+          ${pastQLink
+            ? `<button class="exam-btn exam-btn-secondary" onclick="window.open('${pastQLink}','_blank')">📝 Past Questions</button>`
+            : `<button class="exam-btn exam-btn-secondary" onclick="showToast('Mock tests coming soon!')">🎯 Test Knowledge</button>`}
+        </div>
+      </div>`;
+    });
+  }
+
+  if (past.length) {
+    html += `<div class="exam-section-title" style="margin-top:28px;">Past Exams</div>`;
+    past.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(e => {
+      const code = normCode(e.course || '');
+      html += `<div class="exam-card exam-past">
+        <div class="exam-card-header">
+          <div class="exam-course-code" style="font-size:20px;">${code || e.course}</div>
+          <div class="exam-days-badge badge-past">Done</div>
+        </div>
+        <div class="exam-info-row">
+          <div class="exam-info-item">📅 ${fmtExamDate(e.date)}</div>
+          ${e.startTime ? `<div class="exam-info-item">🕐 ${fmtTime(e.startTime)}${e.endTime ? ' – ' + fmtTime(e.endTime) : ''}</div>` : ''}
+          ${e.venue ? `<div class="exam-info-item">📍 ${e.venue}</div>` : ''}
+        </div>
+      </div>`;
+    });
+  }
+
+  el.innerHTML = html;
+}
+
+window.enableExamNotifs = async function () {
+  if (!('Notification' in window)) return;
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted') {
+    sendExamNotifications(true);
+    renderExamView();
+    showToast('Exam reminders enabled');
+  }
+};
+
+function sendExamNotifications(force = false) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  examEntries.forEach(e => {
+    const code = normCode(e.course || '');
+    const days = examDaysLeft(e.date);
+    if (days === null || days < 0 || days > 7) return;
+    const key = `exam-notif-${code}-${e.date}-${new Date().toDateString()}`;
+    if (!force && localStorage.getItem(key)) return;
+    const r = examReadiness[code] || { pct: 0 };
+    let title, body;
+    if (days === 0) {
+      title = `${code} exam is TODAY`;
+      body = `Starts at ${fmtTime(e.startTime)}${e.venue ? ' · ' + e.venue : ''}. Good luck!`;
+    } else if (r.pct >= 85) {
+      title = `${code} in ${days} day${days === 1 ? '' : 's'} — you're ready`;
+      body = `${r.pct}% complete. Test your knowledge to seal the deal.`;
+    } else if (r.pct < 30) {
+      title = `${code} in ${days} day${days === 1 ? '' : 's'} — action needed`;
+      body = `Only ${r.pct}% done. Open Unify and keep studying.`;
+    } else {
+      title = `${code} exam in ${days} day${days === 1 ? '' : 's'}`;
+      body = `${r.pct}% done. Keep pushing — you can get there.`;
+    }
+    try {
+      new Notification(title, {
+        body, icon: '/icons/apple-touch-icon.png', tag: key,
+      });
+      localStorage.setItem(key, '1');
+    } catch (_) {}
+  });
+}
+
 // Handle browser back/forward buttons
 window.addEventListener('popstate', () => {
   const params = new URLSearchParams(window.location.search);
