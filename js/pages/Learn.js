@@ -404,8 +404,11 @@ window.showWeekView = function (wi) {
 };
 
 function renderResources() {
-  const resources = window.getResources ? window.getResources(courseCode) : {};
-  const resourceDefs = [
+  const wi = activeWeekIdx;
+  const week = courseTopics[wi];
+  const fs = week ? firestoreContentByWeek[week.week] : null;
+  const staticRes = window.getResources ? window.getResources(courseCode) : {};
+  const staticDefs = [
     { key: 'Course Outline',       icon: '📄', label: 'Course Outline',    type: 'PDF'   },
     { key: 'Lecture Material PDF', icon: '📋', label: 'Lecture Material',   type: 'PDF'   },
     { key: 'Video Courses',        icon: '▶',  label: 'Video Courses',      type: 'Video' },
@@ -413,22 +416,49 @@ function renderResources() {
     { key: 'Continuous Assessment',icon: '📊', label: 'Assignments',        type: 'PDF'   },
   ];
 
-  const available = resourceDefs.filter(r => resources[r.key]);
-  const section = document.getElementById('resourcesSectionEl');
+  const rows = [];
 
-  if (available.length === 0) { section.style.display = 'none'; return; }
+  // Firestore-based items for this week
+  if (fs?.htmlContent) {
+    const backU = new URL(window.location.href);
+    backU.searchParams.delete('topic');
+    const href = `notes.html?courseCode=${encodeURIComponent(courseCode)}&week=${week.week}&back=${encodeURIComponent(backU.toString())}`;
+    rows.push(`<a class="resource-row" href="${href}">
+      <div class="resource-icon-box">📖</div>
+      <div class="resource-info">
+        <div class="resource-name">Lecture Notes</div>
+        <div class="resource-type">Notes</div>
+      </div>
+      <span class="resource-arrow">›</span>
+    </a>`);
+  }
+  if (fs?.youtubeUrl) {
+    rows.push(`<a class="resource-row" href="${fs.youtubeUrl}" target="_blank" rel="noopener noreferrer">
+      <div class="resource-icon-box">▶</div>
+      <div class="resource-info">
+        <div class="resource-name">Video Tutorial</div>
+        <div class="resource-type">Video</div>
+      </div>
+      <span class="resource-arrow">›</span>
+    </a>`);
+  }
 
-  section.style.display = 'block';
-  document.getElementById('resourcesListEl').innerHTML = available.map(r =>
-    `<a class="resource-row" href="${resources[r.key]}" target="_blank" rel="noopener noreferrer">
+  // Static Drive links
+  staticDefs.filter(r => staticRes[r.key]).forEach(r => {
+    rows.push(`<a class="resource-row" href="${staticRes[r.key]}" target="_blank" rel="noopener noreferrer">
       <div class="resource-icon-box">${r.icon}</div>
       <div class="resource-info">
         <div class="resource-name">${r.label}</div>
         <div class="resource-type">${r.type}</div>
       </div>
       <span class="resource-arrow">›</span>
-    </a>`
-  ).join('');
+    </a>`);
+  });
+
+  const section = document.getElementById('resourcesSectionEl');
+  if (rows.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  document.getElementById('resourcesListEl').innerHTML = rows.join('');
 }
 
 // ── CONTENT VIEW ─────────────────────────────────────────────────
