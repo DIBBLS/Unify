@@ -178,6 +178,16 @@ body { max-width: 480px; margin: 0 auto; }
 
 /* Weeks list */
 .weeks-list { display: flex; flex-direction: column; gap: 8px; }
+.weeks-expand-btn {
+  width: 100%; padding: 14px;
+  background: none; border: none;
+  font-size: 13px; font-weight: 600; color: var(--text2);
+  cursor: pointer; text-align: center;
+  border-radius: var(--radius);
+  transition: color 0.15s;
+  margin-top: 2px;
+}
+.weeks-expand-btn:hover { color: var(--green); }
 .week-row-btn {
   background: var(--surface);
   border: 1.5px solid var(--border);
@@ -364,6 +374,84 @@ body { max-width: 480px; margin: 0 auto; }
   pointer-events: none; z-index: 200; white-space: nowrap;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── EXAM VIEW ───────────────────────────────────── */
+.exam-scroll { padding: 0 16px 120px; }
+.exam-section-title {
+  font-size: 12px; font-weight: 700; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.7px;
+  margin: 20px 0 10px;
+}
+.exam-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px; margin-bottom: 12px;
+  box-shadow: var(--shadow-sm);
+}
+.exam-card.exam-today  { border-color: #ef4444; }
+.exam-card.exam-soon   { border-color: #f59e0b; }
+.exam-card.exam-past   { opacity: 0.5; }
+.exam-card-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 8px; margin-bottom: 10px;
+}
+.exam-course-code { font-size: 26px; font-weight: 800; color: var(--text); line-height: 1.1; }
+.exam-days-badge {
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 12px; font-weight: 700;
+  white-space: nowrap; flex-shrink: 0; margin-top: 4px;
+}
+.badge-danger { background: rgba(239,68,68,.12); color: #ef4444; }
+.badge-warn   { background: rgba(245,158,11,.12); color: #b45309; }
+.badge-ok     { background: var(--green-light); color: var(--green-text); }
+.badge-past   { background: var(--border); color: var(--text3); }
+.badge-today  { background: rgba(239,68,68,.15); color: #ef4444; animation: pulse-badge 1.4s ease infinite; }
+@keyframes pulse-badge { 0%,100%{opacity:1} 50%{opacity:.55} }
+.exam-info-row {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  font-size: 12px; color: var(--text2); margin-bottom: 14px;
+}
+.exam-info-item { display: flex; align-items: center; gap: 4px; }
+.readiness-label-row {
+  display: flex; justify-content: space-between;
+  align-items: center; margin-bottom: 6px;
+}
+.readiness-label { font-size: 12px; font-weight: 600; color: var(--text2); }
+.status-pill { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+.pill-danger { background: rgba(239,68,68,.12); color: #ef4444; }
+.pill-warn   { background: rgba(245,158,11,.12); color: #b45309; }
+.pill-ok     { background: rgba(34,197,94,.12); color: #15803d; }
+.pill-great  { background: var(--green-light); color: var(--green-text); }
+.readiness-track { height: 7px; background: var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 4px; }
+.readiness-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+.readiness-pct { font-size: 11px; color: var(--text3); text-align: right; }
+.exam-message {
+  font-size: 13px; color: var(--text2); line-height: 1.55;
+  margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);
+}
+.exam-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.exam-btn {
+  flex: 1; padding: 10px 14px; border-radius: 50px;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  border: none; font-family: inherit; white-space: nowrap;
+  text-align: center; transition: opacity 0.15s; min-width: 0;
+}
+.exam-btn:hover { opacity: 0.85; }
+.exam-btn-primary { background: var(--green); color: #fff; }
+.exam-btn-secondary { background: var(--surface); color: var(--text); border: 1.5px solid var(--border); }
+.exam-notif-bar {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 12px 14px;
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 4px; font-size: 13px; color: var(--text2);
+}
+.exam-notif-bar button {
+  margin-left: auto; flex-shrink: 0;
+  background: var(--green); color: #fff; border: none;
+  border-radius: 8px; padding: 6px 12px;
+  font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
+}
 </style>
 </head>
 <body>
@@ -381,6 +469,7 @@ body { max-width: 480px; margin: 0 auto; }
   <header class="app-header">
     <a href="dashboard.html" class="btn-icon" title="Dashboard">←</a>
     <div class="header-spacer"></div>
+    <button class="btn-icon" onclick="showExamView()" title="Exam Prep" style="font-size:16px;">📅</button>
     <button class="header-theme-btn" onclick="toggleLearnTheme()" title="Toggle theme">☀</button>
   </header>
 
@@ -425,6 +514,7 @@ body { max-width: 480px; margin: 0 auto; }
   <header class="app-header">
     <button class="btn-icon" onclick="backFromWeek()">←</button>
     <div class="header-spacer"></div>
+    <button class="btn-icon" style="font-size:20px;letter-spacing:2px;" title="More options">···</button>
   </header>
 
   <div class="week-hero">
@@ -493,6 +583,22 @@ body { max-width: 480px; margin: 0 auto; }
   <div class="bottom-bar bottom-bar-row">
     <button class="action-btn" id="markCompleteBtn" onclick="toggleTopicComplete()">✓ Mark as Complete</button>
     <button class="action-btn action-btn-ghost" id="nextTopicBtn" onclick="goToNextTopic()" style="display:none">Next →</button>
+  </div>
+</div>
+
+<!-- ══ VIEW 4: EXAM ══════════════════════════════════ -->
+<div class="view" id="viewExam">
+  <header class="app-header">
+    <button class="btn-icon" onclick="goToView('course')">←</button>
+    <div class="header-spacer"></div>
+    <span style="font-size:15px;font-weight:800;color:var(--text);">Exam Prep</span>
+    <div class="header-spacer"></div>
+    <button class="header-theme-btn" onclick="toggleLearnTheme()">☀</button>
+  </header>
+  <div class="exam-scroll" id="examScrollEl">
+    <div class="empty-state" style="margin-top:60px;">
+      <div class="loading-spinner"></div>
+    </div>
   </div>
 </div>
 
