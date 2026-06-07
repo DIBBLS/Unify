@@ -1,5 +1,25 @@
 import { auth, db } from "../firebase-config.js";
 import { listCourses } from "../courses-service.js";
+
+// ── 300 Level auto-enrol map (mirrors Onboarding.js) ────────────────────────
+const _S300 = ['CHE 352','MEE 352','ECE 316','ECE 352','GNS 312','ENT 312'];
+const COURSES_300L = {
+  'Electronic & Computer Engineering':  [..._S300,'ECE 302','ECE 308','ECE 310','ECE 312','ECE 314','ECE 320','ECE 350'],
+  'Mechanical Engineering':             [..._S300,'MEE 354'],
+  'Industrial & Petroleum Engineering': [..._S300,'IPE 316'],
+  'Aerospace Engineering':              [..._S300,'ASE 363','ASE 366'],
+  'Civil Engineering':                  _S300.filter(c=>c!=='CHE 352').concat(['CVE 304','CVE 308','CVE 310']),
+  'Chemical & Polymer Engineering':     _S300.filter(c=>c!=='CHE 352'&&c!=='ECE 316').concat(['CHE 312','CHE 314']),
+};
+function normaliseCourses(raw) {
+  // Convert plain strings → objects; filter out anything completely unparseable
+  return (raw || []).map(c => {
+    if (c && typeof c === 'object' && c.course) return c;
+    if (typeof c === 'string' && c.trim()) return { course: c.trim().toUpperCase(), grade: '-', units: 3 };
+    return null;
+  }).filter(Boolean);
+}
+
 import {
   onAuthStateChanged,
   signOut,
@@ -200,10 +220,8 @@ async function loadUserData() {
       document.getElementById("navUserName").textContent = first;
     }
 
-    // ── FIX: only use saved courses — never auto-overwrite them ──
-    // If the user has saved courses (even with grade "-"), honour them.
-    // Only fall back to autoLoadCourses when there are genuinely zero courses.
-    window.courses = d.courses || [];
+    // Normalise courses — convert legacy plain strings to objects
+    window.courses = normaliseCourses(d.courses);
     aspirations = d.aspirations || [];
     weekProgress = d.weekProgress || {};
 
@@ -218,8 +236,16 @@ async function loadUserData() {
     applyStatsMask();
 
     if (window.courses.length === 0) {
-      // Truly first time or cleared — auto-populate from course DB + Firestore
-      await autoLoadCourses(d.department, d.level);
+      // Try 300L mapping first (covers old users who signed up before auto-enrol)
+      const mapped = d.level === '300 Level' ? COURSES_300L[d.department] || [] : [];
+      if (mapped.length) {
+        window.courses = mapped.map(code => ({ course: code, grade: '-', units: 3 }));
+        if (currentUser) {
+          setDoc(doc(db, 'users', currentUser.uid), { courses: window.courses }, { merge: true }).catch(() => {});
+        }
+      } else {
+        await autoLoadCourses(d.department, d.level);
+      }
     }
 
     renderAspirations();
