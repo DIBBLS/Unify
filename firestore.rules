@@ -176,6 +176,19 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // ── EXAM TIMETABLES (admin + class reps write, students read) ──
+    match /examTimetables/{deptId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin() || isClassRep();
+    }
+
+    // ── FEEDBACK (anyone signed in can submit; only admins can read/manage) ──
+    match /feedback/{id} {
+      allow read: if isAdmin();
+      allow create: if signedIn();
+      allow update, delete: if isAdmin();
+    }
+
     // ── DENY EVERYTHING ELSE ────────────────────────────────
     match /{document=**} {
       allow read, write: if false;
