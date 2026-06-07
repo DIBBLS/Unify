@@ -178,6 +178,16 @@ body { max-width: 480px; margin: 0 auto; }
 
 /* Weeks list */
 .weeks-list { display: flex; flex-direction: column; gap: 8px; }
+.weeks-expand-btn {
+  width: 100%; padding: 14px;
+  background: none; border: none;
+  font-size: 13px; font-weight: 600; color: var(--text2);
+  cursor: pointer; text-align: center;
+  border-radius: var(--radius);
+  transition: color 0.15s;
+  margin-top: 2px;
+}
+.weeks-expand-btn:hover { color: var(--green); }
 .week-row-btn {
   background: var(--surface);
   border: 1.5px solid var(--border);
@@ -425,6 +435,7 @@ body { max-width: 480px; margin: 0 auto; }
   <header class="app-header">
     <button class="btn-icon" onclick="backFromWeek()">←</button>
     <div class="header-spacer"></div>
+    <button class="btn-icon" style="font-size:20px;letter-spacing:2px;" title="More options">···</button>
   </header>
 
   <div class="week-hero">
