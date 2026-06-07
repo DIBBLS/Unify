@@ -37,12 +37,8 @@ onAuthStateChanged(auth, async user => {
   const urlTopic = parseInt(params.get('topic'), 10);
 
   if (Number.isFinite(urlWeek) && urlWeek >= 0 && urlWeek < courseTopics.length) {
-    if (Number.isFinite(urlTopic) && urlTopic >= 0) {
-      const type = urlTopic === 0 ? 'notes' : 'video';
-      showContentView(urlWeek, type);
-    } else {
-      showWeekView(urlWeek);
-    }
+    // Don't auto-navigate to notes.html on init — just show week view
+    showWeekView(urlWeek);
   } else {
     showCourseView();
   }
@@ -476,8 +472,9 @@ window.showContentView = function (wi, topicType) {
       noContent.style.display = '';
     }
   } else if (topicType === 'notes' && fs?.htmlContent) {
-    const backUrl = encodeURIComponent(window.location.href);
-    window.location.href = `notes.html?courseCode=${encodeURIComponent(courseCode)}&week=${week.week}&back=${backUrl}`;
+    const backU = new URL(window.location.href);
+    backU.searchParams.delete('topic');
+    window.location.href = `notes.html?courseCode=${encodeURIComponent(courseCode)}&week=${week.week}&back=${encodeURIComponent(backU.toString())}`;
     return;
   } else {
     noContent.style.display = '';
@@ -580,11 +577,7 @@ window.addEventListener('popstate', () => {
   const urlWeek = parseInt(params.get('week'), 10);
   const urlTopic = parseInt(params.get('topic'), 10);
   if (Number.isFinite(urlWeek) && urlWeek >= 0 && urlWeek < courseTopics.length) {
-    if (Number.isFinite(urlTopic) && urlTopic >= 0) {
-      showContentView(urlWeek, urlTopic === 0 ? 'notes' : 'video');
-    } else {
-      showWeekView(urlWeek);
-    }
+    showWeekView(urlWeek);
   } else {
     showCourseView();
   }
