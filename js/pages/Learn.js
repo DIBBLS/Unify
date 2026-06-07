@@ -307,6 +307,9 @@ window.backFromWeek = function () {
   showCourseView();
 };
 
+let weeksExpanded = false;
+const WEEKS_PREVIEW = 5;
+
 function renderWeeksList() {
   const list = document.getElementById('weeksListEl');
   if (courseTopics.length === 0) {
@@ -317,7 +320,9 @@ function renderWeeksList() {
     return;
   }
 
-  list.innerHTML = courseTopics.map((week, wi) => {
+  const visible = weeksExpanded ? courseTopics : courseTopics.slice(0, WEEKS_PREVIEW);
+
+  const rows = visible.map((week, wi) => {
     const weekTopics = getTopicsForWeek(week);
     const done = weekTopics.filter((_, ti) => topicProgress[topicKey(wi, ti)]?.done).length;
     const total = weekTopics.length;
@@ -338,7 +343,23 @@ function renderWeeksList() {
       </div>
     </button>`;
   }).join('');
+
+  const remaining = courseTopics.length - WEEKS_PREVIEW;
+  const expandBtn = courseTopics.length > WEEKS_PREVIEW
+    ? `<button class="weeks-expand-btn" onclick="toggleWeeksExpand()">
+        ${weeksExpanded
+          ? '↑ Show less'
+          : `View all weeks (${courseTopics.length}) ↓`}
+       </button>`
+    : '';
+
+  list.innerHTML = rows + expandBtn;
 }
+
+window.toggleWeeksExpand = function () {
+  weeksExpanded = !weeksExpanded;
+  renderWeeksList();
+};
 
 window.resumeLearning = function () {
   const card = document.getElementById('continueLearningCard');
