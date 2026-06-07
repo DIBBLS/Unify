@@ -1,6 +1,23 @@
 import { auth, db } from '../firebase-config.js';
 import { onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ── AUTO-ENROL: 300 Level courses per department ─────────────────────────────
+const SHARED_300 = ['CHE 352', 'MEE 352', 'ECE 316', 'ECE 352', 'GNS 312', 'ENT 312'];
+const COURSES_300L = {
+  'Electronic & Computer Engineering':   [...SHARED_300, 'ECE 302', 'ECE 308', 'ECE 310', 'ECE 312', 'ECE 314', 'ECE 320', 'ECE 350'],
+  'Mechanical Engineering':              [...SHARED_300, 'MEE 354'],
+  'Industrial & Petroleum Engineering':  [...SHARED_300, 'IPE 316'],
+  'Aerospace Engineering':               [...SHARED_300, 'ASE 363', 'ASE 366'],
+  'Civil Engineering':                   SHARED_300.filter(c => c !== 'CHE 352').concat(['CVE 304', 'CVE 308', 'CVE 310']),
+  'Chemical & Polymer Engineering':      SHARED_300.filter(c => c !== 'CHE 352' && c !== 'ECE 316').concat(['CHE 312', 'CHE 314']),
+};
+
+function getAutoEnrolCourses(department, level) {
+  if (level !== '300 Level') return [];
+  return COURSES_300L[department] || [];
+}
+
 let currentUser = null;
 
 // ── DATA ─────────────────────────────────────────────────────────────────────
@@ -334,7 +351,7 @@ async function saveAndGo() {
       faculty: selected.faculty,
       department: selected.department,
       level: selected.level,
-      courses: [],
+      courses: getAutoEnrolCourses(selected.department, selected.level),
     };
     if (selected.gradTarget != null) {
       payload.gradePlanner = {
