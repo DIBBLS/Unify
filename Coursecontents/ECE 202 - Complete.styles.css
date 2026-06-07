@@ -145,4 +145,4 @@ footer strong { color: var(--text); }
   .step { grid-template-columns: 36px 1fr; }
   .step-math { font-size: 12px; }
   .def-row { grid-template-columns: 1fr; gap: 0.2rem; }
-}
+}nav{display:none!important}
