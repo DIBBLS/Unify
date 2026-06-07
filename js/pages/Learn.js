@@ -295,6 +295,16 @@ function showCourseView() {
   renderWeeksList();
   goToView('course');
 }
+window.showCourseView = showCourseView;
+
+// Called by the week-view ← button: updates URL then renders course view.
+window.backFromWeek = function () {
+  const url = new URL(window.location.href);
+  url.searchParams.delete('week');
+  url.searchParams.delete('topic');
+  history.pushState({}, '', url);
+  showCourseView();
+};
 
 function renderWeeksList() {
   const list = document.getElementById('weeksListEl');
