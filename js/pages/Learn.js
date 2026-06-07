@@ -476,8 +476,9 @@ window.showContentView = function (wi, topicType) {
       noContent.style.display = '';
     }
   } else if (topicType === 'notes' && fs?.htmlContent) {
-    notesWrap.style.display = '';
-    renderNotesShadow(fs.htmlContent);
+    const backUrl = encodeURIComponent(window.location.href);
+    window.location.href = `notes.html?courseCode=${encodeURIComponent(courseCode)}&week=${week.week}&back=${backUrl}`;
+    return;
   } else {
     noContent.style.display = '';
   }
