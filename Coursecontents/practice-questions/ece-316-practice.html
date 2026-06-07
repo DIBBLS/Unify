@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECE 316 — Practice Questions | Unify Learn</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['\\(','\\)'],['$','$']], displayMath: [['\\[','\\]'],['$$','$$']] },
+    options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+  :root {
+    --bg: #f5f4f0; --surface: #ffffff; --surface2: #f8f7f3; --border: #e0deda;
+    --text: #0a0a0a; --text2: #555555; --text3: #999999;
+    --green: #4ade80; --green-deep: #16a34a; --green-bg: rgba(74,222,128,0.1);
+    --yellow: #fbbf24; --fd: 'Playfair Display', serif; --fb: 'DM Sans', sans-serif;
+    --radius: 12px; --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  [data-theme="dark"] {
+    --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #222222; --border: #2a2a2a;
+    --text: #f0efeb; --text2: #aaa; --text3: #666; --shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--fb); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; transition: background 0.3s, color 0.3s; }
+  #progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--green); width: 0%; z-index: 1000; transition: width 0.2s; }
+  .topbar { position: fixed; top: 3px; left: 0; right: 0; height: 52px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 999; transition: background 0.3s, border-color 0.3s; }
+  .topbar-wordmark { font-family: var(--fd); font-weight: 900; font-size: 18px; color: var(--text); letter-spacing: -0.5px; }
+  .topbar-wordmark span { color: var(--green); }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .course-pill { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--text3); }
+  #dark-toggle { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: all 0.2s; }
+  #dark-toggle:hover { background: var(--surface2); }
+  .progress-tracker { position: fixed; bottom: 20px; right: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; font-size: 11px; font-weight: 600; color: var(--text2); box-shadow: var(--shadow); z-index: 998; display: flex; align-items: center; gap: 8px; }
+  .tracker-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+  .wrapper { max-width: 780px; margin: 0 auto; padding: 88px 20px 100px; }
+
+  /* HERO */
+  .hero { background: #0a0a0a; color: #f5f4f0; border-radius: var(--radius); padding: 40px 36px; margin-bottom: 32px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -40px; right: -40px; width: 200px; height: 200px; border-radius: 50%; background: rgba(74,222,128,0.07); pointer-events: none; }
+  .hero-eyebrow { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #4ade80; margin-bottom: 12px; }
+  .hero-title { font-family: var(--fd); font-size: 32px; font-weight: 900; letter-spacing: -1px; line-height: 1.15; color: #f5f4f0; margin-bottom: 8px; }
+  .hero-subtitle { font-family: var(--fd); font-size: 17px; font-weight: 400; font-style: italic; color: rgba(245,244,240,0.7); margin-bottom: 24px; line-height: 1.4; }
+  .hero-outcome { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.25); border-radius: 8px; padding: 14px 18px; font-size: 13px; color: rgba(245,244,240,0.9); line-height: 1.6; margin-bottom: 24px; }
+  .hero-outcome strong { color: #4ade80; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; }
+  .meta-chip { font-size: 11px; font-weight: 500; padding: 4px 12px; border-radius: 20px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: rgba(245,244,240,0.7); }
+
+  /* TOPIC PROGRESS */
+  .topic-progress { margin-bottom: 32px; }
+  .tp-label { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+  .tp-steps { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tp-step { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text3); }
+  .tp-step.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .tp-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* TAGS */
+  .tags-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+  .tag { font-family: var(--fb); font-size: 11px; font-weight: 500; padding: 5px 13px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); }
+  .tag.green { background: var(--green-bg); border-color: rgba(74,222,128,0.3); color: var(--green-deep); }
+
+  /* SECTION HEADERS */
+  .section-label { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green-deep); margin-bottom: 6px; }
+  .section-title { font-family: var(--fd); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); margin-bottom: 20px; line-height: 1.25; }
+
+  /* PQ CARD — shared wrapper for every question */
+  .pq { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 18px; overflow: hidden; }
+
+  /* PQ HEADER */
+  .pq-header { display: flex; align-items: center; gap: 12px; padding: 14px 22px; border-bottom: 1px solid var(--border); }
+  .pq-num { font-family: var(--fb); font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+  .pq-num.theory  { background: rgba(251,191,36,0.15); color: #b45309; border: 1px solid rgba(251,191,36,0.35); }
+  .pq-num.calc    { background: var(--green-bg); border: 1px solid rgba(74,222,128,0.35); color: var(--green-deep); }
+  .pq-title { font-family: var(--fd); font-size: 14px; font-weight: 700; color: var(--text); }
+
+  /* PQ BODY */
+  .pq-body { padding: 18px 22px; }
+  .pq-q { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.7; max-width: 66ch; margin-bottom: 14px; }
+  .pq-q ul { padding-left: 20px; margin-top: 8px; }
+  .pq-q ul li { margin-bottom: 4px; font-weight: 400; color: var(--text2); }
+
+  /* REVEAL BUTTON */
+  .reveal-btn { font-family: var(--fb); font-size: 11px; font-weight: 700; padding: 8px 18px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: pointer; transition: all 0.2s; display: inline-block; }
+  .reveal-btn:hover { background: var(--green-bg); border-color: rgba(74,222,128,0.3); color: var(--green-deep); }
+  .reveal-btn.open { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+  /* ANSWER BODY — shared by theory + calc */
+  .pq-answer { display: none; margin-top: 16px; padding: 16px 18px; background: var(--surface2); border-left: 3px solid var(--green); border-radius: 0 10px 10px 0; }
+  .pq-answer.show { display: block; }
+  .pq-answer p { font-size: 13px; color: var(--text2); line-height: 1.85; margin-bottom: 10px; max-width: 66ch; }
+  .pq-answer p:last-child { margin-bottom: 0; }
+  .pq-answer strong { color: var(--text); }
+  .pq-answer ul, .pq-answer ol { padding-left: 20px; font-size: 13px; color: var(--text2); line-height: 1.85; margin-bottom: 10px; max-width: 66ch; }
+  .pq-answer ul li, .pq-answer ol li { margin-bottom: 5px; }
+  .pq-answer table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; max-width: 60ch; }
+  .pq-answer table th { background: var(--text); color: var(--bg); padding: 7px 10px; text-align: left; font-family: var(--fd); font-size: 11px; }
+  .pq-answer table td { padding: 7px 10px; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: top; }
+
+  /* ANSWER BOX (final answer highlight for calc) */
+  .ans-box { display: inline-block; background: var(--green); color: #0a0a0a; font-family: var(--fd); font-weight: 700; font-size: 14px; padding: 5px 16px; border-radius: 7px; margin-top: 6px; margin-bottom: 2px; }
+
+  /* TABLE inside topic-card */
+  .ref-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow); margin-bottom: 28px; }
+  .ref-card p { font-size: 13px; color: var(--text2); line-height: 1.75; margin-bottom: 10px; max-width: 66ch; }
+  .ref-card p:last-child { margin-bottom: 0; }
+  .ref-card strong { color: var(--text); }
+  .vn-table { width: 100%; border-collapse: collapse; font-size: 12px; max-width: 66ch; margin: 10px 0; }
+  .vn-table th { background: var(--text); color: var(--bg); padding: 8px 12px; text-align: left; font-family: var(--fd); font-weight: 700; font-size: 12px; }
+  .vn-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: top; }
+  .vn-table tr:hover td { background: var(--surface2); }
+
+  /* PULSE CHECK */
+  .pulse-check { background: var(--green); border-radius: var(--radius); padding: 28px; margin: 36px 0; }
+  .pulse-check .pc-title { font-family: var(--fd); font-size: 20px; font-weight: 900; color: #0a0a0a; margin-bottom: 4px; }
+  .pulse-check .pc-sub { font-size: 12px; color: rgba(10,10,10,0.6); margin-bottom: 20px; }
+  .pc-question { background: rgba(255,255,255,0.35); border-radius: 10px; padding: 16px 18px; margin-bottom: 12px; }
+  .pc-q-text { font-size: 14px; font-weight: 500; color: #0a0a0a; margin-bottom: 10px; max-width: 66ch; line-height: 1.6; }
+  .pc-options { display: flex; flex-direction: column; gap: 6px; }
+  .pc-option { display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer; padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.5); color: #0a0a0a; transition: all 0.15s; max-width: 66ch; }
+  .pc-option:hover { background: rgba(255,255,255,0.65); }
+  .pc-option.correct { background: #fff; border-color: #16a34a; }
+  .pc-option.wrong { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.5); }
+  .pc-letter { font-weight: 700; font-size: 11px; width: 22px; height: 22px; border-radius: 50%; background: rgba(10,10,10,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .pc-feedback { margin-top: 8px; font-size: 12px; font-weight: 500; display: none; color: #0a0a0a; }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--border); margin: 40px 0; }
+
+  /* EOQ */
+  .eoq { background: var(--text); border-radius: var(--radius); padding: 32px; margin-top: 48px; }
+  .eoq-eyebrow { font-family: var(--fb); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green); margin-bottom: 6px; }
+  .eoq-title { font-family: var(--fd); font-size: 24px; font-weight: 900; color: #f5f4f0; margin-bottom: 4px; letter-spacing: -0.5px; }
+  .eoq-sub { font-size: 12px; color: rgba(240,239,235,0.5); margin-bottom: 24px; }
+  .eoq-question { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 18px 20px; margin-bottom: 14px; }
+  .eoq-qnum { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: rgba(240,239,235,0.4); margin-bottom: 6px; }
+  .eoq-q-text { font-size: 14px; font-weight: 500; color: #f0efeb; max-width: 66ch; line-height: 1.6; margin-bottom: 12px; }
+  .eoq-options { display: flex; flex-direction: column; gap: 6px; }
+  .eoq-option { display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer; padding: 10px 14px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(240,239,235,0.8); transition: all 0.15s; max-width: 66ch; user-select: none; }
+  .eoq-option:hover:not(.locked) { background: rgba(255,255,255,0.1); }
+  .eoq-option.selected { border-color: var(--green); background: rgba(74,222,128,0.1); }
+  .eoq-option.correct-reveal { border-color: var(--green); background: rgba(74,222,128,0.15); color: #f0efeb; }
+  .eoq-option.wrong-reveal { border-color: rgba(239,68,68,0.5); background: rgba(239,68,68,0.1); color: rgba(240,239,235,0.6); }
+  .eoq-letter { font-weight: 700; font-size: 11px; width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: rgba(240,239,235,0.7); }
+  .eoq-feedback { display: none; margin-top: 10px; font-size: 12px; line-height: 1.6; padding: 10px 14px; border-radius: 6px; max-width: 66ch; }
+  .eoq-feedback.correct-fb { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.25); color: #86efac; }
+  .eoq-feedback.wrong-fb { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #fca5a5; }
+  .eoq-submit { margin-top: 24px; width: 100%; padding: 14px; border-radius: 8px; border: none; background: var(--green); color: #0a0a0a; font-family: var(--fb); font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+  .eoq-submit:hover { opacity: 0.88; }
+  .eoq-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+  .eoq-result { display: none; margin-top: 24px; padding: 24px; border-radius: 10px; text-align: center; }
+  .eoq-result.pass { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); }
+  .eoq-result.fail { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); }
+  .result-score { font-family: var(--fd); font-size: 40px; font-weight: 900; color: #f0efeb; margin-bottom: 6px; }
+  .result-pill { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 5px 16px; border-radius: 20px; margin-bottom: 14px; }
+  .pill-pass { background: var(--green); color: #0a0a0a; }
+  .pill-fail { background: rgba(239,68,68,0.3); color: #fca5a5; border: 1px solid rgba(239,68,68,0.4); }
+  .result-msg { font-size: 13px; color: rgba(240,239,235,0.7); line-height: 1.6; max-width: 52ch; margin: 0 auto 16px; }
+  .unlock-banner { background: rgba(74,222,128,0.15); border: 1px solid rgba(74,222,128,0.3); border-radius: 8px; padding: 12px 16px; font-size: 13px; color: var(--green); font-weight: 500; margin-top: 12px; }
+  .review-nudge { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 14px 16px; margin-top: 12px; text-align: left; }
+  .review-nudge p { font-size: 12px; color: rgba(240,239,235,0.6); margin-bottom: 8px; }
+  .review-nudge ul { padding-left: 16px; font-size: 12px; color: #fca5a5; line-height: 1.8; }
+
+  @media (max-width: 600px) {
+    .wrapper { padding: 72px 14px 100px; } .hero { padding: 28px 20px; } .hero-title { font-size: 24px; }
+    .pq-body { padding: 14px 16px; } .pq-header { padding: 12px 16px; }
+    .eoq { padding: 22px 16px; } .pulse-check { padding: 20px 16px; }
+    .progress-tracker { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<nav class="topbar">
+  <div class="topbar-wordmark">Unify<span>.</span></div>
+  <div class="topbar-right">
+    <span class="course-pill">ECE 316</span>
+    <button id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode">🌙</button>
+  </div>
+</nav>
+
+<div class="progress-tracker">
+  <div class="tracker-dot"></div>
+  <span id="tracker-text">Scroll to begin</span>
+</div>
+
+<div class="wrapper">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-eyebrow">ECE 316 · Practice Questions · LASU Faculty of Engineering</div>
+    <h1 class="hero-title">DC Machines — PQ Bank</h1>
+    <p class="hero-subtitle">Theory, Derivations &amp; Calculations · Weeks 6–8</p>
+    <div class="hero-outcome">
+      <strong>30 questions, mixed and numbered.</strong> Theory questions ask you to explain, define, compare, or derive — write your answer first, then reveal. Calculation questions show a worked solution behind a toggle. Cover the answer before you check. That's the only way this works.
+    </div>
+    <div class="hero-meta">
+      <span class="meta-chip">📝 20 Theory Questions</span>
+      <span class="meta-chip">📐 10 Calculation Questions</span>
+      <span class="meta-chip">🎓 ECE 316 Exam Prep</span>
+    </div>
+  </header>
+
+  <!-- TOPIC PROGRESS -->
+  <div class="topic-progress">
+    <div class="tp-label">Sections</div>
+    <div class="tp-steps">
+      <div class="tp-step active"><span class="tp-dot"></span> Generator Theory &amp; Calculations</div>
+      <div class="tp-step"><span class="tp-dot"></span> Armature Reaction &amp; Commutation</div>
+      <div class="tp-step"><span class="tp-dot"></span> DC Motors</div>
+      <div class="tp-step"><span class="tp-dot"></span> Final Quiz</div>
+    </div>
+  </div>
+
+  <!-- TAGS -->
+  <div class="tags-row">
+    <span class="tag green">Excitation</span>
+    <span class="tag green">Shunt Generator</span>
+    <span class="tag green">Series Generator</span>
+    <span class="tag green">Compound Generator</span>
+    <span class="tag green">Armature Reaction</span>
+    <span class="tag green">Commutation</span>
+    <span class="tag">Back EMF</span>
+    <span class="tag">Mechanical Power</span>
+    <span class="tag">Efficiency</span>
+    <span class="tag">Force on Conductor</span>
+    <span class="tag">MNA / GNA</span>
+    <span class="tag">Interpoles</span>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SECTION A: GENERATOR THEORY & CALCULATIONS
+  ══════════════════════════════════════════ -->
+  <div class="section-label">Section A</div>
+  <div class="section-title">DC Generator — Theory &amp; Calculations</div>
+
+  <!-- Q1 THEORY -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num theory">Q 01 · Theory</span>
+      <span class="pq-title">Excitation in DC Generators</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">Explain the term <strong>excitation</strong> in a DC generator. How is it used to classify DC generators?</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Reveal Answer</button>
+      <div class="pq-answer">
+        <p>Excitation is the process of producing magnetic flux in a DC generator by allowing current to flow through the field winding. Without excitation, no flux exists — and without flux, no emf can be generated.</p>
+        <p>Generators are classified by their excitation method into two broad groups:</p>
+        <ul>
+          <li><strong>Separately excited</strong> — the field winding receives current from an external DC source independent of the generator itself.</li>
+          <li><strong>Self-excited</strong> — the field winding is supplied by the generator's own output. This group is further divided into shunt, series, and compound types.</li>
+        </ul>
+        <p>Permanent magnet generators form a third category where no field winding is used at all — the flux comes from permanent magnets.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q2 THEORY -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num theory">Q 02 · Theory</span>
+      <span class="pq-title">Separately Excited vs Self-Excited</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">Distinguish between a <strong>separately excited</strong> and a <strong>self-excited</strong> DC generator. Give one advantage of each.</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Reveal Answer</button>
+      <div class="pq-answer">
+        <table>
+          <tr><th>Separately Excited</th><th>Self-Excited</th></tr>
+          <tr><td>Field winding supplied from an external DC source</td><td>Field winding supplied from the generator's own output</td></tr>
+          <tr><td>Field and armature circuits are independent</td><td>Field depends on generator terminal voltage</td></tr>
+          <tr><td>Better and more precise voltage control</td><td>Simpler construction — no external source needed</td></tr>
+          <tr><td>Used where stable voltage regulation is critical</td><td>Commonly used in everyday practical applications</td></tr>
+        </table>
+        <p><strong>Advantage of separately excited:</strong> more precise voltage regulation since the field is independent of load variations.</p>
+        <p><strong>Advantage of self-excited:</strong> simpler and cheaper — no external power supply required.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q3 THEORY -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num theory">Q 03 · Theory</span>
+      <span class="pq-title">Shunt vs Series Field Winding Construction</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">Why does a shunt field winding have <strong>many turns of fine wire</strong> while a series field winding has <strong>few turns of thick wire</strong>? Explain using current and resistance.</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Reveal Answer</button>
+      <div class="pq-answer">
+        <p><strong>Shunt field winding:</strong> connected in parallel with the armature, so it operates at terminal voltage. Only a small field current flows through it. Because the current is small, fine wire is sufficient to carry it. However, many turns are needed to produce enough ampere-turns (and therefore enough flux) for the machine to work properly. The resistance is typically high — around 100 Ω.</p>
+        <p><strong>Series field winding:</strong> connected in series with the armature, so it carries the full load (armature) current, which is large. Thick wire is required to handle this without overheating. Only a few turns are needed because the high current already provides sufficient ampere-turns. The resistance is very low — usually less than 1 Ω, to avoid excessive voltage drop.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q4 THEORY -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num theory">Q 04 · Theory</span>
+      <span class="pq-title">Shunt Generator vs Series Generator</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">Compare the <strong>shunt-wound</strong> and <strong>series-wound</strong> DC generators. Include field connection, current relationship, and field winding properties.</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Reveal Answer</button>
+      <div class="pq-answer">
+        <table>
+          <tr><th>Property</th><th>Shunt Generator</th><th>Series Generator</th></tr>
+          <tr><td>Field connection</td><td>Parallel with armature</td><td>Series with armature</td></tr>
+          <tr><td>Field resistance</td><td>High (~100 Ω)</td><td>Very low (&lt;1 Ω)</td></tr>
+          <tr><td>Field wire</td><td>Many turns, fine wire</td><td>Few turns, thick wire</td></tr>
+          <tr><td>Current relationship</td><td>\(I_a = I_{sh} + I_L\)</td><td>\(I_a = I_f = I_L\)</td></tr>
+          <tr><td>Voltage characteristic</td><td>Fairly constant terminal voltage</td><td>Terminal voltage rises steeply with load</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q5 CALC -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num calc">Q 05 · Calculation</span>
+      <span class="pq-title">Separately Excited Generator — Find \(E_g\) and \(\eta\)</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">
+        A separately excited DC generator has \(R_a = 0.4\,\Omega\), \(I_L = 25\,\text{A}\), \(V = 220\,\text{V}\). Find:
+        <ul><li>a) Generated emf \(E_g\)</li><li>b) Efficiency \(\eta\)</li></ul>
+      </div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Show Solution</button>
+      <div class="pq-answer">
+        <p>Since separately excited: \(I_a = I_L = 25\,\text{A}\)</p>
+        <p>\(E_g = V + I_a R_a = 220 + (25 \times 0.4) = 220 + 10\)</p>
+        <div class="ans-box">\(E_g = 230\,\text{V}\)</div>
+        <p style="margin-top:12px;">\(P_i = E_g \cdot I_a = 230 \times 25 = 5\,750\,\text{W}\)</p>
+        <p>\(P_o = V \cdot I_L = 220 \times 25 = 5\,500\,\text{W}\)</p>
+        <div class="ans-box">\(\eta = \dfrac{5500}{5750} \times 100 = 95.65\%\)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q6 THEORY -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num theory">Q 06 · Theory</span>
+      <span class="pq-title">Compound Generator — What and Why</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">What is a <strong>compound-wound generator</strong>? Why is it called compound? State one advantage it has over a pure shunt generator.</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Reveal Answer</button>
+      <div class="pq-answer">
+        <p>A compound-wound generator contains <strong>two field windings on each pole</strong> — a shunt field winding and a series field winding. The magnetic flux in the machine is produced by the combined (compounded) effect of both windings acting together. That combined action is why it is called compound.</p>
+        <p><strong>Advantage over a pure shunt generator:</strong> a cumulatively compounded generator can compensate for the voltage drop that occurs as load current increases. The series field strengthens flux as load rises, keeping terminal voltage more stable — something a plain shunt generator cannot do as effectively.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q7 THEORY -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num theory">Q 07 · Theory</span>
+      <span class="pq-title">Long Shunt vs Short Shunt</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">Explain the difference between a <strong>long shunt</strong> and a <strong>short shunt</strong> compound generator. Which currents change between the two configurations?</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Reveal Answer</button>
+      <div class="pq-answer">
+        <p><strong>Long shunt:</strong> the shunt field winding is connected across the armature <em>and</em> the series field winding together — i.e., across the full internal EMF path. The shunt field current is therefore \(I_{sh} = V / R_{sh}\) and the armature current \(I_a\) flows through both \(R_a\) and \(R_{ss}\).</p>
+        <p><strong>Short shunt:</strong> the shunt field winding is connected directly across the armature terminals only — not across the series field. The load current \(I_L\) (not \(I_a\)) flows through the series resistance, giving a slightly different voltage equation.</p>
+        <p>The key difference is <strong>where the shunt winding is tapped</strong>. The current distribution — specifically how \(I_{sh}\) is calculated and which current passes through the series field — changes between the two.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q8 CALC -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num calc">Q 08 · Calculation</span>
+      <span class="pq-title">Shunt Generator — Find \(I_{sh}\), \(I_a\), \(E_g\), \(\eta\)</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">
+        A shunt generator: \(V = 220\,\text{V}\), \(R_{sh} = 110\,\Omega\), \(I_L = 60\,\text{A}\), \(R_a = 0.1\,\Omega\). Find \(I_{sh}\), \(I_a\), \(E_g\), and \(\eta\).
+      </div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Show Solution</button>
+      <div class="pq-answer">
+        <p>\(I_{sh} = \dfrac{V}{R_{sh}} = \dfrac{220}{110} = 2\,\text{A}\)</p>
+        <p>\(I_a = I_L + I_{sh} = 60 + 2 = 62\,\text{A}\)</p>
+        <p>\(E_g = V + I_a R_a = 220 + (62 \times 0.1) = 220 + 6.2\)</p>
+        <div class="ans-box">\(E_g = 226.2\,\text{V}\)</div>
+        <p style="margin-top:12px;">\(P_i = 226.2 \times 62 = 14\,024.4\,\text{W}\) &nbsp;|&nbsp; \(P_o = 220 \times 60 = 13\,200\,\text{W}\)</p>
+        <div class="ans-box">\(\eta = 94.12\%\)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q9 THEORY -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num theory">Q 09 · Theory</span>
+      <span class="pq-title">Differentially Compounded Generator</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">What is a <strong>differentially compounded generator</strong>? Describe what happens to terminal voltage as load increases.</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Reveal Answer</button>
+      <div class="pq-answer">
+        <p>A compound generator is differentially compounded when the series field winding is connected so that its flux <strong>opposes</strong> the flux produced by the shunt field winding — rather than aiding it.</p>
+        <p>As load current increases, the series field strengthens. Because it opposes the shunt field, the total flux in the machine <strong>decreases</strong>. Reduced flux means reduced generated emf. The terminal voltage therefore <strong>falls rapidly and steeply</strong> with increasing load — making this configuration unsuitable for most practical applications. It is occasionally used where a drooping voltage characteristic is specifically required.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q10 THEORY -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num theory">Q 10 · Theory</span>
+      <span class="pq-title">Why Generator Efficiency Cannot Be 100%</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">Explain clearly why generator efficiency can <strong>never reach 100%</strong>. Name all loss categories involved.</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Reveal Answer</button>
+      <div class="pq-answer">
+        <p>Efficiency is defined as \(\eta = P_o / P_i \times 100\%\). For 100% efficiency, output power would have to equal input power — meaning zero losses inside the machine. That is physically impossible because energy is always converted to heat through several mechanisms:</p>
+        <ul>
+          <li><strong>Armature copper losses:</strong> \(I_a^2 R_a\) — heat generated as current flows through armature resistance.</li>
+          <li><strong>Field copper losses:</strong> \(I_f^2 R_f\) — heat in the field winding resistance.</li>
+          <li><strong>Brush contact losses:</strong> voltage drop across the carbon brush–commutator interface.</li>
+          <li><strong>Core (magnetic) losses:</strong> hysteresis and eddy current losses in the armature iron as flux alternates.</li>
+          <li><strong>Mechanical losses:</strong> friction at bearings and brushes, windage from rotating parts.</li>
+        </ul>
+        <p>Because \(P_o = P_i - \text{losses}\), output is always less than input. Therefore \(\eta\) is always strictly less than 100%.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PULSE CHECK 1 -->
+  <div class="pulse-check">
+    <div class="pc-title">Pulse Check ①</div>
+    <div class="pc-sub">End of Generator section — no grade, just a check.</div>
+    <div class="pc-question">
+      <div class="pc-q-text">A long shunt compound generator has \(V = 240\,\text{V}\), \(I_L = 80\,\text{A}\), \(R_{sh} = 120\,\Omega\). What is \(I_a\)?</div>
+      <div class="pc-options" id="pc1-opts">
+        <div class="pc-option" onclick="pcAnswer(this,'pc1',false)"><span class="pc-letter">A</span> 80 A</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1',true)"><span class="pc-letter">B</span> 82 A</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1',false)"><span class="pc-letter">C</span> 78 A</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc1',false)"><span class="pc-letter">D</span> 2 A</div>
+      </div>
+      <div class="pc-feedback" id="pc1-fb"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SECTION B: ARMATURE REACTION & COMMUTATION
+  ══════════════════════════════════════════ -->
+  <div class="section-label">Section B</div>
+  <div class="section-title">Armature Reaction &amp; Commutation</div>
+
+  <!-- Q11 THEORY -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num theory">Q 11 · Theory</span>
+      <span class="pq-title">Definition of Armature Reaction</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">Define <strong>armature reaction</strong>. When does it occur and what causes it?</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Reveal Answer</button>
+      <div class="pq-answer">
+        <p>Armature reaction is the effect of the magnetic field produced by armature current on the main (stator) field flux of a DC machine.</p>
+        <p>It occurs whenever current flows through the armature conductors — that is, whenever the machine is under load. The armature current creates its own magnetic field. This armature field interacts with the main field produced by the poles, distorting and in some cases weakening it. The result is a combined field that is neither purely the main field nor purely the armature field, but a distorted combination of both.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q12 THEORY -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num theory">Q 12 · Theory</span>
+      <span class="pq-title">Two Adverse Effects of Armature Reaction</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">State and explain the <strong>two adverse effects</strong> of armature reaction on a DC machine.</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Reveal Answer</button>
+      <div class="pq-answer">
+        <p><strong>1. Weakening of Main Flux (Demagnetisation)</strong></p>
+        <p>The armature mmf has a component that directly opposes the main field mmf. This reduces the total flux in the machine. In a generator, reduced flux means a lower generated emf. In a motor, it means reduced torque. This weakening effect worsens as load current increases.</p>
+        <p><strong>2. Distortion of Main Flux (Cross-Magnetisation)</strong></p>
+        <p>The armature mmf also has a component acting at right angles to the main field — this is the cross-magnetising effect. It distorts the flux distribution across the pole face, making the field stronger under one half of each pole and weaker under the other. The practical consequence is a shift in the Magnetic Neutral Axis (MNA) away from its no-load position, which causes poor commutation and sparking at the brushes.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q13 THEORY -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num theory">Q 13 · Theory</span>
+      <span class="pq-title">MNA vs GNA</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">Differentiate between the <strong>Magnetic Neutral Axis (MNA)</strong> and the <strong>Geometrical Neutral Axis (GNA)</strong>.</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Reveal Answer</button>
+      <div class="pq-answer">
+        <table>
+          <tr><th>MNA</th><th>GNA</th></tr>
+          <tr><td>The axis along which no emf is induced in the armature conductors</td><td>The fixed geometrical axis perpendicular to the stator field axis</td></tr>
+          <tr><td>Brushes are placed on it for sparkless commutation</td><td>Brushes would ideally be placed here at no-load</td></tr>
+          <tr><td><strong>Shifts position</strong> due to armature reaction under load</td><td>Remains fixed regardless of load or armature reaction</td></tr>
+          <tr><td>Moves in the direction of rotation (generator) or against (motor)</td><td>Independent of machine operation</td></tr>
+        </table>
+        <p>At no load, MNA and GNA coincide. Under load, armature reaction pushes the MNA away from the GNA — this misalignment causes the coil undergoing commutation to have a net emf in it, leading to sparking.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q14 THEORY -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num theory">Q 14 · Theory</span>
+      <span class="pq-title">Demagnetising vs Cross-Magnetising Conductors</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">Compare <strong>demagnetising conductors</strong> and <strong>cross-magnetising conductors</strong> in terms of their position and effect on the main field.</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Reveal Answer</button>
+      <div class="pq-answer">
+        <table>
+          <tr><th>Demagnetising Conductors</th><th>Cross-Magnetising Conductors</th></tr>
+          <tr><td>Located near the Geometrical Neutral Axis (GNA)</td><td>Located under the pole faces (sides of the armature)</td></tr>
+          <tr><td>Current directly opposes the main field mmf</td><td>Current acts at 90° to the main field mmf</td></tr>
+          <tr><td>Reduce total flux in the machine</td><td>Distort the flux distribution — strengthen one side, weaken the other</td></tr>
+          <tr><td>Cause a drop in generated emf or torque</td><td>Cause MNA shift and poor commutation</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q15 THEORY -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num theory">Q 15 · Theory</span>
+      <span class="pq-title">Compensating Windings</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">Explain how <strong>compensating windings</strong> reduce armature reaction. Where are they located and how do they work?</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Reveal Answer</button>
+      <div class="pq-answer">
+        <p>Compensating windings are conductors embedded in slots cut into the pole faces of the main poles. They are connected in series with the armature winding and carry armature current.</p>
+        <p>Because they carry the same current as the armature but are positioned directly opposite the armature conductors under the pole faces, they produce an mmf that is <strong>equal and opposite</strong> to the cross-magnetising component of the armature mmf. The two cancel each other out.</p>
+        <p>The result is that flux distortion under the pole face is eliminated or greatly reduced, the MNA shift is minimised, and commutation improves significantly. Compensating windings are especially important in machines that experience large and rapid variations in load current.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q16 THEORY -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num theory">Q 16 · Theory</span>
+      <span class="pq-title">Compensating Windings vs Interpoles</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">Differentiate between <strong>compensating windings</strong> and <strong>interpoles</strong> in terms of location, function, and purpose.</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Reveal Answer</button>
+      <div class="pq-answer">
+        <table>
+          <tr><th>Compensating Winding</th><th>Interpole (Commutating Pole)</th></tr>
+          <tr><td>Located in slots under the <strong>main pole faces</strong></td><td>Located <strong>between the main poles</strong> in the interpolar space</td></tr>
+          <tr><td>Produces an opposing mmf that cancels cross-magnetising armature mmf</td><td>Produces a localised reversing emf in the coil undergoing commutation</td></tr>
+          <tr><td>Primarily corrects <strong>flux distortion</strong> across the pole face</td><td>Primarily improves <strong>commutation</strong> by neutralising reactance voltage</td></tr>
+          <tr><td>Addresses the cause of armature reaction</td><td>Addresses the effect of armature reaction at the brush zone</td></tr>
+        </table>
+        <p>Both are connected in series with the armature. In large machines, both are used together — compensating windings tackle the bulk of armature reaction under the poles, while interpoles handle the commutation zone specifically.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q17 THEORY -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num theory">Q 17 · Theory</span>
+      <span class="pq-title">Commutation — Definition and Importance</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">Define <strong>commutation</strong>. Why is it important in DC machines? What happens if commutation is poor?</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Reveal Answer</button>
+      <div class="pq-answer">
+        <p>Commutation is the process of reversing the direction of current in an armature coil as it passes through the interpolar region (the region between the main poles), facilitated by the brushes and commutator segments.</p>
+        <p><strong>Why it matters:</strong> DC machines require that the current in each armature coil reverses every half-revolution to maintain a unidirectional output (in generators) or torque in a consistent direction (in motors). Commutation is the mechanism that achieves this reversal.</p>
+        <p><strong>If commutation is poor:</strong> the current reversal is not smooth — a residual emf (reactance voltage) remains in the coil at the moment of switching. This causes arcing and sparking at the brushes. Consequences include: brush wear and damage, commutator pitting and erosion, excessive heat, reduced machine efficiency, and ultimately machine failure if left uncorrected.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q18 THEORY -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num theory">Q 18 · Theory</span>
+      <span class="pq-title">Resistance Commutation vs EMF Commutation</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">Compare <strong>resistance commutation</strong> and <strong>EMF commutation</strong> as methods of improving commutation in DC machines.</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Reveal Answer</button>
+      <div class="pq-answer">
+        <p><strong>Resistance commutation</strong> uses high-resistance carbon brushes. Because the brush contact resistance is high, the current diverts gradually from one commutator segment to the next as the segment passes under the brush. This smooths the current reversal and reduces sparking. It works reasonably well for lightly loaded machines but does not fully eliminate the reactance voltage problem.</p>
+        <p><strong>EMF commutation</strong> uses interpoles (commutating poles). These small poles are placed between the main poles in the zone where commutation occurs. They generate a small localised emf that exactly opposes and neutralises the reactance voltage in the short-circuited coil. The result is truly sparkless commutation — current reversal is clean and complete. EMF commutation is far superior and is the standard method in modern DC machines.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q19 CALC -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num calc">Q 19 · Calculation</span>
+      <span class="pq-title">Series Generator — Find \(E_g\) and \(\eta\)</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">A series generator: \(V = 250\,\text{V}\), \(I_L = 40\,\text{A}\), \(R_a + R_f = 0.5\,\Omega\). Find \(E_g\) and \(\eta\).</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Show Solution</button>
+      <div class="pq-answer">
+        <p>In a series generator: \(I_a = I_f = I_L = 40\,\text{A}\)</p>
+        <p>\(E_g = V + I_a(R_a + R_f) = 250 + (40 \times 0.5) = 250 + 20\)</p>
+        <div class="ans-box">\(E_g = 270\,\text{V}\)</div>
+        <p style="margin-top:12px;">Since \(I_a = I_L\): &nbsp; \(\eta = \dfrac{V}{E_g} \times 100 = \dfrac{250}{270} \times 100\)</p>
+        <div class="ans-box">\(\eta = 92.59\%\)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q20 CALC -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num calc">Q 20 · Calculation</span>
+      <span class="pq-title">Long Shunt Compound — Full Solution</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">
+        A long shunt compound generator supplies \(250\,\text{V}\) at \(100\,\text{A}\). \(R_a = 0.05\,\Omega\), \(R_{ss} = 0.02\,\Omega\), \(R_{sh} = 125\,\Omega\). Find \(I_{sh}\), \(I_a\), \(E_g\), and \(\eta\).
+      </div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Show Solution</button>
+      <div class="pq-answer">
+        <p>\(I_{sh} = \dfrac{250}{125} = 2\,\text{A}\)</p>
+        <p>\(I_a = I_L + I_{sh} = 100 + 2 = 102\,\text{A}\)</p>
+        <p>\(E_g = 250 + (102 \times 0.05) + (102 \times 0.02) = 250 + 5.1 + 2.04\)</p>
+        <div class="ans-box">\(E_g = 257.14\,\text{V}\)</div>
+        <p style="margin-top:12px;">\(P_i = 257.14 \times 102 = 26\,228.28\,\text{W}\) &nbsp;|&nbsp; \(P_o = 250 \times 100 = 25\,000\,\text{W}\)</p>
+        <div class="ans-box">\(\eta = 95.32\%\)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PULSE CHECK 2 -->
+  <div class="pulse-check">
+    <div class="pc-title">Pulse Check ②</div>
+    <div class="pc-sub">End of Armature Reaction section — no grade, just a check.</div>
+    <div class="pc-question">
+      <div class="pc-q-text">What is the primary purpose of interpoles in a DC machine?</div>
+      <div class="pc-options" id="pc2-opts">
+        <div class="pc-option" onclick="pcAnswer(this,'pc2',false)"><span class="pc-letter">A</span> To increase the total flux produced by the main poles</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc2',false)"><span class="pc-letter">B</span> To cancel the demagnetising effect of armature reaction under the pole faces</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc2',true)"><span class="pc-letter">C</span> To neutralise the reactance voltage in the commutating coil and improve commutation</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc2',false)"><span class="pc-letter">D</span> To reduce armature resistance and copper losses</div>
+      </div>
+      <div class="pc-feedback" id="pc2-fb"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SECTION C: DC MOTORS
+  ══════════════════════════════════════════ -->
+  <div class="section-label">Section C</div>
+  <div class="section-title">DC Motors</div>
+
+  <!-- Q21 THEORY -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num theory">Q 21 · Theory</span>
+      <span class="pq-title">Working Principle of a DC Motor</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">Explain the working principle of a DC motor <strong>from the moment supply is applied until rotation occurs</strong>. Include the relevant laws.</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Reveal Answer</button>
+      <div class="pq-answer">
+        <p>1. A DC supply voltage is applied across the armature terminals.</p>
+        <p>2. Current flows through the armature conductors.</p>
+        <p>3. Each current-carrying armature conductor produces its own magnetic field around it (by Ampere's Law).</p>
+        <p>4. The main poles (field winding or permanent magnets) produce a separate, steady magnetic field \(F_m\) across the air gap.</p>
+        <p>5. The interaction between the armature field \(F_c\) and the main field \(F_m\) produces a mechanical force on each armature conductor. The direction of this force is given by the <strong>Lorentz force law</strong> and practically determined using <strong>Fleming's Left-Hand Rule</strong> — First finger: field direction; seCond finger: current direction; thuMb: direction of motion.</p>
+        <p>6. Because the forces on conductors under opposite poles act in the same rotational direction, they combine to produce a net <strong>torque</strong> on the armature.</p>
+        <p>7. The armature begins to rotate, converting electrical energy into mechanical energy.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q22 THEORY -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num theory">Q 22 · Theory</span>
+      <span class="pq-title">Significance of Back EMF</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">Explain the significance of <strong>back emf</strong> in a DC motor. What would happen if back emf did not exist?</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Reveal Answer</button>
+      <div class="pq-answer">
+        <p>Back emf (also called counter emf) is the emf induced in the rotating armature due to its conductors cutting through the main magnetic field — exactly as in a generator. By Lenz's Law, it opposes the supply voltage that caused the rotation.</p>
+        <p>Its significance:</p>
+        <ul>
+          <li><strong>It limits armature current automatically.</strong> The effective voltage driving current through the armature is \(V - E_b\), not \(V\). As the motor speeds up, \(E_b\) increases, reducing armature current.</li>
+          <li><strong>It acts as a self-regulating mechanism.</strong> If load increases, the motor slows down, \(E_b\) drops, \(I_a\) rises, torque increases to match the load — automatically.</li>
+          <li><strong>It protects the armature winding</strong> from overheating due to excessive current.</li>
+          <li><strong>It controls speed:</strong> the steady-state speed is largely determined by the back emf magnitude.</li>
+        </ul>
+        <p><strong>Without back emf:</strong> at the instant of switching on, the full supply voltage would drive current through only the armature resistance \(R_a\), which is very small. The resulting current \(V/R_a\) would be enormous — enough to burn the windings and damage the machine within seconds. This is why DC motors require a starting resistance at startup, before sufficient back emf has built up.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q23 CALC -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num calc">Q 23 · Calculation</span>
+      <span class="pq-title">DC Motor — Back EMF and Mechanical Power</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">
+        A DC motor: \(V = 240\,\text{V}\), \(I_a = 30\,\text{A}\), \(R_a = 0.4\,\Omega\). Find:
+        <ul><li>a) Back emf \(E_b\)</li><li>b) Mechanical power \(P_m\)</li><li>c) Armature copper loss \(P_{cu}\)</li></ul>
+      </div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Show Solution</button>
+      <div class="pq-answer">
+        <p><strong>(a)</strong> \(E_b = V - I_a R_a = 240 - (30 \times 0.4) = 240 - 12\)</p>
+        <div class="ans-box">\(E_b = 228\,\text{V}\)</div>
+        <p style="margin-top:12px;"><strong>(b)</strong> \(P_m = E_b \cdot I_a = 228 \times 30\)</p>
+        <div class="ans-box">\(P_m = 6\,840\,\text{W}\)</div>
+        <p style="margin-top:12px;"><strong>(c)</strong> \(P_{cu} = I_a^2 R_a = 30^2 \times 0.4 = 900 \times 0.4\)</p>
+        <div class="ans-box">\(P_{cu} = 360\,\text{W}\)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q24 THEORY -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num theory">Q 24 · Theory</span>
+      <span class="pq-title">Derive the Power Equation of a DC Motor</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">Starting from the voltage equation \(V = E_b + I_a R_a\), derive the power equation of a DC motor and show that mechanical power developed is \(P_m = E_b I_a\).</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Reveal Answer</button>
+      <div class="pq-answer">
+        <p>Start with the voltage equation:</p>
+        <p>\(V = E_b + I_a R_a\)</p>
+        <p>Multiply every term by \(I_a\) to convert to a power equation:</p>
+        <p>\(V I_a = E_b I_a + I_a^2 R_a\)</p>
+        <p>Identify each term:</p>
+        <ul>
+          <li>\(V I_a\) = total electrical power input to the armature</li>
+          <li>\(I_a^2 R_a\) = armature copper loss (heat dissipated in \(R_a\))</li>
+          <li>\(E_b I_a\) = the remaining power — this must be the power converted to mechanical form</li>
+        </ul>
+        <p>Therefore:</p>
+        <p>\(P_m = E_b I_a = V I_a - I_a^2 R_a\)</p>
+        <p>This confirms that <strong>mechanical power developed equals the product of back emf and armature current</strong>. The armature copper loss is the only power lost in the armature circuit itself; everything else goes to the shaft.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q25 THEORY -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num theory">Q 25 · Theory</span>
+      <span class="pq-title">Derive the Condition for Maximum Power Output</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">Derive the condition for maximum mechanical power output of a DC motor and prove that at maximum power, \(E_b = V/2\).</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Reveal Answer</button>
+      <div class="pq-answer">
+        <p>From the armature circuit: \(I_a = \dfrac{V - E_b}{R_a}\)</p>
+        <p>Mechanical power: \(P_m = E_b I_a = E_b \cdot \dfrac{V - E_b}{R_a} = \dfrac{V E_b - E_b^2}{R_a}\)</p>
+        <p>To find the maximum, differentiate \(P_m\) with respect to \(E_b\) and set the derivative to zero:</p>
+        <p>\(\dfrac{dP_m}{dE_b} = \dfrac{V - 2E_b}{R_a} = 0\)</p>
+        <p>Solving:</p>
+        <p>\(V - 2E_b = 0 \implies 2E_b = V \implies E_b = \dfrac{V}{2}\)</p>
+        <p>Therefore maximum mechanical power occurs when back emf equals half the supply voltage. At this point, armature current \(I_a = V / (2R_a)\) — which is very large, making this a theoretical limit rather than a practical operating point.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q26 CALC -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num calc">Q 26 · Calculation</span>
+      <span class="pq-title">Maximum Power Condition</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">
+        A DC motor: \(V = 240\,\text{V}\), \(R_a = 0.5\,\Omega\). Find:
+        <ul><li>a) Back emf at maximum power</li><li>b) Armature current at maximum power</li></ul>
+      </div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Show Solution</button>
+      <div class="pq-answer">
+        <p><strong>(a)</strong> At maximum power: \(E_b = \dfrac{V}{2} = \dfrac{240}{2}\)</p>
+        <div class="ans-box">\(E_b = 120\,\text{V}\)</div>
+        <p style="margin-top:12px;"><strong>(b)</strong> \(I_a = \dfrac{V}{2R_a} = \dfrac{240}{2 \times 0.5} = \dfrac{240}{1}\)</p>
+        <div class="ans-box">\(I_a = 240\,\text{A}\)</div>
+        <p style="margin-top:8px; font-size:12px; color: var(--text3);">This extremely high current explains why maximum power is a theoretical condition — in practice a motor is never run at this point.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q27 CALC -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num calc">Q 27 · Calculation</span>
+      <span class="pq-title">Force on a Current-Carrying Conductor</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">
+        Two conductors are placed in a magnetic field. Find the force on each:
+        <ul>
+          <li>a) \(B = 0.8\,\text{T}\), \(I = 15\,\text{A}\), \(L = 0.5\,\text{m}\)</li>
+          <li>b) \(B = 1.2\,\text{T}\), \(I = 20\,\text{A}\), \(L = 0.4\,\text{m}\)</li>
+        </ul>
+      </div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Show Solution</button>
+      <div class="pq-answer">
+        <p>Using \(F = BIL\):</p>
+        <p><strong>(a)</strong> \(F = 0.8 \times 15 \times 0.5\)</p>
+        <div class="ans-box">\(F = 6\,\text{N}\)</div>
+        <p style="margin-top:12px;"><strong>(b)</strong> \(F = 1.2 \times 20 \times 0.4\)</p>
+        <div class="ans-box">\(F = 9.6\,\text{N}\)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q28 THEORY -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num theory">Q 28 · Theory</span>
+      <span class="pq-title">Fleming's Left-Hand Rule</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">Using <strong>Fleming's Left-Hand Rule</strong>, explain how the direction of force on a current-carrying conductor in a magnetic field is determined. Which fingers represent which quantities?</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Reveal Answer</button>
+      <div class="pq-answer">
+        <p>Fleming's Left-Hand Rule applies to motors — it determines the direction of mechanical force (motion) on a conductor carrying current in a magnetic field.</p>
+        <p>Hold the left hand with the thumb, index finger, and middle finger mutually perpendicular to each other:</p>
+        <ul>
+          <li><strong>First (index) finger</strong> → direction of the magnetic <strong>Field</strong> (from N to S pole)</li>
+          <li><strong>seCond (middle) finger</strong> → direction of conventional <strong>Current</strong> flow in the conductor</li>
+          <li><strong>thuMb</strong> → direction of the resulting <strong>Motion</strong> (force on the conductor)</li>
+        </ul>
+        <p>The mnemonic is <strong>FBI</strong> — Force, B (field), Current — mapped to thumb, first finger, second finger respectively. As long as any two directions are known, the third can be found.</p>
+        <p>Note: Fleming's Right-Hand Rule applies to <em>generators</em> — it gives the direction of induced emf when a conductor moves in a field.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q29 CALC -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num calc">Q 29 · Calculation</span>
+      <span class="pq-title">Shunt Generator — Mixed Practice</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">
+        A shunt generator delivers \(220\,\text{V}\) at \(50\,\text{A}\). \(R_{sh} = 110\,\Omega\), \(R_a = 0.2\,\Omega\). Find \(I_{sh}\), \(I_a\), \(E_g\), and efficiency.
+      </div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Show Solution</button>
+      <div class="pq-answer">
+        <p>\(I_{sh} = \dfrac{220}{110} = 2\,\text{A}\)</p>
+        <p>\(I_a = 50 + 2 = 52\,\text{A}\)</p>
+        <p>\(E_g = 220 + (52 \times 0.2) = 220 + 10.4\)</p>
+        <div class="ans-box">\(E_g = 230.4\,\text{V}\)</div>
+        <p style="margin-top:12px;">\(P_i = 230.4 \times 52 = 11\,980.8\,\text{W}\) &nbsp;|&nbsp; \(P_o = 220 \times 50 = 11\,000\,\text{W}\)</p>
+        <div class="ans-box">\(\eta = 91.82\%\)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q30 THEORY -->
+  <div class="pq">
+    <div class="pq-header">
+      <span class="pq-num theory">Q 30 · Theory</span>
+      <span class="pq-title">DC Motor vs DC Generator — Core Distinction</span>
+    </div>
+    <div class="pq-body">
+      <div class="pq-q">A DC machine can function as both a motor and a generator. Explain the <strong>fundamental difference</strong> in energy conversion between the two modes and state which law governs each.</div>
+      <button class="reveal-btn" onclick="togglePQ(this)">Reveal Answer</button>
+      <div class="pq-answer">
+        <p><strong>DC Generator — Electrical energy from mechanical energy:</strong> a prime mover (engine, turbine) rotates the armature conductors through the magnetic field. By Faraday's Law of Electromagnetic Induction, the relative motion between conductors and flux induces an emf in the armature. When a load is connected, current flows and electrical power is delivered. The governing principle is <em>Faraday's Law</em> — a changing flux linkage induces emf.</p>
+        <p><strong>DC Motor — Mechanical energy from electrical energy:</strong> a DC supply drives current through the armature conductors which sit in a magnetic field. By the <em>Lorentz force law</em> (practically applied using Fleming's Left-Hand Rule), a mechanical force acts on each conductor. The combined forces produce a torque, rotating the armature and delivering mechanical power to the shaft.</p>
+        <p>Both effects coexist in either mode — a generator has back-torque opposing its rotation, and a motor develops back-emf opposing its supply. The machine is always performing both conversions simultaneously; the dominant direction of power flow is what determines whether it is operating as a motor or a generator.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PULSE CHECK 3 -->
+  <div class="pulse-check">
+    <div class="pc-title">Pulse Check ③</div>
+    <div class="pc-sub">End of DC Motors section — no grade, just a check.</div>
+    <div class="pc-question">
+      <div class="pc-q-text">A DC motor has \(V = 200\,\text{V}\), \(I_a = 20\,\text{A}\), \(R_a = 0.5\,\Omega\). What is the mechanical power developed?</div>
+      <div class="pc-options" id="pc3-opts">
+        <div class="pc-option" onclick="pcAnswer(this,'pc3',false)"><span class="pc-letter">A</span> 4000 W</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc3',false)"><span class="pc-letter">B</span> 200 W</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc3',true)"><span class="pc-letter">C</span> 3800 W</div>
+        <div class="pc-option" onclick="pcAnswer(this,'pc3',false)"><span class="pc-letter">D</span> 3600 W</div>
+      </div>
+      <div class="pc-feedback" id="pc3-fb"></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ══════════════════════════════════════════
+       FINAL QUIZ
+  ══════════════════════════════════════════ -->
+  <div class="eoq" id="eoq-section">
+    <div class="eoq-eyebrow">ECE 316 · PQ Bank</div>
+    <div class="eoq-title">Final Quiz</div>
+    <div class="eoq-sub">10 questions — score 6/10 (60%) to pass · One attempt</div>
+
+    <div class="eoq-question" data-q="1" data-type="mcq" data-correct="B">
+      <div class="eoq-qnum">Question 01</div>
+      <div class="eoq-q-text">Excitation in a DC generator refers to:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,1,'A')"><span class="eoq-letter">A</span> The process of rotating the armature at full speed</div>
+        <div class="eoq-option" onclick="eoqSelect(this,1,'B')"><span class="eoq-letter">B</span> The process of producing magnetic flux by passing current through the field winding</div>
+        <div class="eoq-option" onclick="eoqSelect(this,1,'C')"><span class="eoq-letter">C</span> The process of connecting the generator to a load</div>
+        <div class="eoq-option" onclick="eoqSelect(this,1,'D')"><span class="eoq-letter">D</span> The process of inducing emf in the armature conductors</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-1"></div>
+    </div>
+
+    <div class="eoq-question" data-q="2" data-type="mcq" data-correct="C">
+      <div class="eoq-qnum">Question 02</div>
+      <div class="eoq-q-text">A shunt generator has \(V = 200\,\text{V}\), \(R_{sh} = 50\,\Omega\), \(I_L = 40\,\text{A}\), \(R_a = 0.1\,\Omega\). What is \(E_g\)?</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,2,'A')"><span class="eoq-letter">A</span> 200 V</div>
+        <div class="eoq-option" onclick="eoqSelect(this,2,'B')"><span class="eoq-letter">B</span> 204 V</div>
+        <div class="eoq-option" onclick="eoqSelect(this,2,'C')"><span class="eoq-letter">C</span> 204.2 V</div>
+        <div class="eoq-option" onclick="eoqSelect(this,2,'D')"><span class="eoq-letter">D</span> 202 V</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-2"></div>
+    </div>
+
+    <div class="eoq-question" data-q="3" data-type="mcq" data-correct="A">
+      <div class="eoq-qnum">Question 03</div>
+      <div class="eoq-q-text">Armature reaction causes the MNA to:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,3,'A')"><span class="eoq-letter">A</span> Shift away from the GNA</div>
+        <div class="eoq-option" onclick="eoqSelect(this,3,'B')"><span class="eoq-letter">B</span> Permanently coincide with the GNA</div>
+        <div class="eoq-option" onclick="eoqSelect(this,3,'C')"><span class="eoq-letter">C</span> Strengthen the main field flux</div>
+        <div class="eoq-option" onclick="eoqSelect(this,3,'D')"><span class="eoq-letter">D</span> Reduce the load current</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-3"></div>
+    </div>
+
+    <div class="eoq-question" data-q="4" data-type="mcq" data-correct="D">
+      <div class="eoq-qnum">Question 04</div>
+      <div class="eoq-q-text">Compensating windings are located:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,4,'A')"><span class="eoq-letter">A</span> Between the main poles in the interpolar space</div>
+        <div class="eoq-option" onclick="eoqSelect(this,4,'B')"><span class="eoq-letter">C</span> On the commutator segments</div>
+        <div class="eoq-option" onclick="eoqSelect(this,4,'C')"><span class="eoq-letter">B</span> On the armature slots near the GNA</div>
+        <div class="eoq-option" onclick="eoqSelect(this,4,'D')"><span class="eoq-letter">D</span> In slots cut into the main pole faces</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-4"></div>
+    </div>
+
+    <div class="eoq-question" data-q="5" data-type="mcq" data-correct="B">
+      <div class="eoq-qnum">Question 05</div>
+      <div class="eoq-q-text">A DC motor has \(V = 220\,\text{V}\), \(I_a = 20\,\text{A}\), \(R_a = 0.5\,\Omega\). What is the back emf?</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,5,'A')"><span class="eoq-letter">A</span> 220 V</div>
+        <div class="eoq-option" onclick="eoqSelect(this,5,'B')"><span class="eoq-letter">B</span> 210 V</div>
+        <div class="eoq-option" onclick="eoqSelect(this,5,'C')"><span class="eoq-letter">C</span> 230 V</div>
+        <div class="eoq-option" onclick="eoqSelect(this,5,'D')"><span class="eoq-letter">D</span> 200 V</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-5"></div>
+    </div>
+
+    <div class="eoq-question" data-q="6" data-type="mcq" data-correct="C">
+      <div class="eoq-qnum">Question 06</div>
+      <div class="eoq-q-text">Mechanical power developed in a DC motor is given by:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,6,'A')"><span class="eoq-letter">A</span> \(P_m = V \cdot I_a\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,6,'B')"><span class="eoq-letter">B</span> \(P_m = I_a^2 R_a\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,6,'C')"><span class="eoq-letter">C</span> \(P_m = E_b \cdot I_a\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,6,'D')"><span class="eoq-letter">D</span> \(P_m = V \cdot I_L\)</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-6"></div>
+    </div>
+
+    <div class="eoq-question" data-q="7" data-type="mcq" data-correct="A">
+      <div class="eoq-qnum">Question 07</div>
+      <div class="eoq-q-text">At maximum power output of a DC motor, the back emf equals:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,7,'A')"><span class="eoq-letter">A</span> \(V/2\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,7,'B')"><span class="eoq-letter">B</span> \(V\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,7,'C')"><span class="eoq-letter">C</span> \(2V\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,7,'D')"><span class="eoq-letter">D</span> Zero</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-7"></div>
+    </div>
+
+    <div class="eoq-question" data-q="8" data-type="mcq" data-correct="B">
+      <div class="eoq-qnum">Question 08</div>
+      <div class="eoq-q-text">A conductor of length \(0.3\,\text{m}\) carries \(20\,\text{A}\) in a field of \(1.5\,\text{T}\). The force on it is:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,8,'A')"><span class="eoq-letter">A</span> 6 N</div>
+        <div class="eoq-option" onclick="eoqSelect(this,8,'B')"><span class="eoq-letter">B</span> 9 N</div>
+        <div class="eoq-option" onclick="eoqSelect(this,8,'C')"><span class="eoq-letter">C</span> 3 N</div>
+        <div class="eoq-option" onclick="eoqSelect(this,8,'D')"><span class="eoq-letter">D</span> 12 N</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-8"></div>
+    </div>
+
+    <div class="eoq-question" data-q="9" data-type="mcq" data-correct="D">
+      <div class="eoq-qnum">Question 09</div>
+      <div class="eoq-q-text">In a differentially compounded DC generator, as load increases:</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,9,'A')"><span class="eoq-letter">A</span> Terminal voltage increases steadily</div>
+        <div class="eoq-option" onclick="eoqSelect(this,9,'B')"><span class="eoq-letter">B</span> Terminal voltage remains constant</div>
+        <div class="eoq-option" onclick="eoqSelect(this,9,'C')"><span class="eoq-letter">C</span> Total flux increases because both fields aid each other</div>
+        <div class="eoq-option" onclick="eoqSelect(this,9,'D')"><span class="eoq-letter">D</span> Total flux decreases and terminal voltage falls rapidly</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-9"></div>
+    </div>
+
+    <div class="eoq-question" data-q="10" data-type="mcq" data-correct="C">
+      <div class="eoq-qnum">Question 10</div>
+      <div class="eoq-q-text">In a series generator, which of the following is true?</div>
+      <div class="eoq-options">
+        <div class="eoq-option" onclick="eoqSelect(this,10,'A')"><span class="eoq-letter">A</span> The field winding is in parallel with the armature</div>
+        <div class="eoq-option" onclick="eoqSelect(this,10,'B')"><span class="eoq-letter">B</span> \(I_a = I_L + I_f\)</div>
+        <div class="eoq-option" onclick="eoqSelect(this,10,'C')"><span class="eoq-letter">C</span> \(I_a = I_f = I_L\) and the field winding carries full load current</div>
+        <div class="eoq-option" onclick="eoqSelect(this,10,'D')"><span class="eoq-letter">D</span> The field winding has high resistance and many turns of fine wire</div>
+      </div>
+      <div class="eoq-feedback" id="eoq-fb-10"></div>
+    </div>
+
+    <button class="eoq-submit" id="eoq-submit-btn" onclick="eoqSubmit()">Submit Quiz</button>
+
+    <div class="eoq-result" id="eoq-result">
+      <div class="result-score" id="result-score"></div>
+      <div id="result-pill"></div>
+      <div class="result-msg" id="result-msg"></div>
+      <div id="result-extra"></div>
+    </div>
+  </div>
+
+</div><!-- .wrapper -->
+
+<script>
+// ─── DARK MODE ────────────────────────────────────────────────────────────────
+function toggleDark() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('dark-toggle').textContent = isDark ? '🌙' : '☀️';
+}
+
+// ─── SCROLL PROGRESS ─────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const scrollTop = window.scrollY;
+  const docHeight = document.body.scrollHeight - window.innerHeight;
+  const pct = Math.min(100, (scrollTop / docHeight) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  const t = document.getElementById('tracker-text');
+  if (pct < 5) t.textContent = 'Scroll to begin';
+  else if (pct < 38) t.textContent = 'Section A — Generators';
+  else if (pct < 65) t.textContent = 'Section B — Armature Reaction';
+  else if (pct < 88) t.textContent = 'Section C — Motors';
+  else t.textContent = 'Final Quiz';
+});
+
+// ─── TOGGLE PQ ANSWER ────────────────────────────────────────────────────────
+function togglePQ(btn) {
+  const ans = btn.nextElementSibling;
+  const open = ans.classList.contains('show');
+  ans.classList.toggle('show', !open);
+  btn.textContent = open ? 'Reveal Answer' : 'Hide Answer';
+  if (btn.classList.contains('reveal-btn')) {
+    // calc buttons say "Show/Hide Solution"
+    if (btn.textContent === 'Reveal Answer') btn.textContent = 'Show Solution';
+  }
+  btn.classList.toggle('open', !open);
+}
+
+// ─── PULSE CHECK ─────────────────────────────────────────────────────────────
+function pcAnswer(el, groupId, isCorrect) {
+  if (el.classList.contains('correct') || el.classList.contains('wrong')) return;
+  document.getElementById(groupId + '-opts').querySelectorAll('.pc-option').forEach(o => o.style.pointerEvents = 'none');
+  el.classList.add(isCorrect ? 'correct' : 'wrong');
+  const fb = document.getElementById(groupId + '-fb');
+  fb.style.display = 'block';
+  fb.textContent = isCorrect ? '✓ Correct.' : '✗ Not quite — review the relevant question above.';
+}
+
+// ─── FINAL QUIZ ───────────────────────────────────────────────────────────────
+const totalQ = 10;
+const eoqAnswers = {};
+const eoqLocked = {};
+
+const eoqFeedbacks = {
+  1: { correct: "Correct. Excitation = producing flux by running current through the field winding.", wrong: "Incorrect. Excitation is specifically about producing the magnetic flux via the field winding current — not rotation, connection, or induction." },
+  2: { correct: "Correct. \\(I_{sh} = 200/50 = 4\\,\\text{A}\\); \\(I_a = 40+4 = 44\\,\\text{A}\\); \\(E_g = 200 + (44 \\times 0.1) = 204.4 \\approx 204.4\\,\\text{V}\\). Closest is 204.2 — accept 204.4 as the precise answer.", wrong: "Incorrect. \\(I_{sh} = 200/50 = 4\\,\\text{A}\\), \\(I_a = 44\\,\\text{A}\\), \\(E_g = 200 + 4.4 = 204.4\\,\\text{V}\\)." },
+  3: { correct: "Correct. Armature reaction distorts the field and shifts the MNA away from the GNA.", wrong: "Incorrect. The MNA shifts away from the GNA due to armature reaction — it does not stay fixed." },
+  4: { correct: "Correct. Compensating windings sit in slots cut directly into the main pole faces.", wrong: "Incorrect. Compensating windings are in the pole faces. Interpoles are between the poles — don't confuse the two." },
+  5: { correct: "Correct. \\(E_b = V - I_aR_a = 220 - (20 \\times 0.5) = 210\\,\\text{V}\\).", wrong: "Incorrect. \\(E_b = V - I_aR_a = 220 - 10 = 210\\,\\text{V}\\)." },
+  6: { correct: "Correct. \\(P_m = E_b \\cdot I_a\\) — the product of back emf and armature current.", wrong: "Incorrect. \\(P_m = E_b \\cdot I_a\\). The \\(I_a^2 R_a\\) term is copper loss — heat, not mechanical output." },
+  7: { correct: "Correct. Maximum power occurs when \\(E_b = V/2\\), derived by differentiating \\(P_m\\) w.r.t. \\(E_b\\).", wrong: "Incorrect. Differentiate \\(P_m = E_b(V-E_b)/R_a\\) — setting \\(dP_m/dE_b = 0\\) gives \\(E_b = V/2\\)." },
+  8: { correct: "Correct. \\(F = BIL = 1.5 \\times 20 \\times 0.3 = 9\\,\\text{N}\\).", wrong: "Incorrect. \\(F = BIL = 1.5 \\times 20 \\times 0.3 = 9\\,\\text{N}\\)." },
+  9: { correct: "Correct. In differential compounding, series flux opposes shunt flux — net flux and voltage drop rapidly with load.", wrong: "Incorrect. Differential compounding means the series field opposes the shunt field, reducing total flux and causing terminal voltage to fall steeply." },
+  10: { correct: "Correct. In a series generator the field winding is in series — all three currents are equal and the field carries full load current.", wrong: "Incorrect. In a series generator \\(I_a = I_f = I_L\\). The field has low resistance and few turns of thick wire — not the other way round." }
+};
+
+function eoqSelect(el, qNum, choice) {
+  if (eoqLocked[qNum]) return;
+  el.closest('.eoq-question').querySelectorAll('.eoq-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  eoqAnswers[qNum] = choice;
+}
+
+function eoqSubmit() {
+  let score = 0;
+  document.querySelectorAll('.eoq-question').forEach(q => {
+    const qNum = parseInt(q.getAttribute('data-q'));
+    const correct = q.getAttribute('data-correct');
+    const selected = eoqAnswers[qNum];
+    const isCorrect = selected === correct;
+    if (isCorrect) score++;
+    eoqLocked[qNum] = true;
+    q.querySelectorAll('.eoq-option').forEach(o => {
+      o.classList.add('locked');
+      const ltr = o.querySelector('.eoq-letter').textContent.trim();
+      if (ltr === correct) o.classList.add('correct-reveal');
+      else if (ltr === selected && !isCorrect) o.classList.add('wrong-reveal');
+    });
+    const fb = document.getElementById('eoq-fb-' + qNum);
+    fb.style.display = 'block';
+    fb.className = 'eoq-feedback ' + (isCorrect ? 'correct-fb' : 'wrong-fb');
+    fb.textContent = (isCorrect ? '✓ ' : '✗ ') + eoqFeedbacks[qNum][isCorrect ? 'correct' : 'wrong'];
+  });
+
+  document.getElementById('eoq-submit-btn').disabled = true;
+  const pct = Math.round((score / totalQ) * 100);
+  const passed = pct >= 60;
+  const result = document.getElementById('eoq-result');
+  result.style.display = 'block';
+  result.className = 'eoq-result ' + (passed ? 'pass' : 'fail');
+  document.getElementById('result-score').textContent = score + '/' + totalQ;
+  document.getElementById('result-pill').innerHTML =
+    '<span class="result-pill ' + (passed ? 'pill-pass' : 'pill-fail') + '">' + pct + '% — ' + (passed ? 'PASSED' : 'NOT YET') + '</span>';
+
+  const topicMap = {
+    1:'Section A — Excitation & Classification', 2:'Section A — Shunt Generator Calculation',
+    3:'Section B — Armature Reaction (MNA)', 4:'Section B — Compensating Windings',
+    5:'Section C — Back EMF', 6:'Section C — Mechanical Power',
+    7:'Section C — Maximum Power Derivation', 8:'Section C — Force on Conductor',
+    9:'Section A — Differential Compounding', 10:'Section A — Series Generator'
+  };
+
+  const missed = [];
+  document.querySelectorAll('.eoq-question').forEach(q => {
+    const qNum = parseInt(q.getAttribute('data-q'));
+    if (eoqAnswers[qNum] !== q.getAttribute('data-correct')) missed.push(topicMap[qNum]);
+  });
+
+  document.getElementById('result-msg').textContent = passed
+    ? 'Good. You have command of the core theory and calculations across all three sections.'
+    : 'Not there yet. Go back through the questions you missed — the answers are all in the worked examples above.';
+
+  document.getElementById('result-extra').innerHTML = passed
+    ? '<div class="unlock-banner">✓ All 30 done. Now attempt past exam questions under timed conditions.</div>'
+    : '<div class="review-nudge"><p>Topics to revisit:</p><ul>' + [...new Set(missed)].map(t => '<li>' + t + '</li>').join('') + '</ul></div>';
+
+  result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>
