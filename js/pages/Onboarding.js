@@ -15,7 +15,8 @@ const COURSES_300L = {
 
 function getAutoEnrolCourses(department, level) {
   if (level !== '300 Level') return [];
-  return COURSES_300L[department] || [];
+  const codes = COURSES_300L[department] || [];
+  return codes.map(code => ({ course: code, grade: '-', units: 3 }));
 }
 
 let currentUser = null;
