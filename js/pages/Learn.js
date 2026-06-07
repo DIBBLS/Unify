@@ -200,12 +200,17 @@ function renderNotesShadow(html) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(raw, 'text/html');
 
-  // Remove page chrome — nav, header, back/nav bars, week-nav strips
-  doc.querySelectorAll('nav, header, footer, script, .nav, .navbar, .header, .footer, .back-bar, .week-nav, .wk-nav-strip, [class*="nav-"], [class*="header-"], [id*="nav"], [id*="header"]')
+  // Strip only true navigation chrome — leave hero cards, topic pills, and content intact
+  doc.querySelectorAll('nav, footer, script, .back-bar, .week-nav, .wk-nav-strip')
      .forEach(el => el.remove());
 
-  // Prefer a semantic content container; fall back to full body
-  const main = doc.querySelector('main, article, [role="main"], .week-body, .week-block, .week-page, .main-content, .week-content, .lesson-content, .content-body, #content, #main');
+  // Prefer the full week block (includes dark hero card + body) over body-only containers
+  const main = doc.querySelector(
+    'main, article, [role="main"], ' +
+    '.week-block, .week-page, ' +          // full block incl. hero card — check these first
+    '.main-content, .week-content, .lesson-content, .content-body, ' +
+    '#content, #main, .week-body'          // body-only as last resort
+  );
   const contentEl = main || doc.body;
 
   // Collect any <style> blocks from the original document
@@ -214,7 +219,7 @@ function renderNotesShadow(html) {
   if (!host._shadow) host._shadow = host.attachShadow({ mode: 'open' });
   host._shadow.innerHTML = `
     <style>
-      :host { display: block; padding: 20px; font-family: system-ui, -apple-system, sans-serif;
+      :host { display: block; padding: 0; font-family: system-ui, -apple-system, sans-serif;
               color: #111827; font-size: 15px; line-height: 1.75; }
       * { box-sizing: border-box; max-width: 100%; }
       h1, h2, h3, h4 { margin-top: 1.3em; margin-bottom: 0.4em; line-height: 1.25; }
