@@ -744,18 +744,42 @@ function renderExamView() {
 
   const upcoming = [], past = [];
   examEntries.forEach(e => {
+    if (!e.course && !e.date) return; // skip blank rows
     const d = examDaysLeft(e.date);
     (d !== null && d < 0 ? past : upcoming).push(e);
   });
-  upcoming.sort((a, b) => new Date(a.date) - new Date(b.date));
+  // ISO dates (YYYY-MM-DD) sort correctly as strings — avoids NaN from new Date()
+  upcoming.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+  past.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
 
   let html = '';
 
-  if ('Notification' in window && Notification.permission === 'default') {
-    html += `<div class="exam-notif-bar">
-      <span>🔔</span>
-      <span>Get reminders before your exams</span>
-      <button onclick="enableExamNotifs()">Enable</button>
+  const notifSupported = 'Notification' in window;
+  const notifPerm = notifSupported ? Notification.permission : 'unsupported';
+  if (notifPerm === 'default') {
+    html += `<div class="exam-notif-card">
+      <div class="exam-notif-top">
+        <span class="exam-notif-icon">🔔</span>
+        <div>
+          <div class="exam-notif-title">Don't get caught off guard</div>
+          <div class="exam-notif-sub">Most students only panic when it's too late</div>
+        </div>
+      </div>
+      <div class="exam-notif-desc">
+        Turn on reminders and Unify will ping you <strong>3 days before</strong> each exam with your exact readiness score — so you know whether to relax or grind, not guess.
+      </div>
+      <button class="exam-notif-btn" onclick="enableExamNotifs()">Turn on exam reminders</button>
+    </div>`;
+  } else if (notifPerm === 'denied') {
+    html += `<div class="exam-notif-card exam-notif-muted">
+      <div class="exam-notif-top">
+        <span class="exam-notif-icon">🔕</span>
+        <div>
+          <div class="exam-notif-title">Reminders are blocked</div>
+          <div class="exam-notif-sub">You previously denied notification access</div>
+        </div>
+      </div>
+      <div class="exam-notif-desc">To get exam reminders, go to your browser settings and allow notifications for this site.</div>
     </div>`;
   }
 
@@ -818,7 +842,7 @@ function renderExamView() {
 
   if (past.length) {
     html += `<div class="exam-section-title" style="margin-top:28px;">Past Exams</div>`;
-    past.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(e => {
+    past.forEach(e => {
       const code = normCode(e.course || '');
       html += `<div class="exam-card exam-past">
         <div class="exam-card-header">

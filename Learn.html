@@ -440,18 +440,30 @@ body { max-width: 480px; margin: 0 auto; }
 .exam-btn:hover { opacity: 0.85; }
 .exam-btn-primary { background: var(--green); color: #fff; }
 .exam-btn-secondary { background: var(--surface); color: var(--text); border: 1.5px solid var(--border); }
-.exam-notif-bar {
-  background: var(--surface); border: 1.5px solid var(--border);
-  border-radius: 12px; padding: 12px 14px;
-  display: flex; align-items: center; gap: 10px;
-  margin-bottom: 4px; font-size: 13px; color: var(--text2);
+.exam-notif-card {
+  background: var(--surface); border: 1.5px solid var(--green);
+  border-radius: var(--radius); padding: 16px;
+  margin-bottom: 16px;
 }
-.exam-notif-bar button {
-  margin-left: auto; flex-shrink: 0;
+.exam-notif-card.exam-notif-muted { border-color: var(--border); }
+.exam-notif-top {
+  display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px;
+}
+.exam-notif-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
+.exam-notif-title { font-size: 14px; font-weight: 700; color: var(--text); }
+.exam-notif-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.exam-notif-desc {
+  font-size: 13px; color: var(--text2); line-height: 1.55;
+  margin-bottom: 14px;
+}
+.exam-notif-desc strong { color: var(--text); font-weight: 700; }
+.exam-notif-btn {
+  width: 100%; padding: 12px;
   background: var(--green); color: #fff; border: none;
-  border-radius: 8px; padding: 6px 12px;
-  font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
+  border-radius: 50px; font-size: 14px; font-weight: 700;
+  cursor: pointer; font-family: inherit; transition: opacity 0.15s;
 }
+.exam-notif-btn:hover { opacity: 0.88; }
 </style>
 </head>
 <body>
