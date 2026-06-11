@@ -1,441 +1,564 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="auto">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Unify — Access Codes</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/variables.css">
-  <link rel="stylesheet" href="css/base.css">
-  <script src="js/theme.js"></script>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#16a34a">
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
-  <script src="js/register-sw.js" defer></script>
-
-  <style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Unify — Access Codes</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
+<style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* ── TOPBAR ── */
-  .ac-nav {
-    position: sticky; top: 0; z-index: 100;
-    background: var(--bg); border-bottom: 1px solid var(--border);
-    height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 20px;
-  }
-  .ac-nav-logo {
-    font-family: var(--font-display); font-weight: 900; font-size: 18px;
-    letter-spacing: -0.5px; color: var(--text); text-decoration: none;
-  }
-  .ac-nav-logo span { color: var(--green); }
-  .ac-nav-back {
-    margin-left: auto; font-size: 13px; font-weight: 500; color: var(--text2);
-    text-decoration: none; padding: 6px 12px; border-radius: 8px;
-    border: 1px solid var(--border); background: var(--surface);
-    transition: border-color 0.15s, color 0.15s;
-  }
-  .ac-nav-back:hover { border-color: var(--text); color: var(--text); }
-  .ac-nav-theme {
-    width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border);
-    background: var(--surface); color: var(--text2); font-size: 14px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f8f7f3;
+    --border: #e0deda;
+    --text: #0a0a0a;
+    --text2: #555555;
+    --text3: #999999;
+    --green: #4ade80;
+    --green-deep: #16a34a;
+    --green-bg: rgba(74,222,128,0.1);
+    --fd: 'Playfair Display', serif;
+    --fb: 'DM Sans', sans-serif;
   }
 
-  /* ── LAYOUT ── */
-  .ac-wrap { max-width: 720px; margin: 0 auto; padding: 36px 20px 60px; }
-
-  .ac-hero { margin-bottom: 32px; }
-  .ac-hero-title {
-    font-family: var(--font-display); font-weight: 900; font-size: 28px;
-    letter-spacing: -0.5px; color: var(--text); margin-bottom: 6px;
+  body {
+    font-family: var(--fb);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
   }
-  .ac-hero-title span { color: var(--green); }
-  .ac-hero-sub { font-size: 14px; color: var(--text2); line-height: 1.6; }
 
-  /* ── TABS ── */
-  .ac-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
-  .ac-tab {
-    font-size: 13px; font-weight: 500; padding: 10px 20px; cursor: pointer;
-    border: none; background: none; color: var(--text3); border-bottom: 2px solid transparent;
-    font-family: var(--font-body); transition: color 0.15s, border-color 0.15s;
-  }
-  .ac-tab.active { color: var(--text); border-bottom-color: var(--green); }
+  /* ── Layout ── */
+  .wrap { max-width: 680px; margin: 0 auto; padding: 40px 20px 80px; }
 
-  /* ── CARD ── */
-  .ac-card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-    padding: 24px; margin-bottom: 16px;
+  /* ── Wordmark ── */
+  .wordmark {
+    font-family: var(--fd);
+    font-weight: 900;
+    font-size: 24px;
+    letter-spacing: -0.5px;
+    margin-bottom: 36px;
+    display: inline-block;
   }
-  .ac-card-title {
-    font-family: var(--font-display); font-weight: 700; font-size: 17px;
-    letter-spacing: -0.3px; margin-bottom: 4px; color: var(--text);
-  }
-  .ac-card-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; line-height: 1.5; }
+  .wordmark .dot { color: var(--green); }
 
-  /* ── FORM ── */
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+  }
+  .tab-btn {
+    font-family: var(--fb);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text3);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab-btn.active { color: var(--text); border-bottom-color: var(--green); }
+
+  /* ── Tab panels ── */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-family: var(--fd);
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+  }
+  .card-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; line-height: 1.5; }
+
+  /* ── Form ── */
   .form-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
-  .field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 140px; }
-  .field-label {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 1.5px; color: var(--text3);
+  .field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 130px; }
+  .field label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text3);
   }
-  .field-input, .field-select {
-    border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;
-    font-family: var(--font-body); font-size: 14px; color: var(--text);
-    background: var(--surface2); outline: none; width: 100%;
+  .field select,
+  .field input {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: var(--fb);
+    font-size: 14px;
+    color: var(--text);
+    background: var(--surface2);
+    outline: none;
+    width: 100%;
     transition: border-color 0.15s, background 0.15s;
+    appearance: none;
+    -webkit-appearance: none;
   }
-  .field-input:focus, .field-select:focus {
-    border-color: var(--green); background: var(--surface);
-  }
+  .field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+  .field select:focus, .field input:focus { border-color: var(--green); background: var(--surface); }
 
-  /* ── BUTTONS ── */
+  /* ── Buttons ── */
   .btn {
-    display: inline-flex; align-items: center; gap: 8px; border: none; border-radius: 8px;
-    padding: 10px 18px; font-family: var(--font-body); font-size: 12px; font-weight: 600;
-    cursor: pointer; transition: all 0.15s; letter-spacing: 0.2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 20px;
+    font-family: var(--fb);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
   }
   .btn-primary { background: var(--text); color: var(--bg); }
-  .btn-primary:hover { opacity: 0.85; }
-  .btn-green { background: var(--green); color: #0a0a0a; }
-  .btn-green:hover { filter: brightness(0.92); }
-  .btn-ghost {
-    background: transparent; border: 1px solid var(--border); color: var(--text);
-  }
+  .btn-primary:hover { background: #222; }
+  .btn-green { background: var(--green); color: var(--text); }
+  .btn-green:hover { background: #22c55e; }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
   .btn-ghost:hover { border-color: var(--text); }
-  .btn-sm { padding: 6px 12px; font-size: 11px; }
+  .btn-sm { padding: 7px 14px; font-size: 11px; }
+  .btn-full { width: 100%; justify-content: center; font-size: 14px; padding: 14px; margin-top: 12px; }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  /* ── CODE LIST ── */
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ── Codes section ── */
   .codes-header {
-    display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
   }
   .codes-count {
-    font-size: 10px; font-weight: 700; color: var(--text3);
-    text-transform: uppercase; letter-spacing: 1.5px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text3);
   }
-  .codes-actions { display: flex; gap: 8px; }
+  .codes-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
   .code-list {
-    display: flex; flex-direction: column; gap: 6px; max-height: 320px; overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 340px;
+    overflow-y: auto;
   }
+  .code-list::-webkit-scrollbar { width: 4px; }
+  .code-list::-webkit-scrollbar-track { background: transparent; }
+  .code-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
   .code-row {
-    display: flex; align-items: center; justify-content: space-between;
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 8px; padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    gap: 8px;
   }
-  .code-text {
-    font-family: monospace; font-size: 15px; font-weight: 700;
-    letter-spacing: 1px; color: var(--text);
-  }
-  .code-meta { font-size: 11px; color: var(--text3); margin-left: 12px; }
-  .code-right { display: flex; align-items: center; gap: 8px; }
+  .code-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .code-text { font-family: monospace; font-size: 15px; font-weight: 700; letter-spacing: 1px; white-space: nowrap; }
+  .code-exp { font-size: 11px; color: var(--text3); white-space: nowrap; }
+  .code-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+  /* ── Badges ── */
   .badge {
-    font-size: 10px; font-weight: 700; padding: 3px 10px;
-    border-radius: 20px; letter-spacing: 0.5px;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
   }
-  .badge-sem {
-    background: var(--green-bg); color: var(--green-deep);
-    border: 1px solid var(--green-border);
-  }
-  .badge-yr {
-    background: var(--yellow-bg); color: #b45309;
-    border: 1px solid var(--yellow-border);
-  }
+  .badge-1m  { background: rgba(74,222,128,0.12); color: var(--green-deep); border: 1px solid rgba(74,222,128,0.3); }
+  .badge-3m  { background: rgba(251,191,36,0.12); color: #b45309; border: 1px solid rgba(251,191,36,0.3); }
+  .badge-6m  { background: rgba(139,92,246,0.1);  color: #6d28d9; border: 1px solid rgba(139,92,246,0.25); }
+
   .copy-btn {
-    border: none; background: none; cursor: pointer; color: var(--text3);
-    font-size: 11px; padding: 4px 8px; border-radius: 6px;
-    font-family: var(--font-body); font-weight: 600; transition: all 0.15s;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: var(--fb);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    padding: 4px 10px;
+    border-radius: 6px;
+    transition: all 0.15s;
   }
   .copy-btn:hover { background: var(--border); color: var(--text); }
   .copy-btn.copied { color: var(--green-deep); }
 
-  /* ── REDEEM INPUT ── */
-  .redeem-input {
-    font-size: 20px; font-family: monospace; font-weight: 700;
-    letter-spacing: 3px; text-transform: uppercase; text-align: center;
-    padding: 14px;
+  /* ── Write-to-Firestore bar ── */
+  .write-bar {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text2);
   }
-  .redeem-btn {
-    width: 100%; margin-top: 12px; justify-content: center;
-    font-size: 14px; padding: 14px;
-  }
-
-  /* ── STATUS MESSAGES ── */
-  .status {
-    border-radius: 8px; padding: 14px 16px; font-size: 13px; margin-top: 12px;
-    line-height: 1.5;
-  }
-  .status.success {
-    background: var(--green-bg); border: 1px solid var(--green-border); color: var(--green-deep);
-  }
-  .status.error {
-    background: var(--red-bg); border: 1px solid var(--red-border); color: #dc2626;
-  }
-  .status.loading {
-    background: var(--surface2); border: 1px solid var(--border); color: var(--text2);
-  }
-
-  /* ── DIVIDER / INFO ── */
-  .divider { height: 1px; background: var(--border); margin: 20px 0; }
-  .info-row { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--text2); line-height: 1.5; }
-  .info-dot {
-    width: 6px; height: 6px; border-radius: 50%; background: var(--green);
-    flex-shrink: 0; margin-top: 6px;
-  }
-
-  /* ── MODAL ── */
-  .modal-bg {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex;
-    align-items: center; justify-content: center; z-index: 200; padding: 20px;
-  }
-  .modal {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 12px; max-width: 620px; width: 100%;
-    max-height: 82vh; overflow-y: auto; padding: 28px;
-  }
-  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-  .modal-title {
-    font-family: var(--font-display); font-weight: 700; font-size: 17px;
-    letter-spacing: -0.3px; color: var(--text);
-  }
-  .modal-close {
-    background: none; border: none; font-size: 22px; cursor: pointer;
-    color: var(--text3); line-height: 1; padding: 2px 6px;
-  }
-  .modal-tabs {
-    display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 16px;
-  }
-  pre {
-    background: var(--text); color: var(--green); border-radius: 8px; padding: 16px;
-    font-size: 11px; line-height: 1.7; overflow-x: auto; white-space: pre-wrap;
-    font-family: monospace;
-  }
-
-  /* ── LOADING / STATES ── */
-  #loadingState {
-    min-height: 60vh; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 12px;
-    font-size: 13px; color: var(--text2);
-  }
-  .spinner {
-    width: 28px; height: 28px; border: 3px solid var(--border);
-    border-top-color: var(--green); border-radius: 50%;
-    animation: spin 0.7s linear infinite;
+  .write-bar.show { display: flex; }
+  .write-bar .spinner {
+    width: 14px; height: 14px; border: 2px solid var(--border);
+    border-top-color: var(--green-deep); border-radius: 50%;
+    animation: spin 0.7s linear infinite; flex-shrink: 0;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  #mainContent { display: none; }
+  /* ── Divider ── */
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
 
-  /* ── WRITE TO FIRESTORE PROGRESS ── */
-  .write-bar {
-    margin-top: 12px; background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 8px; padding: 12px 14px; font-size: 13px; display: none;
-    align-items: center; gap: 10px; color: var(--text2);
+  /* ── Info rows ── */
+  .info-list { display: flex; flex-direction: column; gap: 8px; }
+  .info-row { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--text2); line-height: 1.5; }
+  .info-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; margin-top: 6px; }
+
+  /* ── Redeem input ── */
+  .redeem-input {
+    font-size: 20px !important;
+    font-family: monospace !important;
+    font-weight: 700 !important;
+    letter-spacing: 3px !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
   }
-  .write-bar.visible { display: flex; }
-  .write-bar .spinner { width: 16px; height: 16px; border-width: 2px; }
 
-  @media (max-width: 500px) {
+  /* ── Status ── */
+  .status {
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13px;
+    margin-top: 12px;
+    line-height: 1.5;
+    display: none;
+  }
+  .status.show { display: block; }
+  .status.success { background: var(--green-bg); border: 1px solid rgba(74,222,128,0.3); color: var(--green-deep); }
+  .status.error   { background: rgba(239,68,68,0.07); border: 1px solid rgba(239,68,68,0.2); color: #dc2626; }
+  .status.loading { background: var(--surface2); border: 1px solid var(--border); color: var(--text2); }
+
+  /* ── Loading / auth states ── */
+  #authLoading {
+    min-height: 60vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 12px;
+    font-size: 13px; color: var(--text3);
+  }
+  #authLoading .spinner {
+    width: 28px; height: 28px; border: 3px solid var(--border);
+    border-top-color: var(--green-deep); border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  /* ── Modal ── */
+  .modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-bg.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface);
+    border-radius: 12px;
+    max-width: 620px;
+    width: 100%;
+    max-height: 82vh;
+    overflow-y: auto;
+    padding: 28px;
+    transform: translateY(8px);
+    transition: transform 0.2s;
+  }
+  .modal-bg.open .modal { transform: translateY(0); }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .modal-title { font-family: var(--fd); font-weight: 700; font-size: 18px; }
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--text3);
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 6px;
+    transition: color 0.15s;
+  }
+  .modal-close:hover { color: var(--text); }
+
+  .modal-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+  .modal-tab {
+    font-family: var(--fb);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 8px 16px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text3);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .modal-tab.active { color: var(--text); border-bottom-color: var(--green); }
+
+  .snippet { display: none; }
+  .snippet.active { display: block; }
+
+  pre {
+    background: #0f0f0f;
+    color: #4ade80;
+    border-radius: 8px;
+    padding: 18px;
+    font-size: 11.5px;
+    line-height: 1.75;
+    overflow-x: auto;
+    white-space: pre;
+    font-family: 'Courier New', monospace;
+  }
+
+  @media (max-width: 480px) {
     .form-row { flex-direction: column; }
-    .redeem-input { font-size: 16px; letter-spacing: 1.5px; }
+    .code-exp { display: none; }
+    .modal-tabs { gap: 0; }
+    .modal-tab { padding: 8px 10px; font-size: 11px; }
   }
-  </style>
+</style>
 </head>
 <body>
 
-<!-- TOPBAR -->
-<nav class="ac-nav">
-  <a href="dashboard.html" class="ac-nav-logo">Unify<span>.</span></a>
-  <button class="ac-nav-theme" onclick="toggleTheme()" title="Toggle theme" id="themeBtn">☀</button>
-  <a href="dashboard.html" class="ac-nav-back">← Dashboard</a>
-</nav>
-
-<!-- LOADING -->
-<div id="loadingState">
+<!-- ── AUTH LOADING ── -->
+<div id="authLoading">
   <div class="spinner"></div>
   <span>Checking access…</span>
 </div>
 
-<!-- MAIN CONTENT -->
-<div class="ac-wrap" id="mainContent">
+<div id="appRoot" style="display:none">
+<div class="wrap">
 
-  <div class="ac-hero">
-    <div class="ac-hero-title">Access Codes<span>.</span></div>
-    <div class="ac-hero-sub" id="heroSub"></div>
+  <div class="wordmark">Unify<span class="dot">.</span></div>
+
+  <div class="tabs" id="tabBar">
+    <!-- Admin tab injected here if user is admin -->
+    <button class="tab-btn active" id="studentTabBtn" onclick="switchTab('student', this)">Redeem Code</button>
   </div>
 
-  <!-- TABS (admin sees both; students only see Redeem) -->
-  <div class="ac-tabs" id="acTabs">
-    <button class="ac-tab" id="adminTabBtn" data-tab="admin" style="display:none">
-      Admin — Generate Codes
-    </button>
-    <button class="ac-tab active" id="redeemTabBtn" data-tab="redeem">
-      Redeem Code
-    </button>
-  </div>
+  <!-- ─────────────────── ADMIN PANEL ─────────────────── -->
+  <div id="panel-admin" class="panel">
 
-  <!-- ── ADMIN TAB ── -->
-  <div id="adminTab" style="display:none">
-    <div class="ac-card">
-      <div class="ac-card-title">Generate Access Codes</div>
-      <div class="ac-card-sub">Each code is single-use. Generate a batch, then send one per student after they pay.</div>
+    <div class="card">
+      <div class="card-title">Generate Access Codes</div>
+      <div class="card-sub">Set how many codes to make, which plan, and how long they last. Send one code per student after you confirm their payment.</div>
 
       <div class="form-row">
         <div class="field">
-          <span class="field-label">Quantity</span>
-          <input class="field-input" type="number" id="qtyInput" min="1" max="200" value="10">
+          <label>Quantity</label>
+          <input type="number" id="qty" min="1" max="500" value="10" />
         </div>
         <div class="field">
-          <span class="field-label">Tier</span>
-          <select class="field-select" id="tierSelect">
-            <option value="semester">Semester (₦2,000)</option>
-            <option value="year">Full Year (₦3,500)</option>
-          </select>
-        </div>
-        <div class="field">
-          <span class="field-label">Valid For</span>
-          <select class="field-select" id="durationSelect">
-            <option value="4">4 months</option>
-            <option value="6" selected>6 months</option>
-            <option value="12">12 months</option>
+          <label>Plan</label>
+          <select id="tier">
+            <option value="1m">1 Month — ₦2,000</option>
+            <option value="3m">3 Months — ₦5,500</option>
+            <option value="6m">6 Months — ₦9,000</option>
           </select>
         </div>
       </div>
 
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="btn btn-green" id="generateBtn">Generate Codes</button>
-        <button class="btn btn-ghost" id="firestoreSnippetBtn">View Firestore Code</button>
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="handleGenerate()">Generate Codes</button>
+        <button class="btn btn-ghost" onclick="openModal()">View Firestore Code</button>
       </div>
     </div>
 
-    <!-- GENERATED CODES CARD (hidden until codes are generated) -->
-    <div class="ac-card" id="codesCard" style="display:none">
+    <!-- Generated codes list -->
+    <div id="codes-section" class="card" style="display:none;">
       <div class="codes-header">
-        <div class="codes-count" id="codesCount"></div>
+        <span class="codes-count" id="codes-count">0 codes</span>
         <div class="codes-actions">
-          <button class="btn btn-ghost btn-sm copy-btn" id="copyAllBtn">Copy all</button>
-          <button class="btn btn-ghost btn-sm" id="csvBtn">Download CSV</button>
-          <button class="btn btn-primary btn-sm" id="writeFirestoreBtn">Write to Firestore</button>
+          <button class="btn btn-ghost btn-sm copy-btn" id="copy-all-btn" onclick="copyAll()">Copy all</button>
+          <button class="btn btn-ghost btn-sm" onclick="downloadCSV()">Download CSV</button>
+          <button class="btn btn-primary btn-sm" id="write-btn" onclick="writeToFirestore()">Write to Firestore</button>
         </div>
       </div>
 
-      <div class="code-list" id="codeList"></div>
+      <div class="code-list" id="code-list"></div>
 
-      <div class="write-bar" id="writeBar">
+      <div class="write-bar" id="write-bar">
         <div class="spinner"></div>
-        <span id="writeBarMsg">Writing to Firestore…</span>
+        <span id="write-bar-msg">Saving to Firestore…</span>
       </div>
 
       <div class="divider"></div>
-      <div style="display:flex; flex-direction:column; gap:8px;">
-        <div class="info-row"><div class="info-dot"></div><span>Copy one code per student after you confirm payment.</span></div>
-        <div class="info-row"><div class="info-dot"></div><span>Once a student redeems the code it locks — nobody else can use it.</span></div>
-        <div class="info-row"><div class="info-dot"></div><span>Click "Write to Firestore" to save this batch before distributing.</span></div>
+      <div class="info-list">
+        <div class="info-row"><div class="info-dot"></div><span>Click "Write to Firestore" to save codes — students can't redeem until you do this.</span></div>
+        <div class="info-row"><div class="info-dot"></div><span>Download the CSV and share it with helpers. They tick off codes as students pay.</span></div>
+        <div class="info-row"><div class="info-dot"></div><span>Each code works once. Once redeemed, it locks permanently.</span></div>
       </div>
     </div>
+
   </div>
 
-  <!-- ── REDEEM TAB ── -->
-  <div id="redeemTab">
-    <div class="ac-card">
-      <div class="ac-card-title">Redeem Access Code</div>
-      <div class="ac-card-sub">Enter the code you received after payment to unlock your Unify subscription.</div>
+  <!-- ─────────────────── STUDENT PANEL ─────────────────── -->
+  <div id="panel-student" class="panel active">
+
+    <div class="card">
+      <div class="card-title">Redeem Your Code</div>
+      <div class="card-sub">Enter the code sent to you after payment. It activates your subscription immediately.</div>
 
       <div class="field">
-        <span class="field-label">Your Code</span>
-        <input class="field-input redeem-input" type="text" id="redeemInput"
-          placeholder="UNF-XXXX-XXXX" maxlength="12" autocomplete="off" spellcheck="false">
+        <label>Access Code</label>
+        <input type="text" id="redeem-input" class="redeem-input"
+          placeholder="UNF-XXXX-XXXX" maxlength="12"
+          oninput="formatCodeInput(this)"
+          onkeydown="if(event.key==='Enter') handleRedeem()" />
       </div>
 
-      <button class="btn btn-green redeem-btn" id="redeemBtn">Activate Access</button>
+      <button class="btn btn-green btn-full" id="redeem-btn" onclick="handleRedeem()">Activate Access</button>
 
-      <div id="redeemStatus" style="display:none"></div>
+      <div id="redeem-status" class="status"></div>
     </div>
 
-    <div class="ac-card">
-      <div class="field-label" style="margin-bottom:12px;">What you get</div>
-      <div style="display:flex; flex-direction:column; gap:8px;">
-        <div class="info-row"><div class="info-dot"></div><span><strong>Semester (₦2,000)</strong> — 6 months full access to all course notes, past questions, and learning resources.</span></div>
-        <div class="info-row"><div class="info-dot"></div><span><strong>Full Year (₦3,500)</strong> — 12 months access at a discounted rate, ideal for both semesters.</span></div>
+    <div class="card">
+      <div class="info-list">
+        <div class="info-row"><div class="info-dot"></div><span><strong>1 Month (₦2,000)</strong> — full access to all notes, past questions and resources for one month.</span></div>
+        <div class="info-row"><div class="info-dot"></div><span><strong>3 Months (₦5,500)</strong> — covers a full semester at a discount.</span></div>
+        <div class="info-row"><div class="info-dot"></div><span><strong>6 Months (₦9,000)</strong> — both semesters, best value.</span></div>
         <div class="info-row"><div class="info-dot"></div><span>Pay your class rep, get a code, enter it above — access activates instantly.</span></div>
       </div>
     </div>
+
   </div>
 
-</div>
+</div><!-- /wrap -->
+</div><!-- /appRoot -->
 
-<!-- ── FIRESTORE SNIPPETS MODAL ── -->
-<div class="modal-bg" id="firestoreModal" style="display:none">
+<!-- ─────────────────── FIRESTORE MODAL ─────────────────── -->
+<div id="modal-bg" class="modal-bg" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title">Firestore Integration</div>
-      <button class="modal-close" id="modalCloseBtn">×</button>
+      <button class="modal-close" onclick="closeModal()">×</button>
     </div>
-    <div class="modal-tabs" id="modalTabs">
-      <button class="ac-tab active" data-snippet="write">Write Codes</button>
-      <button class="ac-tab" data-snippet="redeem">Redeem Function</button>
-      <button class="ac-tab" data-snippet="rules">Security Rules</button>
+
+    <div class="modal-tabs">
+      <button class="modal-tab active" onclick="switchSnippet('write', this)">Write Codes</button>
+      <button class="modal-tab" onclick="switchSnippet('redeem', this)">Redeem Function</button>
+      <button class="modal-tab" onclick="switchSnippet('rules', this)">Security Rules</button>
     </div>
-    <pre id="snippetContent"></pre>
-    <div style="margin-top:12px;">
-      <button class="btn btn-ghost btn-sm" id="copySnippetBtn">Copy snippet</button>
-    </div>
-  </div>
-</div>
 
-<script type="module">
-import { auth, db } from './js/firebase-config.js';
-import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { doc, getDoc, collection, writeBatch, runTransaction, serverTimestamp, Timestamp }
-  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    <div id="snippet-write" class="snippet active">
+<pre>// Run once after generating a batch — writes codes to Firestore
+// Use this in your admin console or a one-off Node script
 
-// ── Firestore code snippets ──────────────────────────────────────────────────
-
-const SNIPPETS = {
-  write: `// Run in your admin script to write codes to Firestore
 async function writeCodeBatch(codes) {
-  const batch = db.batch();
-  codes.forEach(code => {
-    const ref = db.collection("accessCodes").doc(code.code);
+  var batch = db.batch();
+
+  codes.forEach(function(code) {
+    var ref = db.collection("accessCodes").doc(code.code);
     batch.set(ref, {
-      tier: code.tier,
-      isUsed: false,
+      tier:      code.tier,
+      isUsed:    false,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      expiresAt: firebase.firestore.Timestamp.fromDate(new Date(code.expiresAt)),
-      usedBy: null
+      expiresAt: firebase.firestore.Timestamp.fromDate(
+                   new Date(code.expiresAt)
+                 ),
+      usedBy:    null
     });
   });
+
   await batch.commit();
-}`,
-  redeem: `// Called when student submits the code form
+  console.log("Written:", codes.length, "codes");
+}</pre>
+    </div>
+
+    <div id="snippet-redeem" class="snippet">
+<pre>// Paste into your student dashboard JS
+// Call when the student submits the code form
+
 async function redeemCode(code, userId) {
-  const codeRef = db.collection("accessCodes").doc(code.trim().toUpperCase());
-  const userRef = db.collection("users").doc(userId);
+  var codeRef = db.collection("accessCodes")
+                  .doc(code.trim().toUpperCase());
+  var userRef = db.collection("users").doc(userId);
 
-  await db.runTransaction(async (txn) => {
-    const snap = await txn.get(codeRef);
-    if (!snap.exists) throw new Error("Code not found.");
-    const data = snap.data();
-    if (data.isUsed) throw new Error("Code already used.");
-    if (data.expiresAt.toDate() < new Date()) throw new Error("Code expired.");
+  try {
+    await db.runTransaction(async function(txn) {
+      var snap = await txn.get(codeRef);
 
-    txn.update(codeRef, {
-      isUsed: true, usedBy: userId,
-      usedAt: firebase.firestore.FieldValue.serverTimestamp()
+      if (!snap.exists)
+        throw new Error("Code not found. Check and try again.");
+
+      var data = snap.data();
+
+      if (data.isUsed)
+        throw new Error("This code has already been used.");
+
+      if (data.expiresAt.toDate() < new Date())
+        throw new Error("This code has expired.");
+
+      // Lock the code
+      txn.update(codeRef, {
+        isUsed: true,
+        usedBy: userId,
+        usedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      // Activate subscription
+      txn.set(userRef, {
+        subscription: {
+          active:      true,
+          tier:        data.tier,
+          activatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          expiresAt:   data.expiresAt
+        }
+      }, { merge: true });
     });
-    txn.set(userRef, {
-      "subscription.active": true,
-      "subscription.tier": data.tier,
-      "subscription.activatedAt": firebase.firestore.FieldValue.serverTimestamp(),
-      "subscription.expiresAt": data.expiresAt
-    }, { merge: true });
-  });
-}`,
-  rules: `match /accessCodes/{code} {
-  allow read: if request.auth != null;
+
+    return { success: true,
+             message: "Access activated successfully." };
+
+  } catch (err) {
+    return { success: false, message: err.message };
+  }
+}</pre>
+    </div>
+
+    <div id="snippet-rules" class="snippet">
+<pre>match /accessCodes/{code} {
+  allow read:  if request.auth != null;
   allow create: if isAdmin();
-  // Students can only mark a code as used (single-use lock)
+  // Students can only mark a code as used
   allow update: if request.auth != null
     && resource.data.isUsed == false
     && resource.data.expiresAt > request.time
@@ -446,363 +569,341 @@ async function redeemCode(code, userId) {
 }
 
 match /users/{uid} {
-  // Allow setting subscription fields via code redemption
+  // Allow subscription activation via code redemption
   allow update: if request.auth != null
     && request.auth.uid == uid
     && request.resource.data.diff(resource.data)
          .affectedKeys().hasOnly(['subscription']);
-}`
-};
+}</pre>
+    </div>
 
-// ── Code generation ──────────────────────────────────────────────────────────
+    <div style="margin-top:14px;">
+      <button class="btn btn-ghost btn-sm" id="copy-snippet-btn" onclick="copySnippet()">Copy snippet</button>
+    </div>
+  </div>
+</div>
 
-const CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+<script type="module">
+import { auth, db } from './js/firebase-config.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { doc, getDoc, collection, writeBatch, runTransaction, serverTimestamp, Timestamp }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-function seg(n) {
-  let s = '';
-  for (let i = 0; i < n; i++) s += CHARS[Math.floor(Math.random() * CHARS.length)];
+// ─── State ───────────────────────────────────────────────────────────────────
+
+var generatedCodes = [];
+var currentSnippet = "write";
+var currentUser    = null;
+
+var TIER_LABELS  = { "1m": "1 Month",  "3m": "3 Months",  "6m": "6 Months" };
+var TIER_MONTHS  = { "1m": 1,          "3m": 3,            "6m": 6 };
+var TIER_BADGE   = { "1m": "badge-1m", "3m": "badge-3m",  "6m": "badge-6m" };
+
+// ─── Code generation ─────────────────────────────────────────────────────────
+
+function randomSegment(n) {
+  var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  var s = "";
+  for (var i = 0; i < n; i++) {
+    s += chars[Math.floor(Math.random() * chars.length)];
+  }
   return s;
 }
 
 function generateCode() {
-  return 'UNF-' + seg(4) + '-' + seg(4);
+  return "UNF-" + randomSegment(4) + "-" + randomSegment(4);
 }
 
-function generateBatch(qty, tier, durationMonths) {
-  const now = Date.now();
-  const expiry = new Date(now + durationMonths * 30 * 24 * 60 * 60 * 1000);
-  return Array.from({ length: qty }, () => ({
-    code: generateCode(),
-    tier,
-    isUsed: false,
-    createdAt: new Date(now).toISOString(),
-    expiresAt: expiry.toISOString(),
-    usedBy: null
-  }));
+function expiryDate(months) {
+  var d = new Date();
+  d.setMonth(d.getMonth() + months);
+  return d.toISOString().slice(0, 10);
 }
 
-function formatRedeemInput(val) {
-  const clean = val.toUpperCase().replace(/[^A-Z0-9]/g, '');
-  const parts = [];
-  if (clean.length > 0) parts.push(clean.slice(0, 3));
-  if (clean.length > 3) parts.push(clean.slice(3, 7));
-  if (clean.length > 7) parts.push(clean.slice(7, 11));
-  return parts.join('-');
-}
+window.handleGenerate = function() {
+  var qty  = Math.min(500, Math.max(1, parseInt(document.getElementById("qty").value) || 10));
+  var tier = document.getElementById("tier").value;
 
-// ── State ────────────────────────────────────────────────────────────────────
-
-let generatedCodes = [];
-let copiedKey = null;
-let copiedTimer = null;
-let currentUser = null;
-let activeSnippet = 'write';
-
-function setCopied(key) {
-  copiedKey = key;
-  if (copiedTimer) clearTimeout(copiedTimer);
-  copiedTimer = setTimeout(() => { copiedKey = null; refreshCopyButtons(); }, 1500);
-  refreshCopyButtons();
-}
-
-function refreshCopyButtons() {
-  document.querySelectorAll('[data-copy-key]').forEach(btn => {
-    const k = btn.dataset.copyKey;
-    const isCopied = copiedKey === k;
-    btn.textContent = isCopied ? '✓' : 'Copy';
-    btn.classList.toggle('copied', isCopied);
-  });
-  const copyAllBtn = document.getElementById('copyAllBtn');
-  if (copyAllBtn) {
-    copyAllBtn.textContent = copiedKey === 'all' ? '✓ Copied all' : 'Copy all';
-    copyAllBtn.classList.toggle('copied', copiedKey === 'all');
-  }
-  const snippetBtn = document.getElementById('copySnippetBtn');
-  if (snippetBtn) {
-    snippetBtn.textContent = copiedKey === 'snippet' ? '✓ Copied' : 'Copy snippet';
-  }
-}
-
-// ── Tab switching ────────────────────────────────────────────────────────────
-
-function switchTab(tab) {
-  document.getElementById('adminTab').style.display = tab === 'admin' ? 'block' : 'none';
-  document.getElementById('redeemTab').style.display = tab === 'redeem' ? 'block' : 'none';
-  document.querySelectorAll('.ac-tab[data-tab]').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.tab === tab);
-  });
-}
-
-// ── Code list rendering ──────────────────────────────────────────────────────
-
-function renderCodeList() {
-  const list = document.getElementById('codeList');
-  list.innerHTML = generatedCodes.map((c, i) => `
-    <div class="code-row">
-      <div style="display:flex; align-items:center;">
-        <span class="code-text">${c.code}</span>
-        <span class="code-meta">· expires ${c.expiresAt.slice(0, 10)}</span>
-      </div>
-      <div class="code-right">
-        <span class="badge ${c.tier === 'semester' ? 'badge-sem' : 'badge-yr'}">
-          ${c.tier === 'semester' ? 'SEM' : 'YR'}
-        </span>
-        <button class="copy-btn${copiedKey === i ? ' copied' : ''}" data-copy-key="${i}">
-          ${copiedKey === i ? '✓' : 'Copy'}
-        </button>
-      </div>
-    </div>
-  `).join('');
-
-  // Bind copy buttons
-  list.querySelectorAll('[data-copy-key]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.copyKey, 10);
-      navigator.clipboard.writeText(generatedCodes[idx].code).then(() => setCopied(idx));
+  generatedCodes = [];
+  for (var i = 0; i < qty; i++) {
+    generatedCodes.push({
+      code:      generateCode(),
+      tier:      tier,
+      expiresAt: expiryDate(TIER_MONTHS[tier])
     });
+  }
+
+  renderCodes();
+};
+
+function renderCodes() {
+  var section = document.getElementById("codes-section");
+  var list    = document.getElementById("code-list");
+  var count   = document.getElementById("codes-count");
+
+  section.style.display = "block";
+  count.textContent = generatedCodes.length + " code" + (generatedCodes.length !== 1 ? "s" : "") + " generated";
+  list.innerHTML = "";
+
+  // Reset write bar
+  var bar = document.getElementById("write-bar");
+  var btn = document.getElementById("write-btn");
+  bar.className = "write-bar";
+  btn.disabled = false;
+  btn.textContent = "Write to Firestore";
+
+  generatedCodes.forEach(function(c, i) {
+    var row = document.createElement("div");
+    row.className = "code-row";
+    row.innerHTML =
+      '<div class="code-left">' +
+        '<span class="code-text">' + c.code + '</span>' +
+        '<span class="code-exp">expires ' + c.expiresAt + '</span>' +
+      '</div>' +
+      '<div class="code-right">' +
+        '<span class="badge ' + TIER_BADGE[c.tier] + '">' + TIER_LABELS[c.tier].toUpperCase() + '</span>' +
+        '<button class="copy-btn" id="copy-' + i + '" onclick="copyCode(\'' + c.code + '\',' + i + ')">Copy</button>' +
+      '</div>';
+    list.appendChild(row);
   });
 }
 
-// ── Generate ─────────────────────────────────────────────────────────────────
+// ─── Copy helpers ─────────────────────────────────────────────────────────────
 
-document.getElementById('generateBtn').addEventListener('click', () => {
-  const qty      = Math.min(200, Math.max(1, parseInt(document.getElementById('qtyInput').value) || 1));
-  const tier     = document.getElementById('tierSelect').value;
-  const duration = parseInt(document.getElementById('durationSelect').value);
+window.copyCode = function(code, idx) {
+  navigator.clipboard.writeText(code).then(function() {
+    var btn = document.getElementById("copy-" + idx);
+    btn.textContent = "✓";
+    btn.classList.add("copied");
+    setTimeout(function() {
+      btn.textContent = "Copy";
+      btn.classList.remove("copied");
+    }, 1500);
+  });
+};
 
-  generatedCodes = generateBatch(qty, tier, duration);
+window.copyAll = function() {
+  var text = generatedCodes.map(function(c) { return c.code; }).join("\n");
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.getElementById("copy-all-btn");
+    btn.textContent = "✓ Copied";
+    btn.classList.add("copied");
+    setTimeout(function() {
+      btn.textContent = "Copy all";
+      btn.classList.remove("copied");
+    }, 1800);
+  });
+};
 
-  document.getElementById('generateBtn').textContent =
-    `Generate ${qty} Code${qty !== 1 ? 's' : ''}`;
+window.copySnippet = function() {
+  var el   = document.getElementById("snippet-" + currentSnippet);
+  var text = el.querySelector("pre").textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.getElementById("copy-snippet-btn");
+    btn.textContent = "✓ Copied";
+    setTimeout(function() { btn.textContent = "Copy snippet"; }, 1800);
+  });
+};
 
-  document.getElementById('codesCount').textContent = `${qty} codes generated`;
-  document.getElementById('codesCard').style.display = 'block';
-  document.getElementById('writeBar').classList.remove('visible');
-  renderCodeList();
-});
+// ─── CSV download ─────────────────────────────────────────────────────────────
 
-// Keep button label in sync with qty input
-document.getElementById('qtyInput').addEventListener('input', e => {
-  const n = Math.min(200, Math.max(1, parseInt(e.target.value) || 1));
-  document.getElementById('generateBtn').textContent = `Generate ${n} Code${n !== 1 ? 's' : ''}`;
-});
-
-// ── Copy all ─────────────────────────────────────────────────────────────────
-
-document.getElementById('copyAllBtn').addEventListener('click', () => {
-  const text = generatedCodes.map(c => c.code).join('\n');
-  navigator.clipboard.writeText(text).then(() => setCopied('all'));
-});
-
-// ── Download CSV ─────────────────────────────────────────────────────────────
-
-document.getElementById('csvBtn').addEventListener('click', () => {
-  const rows = generatedCodes.map(c =>
-    [c.code, c.tier, c.expiresAt.slice(0, 10)].join(',')
-  );
-  const blob = new Blob(['Code,Tier,Expires\n' + rows.join('\n')], { type: 'text/csv' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url; a.download = 'unify-codes-' + Date.now() + '.csv'; a.click();
+window.downloadCSV = function() {
+  var rows = ["Code,Tier,Expires"];
+  generatedCodes.forEach(function(c) {
+    rows.push([c.code, TIER_LABELS[c.tier], c.expiresAt].join(","));
+  });
+  var blob = new Blob([rows.join("\n")], { type: "text/csv" });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement("a");
+  a.href     = url;
+  a.download = "unify-codes-" + new Date().toISOString().slice(0, 10) + ".csv";
+  a.click();
   URL.revokeObjectURL(url);
-});
+};
 
-// ── Write to Firestore ────────────────────────────────────────────────────────
+// ─── Write to Firestore ───────────────────────────────────────────────────────
 
-document.getElementById('writeFirestoreBtn').addEventListener('click', async () => {
+window.writeToFirestore = async function() {
   if (!generatedCodes.length) return;
-  const btn = document.getElementById('writeFirestoreBtn');
-  const bar = document.getElementById('writeBar');
-  const msg = document.getElementById('writeBarMsg');
+  var btn = document.getElementById("write-btn");
+  var bar = document.getElementById("write-bar");
+  var msg = document.getElementById("write-bar-msg");
 
   btn.disabled = true;
-  bar.classList.add('visible');
-  msg.textContent = `Writing ${generatedCodes.length} codes to Firestore…`;
+  bar.className = "write-bar show";
+  msg.textContent = "Saving " + generatedCodes.length + " codes to Firestore…";
 
   try {
-    const batch = writeBatch(db);
-    generatedCodes.forEach(c => {
-      const ref = doc(collection(db, 'accessCodes'), c.code);
+    var batch = writeBatch(db);
+    generatedCodes.forEach(function(c) {
+      var ref = doc(collection(db, "accessCodes"), c.code);
       batch.set(ref, {
-        tier: c.tier,
-        isUsed: false,
+        tier:      c.tier,
+        isUsed:    false,
         createdAt: serverTimestamp(),
         expiresAt: Timestamp.fromDate(new Date(c.expiresAt)),
-        usedBy: null
+        usedBy:    null
       });
     });
     await batch.commit();
 
-    bar.innerHTML = `<span style="color:var(--green-deep); font-weight:600;">
-      ✓ ${generatedCodes.length} codes saved to Firestore. Safe to distribute.
-    </span>`;
-    btn.textContent = '✓ Written';
+    bar.innerHTML =
+      '<span style="color:var(--green-deep);font-weight:600;">' +
+      '✓ ' + generatedCodes.length + ' codes saved. Safe to distribute.' +
+      '</span>';
+    btn.textContent = "✓ Saved";
   } catch (err) {
-    bar.innerHTML = `<span style="color:#dc2626;">Error: ${err.message}</span>`;
-    btn.disabled = false;
-    btn.textContent = 'Retry';
+    bar.innerHTML = '<span style="color:#dc2626;">Error: ' + err.message + '</span>';
+    btn.disabled  = false;
+    btn.textContent = "Retry";
   }
-});
+};
 
-// ── Firestore snippets modal ──────────────────────────────────────────────────
+// ─── Student redemption ───────────────────────────────────────────────────────
 
-function renderSnippet(key) {
-  document.getElementById('snippetContent').textContent = SNIPPETS[key];
-  document.querySelectorAll('#modalTabs .ac-tab').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.snippet === key);
-  });
-  activeSnippet = key;
+window.formatCodeInput = function(el) {
+  var raw   = el.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  var parts = [];
+  if (raw.length > 0) parts.push(raw.slice(0, 3));
+  if (raw.length > 3) parts.push(raw.slice(3, 7));
+  if (raw.length > 7) parts.push(raw.slice(7, 11));
+  el.value = parts.join("-");
+  setStatus(null);
+};
+
+function setStatus(type, message) {
+  var el = document.getElementById("redeem-status");
+  if (!type) { el.className = "status"; el.innerHTML = ""; return; }
+  el.className = "status show " + type;
+  el.innerHTML = message;
 }
 
-document.getElementById('firestoreSnippetBtn').addEventListener('click', () => {
-  renderSnippet('write');
-  document.getElementById('firestoreModal').style.display = 'flex';
-});
-document.getElementById('modalCloseBtn').addEventListener('click', () => {
-  document.getElementById('firestoreModal').style.display = 'none';
-});
-document.getElementById('firestoreModal').addEventListener('click', e => {
-  if (e.target === e.currentTarget)
-    document.getElementById('firestoreModal').style.display = 'none';
-});
-document.getElementById('modalTabs').addEventListener('click', e => {
-  const btn = e.target.closest('[data-snippet]');
-  if (btn) renderSnippet(btn.dataset.snippet);
-});
-document.getElementById('copySnippetBtn').addEventListener('click', () => {
-  navigator.clipboard.writeText(SNIPPETS[activeSnippet]).then(() => setCopied('snippet'));
-});
+window.handleRedeem = async function() {
+  var input = document.getElementById("redeem-input");
+  var btn   = document.getElementById("redeem-btn");
+  var code  = input.value.trim().toUpperCase();
 
-// ── Tab buttons ───────────────────────────────────────────────────────────────
-
-document.getElementById('acTabs').addEventListener('click', e => {
-  const btn = e.target.closest('[data-tab]');
-  if (btn) switchTab(btn.dataset.tab);
-});
-
-// ── Redeem ────────────────────────────────────────────────────────────────────
-
-const redeemInput = document.getElementById('redeemInput');
-const redeemBtn   = document.getElementById('redeemBtn');
-const statusEl    = document.getElementById('redeemStatus');
-
-redeemInput.addEventListener('input', e => {
-  e.target.value = formatRedeemInput(e.target.value);
-  statusEl.style.display = 'none';
-});
-redeemInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') redeemBtn.click();
-});
-
-redeemBtn.addEventListener('click', async () => {
-  const code = redeemInput.value.trim().toUpperCase();
-  if (code.length < 11) {
-    showStatus('error', 'Enter a full 11-character code (format: UNF-XXXX-XXXX).');
+  if (code.length < 12) {
+    setStatus("error", "Enter a full code in the format UNF-XXXX-XXXX.");
     return;
   }
-  if (!currentUser) { window.location.href = 'Auth.html'; return; }
+  if (!currentUser) { window.location.href = "Auth.html"; return; }
 
-  redeemBtn.disabled = true;
-  showStatus('loading', 'Verifying code…');
+  btn.disabled    = true;
+  btn.textContent = "Checking…";
+  setStatus("loading", "Verifying code…");
 
   try {
-    const codeRef = doc(db, 'accessCodes', code);
-    const userRef = doc(db, 'users', currentUser.uid);
+    var codeRef = doc(db, "accessCodes", code);
+    var userRef = doc(db, "users", currentUser.uid);
+    var tier    = null;
 
-    let tier = null;
-    await runTransaction(db, async txn => {
-      const snap = await txn.get(codeRef);
-      if (!snap.exists()) throw new Error('Code not found. Double-check and try again.');
-      const data = snap.data();
-      if (data.isUsed) throw new Error('This code has already been used.');
-      if (data.expiresAt.toDate() < new Date()) throw new Error('This code has expired.');
+    await runTransaction(db, async function(txn) {
+      var snap = await txn.get(codeRef);
+
+      if (!snap.exists()) throw new Error("Code not found. Double-check and try again.");
+
+      var data = snap.data();
+      if (data.isUsed) throw new Error("This code has already been used.");
+      if (data.expiresAt.toDate() < new Date()) throw new Error("This code has expired. Contact us for a replacement.");
 
       tier = data.tier;
+
       txn.update(codeRef, {
         isUsed: true,
         usedBy: currentUser.uid,
         usedAt: serverTimestamp()
       });
+
       txn.set(userRef, {
         subscription: {
-          active: true,
-          tier: data.tier,
+          active:      true,
+          tier:        data.tier,
           activatedAt: serverTimestamp(),
-          expiresAt: data.expiresAt
+          expiresAt:   data.expiresAt
         }
       }, { merge: true });
     });
 
-    const tierLabel = tier === 'semester' ? 'Semester' : 'Full Year';
-    showStatus('success',
-      `Access activated! Your ${tierLabel} subscription is now live. ` +
-      `<a href="Learn.html" style="color:var(--green-deep); font-weight:600;">Go to Notes →</a>`
+    setStatus("success",
+      "Access activated — <strong>" + TIER_LABELS[tier] + "</strong> subscription is now live. " +
+      '<a href="Learn.html" style="color:var(--green-deep);font-weight:600;">Go to Notes →</a>'
     );
-    redeemInput.value = '';
+    input.value = "";
   } catch (err) {
-    showStatus('error', err.message);
-    redeemBtn.disabled = false;
+    setStatus("error", err.message);
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = "Activate Access";
   }
-});
-
-function showStatus(type, html) {
-  statusEl.className = 'status ' + type;
-  statusEl.innerHTML = html;
-  statusEl.style.display = 'block';
-  if (type !== 'loading') redeemBtn.disabled = false;
-}
-
-// ── Theme ─────────────────────────────────────────────────────────────────────
-
-window.toggleTheme = function() {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const next = isDark ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('unify-theme', next);
-  document.getElementById('themeBtn').textContent = next === 'dark' ? '☀' : '☾';
 };
 
-// ── Auth init ─────────────────────────────────────────────────────────────────
+// ─── Tab / modal switching ────────────────────────────────────────────────────
 
-onAuthStateChanged(auth, async user => {
-  if (!user) { window.location.href = 'Auth.html'; return; }
+window.switchTab = function(name, clickedBtn) {
+  document.querySelectorAll(".panel").forEach(function(p) { p.classList.remove("active"); });
+  document.querySelectorAll(".tab-btn").forEach(function(b) { b.classList.remove("active"); });
+  document.getElementById("panel-" + name).classList.add("active");
+  if (clickedBtn) clickedBtn.classList.add("active");
+};
+
+window.openModal  = function() { document.getElementById("modal-bg").classList.add("open"); };
+window.closeModal = function() { document.getElementById("modal-bg").classList.remove("open"); };
+
+window.switchSnippet = function(name, btn) {
+  document.querySelectorAll(".snippet").forEach(function(s) { s.classList.remove("active"); });
+  document.querySelectorAll(".modal-tab").forEach(function(b) { b.classList.remove("active"); });
+  document.getElementById("snippet-" + name).classList.add("active");
+  btn.classList.add("active");
+  currentSnippet = name;
+  document.getElementById("copy-snippet-btn").textContent = "Copy snippet";
+};
+
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") window.closeModal();
+});
+
+// ─── Auth init ────────────────────────────────────────────────────────────────
+
+onAuthStateChanged(auth, async function(user) {
+  if (!user) { window.location.href = "Auth.html"; return; }
   currentUser = user;
 
-  // Check admin status
-  let isAdmin = false;
+  // Check if admin and inject the Generate tab
   try {
-    const snap = await getDoc(doc(db, 'users', user.uid));
-    isAdmin = snap.data()?.isAdmin === true;
+    var snap    = await getDoc(doc(db, "users", user.uid));
+    var isAdmin = snap.data()?.isAdmin === true;
+
+    if (isAdmin) {
+      var tabBar   = document.getElementById("tabBar");
+      var adminBtn = document.createElement("button");
+      adminBtn.className  = "tab-btn active";
+      adminBtn.textContent = "Admin — Generate Codes";
+      adminBtn.onclick    = function() { window.switchTab("admin", adminBtn); };
+      tabBar.insertBefore(adminBtn, tabBar.firstChild);
+
+      // Make student tab inactive and switch to admin
+      document.getElementById("studentTabBtn").classList.remove("active");
+      window.switchTab("admin", adminBtn);
+    }
   } catch (_) {}
 
-  const heroSub = document.getElementById('heroSub');
-  if (isAdmin) {
-    heroSub.textContent = 'Generate single-use access codes to sell to students, or redeem a code for your own account.';
-    document.getElementById('adminTabBtn').style.display = 'inline-flex';
-    document.getElementById('adminTabBtn').classList.add('active');
-    document.getElementById('redeemTabBtn').classList.remove('active');
-    switchTab('admin');
-  } else {
-    heroSub.textContent = 'Enter the access code you received after payment to unlock your Unify subscription.';
-    switchTab('redeem');
-  }
-
-  // Check if already subscribed
+  // Check if already subscribed and show a note on the redeem tab
   try {
-    const snap = await getDoc(doc(db, 'users', user.uid));
-    const sub  = snap.data()?.subscription;
+    var userSnap = await getDoc(doc(db, "users", user.uid));
+    var sub      = userSnap.data()?.subscription;
     if (sub?.active && sub?.expiresAt?.toDate() > new Date()) {
-      const label = sub.tier === 'semester' ? 'Semester' : 'Full Year';
-      const exp   = sub.expiresAt.toDate().toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
-      showStatus('success',
-        `You already have an active ${label} subscription, valid until ${exp}. ` +
-        `<a href="Learn.html" style="color:var(--green-deep); font-weight:600;">Go to Notes →</a>`
+      var exp   = sub.expiresAt.toDate().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+      var label = TIER_LABELS[sub.tier] || sub.tier;
+      setStatus("success",
+        "You already have an active <strong>" + label + "</strong> subscription, valid until " + exp + ". " +
+        '<a href="Learn.html" style="color:var(--green-deep);font-weight:600;">Go to Notes →</a>'
       );
     }
   } catch (_) {}
 
-  document.getElementById('loadingState').style.display = 'none';
-  document.getElementById('mainContent').style.display = 'block';
+  document.getElementById("authLoading").style.display = "none";
+  document.getElementById("appRoot").style.display     = "block";
 });
 </script>
 
