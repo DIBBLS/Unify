@@ -182,11 +182,11 @@ onAuthStateChanged(auth, async user => {
   }
 
   // Parse the admin-uploaded HTML
-  const parser = new DOMParser();
-  const doc    = parser.parseFromString(htmlContent, 'text/html');
+  const parser    = new DOMParser();
+  const parsedDoc = parser.parseFromString(htmlContent, 'text/html');
 
   // 1. Inject external stylesheets & Google Fonts (dedup by href)
-  doc.querySelectorAll('link[rel="stylesheet"]').forEach(l => {
+  parsedDoc.querySelectorAll('link[rel="stylesheet"]').forEach(l => {
     if (document.querySelector(`link[href="${l.href}"]`)) return;
     const el = document.createElement('link');
     el.rel = 'stylesheet'; el.href = l.href;
@@ -194,23 +194,23 @@ onAuthStateChanged(auth, async user => {
   });
 
   // 2. Inject <style> blocks
-  doc.querySelectorAll('style').forEach(s => {
+  parsedDoc.querySelectorAll('style').forEach(s => {
     const el = document.createElement('style');
     el.textContent = s.textContent;
     document.head.appendChild(el);
   });
 
   // 3. Strip navigation chrome only
-  doc.querySelectorAll('.topbar, #progress-bar, nav, .nav, .back-bar, .week-nav, .wk-nav-strip')
+  parsedDoc.querySelectorAll('.topbar, #progress-bar, nav, .nav, .back-bar, .week-nav, .wk-nav-strip')
      .forEach(el => el.remove());
 
   // 4. Find main content container
-  const main = doc.querySelector(
+  const main = parsedDoc.querySelector(
     '.wrapper, main, article, [role="main"], ' +
     '.week-block, .week-page, ' +
     '.main-content, .week-content, .lesson-content, .content-body, ' +
     '#content, #main, .week-body'
-  ) || doc.body;
+  ) || parsedDoc.body;
 
   // 5. Inject content into the page
   const noteBody = document.getElementById('noteBody');
@@ -218,7 +218,7 @@ onAuthStateChanged(auth, async user => {
 
   // 6. Load external scripts (MathJax, KaTeX, etc.) AFTER content is in DOM
   const scriptPromises = [];
-  doc.querySelectorAll('script[src]').forEach(s => {
+  parsedDoc.querySelectorAll('script[src]').forEach(s => {
     if (document.querySelector(`script[src="${s.src}"]`)) return;
     const el = document.createElement('script');
     el.src = s.src;
@@ -231,7 +231,7 @@ onAuthStateChanged(auth, async user => {
   await Promise.all(scriptPromises);
 
   // 7. Run inline scripts so interactive functions (switchTab, mcReveal, eoqSelect…) are defined
-  doc.querySelectorAll('script:not([src])').forEach(s => {
+  parsedDoc.querySelectorAll('script:not([src])').forEach(s => {
     const el = document.createElement('script');
     el.textContent = s.textContent;
     document.body.appendChild(el);
@@ -249,7 +249,7 @@ onAuthStateChanged(auth, async user => {
   noteBody.style.display = 'block';
 
   // Restore page title
-  const titleEl = doc.querySelector('title');
+  const titleEl = parsedDoc.querySelector('title');
   if (titleEl) document.title = titleEl.textContent;
 });
 </script>

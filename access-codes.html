@@ -440,7 +440,7 @@
       <div class="field">
         <label>Access Code</label>
         <input type="text" id="redeem-input" class="redeem-input"
-          placeholder="UNF-XXXX-XXXX" maxlength="12"
+          placeholder="UNF-XXXX-XXXX" maxlength="13"
           oninput="formatCodeInput(this)"
           onkeydown="if(event.key==='Enter') handleRedeem()" />
       </div>
@@ -621,7 +621,7 @@ function expiryDate(months) {
 }
 
 window.handleGenerate = function() {
-  var qty  = Math.min(500, Math.max(1, parseInt(document.getElementById("qty").value) || 10));
+  var qty  = Math.min(500, Math.max(1, parseInt(document.getElementById("qty").value, 10) || 1));
   var tier = document.getElementById("tier").value;
 
   generatedCodes = [];
@@ -783,7 +783,7 @@ window.handleRedeem = async function() {
   var btn   = document.getElementById("redeem-btn");
   var code  = input.value.trim().toUpperCase();
 
-  if (code.length < 12) {
+  if (!/^[A-Z0-9]{3}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) {
     setStatus("error", "Enter a full code in the format UNF-XXXX-XXXX.");
     return;
   }
@@ -869,29 +869,25 @@ onAuthStateChanged(auth, async function(user) {
   if (!user) { window.location.href = "Auth.html"; return; }
   currentUser = user;
 
-  // Check if admin and inject the Generate tab
+  // Single read — used for both admin check and subscription status
   try {
-    var snap    = await getDoc(doc(db, "users", user.uid));
-    var isAdmin = snap.data()?.isAdmin === true;
+    var snap     = await getDoc(doc(db, "users", user.uid));
+    var userData = snap.data() || {};
+    var isAdmin  = userData.isAdmin === true;
 
     if (isAdmin) {
       var tabBar   = document.getElementById("tabBar");
       var adminBtn = document.createElement("button");
-      adminBtn.className  = "tab-btn active";
+      adminBtn.className   = "tab-btn active";
       adminBtn.textContent = "Admin — Generate Codes";
-      adminBtn.onclick    = function() { window.switchTab("admin", adminBtn); };
+      adminBtn.onclick     = function() { window.switchTab("admin", adminBtn); };
       tabBar.insertBefore(adminBtn, tabBar.firstChild);
 
-      // Make student tab inactive and switch to admin
       document.getElementById("studentTabBtn").classList.remove("active");
       window.switchTab("admin", adminBtn);
     }
-  } catch (_) {}
 
-  // Check if already subscribed and show a note on the redeem tab
-  try {
-    var userSnap = await getDoc(doc(db, "users", user.uid));
-    var sub      = userSnap.data()?.subscription;
+    var sub = userData.subscription;
     if (sub?.active && sub?.expiresAt?.toDate() > new Date()) {
       var exp   = sub.expiresAt.toDate().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
       var label = TIER_LABELS[sub.tier] || sub.tier;
