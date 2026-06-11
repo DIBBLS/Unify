@@ -63,6 +63,25 @@ html, body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg
    We provide our own topbar above, so reset that offset. */
 #noteBody .wrapper { padding-top: 20px !important; padding-bottom: 60px !important; }
 #noteBody { display: none; }
+
+/* ── PAYWALL GATE ─── */
+#paywallState {
+  display: none; min-height: 60vh;
+  align-items: center; justify-content: center; flex-direction: column;
+  gap: 12px; text-align: center; padding: 40px 20px;
+}
+.paywall-icon { font-size: 40px; margin-bottom: 8px; }
+.paywall-title {
+  font-family: 'Playfair Display', serif; font-weight: 700;
+  font-size: 22px; color: var(--text); margin-bottom: 6px;
+}
+.paywall-sub { font-size: 14px; color: var(--text2); max-width: 380px; line-height: 1.6; margin-bottom: 20px; }
+.paywall-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #22C55E; color: #0a0a0a; border: none; border-radius: 8px;
+  padding: 12px 24px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+  font-weight: 600; cursor: pointer; text-decoration: none;
+}
 </style>
 </head>
 <body>
@@ -78,12 +97,18 @@ html, body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg
   <span>Loading note…</span>
 </div>
 <div id="errorState">Content not found for this week.</div>
+<div id="paywallState">
+  <div class="paywall-icon">🔒</div>
+  <div class="paywall-title">Subscription Required</div>
+  <div class="paywall-sub">This content is available to subscribers only. Get an access code from your class rep after payment.</div>
+  <a href="access-codes.html" class="paywall-btn">Redeem Access Code →</a>
+</div>
 <div id="noteBody"></div>
 
 <script type="module">
 import { auth, db } from './js/firebase-config.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { doc, getDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 function normCode(raw) {
   return String(raw || '').trim().toUpperCase().replace(/\s+/g, ' ');
@@ -97,8 +122,26 @@ function toggleNoteTheme() {
 }
 window.toggleNoteTheme = toggleNoteTheme;
 
+function showPaywall() {
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('paywallState').style.display = 'flex';
+}
+
 onAuthStateChanged(auth, async user => {
   if (!user) { window.location.href = 'Auth.html'; return; }
+
+  // ── Subscription gate ────────────────────────────────────────
+  try {
+    const userSnap = await getDoc(doc(db, 'users', user.uid));
+    const sub      = userSnap.data()?.subscription;
+    const hasAccess = sub?.active === true
+      && sub?.expiresAt?.toDate() > new Date();
+    if (!hasAccess) { showPaywall(); return; }
+  } catch (_) {
+    // If Firestore read fails, show paywall rather than expose content
+    showPaywall(); return;
+  }
+  // ─────────────────────────────────────────────────────────────
 
   const params  = new URLSearchParams(window.location.search);
   const rawCode = params.get('courseCode') || '';
