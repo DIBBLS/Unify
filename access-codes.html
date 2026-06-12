@@ -348,11 +348,145 @@
     font-family: 'Courier New', monospace;
   }
 
+  /* ── Plan cards ── */
+  .plan-cards { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+
+  .plan-card {
+    background: #111318;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 22px 20px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .plan-card:hover { border-color: rgba(74,222,128,0.35); }
+  .plan-card::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(74,222,128,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .plan-card.plan-popular { border-color: rgba(74,222,128,0.4); }
+  .plan-card.plan-popular::before { background: radial-gradient(circle, rgba(74,222,128,0.12) 0%, transparent 70%); }
+
+  .plan-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .plan-name {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: #f0efe9;
+    letter-spacing: -0.3px;
+  }
+  .plan-badge {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .badge-popular { background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+  .badge-value   { background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }
+  .badge-start   { background: rgba(255,255,255,0.07); color: #a1a1aa; border: 1px solid rgba(255,255,255,0.1); }
+
+  .plan-price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .plan-price-was {
+    font-size: 16px;
+    font-weight: 600;
+    color: #555;
+    text-decoration: line-through;
+  }
+  .plan-price-now {
+    font-size: 30px;
+    font-weight: 800;
+    color: #f0efe9;
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  .plan-price-unit { font-size: 13px; color: #71717a; }
+
+  .plan-tagline {
+    font-size: 12px;
+    color: #71717a;
+    margin-bottom: 18px;
+    line-height: 1.4;
+  }
+
+  .plan-cta {
+    width: 100%;
+    background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+    color: #0a0a0a;
+    border: none;
+    border-radius: 10px;
+    padding: 13px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 18px;
+    transition: filter 0.15s;
+    display: block;
+    text-align: center;
+  }
+  .plan-cta:hover { filter: brightness(0.92); }
+  .plan-card.plan-popular .plan-cta {
+    background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%);
+    box-shadow: 0 4px 20px rgba(74,222,128,0.25);
+  }
+
+  .plan-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .plan-features li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #a1a1aa;
+    line-height: 1.4;
+  }
+  .plan-features li .fi {
+    font-size: 14px;
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+  }
+
+  .plan-terms {
+    font-size: 11px;
+    color: #52525b;
+    margin-top: 14px;
+    line-height: 1.5;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-top: 12px;
+  }
+
   @media (max-width: 480px) {
     .form-row { flex-direction: column; }
     .code-exp { display: none; }
     .modal-tabs { gap: 0; }
     .modal-tab { padding: 8px 10px; font-size: 11px; }
+    .plan-price-now { font-size: 26px; }
   }
 </style>
 </head>
@@ -467,13 +601,78 @@
       <div id="redeem-status" class="status"></div>
     </div>
 
-    <div class="card">
-      <div class="info-list">
-        <div class="info-row"><div class="info-dot"></div><span><strong>1 Month (₦2,000)</strong> — full access to all notes, past questions and resources for one month.</span></div>
-        <div class="info-row"><div class="info-dot"></div><span><strong>3 Months (₦5,500)</strong> — covers a full semester at a discount.</span></div>
-        <div class="info-row"><div class="info-dot"></div><span><strong>6 Months (₦9,000)</strong> — both semesters, best value.</span></div>
-        <div class="info-row"><div class="info-dot"></div><span>Pay your class rep, get a code, enter it above — access activates instantly.</span></div>
+    <div class="plan-cards">
+
+      <!-- 1 Month -->
+      <div class="plan-card">
+        <div class="plan-header">
+          <span class="plan-name">Starter</span>
+          <span class="plan-badge badge-start">⏱ 1 Month</span>
+        </div>
+        <div class="plan-price-row">
+          <span class="plan-price-was">₦4,000</span>
+          <span class="plan-price-now">₦2,000</span>
+          <span class="plan-price-unit">NGN / month</span>
+        </div>
+        <p class="plan-tagline">Try it out — full access for a month.</p>
+        <button class="plan-cta" onclick="focusRedeem()">Get access →</button>
+        <ul class="plan-features">
+          <li><span class="fi">📖</span>All lecture notes (every course)</li>
+          <li><span class="fi">📝</span>Past exam questions</li>
+          <li><span class="fi">📂</span>Course resources &amp; materials</li>
+          <li><span class="fi">🗓</span>Week-by-week study guides</li>
+          <li><span class="fi">⚡</span>Instant activation</li>
+        </ul>
       </div>
+
+      <!-- 3 Months -->
+      <div class="plan-card plan-popular">
+        <div class="plan-header">
+          <span class="plan-name">Semester</span>
+          <span class="plan-badge badge-popular">★ Most Popular</span>
+        </div>
+        <div class="plan-price-row">
+          <span class="plan-price-was">₦12,000</span>
+          <span class="plan-price-now">₦5,500</span>
+          <span class="plan-price-unit">NGN / 3 months</span>
+        </div>
+        <p class="plan-tagline">Covers a full semester at a discount.</p>
+        <button class="plan-cta" onclick="focusRedeem()">Get access →</button>
+        <ul class="plan-features">
+          <li><span class="fi">📖</span>All lecture notes (every course)</li>
+          <li><span class="fi">📝</span>Past exam questions</li>
+          <li><span class="fi">📂</span>Course resources &amp; materials</li>
+          <li><span class="fi">🗓</span>Week-by-week study guides</li>
+          <li><span class="fi">⚡</span>Instant activation</li>
+          <li><span class="fi">💰</span>54% cheaper than monthly</li>
+        </ul>
+        <p class="plan-terms">Best choice for the current semester. Access lasts the full 3 months from activation.</p>
+      </div>
+
+      <!-- 6 Months -->
+      <div class="plan-card">
+        <div class="plan-header">
+          <span class="plan-name">Full Year</span>
+          <span class="plan-badge badge-value">🏆 Best Value</span>
+        </div>
+        <div class="plan-price-row">
+          <span class="plan-price-was">₦24,000</span>
+          <span class="plan-price-now">₦9,000</span>
+          <span class="plan-price-unit">NGN / 6 months</span>
+        </div>
+        <p class="plan-tagline">Both semesters — lock in the lowest rate.</p>
+        <button class="plan-cta" onclick="focusRedeem()">Get access →</button>
+        <ul class="plan-features">
+          <li><span class="fi">📖</span>All lecture notes (every course)</li>
+          <li><span class="fi">📝</span>Past exam questions</li>
+          <li><span class="fi">📂</span>Course resources &amp; materials</li>
+          <li><span class="fi">🗓</span>Week-by-week study guides</li>
+          <li><span class="fi">⚡</span>Instant activation</li>
+          <li><span class="fi">💰</span>63% cheaper than monthly</li>
+        </ul>
+        <p class="plan-terms">Pay your class rep, receive your code, enter it above — access activates the moment you redeem.</p>
+      </div>
+
     </div>
 
   </div>
@@ -836,6 +1035,13 @@ window.importFromCSV = async function() {
 
 // ─── Student redemption ───────────────────────────────────────────────────────
 
+window.focusRedeem = function() {
+  var input = document.getElementById("redeem-input");
+  if (!input) return;
+  input.scrollIntoView({ behavior: "smooth", block: "center" });
+  setTimeout(function() { input.focus(); }, 300);
+};
+
 window.formatCodeInput = function(el) {
   var raw   = el.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
   var parts = [];
@@ -901,10 +1107,10 @@ window.handleRedeem = async function() {
     });
 
     setStatus("success",
-      "Access activated — <strong>" + TIER_LABELS[tier] + "</strong> subscription is now live. " +
-      '<a href="Learn.html" style="color:var(--green-deep);font-weight:600;">Go to Notes →</a>'
+      "✓ Access activated — <strong>" + TIER_LABELS[tier] + "</strong> is now live. Taking you to your dashboard…"
     );
     input.value = "";
+    setTimeout(function() { window.location.href = "dashboard.html"; }, 2200);
   } catch (err) {
     setStatus("error", err.message);
   } finally {
