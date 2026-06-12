@@ -95,6 +95,14 @@
       padding: 6px;
     }
     .pw-redeem-link:hover { color: var(--text); }
+
+    /* ── Visual lock badge on course cards when not subscribed ── */
+    body.paywall-active .course-item::after {
+      content: '🔒';
+      position: absolute; top: 8px; right: 8px;
+      font-size: 15px; line-height: 1;
+      pointer-events: none; z-index: 4;
+    }
     </style>
       <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#16a34a">
@@ -562,12 +570,13 @@
         if (isActive) return; // subscribed — nothing to lock
       } catch (_) { /* lock by default on error */ }
 
-      // Show sidebar CTA
+      // Show sidebar CTA + visual lock badges
       document.getElementById('sidebarGoPro').style.display = 'block';
+      document.body.classList.add('paywall-active');
 
       // Intercept course card + resource panel clicks (capture phase fires before dashboard.js)
       document.addEventListener('click', function(e) {
-        var target = e.target.closest('.dash-courses-list li, .topic-row, .week-acc-body a');
+        var target = e.target.closest('.dash-courses-list li, .topic-row, .week-acc-body a, .panel-learn-btn');
         if (!target) return;
         e.preventDefault();
         e.stopPropagation();
