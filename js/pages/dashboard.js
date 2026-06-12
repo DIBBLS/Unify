@@ -1134,7 +1134,7 @@ function saveStreak() {
 
 function renderStreak() {
   const nudge = document.getElementById("streakNudge");
-  const fire = document.getElementById("streakFire");
+  if (!nudge) return; // streak card removed from dashboard
   const daysVal = document.getElementById("streakDaysVal");
   const message = document.getElementById("streakMessage");
   const sub = document.getElementById("streakSub");
@@ -1193,6 +1193,7 @@ function renderStreak() {
 }
 
 window.openReview = function () {
+  if (!document.getElementById("reviewModalOverlay")) return;
   if (streakData.todayDone) return;
   reviewAnswered = false;
 
@@ -1273,11 +1274,13 @@ window.finishReview = function () {
 };
 
 window.closeReview = function () {
-  document.getElementById("reviewModalOverlay").classList.remove("open");
+  const el = document.getElementById("reviewModalOverlay");
+  if (el) el.classList.remove("open");
 };
 
 window.closeReviewOnOverlay = function (e) {
-  if (e.target === document.getElementById("reviewModalOverlay")) closeReview();
+  const el = document.getElementById("reviewModalOverlay");
+  if (el && e.target === el) closeReview();
 };
 
 // ── STUDY PLANNER ─────────────────────────────────────
