@@ -517,6 +517,14 @@ body { max-width: 480px; margin: 0 auto; }
   font-size: 13px; color: var(--text3); text-decoration: none; padding: 6px;
 }
 .pw-redeem-link:hover { color: var(--text); }
+
+/* ── Visual lock on week/topic/resource rows when not subscribed ── */
+body.paywall-active .week-row-btn .week-row-arrow,
+body.paywall-active .topic-card .topic-arrow,
+body.paywall-active .resource-row .resource-arrow { display: none; }
+body.paywall-active .week-row-btn .week-row-right::after,
+body.paywall-active .topic-card .topic-card-right::after { content: '🔒'; font-size: 14px; }
+body.paywall-active .resource-row::after { content: '🔒'; font-size: 14px; margin-left: auto; flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -712,9 +720,12 @@ onAuthStateChanged(auth, async function(user) {
     if (isActive) return;
   } catch (_) { /* lock by default */ }
 
-  // Intercept week buttons, topic cards, and notes links (capture phase)
+  // Show visual lock badges
+  document.body.classList.add('paywall-active');
+
+  // Intercept week buttons, topic cards, and ALL resource rows (capture phase)
   document.addEventListener('click', function(e) {
-    var target = e.target.closest('.week-row-btn, .topic-card, a[href*="notes.html"], .resource-row[href*="notes"]');
+    var target = e.target.closest('.week-row-btn, .topic-card, .resource-row');
     if (!target) return;
     showPaywall(e);
   }, true);
