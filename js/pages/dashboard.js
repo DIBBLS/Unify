@@ -229,12 +229,6 @@ async function loadUserData() {
       `${d.university} · ${d.level}`;
     document.getElementById("heroDept").textContent = d.department;
 
-    // Show practice questions banner for 300 Level students only
-    if (d.level === '300 Level') {
-      const banner = document.getElementById('pqBanner');
-      if (banner) banner.style.display = 'block';
-    }
-
     // Show persisted CGPA immediately from Firestore (before courses render)
     if (typeof d.cgpa === "number" && d.cgpa > 0) {
       document.getElementById("statCGPA").textContent = d.cgpa.toFixed(2);
