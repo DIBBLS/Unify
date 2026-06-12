@@ -171,28 +171,6 @@
       </div>
     </div>
 
-    <!-- REVIEW MODAL -->
-    <div class="review-modal-overlay" id="reviewModalOverlay" onclick="closeReviewOnOverlay(event)">
-      <div class="review-modal">
-        <div class="review-modal-header">
-          <span class="review-modal-badge" id="reviewModalBadge">Quick Review</span>
-          <button class="review-modal-close" onclick="closeReview()">&#x2715;</button>
-        </div>
-        <div class="review-modal-topic" id="reviewModalTopic">Topic Name</div>
-        <div class="review-modal-course" id="reviewModalCourse">Course · Week</div>
-        <div class="review-question" id="reviewQuestion">Loading question...</div>
-        <div class="review-options" id="reviewOptions"></div>
-        <div class="review-result" id="reviewResult">
-          <div class="review-result-title" id="reviewResultTitle"></div>
-          <div id="reviewResultBody"></div>
-        </div>
-        <div class="review-modal-actions">
-          <button class="review-done-btn" id="reviewDoneBtn" onclick="finishReview()">Done ✓</button>
-          <button class="review-skip-btn" onclick="closeReview()">Later</button>
-        </div>
-      </div>
-    </div>
-
     <!-- APP LAYOUT -->
     <div class="app-layout">
 
@@ -349,34 +327,18 @@
             <div class="goal-card" id="goalCard"></div>
           </div>
 
-          <!-- TWO-COL: Motivation + Streak -->
-          <div class="dash-two-col">
-            <div class="dash-motivation-banner">
-              <div class="dash-motivation-left">
-                <div class="dash-motivation-crown">👑</div>
-                <p class="dash-motivation-title">Keep up the momentum</p>
-                <small class="dash-motivation-sub">You're on track this semester</small>
-              </div>
-              <div class="dash-motivation-right">
-                <p class="dash-motivation-ahead">Ahead <strong>this week</strong></p>
-                <svg class="dash-sparkline" viewBox="0 0 80 28" xmlns="http://www.w3.org/2000/svg">
-                  <polyline points="0,24 20,18 40,13 60,8 80,3" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                </svg>
-              </div>
+          <!-- MOTIVATION BANNER -->
+          <div class="dash-motivation-banner">
+            <div class="dash-motivation-left">
+              <div class="dash-motivation-crown">👑</div>
+              <p class="dash-motivation-title">Keep up the momentum</p>
+              <small class="dash-motivation-sub">You're on track this semester</small>
             </div>
-
-            <div class="streak-nudge" id="streakNudge" onclick="openReview()">
-              <div class="streak-fire" id="streakFire">🔥</div>
-              <div class="streak-info">
-                <div class="streak-count">
-                  <span class="streak-days-val" id="streakDaysVal">0</span>
-                  <span>day streak</span>
-                </div>
-                <div class="streak-message" id="streakMessage">Start your streak today</div>
-                <div class="streak-sub" id="streakSub">One quick question. 2 minutes max.</div>
-                <div class="streak-dots" id="streakDots"></div>
-              </div>
-              <button class="streak-action" id="streakActionBtn">Let's go →</button>
+            <div class="dash-motivation-right">
+              <p class="dash-motivation-ahead">Ahead <strong>this week</strong></p>
+              <svg class="dash-sparkline" viewBox="0 0 80 28" xmlns="http://www.w3.org/2000/svg">
+                <polyline points="0,24 20,18 40,13 60,8 80,3" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              </svg>
             </div>
           </div>
 
