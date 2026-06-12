@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Unify — Import Codes to Firestore</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f5f4f0; color: #0a0a0a; min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 40px 16px 80px; }
+  .wrap { width: 100%; max-width: 600px; }
+  h1 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+  .sub { font-size: 14px; color: #666; margin-bottom: 32px; line-height: 1.5; }
+  .card { background: #fff; border: 1px solid #e0deda; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+  label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #999; margin-bottom: 8px; }
+  input[type=email], input[type=password] {
+    width: 100%; border: 1px solid #e0deda; border-radius: 8px;
+    padding: 10px 12px; font-size: 14px; background: #f8f7f3;
+    margin-bottom: 12px; outline: none;
+  }
+  input:focus { border-color: #4ade80; background: #fff; }
+  textarea { width: 100%; border: 1px solid #e0deda; border-radius: 8px; padding: 10px 12px; font-family: monospace; font-size: 12px; background: #f8f7f3; min-height: 160px; resize: vertical; outline: none; }
+  textarea:focus { border-color: #4ade80; background: #fff; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: none; border-radius: 8px; padding: 12px 22px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 12px; transition: filter 0.15s; }
+  .btn-green { background: #4ade80; color: #0a0a0a; }
+  .btn-green:hover { filter: brightness(0.92); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .status { border-radius: 8px; padding: 14px 16px; font-size: 13px; margin-top: 14px; line-height: 1.55; display: none; }
+  .status.show { display: block; }
+  .status.ok  { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.3); color: #16a34a; }
+  .status.err { background: rgba(239,68,68,0.07); border: 1px solid rgba(239,68,68,0.2); color: #dc2626; }
+  .status.inf { background: #f8f7f3; border: 1px solid #e0deda; color: #555; }
+  .spinner { width: 14px; height: 14px; border: 2px solid #e0deda; border-top-color: #16a34a; border-radius: 50%; animation: spin .7s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #importCard { display: none; }
+  .hint { font-size: 12px; color: #999; margin-top: 8px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Unify — Import Codes</h1>
+  <p class="sub">One-time tool to write your generated CSV codes into Firestore.<br>
+    Must be served from <code>localhost</code> — open a terminal in your Unify folder and run:<br>
+    <strong>python -m http.server 8000</strong> then visit <strong>http://localhost:8000/import-codes.html</strong></p>
+
+  <!-- SIGN IN -->
+  <div class="card" id="loginCard">
+    <label>Sign in with your admin account</label>
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <button class="btn btn-green" id="loginBtn" onclick="doLogin()">Sign In</button>
+    <div id="loginStatus" class="status"></div>
+  </div>
+
+  <!-- IMPORT -->
+  <div class="card" id="importCard">
+    <div id="userLine" style="font-size:13px;color:#555;margin-bottom:16px;"></div>
+    <label>Paste your CSV here</label>
+    <textarea id="csvInput" placeholder="Code,Tier,Expires&#10;UNF-XXXX-XXXX,1 Month,2026-07-12&#10;..."></textarea>
+    <p class="hint">Header row is ignored. Accepts "1 Month", "3 Months", or "6 Months" in the Tier column.</p>
+    <button class="btn btn-green" id="importBtn" onclick="doImport()">Import &amp; Save to Firestore</button>
+    <div id="importStatus" class="status"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, doc, collection, writeBatch, serverTimestamp, Timestamp }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const app = initializeApp({
+  apiKey:            'AIzaSyBjZyfNNpXZFJwB7GKXVeSzLTVknfwCa8I',
+  authDomain:        'unify-b4316.firebaseapp.com',
+  projectId:         'unify-b4316',
+  storageBucket:     'unify-b4316.firebasestorage.app',
+  messagingSenderId: '114594366615',
+  appId:             '1:114594366615:web:44ef821b4618f1a24615d2',
+});
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+const TIER_MAP = { '1 month': '1m', '3 months': '3m', '6 months': '6m' };
+
+function setLoginStatus(type, html) {
+  var el = document.getElementById('loginStatus');
+  el.className = 'status show ' + type;
+  el.innerHTML = html;
+}
+function setImportStatus(type, html) {
+  var el = document.getElementById('importStatus');
+  el.className = 'status show ' + type;
+  el.innerHTML = html;
+}
+
+onAuthStateChanged(auth, function(user) {
+  if (user) {
+    document.getElementById('loginCard').style.display  = 'none';
+    document.getElementById('importCard').style.display = 'block';
+    document.getElementById('userLine').textContent = '✓ Signed in as ' + user.email;
+  }
+});
+
+window.doLogin = async function() {
+  var email    = document.getElementById('email').value.trim();
+  var password = document.getElementById('password').value;
+  var btn      = document.getElementById('loginBtn');
+  if (!email || !password) { setLoginStatus('err', 'Enter your email and password.'); return; }
+  btn.disabled    = true;
+  btn.textContent = 'Signing in…';
+  setLoginStatus('inf', '<span class="spinner"></span> Signing in…');
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    // onAuthStateChanged will switch the UI
+  } catch (e) {
+    setLoginStatus('err', e.message);
+    btn.disabled    = false;
+    btn.textContent = 'Sign In';
+  }
+};
+
+window.doImport = async function() {
+  var raw = document.getElementById('csvInput').value.trim();
+  if (!raw) { setImportStatus('err', 'Paste your CSV first.'); return; }
+
+  var codes = [];
+  raw.split('\n').forEach(function(line) {
+    line = line.trim();
+    if (!line || line.toLowerCase().startsWith('code')) return;
+    var parts   = line.split(',');
+    if (parts.length < 3) return;
+    var code    = parts[0].trim().toUpperCase();
+    var tierRaw = parts[1].trim().toLowerCase();
+    var expStr  = parts[2].trim();
+    var tier    = TIER_MAP[tierRaw];
+    if (!tier || !/^[A-Z0-9]{3}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) return;
+    codes.push({ code, tier, expiresAt: expStr });
+  });
+
+  if (!codes.length) {
+    setImportStatus('err', 'No valid codes found — check the format and try again.');
+    return;
+  }
+
+  var btn = document.getElementById('importBtn');
+  btn.disabled    = true;
+  btn.textContent = 'Writing…';
+  setImportStatus('inf', '<span class="spinner"></span> Writing ' + codes.length + ' codes to Firestore…');
+
+  try {
+    var CHUNK = 400;
+    for (var i = 0; i < codes.length; i += CHUNK) {
+      var batch = writeBatch(db);
+      codes.slice(i, i + CHUNK).forEach(function(c) {
+        var ref = doc(collection(db, 'accessCodes'), c.code);
+        batch.set(ref, {
+          tier:      c.tier,
+          isUsed:    false,
+          createdAt: serverTimestamp(),
+          expiresAt: Timestamp.fromDate(new Date(c.expiresAt)),
+          usedBy:    null
+        });
+      });
+      await batch.commit();
+    }
+    setImportStatus('ok',
+      '✓ <strong>' + codes.length + ' codes saved.</strong> Students can redeem them now. ' +
+      'You can close this page.'
+    );
+    document.getElementById('csvInput').value = '';
+  } catch (err) {
+    setImportStatus('err',
+      '<strong>Error:</strong> ' + err.message +
+      '<br><br>If you see a "permission-denied" error, your account needs <code>isAdmin: true</code> in Firestore, ' +
+      'and the security rules must be deployed (<code>firebase deploy --only firestore:rules</code>).'
+    );
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = 'Import & Save to Firestore';
+  }
+};
+</script>
+</body>
+</html>
