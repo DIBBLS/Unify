@@ -402,6 +402,23 @@
       </div>
     </div>
 
+    <!-- Import from CSV -->
+    <div class="card" id="import-section">
+      <div class="card-title">Import Existing CSV</div>
+      <div class="card-sub">Already downloaded a CSV but forgot to save it to Firestore? Paste it here and click Import.</div>
+      <div class="field">
+        <label>Paste CSV content</label>
+        <textarea id="csv-input" rows="6" style="border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:monospace;font-size:12px;background:var(--surface2);color:var(--text);width:100%;resize:vertical;outline:none;" placeholder="Code,Tier,Expires&#10;UNF-XXXX-XXXX,1 Month,2026-07-12&#10;..."></textarea>
+      </div>
+      <div class="btn-row" style="margin-top:8px;">
+        <button class="btn btn-primary" onclick="importFromCSV()">Import &amp; Save to Firestore</button>
+      </div>
+      <div class="write-bar" id="import-bar" style="margin-top:12px;">
+        <div class="spinner"></div>
+        <span id="import-bar-msg">Importing…</span>
+      </div>
+    </div>
+
     <!-- Generated codes list -->
     <div id="codes-section" class="card" style="display:none;">
       <div class="codes-header">
@@ -756,6 +773,64 @@ window.writeToFirestore = async function() {
     bar.innerHTML = '<span style="color:#dc2626;">Error: ' + err.message + '</span>';
     btn.disabled  = false;
     btn.textContent = "Retry";
+  }
+};
+
+// ─── CSV Import ───────────────────────────────────────────────────────────────
+
+window.importFromCSV = async function() {
+  var raw  = document.getElementById("csv-input").value.trim();
+  var bar  = document.getElementById("import-bar");
+  var msg  = document.getElementById("import-bar-msg");
+
+  if (!raw) { alert("Paste your CSV content first."); return; }
+
+  // Parse — skip header row
+  var TIER_MAP = { "1 month": "1m", "3 months": "3m", "6 months": "6m" };
+  var codes = [];
+  raw.split("\n").forEach(function(line) {
+    line = line.trim();
+    if (!line || line.toLowerCase().startsWith("code")) return; // skip header
+    var parts = line.split(",");
+    if (parts.length < 3) return;
+    var code    = parts[0].trim().toUpperCase();
+    var tierRaw = parts[1].trim().toLowerCase();
+    var expStr  = parts[2].trim();
+    var tier    = TIER_MAP[tierRaw];
+    if (!tier || !/^[A-Z0-9]{3}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) return;
+    codes.push({ code: code, tier: tier, expiresAt: expStr });
+  });
+
+  if (!codes.length) { alert("No valid codes found. Check the format and try again."); return; }
+
+  bar.className   = "write-bar show";
+  msg.textContent = "Writing " + codes.length + " codes to Firestore…";
+
+  try {
+    // Firestore allows max 500 ops per batch — chunk if needed
+    var CHUNK = 400;
+    for (var i = 0; i < codes.length; i += CHUNK) {
+      var batch = writeBatch(db);
+      codes.slice(i, i + CHUNK).forEach(function(c) {
+        var ref = doc(collection(db, "accessCodes"), c.code);
+        batch.set(ref, {
+          tier:      c.tier,
+          isUsed:    false,
+          createdAt: serverTimestamp(),
+          expiresAt: Timestamp.fromDate(new Date(c.expiresAt)),
+          usedBy:    null
+        }, { merge: false });
+      });
+      await batch.commit();
+    }
+    bar.innerHTML =
+      '<span style="color:var(--green-deep);font-weight:600;">✓ ' + codes.length +
+      ' codes saved successfully. Students can now redeem them.</span>';
+    document.getElementById("csv-input").value = "";
+  } catch (err) {
+    bar.innerHTML =
+      '<span style="color:#dc2626;font-weight:600;">Error: ' + err.message +
+      '</span><br><span style="font-size:12px;color:var(--text2);">Make sure your Firestore rules are deployed and you are marked as admin.</span>';
   }
 };
 
