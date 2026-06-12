@@ -15,6 +15,131 @@
     <script src="js/theme.js"></script>
     <link rel="stylesheet" href="css/pages/dashboard.styles.css?v=goal-5" />
     <link rel="stylesheet" href="css/pages/dashboard-v2.styles.css?v=2" />
+    <style>
+    /* ── Unify Plus promo card ── */
+    .plus-card {
+      display: none; /* shown by JS only when not subscribed */
+      background: var(--invert-bg);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .plus-card::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 160px; height: 160px;
+      border-radius: 50%;
+      background: rgba(74,222,128,0.07);
+      pointer-events: none;
+    }
+    .plus-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .plus-card-title {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      font-size: 26px;
+      letter-spacing: -0.5px;
+      color: var(--invert-text);
+      line-height: 1;
+    }
+    .plus-card-badge {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      background: rgba(74,222,128,0.15);
+      color: #4ade80;
+      border: 1px solid rgba(74,222,128,0.3);
+      border-radius: 20px;
+      padding: 4px 10px;
+      white-space: nowrap;
+      margin-top: 4px;
+    }
+    .plus-card-pricing {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .plus-price-strike {
+      font-size: 18px;
+      font-weight: 700;
+      color: rgba(240,239,233,0.3);
+      text-decoration: line-through;
+    }
+    .plus-price-now {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--invert-text);
+      letter-spacing: -0.5px;
+    }
+    .plus-price-unit {
+      font-size: 13px;
+      color: rgba(240,239,233,0.5);
+    }
+    .plus-card-tagline {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--invert-text);
+      margin-bottom: 18px;
+      line-height: 1.4;
+    }
+    .plus-card-btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      background: #4ade80;
+      color: #0a0a0a;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      margin-bottom: 20px;
+      transition: filter 0.15s;
+    }
+    .plus-card-btn:hover { filter: brightness(0.92); }
+    .plus-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .plus-features li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: rgba(240,239,233,0.75);
+    }
+    .plus-feat-icon {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: rgba(74,222,128,0.12);
+      border: 1px solid rgba(74,222,128,0.25);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 9px;
+      color: #4ade80;
+    }
+    .plus-card-fine {
+      font-size: 10px;
+      color: rgba(240,239,233,0.3);
+      line-height: 1.5;
+    }
+    .plus-card-fine a { color: rgba(240,239,233,0.45); }
+    </style>
       <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#16a34a">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -301,6 +426,33 @@
             </div>
           </div>
 
+          <!-- UNIFY PLUS PROMO CARD (hidden; shown by JS when not subscribed) -->
+          <div class="plus-card" id="unifyPlusCard">
+            <div class="plus-card-top">
+              <div class="plus-card-title">Unify Plus<span style="color:#4ade80;">.</span></div>
+              <span class="plus-card-badge">Limited Time</span>
+            </div>
+
+            <div class="plus-card-pricing">
+              <span class="plus-price-strike">₦9,000</span>
+              <span class="plus-price-now">₦2,000</span>
+              <span class="plus-price-unit">NGN for 1 month</span>
+            </div>
+            <div class="plus-card-tagline">Full access to all course notes &amp; resources</div>
+
+            <a href="access-codes.html" class="plus-card-btn">Claim Notes Access →</a>
+
+            <ul class="plus-features">
+              <li><span class="plus-feat-icon">✦</span>Week-by-week course notes for all engineering courses</li>
+              <li><span class="plus-feat-icon">✦</span>Past questions &amp; exam prep materials</li>
+              <li><span class="plus-feat-icon">✦</span>Lecture summaries &amp; study guides</li>
+              <li><span class="plus-feat-icon">✦</span>3-month &amp; 6-month plans at a discount</li>
+              <li><span class="plus-feat-icon">✦</span>New content added every week</li>
+            </ul>
+
+            <p class="plus-card-fine">Pay your class rep, get a code, redeem it above — activates instantly. <a href="access-codes.html">Learn more.</a></p>
+          </div>
+
           <!-- COURSES -->
           <div class="dash-courses-section">
             <div class="dash-courses-header">
@@ -440,6 +592,28 @@
     <script src="courses.js?v=step1-deptfix"></script>
     <script src="Coursecontent.JS?v=4"></script>
     <script type="module" src="js/pages/dashboard.js?v=goal-5"></script>
-  <script type="module" src="js/feedback.js"></script>
+    <script type="module" src="js/feedback.js"></script>
+
+    <!-- Show Unify Plus card only when user has no active subscription -->
+    <script type="module">
+    import { auth, db } from './js/firebase-config.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+    onAuthStateChanged(auth, async function(user) {
+      if (!user) return;
+      try {
+        var snap = await getDoc(doc(db, 'users', user.uid));
+        var sub  = snap.data()?.subscription;
+        var isActive = sub?.active === true && sub?.expiresAt?.toDate() > new Date();
+        if (!isActive) {
+          document.getElementById('unifyPlusCard').style.display = 'block';
+        }
+      } catch (_) {
+        // On error, show card (safe default)
+        document.getElementById('unifyPlusCard').style.display = 'block';
+      }
+    });
+    </script>
 </body>
 </html>
