@@ -1136,6 +1136,7 @@ function renderStreak() {
   const sub = document.getElementById("streakSub");
   const btn = document.getElementById("streakActionBtn");
   const dots = document.getElementById("streakDots");
+  const fire = document.getElementById("streakFire");
 
   daysVal.textContent = streakData.count;
 
