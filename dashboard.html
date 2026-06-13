@@ -19,10 +19,13 @@
     /* ── Support Unify nudge bar ── */
     .support-nudge {
       display: flex; align-items: center; gap: 14px;
-      padding: 10px 16px 10px 12px;
+      margin: 0 16px 14px;
+      padding: 12px 14px;
       background: rgba(74,222,128,0.06);
-      border-bottom: 1px solid rgba(74,222,128,0.15);
+      border: 1px solid rgba(74,222,128,0.18);
+      border-radius: 14px;
     }
+    @media (min-width: 769px) { .support-nudge { margin: 0 40px 16px; } }
     .support-nudge-img {
       width: 52px; height: 52px; object-fit: contain;
       flex-shrink: 0; border-radius: 8px;
@@ -361,18 +364,6 @@
             </div>
           </div>
 
-          <!-- SUPPORT NUDGE -->
-          <div class="support-nudge" id="supportNudge">
-            <img src="icons/boxboy.png" class="support-nudge-img" alt="Box Boy" />
-            <div class="support-nudge-body">
-              <div class="support-nudge-title">🏅 Become an Early Supporter</div>
-              <div class="support-nudge-text">
-                Send to <strong>6118998666</strong> (Commy Glory Ventures), then get your code from admin to unlock a special Early Supporter badge on your profile.
-              </div>
-            </div>
-            <button class="support-nudge-close" onclick="document.getElementById('supportNudge').style.display='none'" aria-label="Dismiss">×</button>
-          </div>
-
           <!-- GREETING -->
           <div class="dash-greeting">
             <p class="dash-greeting-eyebrow" id="heroTag">Your Dashboard</p>
@@ -439,6 +430,18 @@
               </div>
               <button class="streak-action" id="streakActionBtn">Let's go →</button>
             </div>
+          </div>
+
+          <!-- SUPPORT NUDGE -->
+          <div class="support-nudge" id="supportNudge">
+            <img src="icons/boxboy.png" class="support-nudge-img" alt="Box Boy" />
+            <div class="support-nudge-body">
+              <div class="support-nudge-title">🏅 Become an Early Supporter</div>
+              <div class="support-nudge-text">
+                Send to <strong>6118998666</strong> (Commy Glory Ventures), then get your code from admin to unlock a special Early Supporter badge on your profile.
+              </div>
+            </div>
+            <button class="support-nudge-close" onclick="document.getElementById('supportNudge').style.display='none'" aria-label="Dismiss">×</button>
           </div>
 
           <!-- STUDY PLANNER (hidden — has its own page via Study Plan nav) -->
