@@ -162,14 +162,20 @@
     }
     #getPlusBtn:hover { background: rgba(74,222,128,0.2); }
 
-    /* ── Partial-lock badge on course cards (week 1 free, rest locked) ── */
+    /* ── Partial-lock badge on course cards — open padlock, full opacity ── */
     body.paywall-active .course-item::after {
-      content: '🔒';
+      content: '🔓';
       position: absolute; top: 8px; right: 8px;
-      font-size: 13px; line-height: 1;
+      font-size: 14px; line-height: 1;
       pointer-events: none; z-index: 4;
-      opacity: 0.45;
-      filter: grayscale(0.3);
+    }
+
+    /* ── Full lock on topic rows inside the week accordion panel ── */
+    body.paywall-active .topic-row::after {
+      content: '🔒';
+      font-size: 13px;
+      margin-left: auto;
+      flex-shrink: 0;
     }
     </style>
       <link rel="manifest" href="manifest.json">
@@ -621,11 +627,20 @@
         if (isActive) return; // subscribed — nothing to lock
       } catch (_) { /* lock by default on error */ }
 
-      // Show sidebar CTA + Get Plus+ chip + partial-lock badge on course cards
-      // Clicks pass through to Learn.html where week 1 is free and weeks 2-12 are locked
+      // Show sidebar CTA + Get Plus+ chip + lock badges
       document.getElementById('sidebarGoPro').style.display = 'block';
       document.getElementById('getPlusBtn').style.display = 'inline-flex';
       document.body.classList.add('paywall-active');
+
+      // Lock topic/week links inside the course panel (capture phase)
+      // Course card clicks are NOT blocked — they navigate to Learn.html (week 1 free)
+      document.addEventListener('click', function(e) {
+        var target = e.target.closest('.topic-row, .week-acc-body a, .panel-learn-btn');
+        if (!target) return;
+        e.preventDefault();
+        e.stopPropagation();
+        document.getElementById('paywallModal').classList.add('open');
+      }, true);
     });
 
     // Close modal on backdrop click
