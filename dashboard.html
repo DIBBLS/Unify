@@ -16,36 +16,40 @@
     <link rel="stylesheet" href="css/pages/dashboard.styles.css?v=goal-8" />
     <link rel="stylesheet" href="css/pages/dashboard-v2.styles.css?v=2" />
     <style>
-    /* ── Support Unify nudge bar ── */
-    .support-nudge {
-      display: flex; align-items: center; gap: 14px;
-      margin: 0 16px 14px;
-      padding: 12px 14px;
-      background: rgba(74,222,128,0.06);
+    /* ── Sidebar coffee card ── */
+    .sidebar-coffee {
+      margin: 0 0 10px;
+      background: rgba(74,222,128,0.07);
       border: 1px solid rgba(74,222,128,0.18);
-      border-radius: 14px;
+      border-radius: 12px;
+      padding: 12px 13px;
+      text-align: center;
     }
-    @media (min-width: 769px) { .support-nudge { margin: 0 40px 16px; } }
-    .support-nudge-img {
-      width: 52px; height: 52px; object-fit: contain;
-      flex-shrink: 0; border-radius: 8px;
+    .sidebar-coffee-icon {
+      font-size: 28px; line-height: 1; margin-bottom: 4px;
     }
-    .support-nudge-body { flex: 1; min-width: 0; }
-    .support-nudge-title {
-      font-size: 13px; font-weight: 700; color: var(--text);
+    .sidebar-coffee-title {
+      font-size: 12px; font-weight: 700; color: #4ade80;
+      margin-bottom: 4px; letter-spacing: 0.2px;
+    }
+    .sidebar-coffee-sub {
+      font-size: 11px; color: rgba(240,239,233,0.55);
+      line-height: 1.4; margin-bottom: 10px;
+    }
+    .sidebar-coffee-acct {
+      font-size: 16px; font-weight: 800;
+      color: rgba(240,239,233,0.92);
+      letter-spacing: 2px;
+      font-family: 'DM Mono', 'Courier New', monospace;
       margin-bottom: 2px;
     }
-    .support-nudge-text {
-      font-size: 12px; color: var(--text2); line-height: 1.45;
+    .sidebar-coffee-bank {
+      font-size: 10px; color: rgba(240,239,233,0.38);
+      margin-bottom: 10px;
     }
-    .support-nudge-text strong {
-      font-family: 'DM Mono', 'Courier New', monospace;
-      color: var(--text); letter-spacing: 0.5px;
-    }
-    .support-nudge-close {
-      background: none; border: none; font-size: 18px;
-      cursor: pointer; color: var(--text3); line-height: 1;
-      flex-shrink: 0; padding: 4px;
+    .sidebar-coffee-cta {
+      font-size: 10px; color: rgba(240,239,233,0.45);
+      line-height: 1.5;
     }
 
     /* ── Paywall modal ── */
@@ -328,6 +332,14 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             <span class="app-sidebar-link-text"><span id="themeToggle">🌙 Dark</span></span>
           </button>
+          <div class="sidebar-coffee">
+            <div class="sidebar-coffee-icon">☕</div>
+            <div class="sidebar-coffee-title">Buy me a coffee</div>
+            <div class="sidebar-coffee-sub">Support Unify &amp; get a special Early Supporter badge on your profile!</div>
+            <div class="sidebar-coffee-acct">6118998666</div>
+            <div class="sidebar-coffee-bank">Commy Glory Ventures</div>
+            <div class="sidebar-coffee-cta">Transfer → get your code from admin → redeem to claim your badge</div>
+          </div>
           <button class="app-sidebar-signout" id="signOutBtn">Sign out</button>
         </div>
       </aside>
@@ -430,18 +442,6 @@
               </div>
               <button class="streak-action" id="streakActionBtn">Let's go →</button>
             </div>
-          </div>
-
-          <!-- SUPPORT NUDGE -->
-          <div class="support-nudge" id="supportNudge">
-            <img src="icons/boxboy.png" class="support-nudge-img" alt="Box Boy" />
-            <div class="support-nudge-body">
-              <div class="support-nudge-title">🏅 Become an Early Supporter</div>
-              <div class="support-nudge-text">
-                Send to <strong>6118998666</strong> (Commy Glory Ventures), then get your code from admin to unlock a special Early Supporter badge on your profile.
-              </div>
-            </div>
-            <button class="support-nudge-close" onclick="document.getElementById('supportNudge').style.display='none'" aria-label="Dismiss">×</button>
           </div>
 
           <!-- STUDY PLANNER (hidden — has its own page via Study Plan nav) -->
