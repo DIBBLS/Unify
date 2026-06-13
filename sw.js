@@ -1,4 +1,4 @@
-const CACHE = 'unify-v6';
+const CACHE = 'unify-v7';
 
 // Only truly static, versioned assets go in the cache
 const SHELL = [
