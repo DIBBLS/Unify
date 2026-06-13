@@ -464,6 +464,77 @@ body { max-width: 480px; margin: 0 auto; }
   cursor: pointer; font-family: inherit; transition: opacity 0.15s;
 }
 .exam-notif-btn:hover { opacity: 0.88; }
+
+/* ── Paywall modal ── */
+.pw-bg {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex; align-items: flex-end; justify-content: center;
+  z-index: 600; padding: 16px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.pw-bg.open { opacity: 1; pointer-events: all; }
+.pw-modal {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 28px 24px 24px;
+  width: 100%; max-width: 440px;
+  transform: translateY(24px);
+  transition: transform 0.25s cubic-bezier(.2,.8,.4,1);
+  position: relative;
+}
+.pw-bg.open .pw-modal { transform: translateY(0); }
+.pw-close {
+  position: absolute; top: 14px; right: 16px;
+  background: none; border: none; font-size: 22px;
+  cursor: pointer; color: var(--text3); line-height: 1; padding: 4px;
+}
+.pw-icon { font-size: 32px; margin-bottom: 10px; }
+.pw-title {
+  font-family: 'DM Sans', sans-serif; font-weight: 800;
+  font-size: 20px; color: var(--text); margin-bottom: 6px;
+}
+.pw-sub { font-size: 13px; color: var(--text2); line-height: 1.55; margin-bottom: 20px; }
+.pw-steps { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
+.pw-step { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--text2); }
+.pw-step-n {
+  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3);
+  color: var(--green-text); font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.pw-wa-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; background: #25D366; color: #fff;
+  border-radius: 10px; padding: 14px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
+  text-decoration: none; margin-bottom: 10px; transition: filter 0.15s;
+}
+.pw-wa-btn:hover { filter: brightness(0.92); }
+.pw-redeem-link {
+  display: block; text-align: center;
+  font-size: 13px; color: var(--text3); text-decoration: none; padding: 6px;
+}
+.pw-redeem-link:hover { color: var(--text); }
+
+/* ── Bank account box ── */
+.pw-bank {
+  background: rgba(74,222,128,0.06); border: 1px solid rgba(74,222,128,0.18);
+  border-radius: 10px; padding: 12px 16px; text-align: center; margin: 16px 0 20px;
+}
+.pw-bank-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
+.pw-bank-acct { font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: 3px; font-family: 'Courier New', monospace; }
+.pw-bank-name { font-size: 12px; color: var(--text2); margin-top: 3px; }
+
+/* ── Visual lock: week 1 is always free, only lock weeks 2+ ── */
+body.paywall-active .week-row-btn:not([data-week="1"]) .week-row-arrow { display: none; }
+body.paywall-active .week-row-btn:not([data-week="1"]) .week-row-right::after { content: '🔒'; font-size: 14px; }
+
+body.paywall-active:not([data-week-idx="0"]) .topic-card .topic-arrow,
+body.paywall-active:not([data-week-idx="0"]) .resource-row .resource-arrow { display: none; }
+body.paywall-active:not([data-week-idx="0"]) .topic-card .topic-card-right::after { content: '🔒'; font-size: 14px; }
+body.paywall-active:not([data-week-idx="0"]) .resource-row::after { content: '🔒'; font-size: 14px; margin-left: auto; flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -617,5 +688,64 @@ body { max-width: 480px; margin: 0 auto; }
 <script src="courses.js"></script>
 <script src="Coursecontent.JS?v=4"></script>
 <script type="module" src="js/pages/Learn.js?v=redesign-2"></script>
+
+<!-- Paywall modal -->
+<div class="pw-bg" id="paywallModal">
+  <div class="pw-modal">
+    <button class="pw-close" onclick="document.getElementById('paywallModal').classList.remove('open')">×</button>
+    <div class="pw-icon">🔒</div>
+    <div class="pw-title">Week 2+ is Plus Only</div>
+    <div class="pw-sub">Week 1 is always free. Transfer to unlock all 12 weeks of notes and resources.</div>
+    <div class="pw-bank">
+      <div class="pw-bank-label">Pay to</div>
+      <div class="pw-bank-acct">6118998666</div>
+      <div class="pw-bank-name">Commy Glory Ventures</div>
+    </div>
+    <a href="https://wa.me/2349031767696?text=Hi%2C%20I%27ve%20paid%20for%20Unify%20Plus%20to%206118998666%20(Commy%20Glory%20Ventures).%20Please%20send%20my%20access%20code.%20Here%27s%20my%20receipt%3A" target="_blank" rel="noopener" class="pw-wa-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.524 5.852L.057 23.478a.5.5 0 0 0 .624.608l5.808-1.525A11.953 11.953 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.896 0-3.67-.52-5.188-1.424l-.372-.22-3.449.905.922-3.37-.242-.386A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+      Send Receipt to Admin
+    </a>
+    <a href="access-codes.html" class="pw-redeem-link">Already have a code? Redeem it →</a>
+  </div>
+</div>
+
+<!-- Subscription gate -->
+<script type="module">
+import { auth, db } from './js/firebase-config.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+function showPaywall(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  document.getElementById('paywallModal').classList.add('open');
+}
+
+onAuthStateChanged(auth, async function(user) {
+  if (!user) return;
+  try {
+    var snap     = await getDoc(doc(db, 'users', user.uid));
+    var sub      = snap.data()?.subscription;
+    var isActive = sub?.active === true && sub?.expiresAt?.toDate() > new Date();
+    if (isActive) return;
+  } catch (_) { /* lock by default */ }
+
+  // Show visual lock badges
+  document.body.classList.add('paywall-active');
+
+  // Intercept week buttons, topic cards, resource rows — but Week 1 is always free
+  document.addEventListener('click', function(e) {
+    var target = e.target.closest('.week-row-btn, .topic-card, .resource-row');
+    if (!target) return;
+    if (target.matches('.week-row-btn') && target.dataset.week === '1') return;
+    if ((target.matches('.topic-card') || target.matches('.resource-row')) && document.body.dataset.weekIdx === '0') return;
+    showPaywall(e);
+  }, true);
+});
+
+document.getElementById('paywallModal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+</script>
 </body>
 </html>

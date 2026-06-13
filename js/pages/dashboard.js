@@ -229,12 +229,6 @@ async function loadUserData() {
       `${d.university} · ${d.level}`;
     document.getElementById("heroDept").textContent = d.department;
 
-    // Show practice questions banner for 300 Level students only
-    if (d.level === '300 Level') {
-      const banner = document.getElementById('pqBanner');
-      if (banner) banner.style.display = 'block';
-    }
-
     // Show persisted CGPA immediately from Firestore (before courses render)
     if (typeof d.cgpa === "number" && d.cgpa > 0) {
       document.getElementById("statCGPA").textContent = d.cgpa.toFixed(2);
@@ -515,6 +509,8 @@ window.updateStats = function () {
   const pct = count > 0 ? Math.round((graded / count) * 100) : 0;
   document.getElementById("progressFill").style.width = pct + "%";
   document.getElementById("progressPct").textContent = pct + "%";
+  const sub = document.getElementById("semProgressSub");
+  if (sub) sub.textContent = "Grades entered for " + graded + " of " + count + " course" + (count !== 1 ? "s" : "");
 };
 
 function gradeToPoint(g) {
@@ -1134,7 +1130,7 @@ function saveStreak() {
 
 function renderStreak() {
   const nudge = document.getElementById("streakNudge");
-  const fire = document.getElementById("streakFire");
+  if (!nudge) return; // streak card removed from dashboard
   const daysVal = document.getElementById("streakDaysVal");
   const message = document.getElementById("streakMessage");
   const sub = document.getElementById("streakSub");
@@ -1193,6 +1189,7 @@ function renderStreak() {
 }
 
 window.openReview = function () {
+  if (!document.getElementById("reviewModalOverlay")) return;
   if (streakData.todayDone) return;
   reviewAnswered = false;
 
@@ -1273,11 +1270,13 @@ window.finishReview = function () {
 };
 
 window.closeReview = function () {
-  document.getElementById("reviewModalOverlay").classList.remove("open");
+  const el = document.getElementById("reviewModalOverlay");
+  if (el) el.classList.remove("open");
 };
 
 window.closeReviewOnOverlay = function (e) {
-  if (e.target === document.getElementById("reviewModalOverlay")) closeReview();
+  const el = document.getElementById("reviewModalOverlay");
+  if (el && e.target === el) closeReview();
 };
 
 // ── STUDY PLANNER ─────────────────────────────────────

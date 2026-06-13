@@ -75,6 +75,12 @@ service cloud.firestore {
               && resource.data.isAdmin == false)
         );
 
+      // User activates subscription via code redemption
+      allow update: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.diff(resource.data)
+             .affectedKeys().hasOnly(['subscription']);
+
       // Admin can grant/revoke roles and class assignments
       allow update: if isAdmin()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
@@ -162,6 +168,20 @@ service cloud.firestore {
         && request.resource.data.authorId == request.auth.uid;
       allow delete: if signedIn()
         && resource.data.authorId == request.auth.uid;
+    }
+
+    // ── ACCESS CODES (admin creates; students can mark used) ───
+    match /accessCodes/{code} {
+      allow read: if signedIn();
+      allow create: if isAdmin();
+      // Students mark a code as used (single-use, not expired)
+      allow update: if signedIn()
+        && resource.data.isUsed == false
+        && resource.data.expiresAt > request.time
+        && request.resource.data.diff(resource.data)
+             .affectedKeys().hasOnly(['isUsed', 'usedBy', 'usedAt'])
+        && request.resource.data.isUsed == true
+        && request.resource.data.usedBy == request.auth.uid;
     }
 
     // ── COURSE CONTENT (admin writes, students read) ────────

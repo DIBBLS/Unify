@@ -15,6 +15,195 @@
     <script src="js/theme.js"></script>
     <link rel="stylesheet" href="css/pages/dashboard.styles.css?v=goal-5" />
     <link rel="stylesheet" href="css/pages/dashboard-v2.styles.css?v=2" />
+    <style>
+    /* ── Sidebar Go-Pro CTA ── */
+    .sidebar-gopro {
+      display: none;
+      margin: 0 0 10px;
+      background: var(--invert-bg);
+      border-radius: 10px;
+      padding: 12px 14px;
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+    .sidebar-gopro:hover { opacity: 0.85; }
+    .sidebar-gopro-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #4ade80;
+      margin-bottom: 2px;
+    }
+    .sidebar-gopro-text {
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(240,239,233,0.7);
+      line-height: 1.4;
+    }
+
+    /* ── Paywall modal ── */
+    .pw-bg {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex; align-items: flex-end; justify-content: center;
+      z-index: 600; padding: 0;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .pw-bg.open { opacity: 1; pointer-events: all; }
+    .pw-modal {
+      background: var(--surface);
+      border-radius: 20px 20px 0 0;
+      padding: 24px 20px 32px;
+      width: 100%; max-width: 640px;
+      max-height: 92vh; overflow-y: auto;
+      transform: translateY(32px);
+      transition: transform 0.28s cubic-bezier(.2,.8,.4,1);
+      position: relative;
+    }
+    .pw-bg.open .pw-modal { transform: translateY(0); }
+    .pw-close {
+      position: absolute; top: 14px; right: 16px;
+      background: none; border: none; font-size: 22px;
+      cursor: pointer; color: var(--text3); line-height: 1; padding: 4px;
+    }
+    .pw-handle {
+      width: 36px; height: 4px; border-radius: 2px;
+      background: var(--border); margin: 0 auto 18px;
+    }
+    .pw-header { margin-bottom: 4px; }
+    .pw-title {
+      font-family: 'Playfair Display', serif; font-weight: 700;
+      font-size: 20px; color: var(--text); letter-spacing: -0.3px;
+    }
+    .pw-sub { font-size: 13px; color: var(--text2); line-height: 1.5; margin-top: 4px; }
+
+    /* ── Inline plan cards ── */
+    .pw-plans {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 10px; margin: 18px 0 16px;
+    }
+    @media (max-width: 480px) { .pw-plans { grid-template-columns: 1fr; } }
+
+    .pw-plan {
+      background: #111318;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px; padding: 16px 14px;
+      display: flex; flex-direction: column; gap: 0;
+      position: relative; overflow: hidden;
+    }
+    .pw-plan::before {
+      content: ''; position: absolute; top: -40px; right: -40px;
+      width: 100px; height: 100px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(74,222,128,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .pw-plan.pw-popular {
+      border-color: rgba(74,222,128,0.4);
+      box-shadow: 0 0 0 1px rgba(74,222,128,0.15);
+    }
+    .pw-plan-badge {
+      font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; padding: 3px 8px; border-radius: 20px;
+      display: inline-block; margin-bottom: 10px; align-self: flex-start;
+    }
+    .badge-pop  { background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+    .badge-val  { background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }
+    .badge-base { background: rgba(255,255,255,0.07); color: #71717a; border: 1px solid rgba(255,255,255,0.1); }
+    .pw-plan-name { font-size: 13px; font-weight: 700; color: #f0efe9; margin-bottom: 6px; }
+    .pw-plan-price { font-size: 24px; font-weight: 800; color: #f0efe9; letter-spacing: -0.5px; line-height: 1; }
+    .pw-plan-was { font-size: 12px; color: #3f3f46; text-decoration: line-through; margin-bottom: 2px; }
+    .pw-plan-per { font-size: 11px; color: #52525b; margin-bottom: 14px; }
+    .pw-plan-wa {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      background: #25D366; color: #fff; border: none; border-radius: 8px;
+      padding: 10px 8px; font-family: 'DM Sans', sans-serif;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      text-decoration: none; transition: filter 0.15s; width: 100%; text-align: center;
+      margin-top: auto;
+    }
+    .pw-plan-wa:hover { filter: brightness(0.9); }
+
+    /* ── Bank account info box ── */
+    .pw-bank {
+      background: rgba(74,222,128,0.06);
+      border: 1px solid rgba(74,222,128,0.18);
+      border-radius: 10px; padding: 12px 16px;
+      text-align: center; margin: 14px 0 0;
+    }
+    .pw-bank-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--text3); margin-bottom: 4px;
+    }
+    .pw-bank-acct {
+      font-size: 22px; font-weight: 800; color: var(--text);
+      letter-spacing: 3px; font-family: 'DM Mono', 'Courier New', monospace;
+    }
+    .pw-bank-name { font-size: 12px; color: var(--text2); margin-top: 3px; }
+
+    .pw-redeem-link {
+      display: block; text-align: center;
+      font-size: 13px; color: var(--text3); text-decoration: none; padding: 8px;
+    }
+    .pw-redeem-link:hover { color: var(--text); }
+
+    /* ── Get Plus+ chip ── */
+    #getPlusBtn {
+      display: none;
+      align-items: center; gap: 6px;
+      background: rgba(74,222,128,0.12);
+      border: 1px solid rgba(74,222,128,0.3);
+      color: #16a34a;
+      border-radius: 20px; padding: 5px 12px 5px 8px;
+      font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700;
+      cursor: pointer; white-space: nowrap;
+      transition: background 0.15s;
+    }
+    #getPlusBtn:hover { background: rgba(74,222,128,0.2); }
+
+    /* ── Semester Progress card ── */
+    .dash-sem-progress {
+      margin: 0 16px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+    @media (min-width: 769px) { .dash-sem-progress { margin: 0 40px 16px; } }
+    .dash-sem-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+    }
+    .dash-sem-label {
+      font-size: 12px; font-weight: 700; color: var(--text2);
+      text-transform: uppercase; letter-spacing: 0.8px;
+    }
+    .dash-sem-pct { font-size: 13px; font-weight: 700; color: var(--green-text); }
+    .dash-sem-track {
+      height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 8px;
+    }
+    .dash-sem-fill {
+      height: 100%; width: 0%; background: var(--green); border-radius: 4px;
+      transition: width 0.8s ease;
+    }
+    .dash-sem-sub { font-size: 11px; color: var(--text3); }
+
+    /* ── Partial-lock badge on course cards — open padlock, full opacity ── */
+    body.paywall-active .course-item::after {
+      content: '🔓';
+      position: absolute; top: 8px; right: 8px;
+      font-size: 14px; line-height: 1;
+      pointer-events: none; z-index: 4;
+    }
+
+    /* ── Full lock on topic rows for weeks 2+ inside the week accordion panel ── */
+    body.paywall-active .week-acc-item:not(:first-child) .topic-row::after {
+      content: '🔒';
+      font-size: 13px;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    </style>
       <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#16a34a">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -23,6 +212,28 @@
     <script src="js/register-sw.js" defer></script>
 </head>
   <body>
+
+    <!-- REVIEW MODAL -->
+    <div class="review-modal-overlay" id="reviewModalOverlay" onclick="closeReviewOnOverlay(event)">
+      <div class="review-modal">
+        <div class="review-modal-header">
+          <span class="review-modal-badge" id="reviewModalBadge">Quick Review</span>
+          <button class="review-modal-close" onclick="closeReview()">&#x2715;</button>
+        </div>
+        <div class="review-modal-topic" id="reviewModalTopic">Topic Name</div>
+        <div class="review-modal-course" id="reviewModalCourse">Course · Week</div>
+        <div class="review-question" id="reviewQuestion">Loading question...</div>
+        <div class="review-options" id="reviewOptions"></div>
+        <div class="review-result" id="reviewResult">
+          <div class="review-result-title" id="reviewResultTitle"></div>
+          <div id="reviewResultBody"></div>
+        </div>
+        <div class="review-modal-actions">
+          <button class="review-done-btn" id="reviewDoneBtn" onclick="finishReview()">Done ✓</button>
+          <button class="review-skip-btn" onclick="closeReview()">Later</button>
+        </div>
+      </div>
+    </div>
 
     <!-- LOADING -->
     <div class="loading-overlay" id="loadingOverlay">
@@ -82,28 +293,6 @@
       </div>
     </div>
 
-    <!-- REVIEW MODAL -->
-    <div class="review-modal-overlay" id="reviewModalOverlay" onclick="closeReviewOnOverlay(event)">
-      <div class="review-modal">
-        <div class="review-modal-header">
-          <span class="review-modal-badge" id="reviewModalBadge">Quick Review</span>
-          <button class="review-modal-close" onclick="closeReview()">&#x2715;</button>
-        </div>
-        <div class="review-modal-topic" id="reviewModalTopic">Topic Name</div>
-        <div class="review-modal-course" id="reviewModalCourse">Course · Week</div>
-        <div class="review-question" id="reviewQuestion">Loading question...</div>
-        <div class="review-options" id="reviewOptions"></div>
-        <div class="review-result" id="reviewResult">
-          <div class="review-result-title" id="reviewResultTitle"></div>
-          <div id="reviewResultBody"></div>
-        </div>
-        <div class="review-modal-actions">
-          <button class="review-done-btn" id="reviewDoneBtn" onclick="finishReview()">Done ✓</button>
-          <button class="review-skip-btn" onclick="closeReview()">Later</button>
-        </div>
-      </div>
-    </div>
-
     <!-- APP LAYOUT -->
     <div class="app-layout">
 
@@ -159,6 +348,10 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             <span class="app-sidebar-link-text"><span id="themeToggle">🌙 Dark</span></span>
           </button>
+          <a href="access-codes.html" class="sidebar-gopro" id="sidebarGoPro">
+            <div class="sidebar-gopro-label">✦ Unify Plus</div>
+            <div class="sidebar-gopro-text">Unlock notes &amp; resources →</div>
+          </a>
           <button class="app-sidebar-signout" id="signOutBtn">Sign out</button>
         </div>
       </aside>
@@ -203,23 +396,8 @@
             </h1>
             <p class="dash-greeting-dept" id="heroDept"></p>
             <div class="save-indicator" id="saveIndicator">✓ Saved</div>
+            <button id="getPlusBtn" onclick="document.getElementById('paywallModal').classList.add('open')">✦ Get Plus+</button>
           </div>
-
-          <!-- PRACTICE QUESTIONS BANNER (300 Level only) -->
-          <a href="Coursecontents/practice-questions/ece-316-practice.html" id="pqBanner" style="display:none; text-decoration:none; margin-bottom:16px; display:none;">
-            <div style="background:#0a0a0a; border-radius:12px; padding:16px 20px; display:flex; align-items:center; justify-content:space-between; gap:12px; position:relative; overflow:hidden;">
-              <div style="position:absolute; top:-30px; right:-30px; width:120px; height:120px; border-radius:50%; background:rgba(74,222,128,0.08); pointer-events:none;"></div>
-              <div style="display:flex; align-items:center; gap:12px;">
-                <div style="font-size:22px; flex-shrink:0;">📝</div>
-                <div>
-                  <div style="font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#4ade80; margin-bottom:3px;">Practice Questions · ECE 316</div>
-                  <div style="font-family:'Playfair Display',serif; font-size:15px; font-weight:700; color:#f5f4f0; line-height:1.25;">Microprocessors & Microcontrollers</div>
-                  <div style="font-size:11px; color:rgba(245,244,240,0.55); margin-top:2px;">Past questions · exam prep</div>
-                </div>
-              </div>
-              <div style="font-size:12px; font-weight:700; color:#4ade80; white-space:nowrap; flex-shrink:0;">Practise now →</div>
-            </div>
-          </a>
 
           <!-- STATS CARD -->
           <div class="dash-stats-card">
@@ -243,12 +421,15 @@
           </div>
 
           <!-- SEMESTER PROGRESS -->
-          <div class="dash-progress-wrap">
-            <span class="dash-progress-label">Semester Progress</span>
-            <div class="dash-progress-track">
-              <div class="progress-fill" id="progressFill"></div>
+          <div class="dash-sem-progress">
+            <div class="dash-sem-header">
+              <span class="dash-sem-label">Semester Progress</span>
+              <span class="dash-sem-pct" id="progressPct">0%</span>
             </div>
-            <span class="progress-pct" id="progressPct">0%</span>
+            <div class="dash-sem-track">
+              <div class="dash-sem-fill" id="progressFill"></div>
+            </div>
+            <span class="dash-sem-sub" id="semProgressSub">Grades entered for 0 of your courses</span>
           </div>
 
           <!-- GOAL CARD -->
@@ -279,8 +460,8 @@
                   <span class="streak-days-val" id="streakDaysVal">0</span>
                   <span>day streak</span>
                 </div>
-                <div class="streak-message" id="streakMessage">Start your streak today</div>
-                <div class="streak-sub" id="streakSub">One quick question. 2 minutes max.</div>
+                <div class="streak-message" id="streakMessage">Start your streak today 🚀</div>
+                <div class="streak-sub" id="streakSub">One question. 2 minutes. That's all it takes.</div>
                 <div class="streak-dots" id="streakDots"></div>
               </div>
               <button class="streak-action" id="streakActionBtn">Let's go →</button>
@@ -440,6 +621,101 @@
     <script src="courses.js?v=step1-deptfix"></script>
     <script src="Coursecontent.JS?v=4"></script>
     <script type="module" src="js/pages/dashboard.js?v=goal-5"></script>
-  <script type="module" src="js/feedback.js"></script>
+    <script type="module" src="js/feedback.js"></script>
+
+    <!-- Paywall modal -->
+    <div class="pw-bg" id="paywallModal">
+      <div class="pw-modal">
+        <button class="pw-close" onclick="document.getElementById('paywallModal').classList.remove('open')">×</button>
+        <div class="pw-handle"></div>
+        <div class="pw-header">
+          <div class="pw-title">Unlock Unify Plus</div>
+          <p class="pw-sub">Transfer to the account below, send your receipt on WhatsApp, get your code instantly.</p>
+        </div>
+        <div class="pw-bank">
+          <div class="pw-bank-label">Pay to</div>
+          <div class="pw-bank-acct">6118998666</div>
+          <div class="pw-bank-name">Commy Glory Ventures</div>
+        </div>
+        <div class="pw-plans">
+          <!-- Starter -->
+          <div class="pw-plan">
+            <span class="pw-plan-badge badge-base">Starter</span>
+            <div class="pw-plan-name">1 Month</div>
+            <div class="pw-plan-was">₦4,000</div>
+            <div class="pw-plan-price">₦2,000</div>
+            <div class="pw-plan-per">one-time</div>
+            <a href="https://wa.me/2349031767696?text=Hi%2C%20I%20want%20the%201-month%20Unify%20Plus%20plan%20%E2%82%A62%2C000.%20Here%27s%20my%20receipt%3A" target="_blank" rel="noopener" class="pw-plan-wa">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.524 5.852L.057 23.478a.5.5 0 0 0 .624.608l5.808-1.525A11.953 11.953 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.896 0-3.67-.52-5.188-1.424l-.372-.22-3.449.905.922-3.37-.242-.386A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+              DM Admin
+            </a>
+          </div>
+          <!-- Semester / Popular -->
+          <div class="pw-plan pw-popular">
+            <span class="pw-plan-badge badge-pop">Most Popular</span>
+            <div class="pw-plan-name">3 Months</div>
+            <div class="pw-plan-was">₦12,000</div>
+            <div class="pw-plan-price">₦5,500</div>
+            <div class="pw-plan-per">one-time</div>
+            <a href="https://wa.me/2349031767696?text=Hi%2C%20I%20want%20the%203-month%20Unify%20Plus%20plan%20%E2%82%A65%2C500.%20Here%27s%20my%20receipt%3A" target="_blank" rel="noopener" class="pw-plan-wa">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.524 5.852L.057 23.478a.5.5 0 0 0 .624.608l5.808-1.525A11.953 11.953 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.896 0-3.67-.52-5.188-1.424l-.372-.22-3.449.905.922-3.37-.242-.386A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+              DM Admin
+            </a>
+          </div>
+          <!-- Full Year -->
+          <div class="pw-plan">
+            <span class="pw-plan-badge badge-val">Best Value</span>
+            <div class="pw-plan-name">6 Months</div>
+            <div class="pw-plan-was">₦24,000</div>
+            <div class="pw-plan-price">₦9,000</div>
+            <div class="pw-plan-per">one-time</div>
+            <a href="https://wa.me/2349031767696?text=Hi%2C%20I%20want%20the%206-month%20Unify%20Plus%20plan%20%E2%82%A69%2C000.%20Here%27s%20my%20receipt%3A" target="_blank" rel="noopener" class="pw-plan-wa">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.524 5.852L.057 23.478a.5.5 0 0 0 .624.608l5.808-1.525A11.953 11.953 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.896 0-3.67-.52-5.188-1.424l-.372-.22-3.449.905.922-3.37-.242-.386A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+              DM Admin
+            </a>
+          </div>
+        </div>
+        <a href="access-codes.html" class="pw-redeem-link">Already have a code? Redeem it →</a>
+      </div>
+    </div>
+
+    <!-- Subscription gate: sidebar CTA + course card lock -->
+    <script type="module">
+    import { auth, db } from './js/firebase-config.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+    onAuthStateChanged(auth, async function(user) {
+      if (!user) return;
+      try {
+        var snap     = await getDoc(doc(db, 'users', user.uid));
+        var sub      = snap.data()?.subscription;
+        var isActive = sub?.active === true && sub?.expiresAt?.toDate() > new Date();
+        if (isActive) return; // subscribed — nothing to lock
+      } catch (_) { /* lock by default on error */ }
+
+      // Show sidebar CTA + Get Plus+ chip + lock badges
+      document.getElementById('sidebarGoPro').style.display = 'block';
+      document.getElementById('getPlusBtn').style.display = 'inline-flex';
+      document.body.classList.add('paywall-active');
+
+      // Lock week 2+ topic links inside the course panel (capture phase)
+      // Week 1 (first .week-acc-item) is free; course card clicks pass through to Learn.html
+      document.addEventListener('click', function(e) {
+        var target = e.target.closest('.topic-row, .week-acc-body a');
+        if (!target) return;
+        var weekItem = target.closest('.week-acc-item');
+        if (weekItem && weekItem.matches(':first-child')) return; // week 1 is free
+        e.preventDefault();
+        e.stopPropagation();
+        document.getElementById('paywallModal').classList.add('open');
+      }, true);
+    });
+
+    // Close modal on backdrop click
+    document.getElementById('paywallModal').addEventListener('click', function(e) {
+      if (e.target === this) this.classList.remove('open');
+    });
+    </script>
 </body>
 </html>
