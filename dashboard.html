@@ -42,6 +42,28 @@
       line-height: 1.4;
     }
 
+    /* ── Sidebar support card ── */
+    .sidebar-support {
+      margin: 0 0 10px;
+      background: rgba(74,222,128,0.06);
+      border: 1px solid rgba(74,222,128,0.15);
+      border-radius: 10px;
+      padding: 11px 13px;
+    }
+    .sidebar-support-top {
+      font-size: 11px; font-weight: 700; color: #4ade80; margin-bottom: 3px;
+    }
+    .sidebar-support-sub {
+      font-size: 11px; color: rgba(240,239,233,0.5); line-height: 1.4; margin-bottom: 8px;
+    }
+    .sidebar-support-acct {
+      font-size: 15px; font-weight: 800; color: rgba(240,239,233,0.9);
+      letter-spacing: 2px; font-family: 'Courier New', monospace;
+    }
+    .sidebar-support-name {
+      font-size: 10px; color: rgba(240,239,233,0.4); margin-top: 2px;
+    }
+
     /* ── Paywall modal ── */
     .pw-bg {
       position: fixed; inset: 0;
@@ -352,6 +374,12 @@
             <div class="sidebar-gopro-label">✦ Unify Plus</div>
             <div class="sidebar-gopro-text">Unlock notes &amp; resources →</div>
           </a>
+          <div class="sidebar-support">
+            <div class="sidebar-support-top">☕ Support Unify</div>
+            <div class="sidebar-support-sub">Love what we're building? Send us a coffee.</div>
+            <div class="sidebar-support-acct">6118998666</div>
+            <div class="sidebar-support-name">Commy Glory Ventures</div>
+          </div>
           <button class="app-sidebar-signout" id="signOutBtn">Sign out</button>
         </div>
       </aside>
