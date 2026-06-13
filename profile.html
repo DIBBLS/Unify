@@ -406,7 +406,7 @@ onAuthStateChanged(auth, async user => {
 
     // Render sections
     renderFocus(courses);
-    renderAchievements(courses);
+    renderAchievements(d, courses);
     renderStudyStats(d, courses);
   } catch(e) { console.warn('[pv3]', e); }
 });
@@ -435,19 +435,21 @@ function renderFocus(courses) {
   }).join('');
 }
 
-function renderAchievements(courses) {
+function renderAchievements(d, courses) {
   const wrap = document.getElementById('profAchievements');
   if (!wrap) return;
   const s = JSON.parse(localStorage.getItem('unify-streak') || '{}');
   const sc = s.count || 0;
+  const isSupporter = d.subscription?.active === true;
   const badges = [
-    { icon: '🔥', label: 'Consistent', sub: sc + '-day streak', earned: sc >= 3 },
-    { icon: '📊', label: 'On Track', sub: courses.length + ' courses', earned: courses.length >= 3 },
-    { icon: '📚', label: 'Dedicated', sub: '20+ study hrs', earned: false },
-    { icon: '🚀', label: 'Starter', sub: 'Joined Early', earned: true },
+    { icon: '☕', label: 'Early Supporter', sub: 'Coffee contributor', earned: isSupporter, supporter: true },
+    { icon: '🔥', label: 'Consistent',      sub: sc + '-day streak',   earned: sc >= 3 },
+    { icon: '📊', label: 'On Track',        sub: courses.length + ' courses', earned: courses.length >= 3 },
+    { icon: '📚', label: 'Dedicated',       sub: '20+ study hrs',      earned: false },
+    { icon: '🚀', label: 'Starter',         sub: 'Joined Early',       earned: true },
   ];
   wrap.innerHTML = badges.map(b => `
-    <div class="pv3-badge ${b.earned ? 'pv3-badge-earned' : 'pv3-badge-locked'}">
+    <div class="pv3-badge ${b.earned ? 'pv3-badge-earned' : 'pv3-badge-locked'} ${b.supporter && b.earned ? 'pv3-badge-supporter' : ''}">
       <div class="pv3-badge-icon">${b.icon}</div>
       <div class="pv3-badge-label">${b.label}</div>
       <div class="pv3-badge-sub">${b.sub}</div>

@@ -4,10 +4,10 @@ Thumbs.db
 desktop.ini
 
 # Editor directories
-.vscode/
 .idea/
 
 # Node (if added later)
+temp_auto_push.bat
 node_modules/
 
 # Firebase
@@ -17,3 +17,5 @@ firebase-debug.log
 # Local environment
 .env
 .env.local
+.gitignore
+branch_structure.json
