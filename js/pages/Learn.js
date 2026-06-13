@@ -331,7 +331,7 @@ function renderWeeksList() {
     const circleClass = allDone ? 'done' : partial ? 'partial' : '';
     const circleContent = allDone ? '✓' : partial ? '◑' : '';
 
-    return `<button class="week-row-btn" onclick="showWeekView(${wi})">
+    return `<button class="week-row-btn" data-week="${wi + 1}" onclick="showWeekView(${wi})">
       <div class="week-status-circle ${circleClass}">${circleContent}</div>
       <div class="week-row-info">
         <div class="week-row-name">Week ${week.week}</div>
@@ -371,6 +371,7 @@ window.resumeLearning = function () {
 // ── WEEK VIEW ───────────────────────────────────────────────────
 window.showWeekView = function (wi) {
   activeWeekIdx = wi;
+  document.body.dataset.weekIdx = String(wi);
   const week = courseTopics[wi];
   if (!week) return;
 
@@ -485,6 +486,7 @@ function renderResources() {
 // ── CONTENT VIEW ─────────────────────────────────────────────────
 window.showContentView = function (wi, topicType) {
   activeWeekIdx = wi;
+  document.body.dataset.weekIdx = String(wi);
   activeTopicType = topicType;
 
   const week = courseTopics[wi];
