@@ -509,6 +509,8 @@ window.updateStats = function () {
   const pct = count > 0 ? Math.round((graded / count) * 100) : 0;
   document.getElementById("progressFill").style.width = pct + "%";
   document.getElementById("progressPct").textContent = pct + "%";
+  const sub = document.getElementById("semProgressSub");
+  if (sub) sub.textContent = "Grades entered for " + graded + " of " + count + " course" + (count !== 1 ? "s" : "");
 };
 
 function gradeToPoint(g) {

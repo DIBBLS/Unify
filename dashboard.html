@@ -162,6 +162,32 @@
     }
     #getPlusBtn:hover { background: rgba(74,222,128,0.2); }
 
+    /* ── Semester Progress card ── */
+    .dash-sem-progress {
+      margin: 0 16px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+    @media (min-width: 769px) { .dash-sem-progress { margin: 0 40px 16px; } }
+    .dash-sem-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+    }
+    .dash-sem-label {
+      font-size: 12px; font-weight: 700; color: var(--text2);
+      text-transform: uppercase; letter-spacing: 0.8px;
+    }
+    .dash-sem-pct { font-size: 13px; font-weight: 700; color: var(--green-text); }
+    .dash-sem-track {
+      height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 8px;
+    }
+    .dash-sem-fill {
+      height: 100%; width: 0%; background: var(--green); border-radius: 4px;
+      transition: width 0.8s ease;
+    }
+    .dash-sem-sub { font-size: 11px; color: var(--text3); }
+
     /* ── Partial-lock badge on course cards — open padlock, full opacity ── */
     body.paywall-active .course-item::after {
       content: '🔓';
@@ -170,8 +196,8 @@
       pointer-events: none; z-index: 4;
     }
 
-    /* ── Full lock on topic rows inside the week accordion panel ── */
-    body.paywall-active .topic-row::after {
+    /* ── Full lock on topic rows for weeks 2+ inside the week accordion panel ── */
+    body.paywall-active .week-acc-item:not(:first-child) .topic-row::after {
       content: '🔒';
       font-size: 13px;
       margin-left: auto;
@@ -373,12 +399,15 @@
           </div>
 
           <!-- SEMESTER PROGRESS -->
-          <div class="dash-progress-wrap">
-            <span class="dash-progress-label">Semester Progress</span>
-            <div class="dash-progress-track">
-              <div class="progress-fill" id="progressFill"></div>
+          <div class="dash-sem-progress">
+            <div class="dash-sem-header">
+              <span class="dash-sem-label">Semester Progress</span>
+              <span class="dash-sem-pct" id="progressPct">0%</span>
             </div>
-            <span class="progress-pct" id="progressPct">0%</span>
+            <div class="dash-sem-track">
+              <div class="dash-sem-fill" id="progressFill"></div>
+            </div>
+            <span class="dash-sem-sub" id="semProgressSub">Grades entered for 0 of your courses</span>
           </div>
 
           <!-- GOAL CARD -->
@@ -632,11 +661,13 @@
       document.getElementById('getPlusBtn').style.display = 'inline-flex';
       document.body.classList.add('paywall-active');
 
-      // Lock topic/week links inside the course panel (capture phase)
-      // Course card clicks are NOT blocked — they navigate to Learn.html (week 1 free)
+      // Lock week 2+ topic links inside the course panel (capture phase)
+      // Week 1 (first .week-acc-item) is free; course card clicks pass through to Learn.html
       document.addEventListener('click', function(e) {
-        var target = e.target.closest('.topic-row, .week-acc-body a, .panel-learn-btn');
+        var target = e.target.closest('.topic-row, .week-acc-body a');
         if (!target) return;
+        var weekItem = target.closest('.week-acc-item');
+        if (weekItem && weekItem.matches(':first-child')) return; // week 1 is free
         e.preventDefault();
         e.stopPropagation();
         document.getElementById('paywallModal').classList.add('open');
