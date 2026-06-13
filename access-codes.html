@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Unify — Access Codes</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f8f7f3;
+    --border: #e0deda;
+    --text: #0a0a0a;
+    --text2: #555555;
+    --text3: #999999;
+    --green: #4ade80;
+    --green-deep: #16a34a;
+    --green-bg: rgba(74,222,128,0.1);
+    --fd: 'Playfair Display', serif;
+    --fb: 'DM Sans', sans-serif;
+  }
+
+  body {
+    font-family: var(--fb);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── Layout ── */
+  .wrap { max-width: 680px; margin: 0 auto; padding: 40px 20px 80px; }
+
+  /* ── Wordmark ── */
+  .wordmark {
+    font-family: var(--fd);
+    font-weight: 900;
+    font-size: 24px;
+    letter-spacing: -0.5px;
+    margin-bottom: 36px;
+    display: inline-block;
+  }
+  .wordmark .dot { color: var(--green); }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+  }
+  .tab-btn {
+    font-family: var(--fb);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text3);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab-btn.active { color: var(--text); border-bottom-color: var(--green); }
+
+  /* ── Tab panels ── */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-family: var(--fd);
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+  }
+  .card-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; line-height: 1.5; }
+
+  /* ── Form ── */
+  .form-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 130px; }
+  .field label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text3);
+  }
+  .field select,
+  .field input {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: var(--fb);
+    font-size: 14px;
+    color: var(--text);
+    background: var(--surface2);
+    outline: none;
+    width: 100%;
+    transition: border-color 0.15s, background 0.15s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+  .field select:focus, .field input:focus { border-color: var(--green); background: var(--surface); }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 20px;
+    font-family: var(--fb);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--text); color: var(--bg); }
+  .btn-primary:hover { background: #222; }
+  .btn-green { background: var(--green); color: var(--text); }
+  .btn-green:hover { background: #22c55e; }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .btn-ghost:hover { border-color: var(--text); }
+  .btn-sm { padding: 7px 14px; font-size: 11px; }
+  .btn-full { width: 100%; justify-content: center; font-size: 14px; padding: 14px; margin-top: 12px; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ── Codes section ── */
+  .codes-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .codes-count {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text3);
+  }
+  .codes-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .code-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 340px;
+    overflow-y: auto;
+  }
+  .code-list::-webkit-scrollbar { width: 4px; }
+  .code-list::-webkit-scrollbar-track { background: transparent; }
+  .code-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .code-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    gap: 8px;
+  }
+  .code-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .code-text { font-family: monospace; font-size: 15px; font-weight: 700; letter-spacing: 1px; white-space: nowrap; }
+  .code-exp { font-size: 11px; color: var(--text3); white-space: nowrap; }
+  .code-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+  /* ── Badges ── */
+  .badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .badge-1m  { background: rgba(74,222,128,0.12); color: var(--green-deep); border: 1px solid rgba(74,222,128,0.3); }
+  .badge-3m  { background: rgba(251,191,36,0.12); color: #b45309; border: 1px solid rgba(251,191,36,0.3); }
+  .badge-6m  { background: rgba(139,92,246,0.1);  color: #6d28d9; border: 1px solid rgba(139,92,246,0.25); }
+
+  .copy-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: var(--fb);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    padding: 4px 10px;
+    border-radius: 6px;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { background: var(--border); color: var(--text); }
+  .copy-btn.copied { color: var(--green-deep); }
+
+  /* ── Write-to-Firestore bar ── */
+  .write-bar {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text2);
+  }
+  .write-bar.show { display: flex; }
+  .write-bar .spinner {
+    width: 14px; height: 14px; border: 2px solid var(--border);
+    border-top-color: var(--green-deep); border-radius: 50%;
+    animation: spin 0.7s linear infinite; flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Divider ── */
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+  /* ── Info rows ── */
+  .info-list { display: flex; flex-direction: column; gap: 8px; }
+  .info-row { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--text2); line-height: 1.5; }
+  .info-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; margin-top: 6px; }
+
+  /* ── Redeem input ── */
+  .redeem-input {
+    font-size: 20px !important;
+    font-family: monospace !important;
+    font-weight: 700 !important;
+    letter-spacing: 3px !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
+  }
+
+  /* ── Status ── */
+  .status {
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13px;
+    margin-top: 12px;
+    line-height: 1.5;
+    display: none;
+  }
+  .status.show { display: block; }
+  .status.success { background: var(--green-bg); border: 1px solid rgba(74,222,128,0.3); color: var(--green-deep); }
+  .status.error   { background: rgba(239,68,68,0.07); border: 1px solid rgba(239,68,68,0.2); color: #dc2626; }
+  .status.loading { background: var(--surface2); border: 1px solid var(--border); color: var(--text2); }
+
+  /* ── Loading / auth states ── */
+  #authLoading {
+    min-height: 60vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 12px;
+    font-size: 13px; color: var(--text3);
+  }
+  #authLoading .spinner {
+    width: 28px; height: 28px; border: 3px solid var(--border);
+    border-top-color: var(--green-deep); border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  /* ── Modal ── */
+  .modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-bg.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface);
+    border-radius: 12px;
+    max-width: 620px;
+    width: 100%;
+    max-height: 82vh;
+    overflow-y: auto;
+    padding: 28px;
+    transform: translateY(8px);
+    transition: transform 0.2s;
+  }
+  .modal-bg.open .modal { transform: translateY(0); }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .modal-title { font-family: var(--fd); font-weight: 700; font-size: 18px; }
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--text3);
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 6px;
+    transition: color 0.15s;
+  }
+  .modal-close:hover { color: var(--text); }
+
+  .modal-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+  .modal-tab {
+    font-family: var(--fb);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 8px 16px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text3);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .modal-tab.active { color: var(--text); border-bottom-color: var(--green); }
+
+  .snippet { display: none; }
+  .snippet.active { display: block; }
+
+  pre {
+    background: #0f0f0f;
+    color: #4ade80;
+    border-radius: 8px;
+    padding: 18px;
+    font-size: 11.5px;
+    line-height: 1.75;
+    overflow-x: auto;
+    white-space: pre;
+    font-family: 'Courier New', monospace;
+  }
+
+  /* ── Plan cards ── */
+  .plan-cards { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+
+  .plan-card {
+    background: #111318;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 22px 20px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .plan-card:hover { border-color: rgba(74,222,128,0.35); }
+  .plan-card::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(74,222,128,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .plan-card.plan-popular { border-color: rgba(74,222,128,0.4); }
+  .plan-card.plan-popular::before { background: radial-gradient(circle, rgba(74,222,128,0.12) 0%, transparent 70%); }
+
+  .plan-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .plan-name {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: #f0efe9;
+    letter-spacing: -0.3px;
+  }
+  .plan-badge {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .badge-popular { background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+  .badge-value   { background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }
+  .badge-start   { background: rgba(255,255,255,0.07); color: #a1a1aa; border: 1px solid rgba(255,255,255,0.1); }
+
+  .plan-price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .plan-price-was {
+    font-size: 16px;
+    font-weight: 600;
+    color: #555;
+    text-decoration: line-through;
+  }
+  .plan-price-now {
+    font-size: 30px;
+    font-weight: 800;
+    color: #f0efe9;
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  .plan-price-unit { font-size: 13px; color: #71717a; }
+
+  .plan-tagline {
+    font-size: 12px;
+    color: #71717a;
+    margin-bottom: 18px;
+    line-height: 1.4;
+  }
+
+  .plan-cta {
+    width: 100%;
+    background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+    color: #0a0a0a;
+    border: none;
+    border-radius: 10px;
+    padding: 13px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 18px;
+    transition: filter 0.15s;
+    display: block;
+    text-align: center;
+  }
+  .plan-cta:hover { filter: brightness(0.92); }
+  .plan-card.plan-popular .plan-cta {
+    background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%);
+    box-shadow: 0 4px 20px rgba(74,222,128,0.25);
+  }
+
+  .plan-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .plan-features li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #a1a1aa;
+    line-height: 1.4;
+  }
+  .plan-features li .fi {
+    font-size: 14px;
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+  }
+
+  .plan-terms {
+    font-size: 11px;
+    color: #52525b;
+    margin-top: 14px;
+    line-height: 1.5;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-top: 12px;
+  }
+
+  @media (max-width: 480px) {
+    .form-row { flex-direction: column; }
+    .code-exp { display: none; }
+    .modal-tabs { gap: 0; }
+    .modal-tab { padding: 8px 10px; font-size: 11px; }
+    .plan-price-now { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── AUTH LOADING ── -->
+<div id="authLoading">
+  <div class="spinner"></div>
+  <span>Checking access…</span>
+</div>
+
+<div id="appRoot" style="display:none">
+<div class="wrap">
+
+  <div class="wordmark">Unify<span class="dot">.</span></div>
+
+  <div class="tabs" id="tabBar">
+    <!-- Admin tab injected here if user is admin -->
+    <button class="tab-btn active" id="studentTabBtn" onclick="switchTab('student', this)">Redeem Code</button>
+  </div>
+
+  <!-- ─────────────────── ADMIN PANEL ─────────────────── -->
+  <div id="panel-admin" class="panel">
+
+    <div class="card">
+      <div class="card-title">Generate Access Codes</div>
+      <div class="card-sub">Set how many codes to make, which plan, and how long they last. Send one code per student after you confirm their payment.</div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>Quantity</label>
+          <input type="number" id="qty" min="1" max="500" value="10" />
+        </div>
+        <div class="field">
+          <label>Plan</label>
+          <select id="tier">
+            <option value="1m">1 Month — ₦2,000</option>
+            <option value="3m">3 Months — ₦5,500</option>
+            <option value="6m">6 Months — ₦9,000</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="handleGenerate()">Generate Codes</button>
+        <button class="btn btn-ghost" onclick="openModal()">View Firestore Code</button>
+      </div>
+    </div>
+
+    <!-- Import from CSV -->
+    <div class="card" id="import-section">
+      <div class="card-title">Import Existing CSV</div>
+      <div class="card-sub">Already downloaded a CSV but forgot to save it to Firestore? Paste it here and click Import.</div>
+      <div class="field">
+        <label>Paste CSV content</label>
+        <textarea id="csv-input" rows="6" style="border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:monospace;font-size:12px;background:var(--surface2);color:var(--text);width:100%;resize:vertical;outline:none;" placeholder="Code,Tier,Expires&#10;UNF-XXXX-XXXX,1 Month,2026-07-12&#10;..."></textarea>
+      </div>
+      <div class="btn-row" style="margin-top:8px;">
+        <button class="btn btn-primary" onclick="importFromCSV()">Import &amp; Save to Firestore</button>
+      </div>
+      <div class="write-bar" id="import-bar" style="margin-top:12px;">
+        <div class="spinner"></div>
+        <span id="import-bar-msg">Importing…</span>
+      </div>
+    </div>
+
+    <!-- Generated codes list -->
+    <div id="codes-section" class="card" style="display:none;">
+      <div class="codes-header">
+        <span class="codes-count" id="codes-count">0 codes</span>
+        <div class="codes-actions">
+          <button class="btn btn-ghost btn-sm copy-btn" id="copy-all-btn" onclick="copyAll()">Copy all</button>
+          <button class="btn btn-ghost btn-sm" onclick="downloadCSV()">Download CSV</button>
+          <button class="btn btn-primary btn-sm" id="write-btn" onclick="writeToFirestore()">Write to Firestore</button>
+        </div>
+      </div>
+
+      <div class="code-list" id="code-list"></div>
+
+      <div class="write-bar" id="write-bar">
+        <div class="spinner"></div>
+        <span id="write-bar-msg">Saving to Firestore…</span>
+      </div>
+
+      <div class="divider"></div>
+      <div class="info-list">
+        <div class="info-row"><div class="info-dot"></div><span>Click "Write to Firestore" to save codes — students can't redeem until you do this.</span></div>
+        <div class="info-row"><div class="info-dot"></div><span>Download the CSV and share it with helpers. They tick off codes as students pay.</span></div>
+        <div class="info-row"><div class="info-dot"></div><span>Each code works once. Once redeemed, it locks permanently.</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ─────────────────── STUDENT PANEL ─────────────────── -->
+  <div id="panel-student" class="panel active">
+
+    <div class="card">
+      <div class="card-title">Redeem Your Code</div>
+      <div class="card-sub">Enter the code sent to you after payment. It activates your subscription immediately.</div>
+
+      <div class="field">
+        <label>Access Code</label>
+        <input type="text" id="redeem-input" class="redeem-input"
+          placeholder="UNF-XXXX-XXXX" maxlength="13"
+          oninput="formatCodeInput(this)"
+          onkeydown="if(event.key==='Enter') handleRedeem()" />
+      </div>
+
+      <button class="btn btn-green btn-full" id="redeem-btn" onclick="handleRedeem()">Activate Access</button>
+
+      <div id="redeem-status" class="status"></div>
+    </div>
+
+    <div class="plan-cards">
+
+      <!-- 1 Month -->
+      <div class="plan-card">
+        <div class="plan-header">
+          <span class="plan-name">Starter</span>
+          <span class="plan-badge badge-start">⏱ 1 Month</span>
+        </div>
+        <div class="plan-price-row">
+          <span class="plan-price-was">₦4,000</span>
+          <span class="plan-price-now">₦2,000</span>
+          <span class="plan-price-unit">NGN / month</span>
+        </div>
+        <p class="plan-tagline">Try it out — full access for a month.</p>
+        <button class="plan-cta" onclick="focusRedeem()">Get access →</button>
+        <ul class="plan-features">
+          <li><span class="fi">📖</span>All lecture notes (every course)</li>
+          <li><span class="fi">📝</span>Past exam questions</li>
+          <li><span class="fi">📂</span>Course resources &amp; materials</li>
+          <li><span class="fi">🗓</span>Week-by-week study guides</li>
+          <li><span class="fi">⚡</span>Instant activation</li>
+        </ul>
+      </div>
+
+      <!-- 3 Months -->
+      <div class="plan-card plan-popular">
+        <div class="plan-header">
+          <span class="plan-name">Semester</span>
+          <span class="plan-badge badge-popular">★ Most Popular</span>
+        </div>
+        <div class="plan-price-row">
+          <span class="plan-price-was">₦12,000</span>
+          <span class="plan-price-now">₦5,500</span>
+          <span class="plan-price-unit">NGN / 3 months</span>
+        </div>
+        <p class="plan-tagline">Covers a full semester at a discount.</p>
+        <button class="plan-cta" onclick="focusRedeem()">Get access →</button>
+        <ul class="plan-features">
+          <li><span class="fi">📖</span>All lecture notes (every course)</li>
+          <li><span class="fi">📝</span>Past exam questions</li>
+          <li><span class="fi">📂</span>Course resources &amp; materials</li>
+          <li><span class="fi">🗓</span>Week-by-week study guides</li>
+          <li><span class="fi">⚡</span>Instant activation</li>
+          <li><span class="fi">💰</span>54% cheaper than monthly</li>
+        </ul>
+        <p class="plan-terms">Best choice for the current semester. Access lasts the full 3 months from activation.</p>
+      </div>
+
+      <!-- 6 Months -->
+      <div class="plan-card">
+        <div class="plan-header">
+          <span class="plan-name">Full Year</span>
+          <span class="plan-badge badge-value">🏆 Best Value</span>
+        </div>
+        <div class="plan-price-row">
+          <span class="plan-price-was">₦24,000</span>
+          <span class="plan-price-now">₦9,000</span>
+          <span class="plan-price-unit">NGN / 6 months</span>
+        </div>
+        <p class="plan-tagline">Both semesters — lock in the lowest rate.</p>
+        <button class="plan-cta" onclick="focusRedeem()">Get access →</button>
+        <ul class="plan-features">
+          <li><span class="fi">📖</span>All lecture notes (every course)</li>
+          <li><span class="fi">📝</span>Past exam questions</li>
+          <li><span class="fi">📂</span>Course resources &amp; materials</li>
+          <li><span class="fi">🗓</span>Week-by-week study guides</li>
+          <li><span class="fi">⚡</span>Instant activation</li>
+          <li><span class="fi">💰</span>63% cheaper than monthly</li>
+        </ul>
+        <p class="plan-terms">Pay your class rep, receive your code, enter it above — access activates the moment you redeem.</p>
+      </div>
+
+    </div>
+
+  </div>
+
+</div><!-- /wrap -->
+</div><!-- /appRoot -->
+
+<!-- ─────────────────── FIRESTORE MODAL ─────────────────── -->
+<div id="modal-bg" class="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Firestore Integration</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+
+    <div class="modal-tabs">
+      <button class="modal-tab active" onclick="switchSnippet('write', this)">Write Codes</button>
+      <button class="modal-tab" onclick="switchSnippet('redeem', this)">Redeem Function</button>
+      <button class="modal-tab" onclick="switchSnippet('rules', this)">Security Rules</button>
+    </div>
+
+    <div id="snippet-write" class="snippet active">
+<pre>// Run once after generating a batch — writes codes to Firestore
+// Use this in your admin console or a one-off Node script
+
+async function writeCodeBatch(codes) {
+  var batch = db.batch();
+
+  codes.forEach(function(code) {
+    var ref = db.collection("accessCodes").doc(code.code);
+    batch.set(ref, {
+      tier:      code.tier,
+      isUsed:    false,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      expiresAt: firebase.firestore.Timestamp.fromDate(
+                   new Date(code.expiresAt)
+                 ),
+      usedBy:    null
+    });
+  });
+
+  await batch.commit();
+  console.log("Written:", codes.length, "codes");
+}</pre>
+    </div>
+
+    <div id="snippet-redeem" class="snippet">
+<pre>// Paste into your student dashboard JS
+// Call when the student submits the code form
+
+async function redeemCode(code, userId) {
+  var codeRef = db.collection("accessCodes")
+                  .doc(code.trim().toUpperCase());
+  var userRef = db.collection("users").doc(userId);
+
+  try {
+    await db.runTransaction(async function(txn) {
+      var snap = await txn.get(codeRef);
+
+      if (!snap.exists)
+        throw new Error("Code not found. Check and try again.");
+
+      var data = snap.data();
+
+      if (data.isUsed)
+        throw new Error("This code has already been used.");
+
+      if (data.expiresAt.toDate() < new Date())
+        throw new Error("This code has expired.");
+
+      // Lock the code
+      txn.update(codeRef, {
+        isUsed: true,
+        usedBy: userId,
+        usedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      // Activate subscription
+      txn.set(userRef, {
+        subscription: {
+          active:      true,
+          tier:        data.tier,
+          activatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          expiresAt:   data.expiresAt
+        }
+      }, { merge: true });
+    });
+
+    return { success: true,
+             message: "Access activated successfully." };
+
+  } catch (err) {
+    return { success: false, message: err.message };
+  }
+}</pre>
+    </div>
+
+    <div id="snippet-rules" class="snippet">
+<pre>match /accessCodes/{code} {
+  allow read:  if request.auth != null;
+  allow create: if isAdmin();
+  // Students can only mark a code as used
+  allow update: if request.auth != null
+    && resource.data.isUsed == false
+    && resource.data.expiresAt > request.time
+    && request.resource.data.diff(resource.data)
+         .affectedKeys().hasOnly(['isUsed','usedBy','usedAt'])
+    && request.resource.data.isUsed == true
+    && request.resource.data.usedBy == request.auth.uid;
+}
+
+match /users/{uid} {
+  // Allow subscription activation via code redemption
+  allow update: if request.auth != null
+    && request.auth.uid == uid
+    && request.resource.data.diff(resource.data)
+         .affectedKeys().hasOnly(['subscription']);
+}</pre>
+    </div>
+
+    <div style="margin-top:14px;">
+      <button class="btn btn-ghost btn-sm" id="copy-snippet-btn" onclick="copySnippet()">Copy snippet</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { auth, db } from './js/firebase-config.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { doc, getDoc, collection, writeBatch, runTransaction, serverTimestamp, Timestamp }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ─── State ───────────────────────────────────────────────────────────────────
+
+var generatedCodes = [];
+var currentSnippet = "write";
+var currentUser    = null;
+
+var TIER_LABELS  = { "1m": "1 Month",  "3m": "3 Months",  "6m": "6 Months" };
+var TIER_MONTHS  = { "1m": 1,          "3m": 3,            "6m": 6 };
+var TIER_BADGE   = { "1m": "badge-1m", "3m": "badge-3m",  "6m": "badge-6m" };
+
+// ─── Code generation ─────────────────────────────────────────────────────────
+
+function randomSegment(n) {
+  var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  var s = "";
+  for (var i = 0; i < n; i++) {
+    s += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return s;
+}
+
+function generateCode() {
+  return "UNF-" + randomSegment(4) + "-" + randomSegment(4);
+}
+
+function expiryDate(months) {
+  var d = new Date();
+  d.setMonth(d.getMonth() + months);
+  return d.toISOString().slice(0, 10);
+}
+
+window.handleGenerate = function() {
+  var qty  = Math.min(500, Math.max(1, parseInt(document.getElementById("qty").value, 10) || 1));
+  var tier = document.getElementById("tier").value;
+
+  generatedCodes = [];
+  for (var i = 0; i < qty; i++) {
+    generatedCodes.push({
+      code:      generateCode(),
+      tier:      tier,
+      expiresAt: expiryDate(TIER_MONTHS[tier])
+    });
+  }
+
+  renderCodes();
+};
+
+function renderCodes() {
+  var section = document.getElementById("codes-section");
+  var list    = document.getElementById("code-list");
+  var count   = document.getElementById("codes-count");
+
+  section.style.display = "block";
+  count.textContent = generatedCodes.length + " code" + (generatedCodes.length !== 1 ? "s" : "") + " generated";
+  list.innerHTML = "";
+
+  // Reset write bar
+  var bar = document.getElementById("write-bar");
+  var btn = document.getElementById("write-btn");
+  bar.className = "write-bar";
+  btn.disabled = false;
+  btn.textContent = "Write to Firestore";
+
+  generatedCodes.forEach(function(c, i) {
+    var row = document.createElement("div");
+    row.className = "code-row";
+    row.innerHTML =
+      '<div class="code-left">' +
+        '<span class="code-text">' + c.code + '</span>' +
+        '<span class="code-exp">expires ' + c.expiresAt + '</span>' +
+      '</div>' +
+      '<div class="code-right">' +
+        '<span class="badge ' + TIER_BADGE[c.tier] + '">' + TIER_LABELS[c.tier].toUpperCase() + '</span>' +
+        '<button class="copy-btn" id="copy-' + i + '" onclick="copyCode(\'' + c.code + '\',' + i + ')">Copy</button>' +
+      '</div>';
+    list.appendChild(row);
+  });
+}
+
+// ─── Copy helpers ─────────────────────────────────────────────────────────────
+
+window.copyCode = function(code, idx) {
+  navigator.clipboard.writeText(code).then(function() {
+    var btn = document.getElementById("copy-" + idx);
+    btn.textContent = "✓";
+    btn.classList.add("copied");
+    setTimeout(function() {
+      btn.textContent = "Copy";
+      btn.classList.remove("copied");
+    }, 1500);
+  });
+};
+
+window.copyAll = function() {
+  var text = generatedCodes.map(function(c) { return c.code; }).join("\n");
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.getElementById("copy-all-btn");
+    btn.textContent = "✓ Copied";
+    btn.classList.add("copied");
+    setTimeout(function() {
+      btn.textContent = "Copy all";
+      btn.classList.remove("copied");
+    }, 1800);
+  });
+};
+
+window.copySnippet = function() {
+  var el   = document.getElementById("snippet-" + currentSnippet);
+  var text = el.querySelector("pre").textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.getElementById("copy-snippet-btn");
+    btn.textContent = "✓ Copied";
+    setTimeout(function() { btn.textContent = "Copy snippet"; }, 1800);
+  });
+};
+
+// ─── CSV download ─────────────────────────────────────────────────────────────
+
+window.downloadCSV = function() {
+  var rows = ["Code,Tier,Expires"];
+  generatedCodes.forEach(function(c) {
+    rows.push([c.code, TIER_LABELS[c.tier], c.expiresAt].join(","));
+  });
+  var blob = new Blob([rows.join("\n")], { type: "text/csv" });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement("a");
+  a.href     = url;
+  a.download = "unify-codes-" + new Date().toISOString().slice(0, 10) + ".csv";
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+// ─── Write to Firestore ───────────────────────────────────────────────────────
+
+window.writeToFirestore = async function() {
+  if (!generatedCodes.length) return;
+  var btn = document.getElementById("write-btn");
+  var bar = document.getElementById("write-bar");
+  var msg = document.getElementById("write-bar-msg");
+
+  btn.disabled = true;
+  bar.className = "write-bar show";
+  msg.textContent = "Saving " + generatedCodes.length + " codes to Firestore…";
+
+  try {
+    var batch = writeBatch(db);
+    generatedCodes.forEach(function(c) {
+      var ref = doc(collection(db, "accessCodes"), c.code);
+      batch.set(ref, {
+        tier:      c.tier,
+        isUsed:    false,
+        createdAt: serverTimestamp(),
+        expiresAt: Timestamp.fromDate(new Date(c.expiresAt)),
+        usedBy:    null
+      });
+    });
+    await batch.commit();
+
+    bar.innerHTML =
+      '<span style="color:var(--green-deep);font-weight:600;">' +
+      '✓ ' + generatedCodes.length + ' codes saved. Safe to distribute.' +
+      '</span>';
+    btn.textContent = "✓ Saved";
+  } catch (err) {
+    bar.innerHTML = '<span style="color:#dc2626;">Error: ' + err.message + '</span>';
+    btn.disabled  = false;
+    btn.textContent = "Retry";
+  }
+};
+
+// ─── CSV Import ───────────────────────────────────────────────────────────────
+
+window.importFromCSV = async function() {
+  var raw  = document.getElementById("csv-input").value.trim();
+  var bar  = document.getElementById("import-bar");
+  var msg  = document.getElementById("import-bar-msg");
+
+  if (!raw) { alert("Paste your CSV content first."); return; }
+
+  // Parse — skip header row
+  var TIER_MAP = { "1 month": "1m", "3 months": "3m", "6 months": "6m" };
+  var codes = [];
+  raw.split("\n").forEach(function(line) {
+    line = line.trim();
+    if (!line || line.toLowerCase().startsWith("code")) return; // skip header
+    var parts = line.split(",");
+    if (parts.length < 3) return;
+    var code    = parts[0].trim().toUpperCase();
+    var tierRaw = parts[1].trim().toLowerCase();
+    var expStr  = parts[2].trim();
+    var tier    = TIER_MAP[tierRaw];
+    if (!tier || !/^[A-Z0-9]{3}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) return;
+    codes.push({ code: code, tier: tier, expiresAt: expStr });
+  });
+
+  if (!codes.length) { alert("No valid codes found. Check the format and try again."); return; }
+
+  bar.className   = "write-bar show";
+  msg.textContent = "Writing " + codes.length + " codes to Firestore…";
+
+  try {
+    // Firestore allows max 500 ops per batch — chunk if needed
+    var CHUNK = 400;
+    for (var i = 0; i < codes.length; i += CHUNK) {
+      var batch = writeBatch(db);
+      codes.slice(i, i + CHUNK).forEach(function(c) {
+        var ref = doc(collection(db, "accessCodes"), c.code);
+        batch.set(ref, {
+          tier:      c.tier,
+          isUsed:    false,
+          createdAt: serverTimestamp(),
+          expiresAt: Timestamp.fromDate(new Date(c.expiresAt)),
+          usedBy:    null
+        }, { merge: false });
+      });
+      await batch.commit();
+    }
+    bar.innerHTML =
+      '<span style="color:var(--green-deep);font-weight:600;">✓ ' + codes.length +
+      ' codes saved successfully. Students can now redeem them.</span>';
+    document.getElementById("csv-input").value = "";
+  } catch (err) {
+    bar.innerHTML =
+      '<span style="color:#dc2626;font-weight:600;">Error: ' + err.message +
+      '</span><br><span style="font-size:12px;color:var(--text2);">Make sure your Firestore rules are deployed and you are marked as admin.</span>';
+  }
+};
+
+// ─── Student redemption ───────────────────────────────────────────────────────
+
+window.focusRedeem = function() {
+  var input = document.getElementById("redeem-input");
+  if (!input) return;
+  input.scrollIntoView({ behavior: "smooth", block: "center" });
+  setTimeout(function() { input.focus(); }, 300);
+};
+
+window.formatCodeInput = function(el) {
+  var raw   = el.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  var parts = [];
+  if (raw.length > 0) parts.push(raw.slice(0, 3));
+  if (raw.length > 3) parts.push(raw.slice(3, 7));
+  if (raw.length > 7) parts.push(raw.slice(7, 11));
+  el.value = parts.join("-");
+  setStatus(null);
+};
+
+function setStatus(type, message) {
+  var el = document.getElementById("redeem-status");
+  if (!type) { el.className = "status"; el.innerHTML = ""; return; }
+  el.className = "status show " + type;
+  el.innerHTML = message;
+}
+
+window.handleRedeem = async function() {
+  var input = document.getElementById("redeem-input");
+  var btn   = document.getElementById("redeem-btn");
+  var code  = input.value.trim().toUpperCase();
+
+  if (!/^[A-Z0-9]{3}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) {
+    setStatus("error", "Enter a full code in the format UNF-XXXX-XXXX.");
+    return;
+  }
+  if (!currentUser) { window.location.href = "Auth.html"; return; }
+
+  btn.disabled    = true;
+  btn.textContent = "Checking…";
+  setStatus("loading", "Verifying code…");
+
+  try {
+    var codeRef = doc(db, "accessCodes", code);
+    var userRef = doc(db, "users", currentUser.uid);
+    var tier    = null;
+
+    await runTransaction(db, async function(txn) {
+      var snap = await txn.get(codeRef);
+
+      if (!snap.exists()) throw new Error("Code not found. Double-check and try again.");
+
+      var data = snap.data();
+      if (data.isUsed) throw new Error("This code has already been used.");
+      if (data.expiresAt.toDate() < new Date()) throw new Error("This code has expired. Contact us for a replacement.");
+
+      tier = data.tier;
+
+      txn.update(codeRef, {
+        isUsed: true,
+        usedBy: currentUser.uid,
+        usedAt: serverTimestamp()
+      });
+
+      txn.set(userRef, {
+        subscription: {
+          active:      true,
+          tier:        data.tier,
+          activatedAt: serverTimestamp(),
+          expiresAt:   data.expiresAt
+        }
+      }, { merge: true });
+    });
+
+    setStatus("success",
+      "✓ Access activated — <strong>" + TIER_LABELS[tier] + "</strong> is now live. Taking you to your dashboard…"
+    );
+    input.value = "";
+    setTimeout(function() { window.location.href = "dashboard.html"; }, 2200);
+  } catch (err) {
+    setStatus("error", err.message);
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = "Activate Access";
+  }
+};
+
+// ─── Tab / modal switching ────────────────────────────────────────────────────
+
+window.switchTab = function(name, clickedBtn) {
+  document.querySelectorAll(".panel").forEach(function(p) { p.classList.remove("active"); });
+  document.querySelectorAll(".tab-btn").forEach(function(b) { b.classList.remove("active"); });
+  document.getElementById("panel-" + name).classList.add("active");
+  if (clickedBtn) clickedBtn.classList.add("active");
+};
+
+window.openModal  = function() { document.getElementById("modal-bg").classList.add("open"); };
+window.closeModal = function() { document.getElementById("modal-bg").classList.remove("open"); };
+
+window.switchSnippet = function(name, btn) {
+  document.querySelectorAll(".snippet").forEach(function(s) { s.classList.remove("active"); });
+  document.querySelectorAll(".modal-tab").forEach(function(b) { b.classList.remove("active"); });
+  document.getElementById("snippet-" + name).classList.add("active");
+  btn.classList.add("active");
+  currentSnippet = name;
+  document.getElementById("copy-snippet-btn").textContent = "Copy snippet";
+};
+
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") window.closeModal();
+});
+
+// ─── Auth init ────────────────────────────────────────────────────────────────
+
+onAuthStateChanged(auth, async function(user) {
+  if (!user) { window.location.href = "Auth.html"; return; }
+  currentUser = user;
+
+  // Single read — used for both admin check and subscription status
+  try {
+    var snap     = await getDoc(doc(db, "users", user.uid));
+    var userData = snap.data() || {};
+    var isAdmin  = userData.isAdmin === true;
+
+    if (isAdmin) {
+      var tabBar   = document.getElementById("tabBar");
+      var adminBtn = document.createElement("button");
+      adminBtn.className   = "tab-btn active";
+      adminBtn.textContent = "Admin — Generate Codes";
+      adminBtn.onclick     = function() { window.switchTab("admin", adminBtn); };
+      tabBar.insertBefore(adminBtn, tabBar.firstChild);
+
+      document.getElementById("studentTabBtn").classList.remove("active");
+      window.switchTab("admin", adminBtn);
+    }
+
+    var sub = userData.subscription;
+    if (sub?.active && sub?.expiresAt?.toDate() > new Date()) {
+      var exp   = sub.expiresAt.toDate().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+      var label = TIER_LABELS[sub.tier] || sub.tier;
+      setStatus("success",
+        "You already have an active <strong>" + label + "</strong> subscription, valid until " + exp + ". " +
+        '<a href="Learn.html" style="color:var(--green-deep);font-weight:600;">Go to Notes →</a>'
+      );
+    }
+  } catch (_) {}
+
+  document.getElementById("authLoading").style.display = "none";
+  document.getElementById("appRoot").style.display     = "block";
+});
+</script>
+
+</body>
+</html>
