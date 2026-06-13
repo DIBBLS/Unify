@@ -162,14 +162,15 @@
     }
     #getPlusBtn:hover { background: rgba(74,222,128,0.2); }
 
-    /* ── Semester Progress card (lives inside dash-two-col) ── */
+    /* ── Semester Progress card ── */
     .dash-sem-progress {
+      margin: 0 16px 14px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 16px;
-      display: flex; flex-direction: column; justify-content: center;
+      padding: 14px 16px;
     }
+    @media (min-width: 769px) { .dash-sem-progress { margin: 0 40px 16px; } }
     .dash-sem-header {
       display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
     }
@@ -211,6 +212,28 @@
     <script src="js/register-sw.js" defer></script>
 </head>
   <body>
+
+    <!-- REVIEW MODAL -->
+    <div class="review-modal-overlay" id="reviewModalOverlay" onclick="closeReviewOnOverlay(event)">
+      <div class="review-modal">
+        <div class="review-modal-header">
+          <span class="review-modal-badge" id="reviewModalBadge">Quick Review</span>
+          <button class="review-modal-close" onclick="closeReview()">&#x2715;</button>
+        </div>
+        <div class="review-modal-topic" id="reviewModalTopic">Topic Name</div>
+        <div class="review-modal-course" id="reviewModalCourse">Course · Week</div>
+        <div class="review-question" id="reviewQuestion">Loading question...</div>
+        <div class="review-options" id="reviewOptions"></div>
+        <div class="review-result" id="reviewResult">
+          <div class="review-result-title" id="reviewResultTitle"></div>
+          <div id="reviewResultBody"></div>
+        </div>
+        <div class="review-modal-actions">
+          <button class="review-done-btn" id="reviewDoneBtn" onclick="finishReview()">Done ✓</button>
+          <button class="review-skip-btn" onclick="closeReview()">Later</button>
+        </div>
+      </div>
+    </div>
 
     <!-- LOADING -->
     <div class="loading-overlay" id="loadingOverlay">
@@ -397,12 +420,24 @@
             </div>
           </div>
 
+          <!-- SEMESTER PROGRESS -->
+          <div class="dash-sem-progress">
+            <div class="dash-sem-header">
+              <span class="dash-sem-label">Semester Progress</span>
+              <span class="dash-sem-pct" id="progressPct">0%</span>
+            </div>
+            <div class="dash-sem-track">
+              <div class="dash-sem-fill" id="progressFill"></div>
+            </div>
+            <span class="dash-sem-sub" id="semProgressSub">Grades entered for 0 of your courses</span>
+          </div>
+
           <!-- GOAL CARD -->
           <div class="goal-card-wrap">
             <div class="goal-card" id="goalCard"></div>
           </div>
 
-          <!-- TWO-COL: Motivation + Semester Progress -->
+          <!-- TWO-COL: Motivation + Streak -->
           <div class="dash-two-col">
             <div class="dash-motivation-banner">
               <div class="dash-motivation-left">
@@ -418,15 +453,18 @@
               </div>
             </div>
 
-            <div class="dash-sem-progress">
-              <div class="dash-sem-header">
-                <span class="dash-sem-label">Semester Progress</span>
-                <span class="dash-sem-pct" id="progressPct">0%</span>
+            <div class="streak-nudge" id="streakNudge" onclick="openReview()">
+              <div class="streak-fire" id="streakFire">🔥</div>
+              <div class="streak-info">
+                <div class="streak-count">
+                  <span class="streak-days-val" id="streakDaysVal">0</span>
+                  <span>day streak</span>
+                </div>
+                <div class="streak-message" id="streakMessage">Start your streak today 🚀</div>
+                <div class="streak-sub" id="streakSub">One question. 2 minutes. That's all it takes.</div>
+                <div class="streak-dots" id="streakDots"></div>
               </div>
-              <div class="dash-sem-track">
-                <div class="dash-sem-fill" id="progressFill"></div>
-              </div>
-              <span class="dash-sem-sub" id="semProgressSub">Grades entered for 0 of your courses</span>
+              <button class="streak-action" id="streakActionBtn">Let's go →</button>
             </div>
           </div>
 
