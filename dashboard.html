@@ -162,15 +162,14 @@
     }
     #getPlusBtn:hover { background: rgba(74,222,128,0.2); }
 
-    /* ── Semester Progress card ── */
+    /* ── Semester Progress card (lives inside dash-two-col) ── */
     .dash-sem-progress {
-      margin: 0 16px 14px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 14px 16px;
+      padding: 16px;
+      display: flex; flex-direction: column; justify-content: center;
     }
-    @media (min-width: 769px) { .dash-sem-progress { margin: 0 40px 16px; } }
     .dash-sem-header {
       display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
     }
@@ -398,35 +397,36 @@
             </div>
           </div>
 
-          <!-- SEMESTER PROGRESS -->
-          <div class="dash-sem-progress">
-            <div class="dash-sem-header">
-              <span class="dash-sem-label">Semester Progress</span>
-              <span class="dash-sem-pct" id="progressPct">0%</span>
-            </div>
-            <div class="dash-sem-track">
-              <div class="dash-sem-fill" id="progressFill"></div>
-            </div>
-            <span class="dash-sem-sub" id="semProgressSub">Grades entered for 0 of your courses</span>
-          </div>
-
           <!-- GOAL CARD -->
           <div class="goal-card-wrap">
             <div class="goal-card" id="goalCard"></div>
           </div>
 
-          <!-- MOTIVATION BANNER -->
-          <div class="dash-motivation-banner">
-            <div class="dash-motivation-left">
-              <div class="dash-motivation-crown">👑</div>
-              <p class="dash-motivation-title">Keep up the momentum</p>
-              <small class="dash-motivation-sub">You're on track this semester</small>
+          <!-- TWO-COL: Motivation + Semester Progress -->
+          <div class="dash-two-col">
+            <div class="dash-motivation-banner">
+              <div class="dash-motivation-left">
+                <div class="dash-motivation-crown">👑</div>
+                <p class="dash-motivation-title">Keep up the momentum</p>
+                <small class="dash-motivation-sub">You're on track this semester</small>
+              </div>
+              <div class="dash-motivation-right">
+                <p class="dash-motivation-ahead">Ahead <strong>this week</strong></p>
+                <svg class="dash-sparkline" viewBox="0 0 80 28" xmlns="http://www.w3.org/2000/svg">
+                  <polyline points="0,24 20,18 40,13 60,8 80,3" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                </svg>
+              </div>
             </div>
-            <div class="dash-motivation-right">
-              <p class="dash-motivation-ahead">Ahead <strong>this week</strong></p>
-              <svg class="dash-sparkline" viewBox="0 0 80 28" xmlns="http://www.w3.org/2000/svg">
-                <polyline points="0,24 20,18 40,13 60,8 80,3" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-              </svg>
+
+            <div class="dash-sem-progress">
+              <div class="dash-sem-header">
+                <span class="dash-sem-label">Semester Progress</span>
+                <span class="dash-sem-pct" id="progressPct">0%</span>
+              </div>
+              <div class="dash-sem-track">
+                <div class="dash-sem-fill" id="progressFill"></div>
+              </div>
+              <span class="dash-sem-sub" id="semProgressSub">Grades entered for 0 of your courses</span>
             </div>
           </div>
 
