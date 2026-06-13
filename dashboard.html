@@ -13,55 +13,25 @@
     <link rel="stylesheet" href="css/components.css" />
     <link rel="stylesheet" href="css/responsive.css" />
     <script src="js/theme.js"></script>
-    <link rel="stylesheet" href="css/pages/dashboard.styles.css?v=goal-5" />
+    <link rel="stylesheet" href="css/pages/dashboard.styles.css?v=goal-8" />
     <link rel="stylesheet" href="css/pages/dashboard-v2.styles.css?v=2" />
     <style>
-    /* ── Sidebar Go-Pro CTA ── */
-    .sidebar-gopro {
-      display: none;
-      margin: 0 0 10px;
-      background: var(--invert-bg);
-      border-radius: 10px;
-      padding: 12px 14px;
-      text-decoration: none;
-      transition: opacity 0.15s;
-    }
-    .sidebar-gopro:hover { opacity: 0.85; }
-    .sidebar-gopro-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: #4ade80;
-      margin-bottom: 2px;
-    }
-    .sidebar-gopro-text {
-      font-size: 12px;
-      font-weight: 500;
-      color: rgba(240,239,233,0.7);
-      line-height: 1.4;
-    }
-
-    /* ── Sidebar support card ── */
-    .sidebar-support {
-      margin: 0 0 10px;
+    /* ── Support Unify nudge bar ── */
+    .support-nudge {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 10px 20px;
       background: rgba(74,222,128,0.06);
-      border: 1px solid rgba(74,222,128,0.15);
-      border-radius: 10px;
-      padding: 11px 13px;
+      border-bottom: 1px solid rgba(74,222,128,0.15);
+      font-size: 13px; color: var(--text2);
+      flex-wrap: wrap;
     }
-    .sidebar-support-top {
-      font-size: 11px; font-weight: 700; color: #4ade80; margin-bottom: 3px;
+    .support-nudge strong {
+      font-family: 'DM Mono', 'Courier New', monospace;
+      color: var(--text); letter-spacing: 1px;
     }
-    .sidebar-support-sub {
-      font-size: 11px; color: rgba(240,239,233,0.5); line-height: 1.4; margin-bottom: 8px;
-    }
-    .sidebar-support-acct {
-      font-size: 15px; font-weight: 800; color: rgba(240,239,233,0.9);
-      letter-spacing: 2px; font-family: 'Courier New', monospace;
-    }
-    .sidebar-support-name {
-      font-size: 10px; color: rgba(240,239,233,0.4); margin-top: 2px;
+    .support-nudge-close {
+      background: none; border: none; font-size: 16px;
+      cursor: pointer; color: var(--text3); line-height: 1; flex-shrink: 0;
     }
 
     /* ── Paywall modal ── */
@@ -184,33 +154,7 @@
     }
     #getPlusBtn:hover { background: rgba(74,222,128,0.2); }
 
-    /* ── Semester Progress card ── */
-    .dash-sem-progress {
-      margin: 0 16px 14px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px 16px;
-    }
-    @media (min-width: 769px) { .dash-sem-progress { margin: 0 40px 16px; } }
-    .dash-sem-header {
-      display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
-    }
-    .dash-sem-label {
-      font-size: 12px; font-weight: 700; color: var(--text2);
-      text-transform: uppercase; letter-spacing: 0.8px;
-    }
-    .dash-sem-pct { font-size: 13px; font-weight: 700; color: var(--green-text); }
-    .dash-sem-track {
-      height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 8px;
-    }
-    .dash-sem-fill {
-      height: 100%; width: 0%; background: var(--green); border-radius: 4px;
-      transition: width 0.8s ease;
-    }
-    .dash-sem-sub { font-size: 11px; color: var(--text3); }
-
-    /* ── Partial-lock badge on course cards — open padlock, full opacity ── */
+/* ── Partial-lock badge on course cards — open padlock, full opacity ── */
     body.paywall-active .course-item::after {
       content: '🔓';
       position: absolute; top: 8px; right: 8px;
@@ -370,16 +314,6 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             <span class="app-sidebar-link-text"><span id="themeToggle">🌙 Dark</span></span>
           </button>
-          <a href="access-codes.html" class="sidebar-gopro" id="sidebarGoPro">
-            <div class="sidebar-gopro-label">✦ Unify Plus</div>
-            <div class="sidebar-gopro-text">Unlock notes &amp; resources →</div>
-          </a>
-          <div class="sidebar-support">
-            <div class="sidebar-support-top">☕ Support Unify</div>
-            <div class="sidebar-support-sub">Love what we're building? Send us a coffee.</div>
-            <div class="sidebar-support-acct">6118998666</div>
-            <div class="sidebar-support-name">Commy Glory Ventures</div>
-          </div>
           <button class="app-sidebar-signout" id="signOutBtn">Sign out</button>
         </div>
       </aside>
@@ -416,6 +350,12 @@
             </div>
           </div>
 
+          <!-- SUPPORT NUDGE -->
+          <div class="support-nudge" id="supportNudge">
+            <span>☕ Love what we're building? Support Unify — <strong>6118998666</strong> · Commy Glory Ventures</span>
+            <button class="support-nudge-close" onclick="document.getElementById('supportNudge').style.display='none'" aria-label="Dismiss">×</button>
+          </div>
+
           <!-- GREETING -->
           <div class="dash-greeting">
             <p class="dash-greeting-eyebrow" id="heroTag">Your Dashboard</p>
@@ -448,19 +388,7 @@
             </div>
           </div>
 
-          <!-- SEMESTER PROGRESS -->
-          <div class="dash-sem-progress">
-            <div class="dash-sem-header">
-              <span class="dash-sem-label">Semester Progress</span>
-              <span class="dash-sem-pct" id="progressPct">0%</span>
-            </div>
-            <div class="dash-sem-track">
-              <div class="dash-sem-fill" id="progressFill"></div>
-            </div>
-            <span class="dash-sem-sub" id="semProgressSub">Grades entered for 0 of your courses</span>
-          </div>
-
-          <!-- GOAL CARD -->
+<!-- GOAL CARD -->
           <div class="goal-card-wrap">
             <div class="goal-card" id="goalCard"></div>
           </div>
@@ -648,7 +576,7 @@
 
     <script src="courses.js?v=step1-deptfix"></script>
     <script src="Coursecontent.JS?v=4"></script>
-    <script type="module" src="js/pages/dashboard.js?v=goal-7"></script>
+    <script type="module" src="js/pages/dashboard.js?v=goal-8"></script>
     <script type="module" src="js/feedback.js"></script>
 
     <!-- Paywall modal -->
@@ -722,8 +650,7 @@
         if (isActive) return; // subscribed — nothing to lock
       } catch (_) { /* lock by default on error */ }
 
-      // Show sidebar CTA + Get Plus+ chip + lock badges
-      document.getElementById('sidebarGoPro').style.display = 'block';
+      // Show Get Plus+ chip + lock badges
       document.getElementById('getPlusBtn').style.display = 'inline-flex';
       document.body.classList.add('paywall-active');
 
