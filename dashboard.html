@@ -18,20 +18,31 @@
     <style>
     /* ── Support Unify nudge bar ── */
     .support-nudge {
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-      padding: 10px 20px;
+      display: flex; align-items: center; gap: 14px;
+      padding: 10px 16px 10px 12px;
       background: rgba(74,222,128,0.06);
       border-bottom: 1px solid rgba(74,222,128,0.15);
-      font-size: 13px; color: var(--text2);
-      flex-wrap: wrap;
     }
-    .support-nudge strong {
+    .support-nudge-img {
+      width: 52px; height: 52px; object-fit: contain;
+      flex-shrink: 0; border-radius: 8px;
+    }
+    .support-nudge-body { flex: 1; min-width: 0; }
+    .support-nudge-title {
+      font-size: 13px; font-weight: 700; color: var(--text);
+      margin-bottom: 2px;
+    }
+    .support-nudge-text {
+      font-size: 12px; color: var(--text2); line-height: 1.45;
+    }
+    .support-nudge-text strong {
       font-family: 'DM Mono', 'Courier New', monospace;
-      color: var(--text); letter-spacing: 1px;
+      color: var(--text); letter-spacing: 0.5px;
     }
     .support-nudge-close {
-      background: none; border: none; font-size: 16px;
-      cursor: pointer; color: var(--text3); line-height: 1; flex-shrink: 0;
+      background: none; border: none; font-size: 18px;
+      cursor: pointer; color: var(--text3); line-height: 1;
+      flex-shrink: 0; padding: 4px;
     }
 
     /* ── Paywall modal ── */
@@ -352,7 +363,13 @@
 
           <!-- SUPPORT NUDGE -->
           <div class="support-nudge" id="supportNudge">
-            <span>☕ Love what we're building? Support Unify — <strong>6118998666</strong> · Commy Glory Ventures</span>
+            <img src="icons/boxboy.png" class="support-nudge-img" alt="Box Boy" />
+            <div class="support-nudge-body">
+              <div class="support-nudge-title">🏅 Become an Early Supporter</div>
+              <div class="support-nudge-text">
+                Send to <strong>6118998666</strong> (Commy Glory Ventures), then get your code from admin to unlock a special Early Supporter badge on your profile.
+              </div>
+            </div>
             <button class="support-nudge-close" onclick="document.getElementById('supportNudge').style.display='none'" aria-label="Dismiss">×</button>
           </div>
 
