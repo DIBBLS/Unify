@@ -98,7 +98,8 @@
   // Wait for Firebase to initialise (firebase-config.js may load async)
   function tryFirestore(attempts) {
     if (window.db) {
-      window.db.collection('lessons').doc(course + '_W' + week).get()
+      var docId = course.replace(/\s+/g, '_') + '_W' + week;
+      window.db.collection('lessons').doc(docId).get()
         .then(function (doc) {
           if (doc.exists) mount(doc.data());
           else showError('Lesson not found: ' + course + ' Week ' + week);
