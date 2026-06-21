@@ -1180,6 +1180,131 @@ window.uploadCourseContent = async function () {
   btn.textContent = "Upload →";
 };
 
+// ── Content mode toggle ───────────────────────────────────
+window.setContentMode = function (mode) {
+  document.getElementById("ccUploadFields").style.display = mode === "upload" ? "" : "none";
+  document.getElementById("ccParseFields").style.display  = mode === "parse"  ? "" : "none";
+  document.querySelectorAll(".cc-mode-seg").forEach((s) => {
+    s.classList.toggle("active", s.dataset.mode === mode);
+  });
+};
+
+// ── AI note parser ────────────────────────────────────────
+let _parsedLesson = null;
+
+window.parseNotesWithAI = async function () {
+  const courseCode = document.getElementById("ccCode").value.trim().toUpperCase().replace(/\s+/g, " ");
+  const weekRaw    = document.getElementById("ccWeek").value;
+  const weekOf     = parseInt(document.getElementById("ccWeekOf").value, 10);
+  const notes      = document.getElementById("ccRawNotes").value.trim();
+  const keyInput   = document.getElementById("ccApiKey").value.trim();
+  const statusEl   = document.getElementById("ccParseStatus");
+
+  if (!courseCode) { showToast("Enter a course code"); return; }
+  if (!weekRaw)    { showToast("Select a week"); return; }
+  if (!notes)      { showToast("Paste some notes first"); return; }
+
+  // Persist key in session so the admin doesn't re-enter it every time
+  let apiKey = keyInput || sessionStorage.getItem("unify_claude_key") || "";
+  if (!apiKey) { showToast("Enter your Claude API key"); return; }
+  if (keyInput) sessionStorage.setItem("unify_claude_key", keyInput);
+
+  const btn = document.getElementById("ccParseBtn");
+  btn.disabled = true;
+  btn.textContent = "Parsing…";
+  statusEl.textContent = "Calling Claude API…";
+  document.getElementById("ccParsePreview").style.display = "none";
+
+  try {
+    const body = window.buildLessonParserRequest(notes, courseCode, parseInt(weekRaw, 10), weekOf);
+    const res  = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-allow-browser": "true",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `API error ${res.status}`);
+    }
+
+    const data  = await res.json();
+    const text  = data?.content?.[0]?.text;
+    if (!text) throw new Error("Empty response from Claude");
+
+    _parsedLesson = JSON.parse(text);
+
+    const validation = window.validateLesson ? window.validateLesson(_parsedLesson) : { valid: true, errors: [] };
+    if (!validation.valid) {
+      console.warn("[parseNotesWithAI] schema warnings:", validation.errors);
+    }
+
+    const topicCount = _parsedLesson.topics?.length || 0;
+    const qCount     = _parsedLesson.quiz?.questions?.length || 0;
+    statusEl.textContent = "";
+    document.getElementById("ccParseSummary").textContent =
+      `${topicCount} topic${topicCount !== 1 ? "s" : ""} · ${qCount} quiz questions`;
+    document.getElementById("ccParsedJsonDisplay").textContent =
+      JSON.stringify(_parsedLesson, null, 2).slice(0, 3000) + (JSON.stringify(_parsedLesson).length > 3000 ? "\n…" : "");
+    document.getElementById("ccParsePreview").style.display = "block";
+
+  } catch (e) {
+    console.error("[parseNotesWithAI]", e);
+    statusEl.textContent = "Error: " + e.message;
+    showToast("Parse failed — " + e.message);
+  }
+
+  btn.disabled = false;
+  btn.textContent = "Parse with AI →";
+};
+
+window.openLessonPreview = function () {
+  if (!_parsedLesson) return;
+  window.open("lesson.html?data=" + btoa(unescape(encodeURIComponent(JSON.stringify(_parsedLesson)))), "_blank");
+};
+
+window.saveParsedLesson = async function () {
+  if (!_parsedLesson) { showToast("Nothing to save — parse first"); return; }
+  if (!canUploadContent(myRole)) { showToast("Permission denied"); return; }
+
+  const btn = document.getElementById("ccSaveBtn");
+  btn.disabled = true;
+  btn.textContent = "Saving…";
+
+  try {
+    const code  = _parsedLesson.course;
+    const week  = _parsedLesson.week;
+    const docId = code.replace(/\s+/g, "_") + "_W" + week;
+
+    await setDoc(doc(db, "lessons", docId), {
+      ..._parsedLesson,
+      _savedAt:      serverTimestamp(),
+      _savedBy:      me.uid,
+      _savedByName:  myProfile?.name || myProfile?.firstName || me.email,
+    });
+
+    showToast(`${code} Week ${week} saved ✓`);
+    _parsedLesson = null;
+    document.getElementById("ccParsePreview").style.display = "none";
+    document.getElementById("ccRawNotes").value = "";
+    document.getElementById("ccParsedJsonDisplay").textContent = "";
+    document.getElementById("ccParseStatus").textContent = "";
+    document.getElementById("ccParseSummary").textContent = "";
+
+  } catch (e) {
+    console.error("[saveParsedLesson]", e);
+    showToast("Save failed — " + e.message);
+  }
+
+  btn.disabled = false;
+  btn.textContent = "Save to Unify →";
+};
+
 // ── EXAM TIMETABLE SHEET ──────────────────────────────────────────────────────
 
 let etSavedRows = [];

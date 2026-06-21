@@ -321,7 +321,7 @@
           <div class="panel-head">
             <div>
               <h2 class="panel-title">Course Content</h2>
-              <p class="panel-sub">Upload notes and/or YouTube links per week. Re-uploading the same week updates only the fields you fill in — leave HTML blank to update just the video, or vice versa.</p>
+              <p class="panel-sub">Upload a hand-authored HTML file, or paste raw lecture notes and let AI convert them into a structured Unify lesson automatically.</p>
             </div>
           </div>
 
@@ -360,6 +360,16 @@
             </div>
           </div>
 
+          <div class="seg-control" role="tablist" style="margin-bottom:20px;">
+            <button type="button" class="seg active cc-mode-seg" data-mode="upload" onclick="setContentMode('upload')">
+              <span class="seg-dot"></span> Upload HTML
+            </button>
+            <button type="button" class="seg cc-mode-seg" data-mode="parse" onclick="setContentMode('parse')">
+              <span class="seg-dot"></span> Parse from Notes
+            </button>
+          </div>
+
+          <div id="ccUploadFields">
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Week Title</label>
@@ -398,6 +408,51 @@
             </div>
             <button class="btn btn-primary" id="ccUploadBtn" onclick="uploadCourseContent()">Upload →</button>
           </div>
+          </div><!-- /ccUploadFields -->
+
+          <div id="ccParseFields" style="display:none">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Raw Notes <span class="form-label-hint">paste lecture notes, textbook pages, or any text</span></label>
+                <textarea class="form-textarea" id="ccRawNotes" placeholder="Paste your raw lecture notes here…&#10;&#10;The AI will extract topics, create questions, recall cards, and a quiz automatically." style="min-height:240px;font-size:13px;line-height:1.7;"></textarea>
+              </div>
+            </div>
+            <div class="form-row two">
+              <div class="form-group">
+                <label class="form-label">Total Weeks in This Course</label>
+                <select class="form-select" id="ccWeekOf">
+                  <option value="12">12 weeks</option>
+                  <option value="15">15 weeks</option>
+                  <option value="10">10 weeks</option>
+                  <option value="8">8 weeks</option>
+                  <option value="14">14 weeks</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Claude API Key <span class="form-label-hint">saved in this browser session only</span></label>
+                <input class="form-input" id="ccApiKey" type="password" placeholder="sk-ant-…" autocomplete="off" />
+              </div>
+            </div>
+            <div class="ann-foot">
+              <div class="ann-meta" id="ccParseStatus" style="font-size:12px;color:var(--text2);"></div>
+              <button class="btn btn-primary" id="ccParseBtn" onclick="parseNotesWithAI()">Parse with AI →</button>
+            </div>
+
+            <div id="ccParsePreview" style="display:none;margin-top:20px;border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+              <div style="padding:12px 18px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                <div>
+                  <span style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green-deep)">Parsed successfully</span>
+                  <span id="ccParseSummary" style="font-size:12px;color:var(--text3);margin-left:10px;"></span>
+                </div>
+                <div style="display:flex;gap:8px;">
+                  <button class="btn btn-ghost" onclick="openLessonPreview()">Preview in new tab →</button>
+                  <button class="btn btn-primary" id="ccSaveBtn" onclick="saveParsedLesson()">Save to Unify →</button>
+                </div>
+              </div>
+              <pre id="ccParsedJsonDisplay" style="font-size:11px;max-height:180px;overflow-y:auto;color:var(--text2);background:var(--surface);padding:16px;border:none;white-space:pre-wrap;margin:0;line-height:1.6;"></pre>
+            </div>
+          </div><!-- /ccParseFields -->
+
         </section>
 
         <!-- MANAGE COURSES (collapsible) -->
@@ -678,6 +733,8 @@
 
     <div class="toast" id="toast"></div>
 
+    <script src="js/lesson-schema.js"></script>
+    <script src="js/lesson-parser-prompt.js"></script>
     <script type="module" src="js/admin.js?v=content-3"></script>
     <script type="module" src="/unify-analytics.js"></script>
   </body>
