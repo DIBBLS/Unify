@@ -534,7 +534,7 @@
           <div class="topbar-right">
             <div class="tb-icon-btn" title="Notifications">
               <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
-              <span class="notif-badge">3</span>
+              <span class="notif-badge" id="notifBadge" style="display:none">0</span>
             </div>
             <div class="tb-icon-btn" title="Settings">
               <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -576,11 +576,8 @@
                 </div>
                 <div class="metric-body">
                   <div class="metric-label">Total Students</div>
-                  <div class="metric-value">2,640</div>
-                  <div class="metric-delta up">
-                    <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"/></svg>
-                    12.5% this month
-                  </div>
+                  <div class="metric-value" id="metricStudents">—</div>
+                  <div class="metric-delta up" id="metricStudentsDelta">Registered users</div>
                 </div>
               </div>
 
@@ -590,11 +587,8 @@
                 </div>
                 <div class="metric-body">
                   <div class="metric-label">Active Courses</div>
-                  <div class="metric-value">132</div>
-                  <div class="metric-delta up">
-                    <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"/></svg>
-                    8.2% this month
-                  </div>
+                  <div class="metric-value" id="metricCourses">—</div>
+                  <div class="metric-delta up" id="metricCoursesDelta">Available courses</div>
                 </div>
               </div>
 
@@ -604,11 +598,8 @@
                 </div>
                 <div class="metric-body">
                   <div class="metric-label">Announcements</div>
-                  <div class="metric-value">25</div>
-                  <div class="metric-delta up">
-                    <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"/></svg>
-                    3 new today
-                  </div>
+                  <div class="metric-value" id="metricAnnouncements">—</div>
+                  <div class="metric-delta up" id="metricAnnouncementsDelta">Total posted</div>
                 </div>
               </div>
 
@@ -618,11 +609,8 @@
                 </div>
                 <div class="metric-body">
                   <div class="metric-label">Feedback</div>
-                  <div class="metric-value">4</div>
-                  <div class="metric-delta alert">
-                    <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="4"/></svg>
-                    12 unread
-                  </div>
+                  <div class="metric-value" id="metricFeedback">—</div>
+                  <div class="metric-delta alert" id="metricFeedbackDelta">Open items</div>
                 </div>
               </div>
             </div>
@@ -637,59 +625,8 @@
                   <a href="#" class="panel-hdr-link">View all</a>
                 </div>
 
-                <div class="activity-item">
-                  <div class="act-icon purple">
-                    <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
-                  </div>
-                  <div class="act-body">
-                    <div class="act-title">ECE 303 Lecture 3 uploaded</div>
-                    <div class="act-sub">Content Upload</div>
-                  </div>
-                  <div class="act-time">2m ago</div>
-                </div>
-
-                <div class="activity-item">
-                  <div class="act-icon blue">
-                    <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
-                  </div>
-                  <div class="act-body">
-                    <div class="act-title">Timetable updated</div>
-                    <div class="act-sub">Semester schedule revised</div>
-                  </div>
-                  <div class="act-time">1h ago</div>
-                </div>
-
-                <div class="activity-item">
-                  <div class="act-icon purple">
-                    <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
-                  </div>
-                  <div class="act-body">
-                    <div class="act-title">MTH301 Notes updated</div>
-                    <div class="act-sub">Week 4 material added</div>
-                  </div>
-                  <div class="act-time">2h ago</div>
-                </div>
-
-                <div class="activity-item">
-                  <div class="act-icon orange">
-                    <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg>
-                  </div>
-                  <div class="act-body">
-                    <div class="act-title">Exam timetable updated</div>
-                    <div class="act-sub">First Semester schedule</div>
-                  </div>
-                  <div class="act-time">3h ago</div>
-                </div>
-
-                <div class="activity-item">
-                  <div class="act-icon green">
-                    <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z"/></svg>
-                  </div>
-                  <div class="act-body">
-                    <div class="act-title">New student registered</div>
-                    <div class="act-sub">John Doe joined Unify</div>
-                  </div>
-                  <div class="act-time">5h ago</div>
+                <div id="activityList">
+                  <div style="color:var(--text3);font-size:13px;padding:10px 0">Loading activity…</div>
                 </div>
               </div>
 
@@ -804,34 +741,8 @@
                   <a href="#" class="panel-hdr-link">View all</a>
                 </div>
 
-                <div class="ann-item">
-                  <span class="ann-tag general">General</span>
-                  <div class="ann-body">
-                    <div class="ann-title">Department Meeting</div>
-                    <div class="ann-preview">Department meeting scheduled for next Tuesday in the main hall…</div>
-                    <div class="ann-meta">2h ago · Dr. Adeyemi</div>
-                  </div>
-                  <span class="pub-badge">Published</span>
-                </div>
-
-                <div class="ann-item">
-                  <span class="ann-tag academic">Academic</span>
-                  <div class="ann-body">
-                    <div class="ann-title">ECE203 Assignment 3 Released</div>
-                    <div class="ann-preview">All students are expected to submit by end of the week…</div>
-                    <div class="ann-meta">5h ago · Dr. Okonkwo</div>
-                  </div>
-                  <span class="pub-badge">Published</span>
-                </div>
-
-                <div class="ann-item">
-                  <span class="ann-tag notice">Notice</span>
-                  <div class="ann-body">
-                    <div class="ann-title">Library Access Update</div>
-                    <div class="ann-preview">Library will be closed for renovation from Aug 28–30…</div>
-                    <div class="ann-meta">1d ago · Admin</div>
-                  </div>
-                  <span class="pub-badge">Published</span>
+                <div id="dashAnnouncements">
+                  <div style="color:var(--text3);font-size:13px;padding:10px 0">Loading…</div>
                 </div>
               </div>
 
@@ -843,44 +754,13 @@
                 </div>
 
                 <div class="fb-tabs">
-                  <button class="fb-tab active" onclick="switchFbTab(this)">All</button>
-                  <button class="fb-tab" onclick="switchFbTab(this)">Open</button>
-                  <button class="fb-tab" onclick="switchFbTab(this)">Resolved</button>
+                  <button class="fb-tab active" onclick="filterDashFeedback('all', this)">All</button>
+                  <button class="fb-tab" onclick="filterDashFeedback('open', this)">Open</button>
+                  <button class="fb-tab" onclick="filterDashFeedback('resolved', this)">Resolved</button>
                 </div>
 
-                <div class="fb-item">
-                  <div class="fb-avatar">AM</div>
-                  <div class="fb-body">
-                    <div class="fb-name">Alex Martinez</div>
-                    <div class="fb-msg">The timetable isn't showing correct class times…</div>
-                  </div>
-                  <div class="fb-right">
-                    <span class="fb-time">2h ago</span>
-                    <span class="fb-new">NEW</span>
-                  </div>
-                </div>
-
-                <div class="fb-item">
-                  <div class="fb-avatar">EJ</div>
-                  <div class="fb-body">
-                    <div class="fb-name">Emily Johnson</div>
-                    <div class="fb-msg">Could you add more practice questions for ECE 303?</div>
-                  </div>
-                  <div class="fb-right">
-                    <span class="fb-time">5h ago</span>
-                    <span class="fb-new">NEW</span>
-                  </div>
-                </div>
-
-                <div class="fb-item">
-                  <div class="fb-avatar">DC</div>
-                  <div class="fb-body">
-                    <div class="fb-name">David Chen</div>
-                    <div class="fb-msg">Found a bug when trying to access Week 4 content…</div>
-                  </div>
-                  <div class="fb-right">
-                    <span class="fb-time">1d ago</span>
-                  </div>
+                <div id="dashFeedback">
+                  <div style="color:var(--text3);font-size:13px;padding:10px 0">Loading…</div>
                 </div>
               </div>
             </div>
@@ -903,70 +783,46 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    // ── Show dashboard immediately (swap for Firebase auth gate when wiring)
+    // Live date (non-Firebase, runs immediately)
     (function () {
-      document.getElementById('loadingScreen').style.display = 'none';
-      document.getElementById('mainContent').style.display  = 'block';
-
-      // Live date
       const d = new Date();
       const el = document.getElementById('currentDate');
       if (el) el.textContent = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     })();
 
-    // ── Sidebar navigation
+    // Sidebar navigation highlight
     document.querySelectorAll('.nav-item[data-view]').forEach(function (link) {
       link.addEventListener('click', function (e) {
         e.preventDefault();
         document.querySelectorAll('.nav-item').forEach(function (l) { l.classList.remove('active'); });
         link.classList.add('active');
-        // Future: switch visible view panel here
       });
     });
 
-    // Quick action tiles also activate the matching sidebar item
+    // Quick action tiles activate matching sidebar item
     document.querySelectorAll('.quick-item[data-nav]').forEach(function (tile) {
       tile.addEventListener('click', function (e) {
         e.preventDefault();
-        var target = tile.dataset.nav;
-        var sideLink = document.querySelector('.nav-item[data-view="' + target + '"]');
+        var sideLink = document.querySelector('.nav-item[data-view="' + tile.dataset.nav + '"]');
         if (sideLink) sideLink.click();
       });
     });
 
-    // ── Feedback tab switch
-    function switchFbTab(el) {
-      document.querySelectorAll('.fb-tab').forEach(function (t) { t.classList.remove('active'); });
-      el.classList.add('active');
-    }
-
-    // ── Toast helper (exposed globally for future Firebase wiring)
-    function showToast(msg) {
+    // Toast helper
+    window.showToast = function (msg) {
       var t = document.getElementById('toast');
       t.textContent = msg;
       t.classList.add('show');
       setTimeout(function () { t.classList.remove('show'); }, 3000);
-    }
+    };
 
-    // ── Topbar hamburger (future: collapse sidebar)
+    // Topbar hamburger
     document.querySelector('.topbar-menu').addEventListener('click', function () {
       document.querySelector('.sidebar').classList.toggle('sidebar--collapsed');
     });
   </script>
 
-  <!--
-    FIREBASE WIRING TODO:
-    1. Uncomment the script below (update the version query string as needed)
-    2. Restore the onAuthStateChanged gate in admin.js:
-       - Set #loadingScreen display to 'none' on auth check
-       - Set #mainContent display to 'block' (or 'none' if denied)
-       - Populate #heroName, #heroFirstName, #heroRole, #userInitials from user profile
-       - Wire metric card values from Firestore (users, courses, announcements, feedback collections)
-       - Populate Recent Activity from activityLog onSnapshot
-       - Populate Recent Announcements from announcements query
-       - Populate Feedback Inbox from feedback query
-  -->
-  <!-- <script type="module" src="js/admin.js"></script> -->
+  <script type="module" src="js/admin-dashboard.js"></script>
   <script type="module" src="/unify-analytics.js"></script>
 </body>
 </html>
