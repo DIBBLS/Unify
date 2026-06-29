@@ -560,3 +560,143 @@ nav {
 
 /* Bottom padding so content clears the fixed bottom nav */
 .course-page { padding-bottom: 80px; }
+
+/* ── Course Tabs ─────────────────────────────────────────── */
+.ctab-nav {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  padding: 0 0 0 0;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ctab-nav::-webkit-scrollbar { display: none; }
+
+.ctab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-body);
+  color: var(--text3);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+}
+.ctab svg { opacity: 0.6; }
+.ctab.active {
+  color: var(--text);
+  border-bottom-color: var(--green);
+}
+.ctab.active svg { opacity: 1; }
+.ctab:hover:not(.active) { color: var(--text2); }
+
+.ctab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 700;
+  background: #dc2626;
+  color: #fff;
+  line-height: 1;
+}
+
+.ctab-panel { animation: fadeIn 0.15s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* ── Announcement Cards ──────────────────────────────────── */
+.ann-list { display: flex; flex-direction: column; gap: 12px; }
+
+.ann-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--green);
+  border-radius: 10px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ann-card.priority-important { border-left-color: #d97706; }
+.ann-card.priority-urgent    { border-left-color: #ea580c; }
+.ann-card.priority-critical  { border-left-color: #dc2626; background: rgba(220,38,38,0.03); }
+
+.ann-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ann-priority-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 99px;
+}
+.ann-priority-badge.normal   { background: rgba(74,222,128,0.12); color: #16a34a; }
+.ann-priority-badge.important{ background: rgba(217,119,6,0.12);  color: #d97706; }
+.ann-priority-badge.urgent   { background: rgba(234,88,12,0.12);  color: #ea580c; }
+.ann-priority-badge.critical { background: rgba(220,38,38,0.12);  color: #dc2626; }
+
+.ann-scope-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text3);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 2px 8px;
+}
+
+.ann-time {
+  font-size: 11px;
+  color: var(--text3);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ann-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.35;
+}
+
+.ann-card-msg {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+.ann-card-meta {
+  font-size: 11px;
+  color: var(--text3);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.ann-card-meta span::before { content: '·'; margin-right: 6px; }
+.ann-card-meta span:first-child::before { content: none; }
+
+.ann-unread-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #dc2626;
+  flex-shrink: 0;
+}

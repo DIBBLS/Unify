@@ -103,9 +103,31 @@
   <div class="modal-bg" id="ann-modal">
     <div class="modal" style="max-width:520px">
       <div class="modal-hdr">New Announcement</div>
+      <div class="form-2col">
+        <div class="form-group">
+          <label class="form-label">Priority</label>
+          <select class="form-select" id="ann-priority">
+            <option value="normal">🟢 Normal</option>
+            <option value="important">🟡 Important</option>
+            <option value="urgent">🔴 Urgent</option>
+            <option value="critical">🚨 Critical</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Target</label>
+          <select class="form-select" id="ann-scope" onchange="toggleCourseField()">
+            <option value="general">University-wide</option>
+            <option value="course">Specific course</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" id="ann-course-wrap" style="display:none">
+        <label class="form-label">Course code</label>
+        <input class="form-input" id="ann-course-code" type="text" placeholder="e.g. ECE 301" style="text-transform:uppercase">
+      </div>
       <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="ann-title" type="text" placeholder="e.g. No class tomorrow"></div>
       <div class="form-group"><label class="form-label">Message</label><textarea class="form-textarea" id="ann-message" rows="4" placeholder="Write your announcement…"></textarea></div>
-      <div class="form-group"><label class="form-label">Target audience</label>
+      <div class="form-group"><label class="form-label">Audience</label>
         <select class="form-select" id="ann-audience">
           <option value="all">All students</option>
           <option value="300">300 Level only</option>
