@@ -2,9 +2,9 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## What is Unify
+## What is Unify Learn
 
-Unify is a student academic platform for LASU (Lagos State University) engineering students. It provides CGPA calculation, timetable management, a learning library with week-by-week course content, career resources, and a social profile/feed.
+Unify Learn is a student academic platform for LASU (Lagos State University) engineering students. It provides CGPA calculation, timetable management, a learning library with week-by-week course content, career resources, and a social profile/feed.
 
 ## Running the project
 

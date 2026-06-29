@@ -768,7 +768,7 @@ function renderExamView() {
         </div>
       </div>
       <div class="exam-notif-desc">
-        Turn on reminders and Unify will ping you <strong>3 days before</strong> each exam with your exact readiness score — so you know whether to relax or grind, not guess.
+        Turn on reminders and Unify Learn will ping you <strong>3 days before</strong> each exam with your exact readiness score — so you know whether to relax or grind, not guess.
       </div>
       <button class="exam-notif-btn" onclick="enableExamNotifs()">Turn on exam reminders</button>
     </div>`;
@@ -891,7 +891,7 @@ function sendExamNotifications(force = false) {
       body = `${r.pct}% complete. Test your knowledge to seal the deal.`;
     } else if (r.pct < 30) {
       title = `${code} in ${days} day${days === 1 ? '' : 's'} — action needed`;
-      body = `Only ${r.pct}% done. Open Unify and keep studying.`;
+      body = `Only ${r.pct}% done. Open Unify Learn and keep studying.`;
     } else {
       title = `${code} exam in ${days} day${days === 1 ? '' : 's'}`;
       body = `${r.pct}% done. Keep pushing — you can get there.`;

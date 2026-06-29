@@ -50,7 +50,7 @@ function inject() {
     </button>
     <div id="fb-form-area">
       <h3>Send Feedback</h3>
-      <p>Help us make Unify better for you.</p>
+      <p>Help us make Unify Learn better for you.</p>
       <label class="fb-label" for="fb-category">Category</label>
       <select id="fb-category">
         <option value="">Select a category…</option>
@@ -69,7 +69,7 @@ function inject() {
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
       <h4>Thanks for your feedback!</h4>
-      <p>We'll review it and use it to improve Unify.</p>
+      <p>We'll review it and use it to improve Unify Learn.</p>
     </div>
   </div>
 </div>`);
