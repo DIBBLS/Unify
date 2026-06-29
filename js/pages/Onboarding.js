@@ -63,12 +63,12 @@ let step = 0;
 let selected = { firstName: '', university: null, faculty: null, department: null, level: null, gradTarget: null, gradTargetClass: null };
 
 const leftContent = {
-  0: { step: "Step 1 of 6", title: "What's your<br><em>first name?</em>", sub: "This is how Unify will greet you. Just your first name is fine." },
+  0: { step: "Step 1 of 6", title: "What's your<br><em>first name?</em>", sub: "This is how Unify Learn will greet you. Just your first name is fine." },
   1: { step: "Step 2 of 6", title: "Where are<br>you <em>studying?</em>", sub: "Select your university to get a dashboard personalised to your exact courses, resources, and career paths." },
   2: { step: "Step 3 of 6", title: "What's your<br><em>faculty?</em>", sub: "Choose your faculty so we can show you the right departments and course data." },
   3: { step: "Step 4 of 6", title: "Which<br><em>department?</em>", sub: "Pick your department and we'll load all your courses, resources, and career paths automatically." },
   4: { step: "Step 5 of 6", title: "What level<br>are you <em>in?</em>", sub: "Select your current level and your dashboard will be ready with everything you need." },
-  5: { step: "Step 6 of 6", title: "What's your<br><em>graduation target?</em>", sub: "Pick your goal class — Unify will show you the exact GP you need each semester to get there." },
+  5: { step: "Step 6 of 6", title: "What's your<br><em>graduation target?</em>", sub: "Pick your goal class — Unify Learn will show you the exact GP you need each semester to get there." },
 };
 
 // ── AUTH ─────────────────────────────────────────────────────────────────────
@@ -138,7 +138,7 @@ function renderName(panel) {
   title.textContent = 'What\'s your first name?';
   const sub = document.createElement('p');
   sub.className = 'right-sub';
-  sub.textContent = 'Just your first name — this is how Unify will greet you.';
+  sub.textContent = 'Just your first name — this is how Unify Learn will greet you.';
   panel.appendChild(title);
   panel.appendChild(sub);
 
