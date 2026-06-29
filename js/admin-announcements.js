@@ -20,6 +20,13 @@ async function load() {
   }
 }
 
+const PRIORITY_COLORS = {
+  critical: { bg: 'rgba(220,38,38,0.10)', color: '#dc2626', border: 'rgba(220,38,38,0.25)', label: '🚨 Critical' },
+  urgent:   { bg: 'rgba(234,88,12,0.10)',  color: '#ea580c', border: 'rgba(234,88,12,0.25)',  label: '🔴 Urgent' },
+  important:{ bg: 'rgba(217,119,6,0.10)',  color: '#d97706', border: 'rgba(217,119,6,0.25)',  label: '🟡 Important' },
+  normal:   { bg: 'rgba(74,222,128,0.10)', color: '#16a34a', border: 'rgba(74,222,128,0.25)', label: '🟢 Normal' },
+};
+
 function render() {
   const el = document.getElementById('ann-list');
   if (!el) return;
@@ -38,11 +45,13 @@ function render() {
   const rt  = window.relativeTime;
   el.innerHTML = items.map(a => {
     const ts  = a.postedAt?.toDate?.();
-    const tag = a.kind === 'general'
+    const kindTag = a.kind === 'general'
       ? `<span style="font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px;background:rgba(74,222,128,0.1);color:#16a34a;border:1px solid rgba(74,222,128,0.25);white-space:nowrap;flex-shrink:0">General</span>`
       : `<span style="font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px;background:rgba(59,130,246,0.1);color:#2563eb;border:1px solid rgba(59,130,246,0.25);white-space:nowrap;flex-shrink:0">${esc(a.courseCode || 'Course')}</span>`;
+    const p = PRIORITY_COLORS[a.priority] || PRIORITY_COLORS.normal;
+    const priorityTag = `<span style="font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px;background:${p.bg};color:${p.color};border:1px solid ${p.border};white-space:nowrap;flex-shrink:0">${p.label}</span>`;
     return `<div class="ann-full-item">
-      ${tag}
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">${priorityTag}${kindTag}</div>
       <div class="ann-full-body">
         <div class="ann-full-title">${esc(a.title || a.courseCode || 'Update')}</div>
         <div class="ann-full-msg">${esc(a.message || '')}</div>
@@ -72,21 +81,43 @@ window.del = async (id) => {
   } catch { window.showToast('Delete failed'); }
 };
 
+window.toggleCourseField = function () {
+  const scope = document.getElementById('ann-scope').value;
+  document.getElementById('ann-course-wrap').style.display = scope === 'course' ? '' : 'none';
+};
+
 window.submitAnn = async () => {
-  const title    = document.getElementById('ann-title').value.trim();
-  const message  = document.getElementById('ann-message').value.trim();
-  const audience = document.getElementById('ann-audience').value;
+  const title      = document.getElementById('ann-title').value.trim();
+  const message    = document.getElementById('ann-message').value.trim();
+  const priority   = document.getElementById('ann-priority').value;
+  const scope      = document.getElementById('ann-scope').value;
+  const audience   = document.getElementById('ann-audience').value;
+  const isCoursed  = scope === 'course';
+  const courseCode = isCoursed
+    ? document.getElementById('ann-course-code').value.trim().toUpperCase()
+    : null;
+
   if (!title || !message) { window.showToast('Fill in title and message'); return; }
+  if (isCoursed && !courseCode) { window.showToast('Enter a course code'); return; }
+
   try {
     const user = auth.currentUser;
-    await addDoc(collection(db, 'courseUpdates'), {
-      kind: 'general', title, message, audience,
+    const data = {
+      kind: isCoursed ? 'course' : 'general',
+      title, message, audience, priority,
       postedBy: user?.displayName || user?.email || 'Admin',
       postedAt: serverTimestamp(),
-    });
+    };
+    if (isCoursed) data.courseCode = courseCode;
+
+    await addDoc(collection(db, 'courseUpdates'), data);
     window.closeModal('ann-modal');
     document.getElementById('ann-title').value = '';
     document.getElementById('ann-message').value = '';
+    document.getElementById('ann-priority').value = 'normal';
+    document.getElementById('ann-scope').value = 'general';
+    document.getElementById('ann-course-wrap').style.display = 'none';
+    document.getElementById('ann-course-code').value = '';
     window.showToast('Announcement published');
     load();
   } catch { window.showToast('Failed to publish'); }
