@@ -10,14 +10,13 @@
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/responsive.css">
 <script src="js/theme.js"></script>
-
-    <link rel="stylesheet" href="css/pages/Auth.styles.css">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#16a34a">
-    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
-    <script src="js/register-sw.js" defer></script>
+<link rel="stylesheet" href="css/pages/Auth.styles.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#16a34a">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+<script src="js/register-sw.js" defer></script>
 </head>
 <body>
 
@@ -32,25 +31,36 @@
 </div>
 
 <div class="auth-right">
-  <div class="auth-tabs">
+  <!-- Tabs — hidden during "forgot password" view -->
+  <div class="auth-tabs" id="authTabs">
     <button class="auth-tab active" onclick="switchTab('signin')">Sign In</button>
     <button class="auth-tab" onclick="switchTab('signup')">Sign Up</button>
   </div>
 
-  <div id="errorMsg" class="auth-error"></div>
-  <div id="successMsg" class="auth-success"></div>
+  <div id="errorMsg" class="auth-error" role="alert"></div>
+  <div id="successMsg" class="auth-success" role="status"></div>
 
-  <!-- SIGN IN -->
-  <form class="auth-form active" id="signinForm" onsubmit="signIn(event)">
+  <!-- ── SIGN IN ── -->
+  <form class="auth-form active" id="signinForm" onsubmit="signIn(event)" novalidate>
     <div>
-      <label class="form-label">Email</label>
-      <input class="form-input" type="email" id="signinEmail" placeholder="you@email.com" required>
+      <label class="form-label" for="signinEmail">Email</label>
+      <input class="form-input" type="email" id="signinEmail" name="email"
+             autocomplete="email" placeholder="you@email.com" required>
     </div>
     <div>
-      <label class="form-label">Password</label>
-      <input class="form-input" type="password" id="signinPassword" placeholder="Your password" required>
+      <div class="label-row">
+        <label class="form-label" for="signinPassword">Password</label>
+        <button type="button" class="forgot-link" onclick="switchTab('forgot')">Forgot password?</button>
+      </div>
+      <div class="pw-wrap">
+        <input class="form-input" type="password" id="signinPassword" name="password"
+               autocomplete="current-password" placeholder="Your password" required>
+        <button type="button" class="pw-toggle" onclick="togglePw('signinPassword', this)" aria-label="Show password">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </button>
+      </div>
     </div>
-    <button class="btn-submit" type="submit" id="signinBtn">Start Building →</button>
+    <button class="btn-submit" type="submit" id="signinBtn">Sign In →</button>
     <div class="divider"><span>or</span></div>
     <button class="btn-google" type="button" onclick="signInWithGoogle()">
       <svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
@@ -58,19 +68,43 @@
     </button>
   </form>
 
-  <!-- SIGN UP -->
-  <form class="auth-form" id="signupForm" onsubmit="signUp(event)">
+  <!-- ── SIGN UP ── -->
+  <form class="auth-form" id="signupForm" onsubmit="signUp(event)" novalidate>
     <div>
-      <label class="form-label">Full Name</label>
-      <input class="form-input" type="text" id="signupName" placeholder="Your full name" required>
+      <label class="form-label" for="signupName">Full Name</label>
+      <input class="form-input" type="text" id="signupName" name="name"
+             autocomplete="name" placeholder="Your full name" required>
     </div>
     <div>
-      <label class="form-label">Email</label>
-      <input class="form-input" type="email" id="signupEmail" placeholder="you@email.com" required>
+      <label class="form-label" for="signupEmail">Email</label>
+      <input class="form-input" type="email" id="signupEmail" name="email"
+             autocomplete="email" placeholder="you@email.com" required>
     </div>
     <div>
-      <label class="form-label">Password</label>
-      <input class="form-input" type="password" id="signupPassword" placeholder="Min. 6 characters" required>
+      <label class="form-label" for="signupPassword">Password</label>
+      <div class="pw-wrap">
+        <input class="form-input" type="password" id="signupPassword" name="new-password"
+               autocomplete="new-password" placeholder="Min. 8 characters" required>
+        <button type="button" class="pw-toggle" onclick="togglePw('signupPassword', this)" aria-label="Show password">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </button>
+      </div>
+      <div class="strength-bar"><div class="strength-bar-fill" id="strengthFill"></div></div>
+      <div class="pw-rules" id="pwRules" aria-live="polite">
+        <span class="pw-rule" id="rule-length">✗ At least 8 characters</span>
+        <span class="pw-rule" id="rule-upper">✗ One uppercase letter</span>
+        <span class="pw-rule" id="rule-number">✗ One number</span>
+      </div>
+    </div>
+    <div>
+      <label class="form-label" for="signupConfirm">Confirm Password</label>
+      <div class="pw-wrap">
+        <input class="form-input" type="password" id="signupConfirm" name="confirm-password"
+               autocomplete="new-password" placeholder="Repeat your password" required>
+        <button type="button" class="pw-toggle" onclick="togglePw('signupConfirm', this)" aria-label="Show password">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </button>
+      </div>
     </div>
     <button class="btn-submit" type="submit" id="signupBtn">Create Account →</button>
     <div class="divider"><span>or</span></div>
@@ -79,6 +113,22 @@
       Continue with Google
     </button>
   </form>
+
+  <!-- ── FORGOT PASSWORD ── -->
+  <div class="auth-form" id="forgotForm">
+    <div class="forgot-head">
+      <p class="forgot-head-title">Reset your password</p>
+      <p class="forgot-head-sub">Enter your email and we'll send you a reset link.</p>
+    </div>
+    <div>
+      <label class="form-label" for="forgotEmail">Email</label>
+      <input class="form-input" type="email" id="forgotEmail" name="email"
+             autocomplete="email" placeholder="you@email.com">
+    </div>
+    <button class="btn-submit" type="button" id="forgotBtn" onclick="forgotPassword()">Send Reset Link →</button>
+    <button type="button" class="forgot-back-btn" onclick="switchTab('signin')">← Back to Sign In</button>
+  </div>
+
   <p class="auth-legal-links">
     <a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms of Use</a> · <a href="cookies.html">Cookie Policy</a>
   </p>
