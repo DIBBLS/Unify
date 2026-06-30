@@ -12,7 +12,6 @@ import {
   collection,
   query,
   where,
-  orderBy,
   limit,
   getDocs,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
@@ -338,15 +337,12 @@ async function loadAnnouncements(code) {
     const [courseSnap, uniSnap] = await Promise.all([
       getDocs(query(
         collection(db, 'courseUpdates'),
-        where('courseCode', '==', code),
-        orderBy('postedAt', 'desc'),
-        limit(30)
+        where('courseCode', '==', code)
       )),
       getDocs(query(
         collection(db, 'courseUpdates'),
         where('kind', '==', 'general'),
-        orderBy('postedAt', 'desc'),
-        limit(5)
+        limit(20)
       )),
     ]);
 
