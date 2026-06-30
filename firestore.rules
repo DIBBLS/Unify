@@ -170,18 +170,22 @@ service cloud.firestore {
         && resource.data.authorId == request.auth.uid;
     }
 
-    // ── ACCESS CODES (admin creates; students can mark used) ───
+    // ── ACCESS CODES (admin creates/deletes; students can mark used) ───
     match /accessCodes/{code} {
       allow read: if signedIn();
       allow create: if isAdmin();
-      // Students mark a code as used (single-use, not expired)
-      allow update: if signedIn()
+      allow delete: if isAdmin();
+      // Admin can edit a code directly, or a student can mark their own code
+      // as used (single-use, not expired) — same diff shape as the original rule.
+      allow update: if isAdmin() || (
+        signedIn()
         && resource.data.isUsed == false
         && resource.data.expiresAt > request.time
         && request.resource.data.diff(resource.data)
              .affectedKeys().hasOnly(['isUsed', 'usedBy', 'usedAt'])
         && request.resource.data.isUsed == true
-        && request.resource.data.usedBy == request.auth.uid;
+        && request.resource.data.usedBy == request.auth.uid
+      );
     }
 
     // ── COURSE CONTENT (admin writes, students read) ────────
@@ -208,13 +212,6 @@ service cloud.firestore {
       allow create: if signedIn();
       allow update, delete: if isAdmin();
     }
-
-    // ── ACCESS CODES ────────────────────────────────────────
-match /accessCodes/{code} {
-  allow read: if signedIn();
-  allow create, update: if isAdmin();
-  allow delete: if isAdmin();
-}
 
     // ── DENY EVERYTHING ELSE ────────────────────────────────
     match /{document=**} {
