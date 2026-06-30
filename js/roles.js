@@ -39,8 +39,7 @@ export function getAssignment(profile) {
 }
 
 export function matchesClass(profile, entry) {
-  if (!entry.targetDepartment) return true;
-  if (normField(profile.department) !== normField(entry.targetDepartment)) return false;
+  if (entry.targetDepartment && normField(profile.department) !== normField(entry.targetDepartment)) return false;
   if (entry.targetLevel && normField(profile.level) !== normField(entry.targetLevel)) return false;
   return true;
 }

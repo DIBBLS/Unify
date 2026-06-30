@@ -114,6 +114,9 @@ window.submitAnn = async () => {
       data.courseCode = courseCode;
     } else {
       data.audience = audience;
+      if (audience === 'ece') data.targetDepartment = 'Electronic & Computer Engineering';
+      else if (audience === 'mee') data.targetDepartment = 'Mechanical Engineering';
+      else if (audience !== 'all') data.targetLevel = `${audience} Level`;
     }
 
     await addDoc(collection(db, 'courseUpdates'), data);
