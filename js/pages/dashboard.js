@@ -1,7 +1,7 @@
 import { auth, db } from "../firebase-config.js";
 import { listCourses } from "../courses-service.js";
 import { matchesClass } from "../roles.js";
-import { createRegistration, getCurrentAcademicYear } from "../course-registrations-service.js";
+import { createRegistration, getCurrentAcademicYear, listRegistrationsForStudent } from "../course-registrations-service.js";
 
 // ── 300 Level auto-enrol map (mirrors Onboarding.js) ────────────────────────
 const _S300 = ['CHE 352','MEE 352','ECE 316','ECE 352','GNS 312','ENT 312'];
@@ -164,7 +164,7 @@ onAuthStateChanged(auth, async (user) => {
 
   await loadUserData();
   initStreak();
-  subscribeNotifications();
+  await subscribeNotifications();
   document.getElementById("loadingOverlay").style.display = "none";
 });
 
@@ -1472,10 +1472,24 @@ function renderAspirations() {
 // ── NOTIFICATIONS ─────────────────────────────────────
 let _unreadCount = 0;
 
-function subscribeNotifications() {
+// Step 3 of the courseRegistrations migration: this is the one dashboard
+// read that's purely about enrollment (which course codes should this
+// student see notifications for), not grades — so it cuts over to
+// courseRegistrations. Grade-bearing reads (window.courses, CGPA) stay on
+// users/{uid}.courses; see Resolution A.
+async function subscribeNotifications() {
+  let myCodes = [];
+  try {
+    const regs = await listRegistrationsForStudent(currentUser.uid);
+    myCodes = regs
+      .filter(r => r.status !== 'dropped')
+      .map(r => (r.courseId || '').toUpperCase());
+  } catch (e) {
+    console.warn('[dashboard] listRegistrationsForStudent failed:', e);
+  }
+
   const q = query(collection(db, 'courseUpdates'), orderBy('postedAt', 'desc'));
   onSnapshot(q, snap => {
-    const myCodes = (window.courses || []).map(c => (c.code || c.name || '').toUpperCase());
     const updates = snap.docs
       .map(d => ({ id: d.id, ...d.data() }))
       .filter(u => {
