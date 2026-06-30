@@ -77,4 +77,4 @@ Create `Coursecontents/<COURSE CODE>/W{n}.html`, following the structure of exis
 
 ## Known issues
 
-`courses.js` has syntax errors on lines 68, 112, and 130 where two string literals are adjacent with no comma between them inside arrays (e.g. `"MEE 352""ECE 351"`). These will cause JS parse errors if those arrays are accessed.
+`js/pages/predictor-2.js` embeds its own `COURSES` catalog that's a parallel, hand-maintained copy of the per-department course lists in `courses.js` — they can and do drift (e.g. IPE 300 Level differs between the two). There is no single source of truth for course lists yet; reconciling them requires confirming the canonical curriculum, not just diffing the two files.
