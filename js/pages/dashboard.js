@@ -432,7 +432,9 @@ async function autoLoadCourses(dept, level) {
 
   const courseMap = {};
 
-  // Hardcoded fallback
+  // Step 7 (deferred): remove this fallback once the Hierarchy Builder seeds
+  // Firestore `courses` with department/level/semester metadata for all programs.
+  // Until then, window.coursesDatabase from courses.js provides the full catalog.
   const hardcodedList =
     window.coursesDatabase?.["Faculty of Engineering"]?.[dept]?.[level]?.[sem] || [];
   dbg("hardcoded match count:", hardcodedList.length);
@@ -870,6 +872,8 @@ window.switchSemester = async function () {
 
   const courseMap = {};
 
+  // Step 7 (deferred): same fallback note as autoLoadCourses — remove once
+  // Hierarchy Builder seeds Firestore courses with full catalog metadata.
   const hardcodedList =
     window.coursesDatabase?.["Faculty of Engineering"]?.[
       userProfile.department
