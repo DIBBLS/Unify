@@ -45,6 +45,14 @@ function sanitizeIdSegment(raw) {
   return String(raw || '').trim().replace(/\s+/g, '_');
 }
 
+// No academic-calendar config exists yet (that's Step 4's "University setup
+// form"). Until then, derive a placeholder session from the system date:
+// Aug–Dec → "thisYear/nextYear", Jan–Jul → "lastYear/thisYear".
+export function getCurrentAcademicYear(date = new Date()) {
+  const y = date.getFullYear();
+  return date.getMonth() >= 7 ? `${y}/${y + 1}` : `${y - 1}/${y}`;
+}
+
 // Builds the deterministic document ID for a registration. The
 // academicYear's "/" would otherwise be read as a path separator by the
 // Firestore SDK's doc() call, so it is replaced with "-" for ID purposes

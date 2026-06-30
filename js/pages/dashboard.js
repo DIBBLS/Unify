@@ -1,6 +1,7 @@
 import { auth, db } from "../firebase-config.js";
 import { listCourses } from "../courses-service.js";
 import { matchesClass } from "../roles.js";
+import { createRegistration, getCurrentAcademicYear } from "../course-registrations-service.js";
 
 // ── 300 Level auto-enrol map (mirrors Onboarding.js) ────────────────────────
 const _S300 = ['CHE 352','MEE 352','ECE 316','ECE 352','GNS 312','ENT 312'];
@@ -775,6 +776,21 @@ window.toggleWeekAcc = function (header) {
 };
 
 // ── COURSE ACTIONS ────────────────────────────────────
+// Step 2 of the courseRegistrations migration: dual-write only, alongside
+// the existing users/{uid}.courses write — not a cutover. Fire-and-forget
+// so a registrations failure never blocks the existing add-course flow.
+function dualWriteRegistration(code) {
+  if (!currentUser || !code) return;
+  const sem = document.getElementById("semester")?.value || "First Semester";
+  createRegistration({
+    studentId: currentUser.uid,
+    courseId: code,
+    semester: sem,
+    academicYear: getCurrentAcademicYear(),
+    source: "self",
+  }).catch((e) => console.warn("[dashboard] createRegistration failed:", e));
+}
+
 window.switchSemester = async function () {
   const sem = document.getElementById("semester").value;
   dbg("switchSemester to", sem);
@@ -857,6 +873,7 @@ window.addCourse = function () {
   window.courses.push({ course: name, grade: grade || "-", units });
   displayCourses();
   saveUserData(true);
+  dualWriteRegistration(name);
   ["courseInput", "gradeInput", "unitsInput"].forEach(
     (id) => (document.getElementById(id).value = ""),
   );
@@ -891,6 +908,7 @@ window.addCourseInline = function () {
   window.courses.push({ course: code, grade: "-", units });
   displayCourses();
   saveUserData(true);
+  dualWriteRegistration(code);
   document.getElementById("addCourseCode").value = "";
   document.getElementById("addCourseUnits").value = "";
   document.getElementById("addCourseRow").classList.remove("open");
@@ -976,6 +994,7 @@ window.addPickerCourse = function (code, units) {
   window.courses.push({ course: code, grade: "-", units: units || 3 });
   displayCourses();
   saveUserData(true);
+  dualWriteRegistration(code);
   loadCoursePickerList();
   if (window.courses.length === 1) showMilestone("📚 First course added!");
   else showMilestone(`${code} added.`);
