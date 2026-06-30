@@ -127,9 +127,12 @@
       </div>
       <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="ann-title" type="text" placeholder="e.g. No class tomorrow"></div>
       <div class="form-group"><label class="form-label">Message</label><textarea class="form-textarea" id="ann-message" rows="4" placeholder="Write your announcement…"></textarea></div>
-      <div class="form-group"><label class="form-label">Audience</label>
+      <div class="form-group" id="ann-audience-wrap">
+        <label class="form-label">Audience</label>
         <select class="form-select" id="ann-audience">
           <option value="all">All students</option>
+          <option value="100">100 Level only</option>
+          <option value="200">200 Level only</option>
           <option value="300">300 Level only</option>
           <option value="400">400 Level only</option>
           <option value="ece">ECE department</option>

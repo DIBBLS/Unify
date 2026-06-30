@@ -82,8 +82,9 @@ window.del = async (id) => {
 };
 
 window.toggleCourseField = function () {
-  const scope = document.getElementById('ann-scope').value;
-  document.getElementById('ann-course-wrap').style.display = scope === 'course' ? '' : 'none';
+  const isCourse = document.getElementById('ann-scope').value === 'course';
+  document.getElementById('ann-course-wrap').style.display  = isCourse ? '' : 'none';
+  document.getElementById('ann-audience-wrap').style.display = isCourse ? 'none' : '';
 };
 
 window.submitAnn = async () => {
@@ -95,6 +96,7 @@ window.submitAnn = async () => {
   const isCoursed  = scope === 'course';
   const courseCode = isCoursed
     ? document.getElementById('ann-course-code').value.trim().toUpperCase()
+        .replace(/([A-Z]+)\s*(\d+)/, '$1 $2')
     : null;
 
   if (!title || !message) { window.showToast('Fill in title and message'); return; }
@@ -104,11 +106,15 @@ window.submitAnn = async () => {
     const user = auth.currentUser;
     const data = {
       kind: isCoursed ? 'course' : 'general',
-      title, message, audience, priority,
+      title, message, priority,
       postedBy: user?.displayName || user?.email || 'Admin',
       postedAt: serverTimestamp(),
     };
-    if (isCoursed) data.courseCode = courseCode;
+    if (isCoursed) {
+      data.courseCode = courseCode;
+    } else {
+      data.audience = audience;
+    }
 
     await addDoc(collection(db, 'courseUpdates'), data);
     window.closeModal('ann-modal');
