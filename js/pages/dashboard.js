@@ -1,7 +1,7 @@
 import { auth, db } from "../firebase-config.js";
 import { listCourses } from "../courses-service.js";
 import { matchesClass } from "../roles.js";
-import { createRegistration, getCurrentAcademicYear, listRegistrationsForStudent } from "../course-registrations-service.js";
+import { createRegistration, getCurrentAcademicYear, listRegistrationsForStudent, updateStatus } from "../course-registrations-service.js";
 
 // ── 300 Level auto-enrol map (mirrors Onboarding.js) ────────────────────────
 const _S300 = ['CHE 352','MEE 352','ECE 316','ECE 352','GNS 312','ENT 312'];
@@ -46,6 +46,58 @@ let userProfile = {},
   aspirations = [];
 let weekProgress = {};
 let savedGoalPlan = null; // module-scope so the inline save can update it
+
+// Step 4: gradeRecords is the sole source for users/{uid}.courses writes.
+// It contains only courses where a grade has been explicitly entered (or
+// legacy entries loaded from the old field on first visit). It is NEVER
+// written when a course is merely added (enrollment); only the grade-picker
+// writes to it. registrations is the enrollment cache, loaded from
+// courseRegistrations and used to build window.courses via merge.
+let gradeRecords = [];
+let registrations = [];
+
+// Merge enrollment (registrations) with grade data (gradeRecords) into the
+// display array. Union by course code; grade/units from gradeRecords win.
+function mergeCoursesView() {
+  const byCode = {};
+  registrations
+    .filter(r => r.status !== 'dropped')
+    .forEach(r => {
+      const code = (r.courseId || '').toUpperCase();
+      if (!code) return;
+      byCode[code] = {
+        course: code,
+        grade: '-',
+        units: 3,
+        _regSem: r.semester,
+        _regYear: r.academicYear,
+      };
+    });
+  gradeRecords.forEach(r => {
+    const code = (r.course || '').toUpperCase();
+    if (!code) return;
+    byCode[code] = {
+      ...(byCode[code] || {}),
+      course: code,
+      grade: r.grade || '-',
+      units: r.units || byCode[code]?.units || 3,
+      _regSem: byCode[code]?._regSem,
+      _regYear: byCode[code]?._regYear,
+    };
+  });
+  window.courses = Object.values(byCode);
+}
+
+// Upsert a grade record (called by the grade picker). Only this and the
+// initial gradeRecords = normaliseCourses(d.courses) load may mutate gradeRecords.
+function upsertGradeRecord(courseCode, grade, units) {
+  const idx = gradeRecords.findIndex(r => (r.course || '').toUpperCase() === courseCode.toUpperCase());
+  if (idx >= 0) {
+    gradeRecords[idx] = { ...gradeRecords[idx], grade, units };
+  } else {
+    gradeRecords.push({ course: courseCode, grade, units });
+  }
+}
 
 // ── DEBUG ─────────────────────────────────────────────
 // Temporary visible debug panel for Step 1 (course discovery).
@@ -222,10 +274,19 @@ async function loadUserData() {
       document.getElementById("navUserName").textContent = first;
     }
 
-    // Normalise courses — convert legacy plain strings to objects
-    window.courses = normaliseCourses(d.courses);
+    // Step 4: load gradeRecords from the old field (legacy/grade-only storage)
+    // and fetch enrollment registrations; merge into the display array.
+    gradeRecords = normaliseCourses(d.courses);
     aspirations = d.aspirations || [];
     weekProgress = d.weekProgress || {};
+
+    try {
+      registrations = await listRegistrationsForStudent(currentUser.uid);
+    } catch (e) {
+      console.warn('[dashboard] listRegistrationsForStudent failed:', e);
+      registrations = [];
+    }
+    mergeCoursesView();
 
     document.getElementById("heroTag").textContent =
       `${d.university} · ${d.level}`;
@@ -241,10 +302,16 @@ async function loadUserData() {
       // Try 300L mapping first (covers old users who signed up before auto-enrol)
       const mapped = d.level === '300 Level' ? COURSES_300L[d.department] || [] : [];
       if (mapped.length) {
-        window.courses = mapped.map(code => ({ course: code, grade: '-', units: 3 }));
-        if (currentUser) {
-          setDoc(doc(db, 'users', currentUser.uid), { courses: window.courses }, { merge: true }).catch(() => {});
-        }
+        const sem = document.getElementById('semester')?.value || 'First Semester';
+        const year = getCurrentAcademicYear();
+        await Promise.all(
+          mapped.map(code =>
+            createRegistration({ studentId: currentUser.uid, courseId: code, semester: sem, academicYear: year, source: 'self' })
+              .then(r => { registrations.push(r); })
+              .catch(() => {})
+          )
+        );
+        mergeCoursesView();
       } else {
         await autoLoadCourses(d.department, d.level);
       }
@@ -420,13 +487,20 @@ async function autoLoadCourses(dept, level) {
     return;
   }
 
-  window.courses = Object.values(courseMap);
+  // Step 4: bulk-create courseRegistrations instead of writing blank-grade
+  // entries to users/{uid}.courses. Grade/units from the course catalog doc
+  // are NOT carried into courseRegistrations (it has no grade/units fields) —
+  // they'll be added to gradeRecords when the student actually enters a grade.
   if (currentUser) {
-    setDoc(
-      doc(db, "users", currentUser.uid),
-      { courses: window.courses },
-      { merge: true },
-    ).catch(() => {});
+    const year = getCurrentAcademicYear();
+    await Promise.all(
+      Object.keys(courseMap).map(code =>
+        createRegistration({ studentId: currentUser.uid, courseId: code, semester: sem, academicYear: year, source: 'self' })
+          .then(r => { registrations.push(r); })
+          .catch(() => {})
+      )
+    );
+    mergeCoursesView();
   }
   showMilestone("Courses loaded.");
 }
@@ -435,8 +509,9 @@ async function autoLoadCourses(dept, level) {
 async function _doSave() {
   if (!currentUser) return;
   try {
+    // Step 4: write gradeRecords (grade-only), never the full merged view
     let pts = 0, units = 0;
-    window.courses.forEach((c) => {
+    gradeRecords.forEach((c) => {
       const p = gradeToPoint(c.grade);
       if (p !== null && c.units) {
         pts += p * Number(c.units);
@@ -446,7 +521,7 @@ async function _doSave() {
     const cgpa = units > 0 ? parseFloat((pts / units).toFixed(2)) : 0;
     await setDoc(
       doc(db, "users", currentUser.uid),
-      { courses: window.courses, aspirations, weekProgress, cgpa },
+      { courses: gradeRecords, aspirations, weekProgress, cgpa },
       { merge: true },
     );
     const ind = document.getElementById("saveIndicator");
@@ -649,7 +724,10 @@ function showGradePicker(idx, cardEl, gradeEl) {
     `;
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      window.courses[idx].grade = g;
+      const code = window.courses[idx]?.course || '';
+      const units = window.courses[idx]?.units || 3;
+      upsertGradeRecord(code, g, units);
+      mergeCoursesView();
       popup.remove();
       saveUserData();
       displayCourses();
@@ -851,13 +929,53 @@ window.switchSemester = async function () {
     return;
   }
 
-  window.courses = Object.values(courseMap);
+  // Step 4: ensure registrations exist for the new semester's courses; no
+  // blank-grade write to users/{uid}.courses. Existing gradeRecords carry
+  // forward unchanged — don't reset grades just because the semester changed.
+  if (currentUser) {
+    const year = getCurrentAcademicYear();
+    await Promise.all(
+      Object.keys(courseMap).map(code =>
+        createRegistration({ studentId: currentUser.uid, courseId: code, semester: sem, academicYear: year, source: 'self' })
+          .then(r => { registrations.push(r); })
+          .catch(() => {})
+      )
+    );
+    // De-dup registrations list in case some codes already had entries
+    const seen = new Set();
+    registrations = registrations.filter(r => {
+      const key = `${r.studentId}_${r.courseId}_${r.semester}_${r.academicYear}`;
+      if (seen.has(key)) return false;
+      seen.add(key); return true;
+    });
+  }
   activeCourseId = null;
   closeResourcePanel();
+  mergeCoursesView();
   displayCourses();
-  saveUserData(true);
   renderPlanner();
 };
+
+// Step 4: optimistically add to local registrations cache so mergeCoursesView
+// picks it up immediately, without writing a blank-grade entry to users/{uid}.courses.
+function optimisticRegister(code) {
+  code = String(code).trim().toUpperCase();
+  const sem = document.getElementById("semester")?.value || "First Semester";
+  const year = getCurrentAcademicYear();
+  const already = registrations.some(
+    r => r.courseId === code && r.semester === sem && r.academicYear === year
+  );
+  if (!already) {
+    registrations.push({
+      studentId: currentUser?.uid,
+      courseId: code,
+      semester: sem,
+      academicYear: year,
+      status: 'pending',
+      source: 'self',
+    });
+  }
+}
 
 window.addCourse = function () {
   const name = document.getElementById("courseInput").value.trim();
@@ -870,10 +988,15 @@ window.addCourse = function () {
     alert("Please enter a course code.");
     return;
   }
-  window.courses.push({ course: name, grade: grade || "-", units });
-  displayCourses();
-  saveUserData(true);
+  optimisticRegister(name);
   dualWriteRegistration(name);
+  // If a grade was also entered, persist it to gradeRecords (grade-entry path)
+  if (grade && grade !== '-') {
+    upsertGradeRecord(name, grade, units);
+    saveUserData(true);
+  }
+  mergeCoursesView();
+  displayCourses();
   ["courseInput", "gradeInput", "unitsInput"].forEach(
     (id) => (document.getElementById(id).value = ""),
   );
@@ -883,7 +1006,11 @@ window.addCourse = function () {
 window.clearCourses = async function () {
   if (!window.courses.length || !confirm("Reset courses for this semester?"))
     return;
-  window.courses = [];
+  // Reset local caches — old registrations stay in Firestore (not hard-deleted),
+  // autoLoadCourses will createRegistration() for the canonical semester list.
+  registrations = [];
+  gradeRecords = [];
+  mergeCoursesView();
   activeCourseId = null;
   closeResourcePanel();
   await autoLoadCourses(userProfile.department, userProfile.level);
@@ -905,10 +1032,10 @@ window.addCourseInline = function () {
     .toUpperCase();
   const units = parseInt(document.getElementById("addCourseUnits").value) || 3;
   if (!code) return;
-  window.courses.push({ course: code, grade: "-", units });
-  displayCourses();
-  saveUserData(true);
+  optimisticRegister(code);
   dualWriteRegistration(code);
+  mergeCoursesView();
+  displayCourses();
   document.getElementById("addCourseCode").value = "";
   document.getElementById("addCourseUnits").value = "";
   document.getElementById("addCourseRow").classList.remove("open");
@@ -991,10 +1118,10 @@ window.addPickerCourse = function (code, units) {
     showMilestone(`${code} is already in your list.`);
     return;
   }
-  window.courses.push({ course: code, grade: "-", units: units || 3 });
-  displayCourses();
-  saveUserData(true);
+  optimisticRegister(code);
   dualWriteRegistration(code);
+  mergeCoursesView();
+  displayCourses();
   loadCoursePickerList();
   if (window.courses.length === 1) showMilestone("📚 First course added!");
   else showMilestone(`${code} added.`);
@@ -1003,14 +1130,30 @@ window.addPickerCourse = function (code, units) {
 window.removeCourse = function (event, idx) {
   event.stopPropagation();
   if (!window.courses.length) return;
-  const name = window.courses[idx]?.course || "course";
-  window.courses.splice(idx, 1);
+  const entry = window.courses[idx];
+  const name = entry?.course || "course";
+  const code = name.toUpperCase();
+
+  // Drop registration if we have the context for it (Step 4 path).
+  if (currentUser && entry?._regSem && entry?._regYear) {
+    updateStatus(currentUser.uid, code, entry._regSem, entry._regYear, 'dropped')
+      .catch(e => console.warn('[dashboard] updateStatus failed:', e));
+  }
+  registrations = registrations.filter(r =>
+    r.courseId !== code || r.semester !== entry?._regSem || r.academicYear !== entry?._regYear
+  );
+
+  // Remove grade record if one exists, then persist the change.
+  const hadGradeRecord = gradeRecords.some(r => (r.course || '').toUpperCase() === code);
+  gradeRecords = gradeRecords.filter(r => (r.course || '').toUpperCase() !== code);
+  if (hadGradeRecord) saveUserData(true);
+
   if (activeCourseId === idx) {
     activeCourseId = null;
     closeResourcePanel();
   } else if (activeCourseId > idx) activeCourseId--;
+  mergeCoursesView();
   displayCourses();
-  saveUserData(true);
   showMilestone(`${name} removed from your list.`);
 };
 
