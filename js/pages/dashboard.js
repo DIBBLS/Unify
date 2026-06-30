@@ -2,17 +2,7 @@ import { auth, db } from "../firebase-config.js";
 import { listCourses } from "../courses-service.js";
 import { matchesClass } from "../roles.js";
 import { createRegistration, getCurrentAcademicYear, listRegistrationsForStudent, updateStatus } from "../course-registrations-service.js";
-
-// ── 300 Level auto-enrol map (mirrors Onboarding.js) ────────────────────────
-const _S300 = ['CHE 352','MEE 352','ECE 316','ECE 352','GNS 312','ENT 312'];
-const COURSES_300L = {
-  'Electronic & Computer Engineering':  [..._S300,'ECE 302','ECE 308','ECE 310','ECE 312','ECE 314','ECE 320','ECE 350'],
-  'Mechanical Engineering':             [..._S300,'MEE 354'],
-  'Industrial & Petroleum Engineering': [..._S300,'IPE 316'],
-  'Aerospace Engineering':              [..._S300,'ASE 363','ASE 366'],
-  'Civil Engineering':                  _S300.filter(c=>c!=='CHE 352').concat(['CVE 304','CVE 308','CVE 310']),
-  'Chemical & Polymer Engineering':     _S300.filter(c=>c!=='CHE 352'&&c!=='ECE 316').concat(['CHE 312','CHE 314']),
-};
+import { COURSES_300L } from "../auto-enrol-300l.js";
 function normaliseCourses(raw) {
   // Convert plain strings → objects; filter out anything completely unparseable
   return (raw || []).map(c => {
