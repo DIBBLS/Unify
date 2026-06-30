@@ -1,20 +1,32 @@
 import { db } from './firebase-config.js';
 import {
-  collection, query, orderBy, getDocs, addDoc, deleteDoc, doc, serverTimestamp,
+  doc, getDoc, updateDoc, setDoc,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-let _cache = [], _filter = 'upcoming';
+// Exams live in `examTimetables/{department}` as a single doc with an
+// `entries[]` array — this is what js/pages/Learn.js reads directly by
+// department, not a flat collection. Field names (course, date, startTime,
+// endTime, venue) must match what Learn.js expects.
+const DEFAULT_DEPT = 'Electronic & Computer Engineering';
+let _cache = [], _filter = 'upcoming', _department = DEFAULT_DEPT;
 
-window.onAdminReady = function () { load(); };
+window.onAdminReady = function () {
+  const deptSel = document.getElementById('exam-dept-filter');
+  if (deptSel) deptSel.value = _department;
+  load(_department);
+};
 
-async function load() {
+async function load(department) {
+  _department = department;
   const el = document.getElementById('exam-list');
   el.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:20px 0">Loading…</div>';
   try {
-    const snap = await getDocs(query(collection(db, 'exams'), orderBy('date')));
-    _cache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const snap = await getDoc(doc(db, 'examTimetables', department));
+    const entries = snap.exists() ? (snap.data().entries || []) : [];
+    entries.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+    _cache = entries.map((e, i) => ({ ...e, _idx: i }));
     render();
-  } catch { el.innerHTML = emptyState('No exam schedule yet', 'Add exams using the button above'); }
+  } catch { el.innerHTML = emptyState('Could not load exam schedule', 'Check Firestore rules'); }
 }
 
 function render() {
@@ -38,10 +50,10 @@ function render() {
       </div>
       <div class="exam-body">
         <div class="exam-code">${esc(e.course || '—')}</div>
-        <div class="exam-meta">${esc(e.time||'')}${e.duration ? ` · ${e.duration}h` : ''}${e.venue ? ` · ${esc(e.venue)}` : ''}</div>
+        <div class="exam-meta">${esc(e.startTime||'')}${e.duration ? ` · ${e.duration}h` : ''}${e.venue ? ` · ${esc(e.venue)}` : ''}</div>
       </div>
       <div class="row-actions">
-        <button class="btn-sm danger" onclick="delExam('${e.id}')">Remove</button>
+        <button class="btn-sm danger" onclick="delExam(${e._idx})">Remove</button>
       </div>
     </div>`;
   }).join('');
@@ -53,35 +65,49 @@ window.filterExams = (f, btn) => {
   _filter = f; render();
 };
 
+window.filterExamsDept = (department) => {
+  load(department);
+};
+
+function addHours(time, hours) {
+  const [h, m] = time.split(':').map(Number);
+  const total = h + (Number(hours) || 0);
+  return `${String(total % 24).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
 window.submitExam = async () => {
-  const course   = document.getElementById('exam-course').value.trim().toUpperCase();
-  const date     = document.getElementById('exam-date').value;
-  const time     = document.getElementById('exam-time').value;
-  const duration = document.getElementById('exam-duration').value;
-  const venue    = document.getElementById('exam-venue').value.trim();
+  const course     = document.getElementById('exam-course').value.trim().toUpperCase();
+  const department = document.getElementById('exam-dept').value;
+  const date       = document.getElementById('exam-date').value;
+  const startTime  = document.getElementById('exam-time').value;
+  const duration   = Number(document.getElementById('exam-duration').value) || 2;
+  const venue      = document.getElementById('exam-venue').value.trim();
   if (!course || !date) { window.showToast('Course and date required'); return; }
+  const endTime = startTime ? addHours(startTime, duration) : '';
   try {
-    const ref = await addDoc(collection(db, 'exams'), {
-      course, date, time, duration: Number(duration), venue, createdAt: serverTimestamp(),
-    });
-    _cache.push({ id: ref.id, course, date, time, duration: Number(duration), venue });
-    _cache.sort((a, b) => new Date(a.date) - new Date(b.date));
+    const ref = doc(db, 'examTimetables', department);
+    const snap = await getDoc(ref);
+    const entries = snap.exists() ? (snap.data().entries || []) : [];
+    entries.push({ course, date, startTime, endTime, duration, venue });
+    await setDoc(ref, { entries }, { merge: true });
     window.closeModal('exam-modal');
     document.getElementById('exam-course').value = '';
     document.getElementById('exam-date').value   = '';
     document.getElementById('exam-venue').value  = '';
-    render();
     window.showToast('Exam published');
+    load(_department);
   } catch { window.showToast('Failed to publish'); }
 };
 
-window.delExam = async (id) => {
+window.delExam = async (idx) => {
   if (!confirm('Remove this exam?')) return;
   try {
-    await deleteDoc(doc(db, 'exams', id));
-    _cache = _cache.filter(e => e.id !== id);
-    render();
-    window.showToast('Removed');
+    const ref = doc(db, 'examTimetables', _department);
+    const snap = await getDoc(ref);
+    const entries = snap.exists() ? (snap.data().entries || []) : [];
+    entries.splice(idx, 1);
+    await updateDoc(ref, { entries });
+    load(_department);
   } catch { window.showToast('Remove failed'); }
 };
 

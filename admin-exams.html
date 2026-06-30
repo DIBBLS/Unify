@@ -82,6 +82,14 @@
             </button>
           </div>
           <div class="filter-bar">
+            <select class="form-select" id="exam-dept-filter" onchange="filterExamsDept(this.value)" style="max-width:280px">
+              <option value="Electronic &amp; Computer Engineering">Electronic &amp; Computer Engineering (ECE)</option>
+              <option value="Mechanical Engineering">Mechanical Engineering (MEE)</option>
+              <option value="Industrial &amp; Petroleum Engineering">Industrial &amp; Petroleum Engineering (IPE)</option>
+              <option value="Chemical &amp; Polymer Engineering">Chemical &amp; Polymer Engineering (CPE)</option>
+              <option value="Civil Engineering">Civil Engineering (CVE)</option>
+              <option value="Aerospace Engineering">Aerospace Engineering (ASE)</option>
+            </select>
             <div class="filter-tabs">
               <button class="filter-tab active" onclick="filterExams('upcoming',this)">Upcoming</button>
               <button class="filter-tab" onclick="filterExams('all',this)">All</button>
@@ -100,6 +108,17 @@
     <div class="modal" style="max-width:480px">
       <div class="modal-hdr">Add Exam</div>
       <div class="form-group"><label class="form-label">Course Code</label><input class="form-input" id="exam-course" type="text" placeholder="e.g. ECE 302" style="text-transform:uppercase"></div>
+      <div class="form-group">
+        <label class="form-label">Department</label>
+        <select class="form-select" id="exam-dept">
+          <option value="Electronic &amp; Computer Engineering">Electronic &amp; Computer Engineering (ECE)</option>
+          <option value="Mechanical Engineering">Mechanical Engineering (MEE)</option>
+          <option value="Industrial &amp; Petroleum Engineering">Industrial &amp; Petroleum Engineering (IPE)</option>
+          <option value="Chemical &amp; Polymer Engineering">Chemical &amp; Polymer Engineering (CPE)</option>
+          <option value="Civil Engineering">Civil Engineering (CVE)</option>
+          <option value="Aerospace Engineering">Aerospace Engineering (ASE)</option>
+        </select>
+      </div>
       <div class="form-2col">
         <div class="form-group">
           <label class="form-label">Date</label>
