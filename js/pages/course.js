@@ -14,12 +14,15 @@ import {
   where,
   limit,
   getDocs,
+  doc,
+  getDoc,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import {
   resolveCourse,
   getHardcodedWeeks,
   normalizeCode,
 } from '../courses-service.js';
+import { matchesClass } from '../roles.js';
 
 // ── AUTH GATE ────────────────────────────────────────────
 onAuthStateChanged(auth, (user) => {
@@ -334,7 +337,7 @@ async function loadAnnouncements(code) {
   if (!wrap) return;
 
   try {
-    const [courseSnap, uniSnap] = await Promise.all([
+    const [courseSnap, uniSnap, profileSnap] = await Promise.all([
       getDocs(query(
         collection(db, 'courseUpdates'),
         where('courseCode', '==', code)
@@ -344,10 +347,13 @@ async function loadAnnouncements(code) {
         where('kind', '==', 'general'),
         limit(20)
       )),
+      auth.currentUser ? getDoc(doc(db, 'users', auth.currentUser.uid)) : Promise.resolve(null),
     ]);
 
+    const profile = profileSnap?.exists?.() ? profileSnap.data() : {};
     const courseItems = courseSnap.docs.map(d => ({ id: d.id, ...d.data(), _scope: 'course' }));
-    const uniItems   = uniSnap.docs.map(d => ({ id: d.id, ...d.data(), _scope: 'university' }));
+    const uniItems   = uniSnap.docs.map(d => ({ id: d.id, ...d.data(), _scope: 'university' }))
+      .filter(u => matchesClass(profile, u));
 
     const all = [...courseItems, ...uniItems].sort((a, b) => {
       const ta = a.postedAt?.toDate?.()?.getTime() || 0;

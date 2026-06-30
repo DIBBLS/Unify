@@ -1,5 +1,6 @@
 import { auth, db } from "../firebase-config.js";
 import { listCourses } from "../courses-service.js";
+import { matchesClass } from "../roles.js";
 
 // ── 300 Level auto-enrol map (mirrors Onboarding.js) ────────────────────────
 const _S300 = ['CHE 352','MEE 352','ECE 316','ECE 352','GNS 312','ENT 312'];
@@ -1459,11 +1460,7 @@ function subscribeNotifications() {
     const updates = snap.docs
       .map(d => ({ id: d.id, ...d.data() }))
       .filter(u => {
-        if (u.targetDepartment) {
-          const norm = s => (s || '').toLowerCase().replace(/\s+/g, '');
-          if (norm(userProfile.department) !== norm(u.targetDepartment)) return false;
-          if (u.targetLevel && norm(userProfile.level) !== norm(u.targetLevel)) return false;
-        }
+        if (!matchesClass(userProfile, u)) return false;
         return u.kind === 'general' || !myCodes.length || myCodes.includes((u.courseCode || '').toUpperCase());
       });
 
