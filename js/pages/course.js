@@ -62,6 +62,7 @@ async function init() {
   renderAbout(course);
   renderWeeks(code, source);
   renderActions(code, course, source);
+  renderResources(code, course);
 
   loading.style.display = 'none';
   main.style.display = 'block';
@@ -171,6 +172,21 @@ function renderActions(code, course, source) {
   );
 
   wrap.innerHTML = actions.join('');
+}
+
+function renderResources(code, course) {
+  const wrap = document.getElementById('resourcesWrap');
+  if (!wrap) return;
+  const staticRes = window.getResources ? (window.getResources(code) || {}) : {};
+  const res = { ...staticRes, ...(course.resources || {}) };
+  const entries = Object.entries(res).filter(([, url]) => url);
+  if (!entries.length) return;
+
+  wrap.innerHTML = `<div class="course-actions">${entries.map(([label, url]) => `
+    <a class="course-action" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">
+      <div class="course-action-title">${escapeHtml(label)}</div>
+      <div class="course-action-sub">Open resource</div>
+    </a>`).join('')}</div>`;
 }
 
 function showNotFound(message) {

@@ -2,6 +2,7 @@ import { db } from './firebase-config.js';
 import {
   collection, getDocs, setDoc, doc,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { codeToDocId } from './courses-service.js';
 
 const RESOURCE_TYPES = ['Course Outline','Lecture Material PDF','Video Courses','Past Questions','Continuous Assessment'];
 const KNOWN_CODES    = ['ECE 302','ECE 308','ECE 310','ECE 312','ECE 314','ECE 316','ECE 320','ECE 350','ECE 352',
@@ -72,7 +73,7 @@ window.submitRes = async () => {
   const url  = document.getElementById('res-url').value.trim();
   if (!code || !url) { window.showToast('Code and URL required'); return; }
   try {
-    await setDoc(doc(db, 'courses', code), { code, resources: { [type]: url } }, { merge: true });
+    await setDoc(doc(db, 'courses', codeToDocId(code)), { code, resources: { [type]: url } }, { merge: true });
     const existing = _cache.find(c => (c.code||c.id) === code);
     if (existing) { existing.resources = existing.resources || {}; existing.resources[type] = url; }
     else _cache.push({ id: code, code, resources: { [type]: url } });
