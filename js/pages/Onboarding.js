@@ -1,18 +1,23 @@
 import { auth, db } from '../firebase-config.js';
 import { onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { doc, getDoc, setDoc, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { COURSES_300L } from '../auto-enrol-300l.js';
 import { createRegistration, getCurrentAcademicYear } from '../course-registrations-service.js';
 
 let currentUser = null;
 
 // ── DATA ─────────────────────────────────────────────────────────────────────
-const universities = [
-  { name: "Lagos State University", short: "LASU", available: true },
-  { name: "University of Lagos", short: "UNILAG", available: false },
-  { name: "University of Ibadan", short: "UI", available: false },
-  { name: "University of Osun", short: "UNIOSUN", available: false },
-];
+let _universities = []; // loaded from Firestore in loadUniversities()
+
+async function loadUniversities() {
+  try {
+    const snap = await getDocs(collection(db, 'universities'));
+    _universities = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch(e) {
+    console.warn('[onboarding] Could not load universities:', e);
+    _universities = [];
+  }
+}
 
 const faculties = {
   "Lagos State University": [
@@ -45,7 +50,7 @@ const deptMaxLevel = { "Chemical & Polymer Engineering": "400 Level" };
 
 // ── STATE ────────────────────────────────────────────────────────────────────
 let step = 0;
-let selected = { firstName: '', university: null, faculty: null, department: null, level: null, gradTarget: null, gradTargetClass: null };
+let selected = { firstName: '', university: null, universityId: null, faculty: null, department: null, level: null, gradTarget: null, gradTargetClass: null };
 
 const leftContent = {
   0: { step: "Step 1 of 6", title: "What's your<br><em>first name?</em>", sub: "This is how Unify will greet you. Just your first name is fine." },
@@ -75,10 +80,12 @@ onAuthStateChanged(auth, async user => {
     if (snap.exists() && snap.data().university) {
       selected.firstName = snap.data().firstName || currentUser.displayName?.split(' ')[0] || '';
       selected.university = snap.data().university;
+      selected.universityId = snap.data().universityId || null;
       selected.faculty = snap.data().faculty;
       selected.department = snap.data().department;
     }
   } catch(e) {}
+  await loadUniversities();
   document.getElementById('loadingOverlay').style.display = 'none';
   renderStep();
 });
@@ -176,22 +183,29 @@ function renderUniversities(panel) {
   const grid = document.createElement('div');
   grid.className = 'uni-grid';
 
-  universities.forEach(uni => {
+  if (!_universities.length) {
+    const msg = document.createElement('p');
+    msg.style.cssText = 'color:var(--text3);font-size:13px;margin:12px 0;';
+    msg.textContent = 'No universities configured yet. Contact your administrator.';
+    panel.appendChild(msg);
+    panel.appendChild(grid);
+    return;
+  }
+
+  _universities.forEach(uni => {
     const card = document.createElement('div');
-    card.className = 'uni-card' + (!uni.available ? ' coming-soon' : '');
+    card.className = 'uni-card';
     card.innerHTML = `
       <div class="uni-name">${uni.name}</div>
-      <div class="uni-short">${uni.short}</div>
-      ${!uni.available ? '<span class="uni-badge">Soon</span>' : ''}
+      <div class="uni-short">${uni.shortName || ''}</div>
     `;
-    if (uni.available) {
-      card.addEventListener('click', () => {
-        document.querySelectorAll('.uni-card').forEach(c => c.classList.remove('selected'));
-        card.classList.add('selected');
-        selected.university = uni.name;
-        setTimeout(() => { step = 2; renderStep(); }, 300);
-      });
-    }
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.uni-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selected.university = uni.name;
+      selected.universityId = uni.id;
+      setTimeout(() => { step = 2; renderStep(); }, 300);
+    });
     grid.appendChild(card);
   });
   panel.appendChild(grid);
@@ -338,6 +352,7 @@ async function saveAndGo() {
       department: selected.department,
       level: selected.level,
     };
+    if (selected.universityId) payload.universityId = selected.universityId;
     if (selected.gradTarget != null) {
       payload.gradePlanner = {
         target: selected.gradTarget,
@@ -356,7 +371,7 @@ async function saveAndGo() {
         const year = getCurrentAcademicYear();
         await Promise.all(
           codes.map(code =>
-            createRegistration({ studentId: currentUser.uid, courseId: code, semester: sem, academicYear: year, source: 'self' })
+            createRegistration({ studentId: currentUser.uid, courseId: code, semester: sem, academicYear: year, source: 'self', universityId: selected.universityId })
               .catch(() => {})
           )
         );
