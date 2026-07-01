@@ -73,8 +73,10 @@ export async function getRegistration(studentId, courseId, semester, academicYea
   return null;
 }
 
-export async function listRegistrationsForStudent(studentId) {
-  const q = query(collection(db, 'courseRegistrations'), where('studentId', '==', studentId));
+export async function listRegistrationsForStudent(studentId, { universityId } = {}) {
+  const clauses = [where('studentId', '==', studentId)];
+  if (universityId) clauses.push(where('universityId', '==', universityId));
+  const q = query(collection(db, 'courseRegistrations'), ...clauses);
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
@@ -92,7 +94,7 @@ export async function listRegistrationsForCourse(courseId, semester, academicYea
 // Idempotent: if a registration already exists for this composite key,
 // returns it unchanged rather than overwriting (so a later self-declare
 // can't regress an already-approved/active registration back to pending).
-export async function createRegistration({ studentId, courseId, semester, academicYear, source }) {
+export async function createRegistration({ studentId, courseId, semester, academicYear, source, universityId }) {
   if (!studentId) throw new Error('studentId required');
   const code = normalizeCode(courseId);
   if (!code) throw new Error('courseId required');
@@ -115,6 +117,7 @@ export async function createRegistration({ studentId, courseId, semester, academ
     registeredAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   };
+  if (universityId) payload.universityId = universityId;
   await setDoc(ref, payload);
   return { id, ...payload };
 }
