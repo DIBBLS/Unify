@@ -432,18 +432,6 @@ async function autoLoadCourses(dept, level) {
 
   const courseMap = {};
 
-  // Step 7 (deferred): remove this fallback once the Hierarchy Builder seeds
-  // Firestore `courses` with department/level/semester metadata for all programs.
-  // Until then, window.coursesDatabase from courses.js provides the full catalog.
-  const hardcodedList =
-    window.coursesDatabase?.["Faculty of Engineering"]?.[dept]?.[level]?.[sem] || [];
-  dbg("hardcoded match count:", hardcodedList.length);
-  hardcodedList.filter(Boolean).forEach((c) => {
-    const code = String(c).trim().toUpperCase();
-    courseMap[code] = { course: code, grade: "-", units: 3 };
-  });
-
-  // Firestore courses — merge in (Firestore units win)
   try {
     const all = await listCourses();
     dbg("Firestore listCourses returned:", all.length + " docs");
@@ -871,22 +859,6 @@ window.switchSemester = async function () {
   });
 
   const courseMap = {};
-
-  // Step 7 (deferred): same fallback note as autoLoadCourses — remove once
-  // Hierarchy Builder seeds Firestore courses with full catalog metadata.
-  const hardcodedList =
-    window.coursesDatabase?.["Faculty of Engineering"]?.[
-      userProfile.department
-    ]?.[userProfile.level]?.[sem] || [];
-  dbg("switchSemester hardcoded count:", hardcodedList.length);
-  hardcodedList.filter(Boolean).forEach((c) => {
-    const code = String(c).trim().toUpperCase();
-    courseMap[code] = {
-      course: code,
-      grade: existing[code]?.grade || "-",
-      units: existing[code]?.units || 3,
-    };
-  });
 
   try {
     const all = await listCourses();
