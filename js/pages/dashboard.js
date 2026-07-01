@@ -245,6 +245,7 @@ async function loadUserData() {
       faculty: d.faculty,
       department: d.department,
       level: d.level,
+      universityId: d.universityId || null,
     };
     dbg("profile:", userProfile);
     const semSel = document.getElementById("semester");
@@ -271,7 +272,7 @@ async function loadUserData() {
     weekProgress = d.weekProgress || {};
 
     try {
-      registrations = await listRegistrationsForStudent(currentUser.uid);
+      registrations = await listRegistrationsForStudent(currentUser.uid, { universityId: userProfile.universityId });
     } catch (e) {
       console.warn('[dashboard] listRegistrationsForStudent failed:', e);
       registrations = [];
@@ -296,7 +297,7 @@ async function loadUserData() {
         const year = getCurrentAcademicYear();
         await Promise.all(
           mapped.map(code =>
-            createRegistration({ studentId: currentUser.uid, courseId: code, semester: sem, academicYear: year, source: 'self' })
+            createRegistration({ studentId: currentUser.uid, courseId: code, semester: sem, academicYear: year, source: 'self', universityId: userProfile.universityId })
               .then(r => { registrations.push(r); })
               .catch(() => {})
           )
@@ -433,7 +434,7 @@ async function autoLoadCourses(dept, level) {
   const courseMap = {};
 
   try {
-    const all = await listCourses();
+    const all = await listCourses({ universityId: userProfile.universityId });
     dbg("Firestore listCourses returned:", all.length + " docs");
     all.forEach((c, i) => {
       const code = String(c.code || "").trim().toUpperCase();
@@ -475,7 +476,7 @@ async function autoLoadCourses(dept, level) {
     const year = getCurrentAcademicYear();
     await Promise.all(
       Object.keys(courseMap).map(code =>
-        createRegistration({ studentId: currentUser.uid, courseId: code, semester: sem, academicYear: year, source: 'self' })
+        createRegistration({ studentId: currentUser.uid, courseId: code, semester: sem, academicYear: year, source: 'self', universityId: userProfile.universityId })
           .then(r => { registrations.push(r); })
           .catch(() => {})
       )
@@ -861,7 +862,7 @@ window.switchSemester = async function () {
   const courseMap = {};
 
   try {
-    const all = await listCourses();
+    const all = await listCourses({ universityId: userProfile.universityId });
     dbg("switchSemester Firestore docs:", all.length);
     all.forEach((c, i) => {
       const code = String(c.code || "").trim().toUpperCase();
@@ -902,7 +903,7 @@ window.switchSemester = async function () {
     const year = getCurrentAcademicYear();
     await Promise.all(
       Object.keys(courseMap).map(code =>
-        createRegistration({ studentId: currentUser.uid, courseId: code, semester: sem, academicYear: year, source: 'self' })
+        createRegistration({ studentId: currentUser.uid, courseId: code, semester: sem, academicYear: year, source: 'self', universityId: userProfile.universityId })
           .then(r => { registrations.push(r); })
           .catch(() => {})
       )
@@ -1015,7 +1016,7 @@ async function loadCoursePickerList() {
   dbg("loadCoursePickerList opened. profile:", userProfile);
 
   try {
-    const all = await listCourses();
+    const all = await listCourses({ universityId: userProfile.universityId });
     dbg("picker: Firestore returned", all.length + " docs");
     const added = new Set(
       (window.courses || []).map((c) =>

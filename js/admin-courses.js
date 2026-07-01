@@ -1,6 +1,6 @@
 import { db } from './firebase-config.js';
 import {
-  collection, getDocs, setDoc, doc,
+  collection, getDocs, setDoc, doc, query, where,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { codeToDocId } from './courses-service.js';
 
@@ -11,20 +11,27 @@ const KNOWN_CODES    = ['ECE 302','ECE 308','ECE 310','ECE 312','ECE 314','ECE 3
 
 let _cache = [], _filter = 'all';
 let _faculties = [], _departments = [];
+let _universityId = null;
 
-window.onAdminReady = function () { load(); };
+window.onAdminReady = function (user, profile) {
+  _universityId = profile?.universityId || null;
+  load();
+};
 
 async function load() {
   const el = document.getElementById('courses-grid');
   el.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:20px 0">Loading…</div>';
   try {
+    const byUni = (col) => _universityId
+      ? query(collection(db, col), where('universityId', '==', _universityId))
+      : collection(db, col);
     const [coursesSnap, facSnap, deptSnap] = await Promise.all([
-      getDocs(collection(db, 'courses')),
-      getDocs(collection(db, 'faculties')),
-      getDocs(collection(db, 'departments')),
+      getDocs(byUni('courses')),
+      getDocs(byUni('faculties')),
+      getDocs(byUni('departments')),
     ]);
     _cache = coursesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-    if (!_cache.length) _cache = KNOWN_CODES.map(code => ({ id: code, code, resources: {} }));
+    if (!_cache.length && !_universityId) _cache = KNOWN_CODES.map(code => ({ id: code, code, resources: {} }));
     _faculties = facSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     _departments = deptSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     render();
@@ -157,6 +164,7 @@ window.submitMeta = async () => {
   if (units !== null && !isNaN(units)) payload.units = units;
   if (description) payload.description = description;
   payload.isCompulsory = isCompulsory;
+  if (_universityId) payload.universityId = _universityId;
 
   try {
     await setDoc(doc(db, 'courses', codeToDocId(code)), payload, { merge: true });

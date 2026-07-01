@@ -1,14 +1,18 @@
 import { db } from './firebase-config.js';
 import {
-  collection, getDocs, addDoc, setDoc, deleteDoc, doc, serverTimestamp,
+  collection, getDocs, addDoc, setDoc, deleteDoc, doc, serverTimestamp, query, where,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 let _faculties = [];
 let _departments = [];
 let _editingFacultyId = null;
 let _editingDeptId = null;
+let _universityId = null;
 
-window.onAdminReady = function () { loadAll(); };
+window.onAdminReady = function (user, profile) {
+  _universityId = profile?.universityId || null;
+  loadAll();
+};
 
 async function loadAll() {
   await Promise.all([loadFaculties(), loadDepts()]);
@@ -18,7 +22,10 @@ async function loadFaculties() {
   const el = document.getElementById('faculties-list');
   if (el) el.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:20px 0">Loading…</div>';
   try {
-    const snap = await getDocs(collection(db, 'faculties'));
+    const q = _universityId
+      ? query(collection(db, 'faculties'), where('universityId', '==', _universityId))
+      : collection(db, 'faculties');
+    const snap = await getDocs(q);
     _faculties = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderFaculties();
   } catch {
@@ -30,7 +37,10 @@ async function loadDepts() {
   const el = document.getElementById('depts-list');
   if (el) el.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:20px 0">Loading…</div>';
   try {
-    const snap = await getDocs(collection(db, 'departments'));
+    const q = _universityId
+      ? query(collection(db, 'departments'), where('universityId', '==', _universityId))
+      : collection(db, 'departments');
+    const snap = await getDocs(q);
     _departments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderDepts();
   } catch {
@@ -95,7 +105,9 @@ window.submitFaculty = async () => {
       if (idx !== -1) _faculties[idx] = { ..._faculties[idx], name, programDurationYears: duration };
       window.showToast(`Updated "${name}"`);
     } else {
-      const ref = await addDoc(collection(db, 'faculties'), { ...payload, createdAt: serverTimestamp() });
+      const createPayload = { ...payload, createdAt: serverTimestamp() };
+      if (_universityId) createPayload.universityId = _universityId;
+      const ref = await addDoc(collection(db, 'faculties'), createPayload);
       _faculties.push({ id: ref.id, name, programDurationYears: duration });
       window.showToast(`Added "${name}"`);
     }
@@ -185,7 +197,9 @@ window.submitDept = async () => {
       if (idx !== -1) _departments[idx] = { ..._departments[idx], name, facultyId };
       window.showToast(`Updated "${name}"`);
     } else {
-      const ref = await addDoc(collection(db, 'departments'), { ...payload, createdAt: serverTimestamp() });
+      const createPayload = { ...payload, createdAt: serverTimestamp() };
+      if (_universityId) createPayload.universityId = _universityId;
+      const ref = await addDoc(collection(db, 'departments'), createPayload);
       _departments.push({ id: ref.id, name, facultyId });
       window.showToast(`Added "${name}"`);
     }
