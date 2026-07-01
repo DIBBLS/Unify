@@ -188,6 +188,12 @@ service cloud.firestore {
       );
     }
 
+    // ── FACULTIES (admin writes, everyone signed in reads) ──
+    match /faculties/{facultyId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
     // ── COURSE CONTENT (admin writes, students read) ────────
     match /courseContent/{id} {
       allow read: if signedIn();
