@@ -10,6 +10,7 @@ const KNOWN_CODES    = ['ECE 302','ECE 308','ECE 310','ECE 312','ECE 314','ECE 3
   'CVE 304','CVE 308','CVE 310','CHE 312','CHE 314'];
 
 let _cache = [], _filter = 'all';
+let _faculties = [], _departments = [];
 
 window.onAdminReady = function () { load(); };
 
@@ -17,9 +18,15 @@ async function load() {
   const el = document.getElementById('courses-grid');
   el.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:20px 0">Loading…</div>';
   try {
-    const snap = await getDocs(collection(db, 'courses'));
-    _cache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const [coursesSnap, facSnap, deptSnap] = await Promise.all([
+      getDocs(collection(db, 'courses')),
+      getDocs(collection(db, 'faculties')),
+      getDocs(collection(db, 'departments')),
+    ]);
+    _cache = coursesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     if (!_cache.length) _cache = KNOWN_CODES.map(code => ({ id: code, code, resources: {} }));
+    _faculties = facSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    _departments = deptSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     render();
   } catch { el.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:20px 0">Could not load courses.</div>'; }
 }
@@ -45,11 +52,14 @@ function render() {
     const count = RESOURCE_TYPES.filter(t => res[t]).length;
     return `<div class="course-card">
       <div class="cc-code">${esc(code)}</div>
-      <div class="cc-name">${esc(c.name || '')}</div>
+      <div class="cc-name">${esc(c.title || c.name || '')}</div>
       <div class="cc-chips">${chips}</div>
       <div class="cc-footer">
         <span>${count}/${RESOURCE_TYPES.length} resources</span>
-        <button class="btn-sm" onclick="editRes('${esc(code)}')">Edit links</button>
+        <div style="display:flex;gap:6px">
+          <button class="btn-sm" onclick="editMeta('${esc(code)}')">Metadata</button>
+          <button class="btn-sm" onclick="editRes('${esc(code)}')">Links</button>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -81,4 +91,83 @@ window.submitRes = async () => {
     render();
     window.showToast(`Saved ${type} for ${code}`);
   } catch { window.showToast('Save failed'); }
+};
+
+// ── COURSE METADATA ──────────────────────────────────────────────────────────
+
+function populateMetaDepts(facultyId, selectedDeptId) {
+  const deptSel = document.getElementById('meta-dept');
+  if (!deptSel) return;
+  const filtered = facultyId ? _departments.filter(d => d.facultyId === facultyId) : [];
+  deptSel.innerHTML = '<option value="">— Select department —</option>' +
+    filtered.map(d => `<option value="${window.escHtml(d.id)}"${d.id === selectedDeptId ? ' selected' : ''}>${window.escHtml(d.name)}</option>`).join('');
+}
+
+function updateMetaDuration(facultyId) {
+  const f = _faculties.find(x => x.id === facultyId);
+  const el = document.getElementById('meta-duration-display');
+  if (el) el.textContent = f && f.programDurationYears ? `${f.programDurationYears}-year programme` : '—';
+}
+
+window.editMeta = (code) => {
+  const c = _cache.find(x => (x.code || x.id) === code) || { code };
+  const esc = window.escHtml;
+  document.getElementById('meta-code').value = code;
+  document.getElementById('meta-title').value = c.title || c.name || '';
+  document.getElementById('meta-units').value = c.units != null ? c.units : '';
+  document.getElementById('meta-desc').value = c.description || '';
+  document.getElementById('meta-compulsory').checked = !!c.isCompulsory;
+  document.getElementById('meta-level').value = c.level || '';
+  document.getElementById('meta-semester').value = c.semester || '';
+
+  const facSel = document.getElementById('meta-faculty');
+  facSel.innerHTML = '<option value="">— Select faculty —</option>' +
+    _faculties.map(f => `<option value="${esc(f.id)}"${f.id === c.facultyId ? ' selected' : ''}>${esc(f.name)}</option>`).join('');
+
+  populateMetaDepts(c.facultyId || '', c.departmentId || '');
+  updateMetaDuration(c.facultyId || '');
+  window.openModal('course-meta-modal');
+};
+
+window.onMetaFacultyChange = () => {
+  const facultyId = document.getElementById('meta-faculty').value;
+  populateMetaDepts(facultyId, null);
+  updateMetaDuration(facultyId);
+};
+
+window.submitMeta = async () => {
+  const code = document.getElementById('meta-code').value.trim().toUpperCase();
+  if (!code) { window.showToast('No code'); return; }
+  const title = document.getElementById('meta-title').value.trim();
+  const facultyId = document.getElementById('meta-faculty').value;
+  const departmentId = document.getElementById('meta-dept').value;
+  const level = document.getElementById('meta-level').value;
+  const semester = document.getElementById('meta-semester').value;
+  const rawUnits = document.getElementById('meta-units').value.trim();
+  const units = rawUnits !== '' ? parseInt(rawUnits, 10) : null;
+  const description = document.getElementById('meta-desc').value.trim();
+  const isCompulsory = document.getElementById('meta-compulsory').checked;
+
+  const payload = { code };
+  if (title) payload.title = title;
+  if (facultyId) payload.facultyId = facultyId;
+  if (departmentId) payload.departmentId = departmentId;
+  if (level) payload.level = level;
+  if (semester) payload.semester = semester;
+  if (units !== null && !isNaN(units)) payload.units = units;
+  if (description) payload.description = description;
+  payload.isCompulsory = isCompulsory;
+
+  try {
+    await setDoc(doc(db, 'courses', codeToDocId(code)), payload, { merge: true });
+    const idx = _cache.findIndex(c => (c.code || c.id) === code);
+    if (idx !== -1) _cache[idx] = { ..._cache[idx], ...payload };
+    else _cache.push({ id: codeToDocId(code), ...payload });
+    window.closeModal('course-meta-modal');
+    render();
+    window.showToast(`Saved metadata for ${code}`);
+  } catch (e) {
+    console.error(e);
+    window.showToast('Save failed');
+  }
 };

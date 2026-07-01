@@ -123,6 +123,76 @@
     </div>
   </div>
 
+  <!-- Modal: Edit Course Metadata -->
+  <div class="modal-bg" id="course-meta-modal">
+    <div class="modal" style="max-width:520px">
+      <div class="modal-hdr">Edit Course Metadata</div>
+      <div class="form-group">
+        <label class="form-label">Course Code</label>
+        <input class="form-input" id="meta-code" type="text" readonly style="opacity:0.6;cursor:default">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Title</label>
+        <input class="form-input" id="meta-title" type="text" placeholder="e.g. Introduction to Digital Systems">
+      </div>
+      <div class="form-2col">
+        <div class="form-group">
+          <label class="form-label">Faculty</label>
+          <select class="form-select" id="meta-faculty" onchange="onMetaFacultyChange()"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Programme Duration</label>
+          <div class="form-input" id="meta-duration-display" style="opacity:0.6;cursor:default;display:flex;align-items:center">—</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Department</label>
+        <select class="form-select" id="meta-dept"></select>
+      </div>
+      <div class="form-2col">
+        <div class="form-group">
+          <label class="form-label">Level</label>
+          <select class="form-select" id="meta-level">
+            <option value="">— Select level —</option>
+            <option value="100 Level">100 Level</option>
+            <option value="200 Level">200 Level</option>
+            <option value="300 Level">300 Level</option>
+            <option value="400 Level">400 Level</option>
+            <option value="500 Level">500 Level</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Semester</label>
+          <select class="form-select" id="meta-semester">
+            <option value="">— Select semester —</option>
+            <option value="First Semester">First Semester</option>
+            <option value="Second Semester">Second Semester</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-2col">
+        <div class="form-group">
+          <label class="form-label">Units</label>
+          <input class="form-input" id="meta-units" type="number" min="1" max="6" placeholder="e.g. 3">
+        </div>
+        <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:1px">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer">
+            <input type="checkbox" id="meta-compulsory" style="width:15px;height:15px;accent-color:var(--green-deep)">
+            Compulsory course
+          </label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description <span style="font-weight:400;color:var(--text3)">(optional)</span></label>
+        <textarea class="form-textarea" id="meta-desc" placeholder="Brief course description…"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-outline" onclick="closeModal('course-meta-modal')">Cancel</button>
+        <button class="btn-primary" onclick="submitMeta()">Save Metadata</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
   <script type="module" src="js/admin-auth.js"></script>
   <script type="module" src="js/admin-courses.js"></script>
