@@ -1590,7 +1590,7 @@ let _unreadCount = 0;
 async function subscribeNotifications() {
   let myCodes = [];
   try {
-    const regs = await listRegistrationsForStudent(currentUser.uid);
+    const regs = await listRegistrationsForStudent(currentUser.uid, { universityId: userProfile.universityId });
     myCodes = regs
       .filter(r => r.status !== 'dropped')
       .map(r => (r.courseId || '').toUpperCase());
@@ -1600,12 +1600,14 @@ async function subscribeNotifications() {
 
   const q = query(collection(db, 'courseUpdates'), orderBy('postedAt', 'desc'));
   onSnapshot(q, snap => {
-    const updates = snap.docs
+    let updates = snap.docs
       .map(d => ({ id: d.id, ...d.data() }))
       .filter(u => {
         if (!matchesClass(userProfile, u)) return false;
         return u.kind === 'general' || !myCodes.length || myCodes.includes((u.courseCode || '').toUpperCase());
       });
+
+    updates.sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0));
 
     const readIds = JSON.parse(localStorage.getItem('unify-read-notifs') || '[]');
     _unreadCount = updates.filter(u => !readIds.includes(u.id)).length;
@@ -1643,9 +1645,10 @@ function _renderNotifDrawer(updates, readIds) {
     const chip = `<span class="notif-chip ${chipClass[statusKey] || 'notif-chip-general'}">${chipLabel[statusKey] || statusKey}</span>`;
     const label = u.kind === 'general' ? (u.title || 'Announcement') : u.courseCode;
     const details = [u.lecturer ? `Lecturer: ${u.lecturer}` : null, u.venue ? `Venue: ${u.venue}` : null].filter(Boolean).join(' · ');
-    return `<div class="notif-item ${isUnread ? 'unread' : ''}" onclick="markRead('${u.id}')">
+    const pinMark = u.isPinned ? '<span style="font-size:10px;margin-right:2px">📌</span>' : '';
+    return `<div class="notif-item ${isUnread ? 'unread' : ''}${u.isPinned ? ' notif-pinned' : ''}" onclick="markRead('${u.id}')">
       <div class="notif-item-top">
-        <span class="notif-course-code">${label}</span>
+        <span class="notif-course-code">${pinMark}${label}</span>
         <div style="display:flex;align-items:center;gap:6px;">${chip}${isUnread ? '<div class="notif-unread-dot"></div>' : ''}</div>
       </div>
       ${u.message ? `<div class="notif-msg">${u.message}</div>` : ''}
