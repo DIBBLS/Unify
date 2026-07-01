@@ -194,6 +194,12 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // ── DEPARTMENTS (admin writes, everyone signed in reads) ─
+    match /departments/{departmentId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
     // ── COURSE CONTENT (admin writes, students read) ────────
     match /courseContent/{id} {
       allow read: if signedIn();

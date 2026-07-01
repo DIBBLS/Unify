@@ -4,20 +4,37 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 let _faculties = [];
+let _departments = [];
 let _editingFacultyId = null;
+let _editingDeptId = null;
 
-window.onAdminReady = function () { loadFaculties(); };
+window.onAdminReady = function () { loadAll(); };
+
+async function loadAll() {
+  await Promise.all([loadFaculties(), loadDepts()]);
+}
 
 async function loadFaculties() {
   const el = document.getElementById('faculties-list');
-  if (!el) return;
-  el.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:20px 0">Loading…</div>';
+  if (el) el.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:20px 0">Loading…</div>';
   try {
     const snap = await getDocs(collection(db, 'faculties'));
     _faculties = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderFaculties();
   } catch {
-    el.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:20px 0">Could not load faculties.</div>';
+    if (el) el.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:20px 0">Could not load faculties.</div>';
+  }
+}
+
+async function loadDepts() {
+  const el = document.getElementById('depts-list');
+  if (el) el.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:20px 0">Loading…</div>';
+  try {
+    const snap = await getDocs(collection(db, 'departments'));
+    _departments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderDepts();
+  } catch {
+    if (el) el.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:20px 0">Could not load departments.</div>';
   }
 }
 
@@ -99,6 +116,96 @@ window.deleteFaculty = async (id) => {
     _faculties = _faculties.filter(x => x.id !== id);
     renderFaculties();
     window.showToast(`Deleted "${f.name}"`);
+  } catch {
+    window.showToast('Delete failed');
+  }
+};
+
+// ── DEPARTMENTS ──────────────────────────────────────────────────────────────
+
+function renderDepts() {
+  const el = document.getElementById('depts-list');
+  if (!el) return;
+  if (!_departments.length) {
+    el.innerHTML = '<div class="empty-state"><p>No departments yet. Add faculties first, then departments.</p></div>';
+    return;
+  }
+  const esc = window.escHtml;
+  const facultyName = id => (_faculties.find(f => f.id === id) || {}).name || '—';
+  el.innerHTML = _departments.map(d => `
+    <div class="hierarchy-card">
+      <div class="hc-info">
+        <div class="hc-name">${esc(d.name || '—')}</div>
+        <div class="hc-meta">${esc(facultyName(d.facultyId))}</div>
+      </div>
+      <div class="hc-actions">
+        <button class="btn-sm" onclick="openDeptEdit('${esc(d.id)}')">Edit</button>
+        <button class="btn-sm danger" onclick="deleteDept('${esc(d.id)}')">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function populateFacultySelect(selectId, selectedFacultyId) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  sel.innerHTML = _faculties.length
+    ? _faculties.map(f => `<option value="${window.escHtml(f.id)}"${f.id === selectedFacultyId ? ' selected' : ''}>${window.escHtml(f.name)}</option>`).join('')
+    : '<option value="" disabled>No faculties yet — add a faculty first</option>';
+}
+
+window.openDeptModal = () => {
+  _editingDeptId = null;
+  document.getElementById('dept-modal-title').textContent = 'Add Department';
+  document.getElementById('dept-name').value = '';
+  populateFacultySelect('dept-faculty-id', null);
+  window.openModal('dept-modal');
+};
+
+window.openDeptEdit = (id) => {
+  const d = _departments.find(x => x.id === id);
+  if (!d) return;
+  _editingDeptId = id;
+  document.getElementById('dept-modal-title').textContent = 'Edit Department';
+  document.getElementById('dept-name').value = d.name || '';
+  populateFacultySelect('dept-faculty-id', d.facultyId);
+  window.openModal('dept-modal');
+};
+
+window.submitDept = async () => {
+  const name = document.getElementById('dept-name').value.trim();
+  const facultyId = document.getElementById('dept-faculty-id').value;
+  if (!name) { window.showToast('Department name is required'); return; }
+  if (!facultyId) { window.showToast('Faculty is required'); return; }
+  const payload = { name, facultyId, updatedAt: serverTimestamp() };
+  try {
+    if (_editingDeptId) {
+      await setDoc(doc(db, 'departments', _editingDeptId), payload, { merge: true });
+      const idx = _departments.findIndex(d => d.id === _editingDeptId);
+      if (idx !== -1) _departments[idx] = { ..._departments[idx], name, facultyId };
+      window.showToast(`Updated "${name}"`);
+    } else {
+      const ref = await addDoc(collection(db, 'departments'), { ...payload, createdAt: serverTimestamp() });
+      _departments.push({ id: ref.id, name, facultyId });
+      window.showToast(`Added "${name}"`);
+    }
+    window.closeModal('dept-modal');
+    renderDepts();
+  } catch (e) {
+    console.error(e);
+    window.showToast('Save failed');
+  }
+};
+
+window.deleteDept = async (id) => {
+  const d = _departments.find(x => x.id === id);
+  if (!d) return;
+  if (!confirm(`Delete "${d.name}"? This cannot be undone.`)) return;
+  try {
+    await deleteDoc(doc(db, 'departments', id));
+    _departments = _departments.filter(x => x.id !== id);
+    renderDepts();
+    window.showToast(`Deleted "${d.name}"`);
   } catch {
     window.showToast('Delete failed');
   }
