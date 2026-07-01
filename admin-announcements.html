@@ -88,9 +88,24 @@
               <button class="filter-tab" onclick="filterAnn('general',this)">General</button>
               <button class="filter-tab" onclick="filterAnn('course',this)">Course Updates</button>
             </div>
-            <div class="section-search">
-              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
-              <input type="text" id="ann-search" placeholder="Search announcements…" oninput="searchAnn()">
+            <div style="display:flex;align-items:center;gap:8px">
+              <select id="cat-filter" onchange="filterCat(this.value)" style="font-size:12px;padding:5px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);min-width:130px">
+                <option value="">All categories</option>
+                <option value="General">General</option>
+                <option value="Academic">Academic</option>
+                <option value="Examination">Examination</option>
+                <option value="Assignment">Assignment</option>
+                <option value="Emergency">Emergency</option>
+                <option value="Events">Events</option>
+                <option value="Scholarship">Scholarship</option>
+                <option value="Career">Career</option>
+                <option value="Internship">Internship</option>
+                <option value="System Update">System Update</option>
+              </select>
+              <div class="section-search">
+                <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                <input type="text" id="ann-search" placeholder="Search announcements…" oninput="searchAnn()">
+              </div>
             </div>
           </div>
           <div id="ann-list"></div>
@@ -102,44 +117,92 @@
 
   <!-- Modal: New Announcement -->
   <div class="modal-bg" id="ann-modal">
-    <div class="modal" style="max-width:520px">
+    <div class="modal" style="max-width:540px">
       <div class="modal-hdr">New Announcement</div>
+
       <div class="form-2col">
         <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-select" id="ann-category">
+            <option value="General" selected>General</option>
+            <option value="Academic">Academic</option>
+            <option value="Examination">Examination</option>
+            <option value="Assignment">Assignment</option>
+            <option value="Emergency">Emergency</option>
+            <option value="Events">Events</option>
+            <option value="Scholarship">Scholarship</option>
+            <option value="Career">Career</option>
+            <option value="Internship">Internship</option>
+            <option value="System Update">System Update</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label class="form-label">Priority</label>
-          <select class="form-select" id="ann-priority">
-            <option value="normal">🟢 Normal</option>
-            <option value="important">🟡 Important</option>
-            <option value="urgent">🔴 Urgent</option>
+          <select class="form-select" id="ann-priority" onchange="togglePushField()">
+            <option value="normal">🟢 Low</option>
+            <option value="important" selected>🟡 Normal</option>
+            <option value="urgent">🟠 High</option>
             <option value="critical">🚨 Critical</option>
           </select>
         </div>
-        <div class="form-group">
-          <label class="form-label">Target</label>
-          <select class="form-select" id="ann-scope" onchange="toggleCourseField()">
-            <option value="general">University-wide</option>
-            <option value="course">Specific course</option>
-          </select>
-        </div>
       </div>
-      <div class="form-group" id="ann-course-wrap" style="display:none">
-        <label class="form-label">Course code</label>
-        <input class="form-input" id="ann-course-code" type="text" placeholder="e.g. ECE 301" style="text-transform:uppercase">
-      </div>
-      <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="ann-title" type="text" placeholder="e.g. No class tomorrow"></div>
-      <div class="form-group"><label class="form-label">Message</label><textarea class="form-textarea" id="ann-message" rows="4" placeholder="Write your announcement…"></textarea></div>
-      <div class="form-group" id="ann-audience-wrap">
-        <label class="form-label">Audience</label>
-        <select class="form-select" id="ann-audience">
-          <option value="all">All students</option>
-          <option value="100">100 Level only</option>
-          <option value="200">200 Level only</option>
-          <option value="300">300 Level only</option>
-          <option value="400">400 Level only</option>
-          <option value="ece">ECE department</option>
-          <option value="mee">MEE department</option>
+
+      <div class="form-group" id="ann-scope-wrap">
+        <label class="form-label">Target Audience</label>
+        <select class="form-select" id="ann-scope" onchange="toggleTargetFields()">
+          <option value="general">University-wide</option>
+          <option value="course">Specific Course</option>
+          <option value="class">Specific Class</option>
         </select>
       </div>
+
+      <div class="form-group" id="ann-class-badge" style="display:none">
+        <label class="form-label">Target Audience</label>
+        <div id="ann-class-badge-text" style="font-size:13px;color:var(--text2);padding:6px 0"></div>
+      </div>
+
+      <div class="form-group" id="ann-course-wrap" style="display:none">
+        <label class="form-label">Course Code</label>
+        <input class="form-input" id="ann-course-code" type="text" placeholder="e.g. ECE 301" style="text-transform:uppercase">
+      </div>
+
+      <div id="ann-class-fields" style="display:none">
+        <div class="form-2col">
+          <div class="form-group">
+            <label class="form-label">Department</label>
+            <input class="form-input" id="ann-dept" type="text" placeholder="e.g. Electronic &amp; Computer Engineering">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Level</label>
+            <select class="form-select" id="ann-level">
+              <option value="">All levels</option>
+              <option value="100 Level">100 Level</option>
+              <option value="200 Level">200 Level</option>
+              <option value="300 Level">300 Level</option>
+              <option value="400 Level">400 Level</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Title</label>
+        <input class="form-input" id="ann-title" type="text" placeholder="e.g. No class tomorrow">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Message</label>
+        <textarea class="form-textarea" id="ann-message" rows="4" placeholder="Write your announcement…"></textarea>
+      </div>
+
+      <div style="display:flex;gap:24px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;color:var(--text)">
+          <input type="checkbox" id="ann-pin"> Pin to top of feed
+        </label>
+        <label id="ann-push-wrap" style="display:none;gap:7px;cursor:pointer;font-size:13px;color:var(--text)">
+          <input type="checkbox" id="ann-push"> Send push notification
+        </label>
+      </div>
+
       <div class="modal-footer">
         <button class="btn-outline" onclick="closeModal('ann-modal')">Cancel</button>
         <button class="btn-primary" onclick="submitAnn()">Publish</button>
