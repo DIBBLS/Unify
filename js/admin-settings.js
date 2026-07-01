@@ -1,22 +1,38 @@
 import { db } from './firebase-config.js';
 import {
-  doc, getDoc, setDoc, getDocs, addDoc, collection, writeBatch, serverTimestamp,
+  doc, getDoc, setDoc, getDocs, addDoc, collection, writeBatch, serverTimestamp, query, where,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 // ── SETTINGS ──────────────────────────────────────────────────────────────────
 
-window.onAdminReady = async function () {
+window.onAdminReady = async function (user, profile) {
   try {
     const snap = await getDoc(doc(db, 'settings', 'platform'));
-    if (!snap.exists()) return;
-    const s = snap.data();
-    const set = (id, val) => { const el = document.getElementById(id); if (el) el.checked = !!val; };
-    set('set-registrations',  s.registrations   !== false);
-    set('set-feedback',       s.feedbackEnabled  !== false);
-    set('set-maintenance',    s.maintenanceMode  === true);
-    set('set-push',           s.pushEnabled      === true);
-    set('set-exam-reminders', s.examReminders    !== false);
+    if (snap.exists()) {
+      const s = snap.data();
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.checked = !!val; };
+      set('set-registrations',  s.registrations   !== false);
+      set('set-feedback',       s.feedbackEnabled  !== false);
+      set('set-maintenance',    s.maintenanceMode  === true);
+      set('set-push',           s.pushEnabled      === true);
+      set('set-exam-reminders', s.examReminders    !== false);
+    }
   } catch {}
+  // Populate university selector for the import tool
+  try {
+    const uniSnap = await getDocs(collection(db, 'universities'));
+    const sel = document.getElementById('import-university');
+    if (sel) {
+      uniSnap.docs.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.id;
+        opt.textContent = `${d.data().name} (${d.data().shortName || d.data().name})`;
+        sel.appendChild(opt);
+      });
+    }
+  } catch (e) {
+    console.warn('[settings] Could not load universities for import selector:', e);
+  }
 };
 
 window.saveSetting = async (key, value) => {
@@ -185,6 +201,12 @@ function _validate(rows) {
 window.startImport = async function () {
   if (!_parsedRows?.length) return;
 
+  const universityId = document.getElementById('import-university')?.value || '';
+  if (!universityId) {
+    _showError('Select a university before importing.');
+    return;
+  }
+
   const valErrs = _validate(_parsedRows);
   if (valErrs.length) {
     _showError(
@@ -203,11 +225,11 @@ window.startImport = async function () {
   let facCreated = 0, deptCreated = 0, courseCount = 0;
 
   try {
-    // 1 — Load existing faculties and departments to match by name
+    // 1 — Load existing faculties and departments for this university only
     _setProgress(0, 'Loading existing data…');
     const [facSnap, deptSnap] = await Promise.all([
-      getDocs(collection(db, 'faculties')),
-      getDocs(collection(db, 'departments')),
+      getDocs(query(collection(db, 'faculties'), where('universityId', '==', universityId))),
+      getDocs(query(collection(db, 'departments'), where('universityId', '==', universityId))),
     ]);
 
     const existingFac = new Map(); // lc name → {id, programDurationYears}
@@ -247,7 +269,7 @@ window.startImport = async function () {
         }
       } else {
         const ref = await addDoc(collection(db, 'faculties'), {
-          name, programDurationYears: duration,
+          name, programDurationYears: duration, universityId,
           createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
         });
         facNameToId.set(name, ref.id);
@@ -267,7 +289,7 @@ window.startImport = async function () {
         deptKeyToId.set(key, existingDept.get(lookupKey).id);
       } else {
         const ref = await addDoc(collection(db, 'departments'), {
-          name, facultyId,
+          name, facultyId, universityId,
           createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
         });
         deptKeyToId.set(key, ref.id);
@@ -299,6 +321,7 @@ window.startImport = async function () {
           department:   r.department.trim(),
           facultyId:    facNameToId.get(r.faculty.trim()) || '',
           departmentId: deptKeyToId.get(deptKey) || '',
+          universityId,
           level:        String(r.level ?? '').trim(),
           semester:     String(r.semester ?? '').trim(),
           units:        parseInt(r.units) || 0,
