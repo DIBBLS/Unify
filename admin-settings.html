@@ -135,15 +135,37 @@
 
             <div class="settings-section">
               <span class="settings-label">Data Management</span>
-              <div class="settings-card">
-                <div class="setting-row">
-                  <div class="setting-info">
-                    <p>Seed Course Catalog</p>
-                    <span>Write all unique course codes from the Engineering catalog to Firestore. Existing resources and metadata are preserved (merge). Safe to re-run.</span>
-                  </div>
-                  <button id="seed-btn" class="btn-sm" onclick="seedCourses()">Seed</button>
+              <div class="settings-card" style="padding:18px 20px;">
+                <p style="font-size:13px;color:var(--text2);margin:0 0 3px;line-height:1.5;">Upload a spreadsheet to configure an entire university — faculties, departments, and courses — in one step. Accepts <strong>.csv</strong> or <strong>.xlsx</strong>.</p>
+                <p style="font-size:12px;color:var(--text3);margin:0 0 14px;">Required columns: <code style="font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px;">faculty · facultyDuration · department · level · semester · code · title · units · isCompulsory</code></p>
+
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                  <button class="btn-sm" onclick="downloadTemplate()">↓ Template</button>
+                  <label class="btn-sm" style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
+                    Choose file<input type="file" id="import-file" accept=".csv,.xlsx" style="display:none" onchange="handleFileSelect(this)">
+                  </label>
+                  <span id="import-filename" style="font-size:12px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px;">No file chosen</span>
                 </div>
-                <div style="padding:0 0 4px 0;font-size:12px;color:var(--text3)" id="seed-status"></div>
+
+                <div id="import-errors" role="alert" style="display:none;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.28);border-radius:8px;padding:11px 14px;margin-top:12px;font-size:12px;color:#b91c1c;line-height:1.6;"></div>
+
+                <div id="import-preview" style="display:none;margin-top:16px;">
+                  <div style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--text3);margin-bottom:7px;">Preview</div>
+                  <div style="overflow-x:auto;border:1px solid var(--border);border-radius:8px;">
+                    <table id="import-preview-table" class="import-table"></table>
+                  </div>
+                  <div id="import-row-count" style="font-size:12px;color:var(--text3);margin-top:5px;"></div>
+                  <button id="import-btn" class="btn-primary" style="margin-top:14px;" onclick="startImport()">Import</button>
+                </div>
+
+                <div id="import-progress" style="display:none;margin-top:14px;">
+                  <div id="import-progress-label" style="font-size:12px;color:var(--text3);margin-bottom:7px;">Importing…</div>
+                  <div style="background:var(--border);border-radius:4px;height:6px;overflow:hidden;">
+                    <div id="import-progress-fill" style="height:100%;background:var(--green);border-radius:4px;transition:width .3s ease;width:0%"></div>
+                  </div>
+                </div>
+
+                <div id="import-summary" role="status" style="display:none;margin-top:13px;font-size:13px;color:var(--text);"></div>
               </div>
             </div>
           </div>
@@ -154,7 +176,6 @@
   </div>
 
   <div class="toast" id="toast"></div>
-  <script src="courses.js"></script>
   <script type="module" src="js/admin-auth.js"></script>
   <script type="module" src="js/admin-settings.js"></script>
   <script src="/unify-analytics.js" type="module"></script>
