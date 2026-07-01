@@ -132,6 +132,20 @@
                 </div>
               </div>
             </div>
+
+            <div class="settings-section">
+              <span class="settings-label">Data Management</span>
+              <div class="settings-card">
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <p>Seed Course Catalog</p>
+                    <span>Write all unique course codes from the Engineering catalog to Firestore. Existing resources and metadata are preserved (merge). Safe to re-run.</span>
+                  </div>
+                  <button id="seed-btn" class="btn-sm" onclick="seedCourses()">Seed</button>
+                </div>
+                <div style="padding:0 0 4px 0;font-size:12px;color:var(--text3)" id="seed-status"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -140,6 +154,7 @@
   </div>
 
   <div class="toast" id="toast"></div>
+  <script src="courses.js"></script>
   <script type="module" src="js/admin-auth.js"></script>
   <script type="module" src="js/admin-settings.js"></script>
   <script src="/unify-analytics.js" type="module"></script>
