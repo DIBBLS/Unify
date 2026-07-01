@@ -81,7 +81,7 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data)
              .affectedKeys().hasOnly(['subscription']);
 
-      // Admin can grant/revoke roles and class assignments
+      // Admin can grant/revoke roles, class assignments, and stamp universityId
       allow update: if isAdmin()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'isAdmin',
@@ -90,6 +90,7 @@ service cloud.firestore {
           'assignedDepartment',
           'assignedLevel',
           'assignedSemester',
+          'universityId',
           'updatedAt'
         ])
         && (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin is bool)
@@ -186,6 +187,12 @@ service cloud.firestore {
         && request.resource.data.isUsed == true
         && request.resource.data.usedBy == request.auth.uid
       );
+    }
+
+    // ── UNIVERSITIES ────────────────────────────────────────
+    match /universities/{universityId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
     }
 
     // ── FACULTIES (admin writes, everyone signed in reads) ──
