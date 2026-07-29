@@ -298,3 +298,113 @@ body {
     padding: 24px 16px 40px;
   }
 }
+
+/* ── Password field with toggle ── */
+.label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.label-row .form-label {
+  margin-bottom: 0;
+}
+.forgot-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 11px;
+  font-family: var(--font-body);
+  color: var(--mid);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.forgot-link:hover {
+  color: var(--black);
+}
+.pw-wrap {
+  position: relative;
+}
+.pw-wrap .form-input {
+  padding-right: 44px;
+}
+.pw-toggle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 44px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mid);
+  transition: color 0.15s;
+}
+.pw-toggle:hover {
+  color: var(--black);
+}
+
+/* ── Password strength ── */
+.strength-bar {
+  height: 3px;
+  background: var(--grey);
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+.strength-bar-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 2px;
+  transition: width 0.25s, background 0.25s;
+}
+.pw-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+.pw-rule {
+  font-size: 11px;
+  color: var(--mid);
+  transition: color 0.15s;
+}
+.pw-rule.ok {
+  color: #16a34a;
+}
+
+/* ── Forgot password panel ── */
+.forgot-head {
+  margin-bottom: 8px;
+}
+.forgot-head-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 6px;
+}
+.forgot-head-sub {
+  font-size: 13px;
+  color: var(--mid);
+  line-height: 1.5;
+}
+.forgot-back-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  font-family: var(--font-body);
+  color: var(--mid);
+  cursor: pointer;
+  text-align: center;
+  width: 100%;
+  margin-top: 4px;
+}
+.forgot-back-btn:hover {
+  color: var(--black);
+}

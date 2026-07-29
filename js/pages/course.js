@@ -12,13 +12,17 @@ import {
   collection,
   query,
   where,
+  limit,
   getDocs,
+  doc,
+  getDoc,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import {
   resolveCourse,
   getHardcodedWeeks,
   normalizeCode,
 } from '../courses-service.js';
+import { matchesClass } from '../roles.js';
 
 // ── AUTH GATE ────────────────────────────────────────────
 onAuthStateChanged(auth, (user) => {
@@ -58,11 +62,13 @@ async function init() {
   renderAbout(course);
   renderWeeks(code, source);
   renderActions(code, course, source);
+  renderResources(code, course);
 
   loading.style.display = 'none';
   main.style.display = 'block';
 
-  // Load Firestore-uploaded content after page is visible (non-blocking)
+  // Load content non-blocking after page is visible
+  loadAnnouncements(code);
   renderFirestoreContent(code);
 }
 
@@ -166,6 +172,21 @@ function renderActions(code, course, source) {
   );
 
   wrap.innerHTML = actions.join('');
+}
+
+function renderResources(code, course) {
+  const wrap = document.getElementById('resourcesWrap');
+  if (!wrap) return;
+  const staticRes = window.getResources ? (window.getResources(code) || {}) : {};
+  const res = { ...staticRes, ...(course.resources || {}) };
+  const entries = Object.entries(res).filter(([, url]) => url);
+  if (!entries.length) return;
+
+  wrap.innerHTML = `<div class="course-actions">${entries.map(([label, url]) => `
+    <a class="course-action" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">
+      <div class="course-action-title">${escapeHtml(label)}</div>
+      <div class="course-action-sub">Open resource</div>
+    </a>`).join('')}</div>`;
 }
 
 function showNotFound(message) {
@@ -301,3 +322,124 @@ window.closeNotesModal = function () {
 window.handleNotesOverlayClick = function (e) {
   if (e.target === document.getElementById('notesOverlay')) closeNotesModal();
 };
+
+// ── TAB SWITCHING ─────────────────────────────────────────
+window.switchTab = function (tab, btn) {
+  document.querySelectorAll('.ctab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.ctab-panel').forEach(p => { p.style.display = 'none'; });
+  btn.classList.add('active');
+  const panel = document.getElementById('tp-' + tab);
+  if (panel) panel.style.display = '';
+};
+
+// ── ANNOUNCEMENTS ─────────────────────────────────────────
+const PRIORITY_ORDER = { critical: 0, urgent: 1, important: 2, normal: 3, undefined: 3 };
+
+function seenKey(code) { return `unify-ann-seen-${code}`; }
+function getSeenIds(code) {
+  try { return new Set(JSON.parse(localStorage.getItem(seenKey(code)) || '[]')); }
+  catch { return new Set(); }
+}
+function markAllSeen(code, ids) {
+  try {
+    const seen = getSeenIds(code);
+    ids.forEach(id => seen.add(id));
+    localStorage.setItem(seenKey(code), JSON.stringify([...seen]));
+  } catch {}
+}
+
+async function loadAnnouncements(code) {
+  const wrap = document.getElementById('annWrap');
+  if (!wrap) return;
+
+  try {
+    const [courseSnap, uniSnap, profileSnap] = await Promise.all([
+      getDocs(query(
+        collection(db, 'courseUpdates'),
+        where('courseCode', '==', code)
+      )),
+      getDocs(query(
+        collection(db, 'courseUpdates'),
+        where('kind', '==', 'general'),
+        limit(20)
+      )),
+      auth.currentUser ? getDoc(doc(db, 'users', auth.currentUser.uid)) : Promise.resolve(null),
+    ]);
+
+    const profile = profileSnap?.exists?.() ? profileSnap.data() : {};
+    const courseItems = courseSnap.docs.map(d => ({ id: d.id, ...d.data(), _scope: 'course' }));
+    const uniItems   = uniSnap.docs.map(d => ({ id: d.id, ...d.data(), _scope: 'university' }))
+      .filter(u => matchesClass(profile, u));
+
+    const all = [...courseItems, ...uniItems].sort((a, b) => {
+      const ta = a.postedAt?.toDate?.()?.getTime() || 0;
+      const tb = b.postedAt?.toDate?.()?.getTime() || 0;
+      return tb - ta;
+    });
+
+    if (!all.length) return;
+
+    const seen = getSeenIds(code);
+    const unread = all.filter(a => !seen.has(a.id)).length;
+
+    renderAnnouncements(all, seen, wrap);
+    updateAnnBadge(unread);
+
+    // Mark all visible as seen after a short delay
+    setTimeout(() => markAllSeen(code, all.map(a => a.id)), 2000);
+  } catch (e) {
+    console.warn('[announcements]', e);
+  }
+}
+
+function renderAnnouncements(items, seen, wrap) {
+  const priorityLabel = { critical: '🚨 Critical', urgent: '🔴 Urgent', important: '🟡 Important', normal: '🟢 Normal' };
+
+  wrap.innerHTML = `<div class="ann-list">${items.map(a => {
+    const ts = a.postedAt?.toDate?.();
+    const timeStr = ts ? relativeTime(ts) : '';
+    const priority = a.priority || 'normal';
+    const prLabel  = priorityLabel[priority] || '🟢 Normal';
+    const isUnread = !seen.has(a.id);
+    const scopeLabel = a._scope === 'university' ? 'University' : (a.courseCode || 'Course');
+
+    return `<div class="ann-card priority-${priority}">
+      <div class="ann-card-top">
+        <div style="display:flex;align-items:center;gap:6px">
+          ${isUnread ? '<div class="ann-unread-dot"></div>' : ''}
+          <span class="ann-priority-badge ${priority}">${prLabel}</span>
+          <span class="ann-scope-badge">${escapeHtml(scopeLabel)}</span>
+        </div>
+        <span class="ann-time">${escapeHtml(timeStr)}</span>
+      </div>
+      <div class="ann-card-title">${escapeHtml(a.title || 'Announcement')}</div>
+      ${a.message ? `<div class="ann-card-msg">${escapeHtml(a.message)}</div>` : ''}
+      <div class="ann-card-meta">
+        <span>${escapeHtml(a.postedBy || 'Admin')}</span>
+        ${a.audience && a.audience !== 'all' ? `<span>${escapeHtml(a.audience)}</span>` : ''}
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function updateAnnBadge(count) {
+  const badge = document.getElementById('annBadge');
+  if (!badge) return;
+  if (count > 0) {
+    badge.textContent = count > 99 ? '99+' : String(count);
+    badge.style.display = '';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function relativeTime(date) {
+  const diff = Date.now() - date.getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1)  return 'Just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  return d === 1 ? 'Yesterday' : `${d}d ago`;
+}
