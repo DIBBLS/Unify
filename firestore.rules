@@ -81,7 +81,7 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data)
              .affectedKeys().hasOnly(['subscription']);
 
-      // Admin can grant/revoke roles and class assignments
+      // Admin can grant/revoke roles, class assignments, and stamp universityId
       allow update: if isAdmin()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'isAdmin',
@@ -90,6 +90,7 @@ service cloud.firestore {
           'assignedDepartment',
           'assignedLevel',
           'assignedSemester',
+          'universityId',
           'updatedAt'
         ])
         && (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin is bool)
@@ -170,18 +171,40 @@ service cloud.firestore {
         && resource.data.authorId == request.auth.uid;
     }
 
-    // ── ACCESS CODES (admin creates; students can mark used) ───
+    // ── ACCESS CODES (admin creates/deletes; students can mark used) ───
     match /accessCodes/{code} {
       allow read: if signedIn();
       allow create: if isAdmin();
-      // Students mark a code as used (single-use, not expired)
-      allow update: if signedIn()
+      allow delete: if isAdmin();
+      // Admin can edit a code directly, or a student can mark their own code
+      // as used (single-use, not expired) — same diff shape as the original rule.
+      allow update: if isAdmin() || (
+        signedIn()
         && resource.data.isUsed == false
         && resource.data.expiresAt > request.time
         && request.resource.data.diff(resource.data)
              .affectedKeys().hasOnly(['isUsed', 'usedBy', 'usedAt'])
         && request.resource.data.isUsed == true
-        && request.resource.data.usedBy == request.auth.uid;
+        && request.resource.data.usedBy == request.auth.uid
+      );
+    }
+
+    // ── UNIVERSITIES ────────────────────────────────────────
+    match /universities/{universityId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ── FACULTIES (admin writes, everyone signed in reads) ──
+    match /faculties/{facultyId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ── DEPARTMENTS (admin writes, everyone signed in reads) ─
+    match /departments/{departmentId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
     }
 
     // ── COURSE CONTENT (admin writes, students read) ────────
@@ -196,6 +219,18 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // ── COURSE REGISTRATIONS (student owns their own; admin manages all) ──
+    match /courseRegistrations/{registrationId} {
+      allow read: if signedIn() && (resource.data.studentId == request.auth.uid || isAdmin());
+      allow create: if signedIn()
+        && request.resource.data.studentId == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.courseId is string
+        && request.resource.data.semester is string
+        && request.resource.data.academicYear is string;
+      allow update, delete: if isAdmin();
+    }
+
     // ── EXAM TIMETABLES (admin + class reps write, students read) ──
     match /examTimetables/{deptId} {
       allow read: if signedIn();
@@ -208,13 +243,6 @@ service cloud.firestore {
       allow create: if signedIn();
       allow update, delete: if isAdmin();
     }
-
-    // ── ACCESS CODES ────────────────────────────────────────
-match /accessCodes/{code} {
-  allow read: if signedIn();
-  allow create, update: if isAdmin();
-  allow delete: if isAdmin();
-}
 
     // ── DENY EVERYTHING ELSE ────────────────────────────────
     match /{document=**} {

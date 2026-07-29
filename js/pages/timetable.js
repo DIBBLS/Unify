@@ -1,6 +1,7 @@
 import { auth, db } from '../firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, setDoc, getDocs, collection, query, orderBy, onSnapshot, where, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { matchesClass } from '../roles.js';
 
 const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
 let currentUser = null, userProfile = {};
@@ -10,10 +11,6 @@ let saveTimeout = null;
 let isAdminUser = false;
 let editingClass = null; // { cls, day } — used by edit modal
 let timetableSource = 'static'; // 'firestore' | 'static'
-
-function normField(s) {
-  return String(s || '').trim().toLowerCase().replace(/\s*&\s*/g, ' and ').replace(/\s+/g, ' ');
-}
 
 // ── THEME handled by js/theme.js ──────────────────────
 
@@ -108,10 +105,7 @@ function subscribeNotifications() {
       .map(d => ({ id: d.id, ...d.data() }))
       .filter(u => {
         // If the update targets a specific class, skip unless the student matches
-        if (u.targetDepartment) {
-          if (normField(userProfile.department) !== normField(u.targetDepartment)) return false;
-          if (u.targetLevel && normField(userProfile.level) !== normField(u.targetLevel)) return false;
-        }
+        if (!matchesClass(userProfile, u)) return false;
         return u.kind === 'general' || !myCourseCodes.length || myCourseCodes.includes(u.courseCode);
       });
 

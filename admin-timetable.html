@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Timetable — Unify Learn Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="admin.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#16a34a" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
+  <script src="js/register-sw.js" defer></script>
+</head>
+<body>
+
+  <div class="loading-screen" id="loadingScreen">
+    <div class="loading-logo">Unify Learn</div>
+    <div class="loading-sub">Verifying access…</div>
+  </div>
+
+  <div class="denied-wrap" id="accessDenied">
+    <div class="denied-title">Access Restricted</div>
+    <div class="denied-sub">This panel is for faculty staff and elected class representatives only.<br />Contact the Sub Dean's office if this is an error.</div>
+    <a href="dashboard.html" class="denied-back">← Back to Dashboard</a>
+  </div>
+
+  <div id="mainContent">
+    <div class="admin-layout">
+
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <div class="logo-icon">U</div>
+          <div class="logo-text">
+            <span class="logo-wordmark">Unify Learn</span>
+            <span class="logo-badge">Admin</span>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <a href="Admin.html" class="nav-item"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zm0 9.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zm9.75-9.75A2.25 2.25 0 0115.75 3.75H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zm0 9.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>Dashboard</a>
+          <a href="admin-announcements.html" class="nav-item"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46"/></svg>Announcements</a>
+          <a href="admin-courses.html" class="nav-item"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>Courses</a>
+          <a href="admin-hierarchy.html" class="nav-item"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" /></svg>Hierarchy</a>
+          <a href="admin-timetable.html" class="nav-item active"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>Timetable</a>
+          <a href="admin-exams.html" class="nav-item"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg>Exams</a>
+          <a href="admin-users.html" class="nav-item"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>Users &amp; Roles</a>
+          <a href="admin-feedback.html" class="nav-item"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/></svg>Feedback</a>
+          <a href="admin-settings.html" class="nav-item"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Settings</a>
+        </nav>
+        <div class="sidebar-help">
+          <div class="help-icon">?</div>
+          <p>Need help?</p>
+          <span>Check the admin docs</span>
+        </div>
+        <a href="Auth.html" class="sidebar-logout" id="signOutBtn">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/></svg>
+          Logout
+        </a>
+      </aside>
+
+      <div class="main-wrapper">
+        <header class="topbar">
+          <button class="topbar-menu" aria-label="Toggle sidebar"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg></button>
+          <div class="topbar-search"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803 7.5 7.5 0 0015.803 15.803z"/></svg><input type="text" placeholder="Search anything…" /></div>
+          <div class="topbar-right">
+            <div class="topbar-user">
+              <div class="user-avatar" id="userInitials">—</div>
+              <div><div class="tu-name" id="heroName">—</div><div class="tu-role" id="heroRole">Admin</div></div>
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+            </div>
+          </div>
+        </header>
+
+        <div class="content">
+          <div class="page-hdr">
+            <div>
+              <h2>Timetable</h2>
+              <p>Manage the weekly class schedule by level</p>
+            </div>
+            <button class="btn-primary" onclick="openModal('tt-modal')">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+              Add Class
+            </button>
+          </div>
+          <div class="filter-bar">
+            <select class="form-select" id="tt-dept-filter" onchange="filterTTDept(this.value)" style="max-width:280px">
+              <option value="Electronic &amp; Computer Engineering">Electronic &amp; Computer Engineering (ECE)</option>
+              <option value="Mechanical Engineering">Mechanical Engineering (MEE)</option>
+              <option value="Industrial &amp; Petroleum Engineering">Industrial &amp; Petroleum Engineering (IPE)</option>
+              <option value="Chemical &amp; Polymer Engineering">Chemical &amp; Polymer Engineering (CPE)</option>
+              <option value="Civil Engineering">Civil Engineering (CVE)</option>
+              <option value="Aerospace Engineering">Aerospace Engineering (ASE)</option>
+            </select>
+            <div class="filter-tabs">
+              <button class="filter-tab active" onclick="filterTT('300 Level',this)">300 Level</button>
+              <button class="filter-tab" onclick="filterTT('400 Level',this)">400 Level</button>
+              <button class="filter-tab" onclick="filterTT('500 Level',this)">500 Level</button>
+            </div>
+          </div>
+          <div id="tt-grid" class="tt-grid"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal: Add Class -->
+  <div class="modal-bg" id="tt-modal">
+    <div class="modal" style="max-width:480px">
+      <div class="modal-hdr">Add Class</div>
+      <div class="form-group"><label class="form-label">Course Code</label><input class="form-input" id="tt-course" type="text" placeholder="e.g. ECE 302" style="text-transform:uppercase"></div>
+      <div class="form-group">
+        <label class="form-label">Department</label>
+        <select class="form-select" id="tt-dept">
+          <option value="Electronic &amp; Computer Engineering">Electronic &amp; Computer Engineering (ECE)</option>
+          <option value="Mechanical Engineering">Mechanical Engineering (MEE)</option>
+          <option value="Industrial &amp; Petroleum Engineering">Industrial &amp; Petroleum Engineering (IPE)</option>
+          <option value="Chemical &amp; Polymer Engineering">Chemical &amp; Polymer Engineering (CPE)</option>
+          <option value="Civil Engineering">Civil Engineering (CVE)</option>
+          <option value="Aerospace Engineering">Aerospace Engineering (ASE)</option>
+        </select>
+      </div>
+      <div class="form-2col">
+        <div class="form-group">
+          <label class="form-label">Level</label>
+          <select class="form-select" id="tt-level">
+            <option value="300 Level">300</option>
+            <option value="400 Level">400</option>
+            <option value="500 Level">500</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Day</label>
+          <select class="form-select" id="tt-day">
+            <option value="Monday">Mon</option><option value="Tuesday">Tue</option><option value="Wednesday">Wed</option><option value="Thursday">Thu</option><option value="Friday">Fri</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-2col">
+        <div class="form-group">
+          <label class="form-label">Start Time</label>
+          <select class="form-select" id="tt-time">
+            <option>8:00</option><option>9:00</option><option>10:00</option><option>11:00</option>
+            <option>12:00</option><option>13:00</option><option>14:00</option><option>15:00</option><option>16:00</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Venue</label>
+          <input class="form-input" id="tt-venue" type="text" placeholder="e.g. LT1">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-outline" onclick="closeModal('tt-modal')">Cancel</button>
+        <button class="btn-primary" onclick="submitClass()">Add Class</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script type="module" src="js/admin-auth.js"></script>
+  <script type="module" src="js/admin-timetable.js"></script>
+  <script src="/unify-analytics.js" type="module"></script>
+</body>
+</html>

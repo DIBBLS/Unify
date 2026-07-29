@@ -39,6 +39,7 @@ import {
   deleteDoc,
   query,
   orderBy,
+  where,
   serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
@@ -63,14 +64,19 @@ export async function getCourse(code) {
   return null;
 }
 
-export async function listCourses() {
+export async function listCourses({ universityId } = {}) {
   try {
-    const snap = await getDocs(query(collection(db, 'courses'), orderBy('code')));
+    let snap;
+    if (universityId) {
+      // Composite index would be needed for orderBy + where, so sort client-side instead.
+      snap = await getDocs(query(collection(db, 'courses'), where('universityId', '==', universityId)));
+      const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      return docs.sort((a, b) => (a.code || '').localeCompare(b.code || ''));
+    }
+    snap = await getDocs(query(collection(db, 'courses'), orderBy('code')));
     return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
   } catch (e) {
     console.warn('[courses-service] listCourses failed:', e);
-    // Re-throw so callers can surface the real error (permissions, network)
-    // instead of silently treating it as "no courses exist".
     throw e;
   }
 }
