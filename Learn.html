@@ -528,15 +528,6 @@ body { max-width: 480px; margin: 0 auto; }
 .pw-bank-name { font-size: 12px; color: var(--text2); margin-top: 3px; }
 
 /* ── Visual lock: week 1 is always free, only lock weeks 2+ ── */
-body.paywall-active .week-row-btn:not([data-week="1"]) .week-row-arrow { display: none; }
-body.paywall-active .week-row-btn:not([data-week="1"]) .week-row-right::after { content: '🔒'; font-size: 14px; }
-
-body.paywall-active:not([data-week-idx="0"]) .topic-card .topic-arrow,
-body.paywall-active:not([data-week-idx="0"]) .resource-row .resource-arrow { display: none; }
-body.paywall-active:not([data-week-idx="0"]) .topic-card .topic-card-right::after { content: '🔒'; font-size: 14px; }
-body.paywall-active:not([data-week-idx="0"]) .resource-row::after { content: '🔒'; font-size: 14px; margin-left: auto; flex-shrink: 0; }
-</style>
-</head>
 <body>
 
 <!-- LOADING -->
