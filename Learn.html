@@ -701,42 +701,7 @@ body { max-width: 480px; margin: 0 auto; }
 </div>
 
 <!-- Subscription gate -->
-<script type="module">
-import { auth, db } from './js/firebase-config.js';
-import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-function showPaywall(e) {
-  e.preventDefault();
-  e.stopPropagation();
-  document.getElementById('paywallModal').classList.add('open');
-}
-
-onAuthStateChanged(auth, async function(user) {
-  if (!user) return;
-  try {
-    var snap     = await getDoc(doc(db, 'users', user.uid));
-    var sub      = snap.data()?.subscription;
-    var isActive = sub?.active === true && sub?.expiresAt?.toDate() > new Date();
-    if (isActive) return;
-  } catch (_) { /* lock by default */ }
-
-  // Show visual lock badges
-  document.body.classList.add('paywall-active');
-
-  // Intercept week buttons, topic cards, resource rows — but Week 1 is always free
-  document.addEventListener('click', function(e) {
-    var target = e.target.closest('.week-row-btn, .topic-card, .resource-row');
-    if (!target) return;
-    if (target.matches('.week-row-btn') && target.dataset.week === '1') return;
-    if ((target.matches('.topic-card') || target.matches('.resource-row')) && document.body.dataset.weekIdx === '0') return;
-    showPaywall(e);
-  }, true);
-});
-
-document.getElementById('paywallModal').addEventListener('click', function(e) {
-  if (e.target === this) this.classList.remove('open');
-});
 </script>
 <script type="module" src="/unify-analytics.js"></script>
 </body>
