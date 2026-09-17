@@ -20,3 +20,10 @@ firebase-debug.log
 
 # Local notes (do not commit)
 messages.txt
+__out*.txt
+__full*.txt
+
+# Build outputs
+dist/
+apps/web/dist/
+notes-engine/dist/
