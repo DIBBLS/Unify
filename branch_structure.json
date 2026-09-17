@@ -1,0 +1,33 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "claude/deploy-1782137664",
+    "claude/funny-noether-5gllhn",
+    "claude/laughing-noether-aebp2z",
+    "claude/trigger-deploy",
+    "claude/unify-admin-dashboard-c35u90",
+    "claude/unify-learn-branding-controls-fpoer1",
+    "main",
+    "origin"
+  ],
+  "parent": {
+    "claude/deploy-1782137664": "main",
+    "claude/funny-noether-5gllhn": "main",
+    "claude/laughing-noether-aebp2z": "main",
+    "claude/trigger-deploy": "main",
+    "claude/unify-admin-dashboard-c35u90": "main",
+    "claude/unify-learn-branding-controls-fpoer1": "main",
+    "main": null,
+    "origin": "main"
+  },
+  "order": [
+    "main",
+    "claude/deploy-1782137664",
+    "claude/funny-noether-5gllhn",
+    "claude/laughing-noether-aebp2z",
+    "claude/trigger-deploy",
+    "claude/unify-admin-dashboard-c35u90",
+    "claude/unify-learn-branding-controls-fpoer1",
+    "origin"
+  ]
+}
