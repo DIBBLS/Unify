@@ -22,5 +22,9 @@
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
     }
   ],
-  "cleanUrls": true
+  "cleanUrls": true,
+  "framework": "vite",
+  "buildCommand": null,
+  "outputDirectory": ".",
+  "installCommand": "npm install"
 }
