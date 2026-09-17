@@ -300,6 +300,7 @@ var coursesDatabase = {
     "500 Level": {
       "First Semester": [],
       "Second Semester": []
-    }
+     }
+   }
   }
 };
