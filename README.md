@@ -19,7 +19,7 @@ Unify helps students track their academic progress, manage timetables, access co
 |-------|-----------|
 | Frontend | HTML, CSS, JavaScript (no framework) |
 | Backend | Firebase (Auth, Firestore) |
-| Hosting | Netlify |
+| Hosting | Vercel |
 | Fonts | Playfair Display, DM Sans (Google Fonts) |
 
 ## Getting Started
@@ -73,7 +73,7 @@ Unify/
 
 ## Deployment
 
-This site deploys automatically to Netlify on push to `main`.
+This site deploys automatically to Vercel on push to `main` (static, no build step).
 
 To deploy Firestore rules:
 ```bash
