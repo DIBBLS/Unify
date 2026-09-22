@@ -21,7 +21,7 @@ function NotFound() {
   return (
     <div style={{ padding: 40, textAlign: 'center', maxWidth: 480, margin: '0 auto' }}>
       <div style={{ marginBottom: 12 }}>
-        <Mascot size={120} />
+        <Mascot size={120} animate="wave" />
       </div>
       <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 24 }}>Page not found</h1>
       <p style={{ color: '#777', fontSize: 14, margin: '8px 0 20px' }}>This link doesn't exist. Try one of these:</p>
