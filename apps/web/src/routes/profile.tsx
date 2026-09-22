@@ -17,7 +17,6 @@ export default function ProfileRoute() {
   useEffect(() => {
     const sb = supabaseBrowser();
     if (!sb) {
-      setError('App is not configured yet (Supabase keys missing).');
       setLoading(false);
       return;
     }
