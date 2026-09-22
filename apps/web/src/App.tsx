@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate } from 'react-router-dom';
 import Layout from './routes/_layout';
 import CourseRoute from './routes/course';
 import LearnWeek from './routes/learn/week';
@@ -7,6 +8,8 @@ import DashboardRoute from './routes/dashboard';
 import OnboardingRoute from './routes/onboarding';
 import ProfileRoute from './routes/profile';
 import Mascot from './components/Mascot';
+import Loading from './components/Loading';
+import { supabaseBrowser } from './lib/supabase';
 
 function NotFound() {
   const link: React.CSSProperties = {
@@ -34,19 +37,83 @@ function NotFound() {
   );
 }
 
+// Gate: no session -> /auth. Every app route sits behind this; the pages
+// themselves additionally check the profile (onboarded -> app, else onboarding).
+function RequireAuth({ children }: { children: JSX.Element }) {
+  const navigate = useNavigate();
+  const [ok, setOk] = useState(false);
+
+  useEffect(() => {
+    const sb = supabaseBrowser();
+    if (!sb) {
+      navigate('/auth');
+      return;
+    }
+    sb.auth.getSession().then(({ data }) => {
+      if (!data.session) navigate('/auth');
+      else setOk(true);
+    });
+    const { data: sub } = sb.auth.onAuthStateChange((_event, session) => {
+      if (!session) navigate('/auth');
+      else setOk(true);
+    });
+    return () => {
+      sub.subscription.unsubscribe();
+    };
+  }, [navigate]);
+
+  if (!ok) return <Loading text="Checking sign-in…" />;
+  return children;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         {/* Chromeless: no top bar on sign in / onboarding */}
         <Route path="/auth" element={<AuthRoute />} />
-        <Route path="/onboarding" element={<OnboardingRoute />} />
+        <Route
+          path="/onboarding"
+          element={
+            <RequireAuth>
+              <OnboardingRoute />
+            </RequireAuth>
+          }
+        />
         <Route element={<Layout />}>
           <Route path="/" element={<Navigate to="/auth" replace />} />
-          <Route path="/course" element={<CourseRoute />} />
-          <Route path="/learn/:courseCode/week/:week" element={<LearnWeek />} />
-          <Route path="/dashboard" element={<DashboardRoute />} />
-          <Route path="/profile" element={<ProfileRoute />} />
+          <Route
+            path="/course"
+            element={
+              <RequireAuth>
+                <CourseRoute />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/learn/:courseCode/week/:week"
+            element={
+              <RequireAuth>
+                <LearnWeek />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <RequireAuth>
+                <DashboardRoute />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <RequireAuth>
+                <ProfileRoute />
+              </RequireAuth>
+            }
+          />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
