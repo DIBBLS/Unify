@@ -5,38 +5,8 @@ import Mascot from '../components/Mascot';
 import { supabaseBrowser } from '../lib/supabase';
 import { api } from '../lib/api';
 
-const RL_KEY = 'unify-auth-rl';
-const RL_MAX = 10;
-const RL_WINDOW = 7 * 60 * 1000;
-
-function getRl() {
-  try {
-    return JSON.parse(localStorage.getItem(RL_KEY) || 'null') || { count: 0, lockUntil: 0 };
-  } catch {
-    return { count: 0, lockUntil: 0 };
-  }
-}
-function checkRl() {
-  const { lockUntil } = getRl();
-  if (lockUntil > Date.now()) {
-    const mins = Math.ceil((lockUntil - Date.now()) / 60000);
-    return `Too many failed attempts. Try again in ${mins} minute${mins !== 1 ? 's' : ''}.`;
-  }
-  return null;
-}
-function recordFail() {
-  const rl = getRl();
-  if (rl.lockUntil > Date.now()) return;
-  rl.count = (rl.count || 0) + 1;
-  if (rl.count >= RL_MAX) {
-    rl.lockUntil = Date.now() + RL_WINDOW;
-    rl.count = 0;
-  }
-  localStorage.setItem(RL_KEY, JSON.stringify(rl));
-}
-function clearRl() {
-  localStorage.removeItem(RL_KEY);
-}
+// Note: no client-side persistence here. Rate limiting is enforced
+// server-side (API rate limits + Supabase Auth built-in limits).
 
 export default function AuthRoute() {
   const navigate = useNavigate();
@@ -89,8 +59,6 @@ export default function AuthRoute() {
       setError('Auth is not configured yet.');
       return;
     }
-    const blocked = checkRl();
-    if (blocked) return setError(blocked);
     const form = e.currentTarget;
     const email = (form.elements.namedItem('email') as HTMLInputElement).value.trim();
     const password = (form.elements.namedItem('password') as HTMLInputElement).value;
@@ -98,14 +66,11 @@ export default function AuthRoute() {
     try {
       const { data, error: err } = await client.auth.signInWithPassword({ email, password });
       if (err) {
-        recordFail();
-        setError(checkRl() || err.message);
+        setError(err.message);
         return;
       }
-      clearRl();
       if (data.session) await routeToApp();
     } catch (err) {
-      recordFail();
       setError(err instanceof Error ? err.message : 'Sign-in failed.');
     } finally {
       setLoading(false);
@@ -121,8 +86,6 @@ export default function AuthRoute() {
       setError('Auth is not configured yet.');
       return;
     }
-    const blocked = checkRl();
-    if (blocked) return setError(blocked);
     const form = e.currentTarget;
     const name = (form.elements.namedItem('name') as HTMLInputElement).value.trim();
     const email = (form.elements.namedItem('email') as HTMLInputElement).value.trim();
@@ -138,11 +101,9 @@ export default function AuthRoute() {
         options: { data: { display_name: name } },
       });
       if (err) {
-        recordFail();
-        setError(checkRl() || err.message);
+        setError(err.message);
         return;
       }
-      clearRl();
       if (data.session) {
         await routeToApp();
       } else {
@@ -150,7 +111,6 @@ export default function AuthRoute() {
         setTab('signin');
       }
     } catch (err) {
-      recordFail();
       setError(err instanceof Error ? err.message : 'Sign-up failed.');
     } finally {
       setLoading(false);
@@ -192,8 +152,6 @@ export default function AuthRoute() {
       setError('Auth is not configured yet.');
       return;
     }
-    const blocked = checkRl();
-    if (blocked) return setError(blocked);
     try {
       const { error: err } = await client.auth.signInWithOAuth({
         provider: 'google',

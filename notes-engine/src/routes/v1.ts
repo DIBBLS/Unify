@@ -244,4 +244,27 @@ router.get("/stats", requireAuth, async (req: Request, res: Response) => {
   }
 });
 
+// Authed: completed topic indices for one week (client holds nothing locally).
+router.get("/progress", requireAuth, async (req: Request, res: Response) => {
+  const userId = (req as AuthedRequest).userId as string;
+  const course = String(req.query.course || "").toUpperCase();
+  const week = Number(req.query.week);
+  if (!course || !Number.isInteger(week) || week < 1) {
+    res.status(400).json({ error: "Invalid course/week" });
+    return;
+  }
+  try {
+    const { data, error } = await supabaseAdmin()
+      .from("topic_progress")
+      .select("topic")
+      .eq("user_id", userId)
+      .eq("course", course)
+      .eq("week", week);
+    if (error) throw error;
+    res.json({ done: ((data ?? []) as { topic: number }[]).map((r) => r.topic) });
+  } catch (e) {
+    res.status(500).json(dbError(e));
+  }
+});
+
 export default router;

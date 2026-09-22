@@ -1,37 +1,44 @@
 import { useCallback, useEffect, useState } from 'react';
+import { api } from '../lib/api';
 
-export type ProgressMap = Record<string, { done: boolean; completedAt?: number }>;
-
-export function topicKey(wi: number, ti: number) {
-  return `w${wi}_t${ti}`;
-}
-
-export function useProgress(courseCode: string) {
-  const storageKey = `unify-topic-${courseCode}`;
-  const [map, setMap] = useState<ProgressMap>(() => {
-    try {
-      const raw = localStorage.getItem(storageKey);
-      return raw ? JSON.parse(raw) : {};
-    } catch {
-      return {};
-    }
-  });
+// Server-backed topic progress. Nothing is persisted client-side:
+// completed topics load from the API on mount, completion POSTs to the API.
+// Completing is one-way (like Duolingo lessons) so local state always
+// converges with the server (add-only on both sides).
+export function useProgress(courseCode: string, weekNum: number) {
+  const [done, setDone] = useState<Set<number>>(new Set());
 
   useEffect(() => {
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(map));
-    } catch {}
-  }, [map, storageKey]);
+    let cancelled = false;
+    api
+      .progressGet(courseCode, weekNum)
+      .then((d) => {
+        if (!cancelled) setDone(new Set(d.done));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [courseCode, weekNum]);
 
-  const toggle = useCallback((wi: number, ti: number) => {
-    const k = topicKey(wi, ti);
-    setMap((m) => {
-      const wasDone = m[k]?.done;
-      return { ...m, [k]: { done: !wasDone, completedAt: !wasDone ? Date.now() : undefined } };
-    });
-  }, []);
+  const toggle = useCallback(
+    (wi: number, ti: number) => {
+      if (wi !== weekNum) return;
+      setDone((prev) => {
+        if (prev.has(ti)) return prev;
+        const next = new Set(prev);
+        next.add(ti);
+        return next;
+      });
+      void api.progress(courseCode, weekNum, ti).catch(() => {});
+    },
+    [courseCode, weekNum]
+  );
 
-  const isDone = useCallback((wi: number, ti: number) => Boolean(map[topicKey(wi, ti)]?.done), [map]);
+  const isDone = useCallback(
+    (wi: number, ti: number) => wi === weekNum && done.has(ti),
+    [done, weekNum]
+  );
 
-  return { map, toggle, isDone, doneCount: Object.values(map).filter((v) => v.done).length };
+  return { toggle, isDone, doneCount: done.size };
 }

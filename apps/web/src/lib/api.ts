@@ -90,4 +90,6 @@ export const api = {
     }),
   stats: () =>
     apiFetch<{ xp: number; streak: number; courses: { course: string; topics: number }[] }>("/v1/stats"),
+  progressGet: (course: string, week: number) =>
+    apiFetch<{ done: number[] }>(`/v1/progress?course=${encodeURIComponent(course)}&week=${week}`),
 };
