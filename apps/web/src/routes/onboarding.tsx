@@ -5,6 +5,7 @@ import { supabaseBrowser } from '../lib/supabase';
 import { api, type University } from '../lib/api';
 import Loading from '../components/Loading';
 import Mascot from '../components/Mascot';
+import Flash from '../components/Flash';
 
 type Uni = { id: string; name: string; shortName?: string };
 
@@ -128,8 +129,8 @@ export default function OnboardingRoute() {
         </div>
       </div>
       <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {configError && <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 12, padding: 10, color: '#9a3412', fontSize: 13 }}>{configError}</div>}
-        {error && <div style={{ background: '#fff0f0', border: '1px solid #ffcccc', borderRadius: 12, padding: 10, color: '#cc0000', fontSize: 13 }}>{error}</div>}
+        {configError && <Flash tone="info" message={configError} ttl={0} />}
+        {error && <Flash tone="error" message={error} onDismiss={() => setError('')} />}
         {step === 0 && (
           <>
             <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0 4px' }}>

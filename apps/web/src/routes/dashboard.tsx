@@ -5,6 +5,7 @@ import { supabaseBrowser } from '../lib/supabase';
 import { api, type Profile } from '../lib/api';
 import Loading from '../components/Loading';
 import Mascot from '../components/Mascot';
+import Flash from '../components/Flash';
 
 type CourseStat = { course: string; topics: number };
 
@@ -53,17 +54,23 @@ export default function DashboardRoute() {
   if (loading) return <Loading text="Loading dashboard…" />;
   if (configError)
     return (
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: 40, textAlign: 'center' }}>
-        <p style={{ color: '#9a3412', fontSize: 14 }}>{configError}</p>
+      <div style={{ maxWidth: 480, margin: '0 auto', padding: 40 }}>
+        <Flash tone="info" message={configError} ttl={0} />
       </div>
     );
   if (loadError)
     return (
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: 40, textAlign: 'center' }}>
-        <p style={{ color: '#991b1b', fontSize: 14, marginBottom: 12 }}>{loadError}</p>
-        <button onClick={() => window.location.reload()} style={{ padding: '10px 18px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800 }}>
-          Retry
-        </button>
+      <div style={{ maxWidth: 480, margin: '0 auto', padding: 40 }}>
+        <Flash
+          tone="error"
+          message={loadError}
+          ttl={0}
+          action={
+            <button onClick={() => window.location.reload()} style={{ padding: '8px 18px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, fontSize: 13 }}>
+              Retry
+            </button>
+          }
+        />
       </div>
     );
 

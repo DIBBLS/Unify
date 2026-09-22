@@ -7,6 +7,7 @@ import { TopicSlice } from '../../components/TopicSlice';
 import { useProgress } from '../../hooks/useProgress';
 import Loading from '../../components/Loading';
 import Mascot from '../../components/Mascot';
+import Flash from '../../components/Flash';
 
 export default function LearnPage() {
   const { courseCode = 'MEE 352', week: weekParam } = useParams();
@@ -14,6 +15,7 @@ export default function LearnPage() {
   const weekNum = Number(weekParam) || 1;
   const [note, setNote] = useState<UnifyNote | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const { toggle, isDone } = useProgress(decodeURIComponent(courseCode).toUpperCase(), weekNum);
 
   useEffect(() => {
@@ -24,7 +26,7 @@ export default function LearnPage() {
         const note = data.note_json as UnifyNote;
         setNote(note && Array.isArray(note.topics) ? note : null);
       } catch {
-        // keep note null so the empty state renders instead of hanging
+        setLoadError("Couldn't load this week. Check your connection and retry.");
       } finally {
         setLoading(false);
       }
@@ -33,6 +35,24 @@ export default function LearnPage() {
   }, [courseCode, weekNum]);
 
   if (loading) return <Loading text={`Loading Week ${weekNum}`} />;
+  if (loadError)
+    return (
+      <div style={{ padding: 40, maxWidth: 480, margin: '0 auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+          <Mascot size={110} />
+        </div>
+        <Flash
+          tone="error"
+          message={loadError}
+          ttl={0}
+          action={
+            <button onClick={() => window.location.reload()} style={{ padding: '8px 18px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, fontSize: 13 }}>
+              Retry
+            </button>
+          }
+        />
+      </div>
+    );
   if (!note)
     return (
       <div style={{ padding: 40, textAlign: 'center', color: '#777' }}>

@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, Check, X, Loader2 } from 'lucide-react';
 import Mascot from '../components/Mascot';
+import Flash from '../components/Flash';
 import { supabaseBrowser } from '../lib/supabase';
 import { api } from '../lib/api';
 
 // Note: no client-side persistence here. Rate limiting is enforced
 // server-side (API rate limits + Supabase Auth built-in limits).
+const FLASH_TTL = 6000;
 
 export default function AuthRoute() {
   const navigate = useNavigate();
@@ -172,9 +174,9 @@ export default function AuthRoute() {
           <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 32, marginTop: 12, lineHeight: 1.1 }}>
             Own your <span style={{ background: '#fff', color: '#10b981', padding: '0 6px', borderRadius: 6 }}>journey.</span>
           </h1>
-          <p style={{ marginTop: 8, opacity: 0.92, fontSize: 14 }}>Duolingo-style learning</p>
+          <p style={{ marginTop: 8, opacity: 0.92, fontSize: 14 }}>Built for the ones who build</p>
         </div>
-        <Mascot size={104} />
+        <Mascot size={104} animate="wave" />
       </div>
       <div style={{ padding: 20, flex: 1 }}>
         <div style={{ display: 'flex', gap: 4, background: '#f7f7f7', border: '1px solid #e5e5e5', borderRadius: 9999, padding: 4, marginBottom: 20 }}>
@@ -208,9 +210,9 @@ export default function AuthRoute() {
           </button>
         </div>
 
-        {configError && <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 12, padding: 10, color: '#9a3412', fontSize: 13, marginBottom: 12 }}>{configError}</div>}
-        {error && <div style={{ background: '#fff0f0', border: '1px solid #ffcccc', borderRadius: 12, padding: 10, color: '#cc0000', fontSize: 13, marginBottom: 12 }}>{error}</div>}
-        {success && <div style={{ background: '#f0fff4', border: '1px solid #b3f0c8', borderRadius: 12, padding: 10, color: '#006620', fontSize: 13, marginBottom: 12 }}>{success}</div>}
+        {configError && <Flash tone="info" message={configError} ttl={0} />}
+        {error && <Flash tone="error" message={error} ttl={FLASH_TTL} onDismiss={() => setError('')} />}
+        {success && <Flash tone="success" message={success} ttl={FLASH_TTL} onDismiss={() => setSuccess('')} />}
 
         {tab === 'signin' && (
           <form onSubmit={handleSignIn} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
