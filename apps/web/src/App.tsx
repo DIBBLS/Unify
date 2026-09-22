@@ -4,6 +4,7 @@ import CourseRoute from './routes/course';
 import LearnWeek from './routes/learn/week';
 import AuthRoute from './routes/auth';
 import DashboardRoute from './routes/dashboard';
+import OnboardingRoute from './routes/onboarding';
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
           <Route path="/course" element={<CourseRoute />} />
           <Route path="/learn/:courseCode/week/:week" element={<LearnWeek />} />
           <Route path="/auth" element={<AuthRoute />} />
+          <Route path="/onboarding" element={<OnboardingRoute />} />
           <Route path="/dashboard" element={<DashboardRoute />} />
           <Route path="*" element={<div style={{ padding: 40 }}>Not found — route not yet migrated from legacy *.html</div>} />
         </Route>
