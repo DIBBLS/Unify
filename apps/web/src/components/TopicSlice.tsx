@@ -1,3 +1,4 @@
+import { Target } from 'lucide-react';
 import type { Topic } from '../types/note';
 import { ContentBlockView } from './ContentBlock';
 import { MiniCheck } from './MiniCheck';
@@ -36,7 +37,7 @@ export function TopicSlice({ topic }: { topic: Topic }) {
       {topic.pulseCheck && (
         <div className="mini-check" style={{ borderLeft: '3px solid var(--green-deep)', marginTop: 32 }}>
           <div className="mini-check-header">
-            <span>🎯</span>
+            <Target size={14} color="#58a700" />
             <span className="mini-check-title">Pulse Check 0{topic.pulseCheck.number}</span>
           </div>
           <MiniCheck questions={topic.pulseCheck.questions as any} subTitle="Pulse Check" topicNum={topic.number} subAbbr="pulse" />
