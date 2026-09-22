@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { BookOpen, ChevronRight } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
+import Loading from '../components/Loading';
 
 function gradeToPoint(g: string) {
   const m: Record<string, number> = { A: 5, B: 4, C: 3, D: 2, E: 1, F: 0 };
@@ -29,7 +31,7 @@ export default function DashboardRoute() {
     return () => unsub();
   }, [navigate]);
 
-  if (loading) return <div style={{ padding: 40, textAlign: 'center' }}>Loading dashboard…</div>;
+  if (loading) return <Loading text="Loading dashboard…" />;
 
   const graded = courses.filter((c) => c.grade && c.grade !== '-' && c.grade !== '');
   const totalUnits = courses.reduce((s, c) => s + (c.units || 3), 0);
@@ -79,8 +81,10 @@ export default function DashboardRoute() {
       </div>
       <div style={{ margin: '0 16px 16px', fontSize: 12, color: '#777', textAlign: 'right' }}>{pct}% complete</div>
 
-      <div style={{ margin: '0 16px', background: '#fff', border: '2px solid #e5e5e5', borderRadius: 16, padding: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
-        <div style={{ width: 44, height: 44, background: '#dbf8c5', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📚</div>
+      <div style={{ margin: '0 16px', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div style={{ width: 44, height: 44, background: '#f0fdf4', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <BookOpen size={20} color="#58a700" />
+        </div>
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 700 }}>Continue Learning</div>
           <div style={{ fontSize: 12, color: '#777' }}>Pick up where you left off</div>
@@ -92,8 +96,8 @@ export default function DashboardRoute() {
 
       <div style={{ margin: '16px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ fontFamily: 'Nunito', fontWeight: 800 }}>Your Courses</h2>
-        <Link to="/course" style={{ fontSize: 13, color: '#58a700', fontWeight: 700, textDecoration: 'none' }}>
-          View all →
+        <Link to="/course" style={{ fontSize: 13, color: '#58a700', fontWeight: 700, textDecoration: 'none', display: 'flex', gap: 4, alignItems: 'center' }}>
+          View all <ChevronRight size={14} />
         </Link>
       </div>
       <div style={{ margin: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>

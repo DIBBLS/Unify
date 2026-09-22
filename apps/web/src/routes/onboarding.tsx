@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged, updateProfile } from 'firebase/auth';
 import { doc, getDoc, setDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore';
+import { ArrowRight, ChevronLeft } from 'lucide-react';
 import { auth, db } from '../lib/firebase';
+import Loading from '../components/Loading';
 
 type Uni = { id: string; name: string; shortName?: string };
 
@@ -60,7 +62,7 @@ export default function OnboardingRoute() {
     }
   };
 
-  if (loading) return <div style={{ padding: 40, textAlign: 'center' }}>Loading…</div>;
+  if (loading) return <Loading text="Loading onboarding…" />;
 
   const left = [
     { s: 'Step 1 of 6', t: "What's your first name?" },
@@ -85,17 +87,17 @@ export default function OnboardingRoute() {
       <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
         {step === 0 && (
           <>
-            <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="e.g. Joshua" style={{ padding: 12, border: '2px solid #e5e5e5', borderRadius: 12, fontSize: 16 }} />
-            {firstName && <div>Good morning, <strong>{firstName}</strong> 👋</div>}
-            <button onClick={() => firstName.trim() && setStep(1)} style={{ padding: 14, background: '#58cc02', color: '#fff', border: 'none', borderBottom: '4px solid #58a700', borderRadius: 16, fontWeight: 800 }}>
-              Continue →
+            <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="e.g. Joshua" style={{ padding: 12, border: '1px solid #e5e5e5', borderRadius: 12, fontSize: 16 }} />
+            {firstName && <div style={{ fontSize: 14 }}>Good morning, <strong>{firstName}</strong></div>}
+            <button onClick={() => firstName.trim() && setStep(1)} style={{ padding: 14, background: '#58cc02', color: '#fff', border: 'none', borderBottom: '4px solid #58a700', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+              Continue <ArrowRight size={18} />
             </button>
           </>
         )}
         {step === 1 && (
           <>
             {universities.map((u) => (
-              <button key={u.id} onClick={() => { setUniversity(u); setStep(2); }} style={{ padding: 14, border: `2px solid ${university?.id === u.id ? '#58cc02' : '#e5e5e5'}`, borderRadius: 16, background: '#fff', textAlign: 'left' }}>
+              <button key={u.id} onClick={() => { setUniversity(u); setStep(2); }} style={{ padding: 14, border: `1px solid ${university?.id === u.id ? '#58cc02' : '#e5e5e5'}`, borderRadius: 12, background: '#fff', textAlign: 'left' }}>
                 <div style={{ fontWeight: 700 }}>{u.name}</div>
                 <div style={{ fontSize: 12, color: '#777' }}>{u.shortName}</div>
               </button>
@@ -103,15 +105,15 @@ export default function OnboardingRoute() {
           </>
         )}
         {step === 2 && faculties.map((f) => (
-          <button key={f.name} onClick={() => { setFaculty(f.name); setStep(3); }} style={{ padding: 14, border: '2px solid #e5e5e5', borderRadius: 16, background: '#fff', textAlign: 'left' }}>{f.name}</button>
+          <button key={f.name} onClick={() => { setFaculty(f.name); setStep(3); }} style={{ padding: 14, border: '1px solid #e5e5e5', borderRadius: 12, background: '#fff', textAlign: 'left' }}>{f.name}</button>
         ))}
         {step === 3 && departments.map((d) => (
-          <button key={d.name} onClick={() => { setDepartment(d.name); setStep(4); }} style={{ padding: 14, border: '2px solid #e5e5e5', borderRadius: 16, background: '#fff', textAlign: 'left' }}>
+          <button key={d.name} onClick={() => { setDepartment(d.name); setStep(4); }} style={{ padding: 14, border: '1px solid #e5e5e5', borderRadius: 12, background: '#fff', textAlign: 'left' }}>
             {d.name} <span style={{ color: '#777', fontSize: 12 }}>{d.sub}</span>
           </button>
         ))}
         {step === 4 && levels.map((l) => (
-          <button key={l} onClick={() => { setLevel(l); setStep(5); }} style={{ padding: 14, border: '2px solid #e5e5e5', borderRadius: 16, background: level === l ? '#dbf8c5' : '#fff' }}>{l}</button>
+          <button key={l} onClick={() => { setLevel(l); setStep(5); }} style={{ padding: 14, border: '1px solid #e5e5e5', borderRadius: 12, background: level === l ? '#dbf8c5' : '#fff' }}>{l}</button>
         ))}
         {step === 5 && (
           <>
@@ -121,12 +123,12 @@ export default function OnboardingRoute() {
               { label: '2nd Class Lower', val: 2.4 },
               { label: 'Pass', val: 1.5 },
             ].map((t) => (
-              <button key={t.label} onClick={() => setGradTarget(t.val)} style={{ padding: 14, border: `2px solid ${gradTarget === t.val ? '#58cc02' : '#e5e5e5'}`, borderRadius: 16, background: gradTarget === t.val ? '#dbf8c5' : '#fff' }}>
+              <button key={t.label} onClick={() => setGradTarget(t.val)} style={{ padding: 14, border: `1px solid ${gradTarget === t.val ? '#58cc02' : '#e5e5e5'}`, borderRadius: 12, background: gradTarget === t.val ? '#dbf8c5' : '#fff' }}>
                 {t.label} — {t.val}
               </button>
             ))}
-            <button onClick={() => save(false)} style={{ padding: 14, background: '#58cc02', color: '#fff', border: 'none', borderBottom: '4px solid #58a700', borderRadius: 16, fontWeight: 800 }}>
-              Finish setup →
+            <button onClick={() => save(false)} style={{ padding: 14, background: '#58cc02', color: '#fff', border: 'none', borderBottom: '4px solid #58a700', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8 }}>
+              Finish setup <ArrowRight size={18} />
             </button>
             <button onClick={() => save(true)} style={{ background: 'none', border: 'none', color: '#777', fontSize: 13 }}>
               Skip for now
@@ -134,8 +136,8 @@ export default function OnboardingRoute() {
           </>
         )}
         {step > 0 && (
-          <button onClick={() => setStep(step - 1)} style={{ background: 'none', border: 'none', color: '#777', marginTop: 8 }}>
-            ← Back
+          <button onClick={() => setStep(step - 1)} style={{ background: 'none', border: 'none', color: '#777', marginTop: 8, display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}>
+            <ChevronLeft size={16} /> Back
           </button>
         )}
       </div>

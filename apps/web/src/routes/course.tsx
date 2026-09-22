@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Lock, Check, ChevronRight } from 'lucide-react';
 
 export default function CoursePage() {
   const course = 'MEE 352';
@@ -27,8 +28,10 @@ export default function CoursePage() {
                 opacity: locked ? 0.85 : 1,
               }}
             >
-              <span style={{ fontWeight: 700 }}>Week {i + 1} {locked ? '🔒' : '✓'}</span>
-              <span style={{ color: locked ? '#afafaf' : '#58a700' }}>›</span>
+              <span style={{ fontWeight: 700, display: 'flex', gap: 8, alignItems: 'center' }}>Week {i + 1} {locked ? <Lock size={14} /> : <Check size={14} color="#58a700" />}</span>
+              <span style={{ color: locked ? '#afafaf' : '#58a700' }}>
+                <ChevronRight size={18} />
+              </span>
             </Link>
           );
         })}
