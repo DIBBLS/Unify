@@ -139,7 +139,7 @@ export default function DashboardRoute() {
         <Link to="/course" style={{ textDecoration: 'none', color: '#777', fontSize: 12 }}>
           Learn
         </Link>
-        <Link to="/auth" style={{ textDecoration: 'none', color: '#777', fontSize: 12 }}>
+        <Link to="/profile" style={{ textDecoration: 'none', color: '#777', fontSize: 12 }}>
           Profile
         </Link>
       </nav>

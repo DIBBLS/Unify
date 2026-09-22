@@ -5,6 +5,7 @@ import LearnWeek from './routes/learn/week';
 import AuthRoute from './routes/auth';
 import DashboardRoute from './routes/dashboard';
 import OnboardingRoute from './routes/onboarding';
+import ProfileRoute from './routes/profile';
 import Mascot from './components/Mascot';
 
 function NotFound() {
@@ -38,11 +39,12 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route element={<Layout />}>
-          <Route path="/" element={<Navigate to="/course" replace />} />
+          <Route path="/" element={<Navigate to="/auth" replace />} />
           <Route path="/course" element={<CourseRoute />} />
           <Route path="/learn/:courseCode/week/:week" element={<LearnWeek />} />
           <Route path="/auth" element={<AuthRoute />} />
           <Route path="/onboarding" element={<OnboardingRoute />} />
+          <Route path="/profile" element={<ProfileRoute />} />
           <Route path="/dashboard" element={<DashboardRoute />} />
           <Route path="*" element={<NotFound />} />
         </Route>

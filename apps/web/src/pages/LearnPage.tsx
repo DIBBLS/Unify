@@ -14,7 +14,7 @@ export default function LearnPage() {
   const weekNum = Number(weekParam) || 1;
   const [note, setNote] = useState<UnifyNote | null>(null);
   const [loading, setLoading] = useState(true);
-  const { toggle, isDone } = useProgress(`${courseCode}-w${weekNum}`);
+  const { toggle, isDone } = useProgress(decodeURIComponent(courseCode).toUpperCase(), weekNum);
 
   useEffect(() => {
     async function load() {
@@ -57,10 +57,7 @@ export default function LearnPage() {
         <div key={t.number} style={{ marginBottom: 32 }}>
           <TopicSlice topic={t} />
           <button
-            onClick={() => {
-              toggle(weekNum, idx);
-              void api.progress(decodeURIComponent(courseCode).toUpperCase(), weekNum, idx).catch(() => {});
-            }}
+            onClick={() => toggle(weekNum, idx)}
             style={{
               marginTop: 12,
               padding: '10px 18px',
