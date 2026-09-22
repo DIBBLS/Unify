@@ -5,6 +5,7 @@ import { doc, getDoc, setDoc, collection, getDocs, serverTimestamp } from 'fireb
 import { ArrowRight, ChevronLeft } from 'lucide-react';
 import { auth, db } from '../lib/firebase';
 import Loading from '../components/Loading';
+import Mascot from '../components/Mascot';
 
 type Uni = { id: string; name: string; shortName?: string };
 
@@ -98,6 +99,9 @@ export default function OnboardingRoute() {
       <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
         {step === 0 && (
           <>
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0 4px' }}>
+              <Mascot size={110} />
+            </div>
             <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="e.g. Joshua" style={{ padding: 12, border: '1px solid #e5e5e5', borderRadius: 12, fontSize: 16 }} />
             {firstName && <div style={{ fontSize: 14 }}>Good morning, <strong>{firstName}</strong></div>}
             <button onClick={() => firstName.trim() && setStep(1)} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
