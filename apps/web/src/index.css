@@ -1,5 +1,4 @@
-/* Duolingo-inspired — owl green #58cc02, chunky 4px bottom-shadow, 16px radii, Nunito */
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');
+/* Duolingo-inspired — owl green #58cc02, chunky 4px bottom-shadow, 16px radii, Nunito — font loaded via index.html preconnect */
 :root{
   --bg:#ffffff;--surface:#ffffff;--surface2:#f7f7f7;--border:#e5e5e5;--border-strong:#afafaf;
   --text:#3c3c3c;--text2:#777777;--text3:#afafaf;

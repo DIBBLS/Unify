@@ -1,5 +1,4 @@
-/* Duolingo Auth — owl green, Nunito, chunky 4px shadow, mobile-first */
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+/* Duolingo Auth — owl green, Nunito, chunky 4px shadow, mobile-first — font via variables.css Nunito */
 *,
 *::before,
 *::after {
