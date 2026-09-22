@@ -117,7 +117,7 @@ export default function OnboardingRoute() {
 
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', minHeight: '100vh', background: '#fff' }}>
-      <div style={{ background: '#10b981', color: '#fff', padding: 20 }}>
+      <div style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', padding: 20 }}>
         <div style={{ fontSize: 11, letterSpacing: 1, opacity: 0.8 }}>{left.s}</div>
         <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28, marginTop: 6 }}>{left.t}</h1>
         <div style={{ display: 'flex', gap: 6, marginTop: 12 }}>

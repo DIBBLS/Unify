@@ -72,7 +72,7 @@ export default function DashboardRoute() {
       <div style={{ padding: '20px 16px 12px', background: '#fff' }}>
         <div style={{ fontSize: 11, color: '#afafaf', letterSpacing: 1 }}>Your Dashboard</div>
         <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28, marginTop: 4 }}>
-          Good to have you, <em style={{ background: '#10b981', color: '#fff', padding: '0 6px', borderRadius: 6, fontStyle: 'normal' }}>{firstName}</em>
+          Good to have you, <em style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', padding: '0 6px', borderRadius: 6, fontStyle: 'normal' }}>{firstName}</em>
         </h1>
         <div style={{ fontSize: 13, color: '#777', marginTop: 4 }}>{profile?.department || ''}</div>
       </div>

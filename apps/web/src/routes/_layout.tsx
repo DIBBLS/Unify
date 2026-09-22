@@ -37,7 +37,7 @@ export default function Layout() {
               width: 32,
               height: 32,
               borderRadius: 9999,
-              background: '#10b981',
+              background: 'linear-gradient(135deg,#34d399,#059669)',
               color: '#fff',
               display: 'flex',
               alignItems: 'center',
