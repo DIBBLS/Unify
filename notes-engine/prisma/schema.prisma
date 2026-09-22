@@ -1,0 +1,85 @@
+// Prisma schema mirrors supabase/schema.sql (Supabase Postgres).
+// Render runs `prisma migrate deploy` on every build, so the DB migrates itself.
+// Runtime queries still use supabase-js (service_role); Prisma owns DDL only.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // pooler :6543 (app traffic)
+  directUrl = env("DIRECT_URL") // direct :5432 (migrations)
+}
+
+model University {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String    @unique
+  shortName String?   @map("short_name")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  profiles  Profile[]
+
+  @@map("universities")
+}
+
+model Profile {
+  id            String      @id @db.Uuid // = auth.users.id
+  firstName     String?     @map("first_name")
+  email         String?
+  university    String?
+  faculty       String?
+  department    String?
+  level         String?
+  universityId  String?     @map("university_id") @db.Uuid
+  universityRef University? @relation(fields: [universityId], references: [id])
+  gradTarget    Decimal?    @map("grad_target") @db.Decimal
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("profiles")
+}
+
+model Course {
+  code      String   @id
+  title     String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  weeks     Week[]
+
+  @@map("courses")
+}
+
+model Week {
+  course    String
+  week      Int
+  title     String   @default("")
+  subtitle  String   @default("")
+  noteJson  Json     @map("note_json")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  courseRef Course   @relation(fields: [course], references: [code], onDelete: Cascade)
+
+  @@id([course, week])
+  @@map("weeks")
+}
+
+model TopicProgress {
+  userId      String    @map("user_id") @db.Uuid
+  course      String
+  week        Int
+  topic       Int
+  done        Boolean   @default(true)
+  completedAt DateTime? @map("completed_at") @db.Timestamptz(6)
+
+  @@id([userId, course, week, topic])
+  @@map("topic_progress")
+}
+
+model XpEvent {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  amount    Int
+  reason    String   @default("")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([userId, createdAt(sort: Desc)], map: "xp_events_user_created_idx")
+  @@map("xp_events")
+}
