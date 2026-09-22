@@ -39,12 +39,11 @@ Unify/
 ├── docs/
 │   ├── PRD-lean-v1.0.docx
 │   └── PRD-master-v5.0.docx
-├── js/                               # legacy Firebase+roles (re-exported)
-├── css/                              # legacy tokens (reference)
-├── Coursecontents/                   # legacy per-week HTML (migrating to noteJson)
-├── Learn.html, dashboard.html, ...   # legacy static (kept for reference, new is apps/web)
-├── vercel.json, vite.config.js       # root (legacy static + Vite wrapper)
-└── firestore.rules
+├── vercel.json                       # Vercel build + SPA fallback + redirects
+├── render.yaml                       # Render blueprint (API, deploys from fork)
+├── supabase/                         # schema.sql + seed.sql
+├── SETUP.md                          # backend setup guide
+└── scripts/                          # Sync-Frontend.ps1 (frontend-only upstream sync)
 ```
 
 ## Quick Start
@@ -71,9 +70,8 @@ Legacy static (no build): `npx serve .` then open `Learn.html`.
 - **Web:** Vercel → Import `DIBBLS/Unify` → Framework `Vite` → Root `apps/web` or `.` with `vercel.json` `framework:vite` `outputDirectory: apps/web/dist` (static). Auto-deploy on `push to main`.
 - **Notes Engine:** Separate Vercel project from `notes-engine/` with `@vercel/node` or same monorepo rewrite `/api/*` → `notes-engine/api`.
 
-```bash
-firebase deploy --only firestore:rules
-```
+Backend deploys from the fork via the Render Blueprint (`render.yaml`);
+migrations run automatically (`prisma migrate deploy` on Supabase).
 
 ## Lean P0 Scope
 
