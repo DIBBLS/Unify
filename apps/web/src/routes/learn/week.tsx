@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { ChevronLeft, Check } from 'lucide-react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { UnifyNote } from '../types/note';
 import { TopicSlice } from '../components/TopicSlice';
 import { useProgress } from '../hooks/useProgress';
+import Loading from '../../components/Loading';
 
 export default function LearnPage() {
   const { courseCode = 'MEE 352', week: weekParam } = useParams();
@@ -53,20 +55,20 @@ export default function LearnPage() {
     load();
   }, [courseCode, weekNum]);
 
-  if (loading) return <div style={{ padding: 40, textAlign: 'center' }}>Loading Week {weekNum}…</div>;
-  if (!note) return <div style={{ padding: 40, textAlign: 'center' }}>No content for {courseCode} Week {weekNum} yet.</div>;
+  if (loading) return <Loading text={`Loading Week ${weekNum}`} />;
+  if (!note) return <div style={{ padding: 40, textAlign: 'center', color: '#777' }}>No content for {courseCode} Week {weekNum} yet.</div>;
 
   return (
-    <div style={{ maxWidth: 780, margin: '0 auto', padding: '24px 20px 100px' }}>
-      <button onClick={() => navigate(-1)} style={{ marginBottom: 16 }}>
-        ← Back
+    <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 20px 100px' }}>
+      <button onClick={() => navigate(-1)} style={{ marginBottom: 16, display: 'flex', gap: 6, alignItems: 'center', background: 'none', border: 'none', color: '#777', fontSize: 14 }}>
+        <ChevronLeft size={18} /> Back
       </button>
-      <div className="hero" style={{ background: '#0a0a0a', color: '#f5f4f0', borderRadius: 12, padding: 24, marginBottom: 20 }}>
-        <div style={{ fontSize: 10, letterSpacing: 2, color: '#4ade80' }}>
+      <div className="hero" style={{ background: '#fff', color: '#3c3c3c', border: '1px solid #e5e5e5', borderRadius: 12, padding: 24, marginBottom: 32 }}>
+        <div style={{ fontSize: 10, letterSpacing: 2, color: '#58a700', fontWeight: 700, textTransform: 'uppercase' }}>
           {note.course} · Week {note.week}
         </div>
-        <h1 style={{ fontFamily: 'Playfair Display', fontSize: 28, margin: '8px 0' }}>{note.title}</h1>
-        <p style={{ fontStyle: 'italic', opacity: 0.7 }}>{note.subtitle}</p>
+        <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 24, margin: '8px 0' }}>{note.title}</h1>
+        <p style={{ fontSize: 14, color: '#777' }}>{note.subtitle}</p>
       </div>
       {note.topics.map((t, idx) => (
         <div key={t.number} style={{ marginBottom: 32 }}>
@@ -76,14 +78,18 @@ export default function LearnPage() {
             style={{
               marginTop: 12,
               padding: '10px 18px',
-              borderRadius: 8,
-              background: isDone(weekNum, idx) ? '#16a34a' : '#111827',
-              color: '#fff',
-              border: 'none',
+              borderRadius: 9999,
+              background: isDone(weekNum, idx) ? '#58a700' : '#fff',
+              color: isDone(weekNum, idx) ? '#fff' : '#3c3c3c',
+              border: `1px solid ${isDone(weekNum, idx) ? '#58a700' : '#e5e5e5'}`,
               cursor: 'pointer',
+              display: 'flex',
+              gap: 6,
+              alignItems: 'center',
+              fontWeight: 600,
             }}
           >
-            {isDone(weekNum, idx) ? '✓ Completed' : '✓ Mark Topic Complete'}
+            <Check size={16} /> {isDone(weekNum, idx) ? 'Completed' : 'Mark Topic Complete'}
           </button>
         </div>
       ))}

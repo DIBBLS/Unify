@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { Zap, Check, X } from 'lucide-react';
 import type { MiniCheckQuestion } from '../types/note';
 
 export function MiniCheck({ questions, subTitle, topicNum, subAbbr }: { questions: MiniCheckQuestion[]; subTitle: string; topicNum: number; subAbbr: string }) {
   return (
     <div className="mini-check">
       <div className="mini-check-header">
-        <span>⚡</span>
+        <Zap size={14} color="#58a700" />
         <span className="mini-check-title">Quick Check — {subTitle}</span>
         <span className="mini-check-sub">{questions.length} question(s)</span>
       </div>
@@ -43,8 +44,8 @@ function MiniCheckItem({ q, id }: { q: MiniCheckQuestion; id: string }) {
           })}
         </div>
         {selected !== null && (
-          <div className="mc-mcq-fb" style={{ display: 'block', color: selected === q.correctIndex ? '#166534' : '#991b1b' }}>
-            {selected === q.correctIndex ? '✓ Correct!' : '✗ Not quite — correct highlighted'}
+          <div className="mc-mcq-fb" style={{ display: 'flex', gap: 6, alignItems: 'center', color: selected === q.correctIndex ? '#166534' : '#991b1b' }}>
+            {selected === q.correctIndex ? <Check size={14} /> : <X size={14} />} {selected === q.correctIndex ? 'Correct!' : 'Not quite — correct highlighted'}
           </div>
         )}
       </div>
@@ -66,7 +67,11 @@ function MiniCheckItem({ q, id }: { q: MiniCheckQuestion; id: string }) {
             Check
           </button>
         </div>
-        {fitbOk !== null && <div style={{ color: fitbOk ? '#166534' : '#991b1b', fontSize: 11, marginTop: 6 }}>{fitbOk ? '✓ Correct!' : `✗ Accepted: ${q.acceptedAnswers.join(' OR ')}`}</div>}
+        {fitbOk !== null && (
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center', color: fitbOk ? '#166534' : '#991b1b', fontSize: 11, marginTop: 6 }}>
+            {fitbOk ? <Check size={12} /> : <X size={12} />} {fitbOk ? 'Correct!' : `Accepted: ${q.acceptedAnswers.join(' OR ')}`}
+          </div>
+        )}
       </div>
     );
   }
