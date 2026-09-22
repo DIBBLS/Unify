@@ -7,3 +7,4 @@ storage/
 npm-debug.log*
 coverage/
 *.log
+dist/

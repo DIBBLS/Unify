@@ -1,3 +1,4 @@
+// @ts-nocheck — legacy JS-style server; new app code lives in typed src/ modules.
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
@@ -11,7 +12,8 @@ const { renderUnifyNote } = require("./src/renderer");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+const CORS_ORIGINS = (process.env.CORS_ORIGIN || "").split(",").map((s) => s.trim()).filter(Boolean);
+app.use(cors({ origin: CORS_ORIGINS.length ? CORS_ORIGINS : true }));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.static("public"));
 app.use("/uploads", express.static("uploads"));
@@ -132,6 +134,13 @@ Where the rules describe an HTML structure to copy (Mini Check divs, recall-card
 
 Where the raw notes contain a figure/diagram reference, and the admin has NOT tagged it with a [FIGURE: id | caption: ...] placeholder, generate a "diagram" content block with your best caption/description from context but leave "imageRef" null. If the admin HAS tagged it, carry the id through as "imageRef" and never invent, describe, or alter the image itself.
 `;
+
+// Health check (Render healthCheckPath + client warmup ping)
+app.get("/healthz", (req, res) => res.json({ ok: true, service: "unify-api" }));
+
+// v1 app API (Supabase-backed). Compiled to dist/src/routes/v1.js by tsc.
+const v1 = require("./src/routes/v1");
+app.use("/v1", v1.default || v1);
 
 // API Routes
 
