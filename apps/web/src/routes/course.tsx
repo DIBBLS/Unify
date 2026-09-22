@@ -17,8 +17,8 @@ export default function CoursePage() {
               style={{
                 padding: '14px 16px',
                 background: locked ? '#f7f7f7' : '#fff',
-                border: `2px solid ${locked ? '#e5e5e5' : '#58cc02'}`,
-                borderBottom: `4px solid ${locked ? '#e5e5e5' : '#58a700'}`,
+                border: `2px solid ${locked ? '#e5e5e5' : '#10b981'}`,
+                borderBottom: `4px solid ${locked ? '#e5e5e5' : '#059669'}`,
                 borderRadius: 16,
                 textDecoration: 'none',
                 color: locked ? '#afafaf' : '#3c3c3c',
@@ -28,8 +28,8 @@ export default function CoursePage() {
                 opacity: locked ? 0.85 : 1,
               }}
             >
-              <span style={{ fontWeight: 700, display: 'flex', gap: 8, alignItems: 'center' }}>Week {i + 1} {locked ? <Lock size={14} /> : <Check size={14} color="#58a700" />}</span>
-              <span style={{ color: locked ? '#afafaf' : '#58a700' }}>
+              <span style={{ fontWeight: 700, display: 'flex', gap: 8, alignItems: 'center' }}>Week {i + 1} {locked ? <Lock size={14} /> : <Check size={14} color="#059669" />}</span>
+              <span style={{ color: locked ? '#afafaf' : '#059669' }}>
                 <ChevronRight size={18} />
               </span>
             </Link>

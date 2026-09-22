@@ -57,7 +57,7 @@ function friendlyError(code: string) {
   if (code === 'auth/too-many-requests') return 'Too many attempts. Please wait a few minutes and try again.';
   if (code === 'auth/popup-closed-by-user') return 'Google sign-in was cancelled.';
   if (code === 'auth/popup-blocked') return 'Popup was blocked. Please allow popups.';
-  return 'Something went wrong. Please try again.';
+  return `Something went wrong. Please try again.${code ? ` (${code})` : ''}`;
 }
 
 export default function AuthRoute() {
@@ -189,10 +189,10 @@ export default function AuthRoute() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', maxWidth: 480, margin: '0 auto', background: '#fff' }}>
-      <div style={{ background: '#58cc02', color: '#fff', padding: 28, borderRadius: '0 0 16px 16px' }}>
+      <div style={{ background: '#10b981', color: '#fff', padding: 28, borderRadius: '0 0 16px 16px' }}>
         <div style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 20 }}>Unify<span style={{ color: '#fff' }}>.</span></div>
         <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 32, marginTop: 12, lineHeight: 1.1 }}>
-          Own your <span style={{ background: '#fff', color: '#58cc02', padding: '0 6px', borderRadius: 6 }}>journey.</span>
+          Own your <span style={{ background: '#fff', color: '#10b981', padding: '0 6px', borderRadius: 6 }}>journey.</span>
         </h1>
         <p style={{ marginTop: 8, opacity: 0.92, fontSize: 14 }}>Duolingo-style learning</p>
       </div>
@@ -205,7 +205,7 @@ export default function AuthRoute() {
               padding: 10,
               borderRadius: 9999,
               border: 'none',
-              background: tab === 'signin' ? '#58cc02' : 'transparent',
+              background: tab === 'signin' ? '#10b981' : 'transparent',
               color: tab === 'signin' ? '#fff' : '#777',
               fontWeight: 700,
             }}
@@ -219,7 +219,7 @@ export default function AuthRoute() {
               padding: 10,
               borderRadius: 9999,
               border: 'none',
-              background: tab === 'signup' ? '#58cc02' : 'transparent',
+              background: tab === 'signup' ? '#10b981' : 'transparent',
               color: tab === 'signup' ? '#fff' : '#777',
               fontWeight: 700,
             }}
@@ -248,7 +248,7 @@ export default function AuthRoute() {
                 </button>
               </div>
             </label>
-            <button disabled={loading} type="submit" style={{ padding: 14, background: '#58cc02', color: '#fff', border: 'none', borderBottom: '4px solid #58a700', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+            <button disabled={loading} type="submit" style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
               {loading ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : null}
               {loading ? 'Signing in' : 'Sign In'} <ArrowRight size={18} />
             </button>
@@ -275,17 +275,17 @@ export default function AuthRoute() {
               Password
               <input name="new-password" type={showPw ? 'text' : 'password'} value={signupPw} onChange={(e) => setSignupPw(e.target.value)} required placeholder="Min. 8 characters" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid #e5e5e5', borderRadius: 12, display: 'block' }} />
               <div style={{ height: 4, background: '#e5e5e5', borderRadius: 2, marginTop: 8, overflow: 'hidden' }}>
-                <div style={{ width: `${([signupPw.length >= 8, /[A-Z]/.test(signupPw), /[0-9]/.test(signupPw)].filter(Boolean).length / 3) * 100}%`, height: '100%', background: score === 1 ? '#ff4b4b' : score === 2 ? '#ff9600' : '#58cc02', transition: 'width .2s' }} />
+                <div style={{ width: `${([signupPw.length >= 8, /[A-Z]/.test(signupPw), /[0-9]/.test(signupPw)].filter(Boolean).length / 3) * 100}%`, height: '100%', background: score === 1 ? '#ff4b4b' : score === 2 ? '#ff9600' : '#10b981', transition: 'width .2s' }} />
               </div>
-              <div style={{ fontSize: 11, color: hasLength ? '#58a700' : '#777', marginTop: 4, display: 'flex', gap: 6, alignItems: 'center' }}>{hasLength ? <Check size={12} /> : <X size={12} />} At least 8 characters</div>
-              <div style={{ fontSize: 11, color: hasUpper ? '#58a700' : '#777', display: 'flex', gap: 6, alignItems: 'center' }}>{hasUpper ? <Check size={12} /> : <X size={12} />} One uppercase letter</div>
-              <div style={{ fontSize: 11, color: hasNumber ? '#58a700' : '#777', display: 'flex', gap: 6, alignItems: 'center' }}>{hasNumber ? <Check size={12} /> : <X size={12} />} One number</div>
+              <div style={{ fontSize: 11, color: hasLength ? '#059669' : '#777', marginTop: 4, display: 'flex', gap: 6, alignItems: 'center' }}>{hasLength ? <Check size={12} /> : <X size={12} />} At least 8 characters</div>
+              <div style={{ fontSize: 11, color: hasUpper ? '#059669' : '#777', display: 'flex', gap: 6, alignItems: 'center' }}>{hasUpper ? <Check size={12} /> : <X size={12} />} One uppercase letter</div>
+              <div style={{ fontSize: 11, color: hasNumber ? '#059669' : '#777', display: 'flex', gap: 6, alignItems: 'center' }}>{hasNumber ? <Check size={12} /> : <X size={12} />} One number</div>
             </label>
             <label style={{ fontSize: 12, fontWeight: 700 }}>
               Confirm Password
               <input name="confirm-password" type="password" required placeholder="Repeat your password" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid #e5e5e5', borderRadius: 12, display: 'block' }} />
             </label>
-            <button disabled={loading} type="submit" style={{ padding: 14, background: '#58cc02', color: '#fff', border: 'none', borderBottom: '4px solid #58a700', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+            <button disabled={loading} type="submit" style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
               {loading ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : null}
               {loading ? 'Creating' : 'Create Account'} <ArrowRight size={18} />
             </button>
@@ -300,7 +300,7 @@ export default function AuthRoute() {
             <h3 style={{ fontFamily: 'Nunito', fontWeight: 800 }}>Reset your password</h3>
             <p style={{ fontSize: 13, color: '#777' }}>Enter your email and we'll send you a reset link.</p>
             <input id="forgotEmail" placeholder="you@email.com" style={{ padding: 12, border: '1px solid #e5e5e5', borderRadius: 12 }} />
-            <button onClick={handleForgot} disabled={loading} style={{ padding: 14, background: '#58cc02', color: '#fff', border: 'none', borderBottom: '4px solid #58a700', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8 }}>
+            <button onClick={handleForgot} disabled={loading} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8 }}>
               {loading ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : null} Send Reset Link <ArrowRight size={18} />
             </button>
             <button onClick={() => setTab('signin')} style={{ background: 'none', border: 'none', color: '#777', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>

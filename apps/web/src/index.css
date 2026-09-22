@@ -1,11 +1,11 @@
-/* Duolingo-inspired — owl green #58cc02, chunky 4px bottom-shadow, 16px radii, Nunito — font loaded via index.html preconnect */
+/* Emerald theme — #10b981 primary, #059669 active, 1px flat cards, Nunito via index.html preconnect */
 :root{
   --bg:#ffffff;--surface:#ffffff;--surface2:#f7f7f7;--border:#e5e5e5;--border-strong:#afafaf;
   --text:#3c3c3c;--text2:#777777;--text3:#afafaf;
-  --green:#58cc02;--green-hover:#89e219;--green-active:#58a700;--green-deep:#58a700;--green-bg:rgba(88,204,2,.12);--green-pale:#dbf8c5;
+  --green:#10b981;--green-hover:#34d399;--green-active:#059669;--green-deep:#059669;--green-bg:rgba(16,185,129,.12);--green-pale:#d1fae5;
   --red:#ff4b4b;--red-bg:rgba(255,75,75,.08);--yellow:#ff9600;--blue:#1cb0f6;--pink:#ce82ff;
   --radius:16px;--radius-pill:9999px;
-  --shadow:0 4px 0 #e5e5e5;--shadow-green:0 4px 0 #58a700;
+  --shadow:0 4px 0 #e5e5e5;--shadow-green:0 4px 0 #059669;
   --font-display:'Nunito', 'Feather Bold', sans-serif;--font-body:'Nunito','Mona Sans',system-ui,sans-serif
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -13,7 +13,7 @@ html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;padding-bottom:env(safe-area-inset-bottom)}
 /* Mobile-first: 320px base, 480px Duolingo shell, 1080px desktop */
 .hero{background:#3c3c3c;color:#fff;border-radius:var(--radius);padding:20px;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(88,204,2,.08)}
+.hero::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(16,185,129,.08)}
 @media(min-width:768px){.hero{padding:28px}}
 .topic-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:24px;transition:border-color .15s}
 @media(min-width:768px){.topic-card{padding:22px 26px}}
@@ -23,16 +23,16 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-he
 .mini-check-header{display:flex;gap:8px;align-items:center}
 .mc-mcq-opt{padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);cursor:pointer;margin-top:6px;font-weight:500;transition:all .15s}
 .mc-mcq-opt:hover:not(.mc-locked){background:#f9fafb}
-.mc-mcq-opt.mc-correct{background:#f0fdf4;border-color:var(--green-active);color:var(--green-active)}
+.mc-mcq-opt.mc-correct{background:#ecfdf5;border-color:var(--green-active);color:var(--green-active)}
 .mc-mcq-opt.mc-wrong{background:#fef2f2;border-color:#ff4b4b}
 .symbol-card{display:flex;gap:12px;background:var(--surface2);border:2px solid var(--border);border-left:3px solid var(--green);border-radius:0 12px 12px 0;padding:11px 15px;margin:10px 0}
 .formula-box{background:var(--surface2);border:2px solid var(--border);border-left:3px solid var(--green);border-radius:0 12px 12px 0;padding:18px 22px;margin:14px 0}
-.insight-box{background:var(--green-bg);border:2px solid rgba(88,204,2,.22);border-radius:12px;padding:14px 18px;margin:14px 0}
+.insight-box{background:var(--green-bg);border:2px solid rgba(16,185,129,.22);border-radius:12px;padding:14px 18px;margin:14px 0}
 .analogy-box{background:var(--surface2);border:2px dashed var(--border);border-radius:12px;padding:14px 18px;margin:14px 0}
 .section-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--green-deep);margin-bottom:6px;font-weight:800}
 .section-title{font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:20px}
 .subtopic-heading{display:flex;gap:10px;align-items:center;margin:28px 0 12px}
-.subtopic-num{font-size:10px;font-weight:800;padding:4px 10px;border-radius:var(--radius-pill);background:var(--green-bg);border:1px solid rgba(88,204,2,.28);color:var(--green-deep)}
+.subtopic-num{font-size:10px;font-weight:800;padding:4px 10px;border-radius:var(--radius-pill);background:var(--green-bg);border:1px solid rgba(16,185,129,.28);color:var(--green-deep)}
 .btn-primary{background:var(--green);color:#fff;border:none;border-bottom:4px solid var(--green-active);border-radius:16px;padding:14px 24px;font-family:var(--font-display);font-weight:800;font-size:16px;cursor:pointer;transition:transform .12s}
 .btn-primary:active{transform:translateY(4px);border-bottom-width:0}
 .btn-secondary{background:#fff;color:var(--text2);border:2px solid var(--border);border-bottom:4px solid var(--border);border-radius:16px;padding:14px 24px;font-weight:700}

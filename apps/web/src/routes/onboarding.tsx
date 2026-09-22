@@ -8,6 +8,10 @@ import Loading from '../components/Loading';
 
 type Uni = { id: string; name: string; shortName?: string };
 
+// Fallback so onboarding never dead-ends when the `universities`
+// collection hasn't been seeded in Firestore yet.
+const FALLBACK_UNIS: Uni[] = [{ id: 'lasu', name: 'Lagos State University', shortName: 'LASU' }];
+
 export default function OnboardingRoute() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
@@ -25,12 +29,18 @@ export default function OnboardingRoute() {
     const unsub = onAuthStateChanged(auth, async (u) => {
       if (!u) return navigate('/auth');
       setUser(u);
-      const snap = await getDoc(doc(db, 'users', u.uid));
-      const isEdit = new URLSearchParams(window.location.search).get('edit') === '1';
-      if (snap.exists() && snap.data().university && !isEdit) return navigate('/dashboard');
-      const us = await getDocs(collection(db, 'universities'));
-      setUniversities(us.docs.map((d) => ({ id: d.id, ...(d.data() as any) })));
-      setLoading(false);
+      try {
+        const snap = await getDoc(doc(db, 'users', u.uid));
+        const isEdit = new URLSearchParams(window.location.search).get('edit') === '1';
+        if (snap.exists() && snap.data().university && !isEdit) return navigate('/dashboard');
+        const us = await getDocs(collection(db, 'universities'));
+        const list = us.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
+        setUniversities(list.length ? list : FALLBACK_UNIS);
+      } catch {
+        setUniversities(FALLBACK_UNIS);
+      } finally {
+        setLoading(false);
+      }
     });
     return () => unsub();
   }, [navigate]);
@@ -54,6 +64,7 @@ export default function OnboardingRoute() {
       const payload: any = { firstName, email: user.email?.toLowerCase(), university: university?.name, faculty, department, level };
       if (university?.id) payload.universityId = university.id;
       if (!skipTarget && gradTarget) payload.gradePlanner = { target: gradTarget, updatedAt: serverTimestamp() };
+      Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
       await setDoc(doc(db, 'users', user.uid), payload, { merge: true });
       navigate('/dashboard');
     } catch {
@@ -75,7 +86,7 @@ export default function OnboardingRoute() {
 
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', minHeight: '100vh', background: '#fff' }}>
-      <div style={{ background: '#58cc02', color: '#fff', padding: 20 }}>
+      <div style={{ background: '#10b981', color: '#fff', padding: 20 }}>
         <div style={{ fontSize: 11, letterSpacing: 1, opacity: 0.8 }}>{left.s}</div>
         <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28, marginTop: 6 }}>{left.t}</h1>
         <div style={{ display: 'flex', gap: 6, marginTop: 12 }}>
@@ -89,7 +100,7 @@ export default function OnboardingRoute() {
           <>
             <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="e.g. Joshua" style={{ padding: 12, border: '1px solid #e5e5e5', borderRadius: 12, fontSize: 16 }} />
             {firstName && <div style={{ fontSize: 14 }}>Good morning, <strong>{firstName}</strong></div>}
-            <button onClick={() => firstName.trim() && setStep(1)} style={{ padding: 14, background: '#58cc02', color: '#fff', border: 'none', borderBottom: '4px solid #58a700', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+            <button onClick={() => firstName.trim() && setStep(1)} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
               Continue <ArrowRight size={18} />
             </button>
           </>
@@ -97,7 +108,7 @@ export default function OnboardingRoute() {
         {step === 1 && (
           <>
             {universities.map((u) => (
-              <button key={u.id} onClick={() => { setUniversity(u); setStep(2); }} style={{ padding: 14, border: `1px solid ${university?.id === u.id ? '#58cc02' : '#e5e5e5'}`, borderRadius: 12, background: '#fff', textAlign: 'left' }}>
+              <button key={u.id} onClick={() => { setUniversity(u); setStep(2); }} style={{ padding: 14, border: `1px solid ${university?.id === u.id ? '#10b981' : '#e5e5e5'}`, borderRadius: 12, background: '#fff', textAlign: 'left' }}>
                 <div style={{ fontWeight: 700 }}>{u.name}</div>
                 <div style={{ fontSize: 12, color: '#777' }}>{u.shortName}</div>
               </button>
@@ -113,7 +124,7 @@ export default function OnboardingRoute() {
           </button>
         ))}
         {step === 4 && levels.map((l) => (
-          <button key={l} onClick={() => { setLevel(l); setStep(5); }} style={{ padding: 14, border: '1px solid #e5e5e5', borderRadius: 12, background: level === l ? '#dbf8c5' : '#fff' }}>{l}</button>
+          <button key={l} onClick={() => { setLevel(l); setStep(5); }} style={{ padding: 14, border: '1px solid #e5e5e5', borderRadius: 12, background: level === l ? '#d1fae5' : '#fff' }}>{l}</button>
         ))}
         {step === 5 && (
           <>
@@ -123,11 +134,11 @@ export default function OnboardingRoute() {
               { label: '2nd Class Lower', val: 2.4 },
               { label: 'Pass', val: 1.5 },
             ].map((t) => (
-              <button key={t.label} onClick={() => setGradTarget(t.val)} style={{ padding: 14, border: `1px solid ${gradTarget === t.val ? '#58cc02' : '#e5e5e5'}`, borderRadius: 12, background: gradTarget === t.val ? '#dbf8c5' : '#fff' }}>
+              <button key={t.label} onClick={() => setGradTarget(t.val)} style={{ padding: 14, border: `1px solid ${gradTarget === t.val ? '#10b981' : '#e5e5e5'}`, borderRadius: 12, background: gradTarget === t.val ? '#d1fae5' : '#fff' }}>
                 {t.label} — {t.val}
               </button>
             ))}
-            <button onClick={() => save(false)} style={{ padding: 14, background: '#58cc02', color: '#fff', border: 'none', borderBottom: '4px solid #58a700', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8 }}>
+            <button onClick={() => save(false)} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8 }}>
               Finish setup <ArrowRight size={18} />
             </button>
             <button onClick={() => save(true)} style={{ background: 'none', border: 'none', color: '#777', fontSize: 13 }}>
