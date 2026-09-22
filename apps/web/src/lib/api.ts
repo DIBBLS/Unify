@@ -3,9 +3,9 @@ import { log } from "./log";
 
 // Backend is now the source of truth (Supabase Auth + Render API).
 // Set VITE_USE_BACKEND=0 only to disable API calls (auth still needs Supabase).
-export const USE_BACKEND = (import.meta.env.VITE_USE_BACKEND ?? "1") === "1";
+export const USE_BACKEND = ((import.meta.env.VITE_USE_BACKEND ?? import.meta.env.USE_BACKEND ?? "1") as string) === "1";
 
-const API_URL = ((import.meta.env.VITE_API_URL as string | undefined) || "").replace(/\/$/, "");
+const API_URL = (((import.meta.env.VITE_API_URL || import.meta.env.API_URL) as string | undefined) || "").replace(/\/$/, "");
 
 // Raw backend root (authoring studio lives here). Null until VITE_API_URL is set.
 export function getApiUrl(): string | null {
