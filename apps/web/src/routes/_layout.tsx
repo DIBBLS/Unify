@@ -26,7 +26,7 @@ export default function Layout() {
     <div style={{ fontFamily: "'Nunito', system-ui" }}>
       <header style={{ display: 'flex', gap: 12, padding: '12px 16px', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: 0, background: '#fff', zIndex: 10, alignItems: 'center' }}>
         <Link to="/course" style={{ fontWeight: 800, textDecoration: 'none', color: '#111827' }}>
-          Unify<span style={{ color: '#10b981' }}>.</span>
+          Unify<span style={{ color: '#10b981' }}> Learn</span>
         </Link>
         <span style={{ flex: 1 }} />
         {authed ? (
