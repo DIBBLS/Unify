@@ -18,8 +18,9 @@ firebase-debug.log
 .env
 .env.local
 
-# Local notes (do not commit)
+# Local notes (do not commit — may hold pasted keys/logs)
 messages.txt
+messages.unify.txt
 __out*.txt
 __full*.txt
 
