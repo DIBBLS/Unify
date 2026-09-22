@@ -19,7 +19,6 @@ export default function OnboardingRoute() {
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [configError, setConfigError] = useState('');
   const [universities, setUniversities] = useState<Uni[]>([]);
   const [firstName, setFirstName] = useState('');
   const [university, setUniversity] = useState<Uni | null>(null);
@@ -31,7 +30,6 @@ export default function OnboardingRoute() {
   useEffect(() => {
     const sb = supabaseBrowser();
     if (!sb) {
-      setConfigError('App is not configured yet (Supabase keys missing).');
       setLoading(false);
       return;
     }
@@ -129,7 +127,6 @@ export default function OnboardingRoute() {
         </div>
       </div>
       <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {configError && <Flash tone="info" message={configError} ttl={0} />}
         {error && <Flash tone="error" message={error} onDismiss={() => setError('')} />}
         {step === 0 && (
           <>

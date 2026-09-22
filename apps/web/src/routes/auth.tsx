@@ -16,7 +16,6 @@ export default function AuthRoute() {
   const [tab, setTab] = useState<'signin' | 'signup' | 'forgot'>('signin');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [configError, setConfigError] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [signupPw, setSignupPw] = useState('');
   const [loading, setLoading] = useState(false);
@@ -31,10 +30,7 @@ export default function AuthRoute() {
   };
 
   useEffect(() => {
-    if (!sb) {
-      setConfigError('Auth is not configured yet (Supabase keys missing).');
-      return;
-    }
+    if (!sb) return;
     sb.auth.getSession().then(({ data }) => {
       if (data.session) void routeToApp();
     });
@@ -58,7 +54,7 @@ export default function AuthRoute() {
     setSuccess('');
     const client = sb;
     if (!client) {
-      setError('Auth is not configured yet.');
+      setError('Something went wrong. Please reload and try again.');
       return;
     }
     const form = e.currentTarget;
@@ -85,7 +81,7 @@ export default function AuthRoute() {
     setSuccess('');
     const client = sb;
     if (!client) {
-      setError('Auth is not configured yet.');
+      setError('Something went wrong. Please reload and try again.');
       return;
     }
     const form = e.currentTarget;
@@ -124,7 +120,7 @@ export default function AuthRoute() {
     setSuccess('');
     const client = sb;
     if (!client) {
-      setError('Auth is not configured yet.');
+      setError('Something went wrong. Please reload and try again.');
       return;
     }
     const email = (document.getElementById('forgotEmail') as HTMLInputElement)?.value.trim();
@@ -151,7 +147,7 @@ export default function AuthRoute() {
     setSuccess('');
     const client = sb;
     if (!client) {
-      setError('Auth is not configured yet.');
+      setError('Something went wrong. Please reload and try again.');
       return;
     }
     try {
@@ -230,7 +226,6 @@ export default function AuthRoute() {
           </button>
         </div>
 
-        {configError && <Flash tone="info" message={configError} ttl={0} />}
         {error && <Flash tone="error" message={error} ttl={FLASH_TTL} onDismiss={() => setError('')} />}
         {success && <Flash tone="success" message={success} ttl={FLASH_TTL} onDismiss={() => setSuccess('')} />}
 
@@ -258,8 +253,8 @@ export default function AuthRoute() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, color: '#777', fontSize: 11 }}>
               <span style={{ flex: 1, height: 1, background: '#e5e5e5' }} /> or <span style={{ flex: 1, height: 1, background: '#e5e5e5' }} />
             </div>
-            <button type="button" onClick={handleGoogle} style={{ padding: 12, background: '#fff', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 16, fontWeight: 700, display: 'flex', justifyContent: 'center', gap: 8 }}>
-              Continue with Google
+            <button type="button" disabled title="Coming soon — email sign-in for now" style={{ padding: 12, background: '#fff', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 16, fontWeight: 700, display: 'flex', justifyContent: 'center', gap: 8, opacity: 0.55 }}>
+              Continue with Google · Coming soon
             </button>
           </form>
         )}
@@ -292,8 +287,8 @@ export default function AuthRoute() {
               {loading ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : null}
               {loading ? 'Creating' : 'Create Account'} <ArrowRight size={18} />
             </button>
-            <button type="button" onClick={handleGoogle} style={{ padding: 12, background: '#fff', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 16, fontWeight: 700 }}>
-              Continue with Google
+            <button type="button" disabled title="Coming soon — email sign-up for now" style={{ padding: 12, background: '#fff', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 16, fontWeight: 700, opacity: 0.55 }}>
+              Continue with Google · Coming soon
             </button>
           </form>
         )}

@@ -17,12 +17,10 @@ export default function DashboardRoute() {
   const [courses, setCourses] = useState<CourseStat[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
-  const [configError, setConfigError] = useState('');
 
   useEffect(() => {
     const sb = supabaseBrowser();
     if (!sb) {
-      setConfigError('App is not configured yet (Supabase keys missing).');
       setLoading(false);
       return;
     }
@@ -52,12 +50,6 @@ export default function DashboardRoute() {
   }, [navigate]);
 
   if (loading) return <Loading text="Loading dashboard…" />;
-  if (configError)
-    return (
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: 40 }}>
-        <Flash tone="info" message={configError} ttl={0} />
-      </div>
-    );
   if (loadError)
     return (
       <div style={{ maxWidth: 480, margin: '0 auto', padding: 40 }}>
