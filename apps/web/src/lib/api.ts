@@ -6,6 +6,11 @@ export const USE_BACKEND = (import.meta.env.VITE_USE_BACKEND ?? "1") === "1";
 
 const API_URL = ((import.meta.env.VITE_API_URL as string | undefined) || "").replace(/\/$/, "");
 
+// Raw backend root (authoring studio lives here). Null until VITE_API_URL is set.
+export function getApiUrl(): string | null {
+  return API_URL || null;
+}
+
 let warmed = false;
 
 // Fire-and-forget warmup: Render free tier sleeps when idle, first request
