@@ -11,6 +11,27 @@ import { log } from '../lib/log';
 // server-side (API rate limits + Supabase Auth built-in limits).
 const FLASH_TTL = 6000;
 
+// Typed-out tagline: types character by character, cursor blinks,
+// then disappears shortly after the line completes.
+function Typewriter({ text, speed = 45 }: { text: string; speed?: number }) {
+  const [n, setN] = useState(0);
+  const [cursorGone, setCursorGone] = useState(false);
+  useEffect(() => {
+    if (n >= text.length) {
+      const t = setTimeout(() => setCursorGone(true), 700);
+      return () => clearTimeout(t);
+    }
+    const t = setTimeout(() => setN((v) => v + 1), speed);
+    return () => clearTimeout(t);
+  }, [n, text, speed]);
+  return (
+    <span>
+      {text.slice(0, n)}
+      {!cursorGone && <span className="type-cursor" />}
+    </span>
+  );
+}
+
 export default function AuthRoute() {
   const navigate = useNavigate();
   const sb = supabaseBrowser();
@@ -20,14 +41,17 @@ export default function AuthRoute() {
   const [showPw, setShowPw] = useState(false);
   const [signupPw, setSignupPw] = useState('');
   const [loading, setLoading] = useState(false);
+  const [welcomeBack, setWelcomeBack] = useState(false);
 
   const routeToApp = async () => {
+    setWelcomeBack(true);
     try {
       const { onboarded } = await api.me();
       log.info('session', `profile check ok (onboarded=${onboarded})`);
       navigate(onboarded ? '/dashboard' : '/onboarding');
     } catch {
       log.error('session', 'profile check failed (API unreachable?)');
+      setWelcomeBack(false);
       setError("Signed in, but can't reach the server. Check your connection and retry.");
     }
   };
@@ -166,15 +190,27 @@ export default function AuthRoute() {
     }
   };
 
+  if (welcomeBack)
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, maxWidth: 480, margin: '0 auto', background: '#fff', padding: 24, textAlign: 'center' }}>
+        <Mascot size={140} animate="sip" />
+        <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28 }}>Own your journey.</h1>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', color: '#777', fontSize: 13, fontWeight: 600 }}>
+          <Loader2 size={16} style={{ animation: 'spin 0.8s linear infinite', color: '#10b981' }} />
+          Getting your space ready…
+        </div>
+      </div>
+    );
+
   return (
     <div className="auth-page">
       <style>{`.auth-page{min-height:100vh;background:#fff}.auth-side{display:none}.auth-card{maxWidth:480px;margin:0 auto}@media(min-width:900px){.auth-page{display:flex;flex-direction:row;background:#d1fae5}.auth-side{display:flex;flex:1;flex-direction:column;justify-content:center;gap:18px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:64px;min-height:100vh}.auth-main{flex:1.2;display:flex;align-items:center;justify-content:center;padding:48px 32px;background:#ecfdf5}.auth-card{width:100%;max-width:440px;background:#fff;border:1px solid #e5e5e5;border-radius:20px;padding:32px;box-shadow:0 12px 32px rgba(6,95,70,.12);margin:0}.auth-hero-mobile{border-radius:16px !important}}`}</style>
       <aside className="auth-side">
         <div style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 22 }}>Unify Learn</div>
         <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 40, lineHeight: 1.1, margin: 0 }}>
-          Own your journey.
+          Welcome to Unify Learn
         </h1>
-        <p style={{ opacity: 0.92, fontSize: 16, margin: 0 }}>Built for the ones who build</p>
+        <p style={{ opacity: 0.92, fontSize: 16, margin: 0, minHeight: 24 }}><Typewriter text="Built for the ones who build" /></p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 8 }}>
           {['Guided 12-week paths', 'XP, streaks and badges', 'Notes that fit your courses'].map((t) => (
             <div key={t} style={{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 15, fontWeight: 600 }}>
@@ -192,9 +228,9 @@ export default function AuthRoute() {
         <div style={{ flex: 1 }}>
           <div style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 20 }}>Unify Learn</div>
           <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 32, marginTop: 12, lineHeight: 1.1 }}>
-            Own your <span style={{ background: '#fff', color: '#10b981', padding: '0 6px', borderRadius: 6 }}>journey.</span>
+            Welcome to Unify Learn
           </h1>
-          <p style={{ marginTop: 8, opacity: 0.92, fontSize: 14 }}>Built for the ones who build</p>
+          <p style={{ marginTop: 8, opacity: 0.92, fontSize: 14, minHeight: 20 }}><Typewriter text="Built for the ones who build" /></p>
         </div>
         <Mascot size={104} animate="sip" />
       </div>
