@@ -5,6 +5,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import Loading from '../components/Loading';
+import Mascot from '../components/Mascot';
 
 function gradeToPoint(g: string) {
   const m: Record<string, number> = { A: 5, B: 4, C: 3, D: 2, E: 1, F: 0 };
@@ -118,7 +119,10 @@ export default function DashboardRoute() {
       </div>
       <div style={{ margin: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {courses.length === 0 ? (
-          <div style={{ padding: 24, textAlign: 'center', color: '#777', background: '#fff', border: '2px solid #e5e5e5', borderRadius: 16 }}>No courses yet. Go to Courses to enroll.</div>
+          <div style={{ padding: 24, textAlign: 'center', color: '#777', background: '#fff', border: '2px solid #e5e5e5', borderRadius: 16 }}>
+            <Mascot size={96} />
+            <div style={{ marginTop: 8 }}>No courses yet. Go to Courses to enroll.</div>
+          </div>
         ) : (
           courses.slice(0, 5).map((c) => (
             <Link key={c.course} to={`/learn/${encodeURIComponent(c.course)}/week/1`} style={{ padding: 14, background: '#fff', border: '2px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 16, display: 'flex', justifyContent: 'space-between', textDecoration: 'none', color: '#3c3c3c' }}>
