@@ -5,6 +5,7 @@ import LearnWeek from './routes/learn/week';
 import AuthRoute from './routes/auth';
 import DashboardRoute from './routes/dashboard';
 import OnboardingRoute from './routes/onboarding';
+import Mascot from './components/Mascot';
 
 function NotFound() {
   const link: React.CSSProperties = {
@@ -18,6 +19,9 @@ function NotFound() {
   };
   return (
     <div style={{ padding: 40, textAlign: 'center', maxWidth: 480, margin: '0 auto' }}>
+      <div style={{ marginBottom: 12 }}>
+        <Mascot size={120} />
+      </div>
       <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 24 }}>Page not found</h1>
       <p style={{ color: '#777', fontSize: 14, margin: '8px 0 20px' }}>This link doesn't exist. Try one of these:</p>
       <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>

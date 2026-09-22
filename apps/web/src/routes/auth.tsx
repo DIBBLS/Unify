@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, Check, X, Loader2 } from 'lucide-react';
+import Mascot from '../components/Mascot';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -189,12 +190,15 @@ export default function AuthRoute() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', maxWidth: 480, margin: '0 auto', background: '#fff' }}>
-      <div style={{ background: '#10b981', color: '#fff', padding: 28, borderRadius: '0 0 16px 16px' }}>
-        <div style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 20 }}>Unify<span style={{ color: '#fff' }}>.</span></div>
-        <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 32, marginTop: 12, lineHeight: 1.1 }}>
-          Own your <span style={{ background: '#fff', color: '#10b981', padding: '0 6px', borderRadius: 6 }}>journey.</span>
-        </h1>
-        <p style={{ marginTop: 8, opacity: 0.92, fontSize: 14 }}>Duolingo-style learning</p>
+      <div style={{ background: '#10b981', color: '#fff', padding: 28, borderRadius: '0 0 16px 16px', display: 'flex', gap: 16, alignItems: 'center' }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 20 }}>Unify<span style={{ color: '#fff' }}>.</span></div>
+          <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 32, marginTop: 12, lineHeight: 1.1 }}>
+            Own your <span style={{ background: '#fff', color: '#10b981', padding: '0 6px', borderRadius: 6 }}>journey.</span>
+          </h1>
+          <p style={{ marginTop: 8, opacity: 0.92, fontSize: 14 }}>Duolingo-style learning</p>
+        </div>
+        <Mascot size={104} />
       </div>
       <div style={{ padding: 20, flex: 1 }}>
         <div style={{ display: 'flex', gap: 4, background: '#f7f7f7', border: '1px solid #e5e5e5', borderRadius: 9999, padding: 4, marginBottom: 20 }}>
