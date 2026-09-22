@@ -1,4 +1,5 @@
 import { supabaseBrowser } from "./supabase";
+import { log } from "./log";
 
 // Backend is now the source of truth (Supabase Auth + Render API).
 // Set VITE_USE_BACKEND=0 only to disable API calls (auth still needs Supabase).
@@ -18,7 +19,9 @@ let warmed = false;
 export function warmupApi(): void {
   if (warmed || !USE_BACKEND || !API_URL) return;
   warmed = true;
+  log.info("api", `warmup ping ${API_URL}/healthz`);
   fetch(`${API_URL}/healthz`, { mode: "cors" }).catch(() => {
+    log.warn("api", "warmup failed (cold start?) — will retry on first call");
     warmed = false;
   });
 }
@@ -32,9 +35,12 @@ async function sessionToken(): Promise<string | null> {
 
 export async function apiFetch<T>(path: string, init: RequestInit = {}, retries = 1): Promise<T> {
   if (!API_URL) throw new Error("VITE_API_URL is not set");
+  const started = Date.now();
+  const method = (init.method || "GET").toUpperCase();
   const token = await sessionToken();
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (token) headers.Authorization = `Bearer ${token}`;
+  log.info("api", `→ ${method} ${path} ${token ? "(authed)" : "(anon)"}`);
 
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 30000);
@@ -43,6 +49,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, retries 
     if (res.status === 401) {
       // Session dead (expired/revoked): clear it and send the user to sign in.
       // Public endpoints never 401, so this only fires for authed calls.
+      log.warn("api", `← 401 ${path} (session dead, signing out)`);
       try {
         await supabaseBrowser()?.auth.signOut();
       } catch {
@@ -64,12 +71,15 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, retries 
       (err as { status?: number }).status = res.status;
       throw err;
     }
+    log.info("api", `← ${res.status} ${path} (${Date.now() - started}ms)`);
     return (await res.json()) as T;
   } catch (e) {
     if (retries > 0) {
+      log.warn("api", `↻ retry ${path} (${e instanceof Error ? e.message : "network error"})`);
       await new Promise((r) => setTimeout(r, 1500));
       return apiFetch<T>(path, init, retries - 1);
     }
+    log.error("api", `✕ ${method} ${path} failed (${e instanceof Error ? e.message : "network error"})`);
     throw e;
   } finally {
     clearTimeout(timer);

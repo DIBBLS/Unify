@@ -5,6 +5,7 @@ import Mascot from '../components/Mascot';
 import Flash from '../components/Flash';
 import { supabaseBrowser } from '../lib/supabase';
 import { api } from '../lib/api';
+import { log } from '../lib/log';
 
 // Note: no client-side persistence here. Rate limiting is enforced
 // server-side (API rate limits + Supabase Auth built-in limits).
@@ -23,8 +24,10 @@ export default function AuthRoute() {
   const routeToApp = async () => {
     try {
       const { onboarded } = await api.me();
+      log.info('session', `profile check ok (onboarded=${onboarded})`);
       navigate(onboarded ? '/dashboard' : '/onboarding');
     } catch {
+      log.error('session', 'profile check failed (API unreachable?)');
       setError("Signed in, but can't reach the server. Check your connection and retry.");
     }
   };
@@ -34,7 +37,8 @@ export default function AuthRoute() {
     sb.auth.getSession().then(({ data }) => {
       if (data.session) void routeToApp();
     });
-    const { data: sub } = sb.auth.onAuthStateChange((_event, session) => {
+    const { data: sub } = sb.auth.onAuthStateChange((event, session) => {
+      log.info('session', `event=${event} signedIn=${!!session}`);
       if (session) void routeToApp();
     });
     return () => {
