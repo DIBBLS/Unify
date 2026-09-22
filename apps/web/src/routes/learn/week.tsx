@@ -19,6 +19,7 @@ export default function LearnPage() {
   useEffect(() => {
     async function load() {
       setLoading(true);
+      try {
       const code = decodeURIComponent(courseCode).toUpperCase();
       const variants = [...new Set([code, code.replace(/\s/g, '')])];
       for (const v of variants) {
@@ -50,7 +51,11 @@ export default function LearnPage() {
           break;
         }
       }
-      setLoading(false);
+      } catch {
+        // keep note null so the empty state renders instead of hanging
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, [courseCode, weekNum]);
@@ -64,7 +69,7 @@ export default function LearnPage() {
         <ChevronLeft size={18} /> Back
       </button>
       <div className="hero" style={{ background: '#fff', color: '#3c3c3c', border: '1px solid #e5e5e5', borderRadius: 12, padding: 24, marginBottom: 32 }}>
-        <div style={{ fontSize: 10, letterSpacing: 2, color: '#58a700', fontWeight: 700, textTransform: 'uppercase' }}>
+        <div style={{ fontSize: 10, letterSpacing: 2, color: '#059669', fontWeight: 700, textTransform: 'uppercase' }}>
           {note.course} · Week {note.week}
         </div>
         <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 24, margin: '8px 0' }}>{note.title}</h1>
@@ -79,9 +84,9 @@ export default function LearnPage() {
               marginTop: 12,
               padding: '10px 18px',
               borderRadius: 9999,
-              background: isDone(weekNum, idx) ? '#58a700' : '#fff',
+              background: isDone(weekNum, idx) ? '#059669' : '#fff',
               color: isDone(weekNum, idx) ? '#fff' : '#3c3c3c',
-              border: `1px solid ${isDone(weekNum, idx) ? '#58a700' : '#e5e5e5'}`,
+              border: `1px solid ${isDone(weekNum, idx) ? '#059669' : '#e5e5e5'}`,
               cursor: 'pointer',
               display: 'flex',
               gap: 6,

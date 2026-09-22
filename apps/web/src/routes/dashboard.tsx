@@ -17,21 +17,37 @@ export default function DashboardRoute() {
   const [profile, setProfile] = useState<any>(null);
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
       if (!u) return navigate('/auth');
       setUser(u);
-      const snap = await getDoc(doc(db, 'users', u.uid));
-      const data = snap.data() || {};
-      setProfile(data);
-      setCourses(data.courses || []);
-      setLoading(false);
+      try {
+        const snap = await getDoc(doc(db, 'users', u.uid));
+        const data = snap.data() || {};
+        if (!data.university) return navigate('/onboarding');
+        setProfile(data);
+        setCourses(data.courses || []);
+      } catch {
+        setLoadError("Couldn't load your profile. Check your connection and try again.");
+      } finally {
+        setLoading(false);
+      }
     });
     return () => unsub();
   }, [navigate]);
 
   if (loading) return <Loading text="Loading dashboard…" />;
+  if (loadError)
+    return (
+      <div style={{ maxWidth: 480, margin: '0 auto', padding: 40, textAlign: 'center' }}>
+        <p style={{ color: '#991b1b', fontSize: 14, marginBottom: 12 }}>{loadError}</p>
+        <button onClick={() => window.location.reload()} style={{ padding: '10px 18px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800 }}>
+          Retry
+        </button>
+      </div>
+    );
 
   const graded = courses.filter((c) => c.grade && c.grade !== '-' && c.grade !== '');
   const totalUnits = courses.reduce((s, c) => s + (c.units || 3), 0);
@@ -52,7 +68,7 @@ export default function DashboardRoute() {
       <div style={{ padding: '20px 16px 12px', background: '#fff' }}>
         <div style={{ fontSize: 11, color: '#afafaf', letterSpacing: 1 }}>Your Dashboard</div>
         <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28, marginTop: 4 }}>
-          Good to have you, <em style={{ background: '#58cc02', color: '#fff', padding: '0 6px', borderRadius: 6, fontStyle: 'normal' }}>{profile?.firstName || user?.displayName?.split(' ')[0] || 'Builder'}</em>
+          Good to have you, <em style={{ background: '#10b981', color: '#fff', padding: '0 6px', borderRadius: 6, fontStyle: 'normal' }}>{profile?.firstName || user?.displayName?.split(' ')[0] || 'Builder'}</em>
         </h1>
         <div style={{ fontSize: 13, color: '#777', marginTop: 4 }}>{profile?.department || ''}</div>
       </div>
@@ -77,26 +93,26 @@ export default function DashboardRoute() {
       </div>
 
       <div style={{ margin: '0 16px 12px', height: 8, background: '#e5e5e5', borderRadius: 9999, overflow: 'hidden' }}>
-        <div style={{ width: `${pct}%`, height: '100%', background: '#58cc02', borderRadius: 9999 }} />
+        <div style={{ width: `${pct}%`, height: '100%', background: '#10b981', borderRadius: 9999 }} />
       </div>
       <div style={{ margin: '0 16px 16px', fontSize: 12, color: '#777', textAlign: 'right' }}>{pct}% complete</div>
 
       <div style={{ margin: '0 16px', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
-        <div style={{ width: 44, height: 44, background: '#f0fdf4', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <BookOpen size={20} color="#58a700" />
+        <div style={{ width: 44, height: 44, background: '#ecfdf5', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <BookOpen size={20} color="#059669" />
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 700 }}>Continue Learning</div>
           <div style={{ fontSize: 12, color: '#777' }}>Pick up where you left off</div>
         </div>
-        <Link to="/course" style={{ padding: '10px 16px', background: '#58cc02', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #58a700' }}>
+        <Link to="/course" style={{ padding: '10px 16px', background: '#10b981', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #059669' }}>
           Resume
         </Link>
       </div>
 
       <div style={{ margin: '16px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ fontFamily: 'Nunito', fontWeight: 800 }}>Your Courses</h2>
-        <Link to="/course" style={{ fontSize: 13, color: '#58a700', fontWeight: 700, textDecoration: 'none', display: 'flex', gap: 4, alignItems: 'center' }}>
+        <Link to="/course" style={{ fontSize: 13, color: '#059669', fontWeight: 700, textDecoration: 'none', display: 'flex', gap: 4, alignItems: 'center' }}>
           View all <ChevronRight size={14} />
         </Link>
       </div>
@@ -114,7 +130,7 @@ export default function DashboardRoute() {
       </div>
 
       <nav style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, display: 'flex', justifyContent: 'space-around', background: '#fff', borderTop: '2px solid #e5e5e5', padding: '8px 0 calc(8px + env(safe-area-inset-bottom))' }}>
-        <Link to="/dashboard" style={{ textDecoration: 'none', color: '#58cc02', fontWeight: 700, fontSize: 12 }}>
+        <Link to="/dashboard" style={{ textDecoration: 'none', color: '#10b981', fontWeight: 700, fontSize: 12 }}>
           Dashboard
         </Link>
         <Link to="/course" style={{ textDecoration: 'none', color: '#777', fontSize: 12 }}>
