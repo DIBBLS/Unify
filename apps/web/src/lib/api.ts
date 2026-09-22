@@ -96,6 +96,7 @@ export type Profile = {
   department?: string;
   level?: string;
   grad_target?: number;
+  role?: string;
 };
 
 export const api = {

@@ -66,7 +66,10 @@ export default function ProfileRoute() {
     );
 
   const initial = (profile?.first_name || email).charAt(0).toUpperCase() || 'U';
+  const roleLabel = profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : '—';
+  const canAuthor = profile?.role === 'lecturer' || profile?.role === 'collaborator';
   const rows: [string, string][] = [
+    ['Role', roleLabel],
     ['University', profile?.university || '—'],
     ['Faculty', profile?.faculty || '—'],
     ['Department', profile?.department || '—'],
@@ -104,7 +107,7 @@ export default function ProfileRoute() {
           <LogOut size={16} /> Log out
         </button>
       </div>
-      {getApiUrl() && (
+      {getApiUrl() && canAuthor && (
         <a href={getApiUrl() as string} target="_blank" rel="noreferrer" style={{ marginTop: 8, padding: 14, background: '#fff', color: '#059669', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 16, fontWeight: 800, textDecoration: 'none', textAlign: 'center', display: 'block' }}>
           Open Authoring Studio
         </a>
