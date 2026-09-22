@@ -1,5 +1,5 @@
-/* Extracted from Auth.html */
-
+/* Duolingo Auth — owl green, Nunito, chunky 4px shadow, mobile-first */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
 *,
 *::before,
 *::after {
@@ -8,12 +8,15 @@
   padding: 0;
 }
 :root {
-  --black: #0a0a0a;
-  --white: #f5f4f0;
-  --grey: #e0deda;
-  --mid: #888;
-  --font-display: "Playfair Display", serif;
-  --font-body: "DM Sans", sans-serif;
+  --black: #3c3c3c;
+  --white: #ffffff;
+  --grey: #e5e5e5;
+  --mid: #777777;
+  --green: #58cc02;
+  --green-deep: #58a700;
+  --green-pale: #dbf8c5;
+  --font-display: "Nunito", "Feather Bold", sans-serif;
+  --font-body: "Nunito", "Mona Sans", system-ui, sans-serif;
 }
 body {
   background: var(--white);
@@ -25,7 +28,7 @@ body {
 
 .auth-left {
   flex: 1;
-  background: var(--black);
+  background: var(--green);
   color: var(--white);
   padding: 48px;
   display: flex;
@@ -37,22 +40,21 @@ body {
 }
 .auth-left-bg {
   position: absolute;
-  bottom: -60px;
-  left: -20px;
+  bottom: -40px;
+  left: -10px;
   font-family: var(--font-display);
   font-size: 28vw;
-  font-weight: 900;
-  color: transparent;
-  -webkit-text-stroke: 1px #1a1a1a;
+  font-weight: 800;
+  color: rgba(255,255,255,0.12);
   line-height: 1;
   pointer-events: none;
   user-select: none;
 }
 .auth-logo {
   font-family: var(--font-display);
-  font-weight: 900;
+  font-weight: 800;
   font-size: 24px;
-  letter-spacing: -1px;
+  letter-spacing: -0.5px;
   text-decoration: none;
   color: var(--white);
   position: relative;
@@ -65,24 +67,28 @@ body {
 .auth-left-title {
   font-family: var(--font-display);
   font-size: clamp(36px, 4vw, 56px);
-  font-weight: 900;
+  font-weight: 800;
   line-height: 1.05;
-  letter-spacing: -2px;
+  letter-spacing: -0.02em;
   margin-bottom: 20px;
 }
 .auth-left-title em {
-  font-style: italic;
+  font-style: normal;
+  background: var(--white);
+  color: var(--green);
+  padding: 0 8px;
+  border-radius: 8px;
 }
 .auth-left-sub {
-  font-size: 14px;
-  color: #666;
-  line-height: 1.7;
-  font-weight: 300;
-  max-width: 320px;
+  font-size: 15px;
+  color: rgba(255,255,255,0.92);
+  line-height: 1.6;
+  font-weight: 600;
+  max-width: 340px;
 }
 .auth-left-footer {
   font-size: 11px;
-  color: #333;
+  color: rgba(255,255,255,0.7);
   position: relative;
   z-index: 1;
 }
@@ -114,28 +120,31 @@ body {
 
 .auth-tabs {
   display: flex;
-  gap: 0;
-  margin-bottom: 40px;
-  border: 1px solid var(--grey);
-  border-radius: 6px;
-  overflow: hidden;
+  gap: 4px;
+  margin-bottom: 32px;
+  background: #f7f7f7;
+  border: 2px solid var(--grey);
+  border-radius: 9999px;
+  padding: 4px;
 }
 .auth-tab {
   flex: 1;
   padding: 10px;
   text-align: center;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 700;
   cursor: pointer;
-  background: var(--white);
+  background: transparent;
   color: var(--mid);
   transition: all 0.15s;
   border: none;
+  border-radius: 9999px;
   font-family: var(--font-body);
 }
 .auth-tab.active {
-  background: var(--black);
+  background: var(--green);
   color: var(--white);
+  border-bottom: 3px solid var(--green-deep);
 }
 
 .auth-form {
@@ -148,20 +157,20 @@ body {
 }
 
 .form-label {
-  font-size: 11px;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--mid);
-  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--black);
+  margin-bottom: 6px;
   display: block;
 }
 .form-input {
   width: 100%;
   padding: 12px 14px;
-  min-height: 44px;
+  min-height: 48px;
   background: var(--white);
-  border: 1px solid var(--grey);
-  border-radius: 6px;
+  border: 2px solid var(--grey);
+  border-radius: 12px;
   font-family: var(--font-body);
   font-size: 16px;
   color: var(--black);
@@ -169,33 +178,42 @@ body {
   transition: border-color 0.15s;
 }
 .form-input:focus {
-  border-color: var(--black);
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(88,204,2,0.15);
 }
 .form-input::placeholder {
-  color: #bbb;
+  color: #afafaf;
 }
 
 .btn-submit {
   width: 100%;
   padding: 14px;
-  min-height: 48px;
-  background: var(--black);
+  min-height: 56px;
+  background: var(--green);
   color: var(--white);
   border: none;
-  border-radius: 6px;
+  border-bottom: 4px solid var(--green-deep);
+  border-radius: 16px;
   font-family: var(--font-display);
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 800;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: transform 0.12s, filter 0.15s;
   margin-top: 4px;
+  letter-spacing: 0.3px;
 }
 .btn-submit:hover {
-  opacity: 0.8;
+  filter: brightness(1.05);
+}
+.btn-submit:active {
+  transform: translateY(4px);
+  border-bottom-width: 0;
 }
 .btn-submit:disabled {
-  opacity: 0.4;
+  opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
+  border-bottom-width: 4px;
 }
 
 .divider {
