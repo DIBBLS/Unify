@@ -1,59 +1,72 @@
-# Unify Backend Setup (Supabase + Render + Vercel)
+# Unify Backend Setup (Supabase + Prisma + Render + Vercel)
 
-Backend code is already in the repo (`notes-engine` combined server, commit `d3de61f`).
-You do the 3 console setups below — about 20 minutes, all free tier.
+Backend code is already in the repo (`notes-engine` combined server).
+**Yes — Render runs Prisma on Supabase for you**: every Render build executes
+`prisma generate && prisma migrate deploy && npm run build`, so the database
+migrates itself on each deploy. You just supply the connection strings.
 
 ## 1. Supabase (~8 min)
 
-1. Go to https://supabase.com → **New project**. Name `unify`, any region close to you, generate a DB password (save it).
-2. Wait for provisioning → left menu **SQL Editor** → **New query**:
-   - Paste the full contents of `supabase/schema.sql` → **Run**.
-   - New query → paste `supabase/seed.sql` → **Run**.
-3. **Project Settings (gear icon) → API**: copy these 3 values:
-   - `Project URL` → `SUPABASE_URL`
-   - `anon public` key → `SUPABASE_ANON_KEY`
-   - `service_role secret` key → `SUPABASE_SERVICE_ROLE_KEY` (never put this in the frontend)
+1. Go to https://supabase.com → **New project**. Name `unify`, save the DB password.
+2. **Project Settings → Database → Connection string**: you need two URIs
+   (replace `[YOUR-PASSWORD]` with the DB password from step 1):
+   - **Pooler** (port `6543`, Transaction mode) → `DATABASE_URL` (app traffic)
+   - **Direct** (port `5432`) → `DIRECT_URL` (`prisma migrate deploy` only)
+3. **Project Settings → API**: copy `Project URL` (`SUPABASE_URL`), `anon` key
+   (`SUPABASE_ANON_KEY`), `service_role` key (`SUPABASE_SERVICE_ROLE_KEY`, backend only).
 4. **Authentication → Providers → Google → Enable**:
-   - Needs a Google Cloud OAuth client ID/secret (Google Cloud Console → APIs & Services → Credentials → Create OAuth client → Web application).
-   - Authorized redirect URI to add in Google Cloud: `https://xyzcompany.supabase.co/auth/v1/callback` (replace `xyzcompany` with your project ref).
-   - Back in Supabase → **Authentication → URL Configuration** → add your Vercel URL to **Redirect URLs**, e.g. `https://your-app.vercel.app/**`.
+   - Google Cloud Console → Credentials → OAuth client (Web) → add redirect
+     `https://xyzcompany.supabase.co/auth/v1/callback` (your project ref).
+   - Supabase → **Authentication → URL Configuration** → Redirect URLs +=
+     `https://your-app.vercel.app/**`.
+5. **Schema — pick ONE path:**
+   - **A (recommended, automatic):** do nothing. Render applies
+     `notes-engine/prisma/migrations/0001_init` on first deploy. Then run
+     `supabase/seed.sql` once in **SQL Editor** for LASU + MEE 352 Week 1.
+   - **B (manual):** run `supabase/schema.sql` then `supabase/seed.sql` in SQL
+     Editor, and after the first Render deploy baseline Prisma so it doesn't
+     re-apply: `npx prisma migrate resolve --applied 0001_init` (needs
+     `DATABASE_URL`/`DIRECT_URL` locally).
 
 ## 2. Render (~5 min)
 
-1. https://dashboard.render.com → **New → Blueprint** → connect/select the `Unify` repo. It reads `render.yaml` (service `unify-api`, free plan, health check `/healthz`).
-2. On the deploy screen fill the secrets:
-   - `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (from step 1.3)
-   - `CORS_ORIGIN` → your exact Vercel URL, e.g. `https://your-app.vercel.app` (no trailing slash)
-   - `ANTHROPIC_API_KEY` → skip unless you use note authoring (`/api/convert`)
-3. **Deploy**. First build takes ~3-5 min. Note your service URL: `https://unify-api.onrender.com` (name may differ).
-4. Verify in browser: `https://unify-api.onrender.com/healthz` → expect `{"ok":true,"service":"unify-api"}`.
-   First hit after idle can take 30-60s (free tier sleeps) — that is normal; the app warms it up and retries.
+1. Dashboard → **New → Blueprint** → select the `Unify` repo (`render.yaml`).
+2. Fill env vars:
+   - `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+   - `DATABASE_URL`, `DIRECT_URL` (from step 1.2)
+   - `CORS_ORIGIN` → exact Vercel URL, e.g. `https://your-app.vercel.app`
+   - `ANTHROPIC_API_KEY` → skip unless using note authoring
+3. **Deploy** (~3-5 min first build: install → prisma generate → migrate deploy → build).
+   Watch the logs for `prisma migrate deploy` applying `0001_init`.
+4. Verify: `https://unify-api.onrender.com/healthz` →
+   `{"ok":true,"service":"unify-api"}`. First hit after idle takes 30-60s
+   (free tier sleeps) — normal; the app warms it up and retries.
 
 ## 3. Vercel (~3 min)
 
-Project → **Settings → Environment Variables** → add (Production + Preview):
+Settings → Environment Variables (Production + Preview):
 
 | Key | Value |
 |---|---|
-| `VITE_SUPABASE_URL` | from step 1.3 |
-| `VITE_SUPABASE_ANON_KEY` | from step 1.3 |
-| `VITE_API_URL` | your Render URL, e.g. `https://unify-api.onrender.com` (no trailing slash) |
-| `VITE_USE_BACKEND` | `0` for now (keeps current Firebase flow while testing) |
+| `VITE_SUPABASE_URL` | step 1.3 |
+| `VITE_SUPABASE_ANON_KEY` | step 1.3 |
+| `VITE_API_URL` | Render URL, no trailing slash |
+| `VITE_USE_BACKEND` | `0` for now (current Firebase flow while testing) |
 
-**Redeploy** (Deployments → ⋯ → Redeploy) so the new env vars bake in.
+**Redeploy** so env vars bake in.
 
-## 4. Flip the cutover (do together when ready)
+## 4. Flip the cutover (together, when ready)
 
-1. Supabase Auth users re-register (fresh seed — old Firebase test accounts do not carry over, per plan).
-2. Set `VITE_USE_BACKEND=1` in Vercel → redeploy.
-3. Test: sign in with Google → onboarding (LASU fallback guaranteed even before seed check) → dashboard → week content from `weeks.note_json`.
+1. Test users re-register via Supabase Google sign-in (fresh seed — Firebase accounts don't carry over).
+2. `VITE_USE_BACKEND=1` → redeploy → test sign-in → onboarding → dashboard → week content.
 
 ## Troubleshooting
 
-| Symptom | Cause / fix |
+| Symptom | Fix |
 |---|---|
-| First API call slow/fails, then works | Free-tier cold start. App retries once; if still failing, open `/healthz` once to wake it. |
-| `CORS error` in browser console | `CORS_ORIGIN` on Render must exactly match your Vercel URL (scheme + domain, no path). |
-| `401 Invalid session` | Supabase Auth not configured or Google provider off; user must sign in via Supabase (not Firebase) after cutover. |
-| `/v1/universities` returns `[]` | `seed.sql` wasn't run. Run it, or onboarding still works via the LASU fallback. |
-| Render build fails on `tsc` | Paste me the log. Local `tsc --noEmit` is clean, so this would be an env issue (e.g. Node version — blueprint pins 20). |
+| Cold start slow/fails once, then works | Free-tier sleep. App retries; open `/healthz` once to wake. |
+| `CORS error` | `CORS_ORIGIN` must exactly match the Vercel URL. |
+| `401 Invalid session` | Google provider off, or user signed in via Firebase after cutover. |
+| Prisma `P1001 can't reach DB` on Render | Wrong password/port in `DIRECT_URL` — must be `:5432` direct, not pooler. |
+| Prisma tries to re-create existing tables | You used path B already — run the baseline command from 1.5. |
+| `/v1/universities` returns `[]` | Seed not run yet — run `supabase/seed.sql` (onboarding still works via LASU fallback). |
