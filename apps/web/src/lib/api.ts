@@ -5,7 +5,11 @@ import { log } from "./log";
 // Set VITE_USE_BACKEND=0 only to disable API calls (auth still needs Supabase).
 export const USE_BACKEND = ((import.meta.env.VITE_USE_BACKEND ?? import.meta.env.USE_BACKEND ?? "1") as string) === "1";
 
-const API_URL = (((import.meta.env.VITE_API_URL || import.meta.env.API_URL) as string | undefined) || "").replace(/\/$/, "");
+// Built-in fallback (public URL; env vars override when set).
+const FALLBACK_API_URL = 'https://unify-api-z4zm.onrender.com';
+const API_URL = (
+  ((import.meta.env.VITE_API_URL || import.meta.env.API_URL) as string | undefined) || FALLBACK_API_URL
+).replace(/\/$/, '');
 
 // Raw backend root (authoring studio lives here). Null until VITE_API_URL is set.
 export function getApiUrl(): string | null {
