@@ -170,7 +170,7 @@ export default function AuthRoute() {
     <div className="auth-page">
       <style>{`.auth-page{min-height:100vh;background:#fff}.auth-side{display:none}.auth-card{maxWidth:480px;margin:0 auto}@media(min-width:900px){.auth-page{display:flex;flex-direction:row;background:#d1fae5}.auth-side{display:flex;flex:1;flex-direction:column;justify-content:center;gap:18px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:64px;min-height:100vh}.auth-main{flex:1.2;display:flex;align-items:center;justify-content:center;padding:48px 32px;background:#ecfdf5}.auth-card{width:100%;max-width:440px;background:#fff;border:1px solid #e5e5e5;border-radius:20px;padding:32px;box-shadow:0 12px 32px rgba(6,95,70,.12);margin:0}.auth-hero-mobile{display:none}}`}</style>
       <aside className="auth-side">
-        <div style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 22 }}>Unify<span style={{ color: '#fff' }}>.</span></div>
+        <div style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 22 }}>Unify Learn</div>
         <Mascot size={168} animate="wave" />
         <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 40, lineHeight: 1.1, margin: 0 }}>
           Own your journey.
@@ -191,7 +191,7 @@ export default function AuthRoute() {
       <div className="auth-card">
       <div className="auth-hero-mobile" style={{ background: '#10b981', color: '#fff', padding: 28, borderRadius: '0 0 16px 16px', display: 'flex', gap: 16, alignItems: 'center' }}>
         <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 20 }}>Unify<span style={{ color: '#fff' }}>.</span></div>
+          <div style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 20 }}>Unify Learn</div>
           <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 32, marginTop: 12, lineHeight: 1.1 }}>
             Own your <span style={{ background: '#fff', color: '#10b981', padding: '0 6px', borderRadius: 6 }}>journey.</span>
           </h1>

@@ -16,7 +16,7 @@ export default function Mascot({
       viewBox="0 0 200 230"
       fill="none"
       role="img"
-      aria-label="Box Boy, the Unify mascot"
+      aria-label="Box Boy, the Unify Learn mascot"
       style={animate === 'float' ? { animation: 'mascot-float 3s ease-in-out infinite' } : undefined}
     >
       {/* ground shadow */}
@@ -28,17 +28,17 @@ export default function Mascot({
 
       {/* left arm */}
       <rect x="36" y="134" width="17" height="46" rx="8.5" fill="#1F2937" />
-      {/* right arm (waves when animate="wave"; pivot at the shoulder) */}
+      {/* right arm: raised high when waving (hand up), pivoting at the shoulder */}
       {wave ? (
         <g
           style={{
-            transformBox: 'fill-box',
-            transformOrigin: '50% 0%',
+            transformBox: 'view-box',
+            transformOrigin: '150px 148px',
             animation: 'mascot-wave 1.4s ease-in-out infinite',
           }}
         >
-          <rect x="147" y="134" width="17" height="46" rx="8.5" fill="#1F2937" />
-          <circle cx="156" cy="182" r="8" fill="#F2C894" />
+          <line x1="150" y1="148" x2="173" y2="102" stroke="#1F2937" strokeWidth="17" strokeLinecap="round" />
+          <circle cx="173" cy="100" r="9" fill="#F2C894" />
         </g>
       ) : (
         <>

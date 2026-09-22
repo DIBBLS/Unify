@@ -1,13 +1,13 @@
 {
-  "name": "Unify — Student Academic Platform",
-  "short_name": "Unify",
-  "description": "CGPA tracker, timetable, learning library, and career tools for engineering students.",
-  "start_url": "./dashboard.html",
+  "name": "Unify Learn — Student Academic Platform",
+  "short_name": "Unify Learn",
+  "description": "Guided 12-week paths, XP, streaks and notes that fit your courses.",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "theme_color": "#16a34a",
-  "background_color": "#f0efe9",
+  "theme_color": "#10b981",
+  "background_color": "#ffffff",
   "categories": ["education", "productivity"],
   "icons": [
     {
@@ -32,19 +32,13 @@
     {
       "name": "Dashboard",
       "short_name": "Dashboard",
-      "url": "./dashboard.html",
-      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Timetable",
-      "short_name": "Timetable",
-      "url": "./timetable.html",
+      "url": "/dashboard",
       "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Learn",
       "short_name": "Learn",
-      "url": "./Learn.html",
+      "url": "/course",
       "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
