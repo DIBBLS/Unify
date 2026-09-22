@@ -35,6 +35,18 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, retries 
   const timer = setTimeout(() => ctrl.abort(), 30000);
   try {
     const res = await fetch(`${API_URL}${path}`, { ...init, headers, signal: ctrl.signal });
+    if (res.status === 401) {
+      // Session dead (expired/revoked): clear it and send the user to sign in.
+      // Public endpoints never 401, so this only fires for authed calls.
+      try {
+        await supabaseBrowser()?.auth.signOut();
+      } catch {
+        // ignore sign-out errors
+      }
+      if (typeof window !== 'undefined' && window.location.pathname !== '/auth') {
+        window.location.assign('/auth');
+      }
+    }
     if (!res.ok) {
       let detail = "";
       try {

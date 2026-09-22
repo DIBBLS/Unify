@@ -1,6 +1,14 @@
 // Box Boy — Unify mascot as a flat emerald SVG (no binary assets needed).
 // Gold box head with emerald U, dark hoodie, coffee cup. Scales via `size`.
-export default function Mascot({ size = 120 }: { size?: number }) {
+// `animate="wave"` swings the right arm (auth greeting); `"float"` bobs gently.
+export default function Mascot({
+  size = 120,
+  animate = 'none',
+}: {
+  size?: number;
+  animate?: 'none' | 'wave' | 'float';
+}) {
+  const wave = animate === 'wave';
   return (
     <svg
       width={size}
@@ -9,6 +17,7 @@ export default function Mascot({ size = 120 }: { size?: number }) {
       fill="none"
       role="img"
       aria-label="Box Boy, the Unify mascot"
+      style={animate === 'float' ? { animation: 'mascot-float 3s ease-in-out infinite' } : undefined}
     >
       {/* ground shadow */}
       <ellipse cx="100" cy="218" rx="52" ry="9" fill="#000000" opacity="0.08" />
@@ -19,11 +28,26 @@ export default function Mascot({ size = 120 }: { size?: number }) {
 
       {/* left arm */}
       <rect x="36" y="134" width="17" height="46" rx="8.5" fill="#1F2937" />
-      {/* right arm */}
-      <rect x="147" y="134" width="17" height="46" rx="8.5" fill="#1F2937" />
-      {/* hands */}
+      {/* right arm (waves when animate="wave"; pivot at the shoulder) */}
+      {wave ? (
+        <g
+          style={{
+            transformBox: 'fill-box',
+            transformOrigin: '50% 0%',
+            animation: 'mascot-wave 1.4s ease-in-out infinite',
+          }}
+        >
+          <rect x="147" y="134" width="17" height="46" rx="8.5" fill="#1F2937" />
+          <circle cx="156" cy="182" r="8" fill="#F2C894" />
+        </g>
+      ) : (
+        <>
+          <rect x="147" y="134" width="17" height="46" rx="8.5" fill="#1F2937" />
+          <circle cx="156" cy="182" r="8" fill="#F2C894" />
+        </>
+      )}
+      {/* left hand */}
       <circle cx="44" cy="182" r="8" fill="#F2C894" />
-      <circle cx="156" cy="182" r="8" fill="#F2C894" />
 
       {/* hoodie body */}
       <rect x="58" y="108" width="84" height="106" rx="24" fill="#1F2937" />
@@ -74,6 +98,7 @@ export default function Mascot({ size = 120 }: { size?: number }) {
       >
         U
       </text>
+      <style>{`@keyframes mascot-wave{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(16deg)}}@keyframes mascot-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}@media(prefers-reduced-motion:reduce){g{animation:none !important}}`}</style>
     </svg>
   );
 }

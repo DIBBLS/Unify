@@ -38,3 +38,12 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-he
 .btn-secondary{background:#fff;color:var(--text2);border:2px solid var(--border);border-bottom:4px solid var(--border);border-radius:16px;padding:14px 24px;font-weight:700}
 .progress-track{height:16px;background:var(--border);border-radius:var(--radius-pill);overflow:hidden}
 .progress-fill{height:100%;background:var(--green);border-radius:var(--radius-pill);transition:width .32s ease-out}
+/* Fluid tactile feedback on every button + input, app-wide */
+button{transition:transform .12s ease,opacity .15s ease,background-color .15s ease;-webkit-tap-highlight-color:transparent}
+button:active:not(:disabled){transform:scale(.97)}
+button:disabled{opacity:.7;cursor:default}
+input,textarea{transition:border-color .15s ease,box-shadow .15s ease}
+input:focus,textarea:focus{outline:none;border-color:#10b981 !important;box-shadow:0 0 0 3px rgba(16,185,129,.15)}
+.flash{animation:flash-in .25s ease}
+@keyframes flash-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.flash{animation:none}button:active:not(:disabled){transform:none}}
