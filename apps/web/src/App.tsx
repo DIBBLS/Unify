@@ -38,14 +38,15 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Chromeless: no top bar on sign in / onboarding */}
+        <Route path="/auth" element={<AuthRoute />} />
+        <Route path="/onboarding" element={<OnboardingRoute />} />
         <Route element={<Layout />}>
           <Route path="/" element={<Navigate to="/auth" replace />} />
           <Route path="/course" element={<CourseRoute />} />
           <Route path="/learn/:courseCode/week/:week" element={<LearnWeek />} />
-          <Route path="/auth" element={<AuthRoute />} />
-          <Route path="/onboarding" element={<OnboardingRoute />} />
-          <Route path="/profile" element={<ProfileRoute />} />
           <Route path="/dashboard" element={<DashboardRoute />} />
+          <Route path="/profile" element={<ProfileRoute />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
