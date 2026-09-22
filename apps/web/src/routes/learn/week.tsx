@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Check } from 'lucide-react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../lib/firebase';
-import type { UnifyNote } from '../types/note';
-import { TopicSlice } from '../components/TopicSlice';
-import { useProgress } from '../hooks/useProgress';
+import { db } from '../../lib/firebase';
+import type { UnifyNote, Topic } from '../../types/note';
+import { TopicSlice } from '../../components/TopicSlice';
+import { useProgress } from '../../hooks/useProgress';
 import Loading from '../../components/Loading';
 
 export default function LearnPage() {
@@ -70,7 +70,7 @@ export default function LearnPage() {
         <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 24, margin: '8px 0' }}>{note.title}</h1>
         <p style={{ fontSize: 14, color: '#777' }}>{note.subtitle}</p>
       </div>
-      {note.topics.map((t, idx) => (
+      {note.topics.map((t: Topic, idx: number) => (
         <div key={t.number} style={{ marginBottom: 32 }}>
           <TopicSlice topic={t} />
           <button
