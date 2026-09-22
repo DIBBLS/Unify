@@ -1,7 +1,4 @@
 {
-  // Used when the Vercel project's Root Directory is apps/web (the repo-root
-  // vercel.json is ignored in that case). Mirrors the SPA fallback + legacy
-  // redirects so refresh/deep-links never 404 either way.
   "redirects": [
     { "source": "/Auth.html", "destination": "/auth", "permanent": false },
     { "source": "/auth.html", "destination": "/auth", "permanent": false },
@@ -10,6 +7,5 @@
     { "source": "/Learn.html", "destination": "/course", "permanent": false },
     { "source": "/learn.html", "destination": "/course", "permanent": false }
   ],
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
-  "cleanUrls": true
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
