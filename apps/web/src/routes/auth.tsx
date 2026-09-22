@@ -2,19 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, Check, X, Loader2 } from 'lucide-react';
 import Mascot from '../components/Mascot';
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
-  updateProfile,
-  sendPasswordResetEmail,
-  sendEmailVerification,
-  onAuthStateChanged,
-} from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, provider, db } from '../lib/firebase';
+import { supabaseBrowser } from '../lib/supabase';
+import { api } from '../lib/api';
 
 const RL_KEY = 'unify-auth-rl';
 const RL_MAX = 10;
@@ -48,50 +37,42 @@ function recordFail() {
 function clearRl() {
   localStorage.removeItem(RL_KEY);
 }
-function friendlyError(code: string) {
-  if (code === 'auth/invalid-credential') return 'Incorrect email or password.';
-  if (code === 'auth/user-not-found') return 'No account found with this email.';
-  if (code === 'auth/wrong-password') return 'Incorrect password. Try again.';
-  if (code === 'auth/email-already-in-use') return 'An account with this email already exists. Try signing in instead.';
-  if (code === 'auth/weak-password') return 'Password must be at least 6 characters.';
-  if (code === 'auth/invalid-email') return 'Please enter a valid email address.';
-  if (code === 'auth/too-many-requests') return 'Too many attempts. Please wait a few minutes and try again.';
-  if (code === 'auth/popup-closed-by-user') return 'Google sign-in was cancelled.';
-  if (code === 'auth/popup-blocked') return 'Popup was blocked. Please allow popups.';
-  return `Something went wrong. Please try again.${code ? ` (${code})` : ''}`;
-}
 
 export default function AuthRoute() {
   const navigate = useNavigate();
+  const sb = supabaseBrowser();
   const [tab, setTab] = useState<'signin' | 'signup' | 'forgot'>('signin');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [configError, setConfigError] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [signupPw, setSignupPw] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const routeToApp = async () => {
+    try {
+      const { onboarded } = await api.me();
+      navigate(onboarded ? '/dashboard' : '/onboarding');
+    } catch {
+      setError("Signed in, but can't reach the server. Check your connection and retry.");
+    }
+  };
+
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (user) => {
-      if (!user) return;
-      try {
-        const snap = await getDoc(doc(db, 'users', user.uid));
-        if (snap.exists() && snap.data().university) navigate('/dashboard');
-        else navigate('/onboarding');
-      } catch {
-        navigate('/dashboard');
-      }
+    if (!sb) {
+      setConfigError('Auth is not configured yet (Supabase keys missing).');
+      return;
+    }
+    sb.auth.getSession().then(({ data }) => {
+      if (data.session) void routeToApp();
     });
-    getRedirectResult(auth)
-      .then((r) => {
-        if (r?.user) {
-          clearRl();
-          navigate('/dashboard');
-        }
-      })
-      .catch((err: any) => {
-        if (err.code && err.code !== 'auth/cancelled-popup-request') setError(friendlyError(err.code));
-      });
-    return () => unsub();
+    const { data: sub } = sb.auth.onAuthStateChange((_event, session) => {
+      if (session) void routeToApp();
+    });
+    return () => {
+      sub.subscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
 
   const hasLength = signupPw.length >= 8;
@@ -103,6 +84,11 @@ export default function AuthRoute() {
     e.preventDefault();
     setError('');
     setSuccess('');
+    const client = sb;
+    if (!client) {
+      setError('Auth is not configured yet.');
+      return;
+    }
     const blocked = checkRl();
     if (blocked) return setError(blocked);
     const form = e.currentTarget;
@@ -110,12 +96,17 @@ export default function AuthRoute() {
     const password = (form.elements.namedItem('password') as HTMLInputElement).value;
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const { data, error: err } = await client.auth.signInWithPassword({ email, password });
+      if (err) {
+        recordFail();
+        setError(checkRl() || err.message);
+        return;
+      }
       clearRl();
-      navigate('/dashboard');
-    } catch (err: any) {
+      if (data.session) await routeToApp();
+    } catch (err) {
       recordFail();
-      setError(checkRl() || friendlyError(err.code));
+      setError(err instanceof Error ? err.message : 'Sign-in failed.');
     } finally {
       setLoading(false);
     }
@@ -125,6 +116,11 @@ export default function AuthRoute() {
     e.preventDefault();
     setError('');
     setSuccess('');
+    const client = sb;
+    if (!client) {
+      setError('Auth is not configured yet.');
+      return;
+    }
     const blocked = checkRl();
     if (blocked) return setError(blocked);
     const form = e.currentTarget;
@@ -136,15 +132,26 @@ export default function AuthRoute() {
     if (password !== confirm) return setError('Passwords do not match.');
     setLoading(true);
     try {
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      const { data, error: err } = await client.auth.signUp({
+        email,
+        password,
+        options: { data: { display_name: name } },
+      });
+      if (err) {
+        recordFail();
+        setError(checkRl() || err.message);
+        return;
+      }
       clearRl();
-      await updateProfile(cred.user, { displayName: name });
-      await sendEmailVerification(cred.user);
-      setSuccess('Account created! Check your email to verify, then sign in.');
-      setTab('signin');
-    } catch (err: any) {
+      if (data.session) {
+        await routeToApp();
+      } else {
+        setSuccess('Account created! Check your email to verify, then sign in.');
+        setTab('signin');
+      }
+    } catch (err) {
       recordFail();
-      setError(checkRl() || friendlyError(err.code));
+      setError(err instanceof Error ? err.message : 'Sign-up failed.');
     } finally {
       setLoading(false);
     }
@@ -153,14 +160,25 @@ export default function AuthRoute() {
   const handleForgot = async () => {
     setError('');
     setSuccess('');
+    const client = sb;
+    if (!client) {
+      setError('Auth is not configured yet.');
+      return;
+    }
     const email = (document.getElementById('forgotEmail') as HTMLInputElement)?.value.trim();
     if (!email) return setError('Please enter your email address.');
     setLoading(true);
     try {
-      await sendPasswordResetEmail(auth, email);
+      const { error: err } = await client.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+      if (err) {
+        setError(err.message);
+        return;
+      }
       setSuccess('Reset link sent! Check your inbox (and spam folder).');
-    } catch (err: any) {
-      setError(friendlyError(err.code));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Reset failed.');
     } finally {
       setLoading(false);
     }
@@ -169,22 +187,22 @@ export default function AuthRoute() {
   const handleGoogle = async () => {
     setError('');
     setSuccess('');
+    const client = sb;
+    if (!client) {
+      setError('Auth is not configured yet.');
+      return;
+    }
     const blocked = checkRl();
     if (blocked) return setError(blocked);
-    const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
     try {
-      if (isMobile) await signInWithRedirect(auth, provider);
-      else {
-        await signInWithPopup(auth, provider);
-        clearRl();
-        navigate('/dashboard');
-      }
-    } catch (err: any) {
-      if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') recordFail();
-      if (err.code === 'auth/account-exists-with-different-credential') {
-        setError('This email is registered with a password. Sign in with password first.');
-        setTab('signin');
-      } else setError(friendlyError(err.code));
+      const { error: err } = await client.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: `${window.location.origin}/auth` },
+      });
+      if (err) setError(err.message);
+      // Success redirects to Google; the return leg routes via the session listener.
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Google sign-in failed.');
     }
   };
 
@@ -232,6 +250,7 @@ export default function AuthRoute() {
           </button>
         </div>
 
+        {configError && <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 12, padding: 10, color: '#9a3412', fontSize: 13, marginBottom: 12 }}>{configError}</div>}
         {error && <div style={{ background: '#fff0f0', border: '1px solid #ffcccc', borderRadius: 12, padding: 10, color: '#cc0000', fontSize: 13, marginBottom: 12 }}>{error}</div>}
         {success && <div style={{ background: '#f0fff4', border: '1px solid #b3f0c8', borderRadius: 12, padding: 10, color: '#006620', fontSize: 13, marginBottom: 12 }}>{success}</div>}
 

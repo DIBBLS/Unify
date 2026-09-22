@@ -1,22 +1,24 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { onAuthStateChanged, updateProfile } from 'firebase/auth';
-import { doc, getDoc, setDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore';
 import { ArrowRight, ChevronLeft } from 'lucide-react';
-import { auth, db } from '../lib/firebase';
+import { supabaseBrowser } from '../lib/supabase';
+import { api, type University } from '../lib/api';
 import Loading from '../components/Loading';
 import Mascot from '../components/Mascot';
 
 type Uni = { id: string; name: string; shortName?: string };
 
-// Fallback so onboarding never dead-ends when the `universities`
-// collection hasn't been seeded in Firestore yet.
+// Fallback so onboarding never dead-ends when the backend has no universities yet.
 const FALLBACK_UNIS: Uni[] = [{ id: 'lasu', name: 'Lagos State University', shortName: 'LASU' }];
+
+const UUID_RE = /^[0-9a-f-]{36}$/i;
 
 export default function OnboardingRoute() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [configError, setConfigError] = useState('');
   const [universities, setUniversities] = useState<Uni[]>([]);
   const [firstName, setFirstName] = useState('');
   const [university, setUniversity] = useState<Uni | null>(null);
@@ -24,26 +26,51 @@ export default function OnboardingRoute() {
   const [department, setDepartment] = useState<string | null>(null);
   const [level, setLevel] = useState<string | null>(null);
   const [gradTarget, setGradTarget] = useState<number | null>(null);
-  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (u) => {
-      if (!u) return navigate('/auth');
-      setUser(u);
+    const sb = supabaseBrowser();
+    if (!sb) {
+      setConfigError('App is not configured yet (Supabase keys missing).');
+      setLoading(false);
+      return;
+    }
+    (async () => {
+      const { data: sessionData } = await sb.auth.getSession();
+      if (!sessionData.session) {
+        navigate('/auth');
+        return;
+      }
       try {
-        const snap = await getDoc(doc(db, 'users', u.uid));
         const isEdit = new URLSearchParams(window.location.search).get('edit') === '1';
-        if (snap.exists() && snap.data().university && !isEdit) return navigate('/dashboard');
-        const us = await getDocs(collection(db, 'universities'));
-        const list = us.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
-        setUniversities(list.length ? list : FALLBACK_UNIS);
+        const { onboarded, profile } = await api.me();
+        if (onboarded && profile && !isEdit) {
+          navigate('/dashboard');
+          return;
+        }
+        if (profile?.first_name) setFirstName(profile.first_name);
+        let list: Uni[] = [];
+        try {
+          const unis = await api.universities();
+          list = unis.map((u: University) => ({ id: u.id, name: u.name, shortName: u.short_name }));
+        } catch {
+          list = [];
+        }
+        if (!list.length) list = FALLBACK_UNIS;
+        setUniversities(list);
+        if (profile?.university) {
+          const match = list.find((u) => u.name === profile.university);
+          if (match) setUniversity(match);
+        }
+        if (profile?.faculty) setFaculty(profile.faculty);
+        if (profile?.department) setDepartment(profile.department);
+        if (profile?.level) setLevel(profile.level);
+        if (typeof profile?.grad_target === 'number') setGradTarget(profile.grad_target);
       } catch {
         setUniversities(FALLBACK_UNIS);
       } finally {
         setLoading(false);
       }
-    });
-    return () => unsub();
+    })();
   }, [navigate]);
 
   const faculties = [{ name: 'Faculty of Engineering', sub: '6 departments' }];
@@ -58,18 +85,22 @@ export default function OnboardingRoute() {
   const levels = ['100 Level', '200 Level', '300 Level', '400 Level', '500 Level'];
 
   const save = async (skipTarget = false) => {
-    if (!user) return;
+    setError('');
     setLoading(true);
     try {
-      if (firstName && !user.displayName) await updateProfile(user, { displayName: firstName }).catch(() => {});
-      const payload: any = { firstName, email: user.email?.toLowerCase(), university: university?.name, faculty, department, level };
-      if (university?.id) payload.universityId = university.id;
-      if (!skipTarget && gradTarget) payload.gradePlanner = { target: gradTarget, updatedAt: serverTimestamp() };
-      Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
-      await setDoc(doc(db, 'users', user.uid), payload, { merge: true });
+      const payload: Record<string, unknown> = {
+        firstName,
+        university: university?.name,
+        faculty,
+        department,
+        level,
+      };
+      if (university?.id && UUID_RE.test(university.id)) payload.universityId = university.id;
+      if (!skipTarget && gradTarget) payload.gradTarget = gradTarget;
+      await api.onboarding(payload);
       navigate('/dashboard');
-    } catch {
-      alert('Something went wrong');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
       setLoading(false);
     }
   };
@@ -97,6 +128,8 @@ export default function OnboardingRoute() {
         </div>
       </div>
       <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {configError && <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 12, padding: 10, color: '#9a3412', fontSize: 13 }}>{configError}</div>}
+        {error && <div style={{ background: '#fff0f0', border: '1px solid #ffcccc', borderRadius: 12, padding: 10, color: '#cc0000', fontSize: 13 }}>{error}</div>}
         {step === 0 && (
           <>
             <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0 4px' }}>

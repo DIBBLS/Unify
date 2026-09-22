@@ -1,8 +1,8 @@
 import { supabaseBrowser } from "./supabase";
 
-// Flip to 1 (Vercel env VITE_USE_BACKEND) to route through the Render backend.
-// Default 0 keeps the current direct-Firebase flow for testing.
-export const USE_BACKEND = import.meta.env.VITE_USE_BACKEND === "1";
+// Backend is now the source of truth (Supabase Auth + Render API).
+// Set VITE_USE_BACKEND=0 only to disable API calls (auth still needs Supabase).
+export const USE_BACKEND = (import.meta.env.VITE_USE_BACKEND ?? "1") === "1";
 
 const API_URL = ((import.meta.env.VITE_API_URL as string | undefined) || "").replace(/\/$/, "");
 
@@ -88,4 +88,6 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ course, week, topic }),
     }),
+  stats: () =>
+    apiFetch<{ xp: number; streak: number; courses: { course: string; topics: number }[] }>("/v1/stats"),
 };

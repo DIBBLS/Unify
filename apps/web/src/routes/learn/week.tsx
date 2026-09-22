@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Check } from 'lucide-react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
+import { api } from '../../lib/api';
 import type { UnifyNote, Topic } from '../../types/note';
 import { TopicSlice } from '../../components/TopicSlice';
 import { useProgress } from '../../hooks/useProgress';
@@ -21,37 +20,9 @@ export default function LearnPage() {
     async function load() {
       setLoading(true);
       try {
-      const code = decodeURIComponent(courseCode).toUpperCase();
-      const variants = [...new Set([code, code.replace(/\s/g, '')])];
-      for (const v of variants) {
-        const snap = await getDocs(query(collection(db, 'courseContent'), where('courseCode', '==', v), where('week', '==', weekNum)));
-        if (!snap.empty) {
-          const data: any = snap.docs[0].data();
-          if (data.noteJson) setNote(data.noteJson as UnifyNote);
-          else if (data.htmlContent) {
-            // fallback: wrap htmlContent as single-topic note for lean migration
-            setNote({
-              course: code,
-              week: weekNum,
-              title: data.title || `Week ${weekNum}`,
-              subtitle: '',
-              learningOutcome: '',
-              metaChips: [code, `Week ${weekNum}`],
-              tags: [],
-              topics: [
-                {
-                  number: 1,
-                  title: data.title || `Week ${weekNum}`,
-                  abbr: 't1',
-                  subtopics: [{ number: '1.1', abbr: 'main', title: 'Content', content: [{ type: 'paragraph', text: data.htmlContent }], miniCheck: { questions: [] } }],
-                },
-              ],
-              eoq: { questions: [] },
-            });
-          }
-          break;
-        }
-      }
+        const data = await api.week(decodeURIComponent(courseCode), weekNum);
+        const note = data.note_json as UnifyNote;
+        setNote(note && Array.isArray(note.topics) ? note : null);
       } catch {
         // keep note null so the empty state renders instead of hanging
       } finally {
@@ -86,7 +57,10 @@ export default function LearnPage() {
         <div key={t.number} style={{ marginBottom: 32 }}>
           <TopicSlice topic={t} />
           <button
-            onClick={() => toggle(weekNum, idx)}
+            onClick={() => {
+              toggle(weekNum, idx);
+              void api.progress(decodeURIComponent(courseCode).toUpperCase(), weekNum, idx).catch(() => {});
+            }}
             style={{
               marginTop: 12,
               padding: '10px 18px',
