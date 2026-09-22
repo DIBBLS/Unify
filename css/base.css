@@ -11,16 +11,20 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: 16px; /* mobile base */
+  line-height: 1.5;
   overflow-x: hidden;
   transition: background 0.25s, color 0.25s;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* ── Fluid typography helper ─────────────────────────── */

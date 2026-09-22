@@ -10,13 +10,17 @@
   --font-display:'Nunito', 'Feather Bold', sans-serif;--font-body:'Nunito','Mona Sans',system-ui,sans-serif
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased}
-.hero{background:#3c3c3c;color:#fff;border-radius:var(--radius);padding:28px;position:relative;overflow:hidden}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;padding-bottom:env(safe-area-inset-bottom)}
+/* Mobile-first: 320px base, 480px Duolingo shell, 1080px desktop */
+.hero{background:#3c3c3c;color:#fff;border-radius:var(--radius);padding:20px;position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(88,204,2,.08)}
-.topic-card{background:var(--surface);border:2px solid var(--border);border-bottom:4px solid var(--border);border-radius:var(--radius);padding:22px 26px;margin-bottom:12px;transition:transform .15s, box-shadow .15s}
+@media(min-width:768px){.hero{padding:28px}}
+.topic-card{background:var(--surface);border:2px solid var(--border);border-bottom:4px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;transition:transform .15s, box-shadow .15s}
+@media(min-width:768px){.topic-card{padding:22px 26px}}
 .topic-card:hover{transform:translateY(1px);box-shadow:var(--shadow)}
-.mini-check{background:var(--surface2);border:2px solid var(--border);border-left:3px solid var(--green);border-radius:0 var(--radius) var(--radius) 0;padding:18px 22px;margin:0 0 20px}
+.mini-check{background:var(--surface2);border:2px solid var(--border);border-left:3px solid var(--green);border-radius:0 var(--radius) var(--radius) 0;padding:14px 16px;margin:0 0 20px}
+@media(min-width:768px){.mini-check{padding:18px 22px}}
 .mini-check-header{display:flex;gap:8px;align-items:center}
 .mc-mcq-opt{padding:10px 12px;border:2px solid var(--border);border-bottom:4px solid var(--border);border-radius:12px;background:var(--surface);cursor:pointer;margin-top:6px;font-weight:600;transition:all .15s}
 .mc-mcq-opt:hover:not(.mc-locked){background:var(--green-pale)}
