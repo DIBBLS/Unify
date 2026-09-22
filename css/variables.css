@@ -1,68 +1,94 @@
 /*
- * Unify — CSS Custom Properties (Design Tokens)
+ * Unify — CSS Custom Properties (Design Tokens) — Duolingo-inspired
  * Shared across all pages. Include this first.
+ * Adopted from Duolingo: owl green #58cc02, chunky 4px bottom-shadow, 16px radii, 2px borders
  */
 
 :root {
-  --font-display: 'Playfair Display', serif;
-  --font-body: 'DM Sans', sans-serif;
+  --font-display: 'Nunito', 'Feather Bold', 'DIN Round Pro', 'DM Sans', sans-serif;
+  --font-body: 'Nunito', 'Mona Sans', 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
-  /* Backgrounds */
-  --bg:       #f0efe9;
+  /* Backgrounds — Duolingo snow/eel */
+  --bg:       #ffffff;
   --surface:  #ffffff;
-  --surface2: #f5f4ef;
+  --surface2: #f7f7f7;
+  --surface-warm: #f7f7f7;
 
-  /* Borders */
-  --border:   #e6e4de;
+  /* Borders — 2px solid, never hairlines */
+  --border:   #e5e5e5;
+  --border-strong: #afafaf;
+  --radius-sm: 8px;
+  --radius: 16px;
+  --radius-lg: 16px;
+  --radius-pill: 9999px;
 
-  /* Text */
-  --text:     #111410;
-  --text2:    #555;
-  --text3:    #999;
+  /* Text — eel/wolf/hare */
+  --text:     #3c3c3c;
+  --text2:    #777777;
+  --text3:    #afafaf;
+  --fg:       #3c3c3c;
+  --muted:    #777777;
 
   /* Inverted (dark hero banners) */
-  --invert-bg:     #111410;
-  --invert-text:   #f0efe9;
-  --invert-sub:    #555;
-  --invert-border: #1f1f1f;
+  --invert-bg:     #3c3c3c;
+  --invert-text:   #ffffff;
+  --invert-sub:    #777777;
+  --invert-border: #4b4b4b;
 
   /* Tags */
-  --tag-bg:   #f0efeb;
-  --tag-color:#888;
+  --tag-bg:   #f7f7f7;
+  --tag-color:#777777;
 
-  /* Accent colours */
-  --green:        #4ade80;
-  --green-bg:     rgba(74, 222, 128, 0.12);
-  --green-border: rgba(74, 222, 128, 0.25);
-  --green-deep:   #16a34a;
-  --green-d:      #16a34a;
+  /* Duolingo accent — Owl green + semantic */
+  --green:        #58cc02;
+  --green-hover:  #89e219;
+  --green-active: #58a700;
+  --green-pale:   #dbf8c5;
+  --green-bg:     rgba(88, 204, 2, 0.12);
+  --green-border: rgba(88, 204, 2, 0.30);
+  --green-deep:   #58a700;
+  --green-d:      #58a700;
 
-  --yellow:        #fbbf24;
-  --yellow-bg:     rgba(251, 191, 36, 0.08);
-  --yellow-border: rgba(251, 191, 36, 0.25);
+  --yellow:        #ff9600; /* streak orange */
+  --yellow-bg:     rgba(255, 150, 0, 0.12);
+  --yellow-border: rgba(255, 150, 0, 0.28);
 
-  --red:        #ef4444;
-  --red-bg:     rgba(239, 68, 68, 0.07);
-  --red-border: rgba(239, 68, 68, 0.20);
+  --blue:        #1cb0f6;
+  --blue-bg:     rgba(28, 176, 246, 0.10);
+
+  --red:        #ff4b4b; /* cardinal */
+  --red-bg:     rgba(255, 75, 75, 0.08);
+  --red-border: rgba(255, 75, 75, 0.22);
+
+  --pink:       #ce82ff; /* gem */
+
+  /* Elevation — chunky 4px bottom-shadow */
+  --shadow:    0 4px 0 #e5e5e5;
+  --shadow-green: 0 4px 0 #58a700;
+  --shadow-sm: 0 3px 8px rgba(0,0,0,0.15);
+
+  /* Spacing — 4px base: 4,8,12,16,24,32,48 */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-6: 24px; --space-8: 32px;
 
   /* Layout */
   --sidebar-w: 240px;
-  --shadow:    0 1px 3px rgba(0,0,0,0.06);
+  --container-max: 1080px;
 }
 
 [data-theme="dark"] {
-  --bg:       #111410;
-  --surface:  #1c1e1a;
-  --surface2: #242620;
-  --border:   #2a2c27;
-  --text:     #f0efe9;
-  --text2:    #a0a09a;
-  --text3:    #555;
-  --invert-bg:     #f0efe9;
-  --invert-text:   #111410;
-  --invert-sub:    #a0a09a;
-  --invert-border: #e6e4de;
-  --tag-bg:   #2a2c27;
-  --tag-color:#a0a09a;
-  --shadow:   0 1px 4px rgba(0,0,0,0.3);
+  --bg:       #111111;
+  --surface:  #1c1c1e;
+  --surface2: #2c2c2e;
+  --border:   #2c2c2e;
+  --text:     #f5f5f5;
+  --text2:    #a1a1aa;
+  --text3:    #6b6b6b;
+  --invert-bg:     #f5f5f5;
+  --invert-text:   #111111;
+  --invert-sub:    #a1a1aa;
+  --invert-border: #2c2c2e;
+  --tag-bg:   #1c1c1e;
+  --tag-color:#777777;
+  --shadow:   0 4px 0 #2c2c2e;
 }
