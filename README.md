@@ -19,23 +19,23 @@ Master spec: `docs/PRD-master-v5.0.docx` (deferred P2: Arcade/Coins/WhatsApp). L
 ```
 Unify/
 ├── apps/
-│   ├── web/                          # Vite+React TS — lean Learn
-│   │   ├── src/
-│   │   │   ├── pages/                # CoursePage (12 weeks) → LearnPage (Week→TopicSlice)
-│   │   │   ├── components/           # ContentBlock, MiniCheck, TopicSlice
-│   │   │   ├── hooks/                # useProgress (topicKey w_t, localStorage + Firestore)
-│   │   │   ├── lib/firebase.ts       # re-export js/firebase-config.js
-│   │   │   ├── types/note.ts         # UnifyNote (topics[].subtopics[].miniCheck/pulseCheck/eoq)
-│   │   │   ├── App.tsx               # BrowserRouter /course, /learn/:courseCode/week/:week
-│   │   │   └── index.css             # --green/#22C55E tokens
-│   │   ├── public/icons, manifest.json, sw.js
-│   │   ├── package.json, vite.config.ts, tsconfig.json
-│   │   └── index.html
-│   └── notes-engine/                 # Express+TS — Draft→AI→Review→Published
-│       ├── server.ts                 # (from server.js) /api/convert|validate|render|save|upload
-│       ├── src/{renderer.ts,schema.ts}, samples/hand_authored_note.json
-│       ├── package.json (tsx, @types/*), tsconfig.json
-│       └── public/app.js             # admin authoring UI
+│   └── web/                          # Vite+React TS — lean Learn (Duolingo)
+│       ├── src/
+│       │   ├── pages/                # CoursePage (12 weeks) → LearnPage (Week→TopicSlice)
+│       │   ├── components/           # ContentBlock, MiniCheck, TopicSlice
+│       │   ├── hooks/                # useProgress (topicKey w_t, localStorage + Firestore)
+│       │   ├── lib/firebase.ts       # re-export js/firebase-config.js
+│       │   ├── types/note.ts         # UnifyNote (topics[].subtopics[].miniCheck/pulseCheck/eoq)
+│       │   ├── App.tsx               # BrowserRouter /course, /learn/:courseCode/week/:week
+│       │   └── index.css             # --green/#22C55E tokens
+│       ├── public/icons, manifest.json, sw.js
+│       ├── package.json, vite.config.ts, tsconfig.json
+│       └── index.html
+├── notes-engine/                     # Express+TS — Draft→AI→Review→Published (authoring, not in apps/ per Vercel separate deploy)
+│   ├── server.ts / server.js         # /api/convert|validate|render|save|upload (server.ts is TS entry)
+│   ├── src/{renderer.js,schema.js}   # renderer/schema still .js (TS migration next), samples/hand_authored_note.json
+│   ├── package.json (tsx, @types/*), tsconfig.json
+│   └── public/app.js                 # admin authoring UI
 ├── docs/
 │   ├── PRD-lean-v1.0.docx
 │   └── PRD-master-v5.0.docx
@@ -43,7 +43,7 @@ Unify/
 ├── css/                              # legacy tokens (reference)
 ├── Coursecontents/                   # legacy per-week HTML (migrating to noteJson)
 ├── Learn.html, dashboard.html, ...   # legacy static (kept for reference, new is apps/web)
-├── vercel.json, vite.config.js       # root legacy (new web has own vite.config.ts)
+├── vercel.json, vite.config.js       # root (legacy static + Vite wrapper)
 └── firestore.rules
 ```
 
