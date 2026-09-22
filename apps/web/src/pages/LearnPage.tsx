@@ -7,6 +7,7 @@ import type { UnifyNote } from '../types/note';
 import { TopicSlice } from '../components/TopicSlice';
 import { useProgress } from '../hooks/useProgress';
 import Loading from '../components/Loading';
+import Mascot from '../components/Mascot';
 
 export default function LearnPage() {
   const { courseCode = 'MEE 352', week: weekParam } = useParams();
@@ -61,7 +62,13 @@ export default function LearnPage() {
   }, [courseCode, weekNum]);
 
   if (loading) return <Loading text={`Loading Week ${weekNum}`} />;
-  if (!note) return <div style={{ padding: 40, textAlign: 'center', color: '#777' }}>No content for {courseCode} Week {weekNum} yet.</div>;
+  if (!note)
+    return (
+      <div style={{ padding: 40, textAlign: 'center', color: '#777' }}>
+        <Mascot size={110} />
+        <div style={{ marginTop: 12 }}>No content for {courseCode} Week {weekNum} yet.</div>
+      </div>
+    );
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 20px 100px' }}>
