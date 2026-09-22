@@ -217,4 +217,31 @@ router.post("/progress", requireAuth, async (req: Request, res: Response) => {
   }
 });
 
+// Authed: xp total + streak + per-course topic counts for the dashboard.
+router.get("/stats", requireAuth, async (req: Request, res: Response) => {
+  const userId = (req as AuthedRequest).userId as string;
+  try {
+    const sb = supabaseAdmin();
+    const { data: xpRows } = await sb
+      .from("xp_events")
+      .select("amount,created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(200);
+    const rows = (xpRows ?? []) as { amount: number; created_at: string }[];
+    const { data: progRows } = await sb.from("topic_progress").select("course").eq("user_id", userId);
+    const counts: Record<string, number> = {};
+    for (const r of ((progRows ?? []) as { course: string }[])) {
+      counts[r.course] = (counts[r.course] || 0) + 1;
+    }
+    res.json({
+      xp: rows.reduce((s, r) => s + (r.amount || 0), 0),
+      streak: calcStreak(rows.map((r) => r.created_at)),
+      courses: Object.entries(counts).map(([course, topics]) => ({ course, topics })),
+    });
+  } catch (e) {
+    res.status(500).json(dbError(e));
+  }
+});
+
 export default router;

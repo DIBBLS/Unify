@@ -1,45 +1,62 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, ChevronRight } from 'lucide-react';
-import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../lib/firebase';
+import { supabaseBrowser } from '../lib/supabase';
+import { api, type Profile } from '../lib/api';
 import Loading from '../components/Loading';
 import Mascot from '../components/Mascot';
 
-function gradeToPoint(g: string) {
-  const m: Record<string, number> = { A: 5, B: 4, C: 3, D: 2, E: 1, F: 0 };
-  return m[g.toUpperCase()] ?? 0;
-}
+type CourseStat = { course: string; topics: number };
 
 export default function DashboardRoute() {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
-  const [courses, setCourses] = useState<any[]>([]);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [xp, setXp] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [courses, setCourses] = useState<CourseStat[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
+  const [configError, setConfigError] = useState('');
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (u) => {
-      if (!u) return navigate('/auth');
-      setUser(u);
+    const sb = supabaseBrowser();
+    if (!sb) {
+      setConfigError('App is not configured yet (Supabase keys missing).');
+      setLoading(false);
+      return;
+    }
+    (async () => {
+      const { data: sessionData } = await sb.auth.getSession();
+      if (!sessionData.session) {
+        navigate('/auth');
+        return;
+      }
       try {
-        const snap = await getDoc(doc(db, 'users', u.uid));
-        const data = snap.data() || {};
-        if (!data.university) return navigate('/onboarding');
-        setProfile(data);
-        setCourses(data.courses || []);
+        const me = await api.me();
+        if (!me.onboarded || !me.profile) {
+          navigate('/onboarding');
+          return;
+        }
+        setProfile(me.profile);
+        const stats = await api.stats();
+        setXp(stats.xp);
+        setStreak(stats.streak);
+        setCourses(stats.courses);
       } catch {
         setLoadError("Couldn't load your profile. Check your connection and try again.");
       } finally {
         setLoading(false);
       }
-    });
-    return () => unsub();
+    })();
   }, [navigate]);
 
   if (loading) return <Loading text="Loading dashboard…" />;
+  if (configError)
+    return (
+      <div style={{ maxWidth: 480, margin: '0 auto', padding: 40, textAlign: 'center' }}>
+        <p style={{ color: '#9a3412', fontSize: 14 }}>{configError}</p>
+      </div>
+    );
   if (loadError)
     return (
       <div style={{ maxWidth: 480, margin: '0 auto', padding: 40, textAlign: 'center' }}>
@@ -50,53 +67,35 @@ export default function DashboardRoute() {
       </div>
     );
 
-  const graded = courses.filter((c) => c.grade && c.grade !== '-' && c.grade !== '');
-  const totalUnits = courses.reduce((s, c) => s + (c.units || 3), 0);
-  let cgpa = 0;
-  if (graded.length) {
-    let w = 0,
-      u = 0;
-    graded.forEach((c) => {
-      w += gradeToPoint(c.grade) * (c.units || 3);
-      u += c.units || 3;
-    });
-    cgpa = u ? w / u : 0;
-  }
-
-  const pct = 68;
+  const firstName = profile?.first_name || 'Builder';
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', paddingBottom: 80 }}>
       <div style={{ padding: '20px 16px 12px', background: '#fff' }}>
         <div style={{ fontSize: 11, color: '#afafaf', letterSpacing: 1 }}>Your Dashboard</div>
         <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28, marginTop: 4 }}>
-          Good to have you, <em style={{ background: '#10b981', color: '#fff', padding: '0 6px', borderRadius: 6, fontStyle: 'normal' }}>{profile?.firstName || user?.displayName?.split(' ')[0] || 'Builder'}</em>
+          Good to have you, <em style={{ background: '#10b981', color: '#fff', padding: '0 6px', borderRadius: 6, fontStyle: 'normal' }}>{firstName}</em>
         </h1>
         <div style={{ fontSize: 13, color: '#777', marginTop: 4 }}>{profile?.department || ''}</div>
       </div>
 
-      <div style={{ margin: '12px 16px', background: '#fff', border: '2px solid #e5e5e5', borderRadius: 16, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
+      <div style={{ margin: '12px 16px', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 800 }}>{profile?.gradePlanner?.target || '—'}</div>
+          <div style={{ fontSize: 18, fontWeight: 800 }}>{profile?.grad_target ?? '—'}</div>
           <div style={{ fontSize: 11, color: '#777' }}>Target</div>
         </div>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 800 }}>{cgpa.toFixed(2)}</div>
-          <div style={{ fontSize: 11, color: '#777' }}>CGPA</div>
+          <div style={{ fontSize: 18, fontWeight: 800 }}>{xp}</div>
+          <div style={{ fontSize: 11, color: '#777' }}>XP</div>
         </div>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 800 }}>{totalUnits}</div>
-          <div style={{ fontSize: 11, color: '#777' }}>Units</div>
+          <div style={{ fontSize: 18, fontWeight: 800 }}>{streak}</div>
+          <div style={{ fontSize: 11, color: '#777' }}>Streak</div>
         </div>
         <div>
           <div style={{ fontSize: 18, fontWeight: 800 }}>{courses.length}</div>
           <div style={{ fontSize: 11, color: '#777' }}>Courses</div>
         </div>
       </div>
-
-      <div style={{ margin: '0 16px 12px', height: 8, background: '#e5e5e5', borderRadius: 9999, overflow: 'hidden' }}>
-        <div style={{ width: `${pct}%`, height: '100%', background: '#10b981', borderRadius: 9999 }} />
-      </div>
-      <div style={{ margin: '0 16px 16px', fontSize: 12, color: '#777', textAlign: 'right' }}>{pct}% complete</div>
 
       <div style={{ margin: '0 16px', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
         <div style={{ width: 44, height: 44, background: '#ecfdf5', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -124,10 +123,10 @@ export default function DashboardRoute() {
             <div style={{ marginTop: 8 }}>No courses yet. Go to Courses to enroll.</div>
           </div>
         ) : (
-          courses.slice(0, 5).map((c) => (
+          courses.map((c) => (
             <Link key={c.course} to={`/learn/${encodeURIComponent(c.course)}/week/1`} style={{ padding: 14, background: '#fff', border: '2px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 16, display: 'flex', justifyContent: 'space-between', textDecoration: 'none', color: '#3c3c3c' }}>
               <span style={{ fontWeight: 700 }}>{c.course}</span>
-              <span style={{ fontSize: 12, color: '#777' }}>{c.units || 3} units</span>
+              <span style={{ fontSize: 12, color: '#777' }}>{c.topics} topics done</span>
             </Link>
           ))
         )}
