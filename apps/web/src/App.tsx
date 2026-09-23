@@ -8,7 +8,6 @@ import DashboardRoute from './routes/dashboard';
 import OnboardingRoute from './routes/onboarding';
 import ProfileRoute from './routes/profile';
 import StudioRoute from './routes/studio/index';
-import StudioReviewRoute from './routes/studio/review';
 import Mascot from './components/Mascot';
 import Loading from './components/Loading';
 import { supabaseBrowser } from './lib/supabase';
@@ -157,16 +156,7 @@ export default function App() {
               </RequireAuth>
             }
           />
-          <Route
-            path="/studio/review"
-            element={
-              <RequireAuth>
-                <RequireRole allow={AUTHOR_ONLY}>
-                  <StudioReviewRoute />
-                </RequireRole>
-              </RequireAuth>
-            }
-          />
+
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
