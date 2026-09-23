@@ -131,6 +131,10 @@ export const api = {
     apiFetch<{ done: number[] }>(`/v1/progress?course=${encodeURIComponent(course)}&week=${week}`),
   authored: () =>
     apiFetch<{ notes: { course: string; week: number; title: string; subtitle: string }[] }>('/v1/authored'),
+  courseWeeks: (course: string) =>
+    apiFetch<{ weeks: { week: number; title: string; subtitle: string }[] }>(
+      `/v1/courses/${encodeURIComponent(course)}/weeks`
+    ),
   convert: (payload: {
     course: string;
     week: number;
