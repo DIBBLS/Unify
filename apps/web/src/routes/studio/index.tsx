@@ -220,7 +220,7 @@ export default function StudioRoute() {
             </div>
           </details>
           <button onClick={convert} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
-            Convert with Claude <ArrowRight size={18} />
+            Generate note <ArrowRight size={18} />
           </button>
         </div>
       )}
