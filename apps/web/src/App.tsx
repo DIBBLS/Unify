@@ -7,6 +7,7 @@ import AuthRoute from './routes/auth';
 import DashboardRoute from './routes/dashboard';
 import OnboardingRoute from './routes/onboarding';
 import ProfileRoute from './routes/profile';
+import AdminRoute from './routes/admin';
 import StudioRoute from './routes/studio/index';
 import Mascot from './components/Mascot';
 import Loading from './components/Loading';
@@ -83,7 +84,7 @@ function RequireRole({ allow, children }: { allow: string[]; children: JSX.Eleme
       .then((me) => {
         const role = me.profile?.role || 'student';
         if (!me.onboarded) navigate('/onboarding');
-        else if (!allow.includes(role)) navigate('/dashboard');
+        else if (!allow.includes(role) && !me.isAdmin) navigate('/dashboard');
         else setOk(true);
       })
       .catch(() => navigate('/auth'));
@@ -143,6 +144,14 @@ export default function App() {
             element={
               <RequireAuth>
                 <ProfileRoute />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <RequireAuth>
+                <AdminRoute />
               </RequireAuth>
             }
           />
