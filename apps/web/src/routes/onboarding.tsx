@@ -119,15 +119,19 @@ export default function OnboardingRoute() {
 
   if (loading) return <Loading text="Loading onboarding…" />;
 
-  const left = [
-    { s: 'Step 1 of 7', t: "What's your role?" },
-    { s: 'Step 2 of 7', t: "What's your first name?" },
-    { s: 'Step 3 of 7', t: 'Where are you studying?' },
-    { s: 'Step 4 of 7', t: "What's your faculty?" },
-    { s: 'Step 5 of 7', t: 'Which department?' },
-    { s: 'Step 6 of 7', t: 'What level are you in?' },
-    { s: 'Step 7 of 7', t: "What's your graduation target?" },
-  ][step];
+  const STEP_TITLES = [
+    "What's your role?",
+    "What's your first name?",
+    'Where are you studying?',
+    "What's your faculty?",
+    'Which department?',
+    'What level are you in?',
+    "What's your graduation target?",
+  ];
+  // The flow length follows the chosen role: collaborator 2, lecturer 5, student 7.
+  const totalSteps = role === 'collaborator' ? 2 : role === 'lecturer' ? 5 : 7;
+  const shownStep = Math.min(step, totalSteps - 1);
+  const left = { s: `Step ${shownStep + 1} of ${totalSteps}`, t: STEP_TITLES[shownStep] };
 
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', minHeight: '100vh', background: '#fff' }}>
@@ -135,8 +139,8 @@ export default function OnboardingRoute() {
         <div style={{ fontSize: 11, letterSpacing: 1, opacity: 0.8 }}>{left.s}</div>
         <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28, marginTop: 6 }}>{left.t}</h1>
         <div style={{ display: 'flex', gap: 6, marginTop: 12 }}>
-          {Array.from({ length: 7 }).map((_, i) => (
-            <div key={i} style={{ flex: 1, height: 4, borderRadius: 2, background: i <= step ? '#fff' : 'rgba(255,255,255,0.3)' }} />
+          {Array.from({ length: totalSteps }).map((_, i) => (
+            <div key={i} style={{ flex: 1, height: 4, borderRadius: 2, background: i <= shownStep ? '#fff' : 'rgba(255,255,255,0.3)' }} />
           ))}
         </div>
       </div>
