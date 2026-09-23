@@ -94,7 +94,7 @@ export default function OnboardingRoute() {
   ];
   const levels = ['100 Level', '200 Level', '300 Level', '400 Level', '500 Level'];
 
-  const save = async (skipTarget = false) => {
+  const save = async (skipTarget = false, overrides: Record<string, unknown> = {}) => {
     setError('');
     setLoading(true);
     try {
@@ -105,6 +105,7 @@ export default function OnboardingRoute() {
         department,
         level,
         role: role ?? 'student',
+        ...overrides,
       };
       if (university?.id && UUID_RE.test(university.id)) payload.universityId = university.id;
       if (!skipTarget && gradTarget) payload.gradTarget = gradTarget;
@@ -216,7 +217,7 @@ export default function OnboardingRoute() {
           <button key={f.name} onClick={() => { setFaculty(f.name); setStep(4); }} style={{ padding: 14, border: '1px solid #e5e5e5', borderRadius: 12, background: '#fff', textAlign: 'left' }}>{f.name}</button>
         ))}
         {step === 4 && departments.map((d) => (
-          <button key={d.name} onClick={() => { setDepartment(d.name); setStep(5); }} style={{ padding: 14, border: '1px solid #e5e5e5', borderRadius: 12, background: '#fff', textAlign: 'left' }}>
+          <button key={d.name} onClick={() => { setDepartment(d.name); if (role === 'student' || !role) setStep(5); else void save(false, { department: d.name }); }} style={{ padding: 14, border: '1px solid #e5e5e5', borderRadius: 12, background: '#fff', textAlign: 'left' }}>
             {d.name} <span style={{ color: '#777', fontSize: 12 }}>{d.sub}</span>
           </button>
         ))}
