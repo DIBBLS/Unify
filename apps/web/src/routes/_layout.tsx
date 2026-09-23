@@ -3,6 +3,7 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, BookOpen, User, PenTool } from 'lucide-react';
 import { supabaseBrowser } from '../lib/supabase';
 import { api } from '../lib/api';
+import OfflineBanner from '../components/OfflineBanner';
 
 type Tab = {
   to: string;
@@ -104,6 +105,7 @@ export default function Layout() {
           </Link>
         )}
       </header>
+      <OfflineBanner />
       <Outlet />
       <nav style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, display: 'flex', background: '#fff', borderTop: '1px solid #e5e5e5', padding: '8px 0 calc(8px + env(safe-area-inset-bottom))' }}>
         {tabs.map((t) => {

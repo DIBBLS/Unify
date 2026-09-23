@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, X, RotateCcw } from 'lucide-react';
 import type { EOQ } from '../types/note';
+import { api } from '../lib/api';
 
 const PASS_PCT = 60;
 
@@ -16,8 +17,9 @@ function fitbAccepted(q: EOQ['questions'][number]): string[] {
   return q.correct ? [q.correct] : [];
 }
 
-export default function EoqQuiz({ eoq }: { eoq: EOQ }) {
+export default function EoqQuiz({ eoq, course, week }: { eoq: EOQ; course: string; week: number }) {
   const [picked, setPicked] = useState<Record<number, number>>({});
+  const [recorded, setRecorded] = useState(false);
   const [fitb, setFitb] = useState<Record<number, string>>({});
   const [checked, setChecked] = useState<Record<number, boolean>>({});
 
@@ -39,6 +41,12 @@ export default function EoqQuiz({ eoq }: { eoq: EOQ }) {
   const done = eoq.questions.every((_, i) => !gradeable[i] || answered[i]);
   const pct = total ? Math.round((score / total) * 100) : 0;
   const passed = done && total > 0 && pct >= PASS_PCT;
+
+  useEffect(() => {
+    if (!done || total === 0 || recorded) return;
+    setRecorded(true);
+    api.quizAttempt(course, week, score, total).catch(() => {});
+  }, [done, total, recorded, course, week, score]);
 
   const reset = () => {
     setPicked({});

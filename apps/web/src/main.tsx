@@ -5,6 +5,13 @@ import './index.css';
 import { warmupApi } from './lib/api';
 import { log } from './lib/log';
 
+// Offline support: cache shell + readable content (see public/sw.js).
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+
 warmupApi();
 // Boot inventory: which connections exist (names only, never values).
 // If supabaseUrl/Key is false here, sign-in cannot even attempt —

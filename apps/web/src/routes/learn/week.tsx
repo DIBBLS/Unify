@@ -166,7 +166,7 @@ export default function LearnPage() {
           onToggle={() => toggle(weekNum, tab)}
         />
       ) : (
-        <EoqQuiz eoq={note.eoq ?? { questions: [] }} />
+        <EoqQuiz eoq={note.eoq ?? { questions: [] }} course={note.course} week={note.week} />
       )}
 
       {tabCount > 1 && (

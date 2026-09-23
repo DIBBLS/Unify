@@ -15,6 +15,7 @@ export default function DashboardRoute() {
   const [xp, setXp] = useState(0);
   const [streak, setStreak] = useState(0);
   const [courses, setCourses] = useState<CourseStat[]>([]);
+  const [quizzes, setQuizzes] = useState({ taken: 0, avg: 0 });
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [notes, setNotes] = useState<{ course: string; week: number; title: string; subtitle: string }[]>([]);
@@ -42,6 +43,7 @@ export default function DashboardRoute() {
         setXp(stats.xp);
         setStreak(stats.streak);
         setCourses(stats.courses);
+        setQuizzes({ taken: stats.quizzesTaken || 0, avg: stats.quizAvg || 0 });
         if (me.profile?.role === 'lecturer' || me.profile?.role === 'collaborator') {
           try {
             const authored = await api.authored();
@@ -137,6 +139,12 @@ export default function DashboardRoute() {
           <div style={{ fontSize: 11, color: '#777' }}>Courses</div>
         </div>
       </div>
+
+      {quizzes.taken > 0 && (
+        <div style={{ margin: '0 16px 12px', fontSize: 12, color: '#777', textAlign: 'center' }}>
+          {quizzes.taken} {quizzes.taken === 1 ? 'quiz' : 'quizzes'} taken · {quizzes.avg}% average
+        </div>
+      )}
 
       <div style={{ margin: '0 16px', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
         <div style={{ width: 44, height: 44, background: '#ecfdf5', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

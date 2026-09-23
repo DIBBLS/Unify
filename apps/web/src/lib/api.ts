@@ -139,7 +139,7 @@ export const api = {
       body: JSON.stringify({ course, week, topic }),
     }),
   stats: () =>
-    apiFetch<{ xp: number; streak: number; courses: { course: string; topics: number }[] }>("/v1/stats"),
+    apiFetch<{ xp: number; streak: number; courses: { course: string; topics: number }[]; quizzesTaken: number; quizAvg: number }>("/v1/stats"),
   progressGet: (course: string, week: number) =>
     apiFetch<{ done: number[] }>(`/v1/progress?course=${encodeURIComponent(course)}&week=${week}`),
   authored: () =>
@@ -148,6 +148,11 @@ export const api = {
     apiFetch<{ weeks: { week: number; title: string; subtitle: string }[] }>(
       `/v1/courses/${encodeURIComponent(course)}/weeks`
     ),
+  quizAttempt: (course: string, week: number, score: number, total: number) =>
+    apiFetch<{ ok: boolean }>('/v1/quiz/attempt', {
+      method: 'POST',
+      body: JSON.stringify({ course, week, score, total }),
+    }),
   convert: (payload: {
     course: string;
     week: number;
