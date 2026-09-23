@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, BookOpen, User, PenTool } from 'lucide-react';
 import { supabaseBrowser } from '../lib/supabase';
-import { api, getApiUrl } from '../lib/api';
+import { api } from '../lib/api';
 
 type Tab = {
   to: string;
@@ -52,15 +52,13 @@ export default function Layout() {
   }, [authed]);
 
   const isAuthor = role === 'lecturer' || role === 'collaborator';
-  const apiUrl = getApiUrl();
-  const tabs: Tab[] =
-    isAuthor && apiUrl
-      ? [
-          { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, match: ['/dashboard'] },
-          { to: apiUrl, label: 'Studio', icon: PenTool, match: [], external: true },
-          { to: '/profile', label: 'Profile', icon: User, match: ['/profile'] },
-        ]
-      : STUDENT_TABS;
+  const tabs: Tab[] = isAuthor
+    ? [
+        { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, match: ['/dashboard'] },
+        { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio'] },
+        { to: '/profile', label: 'Profile', icon: User, match: ['/profile'] },
+      ]
+    : STUDENT_TABS;
 
   return (
     <div style={{ fontFamily: "'Nunito', system-ui" }}>
