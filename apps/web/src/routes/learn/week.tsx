@@ -63,7 +63,7 @@ export default function LearnPage() {
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 20px 100px' }}>
-      <button onClick={() => navigate(-1)} style={{ marginBottom: 16, display: 'flex', gap: 6, alignItems: 'center', background: 'none', border: 'none', color: '#777', fontSize: 14 }}>
+      <button onClick={() => navigate('/course')} style={{ marginBottom: 16, display: 'flex', gap: 6, alignItems: 'center', background: 'none', border: 'none', color: '#777', fontSize: 14 }}>
         <ChevronLeft size={18} /> Back
       </button>
       <div className="hero" style={{ background: '#fff', color: '#3c3c3c', border: '1px solid #e5e5e5', borderRadius: 12, padding: 24, marginBottom: 32 }}>

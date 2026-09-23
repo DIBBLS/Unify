@@ -131,17 +131,6 @@ export default function DashboardRoute() {
         )}
       </div>
 
-      <nav style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, display: 'flex', justifyContent: 'space-around', background: '#fff', borderTop: '2px solid #e5e5e5', padding: '8px 0 calc(8px + env(safe-area-inset-bottom))' }}>
-        <Link to="/dashboard" style={{ textDecoration: 'none', color: '#10b981', fontWeight: 700, fontSize: 12 }}>
-          Dashboard
-        </Link>
-        <Link to="/course" style={{ textDecoration: 'none', color: '#777', fontSize: 12 }}>
-          Learn
-        </Link>
-        <Link to="/profile" style={{ textDecoration: 'none', color: '#777', fontSize: 12 }}>
-          Profile
-        </Link>
-      </nav>
     </div>
   );
 }
