@@ -197,8 +197,8 @@ export default function OnboardingRoute() {
             </div>
             <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="e.g. Joshua" style={{ padding: 12, border: '1px solid #e5e5e5', borderRadius: 12, fontSize: 16 }} />
             {firstName && <div style={{ fontSize: 14 }}>Good morning, <strong>{firstName}</strong></div>}
-            <button onClick={() => firstName.trim() && setStep(2)} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
-              Continue <ArrowRight size={18} />
+            <button onClick={() => { if (!firstName.trim()) return; if (role === 'student' || !role) setStep(2); else void save(false); }} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+              {role === 'student' || !role ? (<>Continue <ArrowRight size={18} /></>) : (<>Finish setup <ArrowRight size={18} /></>)}
             </button>
           </>
         )}

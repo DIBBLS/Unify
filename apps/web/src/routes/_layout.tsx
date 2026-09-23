@@ -1,9 +1,18 @@
 import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, BookOpen, User } from 'lucide-react';
+import { LayoutDashboard, BookOpen, User, PenTool } from 'lucide-react';
 import { supabaseBrowser } from '../lib/supabase';
+import { api, getApiUrl } from '../lib/api';
 
-const TABS = [
+type Tab = {
+  to: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  match: string[];
+  external?: boolean;
+};
+
+const STUDENT_TABS: Tab[] = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, match: ['/dashboard'] },
   { to: '/course', label: 'Learn', icon: BookOpen, match: ['/course', '/learn'] },
   { to: '/profile', label: 'Profile', icon: User, match: ['/profile'] },
@@ -12,6 +21,7 @@ const TABS = [
 export default function Layout() {
   const [authed, setAuthed] = useState(false);
   const [initial, setInitial] = useState('');
+  const [role, setRole] = useState<string | null>(null);
   const { pathname } = useLocation();
 
   useEffect(() => {
@@ -30,10 +40,32 @@ export default function Layout() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!authed) {
+      setRole(null);
+      return;
+    }
+    api
+      .me()
+      .then((me) => setRole(me.profile?.role || 'student'))
+      .catch(() => {});
+  }, [authed]);
+
+  const isAuthor = role === 'lecturer' || role === 'collaborator';
+  const apiUrl = getApiUrl();
+  const tabs: Tab[] =
+    isAuthor && apiUrl
+      ? [
+          { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, match: ['/dashboard'] },
+          { to: apiUrl, label: 'Studio', icon: PenTool, match: [], external: true },
+          { to: '/profile', label: 'Profile', icon: User, match: ['/profile'] },
+        ]
+      : STUDENT_TABS;
+
   return (
     <div style={{ fontFamily: "'Nunito', system-ui" }}>
       <header style={{ display: 'flex', gap: 12, padding: '12px 16px', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: 0, background: '#fff', zIndex: 10, alignItems: 'center' }}>
-        <Link to="/course" style={{ fontWeight: 800, textDecoration: 'none', color: '#111827' }}>
+        <Link to="/dashboard" style={{ fontWeight: 800, textDecoration: 'none', color: '#111827' }}>
           Unify<span style={{ color: '#10b981' }}> Learn</span>
         </Link>
         <span style={{ flex: 1 }} />
@@ -76,25 +108,27 @@ export default function Layout() {
       </header>
       <Outlet />
       <nav style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, display: 'flex', background: '#fff', borderTop: '1px solid #e5e5e5', padding: '8px 0 calc(8px + env(safe-area-inset-bottom))' }}>
-        {TABS.map((t) => {
+        {tabs.map((t) => {
           const active = t.match.some((m) => pathname === m || pathname.startsWith(m + '/'));
           const Icon = t.icon;
-          return (
-            <Link
-              key={t.to}
-              to={t.to}
-              style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 2,
-                textDecoration: 'none',
-                color: active ? '#10b981' : '#777',
-                fontSize: 11,
-                fontWeight: active ? 800 : 500,
-              }}
-            >
+          const style = {
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 2,
+            textDecoration: 'none',
+            color: active ? '#10b981' : '#777',
+            fontSize: 11,
+            fontWeight: active ? 800 : 500,
+          } as const;
+          return t.external ? (
+            <a key={t.to} href={t.to} target="_blank" rel="noreferrer" style={style}>
+              <Icon size={20} />
+              {t.label}
+            </a>
+          ) : (
+            <Link key={t.to} to={t.to} style={style}>
               <Icon size={20} />
               {t.label}
             </Link>
