@@ -7,6 +7,8 @@ import AuthRoute from './routes/auth';
 import DashboardRoute from './routes/dashboard';
 import OnboardingRoute from './routes/onboarding';
 import ProfileRoute from './routes/profile';
+import StudioRoute from './routes/studio/index';
+import StudioReviewRoute from './routes/studio/review';
 import Mascot from './components/Mascot';
 import Loading from './components/Loading';
 import { supabaseBrowser } from './lib/supabase';
@@ -68,6 +70,7 @@ function RequireAuth({ children }: { children: JSX.Element }) {
 }
 
 const STUDENT_ONLY = ['student'];
+const AUTHOR_ONLY = ['lecturer', 'collaborator'];
 
 // Gate: authors (lecturer/collaborator) have no learn paths — bounce to dashboard.
 function RequireRole({ allow, children }: { allow: string[]; children: JSX.Element }) {
@@ -141,6 +144,26 @@ export default function App() {
             element={
               <RequireAuth>
                 <ProfileRoute />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/studio"
+            element={
+              <RequireAuth>
+                <RequireRole allow={AUTHOR_ONLY}>
+                  <StudioRoute />
+                </RequireRole>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/studio/review"
+            element={
+              <RequireAuth>
+                <RequireRole allow={AUTHOR_ONLY}>
+                  <StudioReviewRoute />
+                </RequireRole>
               </RequireAuth>
             }
           />
