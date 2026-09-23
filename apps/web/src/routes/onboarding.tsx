@@ -23,7 +23,9 @@ const ROLES = [
 
 export default function OnboardingRoute() {
   const navigate = useNavigate();
+  const isEdit = new URLSearchParams(window.location.search).get('edit') === '1';
   const [step, setStep] = useState(0);
+  const [originalRole, setOriginalRole] = useState<Role | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [role, setRole] = useState<Role | null>(null);
@@ -34,6 +36,8 @@ export default function OnboardingRoute() {
   const [department, setDepartment] = useState<string | null>(null);
   const [level, setLevel] = useState<string | null>(null);
   const [gradTarget, setGradTarget] = useState<number | null>(null);
+  const hour = new Date().getHours();
+  const daypart = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
   useEffect(() => {
     const sb = supabaseBrowser();
@@ -48,7 +52,6 @@ export default function OnboardingRoute() {
         return;
       }
       try {
-        const isEdit = new URLSearchParams(window.location.search).get('edit') === '1';
         const { onboarded, profile } = await api.me();
         if (onboarded && profile && !isEdit) {
           navigate('/dashboard');
@@ -57,6 +60,7 @@ export default function OnboardingRoute() {
         if (profile?.first_name) setFirstName(profile.first_name);
         if (profile?.role === 'student' || profile?.role === 'lecturer' || profile?.role === 'collaborator') {
           setRole(profile.role);
+          setOriginalRole(profile.role);
         }
         let list: Uni[] = [];
         try {
@@ -104,7 +108,8 @@ export default function OnboardingRoute() {
         faculty,
         department,
         level,
-        role: role ?? 'student',
+        // In edit mode the locked original role wins (role is immutable).
+        role: (isEdit ? originalRole : null) ?? role ?? 'student',
         ...overrides,
       };
       if (university?.id && UUID_RE.test(university.id)) payload.universityId = university.id;
@@ -151,7 +156,12 @@ export default function OnboardingRoute() {
             <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0 4px' }}>
               <Mascot size={88} />
             </div>
-            {ROLES.map((r) => {
+            {isEdit && (
+              <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 12, padding: 10, fontSize: 13, color: '#065f46', textAlign: 'center' }}>
+                Role{originalRole ? ` (${originalRole})` : ''} can't be changed here.
+              </div>
+            )}
+            {(isEdit ? [] : ROLES).map((r) => {
               const Icon = r.icon;
               const active = role === r.id;
               return (
@@ -201,9 +211,9 @@ export default function OnboardingRoute() {
               <Mascot size={110} />
             </div>
             <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="e.g. Joshua" style={{ padding: 12, border: '1px solid #e5e5e5', borderRadius: 12, fontSize: 16 }} />
-            {firstName && <div style={{ fontSize: 14 }}>Good morning, <strong>{firstName}</strong></div>}
-            <button onClick={() => { if (!firstName.trim()) return; if (role === 'student' || !role) setStep(2); else void save(false); }} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
-              {role === 'student' || !role ? (<>Continue <ArrowRight size={18} /></>) : (<>Finish setup <ArrowRight size={18} /></>)}
+            {firstName && <div style={{ fontSize: 14 }}>{daypart}, <strong>{firstName}</strong></div>}
+            <button onClick={() => { if (!firstName.trim()) return; if (isEdit) { void save(false); return; } if (role === 'student' || !role) setStep(2); else void save(false); }} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+              {isEdit || (role !== 'student' && role) ? (<>Finish setup <ArrowRight size={18} /></>) : (<>Continue <ArrowRight size={18} /></>)}
             </button>
           </>
         )}

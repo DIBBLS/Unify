@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, Pencil } from 'lucide-react';
+import { LogOut, Pencil, Shield } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type Profile } from '../lib/api';
@@ -12,8 +12,11 @@ export default function ProfileRoute() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [email, setEmail] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+  const [emailMsg, setEmailMsg] = useState('');
 
   useEffect(() => {
     const sb = supabaseBrowser();
@@ -35,6 +38,7 @@ export default function ProfileRoute() {
           return;
         }
         setProfile(me.profile);
+        setIsAdmin(!!me.isAdmin);
       } catch {
         setError("Couldn't load your profile. Check your connection and try again.");
       } finally {
@@ -42,6 +46,31 @@ export default function ProfileRoute() {
       }
     })();
   }, [navigate]);
+
+  const handleEmailChange = async () => {
+    setEmailMsg('');
+    const client = supabaseBrowser();
+    if (!client) {
+      setEmailMsg('Something went wrong. Please reload and try again.');
+      return;
+    }
+    const next = newEmail.trim().toLowerCase();
+    if (!next || !next.includes('@')) {
+      setEmailMsg('Enter a valid email address.');
+      return;
+    }
+    try {
+      const { error: err } = await client.auth.updateUser({ email: next });
+      if (err) {
+        setEmailMsg(err.message);
+        return;
+      }
+      setEmailMsg(`Confirmation sent to ${next}. Tap the link there to finish.`);
+      setNewEmail('');
+    } catch (err) {
+      setEmailMsg(err instanceof Error ? err.message : 'Email change failed.');
+    }
+  };
 
   const handleLogout = async () => {
     const sb = supabaseBrowser();
@@ -103,8 +132,23 @@ export default function ProfileRoute() {
         ))}
       </div>
 
+      <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 14, marginBottom: 8 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 6 }}>Change email</div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <input value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="new@email.com" style={{ flex: 1, minWidth: 0, padding: 10, border: '1px solid #e5e5e5', borderRadius: 10, fontSize: 14 }} />
+          <button onClick={handleEmailChange} style={{ padding: '10px 16px', borderRadius: 10, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, fontSize: 13 }}>
+            Send
+          </button>
+        </div>
+        {emailMsg && <div style={{ fontSize: 12, color: '#059669', marginTop: 6 }}>{emailMsg}</div>}
+      </div>
+      {isAdmin && (
+        <Link to="/admin" style={{ marginBottom: 8, padding: 14, background: '#111827', color: '#fff', borderRadius: 16, fontWeight: 800, textDecoration: 'none', textAlign: 'center', display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
+          <Shield size={16} /> Admin panel
+        </Link>
+      )}
       <div style={{ display: 'flex', gap: 8 }}>
-        <Link to="/onboarding?edit=1" style={{ flex: 1, padding: 14, background: '#fff', color: '#3c3c3c', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 16, fontWeight: 800, textDecoration: 'none', textAlign: 'center', display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
+        <Link to="/onboarding?edit=1" style={{ flex: 1, padding: 14, background: '#fff', color: '#3c3c3c', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 16, fontWeight: 700, textDecoration: 'none', textAlign: 'center', display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
           <Pencil size={16} /> Edit profile
         </Link>
         <button onClick={handleLogout} style={{ flex: 1, padding: 14, background: '#fff', color: '#991b1b', border: '1px solid #fecaca', borderBottom: '4px solid #fecaca', borderRadius: 16, fontWeight: 800, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
