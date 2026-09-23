@@ -184,4 +184,15 @@ export const api = {
   adminPatchUser: (id: string, payload: { role?: string; is_admin?: boolean }) =>
     apiFetch<{ ok: boolean }>(`/v1/admin/users/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
   adminDeleteUser: (id: string) => apiFetch<{ ok: boolean }>(`/v1/admin/users/${id}`, { method: 'DELETE' }),
+  adminInvite: (email: string, role: string) =>
+    apiFetch<{ ok: boolean }>('/v1/admin/users/invite', { method: 'POST', body: JSON.stringify({ email, role }) }),
+  courses: (level = '') =>
+    apiFetch<{ code: string; title: string; levels: string[] }[]>(`/v1/courses${level ? `?level=${encodeURIComponent(level)}` : ''}`),
+  adminCreateUni: (name: string, short_name?: string) =>
+    apiFetch<{ ok: boolean }>('/v1/admin/universities', { method: 'POST', body: JSON.stringify({ name, short_name }) }),
+  adminDeleteUni: (id: string) => apiFetch<{ ok: boolean }>(`/v1/admin/universities/${id}`, { method: 'DELETE' }),
+  adminCreateCourse: (code: string, title: string, levels: string[]) =>
+    apiFetch<{ ok: boolean; course: string }>('/v1/admin/courses', { method: 'POST', body: JSON.stringify({ code, title, levels }) }),
+  adminDeleteCourse: (code: string) =>
+    apiFetch<{ ok: boolean }>(`/v1/admin/courses/${encodeURIComponent(code)}`, { method: 'DELETE' }),
 };
