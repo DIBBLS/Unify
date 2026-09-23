@@ -1,4 +1,5 @@
 import type { ContentBlock } from '../types/note';
+import Formula from './Formula';
 
 export function ContentBlockView({ block }: { block: ContentBlock }) {
   switch (block.type) {
@@ -26,7 +27,7 @@ export function ContentBlockView({ block }: { block: ContentBlock }) {
       return (
         <div className="formula-box">
           <div className="f-label">{block.label}</div>
-          <div className="f-eq" dangerouslySetInnerHTML={{ __html: block.equation }} />
+          <Formula latex={block.equation} />
           {block.note && <div className="f-note" dangerouslySetInnerHTML={{ __html: block.note }} />}
         </div>
       );
@@ -64,7 +65,11 @@ export function ContentBlockView({ block }: { block: ContentBlock }) {
               <div className="we-step-label">{st.label}</div>
               <div className="we-step-title">{st.title}</div>
               {st.body && <div className="we-step-body">{st.body}</div>}
-              {st.math && <div className="we-math" dangerouslySetInnerHTML={{ __html: st.math }} />}
+              {st.math && (
+                <div className="we-math">
+                  <Formula latex={st.math} />
+                </div>
+              )}
             </div>
           ))}
           {block.result && <div className="we-result">{block.result}</div>}
