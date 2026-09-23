@@ -15,7 +15,7 @@ const MODES = [
   { id: 'whole-week-ai', label: 'Whole week, AI decides boundaries' },
 ];
 
-const WORK_MSGS = ['Sending to Claude…', 'Structuring topics…', 'Building checks…'];
+const WORK_MSGS = ['Gathering your notes…', 'Structuring topics…', 'Building checks…'];
 
 type Meta = { course: string; week: number; title: string; subtitle: string };
 
