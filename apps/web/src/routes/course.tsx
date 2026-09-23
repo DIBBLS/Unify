@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { Lock, Check, ChevronRight } from 'lucide-react';
+import BackButton from '../components/BackButton';
 
 export default function CoursePage() {
   const course = 'MEE 352';
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px' }}>
+      <BackButton to="/dashboard" />
       <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28 }}>Unify Learn</h1>
       <p style={{ color: '#777', marginTop: 6, fontSize: 13 }}>12-week Duolingo path — Week 1 free, Plus for 2+</p>
       <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>

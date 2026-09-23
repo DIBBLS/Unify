@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, useLocation } from 'react-router-dom';
+import { LayoutDashboard, BookOpen, User } from 'lucide-react';
 import { supabaseBrowser } from '../lib/supabase';
+
+const TABS = [
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, match: ['/dashboard'] },
+  { to: '/course', label: 'Learn', icon: BookOpen, match: ['/course', '/learn'] },
+  { to: '/profile', label: 'Profile', icon: User, match: ['/profile'] },
+];
 
 export default function Layout() {
   const [authed, setAuthed] = useState(false);
   const [initial, setInitial] = useState('');
+  const { pathname } = useLocation();
 
   useEffect(() => {
     const sb = supabaseBrowser();
@@ -67,6 +75,32 @@ export default function Layout() {
         )}
       </header>
       <Outlet />
+      <nav style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, display: 'flex', background: '#fff', borderTop: '1px solid #e5e5e5', padding: '8px 0 calc(8px + env(safe-area-inset-bottom))' }}>
+        {TABS.map((t) => {
+          const active = t.match.some((m) => pathname === m || pathname.startsWith(m + '/'));
+          const Icon = t.icon;
+          return (
+            <Link
+              key={t.to}
+              to={t.to}
+              style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 2,
+                textDecoration: 'none',
+                color: active ? '#10b981' : '#777',
+                fontSize: 11,
+                fontWeight: active ? 800 : 500,
+              }}
+            >
+              <Icon size={20} />
+              {t.label}
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 }
