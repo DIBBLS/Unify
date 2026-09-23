@@ -10,6 +10,7 @@ import ProfileRoute from './routes/profile';
 import Mascot from './components/Mascot';
 import Loading from './components/Loading';
 import { supabaseBrowser } from './lib/supabase';
+import { api } from './lib/api';
 
 function NotFound() {
   const link: React.CSSProperties = {
@@ -66,6 +67,31 @@ function RequireAuth({ children }: { children: JSX.Element }) {
   return children;
 }
 
+const STUDENT_ONLY = ['student'];
+
+// Gate: authors (lecturer/collaborator) have no learn paths — bounce to dashboard.
+function RequireRole({ allow, children }: { allow: string[]; children: JSX.Element }) {
+  const navigate = useNavigate();
+  const [ok, setOk] = useState(false);
+  const key = allow.join('|');
+
+  useEffect(() => {
+    api
+      .me()
+      .then((me) => {
+        const role = me.profile?.role || 'student';
+        if (!me.onboarded) navigate('/onboarding');
+        else if (!allow.includes(role)) navigate('/dashboard');
+        else setOk(true);
+      })
+      .catch(() => navigate('/auth'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigate, key]);
+
+  if (!ok) return <Loading text="Checking access…" />;
+  return children;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -86,7 +112,9 @@ export default function App() {
             path="/course"
             element={
               <RequireAuth>
-                <CourseRoute />
+                <RequireRole allow={STUDENT_ONLY}>
+                  <CourseRoute />
+                </RequireRole>
               </RequireAuth>
             }
           />
@@ -94,7 +122,9 @@ export default function App() {
             path="/learn/:courseCode/week/:week"
             element={
               <RequireAuth>
-                <LearnWeek />
+                <RequireRole allow={STUDENT_ONLY}>
+                  <LearnWeek />
+                </RequireRole>
               </RequireAuth>
             }
           />
