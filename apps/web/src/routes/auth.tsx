@@ -40,6 +40,7 @@ export default function AuthRoute() {
   const [success, setSuccess] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [signupPw, setSignupPw] = useState('');
+  const [pendingEmail, setPendingEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [welcomeBack, setWelcomeBack] = useState(false);
 
@@ -131,13 +132,38 @@ export default function AuthRoute() {
         return;
       }
       if (data.session) {
+        setPendingEmail('');
         await routeToApp();
       } else {
-        setSuccess('Account created! Check your email to verify, then sign in.');
+        setPendingEmail(email);
+        setSuccess('Account created! Check your email (and spam) to verify, then sign in.');
         setTab('signin');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sign-up failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!pendingEmail) return;
+    const client = sb;
+    if (!client) {
+      setError('Something went wrong. Please reload and try again.');
+      return;
+    }
+    setError('');
+    setLoading(true);
+    try {
+      const { error: err } = await client.auth.resend({ type: 'signup', email: pendingEmail });
+      if (err) {
+        setError(err.message);
+        return;
+      }
+      setSuccess(`Verification email re-sent to ${pendingEmail}. Check inbox and spam.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Resend failed.');
     } finally {
       setLoading(false);
     }
@@ -268,6 +294,11 @@ export default function AuthRoute() {
 
         {error && <Flash tone="error" message={error} ttl={FLASH_TTL} onDismiss={() => setError('')} />}
         {success && <Flash tone="success" message={success} ttl={FLASH_TTL} onDismiss={() => setSuccess('')} />}
+        {success && pendingEmail && (
+          <button onClick={handleResend} disabled={loading} style={{ background: 'none', border: 'none', color: '#059669', fontSize: 13, fontWeight: 700, textDecoration: 'underline', marginBottom: 12 }}>
+            Re-send verification email
+          </button>
+        )}
 
         {tab === 'signin' && (
           <form onSubmit={handleSignIn} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
