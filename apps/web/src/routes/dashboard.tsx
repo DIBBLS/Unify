@@ -17,6 +17,7 @@ export default function DashboardRoute() {
   const [courses, setCourses] = useState<CourseStat[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
+  const [notes, setNotes] = useState<{ course: string; week: number; title: string; subtitle: string }[]>([]);
 
   useEffect(() => {
     const sb = supabaseBrowser();
@@ -41,6 +42,14 @@ export default function DashboardRoute() {
         setXp(stats.xp);
         setStreak(stats.streak);
         setCourses(stats.courses);
+        if (me.profile?.role === 'lecturer' || me.profile?.role === 'collaborator') {
+          try {
+            const authored = await api.authored();
+            setNotes(authored.notes);
+          } catch {
+            // empty list stands
+          }
+        }
       } catch {
         setLoadError("Couldn't load your profile. Check your connection and try again.");
       } finally {
@@ -67,6 +76,39 @@ export default function DashboardRoute() {
     );
 
   const firstName = profile?.first_name || 'Builder';
+  const isAuthor = profile?.role === 'lecturer' || profile?.role === 'collaborator';
+  const roleLabel = profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : '';
+  if (isAuthor)
+    return (
+      <div style={{ maxWidth: 480, margin: '0 auto', paddingBottom: 80 }}>
+        <div style={{ padding: '20px 16px 12px', background: '#fff' }}>
+          <div style={{ fontSize: 11, color: '#afafaf', letterSpacing: 1 }}>Your Dashboard</div>
+          <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28, marginTop: 4 }}>
+            Good to have you, <em style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', padding: '0 6px', borderRadius: 6, fontStyle: 'normal' }}>{firstName}</em>
+          </h1>
+          <div style={{ fontSize: 13, color: '#777', marginTop: 4 }}>{profile?.department || roleLabel}</div>
+        </div>
+        <div style={{ margin: '16px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ fontFamily: 'Nunito', fontWeight: 800 }}>Published notes</h2>
+          <span style={{ fontSize: 13, color: '#777' }}>{notes.length}</span>
+        </div>
+        <div style={{ margin: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {notes.length === 0 ? (
+            <div style={{ padding: 24, textAlign: 'center', color: '#777', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12 }}>
+              <Mascot size={96} />
+              <div style={{ marginTop: 8 }}>Nothing published yet. Open Studio to author your first week.</div>
+            </div>
+          ) : (
+            notes.map((n) => (
+              <div key={`${n.course}-${n.week}`} style={{ padding: 14, background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12 }}>
+                <div style={{ fontSize: 11, color: '#059669', fontWeight: 800, letterSpacing: 1 }}>{n.course} · WEEK {n.week}</div>
+                <div style={{ fontWeight: 700, marginTop: 2 }}>{n.title || `Week ${n.week}`}</div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    );
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', paddingBottom: 80 }}>
       <div style={{ padding: '20px 16px 12px', background: '#fff' }}>
