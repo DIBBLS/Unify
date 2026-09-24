@@ -15,6 +15,7 @@ export default function DashboardRoute() {
   const [xp, setXp] = useState(0);
   const [streak, setStreak] = useState(0);
   const [courses, setCourses] = useState<CourseStat[]>([]);
+  const [enrolled, setEnrolled] = useState<string[]>([]);
   const [quizzes, setQuizzes] = useState({ taken: 0, avg: 0 });
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -39,6 +40,7 @@ export default function DashboardRoute() {
           return;
         }
         setProfile(me.profile);
+        setEnrolled(me.courses || []);
         const stats = await api.stats();
         setXp(stats.xp);
         setStreak(stats.streak);
@@ -78,6 +80,9 @@ export default function DashboardRoute() {
     );
 
   const firstName = profile?.first_name || 'Builder';
+  const shown = enrolled.length
+    ? enrolled.map((course) => ({ course }))
+    : courses.map((c) => ({ course: c.course }));
   const isAuthor = profile?.role === 'lecturer' || profile?.role === 'collaborator';
   const roleLabel = profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : '';
   if (isAuthor)
@@ -166,16 +171,16 @@ export default function DashboardRoute() {
         </Link>
       </div>
       <div style={{ margin: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {courses.length === 0 ? (
+        {shown.length === 0 ? (
           <div style={{ padding: 24, textAlign: 'center', color: '#777', background: '#fff', border: '2px solid #e5e5e5', borderRadius: 16 }}>
             <Mascot size={96} />
             <div style={{ marginTop: 8 }}>No courses yet. Go to Courses to enroll.</div>
           </div>
         ) : (
-          courses.map((c) => (
-            <Link key={c.course} to={`/learn/${encodeURIComponent(c.course)}/week/1`} style={{ padding: 14, background: '#fff', border: '2px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 16, display: 'flex', justifyContent: 'space-between', textDecoration: 'none', color: '#3c3c3c' }}>
+          shown.map((c) => (
+            <Link key={c.course} to={`/course/${encodeURIComponent(c.course)}`} style={{ padding: 14, background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: '#3c3c3c' }}>
               <span style={{ fontWeight: 700 }}>{c.course}</span>
-              <span style={{ fontSize: 12, color: '#777' }}>{c.topics} topics done</span>
+              <ChevronRight size={16} color="#059669" />
             </Link>
           ))
         )}

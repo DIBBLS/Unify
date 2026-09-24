@@ -150,7 +150,7 @@ export type AdminUser = {
 
 export const api = {
   universities: () => apiFetch<University[]>("/v1/universities"),
-  me: () => apiFetch<{ onboarded: boolean; profile: Profile | null; isAdmin: boolean }>("/v1/me"),
+  me: () => apiFetch<{ onboarded: boolean; profile: Profile | null; isAdmin: boolean; courses: string[] }>("/v1/me"),
   onboarding: (payload: Record<string, unknown>) =>
     apiFetch<{ ok: boolean; profile: Profile }>("/v1/onboarding", {
       method: "POST",
@@ -224,8 +224,13 @@ export const api = {
     apiFetch<{ ok: boolean }>('/v1/admin/models/reset', { method: 'POST', body: JSON.stringify(model ? { model } : {}) }),
   adminInvite: (email: string, role: string) =>
     apiFetch<{ ok: boolean }>('/v1/admin/users/invite', { method: 'POST', body: JSON.stringify({ email, role }) }),
-  courses: (level = '') =>
-    apiFetch<{ code: string; title: string; levels: string[] }[]>(`/v1/courses${level ? `?level=${encodeURIComponent(level)}` : ''}`),
+  courses: (level = '', semester = '') => {
+    const p = new URLSearchParams();
+    if (level) p.set('level', level);
+    if (semester) p.set('semester', semester);
+    const q = p.toString();
+    return apiFetch<{ code: string; title: string; levels: string[]; semesters: string[] }[]>(`/v1/courses${q ? `?${q}` : ''}`);
+  },
   adminCreateUni: (name: string, short_name?: string) =>
     apiFetch<{ ok: boolean }>('/v1/admin/universities', { method: 'POST', body: JSON.stringify({ name, short_name }) }),
   adminDeleteUni: (id: string) => apiFetch<{ ok: boolean }>(`/v1/admin/universities/${id}`, { method: 'DELETE' }),
