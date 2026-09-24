@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, Check, X, Loader2 } from 'lucide-react';
 import Mascot from '../components/Mascot';
 import Flash from '../components/Flash';
-import { supabaseBrowser, broadcastLogin } from '../lib/supabase';
+import { supabaseBrowser } from '../lib/supabase';
 import { api } from '../lib/api';
 import { log } from '../lib/log';
 
@@ -103,7 +103,6 @@ export default function AuthRoute() {
         return;
       }
       if (data.session) {
-        broadcastLogin(data.session);
         await routeToApp();
       }
     } catch (err) {
@@ -145,7 +144,6 @@ export default function AuthRoute() {
       }
       if (data.session) {
         setPendingEmail('');
-        broadcastLogin(data.session);
         await routeToApp();
       } else {
         setPendingEmail(email);

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, BookOpen, Search, User, PenTool } from 'lucide-react';
-import { supabaseBrowser, onLoginElsewhere } from '../lib/supabase';
+import { supabaseBrowser } from '../lib/supabase';
 import { api } from '../lib/api';
 import OfflineBanner from '../components/OfflineBanner';
 
@@ -37,11 +37,8 @@ export default function Layout() {
       setAuthed(!!session);
       setInitial((session?.user.email || '').charAt(0).toUpperCase());
     });
-    // Single-session policy: a newer login on another tab signs this one out.
-    const offKick = onLoginElsewhere();
     return () => {
       sub.subscription.unsubscribe();
-      offKick();
     };
   }, []);
 

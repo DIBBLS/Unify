@@ -1,72 +1,18 @@
 import { createClient, type SupabaseClient, type Session } from "@supabase/supabase-js";
 
 let cached: SupabaseClient | null = null;
+// Unique per tab so duplicated tabs don't share a session either.
 const tabId = Math.random().toString(36).slice(2) + Date.now().toString(36);
-let ownLoginTs = 0;
 
-// ---- single-session per user: latest login wins, others coexist ----
-// One shared session in localStorage (survives restarts, so returning users
-// stay signed in). When THIS tab signs in with credentials it broadcasts
-// the new session; every other tab holding the SAME user drops to sign-in
-// (local scope only, so the fresh login is never revoked). Tabs signed in
-// as a DIFFERENT user are left completely alone and proceed untouched.
-// Mount/restore/token-refresh never broadcast — only explicit sign-ins.
-// Simultaneous logins resolve deterministically: the later timestamp wins,
-// the earlier tab stands down.
-const LOGIN_CHANNEL = "unify-login";
-
-function loginChannel(): BroadcastChannel | null {
-  try {
-    if (typeof BroadcastChannel === "undefined") return null;
-    return new BroadcastChannel(LOGIN_CHANNEL);
-  } catch {
-    return null;
-  }
-}
-
-// Call immediately after an explicit credential sign-in (NOT on restore).
-export function broadcastLogin(session: Session): void {
-  const ts = Date.now();
-  ownLoginTs = ts;
-  try {
-    loginChannel()?.postMessage({ tabId, userId: session.user.id, token: session.access_token, ts });
-  } catch {
-    // coordination unavailable — shared session still works
-  }
-}
-
-// Listen once per tab (layout-level): drop to sign-in when another tab
-// establishes a newer session. Returns unsubscribe.
-export function onLoginElsewhere(): () => void {
-  const ch = loginChannel();
-  if (!ch) return () => {};
-  ch.onmessage = (ev: MessageEvent) => {
-    const msg = (ev.data || {}) as { tabId?: string; userId?: string; token?: string; ts?: number };
-    if (!msg || msg.tabId === tabId || !msg.userId || !msg.token) return;
-    if ((msg.ts || 0) < ownLoginTs) return; // we logged in later; ignore
-    const sb = supabaseBrowser();
-    if (!sb) return;
-    void sb.auth.getSession().then(({ data }) => {
-      const mine = data.session;
-      if (!mine) return; // already signed out here
-      // Same user, newer login elsewhere: stand down. A different user's
-      // tab is none of our business — leave it proceeding untouched.
-      if (mine.user.id === msg.userId && mine.access_token !== msg.token) {
-        // Clear THIS tab only. Local scope keeps the fresh login alive;
-        // guards navigate this tab to /auth.
-        sb.auth.signOut({ scope: "local" }).catch(() => {});
-      }
-    });
-  };
-  return () => {
-    try {
-      ch.close();
-    } catch {
-      // ignore
-    }
-  };
-}
-// Single shared client (localStorage session, survives restarts).
+// ---- fully independent tab sessions ----
+// Every tab gets its OWN session in sessionStorage under its own key.
+// Signing in, signing out, or expiring in one tab never touches another:
+// no auto-sign-in elsewhere, no auto-logout elsewhere, two tabs can even
+// hold two different accounts side by side. Tradeoff (explicit user call):
+// closing the browser signs every tab out — there is no cross-restart
+// persistence, because any shared storage would re-link the tabs.
+// Server-side data (progress, XP, enrollments) still merges naturally
+// since it's keyed by user, not by tab.
 export function supabaseBrowser(): SupabaseClient | null {
   // Built-in fallbacks (public values; env vars override when set).
   const FALLBACK_URL = 'https://xouxvmprrosstzlitcsp.supabase.co';
@@ -79,7 +25,11 @@ export function supabaseBrowser(): SupabaseClient | null {
       env.SUPABASE_ANON_KEY ||
       env.SUPABASE_PUBLISHABLE_KEY) as string | undefined) || FALLBACK_KEY;
   if (!url || !key) return null;
-  if (!cached) cached = createClient(url, key);
+  if (!cached) {
+    cached = createClient(url, key, {
+      auth: { storage: window.sessionStorage, storageKey: `unify.tab.${tabId}` },
+    });
+  }
   return cached;
 }
 
