@@ -8,7 +8,7 @@ import { TopicSlice } from '../../components/TopicSlice';
 import EoqQuiz from '../../components/EoqQuiz';
 import { useProgress } from '../../hooks/useProgress';
 import Mascot from '../../components/Mascot';
-import Flash from '../../components/Flash';
+import ErrorState from '../../components/ErrorState';
 
 export default function LearnPage() {
   const { courseCode = '', week: weekParam } = useParams();
@@ -121,21 +121,10 @@ export default function LearnPage() {
   }
   if (loadError)
     return (
-      <div style={{ padding: 40, maxWidth: 480, margin: '0 auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
-          <Mascot size={110} />
-        </div>
-        <Flash
-          tone="error"
-          message={loadError}
-          ttl={0}
-          action={
-            <button onClick={() => window.location.reload()} style={{ padding: '8px 18px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, fontSize: 13 }}>
-              Retry
-            </button>
-          }
-        />
-      </div>
+      <ErrorState
+        title={`Couldn't load Week ${weekNum}`}
+        message={loadError}
+      />
     );
   if (blocked)
     return (

@@ -6,6 +6,7 @@ import { supabaseBrowser, clearRememberSession } from '../lib/supabase';
 import { api, type Profile, type University } from '../lib/api';
 import Loading from '../components/Loading';
 import Mascot from '../components/Mascot';
+import ErrorState from '../components/ErrorState';
 import Flash from '../components/Flash';
 
 const UUID_RE = /^[0-9a-f-]{36}$/i;
@@ -163,20 +164,7 @@ export default function ProfileRoute() {
 
   if (loading) return <Loading text="Loading profile…" />;
   if (error)
-    return (
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: 40 }}>
-        <Flash
-          tone="error"
-          message={error}
-          ttl={0}
-          action={
-            <button onClick={() => window.location.reload()} style={{ padding: '8px 18px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, fontSize: 13 }}>
-              Retry
-            </button>
-          }
-        />
-      </div>
-    );
+    return <ErrorState title="Couldn't load your profile" message={error} />;
 
   const initial = (profile?.first_name || email).charAt(0).toUpperCase() || 'U';
   const roleLabel = profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : '—';
