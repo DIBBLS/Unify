@@ -24,18 +24,23 @@ export default function CourseDetailRoute() {
   useEffect(() => {
     (async () => {
       try {
-        // Learning is enrolled-only: students outside this course stop here
-        // (authors in ?preview=1 always pass through).
-        const me = await api.me();
-        const role = me.profile?.role || 'student';
+        // Weeks + profile load in parallel: a flaky profile check (cold
+        // start) must never hide the weeks. The enrolled-only gate applies
+        // only when the check succeeds (authors in ?preview=1 pass through).
         const preview = searchParams.get('preview') === '1';
-        const enrolled = (me.courses || []).map((c) => c.toUpperCase()).includes(courseCode.toUpperCase());
-        if (!preview && (role === 'student' || !role) && courseCode && !enrolled) {
-          setBlocked(true);
-          setLoading(false);
-          return;
+        const [me, res] = await Promise.all([
+          api.me().catch(() => null),
+          api.courseWeeks(courseCode),
+        ]);
+        if (me && !preview) {
+          const role = me.profile?.role || 'student';
+          const enrolled = (me.courses || []).map((c) => c.toUpperCase()).includes(courseCode.toUpperCase());
+          if ((role === 'student' || !role) && courseCode && !enrolled) {
+            setBlocked(true);
+            setLoading(false);
+            return;
+          }
         }
-        const res = await api.courseWeeks(courseCode);
         setWeeks(res.weeks);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Could not load weeks.');

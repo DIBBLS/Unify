@@ -48,17 +48,23 @@ export default function LearnPage() {
         return;
       }
       try {
-        // Enrolled-only learning (authors in ?preview=1 pass through).
+        // Week + profile load in parallel: a flaky profile check (cold
+        // start) must never hide the week. The enrolled-only gate applies
+        // only when the check succeeds (authors in ?preview=1 pass through).
         const previewMode = searchParams.get('preview') === '1';
-        const me = await api.me();
-        const role = me.profile?.role || 'student';
-        const enrolled = (me.courses || []).map((c) => c.toUpperCase()).includes(code.toUpperCase());
-        if (!previewMode && (role === 'student' || !role) && !enrolled) {
-          setBlocked(true);
-          setLoading(false);
-          return;
+        const [me, data] = await Promise.all([
+          api.me().catch(() => null),
+          api.week(code, weekNum),
+        ]);
+        if (me && !previewMode) {
+          const role = me.profile?.role || 'student';
+          const enrolled = (me.courses || []).map((c) => c.toUpperCase()).includes(code.toUpperCase());
+          if ((role === 'student' || !role) && !enrolled) {
+            setBlocked(true);
+            setLoading(false);
+            return;
+          }
         }
-        const data = await api.week(code, weekNum);
         const note = data.note_json as UnifyNote;
         const valid = note && Array.isArray(note.topics) ? note : null;
         setNote(valid);
