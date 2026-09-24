@@ -11,7 +11,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;padding-bottom:env(safe-area-inset-bottom)}
-/* Mobile-first: 320px base, 480px Duolingo shell, 1080px desktop */
+/* Mobile-first: 320px base, 480px app shell, 1080px desktop */
 .hero{background:#3c3c3c;color:#fff;border-radius:var(--radius);padding:20px;position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(16,185,129,.08)}
 @media(min-width:768px){.hero{padding:28px}}

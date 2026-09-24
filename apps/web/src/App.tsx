@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from './routes/_layout';
 import CourseRoute from './routes/course';
+import CourseDetailRoute from './routes/courseDetail';
 import LearnWeek from './routes/learn/week';
 import AuthRoute from './routes/auth';
 import DashboardRoute from './routes/dashboard';
@@ -122,6 +123,16 @@ export default function App() {
               <RequireAuth>
                 <RequireRole allow={STUDENT_ONLY}>
                   <CourseRoute />
+                </RequireRole>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/course/:courseCode"
+            element={
+              <RequireAuth>
+                <RequireRole allow={STUDENT_ONLY}>
+                  <CourseDetailRoute />
                 </RequireRole>
               </RequireAuth>
             }
