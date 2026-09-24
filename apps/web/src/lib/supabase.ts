@@ -4,11 +4,12 @@ let cached: SupabaseClient | null = null;
 const tabId = Math.random().toString(36).slice(2) + Date.now().toString(36);
 let ownLoginTs = 0;
 
-// ---- single-session policy: last login wins across tabs ----
+// ---- single-session per user: latest login wins, others coexist ----
 // One shared session in localStorage (survives restarts, so returning users
 // stay signed in). When THIS tab signs in with credentials it broadcasts
-// the new session; every other tab holding a DIFFERENT session drops to
-// sign-in (local scope only, so the fresh login is never revoked).
+// the new session; every other tab holding the SAME user drops to sign-in
+// (local scope only, so the fresh login is never revoked). Tabs signed in
+// as a DIFFERENT user are left completely alone and proceed untouched.
 // Mount/restore/token-refresh never broadcast — only explicit sign-ins.
 // Simultaneous logins resolve deterministically: the later timestamp wins,
 // the earlier tab stands down.
@@ -48,9 +49,11 @@ export function onLoginElsewhere(): () => void {
     void sb.auth.getSession().then(({ data }) => {
       const mine = data.session;
       if (!mine) return; // already signed out here
-      if (mine.user.id !== msg.userId || mine.access_token !== msg.token) {
-        // A different session took over: clear THIS tab only. Local scope
-        // keeps the fresh login alive; guards navigate this tab to /auth.
+      // Same user, newer login elsewhere: stand down. A different user's
+      // tab is none of our business — leave it proceeding untouched.
+      if (mine.user.id === msg.userId && mine.access_token !== msg.token) {
+        // Clear THIS tab only. Local scope keeps the fresh login alive;
+        // guards navigate this tab to /auth.
         sb.auth.signOut({ scope: "local" }).catch(() => {});
       }
     });
