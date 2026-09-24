@@ -6,6 +6,8 @@ import Flash from '../../components/Flash';
 import Loading from '../../components/Loading';
 import Mascot from '../../components/Mascot';
 import { TopicSlice } from '../../components/TopicSlice';
+import EoqQuiz from '../../components/EoqQuiz';
+import { NoteBuilder, blankNote, normalizeNote } from './NoteBuilder';
 import { api } from '../../lib/api';
 import type { UnifyNote } from '../../types/note';
 
@@ -40,7 +42,12 @@ export default function StudioRoute() {
   const [publishing, setPublishing] = useState(false);
   const [publishingTopic, setPublishingTopic] = useState<number | null>(null);
   const [catalog, setCatalog] = useState<{ code: string; title: string }[]>([]);
-  const [jsonDraft, setJsonDraft] = useState('');
+  const [method, setMethod] = useState<'ai' | 'manual' | 'external'>('ai');
+  const [editing, setEditing] = useState(false);
+  const [formatPack, setFormatPack] = useState('');
+  const [formatLoading, setFormatLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [pasted, setPasted] = useState('');
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
@@ -78,13 +85,13 @@ export default function StudioRoute() {
       setWorking(true);
       try {
         const data = await api.week(editCourse, editWeek);
-        const loaded = data.note_json as UnifyNote;
-        if (!loaded || !Array.isArray(loaded.topics)) throw new Error('Week has no readable content yet.');
+        const loaded = normalizeNote(data.note_json);
+        if (!loaded) throw new Error('Week has no readable content yet.');
         if (cancelled) return;
         setNote(loaded);
         setMeta({ course: data.course, week: data.week, title: data.title || loaded.title, subtitle: data.subtitle || '' });
-        setJsonDraft(JSON.stringify(loaded, null, 2));
         setValidation(null);
+        setEditing(false);
         setStep(1);
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : 'Could not load week.');
@@ -139,28 +146,14 @@ export default function StudioRoute() {
         rawNotesText: raw,
       });
       setNote(res.note as UnifyNote);
-      setJsonDraft(JSON.stringify(res.note, null, 2));
       setMeta({ course: code, week: weekNum, title: title.trim(), subtitle: subtitle.trim() });
       setValidation(res.validation);
+      setEditing(false);
       setStep(1);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Conversion failed.');
     } finally {
       setWorking(false);
-    }
-  };
-
-  const applyEdits = async () => {
-    setError('');
-    try {
-      const parsed = JSON.parse(jsonDraft) as UnifyNote;
-      if (!parsed || !Array.isArray(parsed.topics)) throw new Error('JSON must have a topics array.');
-      setNote(parsed);
-      const res = await api.validateNote(parsed);
-      setValidation(res);
-      if (!res.valid) setError('Saved for review — validation found problems.');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invalid JSON.');
     }
   };
 
@@ -170,9 +163,118 @@ export default function StudioRoute() {
     try {
       const res = await api.validateNote(note);
       setValidation(res);
-      if (!res.valid) setError('Validation found problems — fix the JSON and retry.');
+      if (!res.valid) setError('Validation found problems — fix them in Edit content (list below).');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Validation failed.');
+    }
+  };
+
+  // Manual compose: start a blank note, or keep editing the current draft.
+  const startManual = () => {
+    setError('');
+    if (note) return;
+    const weekNum = Number(week);
+    const code = course.trim().toUpperCase();
+    if (!code || !Number.isInteger(weekNum) || weekNum < 1) {
+      setError('Pick a course and a valid week number first.');
+      return;
+    }
+    setNote({
+      ...blankNote(code, weekNum),
+      title: title.trim(),
+      subtitle: subtitle.trim(),
+      tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
+    });
+  };
+
+  // Manual/external path into review: sync the selected course+week,
+  // validate once for guidance, then preview.
+  const goReview = async () => {
+    if (!note) return;
+    const weekNum = Number(week);
+    const code = course.trim().toUpperCase();
+    if (!code || !Number.isInteger(weekNum) || weekNum < 1) {
+      setError('Pick a course and a valid week number first.');
+      return;
+    }
+    const synced = { ...note, course: code, week: weekNum };
+    setNote(synced);
+    setMeta({ course: code, week: weekNum, title: synced.title, subtitle: synced.subtitle });
+    setError('');
+    setSuccess('');
+    try {
+      const res = await api.validateNote(synced);
+      setValidation(res);
+      if (!res.valid) setError('Heads up — the checker found problems (listed below). You can still publish.');
+    } catch {
+      // validation offline; publish still allowed
+    }
+    setEditing(false);
+    setStep(1);
+  };
+
+  const stripFences = (s: string) => s.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+
+  // External-AI import: paste back whatever your own AI produced with our
+  // format pack, normalize defensively, then review like any other note.
+  const importPasted = async () => {
+    setError('');
+    setSuccess('');
+    if (!pasted.trim()) {
+      setError('Paste the AI output first.');
+      return;
+    }
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(stripFences(pasted));
+    } catch {
+      setError('That is not valid JSON — copy only the JSON block from the AI.');
+      return;
+    }
+    const clean = normalizeNote(parsed);
+    if (!clean) {
+      setError('JSON parsed, but it has no usable topics array.');
+      return;
+    }
+    const weekNum = Number(week);
+    const code = course.trim().toUpperCase();
+    if (!code || !Number.isInteger(weekNum) || weekNum < 1) {
+      setError('Pick a course and a valid week number first.');
+      return;
+    }
+    const synced = { ...clean, course: code, week: weekNum };
+    setNote(synced);
+    setMeta({ course: code, week: weekNum, title: synced.title, subtitle: synced.subtitle });
+    try {
+      const res = await api.validateNote(synced);
+      setValidation(res);
+      if (!res.valid) setSuccess('Imported — the checker found problems (listed below). Fix in Edit content or publish anyway.');
+      else setSuccess('Imported and valid. Review below.');
+    } catch {
+      setSuccess('Imported. Review below.');
+    }
+    setEditing(false);
+    setStep(1);
+  };
+
+  const copyFormat = async () => {
+    setError('');
+    try {
+      let pack = formatPack;
+      if (!pack) {
+        setFormatLoading(true);
+        const res = await api.formatPack();
+        pack = res.prompt;
+        setFormatPack(pack);
+      }
+      if (!navigator.clipboard?.writeText) throw new Error('clipboard unavailable');
+      await navigator.clipboard.writeText(pack);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      setError('Copy failed — open "View format text" below and copy manually.');
+    } finally {
+      setFormatLoading(false);
     }
   };
 
@@ -201,12 +303,15 @@ export default function StudioRoute() {
 
   const reset = () => {
     setStep(0);
+    setMethod('ai');
     setNote(null);
     setMeta(null);
     setValidation(null);
     setError('');
     setSuccess('');
     setRaw('');
+    setPasted('');
+    setEditing(false);
   };
 
   // Publish a single topic as a new version (v1, v2, v3...) without
@@ -252,7 +357,7 @@ export default function StudioRoute() {
       <BackButton to="/dashboard" />
       <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 24 }}>Author a week</h1>
       <div style={{ display: 'flex', gap: 6, margin: '12px 0 20px' }}>
-        {['Paste', 'Review', 'Live'].map((s, i) => (
+        {['Compose', 'Review', 'Live'].map((s, i) => (
           <div key={s} style={{ flex: 1, textAlign: 'center' }}>
             <div style={{ height: 4, borderRadius: 2, background: i <= step ? '#10b981' : '#e5e5e5' }} />
             <div style={{ fontSize: 11, color: i <= step ? '#059669' : '#afafaf', fontWeight: 700, marginTop: 4 }}>{s}</div>
@@ -292,38 +397,108 @@ export default function StudioRoute() {
               Already live: {weeks.map((w) => `W${w.week}`).join(', ')}
             </div>
           )}
-          <label style={label}>
-            Raw lecture notes
-            <textarea value={raw} onChange={(e) => setRaw(e.target.value)} rows={10} placeholder="Paste messy lecture notes here…" style={{ ...input, resize: 'vertical' }} />
-          </label>
-          <details style={{ border: '1px solid #e5e5e5', borderRadius: 12, padding: '10px 14px' }}>
-            <summary style={{ fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Advanced (title, tags, mode)</summary>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 12 }}>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {(['ai', 'manual', 'external'] as const).map((m) => (
+              <button
+                key={m}
+                onClick={() => { setMethod(m); setError(''); }}
+                style={{
+                  flex: 1,
+                  padding: '10px 8px',
+                  borderRadius: 12,
+                  border: `1px solid ${method === m ? '#059669' : '#e5e5e5'}`,
+                  background: method === m ? '#10b981' : '#fff',
+                  color: method === m ? '#fff' : '#777',
+                  fontWeight: 800,
+                  fontSize: 12,
+                }}
+              >
+                {m === 'ai' ? 'AI Generate' : m === 'manual' ? 'Manual' : 'External AI'}
+              </button>
+            ))}
+          </div>
+
+          {method === 'ai' && (
+            <>
               <label style={label}>
-                Week title
-                <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Energy Sources" style={input} />
+                Raw lecture notes
+                <textarea value={raw} onChange={(e) => setRaw(e.target.value)} rows={10} placeholder="Paste messy lecture notes here…" style={{ ...input, resize: 'vertical' }} />
               </label>
+              <details style={{ border: '1px solid #e5e5e5', borderRadius: 12, padding: '10px 14px' }}>
+                <summary style={{ fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Advanced (title, tags, mode)</summary>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 12 }}>
+                  <label style={label}>
+                    Week title
+                    <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Energy Sources" style={input} />
+                  </label>
+                  <label style={label}>
+                    Subtitle
+                    <input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} placeholder="One-line summary" style={input} />
+                  </label>
+                  <label style={label}>
+                    Tags (comma-separated)
+                    <input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="Turbine, Density, Torque" style={input} />
+                  </label>
+                  <label style={label}>
+                    Segmentation
+                    <select value={mode} onChange={(e) => setMode(e.target.value)} style={input}>
+                      {MODES.map((m) => (
+                        <option key={m.id} value={m.id}>{m.label}</option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+              </details>
+              <button onClick={convert} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+                Generate note <ArrowRight size={18} />
+              </button>
+            </>
+          )}
+
+          {method === 'manual' && (
+            <>
+              <div style={{ fontSize: 13, color: '#777', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 12, padding: 12 }}>
+                Compose the week yourself with guided forms — same format the AI produces, no JSON, no tokens spent.
+              </div>
+              {!note ? (
+                <button onClick={startManual} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+                  Start composing <ArrowRight size={18} />
+                </button>
+              ) : (
+                <>
+                  <NoteBuilder note={note} onChange={setNote} />
+                  <button onClick={goReview} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+                    Continue to review <ArrowRight size={18} />
+                  </button>
+                </>
+              )}
+            </>
+          )}
+
+          {method === 'external' && (
+            <>
+              <div style={{ fontSize: 13, color: '#777', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 12, padding: 12 }}>
+                Use your own AI (ChatGPT, Claude, Gemini app) and spend zero server tokens:
+                copy our format, paste it plus your raw notes into your AI, paste the JSON it returns below.
+              </div>
+              <button onClick={copyFormat} disabled={formatLoading} style={{ padding: 12, background: '#fff', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 12, fontWeight: 800, fontSize: 14, color: '#059669', opacity: formatLoading ? 0.6 : 1 }}>
+                {formatLoading ? 'Loading format…' : copied ? 'Copied — paste it into your AI' : 'Copy AI format'}
+              </button>
+              {formatPack && (
+                <details style={{ border: '1px solid #e5e5e5', borderRadius: 12, padding: '10px 14px' }}>
+                  <summary style={{ fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>View format text (manual copy)</summary>
+                  <pre style={{ whiteSpace: 'pre-wrap', fontSize: 11, background: '#fafafa', padding: 10, borderRadius: 8, marginTop: 8, maxHeight: 240, overflow: 'auto' }}>{formatPack}</pre>
+                </details>
+              )}
               <label style={label}>
-                Subtitle
-                <input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} placeholder="One-line summary" style={input} />
+                AI output (JSON)
+                <textarea value={pasted} onChange={(e) => setPasted(e.target.value)} rows={8} spellCheck={false} placeholder="Paste the JSON your AI returned…" style={{ ...input, resize: 'vertical', fontFamily: 'monospace', fontSize: 12 }} />
               </label>
-              <label style={label}>
-                Tags (comma-separated)
-                <input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="Turbine, Density, Torque" style={input} />
-              </label>
-              <label style={label}>
-                Segmentation
-                <select value={mode} onChange={(e) => setMode(e.target.value)} style={input}>
-                  {MODES.map((m) => (
-                    <option key={m.id} value={m.id}>{m.label}</option>
-                  ))}
-                </select>
-              </label>
-            </div>
-          </details>
-          <button onClick={convert} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
-            Generate note <ArrowRight size={18} />
-          </button>
+              <button onClick={importPasted} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+                Import into review <ArrowRight size={18} />
+              </button>
+            </>
+          )}
         </div>
       )}
 
@@ -341,31 +516,55 @@ export default function StudioRoute() {
                 {validation.valid ? 'Schema valid' : 'Schema has problems'}
               </div>
             )}
-          </div>
-          <div style={{ maxWidth: 640, margin: '0 auto' }}>
-            {note.topics.map((t) => (
-              <div key={t.number} style={{ marginBottom: 12 }}>
-                <TopicSlice topic={t} />
-                <button
-                  onClick={() => publishTopic(t.number)}
-                  disabled={publishingTopic !== null}
-                  style={{ marginTop: 6, padding: '8px 14px', borderRadius: 9999, background: '#fff', border: '1px solid #e5e5e5', fontWeight: 700, fontSize: 12, color: '#059669' }}
-                >
-                  {publishingTopic === t.number ? 'Publishing…' : `Publish only Topic ${t.number}`}
+            {validation && !validation.valid && Array.isArray(validation.errors) && validation.errors.length > 0 && (
+              <ul style={{ marginTop: 8, paddingLeft: 18, fontSize: 12, color: '#991b1b', fontWeight: 500 }}>
+                {(validation.errors as unknown[]).slice(0, 8).map((e, i) => (
+                  <li key={i}>{String(e)}</li>
+                ))}
+                {(validation.errors as unknown[]).length > 8 && (
+                  <li>…and {(validation.errors as unknown[]).length - 8} more</li>
+                )}
+              </ul>
+            )}
+            <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+              <button onClick={() => { setEditing((v) => !v); }} style={{ flex: 1, padding: 10, background: editing ? '#10b981' : '#fff', color: editing ? '#fff' : '#059669', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 12, fontWeight: 800, fontSize: 13 }}>
+                {editing ? 'Done editing' : 'Edit content'}
+              </button>
+              {!editing && (
+                <button onClick={revalidate} style={{ flex: 1, padding: 10, background: '#fff', color: '#3c3c3c', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 12, fontWeight: 800, fontSize: 13 }}>
+                  Check again
                 </button>
-              </div>
-            ))}
+              )}
+            </div>
           </div>
-          <details style={{ border: '1px solid #e5e5e5', borderRadius: 12, padding: '10px 14px', marginTop: 16 }}>
-            <summary style={{ fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Edit JSON directly</summary>
-            <textarea value={jsonDraft} onChange={(e) => setJsonDraft(e.target.value)} rows={12} spellCheck={false} style={{ width: '100%', marginTop: 10, padding: 10, border: '1px solid #e5e5e5', borderRadius: 8, fontSize: 12, fontFamily: 'monospace', resize: 'vertical' }} />
-            <button onClick={applyEdits} style={{ marginTop: 8, padding: '10px 18px', borderRadius: 12, background: '#fff', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', fontWeight: 800, fontSize: 13 }}>
-              Apply edits
-            </button>
-          </details>
+          {editing ? (
+            <NoteBuilder note={note} onChange={(n) => { setNote(n); setValidation(null); }} />
+          ) : (
+            <>
+              <div style={{ maxWidth: 640, margin: '0 auto' }}>
+                {note.topics.map((t) => (
+                  <div key={t.number} style={{ marginBottom: 12 }}>
+                    <TopicSlice topic={t} />
+                    <button
+                      onClick={() => publishTopic(t.number)}
+                      disabled={publishingTopic !== null}
+                      style={{ marginTop: 6, padding: '8px 14px', borderRadius: 9999, background: '#fff', border: '1px solid #e5e5e5', fontWeight: 700, fontSize: 12, color: '#059669' }}
+                    >
+                      {publishingTopic === t.number ? 'Publishing…' : `Publish only Topic ${t.number}`}
+                    </button>
+                  </div>
+                ))}
+              </div>
+              {note.eoq.questions.length > 0 && (
+                <div style={{ maxWidth: 640, margin: '16px auto 0' }}>
+                  <EoqQuiz eoq={note.eoq} course={note.course} week={note.week} preview />
+                </div>
+              )}
+            </>
+          )}
           <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap' }}>
             <button onClick={() => setStep(0)} style={{ flex: 1, minWidth: 120, padding: 14, background: '#fff', color: '#3c3c3c', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 16, fontWeight: 800 }}>
-              Edit inputs
+              Back to compose
             </button>
             <button onClick={publish} disabled={publishing} style={{ flex: 2, minWidth: 160, padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
               {publishing ? 'Publishing…' : 'Publish to students'} <ArrowRight size={18} />

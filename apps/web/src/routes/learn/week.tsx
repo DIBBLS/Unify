@@ -42,7 +42,7 @@ export default function LearnPage() {
     async function load() {
       setLoading(true);
       const code = (courseCode || '').trim();
-      if (!code) {
+      if (!courseCode) {
         setLoadError('No course selected. Pick one from Courses.');
         setLoading(false);
         return;

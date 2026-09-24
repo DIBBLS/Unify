@@ -13,8 +13,9 @@ export default function CourseDetailRoute() {
   const { code = '' } = useParams();
   const [searchParams] = useSearchParams();
   // React Router already URL-decodes params — never decode again here
-  // (a stray % once crashed this screen). Trimmed: a stray space in a
-  // stored code must never break lookups or the enrolled check.
+  // (a stray % once crashed this screen). Trimmed for lookups, but the
+  // empty-guard tests the RAW param: a whitespace code is "present but
+  // unenrolled" (blocked screen with enroll button), not "nothing selected".
   const courseCode = (code || '').trim();
   const [weeks, setWeeks] = useState<WeekRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +37,7 @@ export default function CourseDetailRoute() {
         if (me && !preview) {
           const role = me.profile?.role || 'student';
           const enrolled = (me.courses || []).map((c) => c.toUpperCase().trim()).includes(courseCode.toUpperCase());
-          if ((role === 'student' || !role) && courseCode && !enrolled) {
+          if ((role === 'student' || !role) && !enrolled) {
             setBlocked(true);
             setLoading(false);
             return;
@@ -68,7 +69,7 @@ export default function CourseDetailRoute() {
   };
 
   if (loading) return <Loading text={courseCode ? `Loading ${courseCode}…` : 'Loading…'} />;
-  if (!courseCode)
+  if (!code)
     return (
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px', textAlign: 'center' }}>
         <BackButton to="/course" />
