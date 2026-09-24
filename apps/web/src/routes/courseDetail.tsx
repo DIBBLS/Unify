@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import Loading from '../components/Loading';
 import Mascot from '../components/Mascot';
 import Flash from '../components/Flash';
 import { api } from '../lib/api';
+import { log } from '../lib/log';
 
 type WeekRow = { week: number; title: string; subtitle: string };
 
@@ -69,14 +70,13 @@ export default function CourseDetailRoute() {
   };
 
   if (loading) return <Loading text={courseCode ? `Loading ${courseCode}…` : 'Loading…'} />;
-  if (!code)
-    return (
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px', textAlign: 'center' }}>
-        <BackButton to="/course" />
-        <Mascot size={110} />
-        <div style={{ marginTop: 12, color: '#777' }}>No course selected. Pick one from Courses.</div>
-      </div>
-    );
+  if (!code) {
+    // Unreachable via router links (course code is always present), but if
+    // it ever happens, send the student to their courses instead of a
+    // dead-end message. Logged so a recurrence leaves a trace.
+    log.warn('route', `course detail with empty code (url=${window.location.href})`);
+    return <Navigate to="/course" replace />;
+  }
   if (blocked)
     return (
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px', textAlign: 'center' }}>
