@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { BookOpen, ChevronRight } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import Loading from '../components/Loading';
 import Mascot from '../components/Mascot';
@@ -116,9 +115,10 @@ export default function ExplorePage() {
                 alignItems: 'center',
               }}
             >
-              <Link
-                to={`/course/${encodeURIComponent(c.code.trim())}`}
-                style={{ flex: 1, display: 'flex', gap: 12, alignItems: 'center', textDecoration: 'none', color: '#3c3c3c', minWidth: 0 }}
+              {/* Enroll-only: no link into the course. Enrolled courses open
+                  from My Courses (/course). */}
+              <div
+                style={{ flex: 1, display: 'flex', gap: 12, alignItems: 'center', color: '#3c3c3c', minWidth: 0 }}
               >
                 <span style={{ width: 40, height: 40, borderRadius: 10, background: '#ecfdf5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <BookOpen size={20} color="#059669" />
@@ -127,8 +127,7 @@ export default function ExplorePage() {
                   <span style={{ fontWeight: 700, display: 'block' }}>{c.code}</span>
                   <span style={{ fontSize: 12, color: '#777' }}>{c.title} · {c.weeks} {c.weeks === 1 ? 'week' : 'weeks'}</span>
                 </span>
-                <ChevronRight size={18} color="#059669" />
-              </Link>
+              </div>
               <button
                 onClick={() => toggleEnroll(c.code)}
                 disabled={busy === c.code}

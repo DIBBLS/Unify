@@ -33,6 +33,73 @@ export function supabaseBrowser(): SupabaseClient | null {
   return cached;
 }
 
+// ---- Remember me (opt-in cross-restart sign-in) ----
+// Tab sessions live in sessionStorage, so closing the browser signs every
+// tab out and tabs never link. Ticking "Remember me" additionally stores
+// the session tokens in localStorage; on a fresh visit with no tab session,
+// /auth adopts them into the new tab's own client (tabs stay independent
+// afterwards). Sign-out always clears both. Only discarded on auth
+// rejection (bad/revoked tokens) — network blips keep it for next time.
+const REMEMBER_KEY = "unify.remember.v1";
+
+export function saveRememberSession(session: Session): void {
+  try {
+    localStorage.setItem(
+      REMEMBER_KEY,
+      JSON.stringify({ access_token: session.access_token, refresh_token: session.refresh_token })
+    );
+  } catch {
+    // ignore (e.g. private mode) — session still works for this tab
+  }
+}
+
+function loadRememberSession(): { access_token: string; refresh_token: string } | null {
+  try {
+    const raw = localStorage.getItem(REMEMBER_KEY);
+    if (!raw) return null;
+    const p = JSON.parse(raw) as { access_token?: unknown; refresh_token?: unknown };
+    if (typeof p?.access_token === "string" && typeof p?.refresh_token === "string") {
+      return { access_token: p.access_token, refresh_token: p.refresh_token };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearRememberSession(): void {
+  try {
+    localStorage.removeItem(REMEMBER_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+// One-shot restore for fresh entry (called from /auth mount — every launch
+// passes through /auth). Returns true when a session is now present.
+export async function restoreRememberedSession(): Promise<boolean> {
+  const sb = supabaseBrowser();
+  if (!sb) return false;
+  try {
+    const { data } = await sb.auth.getSession();
+    if (data.session) return true;
+  } catch {
+    return false;
+  }
+  const saved = loadRememberSession();
+  if (!saved) return false;
+  try {
+    const { data, error } = await sb.auth.setSession(saved);
+    if (error || !data.session) throw error || new Error("restore failed");
+    return true;
+  } catch (e) {
+    if ((e as { status?: number })?.status && (e as { status?: number }).status! >= 400) {
+      clearRememberSession();
+    }
+    return false;
+  }
+}
+
 // Module session cache: every route mounts its own auth gate, and without
 // this each navigation flashes "Checking sign-in…" while getSession resolves.
 // First gate loads it, the rest render instantly; auth events keep it fresh.
