@@ -237,7 +237,7 @@ export default function DashboardRoute() {
           <div style={{ fontSize: 11, color: '#777' }}>Streak</div>
         </div>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 800 }}>{courses.length}</div>
+          <div style={{ fontSize: 18, fontWeight: 800 }}>{shown.length}</div>
           <div style={{ fontSize: 11, color: '#777' }}>Courses</div>
         </div>
       </div>
