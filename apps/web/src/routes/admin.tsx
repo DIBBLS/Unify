@@ -31,19 +31,26 @@ export default function AdminRoute() {
   const [courseLevels, setCourseLevels] = useState<string[]>([]);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('student');
+  const [models, setModels] = useState<{ model: string; failures: number; last_ok: string | null }[]>([]);
+  const [provider, setProvider] = useState('');
+  const [defaultModel, setDefaultModel] = useState('');
 
   const loadAll = async (query = q, role = roleFilter) => {
     try {
-      const [s, u, un, c] = await Promise.all([
+      const [s, u, un, c, m] = await Promise.all([
         api.adminStats(),
         api.adminUsers(query, role),
         api.universities(),
         api.courses(),
+        api.adminModels(),
       ]);
       setStats(s);
       setUsers(u.users);
       setUnis(un);
       setCourses(c);
+      setModels(m.models);
+      setProvider(m.provider);
+      setDefaultModel(m.default);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Load failed.');
     }
@@ -212,6 +219,59 @@ export default function AdminRoute() {
           </div>
         </div>
       )}
+
+      <h2 style={section}>AI models</h2>
+      <div style={card}>
+        <div style={{ fontSize: 13, color: '#777', marginBottom: 8 }}>
+          Provider: <strong>{provider || '—'}</strong> · Default: <strong>{defaultModel || '—'}</strong>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {models.length === 0 && (
+            <div style={{ fontSize: 13, color: '#777' }}>No models recorded yet — generation attempts populate this list.</div>
+          )}
+          {models.map((m) => {
+            const healthy = m.failures < 3;
+            return (
+              <div key={m.model} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <span style={{ width: 10, height: 10, borderRadius: 9999, background: healthy ? '#10b981' : '#ff4b4b', flexShrink: 0 }} />
+                <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {m.model}
+                </span>
+                <span style={{ fontSize: 12, color: '#777', whiteSpace: 'nowrap' }}>{m.failures} fails</span>
+                <button
+                  onClick={async () => {
+                    try {
+                      await api.adminModelsReset(m.model);
+                      await loadAll();
+                    } catch (err) {
+                      setError(err instanceof Error ? err.message : 'Reset failed.');
+                    }
+                  }}
+                  style={{ padding: '6px 12px', borderRadius: 9999, background: '#fff', border: '1px solid #e5e5e5', fontWeight: 700, fontSize: 12 }}
+                >
+                  Reset
+                </button>
+              </div>
+            );
+          })}
+        </div>
+        <button
+          onClick={async () => {
+            try {
+              const r = await api.adminModels(true);
+              setModels(r.models);
+              setProvider(r.provider);
+              setDefaultModel(r.default);
+              setSuccess('Model list refreshed from Google.');
+            } catch (err) {
+              setError(err instanceof Error ? err.message : 'Refresh failed.');
+            }
+          }}
+          style={{ ...primaryBtn, width: '100%', marginTop: 10 }}
+        >
+          Refresh from Google
+        </button>
+      </div>
 
       <h2 style={section}>Universities</h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

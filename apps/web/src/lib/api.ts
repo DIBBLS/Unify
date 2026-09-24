@@ -189,6 +189,12 @@ export const api = {
   adminPatchUser: (id: string, payload: { role?: string; is_admin?: boolean }) =>
     apiFetch<{ ok: boolean }>(`/v1/admin/users/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
   adminDeleteUser: (id: string) => apiFetch<{ ok: boolean }>(`/v1/admin/users/${id}`, { method: 'DELETE' }),
+  adminModels: (refresh = false) =>
+    apiFetch<{ provider: string; default: string; models: { model: string; failures: number; last_ok: string | null }[] }>(
+      `/v1/admin/models${refresh ? '?refresh=1' : ''}`
+    ),
+  adminModelsReset: (model?: string) =>
+    apiFetch<{ ok: boolean }>('/v1/admin/models/reset', { method: 'POST', body: JSON.stringify(model ? { model } : {}) }),
   adminInvite: (email: string, role: string) =>
     apiFetch<{ ok: boolean }>('/v1/admin/users/invite', { method: 'POST', body: JSON.stringify({ email, role }) }),
   courses: (level = '') =>
