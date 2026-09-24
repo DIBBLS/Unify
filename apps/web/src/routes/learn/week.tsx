@@ -81,8 +81,9 @@ export default function LearnPage() {
   };
 
   return (
+    <>
     <div className="screen-only" style={{ maxWidth: 640, margin: '0 auto', padding: '24px 20px 100px' }}>
-      <button onClick={() => navigate('/course')} style={{ marginBottom: 16, display: 'flex', gap: 6, alignItems: 'center', background: 'none', border: 'none', color: '#777', fontSize: 14 }}>
+      <button onClick={() => navigate(`/course/${encodeURIComponent(decodeURIComponent(courseCode))}`)} style={{ marginBottom: 16, display: 'flex', gap: 6, alignItems: 'center', background: 'none', border: 'none', color: '#777', fontSize: 14 }}>
         <ChevronLeft size={18} /> Back
       </button>
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
@@ -106,14 +107,6 @@ export default function LearnPage() {
             ))}
           </div>
         )}
-      </div>
-
-      <div className="print-only">
-        <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 22 }}>{note.course} · Week {note.week}: {note.title}</h1>
-        <p style={{ fontSize: 13, color: '#555' }}>{note.subtitle}</p>
-        {topics.map((t) => (
-          <TopicSlice key={t.number} topic={t} />
-        ))}
       </div>
 
       {preview && (
@@ -199,6 +192,14 @@ export default function LearnPage() {
         </div>
       )}
     </div>
+    <div className="print-only">
+      <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 22 }}>{note.course} · Week {note.week}: {note.title}</h1>
+      <p style={{ fontSize: 13, color: '#555' }}>{note.subtitle}</p>
+      {topics.map((t) => (
+        <TopicSlice key={t.number} topic={t} />
+      ))}
+    </div>
+    </>
   );
 }
 

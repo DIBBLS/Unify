@@ -3,7 +3,7 @@ import { api } from '../lib/api';
 
 // Server-backed topic progress. Nothing is persisted client-side:
 // completed topics load from the API on mount, completion POSTs to the API.
-// Completing is one-way (like Duolingo lessons) so local state always
+// Completing is one-way (like finished lessons) so local state always
 // converges with the server (add-only on both sides).
 export function useProgress(courseCode: string, weekNum: number) {
   const [done, setDone] = useState<Set<number>>(new Set());
