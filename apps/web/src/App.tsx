@@ -13,6 +13,7 @@ import AdminRoute from './routes/admin';
 import StudioRoute from './routes/studio/index';
 import Mascot from './components/Mascot';
 import Loading from './components/Loading';
+import ErrorState from './components/ErrorState';
 import { supabaseBrowser, ensureSession, setCachedSession, getCachedSession } from './lib/supabase';
 import { api } from './lib/api';
 
@@ -120,14 +121,10 @@ function RequireRole({ allow, children }: { allow: string[]; children: JSX.Eleme
 
   if (failed)
     return (
-      <div style={{ padding: 40, maxWidth: 480, margin: '0 auto', textAlign: 'center' }}>
-        <Mascot size={110} />
-        <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 20, marginTop: 12 }}>Can't reach the server</h1>
-        <p style={{ color: '#777', fontSize: 14, margin: '8px 0 20px' }}>You're still signed in — check your connection and retry.</p>
-        <button onClick={() => window.location.reload()} style={{ padding: '12px 28px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800, fontSize: 14 }}>
-          Retry
-        </button>
-      </div>
+      <ErrorState
+        title="Can't reach the server"
+        message="You're still signed in — check your connection and retry."
+      />
     );
   if (!ok) return <Loading text="Checking access…" />;
   return children;
