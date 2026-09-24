@@ -73,6 +73,7 @@ export default function LearnPage() {
       </div>
     );
 
+  const preview = searchParams.get('preview') === '1';
   const goTab = (t: number) => {
     const clamped = Math.min(Math.max(t, 0), tabCount - 1);
     setTab(clamped);
@@ -114,6 +115,15 @@ export default function LearnPage() {
           <TopicSlice key={t.number} topic={t} />
         ))}
       </div>
+
+      {preview && (
+        <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 12, padding: 10, fontSize: 13, color: '#065f46', marginBottom: 12, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'space-between' }}>
+          <span>Author preview — read-only, nothing is recorded.</span>
+          <button onClick={() => navigate(`/studio?edit=${encodeURIComponent(decodeURIComponent(courseCode))}&week=${weekNum}`)} style={{ padding: '8px 14px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, fontSize: 12, whiteSpace: 'nowrap' }}>
+            Edit in Studio
+          </button>
+        </div>
+      )}
 
       {tabCount > 1 && (
         <div style={{ display: 'flex', gap: 6, overflowX: 'auto', padding: '4px 2px 12px' }}>
@@ -164,9 +174,10 @@ export default function LearnPage() {
           topic={topics[tab]}
           done={isDone(weekNum, tab)}
           onToggle={() => toggle(weekNum, tab)}
+          preview={preview}
         />
       ) : (
-        <EoqQuiz eoq={note.eoq ?? { questions: [] }} course={note.course} week={note.week} />
+        <EoqQuiz eoq={note.eoq ?? { questions: [] }} course={note.course} week={note.week} preview={preview} />
       )}
 
       {tabCount > 1 && (
@@ -191,28 +202,30 @@ export default function LearnPage() {
   );
 }
 
-function TopicTab({ topic, done, onToggle }: { topic: Topic; done: boolean; onToggle: () => void }) {
+function TopicTab({ topic, done, onToggle, preview }: { topic: Topic; done: boolean; onToggle: () => void; preview: boolean }) {
   return (
     <div style={{ marginBottom: 8 }}>
       <TopicSlice topic={topic} />
-      <button
-        onClick={onToggle}
-        style={{
-          marginTop: 12,
-          padding: '10px 18px',
-          borderRadius: 9999,
-          background: done ? '#059669' : '#fff',
-          color: done ? '#fff' : '#3c3c3c',
-          border: `1px solid ${done ? '#059669' : '#e5e5e5'}`,
-          cursor: 'pointer',
-          display: 'flex',
-          gap: 6,
-          alignItems: 'center',
-          fontWeight: 600,
-        }}
-      >
-        <Check size={16} /> {done ? 'Completed' : 'Mark Topic Complete'}
-      </button>
+      {!preview && (
+        <button
+          onClick={onToggle}
+          style={{
+            marginTop: 12,
+            padding: '10px 18px',
+            borderRadius: 9999,
+            background: done ? '#059669' : '#fff',
+            color: done ? '#fff' : '#3c3c3c',
+            border: `1px solid ${done ? '#059669' : '#e5e5e5'}`,
+            cursor: 'pointer',
+            display: 'flex',
+            gap: 6,
+            alignItems: 'center',
+            fontWeight: 600,
+          }}
+        >
+          <Check size={16} /> {done ? 'Completed' : 'Mark Topic Complete'}
+        </button>
+      )}
     </div>
   );
 }

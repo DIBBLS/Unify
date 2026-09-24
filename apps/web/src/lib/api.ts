@@ -49,9 +49,35 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, retries 
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 30000);
   try {
-    const res = await fetch(`${API_URL}${path}`, { ...init, headers, signal: ctrl.signal });
-    if (res.status === 401) {
-      // Session dead (expired/revoked): clear it and send the user to sign in.
+    let response = await fetch(`${API_URL}${path}`, { ...init, headers, signal: ctrl.signal });
+    if (response.status === 401) {
+      // Might be a transient multi-tab refresh race, not a dead session:
+      // re-read the session once and retry before giving up.
+      log.warn("api", `← 401 ${path} (retrying once with fresh session)`);
+      try {
+        const sb = supabaseBrowser();
+        if (sb) {
+          await sb.auth.getSession();
+          const fresh = await sessionToken();
+          if (fresh && fresh !== token) {
+            const retryRes = await fetch(`${API_URL}${path}`, {
+              ...init,
+              headers: { ...headers, Authorization: `Bearer ${fresh}` },
+              signal: ctrl.signal,
+            });
+            if (retryRes.ok) {
+              log.info("api", `← ${retryRes.status} ${path} (retry ok, ${Date.now() - started}ms)`);
+              return (await retryRes.json()) as T;
+            }
+            response = retryRes;
+          }
+        }
+      } catch {
+        // fall through to dead-session handling below
+      }
+    }
+    if (response.status === 401) {
+      // Session truly dead (expired/revoked): clear it and send the user to sign in.
       // Public endpoints never 401, so this only fires for authed calls.
       log.warn("api", `← 401 ${path} (session dead, signing out)`);
       try {
@@ -63,6 +89,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, retries 
         window.location.assign('/auth');
       }
     }
+    const res = response;
     if (!res.ok) {
       let detail = "";
       try {
