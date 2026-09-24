@@ -1,88 +1,94 @@
-# Unify
+# Unify Learn
 
-Student academic platform for LASU Engineering — Duolingo-style Learn, CGPA, timetable, profile. Lean rebuild focus: `Home → Course (lecturer card) → 12 weeks → Class 1/2/3 → Note (scoped AI)` per `docs/PRD-lean-v1.0.docx`.
+Student learning platform for LASU Engineering — guided 12-week paths, XP, streaks, quizzes, PDF export, and an authoring studio for lecturers and collaborators. Minimal emerald UI, mobile-first, Box Boy mascot.
 
-## Stack (lean, minimalistic — Vite+React+TS, Express+TS)
+## Architecture
 
-| Layer | Tech | Why |
-|-------|------|-----|
-| Web (Duolingo Learn) | **Vite 5 + React 18 + TypeScript 5 + React Router 6** in `apps/web` | Flexible hiring (React), fast HMR, Svelte-level LCP via Vite islands for `MiniCheck`, lean `480px` Duolingo shell |
-| Notes Engine (authoring) | **Express 4 + TypeScript** in `notes-engine/` | Extends existing `server.js` (`POST /api/convert` Claude → `noteJson`), `tsx watch`, no rewrite |
-| Data | **Firebase** Auth + Firestore `courseContent/{course-week}.noteJson` | `js/firebase-config.js` single source, `apps/web/src/lib/firebase.ts` re-export |
-| Styling | `css/variables.css` tokens, `DM Sans` + `Playfair Display` | Shared `apps/web/src/index.css` |
-| Hosting | **Vercel** | Root static `vercel.json` `framework:vite`, `notes-engine` as serverless `/api/*` |
+```
+Browser ──HTTPS──▶ Vercel (Unify Learn app) ──HTTPS──▶ Render (Unify API) ──▶ Supabase (Postgres + Auth)
+                          ▲                                ▲                        ▲
+                     DIBBLS/Unify                    knight-dev01/Unify      shared project
+                     (frontend only)                 (full monorepo)
+```
 
-Master spec: `docs/PRD-master-v5.0.docx` (deferred P2: Arcade/Coins/WhatsApp). Lean P0 only here.
+## Stack
+
+| Layer | Tech | Notes |
+|---|---|---|
+| Web app | **Vite 5 + React 18 + TypeScript 5 + React Router 6** (`apps/web`) | 480px shell, Nunito, emerald tokens, lucide icons, KaTeX formulas, SVG mascot |
+| API + authoring | **Express 4 + TypeScript** (`notes-engine/`) | `/v1/*` app API + `/api/*` authoring, zod validation, rate limits, JSON logs |
+| Data + Auth | **Supabase** (Postgres + Auth) | RLS locked down; backend uses service role; Prisma `migrate deploy` on Render |
+| AI notes | **Gemini** (default) / Anthropic (opt-in) | Studio-only `/api/convert`; model registry with health-tracked rotation; students never touch AI |
+| Hosting | **Vercel** (web, static) + **Render** free tier (API, Blueprint) | SPA fallback rewrites; `/healthz`; 12-min keep-alive cron |
+| CI | GitHub Actions (keep-alive) + `Sync-Frontend.ps1` | Frontend-only mirror `fork → DIBBLS/Unify`; **never merge upstream → fork** |
 
 ## Monorepo Structure
 
 ```
 Unify/
-├── apps/
-│   └── web/                          # Vite+React TS — lean Learn (Duolingo)
-│       ├── src/
-│       │   ├── pages/                # CoursePage (12 weeks) → LearnPage (Week→TopicSlice)
-│       │   ├── components/           # ContentBlock, MiniCheck, TopicSlice
-│       │   ├── hooks/                # useProgress (topicKey w_t, localStorage + Firestore)
-│       │   ├── lib/firebase.ts       # re-export js/firebase-config.js
-│       │   ├── types/note.ts         # UnifyNote (topics[].subtopics[].miniCheck/pulseCheck/eoq)
-│       │   ├── App.tsx               # BrowserRouter /course, /learn/:courseCode/week/:week
-│       │   └── index.css             # --green/#22C55E tokens
-│       ├── public/icons, manifest.json, sw.js
-│       ├── package.json, vite.config.ts, tsconfig.json
-│       └── index.html
-├── notes-engine/                     # Express+TS — Draft→AI→Review→Published (authoring, not in apps/ per Vercel separate deploy)
-│   ├── server.ts / server.js         # /api/convert|validate|render|save|upload (server.ts is TS entry)
-│   ├── src/{renderer.js,schema.js}   # renderer/schema still .js (TS migration next), samples/hand_authored_note.json
-│   ├── package.json (tsx, @types/*), tsconfig.json
-│   └── public/app.js                 # admin authoring UI
-├── docs/
-│   ├── PRD-lean-v1.0.docx
-│   └── PRD-master-v5.0.docx
-├── vercel.json                       # Vercel build + SPA fallback + redirects
-├── render.yaml                       # Render blueprint (API, deploys from fork)
-├── supabase/                         # schema.sql + seed.sql
-├── SETUP.md                          # backend setup guide
-└── scripts/                          # Sync-Frontend.ps1 (frontend-only upstream sync)
+├── apps/web/                  # Unify Learn app (deploys to Vercel from DIBBLS/Unify)
+│   ├── src/
+│   │   ├── routes/            # auth, onboarding (role-first), dashboard, course,
+│   │   │                      # learn/week (tabs + quiz), profile, admin, studio
+│   │   ├── components/        # Mascot, Flash, Loading, MiniCheck, TopicSlice,
+│   │   │                      # ContentBlock, Formula (KaTeX), EoqQuiz, BackButton
+│   │   ├── hooks/useProgress.ts  # server-backed topic progress (no localStorage)
+│   │   ├── lib/               # supabase (Auth), api (backend client), log
+│   │   └── types/note.ts      # UnifyNote schema (topics, miniCheck, pulse, EOQ)
+│   ├── public/                # 404.html, manifest, sw.js (offline), og-image.png
+│   └── package.json, vite.config.ts (plain env names work, VITE_ optional)
+├── notes-engine/              # Unify API (deploys to Render from fork)
+│   ├── server.ts              # routes, CORS, logging, trust proxy, JSON 404
+│   ├── src/routes/v1.ts       # universities, me, onboarding, courses, weeks,
+│   │                          # progress, stats, publish, authored, admin/*
+│   ├── src/lib/               # supabase, ai (provider adapter + registry), seed
+│   ├── src/middleware/        # requireAuth, requireAuthor, requireAdmin, logger
+│   ├── prisma/                # schema + migrations (auto-applied on Render)
+│   └── scripts/               # check-env (preflight), copy-js (build)
+├── supabase/                  # schema.sql + seed.sql (reference; Prisma owns DDL)
+├── docs/                      # PRD specs (reference)
+├── render.yaml                # Render Blueprint (fork)
+├── vercel.json                # Vercel build + SPA fallback + redirects
+├── SETUP.md                   # backend setup guide (Supabase + Render + Vercel)
+└── scripts/                   # Sync-Frontend.ps1 (frontend-only upstream sync)
 ```
 
 ## Quick Start
 
 ```bash
-git clone https://github.com/DIBBLS/Unify.git
+git clone https://github.com/knight-dev01/Unify.git
 cd Unify
 
-# Web (lean Learn)
+# Web app
 cd apps/web
 npm install
-npm run dev      # http://localhost:3000  (or 5173 if root)
+npm run dev      # http://localhost:3000
 
-# Notes Engine (authoring)
+# API (separate shell)
 cd ../../notes-engine
 npm install
-npm run dev      # http://localhost:3000 (tsx watch server.ts) — set ANTHROPIC_API_KEY in .env
+npm run dev      # tsx watch server.ts — needs SUPABASE_* + DIRECT_URL in .env
 ```
 
-Legacy static (no build): `npx serve .` then open `Learn.html`.
+## Deploy
 
-## Vercel Deploy
+- **Web (Vercel, `DIBBLS/Unify`)**: Root Directory `.`, build/output/install from `vercel.json`, env `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `API_URL`, `USE_BACKEND=1` → Redeploy. Auto-deploys on push (manual sync script or bot).
+- **API (Render, fork)**: New → Blueprint → `render.yaml` → env `SUPABASE_*`, `DATABASE_URL` (`:6543`), `DIRECT_URL` (`:5432`), `CORS_ORIGIN`, `ADMIN_EMAILS`, `AI_PROVIDER=gemini`, `GEMINI_API_KEY` → Deploy. Migrations + reference seed run automatically.
+- **First admin**: sign in as `unify.admin@unify.learn` / `unify.admin` (auto-seeded, pre-confirmed) → rotate the password immediately.
 
-- **Web:** Vercel → Import `DIBBLS/Unify` → Framework `Vite` → Root `apps/web` or `.` with `vercel.json` `framework:vite` `outputDirectory: apps/web/dist` (static). Auto-deploy on `push to main`.
-- **Notes Engine:** Separate Vercel project from `notes-engine/` with `@vercel/node` or same monorepo rewrite `/api/*` → `notes-engine/api`.
+## Roles & Flows
 
-Backend deploys from the fork via the Render Blueprint (`render.yaml`);
-migrations run automatically (`prisma migrate deploy` on Supabase).
+- **Student** (7 onboarding steps): dashboard (XP/streak/quizzes) → level catalog → 12 weeks → topics + EOQ quiz → PDF export.
+- **Lecturer** (5 steps: role → name → uni → faculty → dept): Studio (convert → review → publish), Published-notes dashboard. No Learn paths.
+- **Collaborator** (2 steps: role → name): same author tooling (internal or external).
+- **Admin** (`/admin`): stats, model registry health, universities, courses-per-level, users/roles/invites. Bootstrap via `ADMIN_EMAILS`.
+- Roles lock at assignment (server-enforced 403); profile edits name/email only.
 
-## Lean P0 Scope
+## Docs
 
-- ✅ Course card (lecturer bio) → 12 weeks → Class → Note + `MiniCheck` per subtopic (`ContentBlock` types: paragraph/bullets/formula/symbol/insight/analogy/workedExample/diagram)
-- ✅ `noteJson` in Firestore (not `htmlContent` string), `TopicSlice` shadow-free React
-- ⏳ Scoped AI per note (stub `showToast`) → `POST /api/convert` `SYSTEM_PROMPT`
-- ⏳ Flexible gating (default free next week, lecturer toggle)
-- ⏳ Lecturer dashboard same web (`dashboard.html` per-week completion)
-
-Deferred `P2`: Arcade, Coins, peer stakes, WhatsApp, multi-uni.
+- `SETUP.md` — full Supabase + Render + Vercel setup, env tables, troubleshooting.
+- `docs/` — product specs. `supabase/` — reference SQL (Prisma migrations are authoritative).
 
 ## License
 
-© 2025 Unify
+© 2026 Unify Learn
