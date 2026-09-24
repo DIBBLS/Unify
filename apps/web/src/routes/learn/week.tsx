@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Check, Download } from 'lucide-react';
 import { api, type TopicMeta } from '../../lib/api';
+import { log } from '../../lib/log';
 import type { UnifyNote, Topic } from '../../types/note';
 import { TopicSlice } from '../../components/TopicSlice';
 import EoqQuiz from '../../components/EoqQuiz';
@@ -89,6 +90,11 @@ export default function LearnPage() {
   }, [courseCode, weekNum]);
 
   if (loading) return <Loading text={`Loading Week ${weekNum}`} />;
+  if (!courseCode) {
+    // Unreachable via router links — redirect to courses instead of stranding.
+    log.warn('route', `week with empty course (url=${window.location.href})`);
+    return <Navigate to="/course" replace />;
+  }
   if (loadError)
     return (
       <div style={{ padding: 40, maxWidth: 480, margin: '0 auto' }}>
@@ -100,15 +106,9 @@ export default function LearnPage() {
           message={loadError}
           ttl={0}
           action={
-            !courseCode ? (
-              <button onClick={() => navigate('/course')} style={{ padding: '8px 18px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, fontSize: 13 }}>
-                Go to Courses
-              </button>
-            ) : (
-              <button onClick={() => window.location.reload()} style={{ padding: '8px 18px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, fontSize: 13 }}>
-                Retry
-              </button>
-            )
+            <button onClick={() => window.location.reload()} style={{ padding: '8px 18px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, fontSize: 13 }}>
+              Retry
+            </button>
           }
         />
       </div>
