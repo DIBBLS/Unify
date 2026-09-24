@@ -25,7 +25,8 @@ export default function LearnPage() {
   const [enrolling, setEnrolling] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
-  const { toggle, isDone } = useProgress(decodeURIComponent(courseCode).toUpperCase(), weekNum);
+  // React Router already URL-decodes params — never decode again here.
+  const { toggle, isDone } = useProgress((courseCode || '').toUpperCase(), weekNum);
   const [tab, setTab] = useState(0);
   const topics = note?.topics ?? [];
   const hasQuiz = (note?.eoq?.questions?.length || 0) > 0;
@@ -40,7 +41,7 @@ export default function LearnPage() {
   useEffect(() => {
     async function load() {
       setLoading(true);
-      const code = decodeURIComponent(courseCode || '');
+      const code = courseCode || '';
       if (!code) {
         setLoadError('No course selected. Pick one from Courses.');
         setLoading(false);
@@ -93,9 +94,15 @@ export default function LearnPage() {
           message={loadError}
           ttl={0}
           action={
-            <button onClick={() => window.location.reload()} style={{ padding: '8px 18px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, fontSize: 13 }}>
-              Retry
-            </button>
+            !courseCode ? (
+              <button onClick={() => navigate('/course')} style={{ padding: '8px 18px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, fontSize: 13 }}>
+                Go to Courses
+              </button>
+            ) : (
+              <button onClick={() => window.location.reload()} style={{ padding: '8px 18px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, fontSize: 13 }}>
+                Retry
+              </button>
+            )
           }
         />
       </div>
@@ -104,13 +111,13 @@ export default function LearnPage() {
     return (
       <div style={{ padding: 40, textAlign: 'center', color: '#777', maxWidth: 480, margin: '0 auto' }}>
         <Mascot size={110} />
-        <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 20, color: '#3c3c3c', marginTop: 12 }}>You're not enrolled in {decodeURIComponent(courseCode)}</h1>
+        <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 20, color: '#3c3c3c', marginTop: 12 }}>You're not enrolled in {courseCode}</h1>
         <p style={{ fontSize: 14, margin: '8px 0 20px' }}>Enroll to unlock its weeks, topics and quizzes.</p>
         <button
           onClick={async () => {
             setEnrolling(true);
             try {
-              await api.enroll(decodeURIComponent(courseCode), true);
+              await api.enroll(courseCode || '', true);
             } catch {
               // reload surfaces the error state either way
             }
@@ -183,7 +190,7 @@ export default function LearnPage() {
   return (
     <>
     <div className="screen-only" style={{ maxWidth: 640, margin: '0 auto', padding: '24px 20px 100px' }}>
-      <button onClick={() => navigate(`/course/${encodeURIComponent(decodeURIComponent(courseCode))}`)} style={{ marginBottom: 16, display: 'flex', gap: 6, alignItems: 'center', background: 'none', border: 'none', color: '#777', fontSize: 14 }}>
+      <button onClick={() => navigate(`/course/${encodeURIComponent(courseCode || '')}`)} style={{ marginBottom: 16, display: 'flex', gap: 6, alignItems: 'center', background: 'none', border: 'none', color: '#777', fontSize: 14 }}>
         <ChevronLeft size={18} /> Back
       </button>
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
@@ -212,7 +219,7 @@ export default function LearnPage() {
       {preview && (
         <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 12, padding: 10, fontSize: 13, color: '#065f46', marginBottom: 12, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'space-between' }}>
           <span>Author preview — read-only, nothing is recorded.</span>
-          <button onClick={() => navigate(`/studio?edit=${encodeURIComponent(decodeURIComponent(courseCode))}&week=${weekNum}`)} style={{ padding: '8px 14px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, fontSize: 12, whiteSpace: 'nowrap' }}>
+          <button onClick={() => navigate(`/studio?edit=${encodeURIComponent(courseCode || '')}&week=${weekNum}`)} style={{ padding: '8px 14px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, fontSize: 12, whiteSpace: 'nowrap' }}>
             Edit in Studio
           </button>
         </div>

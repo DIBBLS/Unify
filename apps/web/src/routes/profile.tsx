@@ -1,12 +1,29 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, Pencil, Shield } from 'lucide-react';
+import { LogOut, Pencil, Shield, X } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import { supabaseBrowser } from '../lib/supabase';
-import { api, type Profile } from '../lib/api';
+import { api, type Profile, type University } from '../lib/api';
 import Loading from '../components/Loading';
 import Mascot from '../components/Mascot';
 import Flash from '../components/Flash';
+
+const UUID_RE = /^[0-9a-f-]{36}$/i;
+const DEPARTMENTS = [
+  'Electronic & Computer Engineering',
+  'Mechanical Engineering',
+  'Industrial & Petroleum Engineering',
+  'Chemical & Polymer Engineering',
+  'Civil Engineering',
+  'Aerospace Engineering',
+];
+const LEVELS = ['100 Level', '200 Level', '300 Level', '400 Level', '500 Level'];
+const TARGETS = [
+  { label: 'First Class', val: 4.5 },
+  { label: '2nd Class Upper', val: 3.5 },
+  { label: '2nd Class Lower', val: 2.4 },
+  { label: 'Pass', val: 1.5 },
+];
 
 export default function ProfileRoute() {
   const navigate = useNavigate();
@@ -17,6 +34,18 @@ export default function ProfileRoute() {
   const [error, setError] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [emailMsg, setEmailMsg] = useState('');
+  // Inline edit (no onboarding detour): role + semester stay locked.
+  const [editing, setEditing] = useState(false);
+  const [unis, setUnis] = useState<University[]>([]);
+  const [dName, setDName] = useState('');
+  const [dUni, setDUni] = useState('');
+  const [dFaculty, setDFaculty] = useState('');
+  const [dDept, setDDept] = useState('');
+  const [dLevel, setDLevel] = useState('');
+  const [dTarget, setDTarget] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState('');
+  const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
     const sb = supabaseBrowser();
@@ -39,6 +68,18 @@ export default function ProfileRoute() {
         }
         setProfile(me.profile);
         setIsAdmin(!!me.isAdmin);
+        const p = me.profile;
+        setDName(p.first_name || '');
+        setDUni(p.university || '');
+        setDFaculty(p.faculty || '');
+        setDDept(p.department || '');
+        setDLevel(p.level || '');
+        setDTarget(p.grad_target != null ? String(p.grad_target) : '');
+        try {
+          setUnis(await api.universities());
+        } catch {
+          // university dropdown falls back to the saved name
+        }
       } catch {
         setError("Couldn't load your profile. Check your connection and try again.");
       } finally {
@@ -76,6 +117,45 @@ export default function ProfileRoute() {
     const sb = supabaseBrowser();
     if (sb) await sb.auth.signOut().catch(() => {});
     navigate('/auth');
+  };
+
+  const startEdit = () => {
+    setSaveMsg('');
+    setSaveError('');
+    setEditing(true);
+  };
+
+  const saveEdit = async () => {
+    if (!dName.trim()) {
+      setSaveError('Enter your first name.');
+      return;
+    }
+    setSaving(true);
+    setSaveError('');
+    setSaveMsg('');
+    try {
+      const payload: Record<string, unknown> = {
+        firstName: dName.trim(),
+        university: dUni || null,
+        faculty: dFaculty || null,
+        department: dDept || null,
+      };
+      const match = unis.find((u) => u.name === dUni);
+      if (match && UUID_RE.test(match.id)) payload.universityId = match.id;
+      const author = profile?.role === 'lecturer' || profile?.role === 'collaborator';
+      if (!author) {
+        if (dLevel) payload.level = dLevel;
+        if (dTarget) payload.gradTarget = Number(dTarget);
+      }
+      const res = await api.updateMe(payload);
+      setProfile(res.profile);
+      setEditing(false);
+      setSaveMsg('Profile updated.');
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Save failed.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) return <Loading text="Loading profile…" />;
@@ -147,10 +227,84 @@ export default function ProfileRoute() {
           <Shield size={16} /> Admin panel
         </Link>
       )}
+      {saveMsg && <Flash tone="success" message={saveMsg} onDismiss={() => setSaveMsg('')} />}
+      {saveError && <Flash tone="error" message={saveError} onDismiss={() => setSaveError('')} />}
+
+      {editing && (
+        <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 14, marginBottom: 8, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ fontSize: 12, fontWeight: 800 }}>Edit profile</div>
+          <label style={{ fontSize: 12, fontWeight: 700 }}>
+            First name
+            <input value={dName} onChange={(e) => setDName(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid #e5e5e5', borderRadius: 10, fontSize: 14, display: 'block' }} />
+          </label>
+          <label style={{ fontSize: 12, fontWeight: 700 }}>
+            University
+            <select value={dUni} onChange={(e) => setDUni(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid #e5e5e5', borderRadius: 10, fontSize: 14, display: 'block' }}>
+              <option value="">Select…</option>
+              {!unis.some((u) => u.name === dUni) && dUni && <option value={dUni}>{dUni}</option>}
+              {unis.map((u) => (
+                <option key={u.id} value={u.name}>{u.name}</option>
+              ))}
+            </select>
+          </label>
+          <label style={{ fontSize: 12, fontWeight: 700 }}>
+            Faculty
+            <select value={dFaculty} onChange={(e) => setDFaculty(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid #e5e5e5', borderRadius: 10, fontSize: 14, display: 'block' }}>
+              <option value="">Select…</option>
+              {!['Faculty of Engineering'].includes(dFaculty) && dFaculty && <option value={dFaculty}>{dFaculty}</option>}
+              <option value="Faculty of Engineering">Faculty of Engineering</option>
+            </select>
+          </label>
+          <label style={{ fontSize: 12, fontWeight: 700 }}>
+            Department
+            <select value={dDept} onChange={(e) => setDDept(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid #e5e5e5', borderRadius: 10, fontSize: 14, display: 'block' }}>
+              <option value="">Select…</option>
+              {!DEPARTMENTS.includes(dDept) && dDept && <option value={dDept}>{dDept}</option>}
+              {DEPARTMENTS.map((d) => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
+          </label>
+          {!canAuthor && (
+            <>
+              <label style={{ fontSize: 12, fontWeight: 700 }}>
+                Level
+                <select value={dLevel} onChange={(e) => setDLevel(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid #e5e5e5', borderRadius: 10, fontSize: 14, display: 'block' }}>
+                  <option value="">Select…</option>
+                  {LEVELS.map((l) => (
+                    <option key={l} value={l}>{l}</option>
+                  ))}
+                </select>
+              </label>
+              <label style={{ fontSize: 12, fontWeight: 700 }}>
+                Graduation target
+                <select value={dTarget} onChange={(e) => setDTarget(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid #e5e5e5', borderRadius: 10, fontSize: 14, display: 'block' }}>
+                  <option value="">Select…</option>
+                  {TARGETS.map((t) => (
+                    <option key={t.val} value={String(t.val)}>{t.label} — {t.val}</option>
+                  ))}
+                </select>
+              </label>
+            </>
+          )}
+          <div style={{ fontSize: 11, color: '#777' }}>Role and semester are locked — only admin can change those.</div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={() => setEditing(false)} style={{ flex: 1, padding: 12, background: '#fff', color: '#3c3c3c', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 12, fontWeight: 800, display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'center' }}>
+              <X size={16} /> Cancel
+            </button>
+            <button onClick={saveEdit} disabled={saving} style={{ flex: 1, padding: 12, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 12, fontWeight: 800, opacity: saving ? 0.6 : 1 }}>
+              {saving ? 'Saving…' : 'Save'}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div style={{ display: 'flex', gap: 8 }}>
-        <Link to="/onboarding?edit=1" style={{ flex: 1, padding: 14, background: '#fff', color: '#3c3c3c', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 16, fontWeight: 700, textDecoration: 'none', textAlign: 'center', display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
-          <Pencil size={16} /> Edit profile
-        </Link>
+        {!editing && (
+          <button onClick={startEdit} style={{ flex: 1, padding: 14, background: '#fff', color: '#3c3c3c', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 16, fontWeight: 700, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
+            <Pencil size={16} /> Edit profile
+          </button>
+        )}
         <button onClick={handleLogout} style={{ flex: 1, padding: 14, background: '#fff', color: '#991b1b', border: '1px solid #fecaca', borderBottom: '4px solid #fecaca', borderRadius: 16, fontWeight: 800, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
           <LogOut size={16} /> Log out
         </button>

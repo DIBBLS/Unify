@@ -12,7 +12,9 @@ type WeekRow = { week: number; title: string; subtitle: string };
 export default function CourseDetailRoute() {
   const { code = '' } = useParams();
   const [searchParams] = useSearchParams();
-  const courseCode = decodeURIComponent(code);
+  // React Router already URL-decodes params — never decode again here
+  // (a stray % once crashed this screen).
+  const courseCode = code;
   const [weeks, setWeeks] = useState<WeekRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -62,9 +64,10 @@ export default function CourseDetailRoute() {
   if (loading) return <Loading text={courseCode ? `Loading ${courseCode}…` : 'Loading…'} />;
   if (!courseCode)
     return (
-      <div style={{ padding: 40, textAlign: 'center', color: '#777' }}>
+      <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px', textAlign: 'center' }}>
+        <BackButton to="/course" />
         <Mascot size={110} />
-        <div style={{ marginTop: 12 }}>No course selected. Pick one from Courses.</div>
+        <div style={{ marginTop: 12, color: '#777' }}>No course selected. Pick one from Courses.</div>
       </div>
     );
   if (blocked)

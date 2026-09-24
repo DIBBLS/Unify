@@ -168,6 +168,11 @@ export const api = {
   universities: () => apiFetch<University[]>("/v1/universities"),
   settings: () => apiFetch<{ currentSemester: string }>("/v1/settings"),
   me: () => apiFetch<{ onboarded: boolean; profile: Profile | null; isAdmin: boolean; courses: string[]; resume: { course: string; week: number; topic: number } | null }>("/v1/me"),
+  updateMe: (payload: Record<string, unknown>) =>
+    apiFetch<{ ok: boolean; profile: Profile }>("/v1/me", {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }),
   onboarding: (payload: Record<string, unknown>) =>
     apiFetch<{ ok: boolean; profile: Profile }>("/v1/onboarding", {
       method: "POST",
