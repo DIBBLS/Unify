@@ -16,6 +16,7 @@ export default function DashboardRoute() {
   const [streak, setStreak] = useState(0);
   const [courses, setCourses] = useState<CourseStat[]>([]);
   const [enrolled, setEnrolled] = useState<string[]>([]);
+  const [resume, setResume] = useState<{ course: string; week: number; topic: number } | null>(null);
   const [quizzes, setQuizzes] = useState({ taken: 0, avg: 0 });
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -43,6 +44,7 @@ export default function DashboardRoute() {
         }
         setProfile(me.profile);
         setEnrolled(me.courses || []);
+        setResume(me.resume || null);
         const stats = await api.stats();
         setXp(stats.xp);
         setStreak(stats.streak);
@@ -183,18 +185,20 @@ export default function DashboardRoute() {
         </div>
       )}
 
-      <div style={{ margin: '0 16px', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
-        <div style={{ width: 44, height: 44, background: '#ecfdf5', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <BookOpen size={20} color="#059669" />
+      {resume && (
+        <div style={{ margin: '0 16px', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <div style={{ width: 44, height: 44, background: '#ecfdf5', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <BookOpen size={20} color="#059669" />
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 700 }}>Continue Learning</div>
+            <div style={{ fontSize: 12, color: '#777' }}>{resume.course} · Week {resume.week} · pick up where you stopped</div>
+          </div>
+          <Link to={`/learn/${encodeURIComponent(resume.course)}/week/${resume.week}${resume.topic ? `?t=${resume.topic}` : ''}`} style={{ padding: '10px 16px', background: '#10b981', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #059669' }}>
+            Resume
+          </Link>
         </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 700 }}>Continue Learning</div>
-          <div style={{ fontSize: 12, color: '#777' }}>Pick up where you left off</div>
-        </div>
-        <Link to="/course" style={{ padding: '10px 16px', background: '#10b981', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #059669' }}>
-          Resume
-        </Link>
-      </div>
+      )}
 
       <div style={{ margin: '16px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ fontFamily: 'Nunito', fontWeight: 800 }}>Your Courses</h2>

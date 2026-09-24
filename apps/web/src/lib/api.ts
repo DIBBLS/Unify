@@ -166,7 +166,8 @@ export type TopicMeta = {
 
 export const api = {
   universities: () => apiFetch<University[]>("/v1/universities"),
-  me: () => apiFetch<{ onboarded: boolean; profile: Profile | null; isAdmin: boolean; courses: string[] }>("/v1/me"),
+  settings: () => apiFetch<{ currentSemester: string }>("/v1/settings"),
+  me: () => apiFetch<{ onboarded: boolean; profile: Profile | null; isAdmin: boolean; courses: string[]; resume: { course: string; week: number; topic: number } | null }>("/v1/me"),
   onboarding: (payload: Record<string, unknown>) =>
     apiFetch<{ ok: boolean; profile: Profile }>("/v1/onboarding", {
       method: "POST",
@@ -185,6 +186,16 @@ export const api = {
     apiFetch<{ xp: number; streak: number; courses: { course: string; topics: number }[]; quizzesTaken: number; quizAvg: number }>("/v1/stats"),
   progressGet: (course: string, week: number) =>
     apiFetch<{ done: number[] }>(`/v1/progress?course=${encodeURIComponent(course)}&week=${week}`),
+  enroll: (course: string, enroll: boolean) =>
+    apiFetch<{ ok: boolean; enrolled: string[] }>('/v1/enrollments', {
+      method: 'POST',
+      body: JSON.stringify({ course, enroll }),
+    }),
+  resume: (course: string, week: number, topic: number) =>
+    apiFetch<{ ok: boolean }>('/v1/resume', {
+      method: 'POST',
+      body: JSON.stringify({ course, week, topic }),
+    }),
   authored: () =>
     apiFetch<{ notes: { id: string; course: string; week: number; topic: number; version: number; title: string }[] }>('/v1/authored'),
   courseWeeks: (course: string) =>
@@ -240,8 +251,12 @@ export const api = {
     }>('/v1/admin/stats'),
   adminUsers: (q = '', role = '') =>
     apiFetch<{ users: AdminUser[] }>(`/v1/admin/users?q=${encodeURIComponent(q)}&role=${encodeURIComponent(role)}`),
-  adminPatchUser: (id: string, payload: { role?: string; is_admin?: boolean }) =>
+  adminPatchUser: (id: string, payload: { role?: string; is_admin?: boolean; level?: string }) =>
     apiFetch<{ ok: boolean }>(`/v1/admin/users/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  adminSetSemester: (semester: string) =>
+    apiFetch<{ ok: boolean; currentSemester: string }>('/v1/admin/settings/semester', { method: 'PUT', body: JSON.stringify({ semester }) }),
+  adminPromote: () =>
+    apiFetch<{ ok: boolean; promoted: number; graduated: number }>('/v1/admin/users/promote', { method: 'POST', body: JSON.stringify({}) }),
   adminDeleteUser: (id: string) => apiFetch<{ ok: boolean }>(`/v1/admin/users/${id}`, { method: 'DELETE' }),
   adminModels: (refresh = false) =>
     apiFetch<{ provider: string; default: string; models: { model: string; failures: number; last_ok: string | null }[] }>(

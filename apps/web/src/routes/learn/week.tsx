@@ -11,7 +11,7 @@ import Mascot from '../../components/Mascot';
 import Flash from '../../components/Flash';
 
 export default function LearnPage() {
-  const { courseCode = 'MEE 352', week: weekParam } = useParams();
+  const { courseCode = '', week: weekParam } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const weekNum = Number(weekParam) || 1;
@@ -21,6 +21,8 @@ export default function LearnPage() {
   const [overrides, setOverrides] = useState<Record<number, Topic>>({});
   const [viewed, setViewed] = useState<Record<number, number>>({});
   const [loadingVersion, setLoadingVersion] = useState(false);
+  const [blocked, setBlocked] = useState(false);
+  const [enrolling, setEnrolling] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const { toggle, isDone } = useProgress(decodeURIComponent(courseCode).toUpperCase(), weekNum);
@@ -38,13 +40,37 @@ export default function LearnPage() {
   useEffect(() => {
     async function load() {
       setLoading(true);
+      const code = decodeURIComponent(courseCode || '');
+      if (!code) {
+        setLoadError('No course selected. Pick one from Courses.');
+        setLoading(false);
+        return;
+      }
       try {
-        const data = await api.week(decodeURIComponent(courseCode), weekNum);
+        // Enrolled-only learning (authors in ?preview=1 pass through).
+        const previewMode = searchParams.get('preview') === '1';
+        const me = await api.me();
+        const role = me.profile?.role || 'student';
+        const enrolled = (me.courses || []).map((c) => c.toUpperCase()).includes(code.toUpperCase());
+        if (!previewMode && (role === 'student' || !role) && !enrolled) {
+          setBlocked(true);
+          setLoading(false);
+          return;
+        }
+        const data = await api.week(code, weekNum);
         const note = data.note_json as UnifyNote;
-        setNote(note && Array.isArray(note.topics) ? note : null);
+        const valid = note && Array.isArray(note.topics) ? note : null;
+        setNote(valid);
         setTopicMeta(data.topicMeta || []);
         setOverrides({});
         setViewed({});
+        // Track the live position for the dashboard Resume card
+        // (previews never pollute it).
+        if (valid && !previewMode) {
+          const count = valid.topics.length + ((valid.eoq?.questions?.length || 0) > 0 ? 1 : 0);
+          const t0 = Math.min(Math.max(Number(searchParams.get('t')) || 0, 0), Math.max(count - 1, 0));
+          api.resume(data.course, weekNum, t0).catch(() => {});
+        }
       } catch {
         setLoadError("Couldn't load this week. Check your connection and retry.");
       } finally {
@@ -52,6 +78,7 @@ export default function LearnPage() {
       }
     }
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseCode, weekNum]);
 
   if (loading) return <Loading text={`Loading Week ${weekNum}`} />;
@@ -73,6 +100,29 @@ export default function LearnPage() {
         />
       </div>
     );
+  if (blocked)
+    return (
+      <div style={{ padding: 40, textAlign: 'center', color: '#777', maxWidth: 480, margin: '0 auto' }}>
+        <Mascot size={110} />
+        <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 20, color: '#3c3c3c', marginTop: 12 }}>You're not enrolled in {decodeURIComponent(courseCode)}</h1>
+        <p style={{ fontSize: 14, margin: '8px 0 20px' }}>Enroll to unlock its weeks, topics and quizzes.</p>
+        <button
+          onClick={async () => {
+            setEnrolling(true);
+            try {
+              await api.enroll(decodeURIComponent(courseCode), true);
+            } catch {
+              // reload surfaces the error state either way
+            }
+            window.location.reload();
+          }}
+          disabled={enrolling}
+          style={{ padding: '12px 28px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800, fontSize: 14, opacity: enrolling ? 0.6 : 1 }}
+        >
+          {enrolling ? 'Enrolling…' : 'Enroll & continue'}
+        </button>
+      </div>
+    );
   if (!note)
     return (
       <div style={{ padding: 40, textAlign: 'center', color: '#777' }}>
@@ -86,6 +136,10 @@ export default function LearnPage() {
     const clamped = Math.min(Math.max(t, 0), tabCount - 1);
     setTab(clamped);
     setSearchParams(clamped ? { t: String(clamped) } : {}, { replace: true });
+    // Every tab switch moves the Resume bookmark (never for previews).
+    if (!preview && !blocked && note) {
+      api.resume(note.course, weekNum, clamped).catch(() => {});
+    }
   };
 
   const versionByTopic: Record<number, TopicMeta> = {};
