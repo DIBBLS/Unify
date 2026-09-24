@@ -41,6 +41,8 @@ export default function AuthRoute() {
   const [showPw, setShowPw] = useState(false);
   const [signupPw, setSignupPw] = useState('');
   const [pendingEmail, setPendingEmail] = useState('');
+  const [recovery, setRecovery] = useState(false);
+  const [recoveryPw, setRecoveryPw] = useState('');
   const [loading, setLoading] = useState(false);
   const [welcomeBack, setWelcomeBack] = useState(false);
 
@@ -64,6 +66,10 @@ export default function AuthRoute() {
     });
     const { data: sub } = sb.auth.onAuthStateChange((event, session) => {
       log.info('session', `event=${event} signedIn=${!!session}`);
+      if (event === 'PASSWORD_RECOVERY') {
+        setRecovery(true);
+        return;
+      }
       if (session) void routeToApp();
     });
     return () => {
@@ -125,7 +131,10 @@ export default function AuthRoute() {
       const { data, error: err } = await client.auth.signUp({
         email,
         password,
-        options: { data: { display_name: name } },
+        options: {
+          data: { display_name: name },
+          emailRedirectTo: `${window.location.origin}/auth?verified=1`,
+        },
       });
       if (err) {
         setError(err.message);
@@ -196,6 +205,39 @@ export default function AuthRoute() {
     }
   };
 
+  const handlePasswordUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    const client = sb;
+    if (!client) {
+      setError('Something went wrong. Please reload and try again.');
+      return;
+    }
+    const form = e.currentTarget;
+    const password = (form.elements.namedItem('new-password') as HTMLInputElement).value;
+    const confirm = (form.elements.namedItem('confirm-password') as HTMLInputElement).value;
+    if (password.length < 8) return setError('Password must be at least 8 characters.');
+    if (password !== confirm) return setError('Passwords do not match.');
+    setLoading(true);
+    try {
+      const { error: err } = await client.auth.updateUser({ password });
+      if (err) {
+        setError(err.message);
+        return;
+      }
+      await client.auth.signOut().catch(() => {});
+      setRecovery(false);
+      setRecoveryPw('');
+      setTab('signin');
+      setSuccess('Password updated! Sign in with your new password.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Update failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleGoogle = async () => {
     setError('');
     setSuccess('');
@@ -225,6 +267,33 @@ export default function AuthRoute() {
           <Loader2 size={16} style={{ animation: 'spin 0.8s linear infinite', color: '#10b981' }} />
           Getting your space ready…
         </div>
+      </div>
+    );
+
+  if (recovery)
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', maxWidth: 480, margin: '0 auto', background: '#fff', padding: 20, justifyContent: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+          <Mascot size={110} />
+        </div>
+        <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 26, textAlign: 'center' }}>Set a new password</h1>
+        <p style={{ fontSize: 13, color: '#777', textAlign: 'center', margin: '8px 0 16px' }}>Choose the password you'll sign in with from now on.</p>
+        {error && <Flash tone="error" message={error} ttl={6000} onDismiss={() => setError('')} />}
+        {success && <Flash tone="success" message={success} ttl={6000} onDismiss={() => setSuccess('')} />}
+        <form onSubmit={handlePasswordUpdate} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <label style={{ fontSize: 12, fontWeight: 700 }}>
+            New password
+            <input name="new-password" type={showPw ? 'text' : 'password'} value={recoveryPw} onChange={(e) => setRecoveryPw(e.target.value)} required placeholder="Min. 8 characters" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid #e5e5e5', borderRadius: 12, display: 'block' }} />
+          </label>
+          <label style={{ fontSize: 12, fontWeight: 700 }}>
+            Confirm new password
+            <input name="confirm-password" type="password" required placeholder="Repeat it" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid #e5e5e5', borderRadius: 12, display: 'block' }} />
+          </label>
+          <button disabled={loading} type="submit" style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+            {loading ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : null}
+            {loading ? 'Saving' : 'Save new password'} <ArrowRight size={18} />
+          </button>
+        </form>
       </div>
     );
 
