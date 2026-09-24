@@ -243,6 +243,7 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(note),
     }),
+  formatPack: () => apiFetch<{ prompt: string }>('/api/format'),
   publish: (payload: { course: string; week: number; title?: string; subtitle?: string; noteJson: unknown }) =>
     apiFetch<{ ok: boolean; course: string; week: number; versions: { topic: number; version: number; id: string }[] }>('/v1/publish', {
       method: 'POST',
