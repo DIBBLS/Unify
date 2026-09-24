@@ -38,6 +38,8 @@ export default function StudioRoute() {
   const [working, setWorking] = useState(false);
   const [workMsg, setWorkMsg] = useState(0);
   const [publishing, setPublishing] = useState(false);
+  const [publishingTopic, setPublishingTopic] = useState<number | null>(null);
+  const [catalog, setCatalog] = useState<{ code: string; title: string }[]>([]);
   const [jsonDraft, setJsonDraft] = useState('');
   const [searchParams] = useSearchParams();
 
@@ -47,6 +49,22 @@ export default function StudioRoute() {
     const t = setInterval(() => setWorkMsg((i) => (i + 1) % WORK_MSGS.length), 2500);
     return () => clearInterval(t);
   }, [working]);
+
+  // Course dropdown: only courses in the system (admin adds new ones).
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .courses()
+      .then((list) => {
+        if (!cancelled) setCatalog(list.map((c) => ({ code: c.code, title: c.title })));
+      })
+      .catch(() => {
+        // offline: manual input fallback below stays
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Deep link from author preview: /studio?edit=COURSE&week=N loads the
   // published week straight into review for editing, then re-publish.
@@ -171,7 +189,8 @@ export default function StudioRoute() {
         subtitle: meta.subtitle || note.subtitle,
         noteJson: note,
       });
-      setSuccess(`${res.course} · Week ${res.week} is now live for students.`);
+      const tags = (res.versions || []).map((v) => `Topic ${v.topic} → v${v.version}`).join(' · ');
+      setSuccess(tags ? `${res.course} · Week ${res.week} is live (${tags}). Old versions are kept.` : `${res.course} · Week ${res.week} is now live for students.`);
       setStep(2);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Publish failed.');
@@ -188,6 +207,31 @@ export default function StudioRoute() {
     setError('');
     setSuccess('');
     setRaw('');
+  };
+
+  // Publish a single topic as a new version (v1, v2, v3...) without
+  // touching the other topics in the week.
+  const publishTopic = async (topicNumber: number) => {
+    if (!note || !meta || publishingTopic !== null) return;
+    const single = note.topics.find((t) => t.number === topicNumber);
+    if (!single) return;
+    setError('');
+    setSuccess('');
+    setPublishingTopic(topicNumber);
+    try {
+      const res = await api.topicPublish({
+        course: meta.course,
+        week: meta.week,
+        topic: topicNumber,
+        title: single.title,
+        noteJson: single,
+      });
+      setSuccess(`${meta.course} · Week ${meta.week} · Topic ${topicNumber} saved as v${res.version}. Old versions are kept.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Topic publish failed.');
+    } finally {
+      setPublishingTopic(null);
+    }
   };
 
   if (working) return <Loading text={WORK_MSGS[workMsg]} />;
@@ -224,7 +268,16 @@ export default function StudioRoute() {
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <label style={{ ...label, flex: 1, minWidth: 140 }}>
               Course
-              <input value={course} onChange={(e) => setCourse(e.target.value)} placeholder="MEE 352" style={input} />
+              {catalog.length > 0 ? (
+                <select value={course} onChange={(e) => setCourse(e.target.value)} style={input}>
+                  {!catalog.some((c) => c.code === course) && <option value={course}>{course}</option>}
+                  {catalog.map((c) => (
+                    <option key={c.code} value={c.code}>{c.code} — {c.title}</option>
+                  ))}
+                </select>
+              ) : (
+                <input value={course} onChange={(e) => setCourse(e.target.value)} placeholder="MEE 352" style={input} />
+              )}
             </label>
             <label style={{ ...label, width: 100 }}>
               Week
@@ -291,7 +344,16 @@ export default function StudioRoute() {
           </div>
           <div style={{ maxWidth: 640, margin: '0 auto' }}>
             {note.topics.map((t) => (
-              <TopicSlice key={t.number} topic={t} />
+              <div key={t.number} style={{ marginBottom: 12 }}>
+                <TopicSlice topic={t} />
+                <button
+                  onClick={() => publishTopic(t.number)}
+                  disabled={publishingTopic !== null}
+                  style={{ marginTop: 6, padding: '8px 14px', borderRadius: 9999, background: '#fff', border: '1px solid #e5e5e5', fontWeight: 700, fontSize: 12, color: '#059669' }}
+                >
+                  {publishingTopic === t.number ? 'Publishing…' : `Publish only Topic ${t.number}`}
+                </button>
+              </div>
             ))}
           </div>
           <details style={{ border: '1px solid #e5e5e5', borderRadius: 12, padding: '10px 14px', marginTop: 16 }}>

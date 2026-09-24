@@ -9,7 +9,7 @@ import BackButton from '../components/BackButton';
 
 type Stats = { users: number; byRole: Record<string, number>; weeks: number; xpTotal: number };
 type Uni = { id: string; name: string; short_name?: string };
-type Course = { code: string; title: string; levels: string[] };
+type Course = { code: string; title: string; levels: string[]; semesters: string[] };
 
 const LEVELS = ['100 Level', '200 Level', '300 Level', '400 Level', '500 Level'];
 
@@ -29,6 +29,7 @@ export default function AdminRoute() {
   const [courseCode, setCourseCode] = useState('');
   const [courseTitle, setCourseTitle] = useState('');
   const [courseLevels, setCourseLevels] = useState<string[]>([]);
+  const [courseSemester, setCourseSemester] = useState('First Semester');
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('student');
   const [models, setModels] = useState<{ model: string; failures: number; last_ok: string | null }[]>([]);
@@ -121,7 +122,7 @@ export default function AdminRoute() {
     }
     setError('');
     try {
-      await api.adminCreateCourse(courseCode.trim().toUpperCase(), courseTitle.trim(), courseLevels);
+      await api.adminCreateCourse(courseCode.trim().toUpperCase(), courseTitle.trim(), courseLevels, courseSemester);
       setCourseCode('');
       setCourseTitle('');
       setCourseLevels([]);
@@ -299,7 +300,7 @@ export default function AdminRoute() {
           <div key={c.code} style={{ ...card, display: 'flex', gap: 8, alignItems: 'center' }}>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: 14 }}>{c.code} — {c.title}</div>
-              <div style={{ fontSize: 12, color: '#777' }}>{(c.levels || []).join(', ') || 'No levels'}</div>
+              <div style={{ fontSize: 12, color: '#777' }}>{(c.levels || []).join(', ') || 'No levels'}{(c.semesters || []).length ? ` · ${(c.semesters || []).join(', ')}` : ''}</div>
             </div>
             <button onClick={() => delCourse(c.code)} aria-label={`Delete ${c.code}`} style={{ background: 'none', border: '1px solid #fecaca', borderRadius: 8, color: '#991b1b', padding: 8, display: 'flex' }}>
               <Trash2 size={16} />
@@ -327,6 +328,26 @@ export default function AdminRoute() {
                 }}
               >
                 {l.replace(' Level', '')}
+              </button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+            {['First Semester', 'Second Semester'].map((s) => (
+              <button
+                key={s}
+                onClick={() => setCourseSemester(s)}
+                style={{
+                  flex: 1,
+                  padding: '8px 14px',
+                  borderRadius: 9999,
+                  border: `1px solid ${courseSemester === s ? '#059669' : '#e5e5e5'}`,
+                  background: courseSemester === s ? '#10b981' : '#fff',
+                  color: courseSemester === s ? '#fff' : '#777',
+                  fontSize: 12,
+                  fontWeight: 700,
+                }}
+              >
+                {s.replace(' Semester', '')}
               </button>
             ))}
           </div>

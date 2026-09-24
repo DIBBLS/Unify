@@ -148,6 +148,22 @@ export type AdminUser = {
   created_at?: string;
 };
 
+export type TopicVersionMeta = {
+  id: string;
+  version: number;
+  authorId: string | null;
+  createdAt: string;
+};
+
+export type TopicMeta = {
+  topic: number;
+  version: number;
+  id: string;
+  title: string;
+  authorId: string | null;
+  versions: TopicVersionMeta[];
+};
+
 export const api = {
   universities: () => apiFetch<University[]>("/v1/universities"),
   me: () => apiFetch<{ onboarded: boolean; profile: Profile | null; isAdmin: boolean; courses: string[] }>("/v1/me"),
@@ -157,7 +173,7 @@ export const api = {
       body: JSON.stringify(payload),
     }),
   week: (course: string, week: number) =>
-    apiFetch<{ course: string; week: number; title: string; subtitle: string; note_json: unknown }>(
+    apiFetch<{ course: string; week: number; title: string; subtitle: string; note_json: unknown; topicMeta?: TopicMeta[] }>(
       `/v1/courses/${encodeURIComponent(course)}/weeks/${week}`
     ),
   progress: (course: string, week: number, topic: number) =>
@@ -170,7 +186,7 @@ export const api = {
   progressGet: (course: string, week: number) =>
     apiFetch<{ done: number[] }>(`/v1/progress?course=${encodeURIComponent(course)}&week=${week}`),
   authored: () =>
-    apiFetch<{ notes: { course: string; week: number; title: string; subtitle: string }[] }>('/v1/authored'),
+    apiFetch<{ notes: { id: string; course: string; week: number; topic: number; version: number; title: string }[] }>('/v1/authored'),
   courseWeeks: (course: string) =>
     apiFetch<{ weeks: { week: number; title: string; subtitle: string }[] }>(
       `/v1/courses/${encodeURIComponent(course)}/weeks`
@@ -200,10 +216,21 @@ export const api = {
       body: JSON.stringify(note),
     }),
   publish: (payload: { course: string; week: number; title?: string; subtitle?: string; noteJson: unknown }) =>
-    apiFetch<{ ok: boolean; course: string; week: number }>('/v1/publish', {
+    apiFetch<{ ok: boolean; course: string; week: number; versions: { topic: number; version: number; id: string }[] }>('/v1/publish', {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
+  topicPublish: (payload: { course: string; week: number; topic: number; title?: string; noteJson: unknown }) =>
+    apiFetch<{ ok: boolean; id: string; version: number }>('/v1/topics/publish', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  topicList: (course: string, week: number) =>
+    apiFetch<{ topics: TopicMeta[] }>(`/v1/courses/${encodeURIComponent(course)}/weeks/${week}/topics`),
+  noteGet: (id: string) =>
+    apiFetch<{ id: string; course: string; week: number; topic: number; version: number; title: string; noteJson: unknown; authorId: string | null }>(`/v1/notes/${id}`),
+  noteDelete: (id: string) =>
+    apiFetch<{ ok: boolean; remaining: number }>(`/v1/notes/${id}`, { method: 'DELETE' }),
   adminStats: () =>
     apiFetch<{
       users: number;
@@ -234,8 +261,8 @@ export const api = {
   adminCreateUni: (name: string, short_name?: string) =>
     apiFetch<{ ok: boolean }>('/v1/admin/universities', { method: 'POST', body: JSON.stringify({ name, short_name }) }),
   adminDeleteUni: (id: string) => apiFetch<{ ok: boolean }>(`/v1/admin/universities/${id}`, { method: 'DELETE' }),
-  adminCreateCourse: (code: string, title: string, levels: string[]) =>
-    apiFetch<{ ok: boolean; course: string }>('/v1/admin/courses', { method: 'POST', body: JSON.stringify({ code, title, levels }) }),
+  adminCreateCourse: (code: string, title: string, levels: string[], semester = 'First Semester') =>
+    apiFetch<{ ok: boolean; course: string }>('/v1/admin/courses', { method: 'POST', body: JSON.stringify({ code, title, levels, semester }) }),
   adminDeleteCourse: (code: string) =>
     apiFetch<{ ok: boolean }>(`/v1/admin/courses/${encodeURIComponent(code)}`, { method: 'DELETE' }),
 };
