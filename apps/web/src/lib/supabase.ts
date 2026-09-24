@@ -1,8 +1,22 @@
 import { createClient, type SupabaseClient, type Session } from "@supabase/supabase-js";
 
 let cached: SupabaseClient | null = null;
-// Unique per tab so duplicated tabs don't share a session either.
-const tabId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+// Stable per tab ACROSS reloads (sessionStorage survives reloads in the
+// same tab). A fresh random id on every load would point the client at a
+// different storage key after refresh and "lose" the session — that was
+// the refresh bug. Duplicated tabs intentionally share the id (and session).
+function getTabId(): string {
+  try {
+    const existing = window.sessionStorage.getItem("unify.tabid");
+    if (existing) return existing;
+    const fresh = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    window.sessionStorage.setItem("unify.tabid", fresh);
+    return fresh;
+  } catch {
+    return Math.random().toString(36).slice(2) + Date.now().toString(36);
+  }
+}
+const tabId = getTabId();
 
 // ---- fully independent tab sessions ----
 // Every tab gets its OWN session in sessionStorage under its own key.
