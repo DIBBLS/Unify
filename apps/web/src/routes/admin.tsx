@@ -7,7 +7,7 @@ import Loading from '../components/Loading';
 import Flash from '../components/Flash';
 import BackButton from '../components/BackButton';
 
-type Stats = { users: number; byRole: Record<string, number>; weeks: number; xpTotal: number };
+type Stats = { users: number; byRole: Record<string, number>; weeks: number; topics: number; courses: number; xpTotal: number };
 type Uni = { id: string; name: string; short_name?: string };
 type Course = { code: string; title: string; levels: string[]; semesters: string[] };
 
@@ -252,6 +252,14 @@ export default function AdminRoute() {
           <div>
             <div style={{ fontSize: 18, fontWeight: 800 }}>{stats.weeks}</div>
             <div style={{ fontSize: 11, color: '#777' }}>Weeks</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 800 }}>{stats.topics ?? 0}</div>
+            <div style={{ fontSize: 11, color: '#777' }}>Topics</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 800 }}>{stats.courses ?? 0}</div>
+            <div style={{ fontSize: 11, color: '#777' }}>Courses</div>
           </div>
           <div>
             <div style={{ fontSize: 18, fontWeight: 800 }}>{stats.xpTotal}</div>

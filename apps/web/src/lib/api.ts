@@ -252,6 +252,8 @@ export const api = {
       users: number;
       byRole: Record<string, number>;
       weeks: number;
+      topics: number;
+      courses: number;
       xpTotal: number;
     }>('/v1/admin/stats'),
   adminUsers: (q = '', role = '') =>
