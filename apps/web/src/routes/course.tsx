@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, ChevronRight } from 'lucide-react';
+import { BookOpen, ChevronRight, Search } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import Loading from '../components/Loading';
 import Mascot from '../components/Mascot';
@@ -8,14 +8,12 @@ import Flash from '../components/Flash';
 import { supabaseBrowser } from '../lib/supabase';
 import { api } from '../lib/api';
 
-type CatalogCourse = { code: string; title: string; weeks: number; levels: string[]; semesters: string[] };
+type MyCourse = { code: string; title: string; weeks: number };
 
+// My Courses: only courses this student enrolled in. Browsing + joining
+// new ones lives under Explore (/explore).
 export default function CoursePage() {
-  const [courses, setCourses] = useState<CatalogCourse[]>([]);
-  const [myLevel, setMyLevel] = useState('');
-  const [activeSemester, setActiveSemester] = useState('First Semester');
-  const [enrolledSet, setEnrolledSet] = useState<Set<string>>(new Set());
-  const [busy, setBusy] = useState<string | null>(null);
+  const [courses, setCourses] = useState<MyCourse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -33,25 +31,26 @@ export default function CoursePage() {
         return;
       }
       try {
-        const [me, settings] = await Promise.all([
-          api.me(),
-          api.settings().catch(() => ({ currentSemester: 'First Semester' })),
-        ]);
-        if (me.profile?.level) setMyLevel(me.profile.level);
-        setEnrolledSet(new Set((me.courses || []).map((c) => c.toUpperCase())));
-        if (settings.currentSemester) setActiveSemester(settings.currentSemester);
-        const list = await api.courses();
-        const withWeeks = await Promise.all(
-          list.map(async (c) => {
+        const me = await api.me();
+        const enrolled = (me.courses || []).map((c) => c.toUpperCase());
+        let titles: Record<string, string> = {};
+        try {
+          const list = await api.courses();
+          titles = Object.fromEntries(list.map((c) => [c.code.toUpperCase(), c.title]));
+        } catch {
+          // titles fall back to codes
+        }
+        const rows = await Promise.all(
+          enrolled.map(async (code) => {
             try {
-              const w = await api.courseWeeks(c.code);
-              return { code: c.code, title: c.title, weeks: w.weeks.length, levels: c.levels || [], semesters: c.semesters || [] };
+              const w = await api.courseWeeks(code);
+              return { code, title: titles[code] || code, weeks: w.weeks.length };
             } catch {
-              return { code: c.code, title: c.title, weeks: 0, levels: c.levels || [], semesters: c.semesters || [] };
+              return { code, title: titles[code] || code, weeks: 0 };
             }
           })
         );
-        setCourses(withWeeks);
+        setCourses(rows);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Could not load courses.');
       } finally {
@@ -60,93 +59,55 @@ export default function CoursePage() {
     })();
   }, []);
 
-  if (loading) return <Loading text="Loading courses…" />;
-
-  // Strict scoping: your level + the admin's active semester, nothing else.
-  const shown = courses.filter(
-    (c) => (!myLevel || c.levels.includes(myLevel)) && c.semesters.includes(activeSemester)
-  );
-
-  const toggleEnroll = async (code: string) => {
-    const isIn = enrolledSet.has(code.toUpperCase());
-    setBusy(code);
-    setError('');
-    try {
-      const res = await api.enroll(code, !isIn);
-      setEnrolledSet(new Set((res.enrolled || []).map((c) => c.toUpperCase())));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Enrollment failed.');
-    } finally {
-      setBusy(null);
-    }
-  };
+  if (loading) return <Loading text="Loading your courses…" />;
 
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px' }}>
       <BackButton to="/dashboard" />
-      <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28 }}>Unify Learn</h1>
+      <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28 }}>My Courses</h1>
       <p style={{ color: '#777', marginTop: 6, fontSize: 13 }}>
-        Guided paths, quizzes and XP{myLevel ? ` · ${myLevel}` : ''}
+        Your enrolled courses — open one to keep learning
       </p>
       {error && <Flash tone="error" message={error} onDismiss={() => setError('')} />}
-      <div style={{ fontSize: 12, color: '#777', marginTop: 8 }}>
-        {myLevel || 'Your level'} · {activeSemester}
-      </div>
+      <Link to="/explore" style={{ marginTop: 12, padding: 12, background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center', textDecoration: 'none', color: '#065f46', fontWeight: 700, fontSize: 14 }}>
+        <Search size={18} /> Explore courses to enroll
+      </Link>
       <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {shown.length === 0 && !error && (
+        {courses.length === 0 && !error && (
           <div style={{ padding: 24, textAlign: 'center', color: '#777', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12 }}>
             <Mascot size={96} />
-            <div style={{ marginTop: 8 }}>No courses for this level yet. Check back soon.</div>
+            <div style={{ marginTop: 8 }}>No enrolled courses yet.</div>
+            <Link to="/explore" style={{ display: 'inline-block', marginTop: 12, padding: '10px 22px', background: '#10b981', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #059669' }}>
+              Explore courses
+            </Link>
           </div>
         )}
-        {shown.map((c) => {
-          const isIn = enrolledSet.has(c.code.toUpperCase());
-          return (
-            <div
-              key={c.code}
-              style={{
-                padding: '14px 16px',
-                background: '#fff',
-                border: '1px solid #e5e5e5',
-                borderRadius: 12,
-                display: 'flex',
-                gap: 12,
-                alignItems: 'center',
-              }}
-            >
-              <Link
-                to={`/course/${encodeURIComponent(c.code)}`}
-                style={{ flex: 1, display: 'flex', gap: 12, alignItems: 'center', textDecoration: 'none', color: '#3c3c3c', minWidth: 0 }}
-              >
-                <span style={{ width: 40, height: 40, borderRadius: 10, background: '#ecfdf5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <BookOpen size={20} color="#059669" />
-                </span>
-                <span style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{ fontWeight: 700, display: 'block' }}>{c.code}</span>
-                  <span style={{ fontSize: 12, color: '#777' }}>{c.title} · {c.weeks} {c.weeks === 1 ? 'week' : 'weeks'}</span>
-                </span>
-                <ChevronRight size={18} color="#059669" />
-              </Link>
-              <button
-                onClick={() => toggleEnroll(c.code)}
-                disabled={busy === c.code}
-                style={{
-                  padding: '8px 14px',
-                  borderRadius: 9999,
-                  border: `1px solid ${isIn ? '#059669' : '#e5e5e5'}`,
-                  background: isIn ? '#10b981' : '#fff',
-                  color: isIn ? '#fff' : '#059669',
-                  fontWeight: 800,
-                  fontSize: 12,
-                  whiteSpace: 'nowrap',
-                  opacity: busy === c.code ? 0.6 : 1,
-                }}
-              >
-                {busy === c.code ? '…' : isIn ? 'Enrolled ✓' : 'Enroll'}
-              </button>
-            </div>
-          );
-        })}
+        {courses.map((c) => (
+          <Link
+            key={c.code}
+            to={`/course/${encodeURIComponent(c.code)}`}
+            style={{
+              padding: '14px 16px',
+              background: '#fff',
+              border: '1px solid #e5e5e5',
+              borderRadius: 12,
+              textDecoration: 'none',
+              color: '#3c3c3c',
+              display: 'flex',
+              gap: 12,
+              alignItems: 'center',
+            }}
+          >
+            <span style={{ width: 40, height: 40, borderRadius: 10, background: '#ecfdf5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <BookOpen size={20} color="#059669" />
+            </span>
+            <span style={{ flex: 1 }}>
+              <span style={{ fontWeight: 700, display: 'block' }}>{c.code}</span>
+              <span style={{ fontSize: 12, color: '#777' }}>{c.title} · {c.weeks} {c.weeks === 1 ? 'week' : 'weeks'}</span>
+            </span>
+            <ChevronRight size={18} color="#059669" />
+          </Link>
+        ))}
       </div>
     </div>
   );
