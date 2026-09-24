@@ -42,7 +42,7 @@ export default function ExplorePage() {
         if (me.profile?.level) setMyLevel(me.profile.level);
         setEnrolledSet(new Set((me.courses || []).map((c) => c.toUpperCase())));
         if (settings.currentSemester) setActiveSemester(settings.currentSemester);
-        const list = await api.courses();
+        const list = (await api.courses()).filter((c) => c.code && c.code.trim());
         const withWeeks = await Promise.all(
           list.map(async (c) => {
             try {

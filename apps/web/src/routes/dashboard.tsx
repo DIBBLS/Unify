@@ -101,8 +101,9 @@ export default function DashboardRoute() {
     );
 
   const firstName = profile?.first_name || 'Builder';
-  const shown = enrolled.length
-    ? enrolled.map((course) => ({ course }))
+  const cleanEnrolled = enrolled.map((c) => (c || '').trim()).filter(Boolean);
+  const shown = cleanEnrolled.length
+    ? cleanEnrolled.map((course) => ({ course }))
     : courses.map((c) => ({ course: c.course }));
   const isAuthor = profile?.role === 'lecturer' || profile?.role === 'collaborator';
   const roleLabel = profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : '';
