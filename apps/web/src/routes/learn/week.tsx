@@ -7,7 +7,6 @@ import type { UnifyNote, Topic } from '../../types/note';
 import { TopicSlice } from '../../components/TopicSlice';
 import EoqQuiz from '../../components/EoqQuiz';
 import { useProgress } from '../../hooks/useProgress';
-import Loading from '../../components/Loading';
 import Mascot from '../../components/Mascot';
 import Flash from '../../components/Flash';
 
@@ -89,7 +88,32 @@ export default function LearnPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseCode, weekNum]);
 
-  if (loading) return <Loading text={`Loading Week ${weekNum}`} />;
+  if (loading)
+    return (
+      <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 20px 100px' }}>
+        <div className="skel" style={{ height: 14, width: 90, marginBottom: 16 }} />
+        <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 24, marginBottom: 20 }}>
+          <div className="skel" style={{ height: 12, width: '40%' }} />
+          <div className="skel" style={{ height: 26, width: '75%', marginTop: 10 }} />
+          <div className="skel" style={{ height: 14, width: '90%', marginTop: 10 }} />
+          <div className="skel" style={{ height: 14, width: '60%', marginTop: 8 }} />
+        </div>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="skel" style={{ height: 34, flex: '1 0 auto', borderRadius: 9999 }} />
+          ))}
+        </div>
+        <div style={{ marginBottom: 8 }}>
+          <div className="skel" style={{ height: 12, width: '30%', marginBottom: 6 }} />
+          <div className="skel" style={{ height: 20, width: '65%', marginBottom: 12 }} />
+          <div className="skel" style={{ height: 14, width: '100%', marginBottom: 8 }} />
+          <div className="skel" style={{ height: 14, width: '100%', marginBottom: 8 }} />
+          <div className="skel" style={{ height: 14, width: '80%', marginBottom: 8 }} />
+          <div className="skel" style={{ height: 120, width: '100%', marginTop: 12 }} />
+        </div>
+        <div style={{ fontSize: 12, color: '#777', textAlign: 'center', marginTop: 12 }}>Loading Week {weekNum}…</div>
+      </div>
+    );
   if (!courseCode) {
     // Unreachable via router links — redirect to courses instead of stranding.
     log.warn('route', `week with empty course (url=${window.location.href})`);

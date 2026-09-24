@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import BackButton from '../components/BackButton';
-import Loading from '../components/Loading';
 import Mascot from '../components/Mascot';
 import Flash from '../components/Flash';
 import { api } from '../lib/api';
@@ -72,7 +71,26 @@ export default function CourseDetailRoute() {
     }
   };
 
-  if (loading) return <Loading text={courseCode ? `Loading ${courseCode}…` : 'Loading…'} />;
+  if (loading)
+    return (
+      <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px' }}>
+        <BackButton to="/course" />
+        <div className="skel" style={{ height: 32, width: '55%', marginTop: 4 }} />
+        <div className="skel" style={{ height: 14, width: '75%', marginTop: 10 }} />
+        <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} style={{ padding: '14px 16px', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, display: 'flex', gap: 12, alignItems: 'center' }}>
+              <div style={{ flex: 1 }}>
+                <div className="skel" style={{ height: 16, width: '60%' }} />
+                <div className="skel" style={{ height: 12, width: '85%', marginTop: 8 }} />
+              </div>
+              <div className="skel" style={{ height: 18, width: 18, borderRadius: 9999 }} />
+            </div>
+          ))}
+        </div>
+        <div style={{ fontSize: 12, color: '#777', textAlign: 'center', marginTop: 12 }}>Loading weeks…</div>
+      </div>
+    );
   if (!code) {
     // Unreachable via router links (course code is always present), but if
     // it ever happens, send the student to their courses instead of a
