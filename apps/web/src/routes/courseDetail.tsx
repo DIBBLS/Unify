@@ -11,7 +11,10 @@ import { log } from '../lib/log';
 type WeekRow = { week: number; title: string; subtitle: string };
 
 export default function CourseDetailRoute() {
-  const { code = '' } = useParams();
+  // Param name must match the route (/course/:courseCode in App.tsx) —
+  // reading a wrong key yields '' for every course (that was the
+  // "No course selected" bug: the link was right, the read was wrong).
+  const { courseCode: code = '' } = useParams();
   const [searchParams] = useSearchParams();
   // React Router already URL-decodes params — never decode again here
   // (a stray % once crashed this screen). Trimmed for lookups, but the
