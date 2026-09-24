@@ -202,6 +202,11 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ course, enroll }),
     }),
+  repairEnrollments: () =>
+    apiFetch<{ ok: boolean; restored: number; enrolled: string[] }>('/v1/enrollments/repair', {
+      method: 'POST',
+      body: JSON.stringify({}),
+    }),
   resume: (course: string, week: number, topic: number) =>
     apiFetch<{ ok: boolean }>('/v1/resume', {
       method: 'POST',

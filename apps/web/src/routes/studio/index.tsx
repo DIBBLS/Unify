@@ -7,7 +7,7 @@ import Loading from '../../components/Loading';
 import Mascot from '../../components/Mascot';
 import { TopicSlice } from '../../components/TopicSlice';
 import EoqQuiz from '../../components/EoqQuiz';
-import { NoteBuilder, blankNote, normalizeNote } from './NoteBuilder';
+import { NoteBuilder, blankNote, normalizeNote, extractJsonPayload } from './NoteBuilder';
 import { api } from '../../lib/api';
 import type { UnifyNote } from '../../types/note';
 
@@ -213,8 +213,6 @@ export default function StudioRoute() {
     setStep(1);
   };
 
-  const stripFences = (s: string) => s.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-
   // External-AI import: paste back whatever your own AI produced with our
   // format pack, normalize defensively, then review like any other note.
   const importPasted = async () => {
@@ -224,16 +222,23 @@ export default function StudioRoute() {
       setError('Paste the AI output first.');
       return;
     }
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(stripFences(pasted));
-    } catch {
-      setError('That is not valid JSON — copy only the JSON block from the AI.');
+    const extracted = extractJsonPayload(pasted);
+    if (!extracted.ok) {
+      setError(extracted.error);
       return;
     }
-    const clean = normalizeNote(parsed);
+    const raw = extracted.value as { topics?: unknown };
+    if (!Array.isArray(raw?.topics)) {
+      setError('JSON parsed, but it has no "topics" array — ask the AI to follow the format strictly.');
+      return;
+    }
+    if (raw.topics.length === 0) {
+      setError('JSON parsed, but "topics" is empty — ask the AI for at least 1 topic.');
+      return;
+    }
+    const clean = normalizeNote(extracted.value);
     if (!clean) {
-      setError('JSON parsed, but it has no usable topics array.');
+      setError('JSON parsed, but the topics are unusable — check they have titles and content.');
       return;
     }
     const weekNum = Number(week);
@@ -248,8 +253,10 @@ export default function StudioRoute() {
     try {
       const res = await api.validateNote(synced);
       setValidation(res);
-      if (!res.valid) setSuccess('Imported — the checker found problems (listed below). Fix in Edit content or publish anyway.');
-      else setSuccess('Imported and valid. Review below.');
+      const tCount = synced.topics.length;
+      const qCount = synced.eoq.questions.length;
+      if (!res.valid) setSuccess(`Imported (${tCount} topics, ${qCount} quiz Qs) — the checker found problems (listed below). Fix in Edit content or publish anyway.`);
+      else setSuccess(`Imported and valid (${tCount} topics, ${qCount} quiz Qs). Review below.`);
     } catch {
       setSuccess('Imported. Review below.');
     }

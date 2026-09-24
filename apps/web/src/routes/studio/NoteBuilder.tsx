@@ -105,6 +105,109 @@ export function blankNote(course: string, week: number): UnifyNote {
   };
 }
 
+// Robust JSON extraction for pasted AI output. LLMs rarely return bare
+// JSON: they add preamble/postamble chatter, markdown fences, trailing
+// commas, and // comments. This finds the first balanced {...} block and
+// sanitizes the usual sloppiness before parsing, and says exactly what
+// failed when it still can't parse.
+function matchBrace(src: string, start: number): number {
+  let depth = 0;
+  let str: string | null = null;
+  for (let i = start; i < src.length; i++) {
+    const c = src[i];
+    if (str) {
+      if (c === '\\') {
+        i++;
+        continue;
+      }
+      if (c === str) str = null;
+      continue;
+    }
+    if (c === '"' || c === "'") {
+      str = c;
+      continue;
+    }
+    if (c === '{') depth++;
+    else if (c === '}') {
+      depth--;
+      if (depth === 0) return i;
+    }
+  }
+  return -1;
+}
+
+function loosen(s: string): string {
+  // strip // and /* */ comments outside strings, then trailing commas
+  let out = '';
+  let str: string | null = null;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (str) {
+      out += c;
+      if (c === '\\') {
+        out += s[i + 1] || '';
+        i++;
+      } else if (c === str) {
+        str = null;
+      }
+      continue;
+    }
+    if (c === '"' || c === "'") {
+      str = c;
+      out += c;
+      continue;
+    }
+    if (c === '/' && s[i + 1] === '/') {
+      while (i < s.length && s[i] !== '\n') i++;
+      continue;
+    }
+    if (c === '/' && s[i + 1] === '*') {
+      i += 2;
+      while (i < s.length && !(s[i] === '*' && s[i + 1] === '/')) i++;
+      i++;
+      continue;
+    }
+    out += c;
+  }
+  return out.replace(/,(\s*[}\]])/g, '$1');
+}
+
+function parseErr(e: unknown): string {
+  const m = e instanceof Error ? e.message : String(e);
+  return m.replace(/^JSON\.parse:\s*/, '').replace(/^\s*Unexpected token.*position (\d+).*/, 'near character $1');
+}
+
+export function extractJsonPayload(
+  text: string
+): { ok: true; value: unknown } | { ok: false; error: string } {
+  const src = text.trim();
+  if (!src) return { ok: false, error: 'Nothing pasted yet.' };
+  const direct = (): unknown => JSON.parse(src);
+  try {
+    return { ok: true, value: direct() };
+  } catch {
+    // fall through to extraction
+  }
+  const start = src.indexOf('{');
+  if (start === -1) {
+    return { ok: false, error: 'No JSON object found — copy the {...} block from the AI.' };
+  }
+  const end = matchBrace(src, start);
+  if (end === -1) {
+    return { ok: false, error: 'The JSON block looks cut off (unbalanced braces) — copy the full {...} block.' };
+  }
+  const candidate = src.slice(start, end + 1);
+  try {
+    return { ok: true, value: JSON.parse(candidate) };
+  } catch (e) {
+    try {
+      return { ok: true, value: JSON.parse(loosen(candidate)) };
+    } catch {
+      return { ok: false, error: `Invalid JSON (${parseErr(e)}). Fix that spot and re-import.` };
+    }
+  }
+}
+
 // Defensive normalizer for pasted external-AI JSON (and legacy weeks):
 // fills every field the reader and this editor touch, drops nothing.
 export function normalizeNote(raw: unknown): UnifyNote | null {
