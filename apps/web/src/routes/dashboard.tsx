@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, ChevronRight } from 'lucide-react';
+import { BookOpen, ChevronRight, Trash2 } from 'lucide-react';
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type Profile } from '../lib/api';
 import Loading from '../components/Loading';
@@ -19,7 +19,9 @@ export default function DashboardRoute() {
   const [quizzes, setQuizzes] = useState({ taken: 0, avg: 0 });
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
-  const [notes, setNotes] = useState<{ course: string; week: number; title: string; subtitle: string }[]>([]);
+  const [notes, setNotes] = useState<{ id: string; course: string; week: number; topic: number; version: number; title: string }[]>([]);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [noteError, setNoteError] = useState('');
 
   useEffect(() => {
     const sb = supabaseBrowser();
@@ -85,6 +87,21 @@ export default function DashboardRoute() {
     : courses.map((c) => ({ course: c.course }));
   const isAuthor = profile?.role === 'lecturer' || profile?.role === 'collaborator';
   const roleLabel = profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : '';
+
+  // Delete one published topic version (own notes; admins can remove any).
+  const deleteNote = async (id: string) => {
+    if (!window.confirm('Delete this note version? Older versions stay live.')) return;
+    setDeleting(id);
+    setNoteError('');
+    try {
+      await api.noteDelete(id);
+      setNotes((prev) => prev.filter((n) => n.id !== id));
+    } catch {
+      setNoteError("Couldn't delete that note. Check your connection and retry.");
+    } finally {
+      setDeleting(null);
+    }
+  };
   if (isAuthor)
     return (
       <div style={{ maxWidth: 480, margin: '0 auto', paddingBottom: 80 }}>
@@ -99,6 +116,11 @@ export default function DashboardRoute() {
           <h2 style={{ fontFamily: 'Nunito', fontWeight: 800 }}>Published notes</h2>
           <span style={{ fontSize: 13, color: '#777' }}>{notes.length}</span>
         </div>
+        {noteError && (
+          <div style={{ margin: '12px 16px 0' }}>
+            <Flash tone="error" message={noteError} onDismiss={() => setNoteError('')} />
+          </div>
+        )}
         <div style={{ margin: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {notes.length === 0 ? (
             <div style={{ padding: 24, textAlign: 'center', color: '#777', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12 }}>
@@ -107,10 +129,20 @@ export default function DashboardRoute() {
             </div>
           ) : (
             notes.map((n) => (
-              <Link key={`${n.course}-${n.week}`} to={`/learn/${encodeURIComponent(n.course)}/week/${n.week}?preview=1`} style={{ padding: 14, background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, textDecoration: 'none', color: '#3c3c3c', display: 'block' }}>
-                <div style={{ fontSize: 11, color: '#059669', fontWeight: 800, letterSpacing: 1 }}>{n.course} · WEEK {n.week}</div>
-                <div style={{ fontWeight: 700, marginTop: 2 }}>{n.title || `Week ${n.week}`}</div>
-              </Link>
+              <div key={n.id} style={{ padding: 14, background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
+                <Link to={`/learn/${encodeURIComponent(n.course)}/week/${n.week}?preview=1`} style={{ flex: 1, textDecoration: 'none', color: '#3c3c3c', display: 'block' }}>
+                  <div style={{ fontSize: 11, color: '#059669', fontWeight: 800, letterSpacing: 1 }}>{n.course} · WEEK {n.week} · TOPIC {n.topic} · v{n.version}</div>
+                  <div style={{ fontWeight: 700, marginTop: 2 }}>{n.title || `Topic ${n.topic}`}</div>
+                </Link>
+                <button
+                  onClick={() => deleteNote(n.id)}
+                  disabled={deleting === n.id}
+                  aria-label={`Delete ${n.course} week ${n.week} topic ${n.topic} version ${n.version}`}
+                  style={{ padding: 10, borderRadius: 10, background: '#fff', border: '1px solid #e5e5e5', color: '#991b1b', opacity: deleting === n.id ? 0.5 : 1 }}
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
             ))
           )}
         </div>

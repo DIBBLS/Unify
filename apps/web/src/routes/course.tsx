@@ -8,11 +8,13 @@ import Flash from '../components/Flash';
 import { supabaseBrowser } from '../lib/supabase';
 import { api } from '../lib/api';
 
-type CatalogCourse = { code: string; title: string; weeks: number };
+type CatalogCourse = { code: string; title: string; weeks: number; levels: string[]; semesters: string[] };
 
 export default function CoursePage() {
   const [courses, setCourses] = useState<CatalogCourse[]>([]);
-  const [level, setLevel] = useState('');
+  const [myLevel, setMyLevel] = useState('');
+  const [filterLevel, setFilterLevel] = useState('');
+  const [filterSem, setFilterSem] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -24,18 +26,25 @@ export default function CoursePage() {
     }
     (async () => {
       const { data: sessionData } = await sb.auth.getSession();
-      if (!sessionData.session) return;
+      if (!sessionData.session) {
+        setError('Please sign in again.');
+        setLoading(false);
+        return;
+      }
       try {
         const me = await api.me();
-        if (me.profile?.level) setLevel(me.profile.level);
+        if (me.profile?.level) {
+          setMyLevel(me.profile.level);
+          setFilterLevel(me.profile.level);
+        }
         const list = await api.courses();
         const withWeeks = await Promise.all(
           list.map(async (c) => {
             try {
               const w = await api.courseWeeks(c.code);
-              return { code: c.code, title: c.title, weeks: w.weeks.length };
+              return { code: c.code, title: c.title, weeks: w.weeks.length, levels: c.levels || [], semesters: c.semesters || [] };
             } catch {
-              return { code: c.code, title: c.title, weeks: 0 };
+              return { code: c.code, title: c.title, weeks: 0, levels: c.levels || [], semesters: c.semesters || [] };
             }
           })
         );
@@ -50,22 +59,55 @@ export default function CoursePage() {
 
   if (loading) return <Loading text="Loading courses…" />;
 
+  const levelsAvailable = [...new Set(courses.flatMap((c) => c.levels))].sort();
+  const shown = courses.filter(
+    (c) =>
+      (!filterLevel || c.levels.includes(filterLevel)) &&
+      (!filterSem || c.semesters.includes(filterSem))
+  );
+  const pill = (active: boolean) => ({
+    padding: '8px 14px',
+    borderRadius: 9999,
+    border: `1px solid ${active ? '#059669' : '#e5e5e5'}`,
+    background: active ? '#10b981' : '#fff',
+    color: active ? '#fff' : '#777',
+    fontSize: 12,
+    fontWeight: 700,
+  });
+
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px' }}>
       <BackButton to="/dashboard" />
       <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28 }}>Unify Learn</h1>
       <p style={{ color: '#777', marginTop: 6, fontSize: 13 }}>
-        Guided paths, quizzes and XP{level ? ` · ${level}` : ''}
+        Guided paths, quizzes and XP{myLevel ? ` · ${myLevel}` : ''}
       </p>
       {error && <Flash tone="error" message={error} onDismiss={() => setError('')} />}
+      {levelsAvailable.length > 0 && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 12 }}>
+          <button onClick={() => setFilterLevel('')} style={pill(!filterLevel)}>All levels</button>
+          {levelsAvailable.map((l) => (
+            <button key={l} onClick={() => setFilterLevel(l)} style={pill(filterLevel === l)}>
+              {l.replace(' Level', '')}
+            </button>
+          ))}
+        </div>
+      )}
+      <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+        {['', 'First Semester', 'Second Semester'].map((s) => (
+          <button key={s || 'all'} onClick={() => setFilterSem(s)} style={{ ...pill(filterSem === s), flex: 1 }}>
+            {s ? s.replace(' Semester', '') : 'Both semesters'}
+          </button>
+        ))}
+      </div>
       <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {courses.length === 0 && !error && (
+        {shown.length === 0 && !error && (
           <div style={{ padding: 24, textAlign: 'center', color: '#777', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12 }}>
             <Mascot size={96} />
-            <div style={{ marginTop: 8 }}>No courses yet. Check back soon.</div>
+            <div style={{ marginTop: 8 }}>No courses for this level yet. Check back soon.</div>
           </div>
         )}
-        {courses.map((c) => (
+        {shown.map((c) => (
           <Link
             key={c.code}
             to={`/course/${encodeURIComponent(c.code)}`}

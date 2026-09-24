@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Check, Download } from 'lucide-react';
-import { api } from '../../lib/api';
+import { api, type TopicMeta } from '../../lib/api';
 import type { UnifyNote, Topic } from '../../types/note';
 import { TopicSlice } from '../../components/TopicSlice';
 import EoqQuiz from '../../components/EoqQuiz';
@@ -16,6 +16,11 @@ export default function LearnPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const weekNum = Number(weekParam) || 1;
   const [note, setNote] = useState<UnifyNote | null>(null);
+  const [topicMeta, setTopicMeta] = useState<TopicMeta[]>([]);
+  // Older-version views: topic number -> Topic payload + viewed version.
+  const [overrides, setOverrides] = useState<Record<number, Topic>>({});
+  const [viewed, setViewed] = useState<Record<number, number>>({});
+  const [loadingVersion, setLoadingVersion] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const { toggle, isDone } = useProgress(decodeURIComponent(courseCode).toUpperCase(), weekNum);
@@ -37,6 +42,9 @@ export default function LearnPage() {
         const data = await api.week(decodeURIComponent(courseCode), weekNum);
         const note = data.note_json as UnifyNote;
         setNote(note && Array.isArray(note.topics) ? note : null);
+        setTopicMeta(data.topicMeta || []);
+        setOverrides({});
+        setViewed({});
       } catch {
         setLoadError("Couldn't load this week. Check your connection and retry.");
       } finally {
@@ -78,6 +86,44 @@ export default function LearnPage() {
     const clamped = Math.min(Math.max(t, 0), tabCount - 1);
     setTab(clamped);
     setSearchParams(clamped ? { t: String(clamped) } : {}, { replace: true });
+  };
+
+  const versionByTopic: Record<number, TopicMeta> = {};
+  for (const m of topicMeta) versionByTopic[m.topic] = m;
+  const activeTopic = tab < topics.length ? topics[tab] : undefined;
+  const activeMeta = activeTopic ? versionByTopic[activeTopic.number] : undefined;
+  const shownTopic =
+    activeTopic && viewed[activeTopic.number] !== undefined && overrides[activeTopic.number]
+      ? (overrides[activeTopic.number] as Topic)
+      : activeTopic;
+  const viewingOld =
+    !!activeMeta && viewed[activeMeta.topic] !== undefined && viewed[activeMeta.topic] !== activeMeta.version;
+
+  // View one version of the active topic (latest clears back to live).
+  const viewVersion = async (m: TopicMeta, version: number, id: string) => {
+    if (version === m.version) {
+      setViewed((prev) => {
+        const next = { ...prev };
+        delete next[m.topic];
+        return next;
+      });
+      setOverrides((prev) => {
+        const next = { ...prev };
+        delete next[m.topic];
+        return next;
+      });
+      return;
+    }
+    setLoadingVersion(true);
+    try {
+      const d = await api.noteGet(id);
+      setOverrides((prev) => ({ ...prev, [m.topic]: d.noteJson as Topic }));
+      setViewed((prev) => ({ ...prev, [m.topic]: version }));
+    } catch {
+      // keep the live version on failure
+    } finally {
+      setLoadingVersion(false);
+    }
   };
 
   return (
@@ -140,6 +186,11 @@ export default function LearnPage() {
               }}
             >
               {isDone(weekNum, idx) && <Check size={12} />} Topic {t.number}
+              {(versionByTopic[t.number]?.versions.length || 0) > 1 && (
+                <span style={{ fontSize: 10, fontWeight: 800, padding: '1px 7px', borderRadius: 9999, background: idx === tab ? '#fff' : '#ecfdf5', color: '#059669' }}>
+                  v{versionByTopic[t.number].version}
+                </span>
+              )}
             </button>
           ))}
           {hasQuiz && (
@@ -163,12 +214,35 @@ export default function LearnPage() {
       )}
 
       {tab < topics.length ? (
-        <TopicTab
-          topic={topics[tab]}
-          done={isDone(weekNum, tab)}
-          onToggle={() => toggle(weekNum, tab)}
-          preview={preview}
-        />
+        <>
+          {activeMeta && activeMeta.versions.length > 1 && (
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: 11, color: '#777', fontWeight: 700 }}>Versions:</span>
+              {activeMeta.versions.map((v) => {
+                const current = (viewed[activeMeta.topic] ?? activeMeta.version) === v.version;
+                return (
+                  <button
+                    key={v.id}
+                    disabled={loadingVersion}
+                    onClick={() => viewVersion(activeMeta, v.version, v.id)}
+                    style={{ padding: '4px 12px', borderRadius: 9999, border: `1px solid ${current ? '#059669' : '#e5e5e5'}`, background: current ? '#10b981' : '#fff', color: current ? '#fff' : '#777', fontWeight: 800, fontSize: 11 }}
+                  >
+                    v{v.version}
+                  </button>
+                );
+              })}
+              {viewingOld && <span style={{ fontSize: 11, color: '#b45309', fontWeight: 700 }}>viewing older version</span>}
+            </div>
+          )}
+          {shownTopic && (
+            <TopicTab
+              topic={shownTopic}
+              done={isDone(weekNum, tab)}
+              onToggle={() => toggle(weekNum, tab)}
+              preview={preview || viewingOld}
+            />
+          )}
+        </>
       ) : (
         <EoqQuiz eoq={note.eoq ?? { questions: [] }} course={note.course} week={note.week} preview={preview} />
       )}

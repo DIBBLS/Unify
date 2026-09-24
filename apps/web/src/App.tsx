@@ -12,7 +12,7 @@ import AdminRoute from './routes/admin';
 import StudioRoute from './routes/studio/index';
 import Mascot from './components/Mascot';
 import Loading from './components/Loading';
-import { supabaseBrowser } from './lib/supabase';
+import { supabaseBrowser, ensureSession, setCachedSession, getCachedSession } from './lib/supabase';
 import { api } from './lib/api';
 
 function NotFound() {
@@ -45,7 +45,12 @@ function NotFound() {
 // themselves additionally check the profile (onboarded -> app, else onboarding).
 function RequireAuth({ children }: { children: JSX.Element }) {
   const navigate = useNavigate();
-  const [ok, setOk] = useState(false);
+  // Start open when a previous gate already confirmed the session, so
+  // navigating between pages never flashes "Checking sign-in…".
+  const [ok, setOk] = useState(() => {
+    const c = getCachedSession();
+    return c.loaded && !!c.session;
+  });
 
   useEffect(() => {
     const sb = supabaseBrowser();
@@ -53,11 +58,12 @@ function RequireAuth({ children }: { children: JSX.Element }) {
       navigate('/auth');
       return;
     }
-    sb.auth.getSession().then(({ data }) => {
-      if (!data.session) navigate('/auth');
+    ensureSession().then((session) => {
+      if (!session) navigate('/auth');
       else setOk(true);
     });
     const { data: sub } = sb.auth.onAuthStateChange((_event, session) => {
+      setCachedSession(session);
       if (!session) navigate('/auth');
       else setOk(true);
     });
@@ -74,16 +80,23 @@ const STUDENT_ONLY = ['student'];
 const AUTHOR_ONLY = ['lecturer', 'collaborator'];
 
 // Gate: authors (lecturer/collaborator) have no learn paths — bounce to dashboard.
+// Only a real 401 (dead session) bounces to /auth. Network/API failures show
+// a retry screen instead of kicking the user to sign-in and back (that loop
+// is what made sessions feel like they "refresh anyhow").
 function RequireRole({ allow, children }: { allow: string[]; children: JSX.Element }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [ok, setOk] = useState(false);
+  const [failed, setFailed] = useState(false);
   const key = allow.join('|');
 
   useEffect(() => {
+    let cancelled = false;
+    setFailed(false);
     api
       .me()
       .then((me) => {
+        if (cancelled) return;
         const role = me.profile?.role || 'student';
         // Authors may open a single week read-only via ?preview=1 (dashboard links).
         const preview =
@@ -93,10 +106,28 @@ function RequireRole({ allow, children }: { allow: string[]; children: JSX.Eleme
         else if (!allow.includes(role) && !me.isAdmin && !preview) navigate('/dashboard');
         else setOk(true);
       })
-      .catch(() => navigate('/auth'));
+      .catch((err) => {
+        if (cancelled) return;
+        if ((err as { status?: number })?.status === 401) navigate('/auth');
+        else setFailed(true);
+      });
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate, key]);
 
+  if (failed)
+    return (
+      <div style={{ padding: 40, maxWidth: 480, margin: '0 auto', textAlign: 'center' }}>
+        <Mascot size={110} />
+        <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 20, marginTop: 12 }}>Can't reach the server</h1>
+        <p style={{ color: '#777', fontSize: 14, margin: '8px 0 20px' }}>You're still signed in — check your connection and retry.</p>
+        <button onClick={() => window.location.reload()} style={{ padding: '12px 28px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800, fontSize: 14 }}>
+          Retry
+        </button>
+      </div>
+    );
   if (!ok) return <Loading text="Checking access…" />;
   return children;
 }

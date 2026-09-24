@@ -1,11 +1,11 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient, type Session } from "@supabase/supabase-js";
 
 let cached: SupabaseClient | null = null;
 
-// Browser Supabase client for Auth (Google sign-in, session JWT).
-// Session lives in sessionStorage (per tab): two tabs can hold two different
-// accounts without clobbering each other. Tradeoff: closing the browser signs
-// you out (no cross-restart persistence). Returns null until configured.
+// Browser Supabase client for Auth (email sign-in, session JWT).
+// Session persists in localStorage so signing in survives browser restarts
+// and returning users stay signed in. (An earlier per-tab sessionStorage
+// build logged everyone out on every restart — reverted per user request.)
 export function supabaseBrowser(): SupabaseClient | null {
   // Built-in fallbacks (public values; env vars override when set).
   const FALLBACK_URL = 'https://xouxvmprrosstzlitcsp.supabase.co';
@@ -18,6 +18,28 @@ export function supabaseBrowser(): SupabaseClient | null {
       env.SUPABASE_ANON_KEY ||
       env.SUPABASE_PUBLISHABLE_KEY) as string | undefined) || FALLBACK_KEY;
   if (!url || !key) return null;
-  if (!cached) cached = createClient(url, key, { auth: { storage: window.sessionStorage } });
+  if (!cached) cached = createClient(url, key);
   return cached;
+}
+
+// Module session cache: every route mounts its own auth gate, and without
+// this each navigation flashes "Checking sign-in…" while getSession resolves.
+// First gate loads it, the rest render instantly; auth events keep it fresh.
+let sessionCache: { loaded: boolean; session: Session | null } = { loaded: false, session: null };
+
+export function getCachedSession(): { loaded: boolean; session: Session | null } {
+  return sessionCache;
+}
+
+export function setCachedSession(session: Session | null): void {
+  sessionCache = { loaded: true, session };
+}
+
+export async function ensureSession(): Promise<Session | null> {
+  const sb = supabaseBrowser();
+  if (!sb) return null;
+  if (sessionCache.loaded) return sessionCache.session;
+  const { data } = await sb.auth.getSession();
+  sessionCache = { loaded: true, session: data.session };
+  return data.session;
 }
