@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogOut, Pencil, Shield, X } from 'lucide-react';
 import BackButton from '../components/BackButton';
-import { supabaseBrowser } from '../lib/supabase';
+import { supabaseBrowser, clearRememberSession } from '../lib/supabase';
 import { api, type Profile, type University } from '../lib/api';
 import Loading from '../components/Loading';
 import Mascot from '../components/Mascot';
@@ -118,6 +118,7 @@ export default function ProfileRoute() {
     // Local scope: clear this tab/client only, never nuke another tab's
     // newer session (single-session policy kicks via broadcast instead).
     if (sb) await sb.auth.signOut({ scope: 'local' }).catch(() => {});
+    clearRememberSession();
     navigate('/auth');
   };
 

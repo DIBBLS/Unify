@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, Check, X, Loader2 } from 'lucide-react';
 import Mascot from '../components/Mascot';
 import Flash from '../components/Flash';
-import { supabaseBrowser } from '../lib/supabase';
+import { supabaseBrowser, saveRememberSession, restoreRememberedSession } from '../lib/supabase';
 import { api } from '../lib/api';
 import { log } from '../lib/log';
 
@@ -45,6 +45,7 @@ export default function AuthRoute() {
   const [recoveryPw, setRecoveryPw] = useState('');
   const [loading, setLoading] = useState(false);
   const [welcomeBack, setWelcomeBack] = useState(false);
+  const [remember, setRemember] = useState(false);
 
   const routeToApp = async () => {
     setWelcomeBack(true);
@@ -61,8 +62,13 @@ export default function AuthRoute() {
 
   useEffect(() => {
     if (!sb) return;
-    sb.auth.getSession().then(({ data }) => {
-      if (data.session) void routeToApp();
+    sb.auth.getSession().then(async ({ data }) => {
+      if (data.session) {
+        void routeToApp();
+        return;
+      }
+      // No tab session: adopt a remembered one (opt-in at last sign-in).
+      if (await restoreRememberedSession()) void routeToApp();
     });
     const { data: sub } = sb.auth.onAuthStateChange((event, session) => {
       log.info('session', `event=${event} signedIn=${!!session}`);
@@ -103,6 +109,7 @@ export default function AuthRoute() {
         return;
       }
       if (data.session) {
+        if (remember) saveRememberSession(data.session);
         await routeToApp();
       }
     } catch (err) {
@@ -387,6 +394,10 @@ export default function AuthRoute() {
                   {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+            </label>
+            <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, color: '#555', fontWeight: 600, cursor: 'pointer' }}>
+              <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} style={{ width: 16, height: 16, accentColor: '#10b981' }} />
+              Remember me on this device
             </label>
             <button disabled={loading} type="submit" style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
               {loading ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : null}

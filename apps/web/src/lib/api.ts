@@ -1,4 +1,4 @@
-import { supabaseBrowser } from "./supabase";
+import { supabaseBrowser, clearRememberSession } from "./supabase";
 import { log } from "./log";
 
 // Backend is now the source of truth (Supabase Auth + Render API).
@@ -83,6 +83,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, retries 
       log.warn("api", `← 401 ${path} (session dead, signing out)`);
       try {
         await supabaseBrowser()?.auth.signOut({ scope: 'local' });
+        clearRememberSession();
       } catch {
         // ignore sign-out errors
       }
