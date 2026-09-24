@@ -20,6 +20,9 @@ export default function DashboardRoute() {
   const [quizzes, setQuizzes] = useState({ taken: 0, avg: 0 });
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [astats, setAstats] = useState<{ courses: number; topics: number; versions: number; students: number; completions: number; quizzesTaken: number; quizAvg: number } | null>(null);
+  const [platform, setPlatform] = useState<{ users: number; weeks: number; topics: number; courses: number; xpTotal: number } | null>(null);
   const [notes, setNotes] = useState<{ id: string; course: string; week: number; topic: number; version: number; title: string }[]>([]);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [noteError, setNoteError] = useState('');
@@ -45,6 +48,7 @@ export default function DashboardRoute() {
         setProfile(me.profile);
         setEnrolled(me.courses || []);
         setResume(me.resume || null);
+        setIsAdmin(!!me.isAdmin);
         const stats = await api.stats();
         setXp(stats.xp);
         setStreak(stats.streak);
@@ -56,6 +60,19 @@ export default function DashboardRoute() {
             setNotes(authored.notes);
           } catch {
             // empty list stands
+          }
+          try {
+            setAstats(await api.authorStats());
+          } catch {
+            // stats stand empty
+          }
+          if (me.isAdmin) {
+            try {
+              const s = await api.adminStats();
+              setPlatform({ users: s.users, weeks: s.weeks, topics: s.topics, courses: s.courses, xpTotal: s.xpTotal });
+            } catch {
+              // platform stats stand empty
+            }
           }
         }
       } catch {
@@ -114,6 +131,52 @@ export default function DashboardRoute() {
           </h1>
           <div style={{ fontSize: 13, color: '#777', marginTop: 4 }}>{profile?.department || roleLabel}</div>
         </div>
+        {astats && (
+          <div style={{ margin: '12px 16px', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
+            <div>
+              <div style={{ fontSize: 18, fontWeight: 800 }}>{astats.topics}</div>
+              <div style={{ fontSize: 11, color: '#777' }}>Topics</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 18, fontWeight: 800 }}>{astats.students}</div>
+              <div style={{ fontSize: 11, color: '#777' }}>Students</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 18, fontWeight: 800 }}>{astats.completions}</div>
+              <div style={{ fontSize: 11, color: '#777' }}>Done</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 18, fontWeight: 800 }}>{astats.quizzesTaken}</div>
+              <div style={{ fontSize: 11, color: '#777' }}>Quizzes</div>
+            </div>
+          </div>
+        )}
+        {isAdmin && platform && (
+          <div style={{ margin: '0 16px', background: '#111827', borderRadius: 12, padding: 16, color: '#fff' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ fontWeight: 800, fontSize: 14 }}>Platform</div>
+              <Link to="/admin" style={{ fontSize: 12, color: '#6ee7b7', fontWeight: 700, textDecoration: 'none' }}>Open Admin panel</Link>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center', marginTop: 10 }}>
+              <div>
+                <div style={{ fontSize: 18, fontWeight: 800 }}>{platform.users}</div>
+                <div style={{ fontSize: 11, color: '#9ca3af' }}>Users</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 18, fontWeight: 800 }}>{platform.courses}</div>
+                <div style={{ fontSize: 11, color: '#9ca3af' }}>Courses</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 18, fontWeight: 800 }}>{platform.weeks}</div>
+                <div style={{ fontSize: 11, color: '#9ca3af' }}>Weeks</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 18, fontWeight: 800 }}>{platform.topics}</div>
+                <div style={{ fontSize: 11, color: '#9ca3af' }}>Topics</div>
+              </div>
+            </div>
+          </div>
+        )}
         <div style={{ margin: '16px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ fontFamily: 'Nunito', fontWeight: 800 }}>Published notes</h2>
           <span style={{ fontSize: 13, color: '#777' }}>{notes.length}</span>
@@ -210,7 +273,10 @@ export default function DashboardRoute() {
         {shown.length === 0 ? (
           <div style={{ padding: 24, textAlign: 'center', color: '#777', background: '#fff', border: '2px solid #e5e5e5', borderRadius: 16 }}>
             <Mascot size={96} />
-            <div style={{ marginTop: 8 }}>No courses yet. Go to Courses to enroll.</div>
+            <div style={{ marginTop: 8 }}>No courses yet.</div>
+            <Link to="/explore" style={{ display: 'inline-block', marginTop: 12, padding: '10px 22px', background: '#10b981', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #059669' }}>
+              Explore courses to enroll
+            </Link>
           </div>
         ) : (
           shown.map((c) => (

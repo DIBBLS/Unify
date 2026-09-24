@@ -203,6 +203,8 @@ export const api = {
     }),
   authored: () =>
     apiFetch<{ notes: { id: string; course: string; week: number; topic: number; version: number; title: string }[] }>('/v1/authored'),
+  authorStats: () =>
+    apiFetch<{ courses: number; topics: number; versions: number; students: number; completions: number; quizzesTaken: number; quizAvg: number }>('/v1/author/stats'),
   courseWeeks: (course: string) =>
     apiFetch<{ weeks: { week: number; title: string; subtitle: string }[] }>(
       `/v1/courses/${encodeURIComponent(course)}/weeks`

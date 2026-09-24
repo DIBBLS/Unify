@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, BookOpen, User, PenTool } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Search, User, PenTool } from 'lucide-react';
 import { supabaseBrowser } from '../lib/supabase';
 import { api } from '../lib/api';
 import OfflineBanner from '../components/OfflineBanner';
@@ -16,6 +16,7 @@ type Tab = {
 const STUDENT_TABS: Tab[] = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, match: ['/dashboard'] },
   { to: '/course', label: 'Learn', icon: BookOpen, match: ['/course', '/learn'] },
+  { to: '/explore', label: 'Explore', icon: Search, match: ['/explore'] },
   { to: '/profile', label: 'Profile', icon: User, match: ['/profile'] },
 ];
 
