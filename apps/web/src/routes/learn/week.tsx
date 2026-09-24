@@ -26,7 +26,7 @@ export default function LearnPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   // React Router already URL-decodes params — never decode again here.
-  const { toggle, isDone } = useProgress((courseCode || '').toUpperCase(), weekNum);
+  const { toggle, isDone } = useProgress((courseCode || '').trim().toUpperCase(), weekNum);
   const [tab, setTab] = useState(0);
   const topics = note?.topics ?? [];
   const hasQuiz = (note?.eoq?.questions?.length || 0) > 0;
@@ -41,7 +41,7 @@ export default function LearnPage() {
   useEffect(() => {
     async function load() {
       setLoading(true);
-      const code = courseCode || '';
+      const code = (courseCode || '').trim();
       if (!code) {
         setLoadError('No course selected. Pick one from Courses.');
         setLoading(false);
@@ -58,7 +58,7 @@ export default function LearnPage() {
         ]);
         if (me && !previewMode) {
           const role = me.profile?.role || 'student';
-          const enrolled = (me.courses || []).map((c) => c.toUpperCase()).includes(code.toUpperCase());
+          const enrolled = (me.courses || []).map((c) => c.toUpperCase().trim()).includes(code.toUpperCase());
           if ((role === 'student' || !role) && !enrolled) {
             setBlocked(true);
             setLoading(false);
@@ -123,7 +123,7 @@ export default function LearnPage() {
           onClick={async () => {
             setEnrolling(true);
             try {
-              await api.enroll(courseCode || '', true);
+              await api.enroll((courseCode || '').trim(), true);
             } catch {
               // reload surfaces the error state either way
             }
@@ -134,6 +134,11 @@ export default function LearnPage() {
         >
           {enrolling ? 'Enrolling…' : 'Enroll & continue'}
         </button>
+        <div style={{ marginTop: 12 }}>
+          <button onClick={() => navigate('/explore')} style={{ background: 'none', border: 'none', color: '#059669', fontWeight: 700, fontSize: 13 }}>
+            or explore other courses
+          </button>
+        </div>
       </div>
     );
   if (!note)

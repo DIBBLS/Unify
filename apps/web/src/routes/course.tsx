@@ -85,7 +85,7 @@ export default function CoursePage() {
         {courses.map((c) => (
           <Link
             key={c.code}
-            to={`/course/${encodeURIComponent(c.code)}`}
+            to={`/course/${encodeURIComponent(c.code.trim())}`}
             style={{
               padding: '14px 16px',
               background: '#fff',

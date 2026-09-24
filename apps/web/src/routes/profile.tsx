@@ -115,7 +115,9 @@ export default function ProfileRoute() {
 
   const handleLogout = async () => {
     const sb = supabaseBrowser();
-    if (sb) await sb.auth.signOut().catch(() => {});
+    // Local scope: clear this tab/client only, never nuke another tab's
+    // newer session (single-session policy kicks via broadcast instead).
+    if (sb) await sb.auth.signOut({ scope: 'local' }).catch(() => {});
     navigate('/auth');
   };
 
