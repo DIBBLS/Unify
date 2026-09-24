@@ -102,10 +102,10 @@ export default function DashboardRoute() {
             </div>
           ) : (
             notes.map((n) => (
-              <div key={`${n.course}-${n.week}`} style={{ padding: 14, background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12 }}>
+              <Link key={`${n.course}-${n.week}`} to={`/learn/${encodeURIComponent(n.course)}/week/${n.week}?preview=1`} style={{ padding: 14, background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, textDecoration: 'none', color: '#3c3c3c', display: 'block' }}>
                 <div style={{ fontSize: 11, color: '#059669', fontWeight: 800, letterSpacing: 1 }}>{n.course} · WEEK {n.week}</div>
                 <div style={{ fontWeight: 700, marginTop: 2 }}>{n.title || `Week ${n.week}`}</div>
-              </div>
+              </Link>
             ))
           )}
         </div>

@@ -17,7 +17,7 @@ function fitbAccepted(q: EOQ['questions'][number]): string[] {
   return q.correct ? [q.correct] : [];
 }
 
-export default function EoqQuiz({ eoq, course, week }: { eoq: EOQ; course: string; week: number }) {
+export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: EOQ; course: string; week: number; preview?: boolean }) {
   const [picked, setPicked] = useState<Record<number, number>>({});
   const [recorded, setRecorded] = useState(false);
   const [fitb, setFitb] = useState<Record<number, string>>({});
@@ -43,10 +43,10 @@ export default function EoqQuiz({ eoq, course, week }: { eoq: EOQ; course: strin
   const passed = done && total > 0 && pct >= PASS_PCT;
 
   useEffect(() => {
-    if (!done || total === 0 || recorded) return;
+    if (!done || total === 0 || recorded || preview) return;
     setRecorded(true);
     api.quizAttempt(course, week, score, total).catch(() => {});
-  }, [done, total, recorded, course, week, score]);
+  }, [done, total, recorded, course, week, score, preview]);
 
   const reset = () => {
     setPicked({});

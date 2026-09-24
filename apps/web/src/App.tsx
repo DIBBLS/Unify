@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from './routes/_layout';
 import CourseRoute from './routes/course';
 import LearnWeek from './routes/learn/week';
@@ -75,6 +75,7 @@ const AUTHOR_ONLY = ['lecturer', 'collaborator'];
 // Gate: authors (lecturer/collaborator) have no learn paths — bounce to dashboard.
 function RequireRole({ allow, children }: { allow: string[]; children: JSX.Element }) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [ok, setOk] = useState(false);
   const key = allow.join('|');
 
@@ -83,8 +84,12 @@ function RequireRole({ allow, children }: { allow: string[]; children: JSX.Eleme
       .me()
       .then((me) => {
         const role = me.profile?.role || 'student';
+        // Authors may open a single week read-only via ?preview=1 (dashboard links).
+        const preview =
+          searchParams.get('preview') === '1' &&
+          (role === 'lecturer' || role === 'collaborator' || me.isAdmin);
         if (!me.onboarded) navigate('/onboarding');
-        else if (!allow.includes(role) && !me.isAdmin) navigate('/dashboard');
+        else if (!allow.includes(role) && !me.isAdmin && !preview) navigate('/dashboard');
         else setOk(true);
       })
       .catch(() => navigate('/auth'));

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowRight, Check, X } from 'lucide-react';
 import BackButton from '../../components/BackButton';
 import Flash from '../../components/Flash';
@@ -38,6 +38,8 @@ export default function StudioRoute() {
   const [working, setWorking] = useState(false);
   const [workMsg, setWorkMsg] = useState(0);
   const [publishing, setPublishing] = useState(false);
+  const [jsonDraft, setJsonDraft] = useState('');
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     if (!working) return;
@@ -45,6 +47,38 @@ export default function StudioRoute() {
     const t = setInterval(() => setWorkMsg((i) => (i + 1) % WORK_MSGS.length), 2500);
     return () => clearInterval(t);
   }, [working]);
+
+  // Deep link from author preview: /studio?edit=COURSE&week=N loads the
+  // published week straight into review for editing, then re-publish.
+  useEffect(() => {
+    const editCourse = searchParams.get('edit');
+    const editWeek = Number(searchParams.get('week'));
+    if (!editCourse || !Number.isInteger(editWeek) || editWeek < 1) return;
+    let cancelled = false;
+    (async () => {
+      setError('');
+      setWorking(true);
+      try {
+        const data = await api.week(editCourse, editWeek);
+        const loaded = data.note_json as UnifyNote;
+        if (!loaded || !Array.isArray(loaded.topics)) throw new Error('Week has no readable content yet.');
+        if (cancelled) return;
+        setNote(loaded);
+        setMeta({ course: data.course, week: data.week, title: data.title || loaded.title, subtitle: data.subtitle || '' });
+        setJsonDraft(JSON.stringify(loaded, null, 2));
+        setValidation(null);
+        setStep(1);
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Could not load week.');
+      } finally {
+        if (!cancelled) setWorking(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const suggestWeek = async () => {
     setError('');
@@ -87,6 +121,7 @@ export default function StudioRoute() {
         rawNotesText: raw,
       });
       setNote(res.note as UnifyNote);
+      setJsonDraft(JSON.stringify(res.note, null, 2));
       setMeta({ course: code, week: weekNum, title: title.trim(), subtitle: subtitle.trim() });
       setValidation(res.validation);
       setStep(1);
@@ -94,6 +129,20 @@ export default function StudioRoute() {
       setError(err instanceof Error ? err.message : 'Conversion failed.');
     } finally {
       setWorking(false);
+    }
+  };
+
+  const applyEdits = async () => {
+    setError('');
+    try {
+      const parsed = JSON.parse(jsonDraft) as UnifyNote;
+      if (!parsed || !Array.isArray(parsed.topics)) throw new Error('JSON must have a topics array.');
+      setNote(parsed);
+      const res = await api.validateNote(parsed);
+      setValidation(res);
+      if (!res.valid) setError('Saved for review — validation found problems.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Invalid JSON.');
     }
   };
 
@@ -245,6 +294,13 @@ export default function StudioRoute() {
               <TopicSlice key={t.number} topic={t} />
             ))}
           </div>
+          <details style={{ border: '1px solid #e5e5e5', borderRadius: 12, padding: '10px 14px', marginTop: 16 }}>
+            <summary style={{ fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Edit JSON directly</summary>
+            <textarea value={jsonDraft} onChange={(e) => setJsonDraft(e.target.value)} rows={12} spellCheck={false} style={{ width: '100%', marginTop: 10, padding: 10, border: '1px solid #e5e5e5', borderRadius: 8, fontSize: 12, fontFamily: 'monospace', resize: 'vertical' }} />
+            <button onClick={applyEdits} style={{ marginTop: 8, padding: '10px 18px', borderRadius: 12, background: '#fff', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', fontWeight: 800, fontSize: 13 }}>
+              Apply edits
+            </button>
+          </details>
           <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap' }}>
             <button onClick={() => setStep(0)} style={{ flex: 1, minWidth: 120, padding: 14, background: '#fff', color: '#3c3c3c', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 16, fontWeight: 800 }}>
               Edit inputs
