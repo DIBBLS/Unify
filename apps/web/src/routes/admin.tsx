@@ -30,6 +30,8 @@ export default function AdminRoute() {
   const [courseTitle, setCourseTitle] = useState('');
   const [courseLevels, setCourseLevels] = useState<string[]>([]);
   const [courseSemester, setCourseSemester] = useState('First Semester');
+  const [currentSemester, setCurrentSemester] = useState('First Semester');
+  const [promoting, setPromoting] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('student');
   const [models, setModels] = useState<{ model: string; failures: number; last_ok: string | null }[]>([]);
@@ -38,12 +40,13 @@ export default function AdminRoute() {
 
   const loadAll = async (query = q, role = roleFilter) => {
     try {
-      const [s, u, un, c, m] = await Promise.all([
+      const [s, u, un, c, m, st] = await Promise.all([
         api.adminStats(),
         api.adminUsers(query, role),
         api.universities(),
         api.courses(),
         api.adminModels(),
+        api.settings().catch(() => ({ currentSemester: 'First Semester' })),
       ]);
       setStats(s);
       setUsers(u.users);
@@ -52,6 +55,7 @@ export default function AdminRoute() {
       setModels(m.models);
       setProvider(m.provider);
       setDefaultModel(m.default);
+      if (st.currentSemester) setCurrentSemester(st.currentSemester);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Load failed.');
     }
@@ -162,6 +166,45 @@ export default function AdminRoute() {
     try {
       await api.adminPatchUser(id, { role });
       setSuccess('Role updated.');
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Update failed.');
+    }
+  };
+
+  // Academic session: which semester students see (global toggle).
+  const setSemester = async (semester: string) => {
+    setError('');
+    try {
+      const res = await api.adminSetSemester(semester);
+      setCurrentSemester(res.currentSemester);
+      setSuccess(`Active semester: ${res.currentSemester}. Students now see only its courses.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Update failed.');
+    }
+  };
+
+  // One-click promotion: every student up one level (500 -> Graduated).
+  const promoteAll = async () => {
+    if (!window.confirm('Promote ALL students up one level? 500 Level graduates. Course enrollments reset for promoted students.')) return;
+    setPromoting(true);
+    setError('');
+    try {
+      const res = await api.adminPromote();
+      setSuccess(`Promoted ${res.promoted} student${res.promoted === 1 ? '' : 's'}, graduated ${res.graduated}.`);
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Promotion failed.');
+    } finally {
+      setPromoting(false);
+    }
+  };
+
+  const changeLevel = async (id: string, level: string) => {
+    setError('');
+    try {
+      await api.adminPatchUser(id, { level });
+      setSuccess('Level updated.');
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Update failed.');
@@ -309,7 +352,7 @@ export default function AdminRoute() {
         ))}
         <div style={card}>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <input value={courseCode} onChange={(e) => setCourseCode(e.target.value)} placeholder="MEE 352" style={{ ...input, flex: 1, minWidth: 100 }} />
+            <input value={courseCode} onChange={(e) => setCourseCode(e.target.value)} placeholder="e.g. ECE 201" style={{ ...input, flex: 1, minWidth: 100 }} />
             <input value={courseTitle} onChange={(e) => setCourseTitle(e.target.value)} placeholder="Course title" style={{ ...input, flex: 2, minWidth: 140 }} />
           </div>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', margin: '10px 0' }}>
@@ -353,6 +396,35 @@ export default function AdminRoute() {
           </div>
           <button onClick={addCourse} style={{ ...primaryBtn, width: '100%' }}>Add course</button>
         </div>
+      </div>
+
+      <h2 style={section}>Academic session</h2>
+      <div style={card}>
+        <div style={{ fontSize: 12, color: '#777', marginBottom: 8 }}>Active semester — students only see this semester's courses.</div>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+          {['First Semester', 'Second Semester'].map((s) => (
+            <button
+              key={s}
+              onClick={() => setSemester(s)}
+              style={{
+                flex: 1,
+                padding: '10px 14px',
+                borderRadius: 9999,
+                border: `1px solid ${currentSemester === s ? '#059669' : '#e5e5e5'}`,
+                background: currentSemester === s ? '#10b981' : '#fff',
+                color: currentSemester === s ? '#fff' : '#777',
+                fontSize: 13,
+                fontWeight: 800,
+              }}
+            >
+              {s.replace(' Semester', '')}
+            </button>
+          ))}
+        </div>
+        <button onClick={promoteAll} disabled={promoting} style={{ ...primaryBtn, width: '100%', opacity: promoting ? 0.6 : 1 }}>
+          {promoting ? 'Promoting…' : 'Promote all students one level'}
+        </button>
+        <div style={{ fontSize: 11, color: '#777', marginTop: 6 }}>500 Level graduates; enrollments reset for promoted students.</div>
       </div>
 
       <h2 style={section}>Users & roles</h2>
@@ -407,6 +479,19 @@ export default function AdminRoute() {
                   {r}
                 </button>
               ))}
+            </div>
+            <div style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'center' }}>
+              <span style={{ fontSize: 12, color: '#777', fontWeight: 700 }}>Level:</span>
+              <select
+                value={u.level || ''}
+                onChange={(e) => changeLevel(u.id, e.target.value)}
+                style={{ ...input, flex: 1 }}
+              >
+                <option value="" disabled>{u.level || 'No level'}</option>
+                {[...LEVELS, 'Graduated'].map((l) => (
+                  <option key={l} value={l}>{l}</option>
+                ))}
+              </select>
             </div>
           </div>
         ))}

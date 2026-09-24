@@ -22,7 +22,7 @@ type Meta = { course: string; week: number; title: string; subtitle: string };
 export default function StudioRoute() {
   const navigate = useNavigate();
   const [step, setStep] = useState<0 | 1 | 2>(0);
-  const [course, setCourse] = useState('MEE 352');
+  const [course, setCourse] = useState('');
   const [week, setWeek] = useState('1');
   const [weeks, setWeeks] = useState<{ week: number; title: string }[]>([]);
   const [title, setTitle] = useState('');
@@ -276,7 +276,7 @@ export default function StudioRoute() {
                   ))}
                 </select>
               ) : (
-                <input value={course} onChange={(e) => setCourse(e.target.value)} placeholder="MEE 352" style={input} />
+                <input value={course} onChange={(e) => setCourse(e.target.value)} placeholder="Course code" style={input} />
               )}
             </label>
             <label style={{ ...label, width: 100 }}>

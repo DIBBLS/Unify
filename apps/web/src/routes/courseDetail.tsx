@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import Loading from '../components/Loading';
@@ -10,15 +10,29 @@ import { api } from '../lib/api';
 type WeekRow = { week: number; title: string; subtitle: string };
 
 export default function CourseDetailRoute() {
-  const { code = 'MEE 352' } = useParams();
+  const { code = '' } = useParams();
+  const [searchParams] = useSearchParams();
   const courseCode = decodeURIComponent(code);
   const [weeks, setWeeks] = useState<WeekRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [blocked, setBlocked] = useState(false);
+  const [enrolling, setEnrolling] = useState(false);
 
   useEffect(() => {
     (async () => {
       try {
+        // Learning is enrolled-only: students outside this course stop here
+        // (authors in ?preview=1 always pass through).
+        const me = await api.me();
+        const role = me.profile?.role || 'student';
+        const preview = searchParams.get('preview') === '1';
+        const enrolled = (me.courses || []).map((c) => c.toUpperCase()).includes(courseCode.toUpperCase());
+        if (!preview && (role === 'student' || !role) && courseCode && !enrolled) {
+          setBlocked(true);
+          setLoading(false);
+          return;
+        }
         const res = await api.courseWeeks(courseCode);
         setWeeks(res.weeks);
       } catch (err) {
@@ -27,9 +41,45 @@ export default function CourseDetailRoute() {
         setLoading(false);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseCode]);
 
-  if (loading) return <Loading text={`Loading ${courseCode}…`} />;
+  const enrollHere = async () => {
+    setEnrolling(true);
+    setError('');
+    try {
+      await api.enroll(courseCode, true);
+      setBlocked(false);
+      const res = await api.courseWeeks(courseCode);
+      setWeeks(res.weeks);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Enrollment failed.');
+    } finally {
+      setEnrolling(false);
+    }
+  };
+
+  if (loading) return <Loading text={courseCode ? `Loading ${courseCode}…` : 'Loading…'} />;
+  if (!courseCode)
+    return (
+      <div style={{ padding: 40, textAlign: 'center', color: '#777' }}>
+        <Mascot size={110} />
+        <div style={{ marginTop: 12 }}>No course selected. Pick one from Courses.</div>
+      </div>
+    );
+  if (blocked)
+    return (
+      <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px', textAlign: 'center' }}>
+        <BackButton to="/course" />
+        <Mascot size={110} />
+        <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 20, marginTop: 12 }}>You're not enrolled in {courseCode}</h1>
+        <p style={{ color: '#777', fontSize: 14, margin: '8px 0 20px' }}>Enroll to unlock its weeks, topics and quizzes.</p>
+        {error && <Flash tone="error" message={error} onDismiss={() => setError('')} />}
+        <button onClick={enrollHere} disabled={enrolling} style={{ padding: '12px 28px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800, fontSize: 14, opacity: enrolling ? 0.6 : 1 }}>
+          {enrolling ? 'Enrolling…' : `Enroll in ${courseCode}`}
+        </button>
+      </div>
+    );
 
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px' }}>

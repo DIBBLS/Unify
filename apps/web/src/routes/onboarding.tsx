@@ -38,7 +38,7 @@ export default function OnboardingRoute() {
   const [gradTarget, setGradTarget] = useState<number | null>(null);
   const hour = new Date().getHours();
   const daypart = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-  const [semester, setSemester] = useState('First Semester');
+  const [activeSemester, setActiveSemester] = useState('First Semester');
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [availableCourses, setAvailableCourses] = useState<{ code: string; title: string }[]>([]);
   const [coursesLoading, setCoursesLoading] = useState(false);
@@ -75,6 +75,12 @@ export default function OnboardingRoute() {
           list = [];
         }
         if (!list.length) list = FALLBACK_UNIS;
+        try {
+          const s = await api.settings();
+          if (s.currentSemester) setActiveSemester(s.currentSemester);
+        } catch {
+          // default active semester stands
+        }
         setUniversities(list);
         if (profile?.university) {
           const match = list.find((u) => u.name === profile.university);
@@ -115,7 +121,7 @@ export default function OnboardingRoute() {
         level,
         // In edit mode the locked original role wins (role is immutable).
         role: (isEdit ? originalRole : null) ?? role ?? 'student',
-        semester,
+        semester: activeSemester,
         courses: selectedCourses,
         ...overrides,
       };
@@ -129,7 +135,7 @@ export default function OnboardingRoute() {
     }
   };
 
-  // Courses step: semester toggle + level-aware course checkboxes.
+  // Courses step: active-semester (admin-owned) + level-aware checkboxes.
   // Students use their level; lecturers pick the level they teach.
   useEffect(() => {
     const lvl = role === 'lecturer' ? lecturerLevel : level;
@@ -141,7 +147,7 @@ export default function OnboardingRoute() {
     let cancelled = false;
     setCoursesLoading(true);
     api
-      .courses(lvl, semester)
+      .courses(lvl, activeSemester)
       .then((list) => {
         if (!cancelled) setAvailableCourses(list.map((c) => ({ code: c.code, title: c.title })));
       })
@@ -154,7 +160,7 @@ export default function OnboardingRoute() {
     return () => {
       cancelled = true;
     };
-  }, [step, role, lecturerLevel, level, semester]);
+  }, [step, role, lecturerLevel, level, activeSemester]);
 
   const toggleCourse = (code: string) =>
     setSelectedCourses((prev) => (prev.includes(code) ? prev.filter((x) => x !== code) : [...prev, code]));
@@ -169,13 +175,9 @@ export default function OnboardingRoute() {
     fontWeight: 700,
   });
 
-  const semesterRow = (
-    <div style={{ display: 'flex', gap: 6 }}>
-      {['First Semester', 'Second Semester'].map((s) => (
-        <button key={s} onClick={() => setSemester(s)} style={{ ...pill(semester === s), flex: 1 }}>
-          {s.replace(' Semester', '')}
-        </button>
-      ))}
+  const semesterNote = (
+    <div style={{ fontSize: 12, color: '#777' }}>
+      Active semester: <strong>{activeSemester}</strong> (set by admin)
     </div>
   );
 
@@ -336,7 +338,7 @@ export default function OnboardingRoute() {
                 <button key={l} onClick={() => setLecturerLevel(l)} style={pill(lecturerLevel === l)}>{l.replace(' Level', '')}</button>
               ))}
             </div>
-            {semesterRow}
+            {semesterNote}
             {courseList}
             <button onClick={() => save(false)} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8 }}>
               Finish setup <ArrowRight size={18} />
@@ -346,7 +348,7 @@ export default function OnboardingRoute() {
         {step === 6 && role !== 'lecturer' && (
           <>
             <div style={{ fontSize: 13, color: '#777' }}>Level: <strong>{level || '—'}</strong></div>
-            {semesterRow}
+            {semesterNote}
             {courseList}
             <button onClick={() => setStep(7)} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8 }}>
               Continue <ArrowRight size={18} />

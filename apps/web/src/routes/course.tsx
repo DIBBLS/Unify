@@ -13,8 +13,9 @@ type CatalogCourse = { code: string; title: string; weeks: number; levels: strin
 export default function CoursePage() {
   const [courses, setCourses] = useState<CatalogCourse[]>([]);
   const [myLevel, setMyLevel] = useState('');
-  const [filterLevel, setFilterLevel] = useState('');
-  const [filterSem, setFilterSem] = useState('');
+  const [activeSemester, setActiveSemester] = useState('First Semester');
+  const [enrolledSet, setEnrolledSet] = useState<Set<string>>(new Set());
+  const [busy, setBusy] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -32,11 +33,13 @@ export default function CoursePage() {
         return;
       }
       try {
-        const me = await api.me();
-        if (me.profile?.level) {
-          setMyLevel(me.profile.level);
-          setFilterLevel(me.profile.level);
-        }
+        const [me, settings] = await Promise.all([
+          api.me(),
+          api.settings().catch(() => ({ currentSemester: 'First Semester' })),
+        ]);
+        if (me.profile?.level) setMyLevel(me.profile.level);
+        setEnrolledSet(new Set((me.courses || []).map((c) => c.toUpperCase())));
+        if (settings.currentSemester) setActiveSemester(settings.currentSemester);
         const list = await api.courses();
         const withWeeks = await Promise.all(
           list.map(async (c) => {
@@ -59,21 +62,24 @@ export default function CoursePage() {
 
   if (loading) return <Loading text="Loading courses…" />;
 
-  const levelsAvailable = [...new Set(courses.flatMap((c) => c.levels))].sort();
+  // Strict scoping: your level + the admin's active semester, nothing else.
   const shown = courses.filter(
-    (c) =>
-      (!filterLevel || c.levels.includes(filterLevel)) &&
-      (!filterSem || c.semesters.includes(filterSem))
+    (c) => (!myLevel || c.levels.includes(myLevel)) && c.semesters.includes(activeSemester)
   );
-  const pill = (active: boolean) => ({
-    padding: '8px 14px',
-    borderRadius: 9999,
-    border: `1px solid ${active ? '#059669' : '#e5e5e5'}`,
-    background: active ? '#10b981' : '#fff',
-    color: active ? '#fff' : '#777',
-    fontSize: 12,
-    fontWeight: 700,
-  });
+
+  const toggleEnroll = async (code: string) => {
+    const isIn = enrolledSet.has(code.toUpperCase());
+    setBusy(code);
+    setError('');
+    try {
+      const res = await api.enroll(code, !isIn);
+      setEnrolledSet(new Set((res.enrolled || []).map((c) => c.toUpperCase())));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Enrollment failed.');
+    } finally {
+      setBusy(null);
+    }
+  };
 
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px' }}>
@@ -83,22 +89,8 @@ export default function CoursePage() {
         Guided paths, quizzes and XP{myLevel ? ` · ${myLevel}` : ''}
       </p>
       {error && <Flash tone="error" message={error} onDismiss={() => setError('')} />}
-      {levelsAvailable.length > 0 && (
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 12 }}>
-          <button onClick={() => setFilterLevel('')} style={pill(!filterLevel)}>All levels</button>
-          {levelsAvailable.map((l) => (
-            <button key={l} onClick={() => setFilterLevel(l)} style={pill(filterLevel === l)}>
-              {l.replace(' Level', '')}
-            </button>
-          ))}
-        </div>
-      )}
-      <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
-        {['', 'First Semester', 'Second Semester'].map((s) => (
-          <button key={s || 'all'} onClick={() => setFilterSem(s)} style={{ ...pill(filterSem === s), flex: 1 }}>
-            {s ? s.replace(' Semester', '') : 'Both semesters'}
-          </button>
-        ))}
+      <div style={{ fontSize: 12, color: '#777', marginTop: 8 }}>
+        {myLevel || 'Your level'} · {activeSemester}
       </div>
       <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {shown.length === 0 && !error && (
@@ -107,32 +99,54 @@ export default function CoursePage() {
             <div style={{ marginTop: 8 }}>No courses for this level yet. Check back soon.</div>
           </div>
         )}
-        {shown.map((c) => (
-          <Link
-            key={c.code}
-            to={`/course/${encodeURIComponent(c.code)}`}
-            style={{
-              padding: '14px 16px',
-              background: '#fff',
-              border: '1px solid #e5e5e5',
-              borderRadius: 12,
-              textDecoration: 'none',
-              color: '#3c3c3c',
-              display: 'flex',
-              gap: 12,
-              alignItems: 'center',
-            }}
-          >
-            <span style={{ width: 40, height: 40, borderRadius: 10, background: '#ecfdf5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <BookOpen size={20} color="#059669" />
-            </span>
-            <span style={{ flex: 1 }}>
-              <span style={{ fontWeight: 700, display: 'block' }}>{c.code}</span>
-              <span style={{ fontSize: 12, color: '#777' }}>{c.title} · {c.weeks} {c.weeks === 1 ? 'week' : 'weeks'}</span>
-            </span>
-            <ChevronRight size={18} color="#059669" />
-          </Link>
-        ))}
+        {shown.map((c) => {
+          const isIn = enrolledSet.has(c.code.toUpperCase());
+          return (
+            <div
+              key={c.code}
+              style={{
+                padding: '14px 16px',
+                background: '#fff',
+                border: '1px solid #e5e5e5',
+                borderRadius: 12,
+                display: 'flex',
+                gap: 12,
+                alignItems: 'center',
+              }}
+            >
+              <Link
+                to={`/course/${encodeURIComponent(c.code)}`}
+                style={{ flex: 1, display: 'flex', gap: 12, alignItems: 'center', textDecoration: 'none', color: '#3c3c3c', minWidth: 0 }}
+              >
+                <span style={{ width: 40, height: 40, borderRadius: 10, background: '#ecfdf5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <BookOpen size={20} color="#059669" />
+                </span>
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{ fontWeight: 700, display: 'block' }}>{c.code}</span>
+                  <span style={{ fontSize: 12, color: '#777' }}>{c.title} · {c.weeks} {c.weeks === 1 ? 'week' : 'weeks'}</span>
+                </span>
+                <ChevronRight size={18} color="#059669" />
+              </Link>
+              <button
+                onClick={() => toggleEnroll(c.code)}
+                disabled={busy === c.code}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: 9999,
+                  border: `1px solid ${isIn ? '#059669' : '#e5e5e5'}`,
+                  background: isIn ? '#10b981' : '#fff',
+                  color: isIn ? '#fff' : '#059669',
+                  fontWeight: 800,
+                  fontSize: 12,
+                  whiteSpace: 'nowrap',
+                  opacity: busy === c.code ? 0.6 : 1,
+                }}
+              >
+                {busy === c.code ? '…' : isIn ? 'Enrolled ✓' : 'Enroll'}
+              </button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
