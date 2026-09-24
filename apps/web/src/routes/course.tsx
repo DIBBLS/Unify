@@ -32,7 +32,7 @@ export default function CoursePage() {
       }
       try {
         const me = await api.me();
-        const enrolled = (me.courses || []).map((c) => c.toUpperCase());
+        const enrolled = (me.courses || []).map((c) => (c || '').toUpperCase().trim()).filter(Boolean);
         let titles: Record<string, string> = {};
         try {
           const list = await api.courses();

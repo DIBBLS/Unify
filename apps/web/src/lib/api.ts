@@ -111,7 +111,11 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, retries 
     log.info("api", `← ${res.status} ${path} (${Date.now() - started}ms)`);
     return (await res.json()) as T;
   } catch (e) {
-    if (retries > 0) {
+    // Retry transient faults (cold starts, network blips) — never 4xx:
+    // those are deterministic (bad input, unknown course) and retrying
+    // them only multiplies failing requests.
+    const status = (e as { status?: number })?.status;
+    if (retries > 0 && !(status && status >= 400 && status < 500)) {
       log.warn("api", `↻ retry ${path} (${e instanceof Error ? e.message : "network error"})`);
       await new Promise((r) => setTimeout(r, 1500));
       return apiFetch<T>(path, init, retries - 1);
@@ -206,10 +210,14 @@ export const api = {
     apiFetch<{ notes: { id: string; course: string; week: number; topic: number; version: number; title: string }[] }>('/v1/authored'),
   authorStats: () =>
     apiFetch<{ courses: number; topics: number; versions: number; students: number; completions: number; quizzesTaken: number; quizAvg: number }>('/v1/author/stats'),
-  courseWeeks: (course: string) =>
-    apiFetch<{ weeks: { week: number; title: string; subtitle: string }[] }>(
-      `/v1/courses/${encodeURIComponent(course)}/weeks`
-    ),
+  courseWeeks: (course: string) => {
+    // Never request a blank code: it 404s by design and would only spam
+    // retries (this exact storm showed up in production logs).
+    if (!course || !course.trim()) return Promise.reject(new Error('No course selected.'));
+    return apiFetch<{ weeks: { week: number; title: string; subtitle: string }[] }>(
+      `/v1/courses/${encodeURIComponent(course.trim())}/weeks`
+    );
+  },
   quizAttempt: (course: string, week: number, score: number, total: number) =>
     apiFetch<{ ok: boolean }>('/v1/quiz/attempt', {
       method: 'POST',
