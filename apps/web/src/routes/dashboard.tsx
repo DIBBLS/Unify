@@ -248,7 +248,7 @@ export default function DashboardRoute() {
         </div>
       )}
 
-      {resume && (
+      {resume && resume.course ? (
         <div style={{ margin: '0 16px', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
           <div style={{ width: 44, height: 44, background: '#ecfdf5', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <BookOpen size={20} color="#059669" />
@@ -257,11 +257,11 @@ export default function DashboardRoute() {
             <div style={{ fontWeight: 700 }}>Continue Learning</div>
             <div style={{ fontSize: 12, color: '#777' }}>{resume.course} · Week {resume.week} · pick up where you stopped</div>
           </div>
-          <Link to={`/learn/${encodeURIComponent(resume.course)}/week/${resume.week}${resume.topic ? `?t=${resume.topic}` : ''}`} style={{ padding: '10px 16px', background: '#10b981', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #059669' }}>
+          <Link to={`/learn/${encodeURIComponent(resume.course.trim())}/week/${resume.week}${resume.topic ? `?t=${resume.topic}` : ''}`} style={{ padding: '10px 16px', background: '#10b981', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #059669' }}>
             Resume
           </Link>
         </div>
-      )}
+      ) : null}
 
       <div style={{ margin: '16px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ fontFamily: 'Nunito', fontWeight: 800 }}>Your Courses</h2>
@@ -280,7 +280,7 @@ export default function DashboardRoute() {
           </div>
         ) : (
           shown.map((c) => (
-            <Link key={c.course} to={`/course/${encodeURIComponent(c.course)}`} style={{ padding: 14, background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: '#3c3c3c' }}>
+            <Link key={c.course} to={`/course/${encodeURIComponent(c.course.trim())}`} style={{ padding: 14, background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: '#3c3c3c' }}>
               <span style={{ fontWeight: 700 }}>{c.course}</span>
               <ChevronRight size={16} color="#059669" />
             </Link>

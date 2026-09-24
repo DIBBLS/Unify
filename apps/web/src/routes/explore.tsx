@@ -117,7 +117,7 @@ export default function ExplorePage() {
               }}
             >
               <Link
-                to={`/course/${encodeURIComponent(c.code)}`}
+                to={`/course/${encodeURIComponent(c.code.trim())}`}
                 style={{ flex: 1, display: 'flex', gap: 12, alignItems: 'center', textDecoration: 'none', color: '#3c3c3c', minWidth: 0 }}
               >
                 <span style={{ width: 40, height: 40, borderRadius: 10, background: '#ecfdf5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>

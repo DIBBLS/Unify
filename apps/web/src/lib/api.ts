@@ -79,9 +79,10 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, retries 
     if (response.status === 401) {
       // Session truly dead (expired/revoked): clear it and send the user to sign in.
       // Public endpoints never 401, so this only fires for authed calls.
+      // Local scope: never revoke another tab's newer session server-side.
       log.warn("api", `← 401 ${path} (session dead, signing out)`);
       try {
-        await supabaseBrowser()?.auth.signOut();
+        await supabaseBrowser()?.auth.signOut({ scope: 'local' });
       } catch {
         // ignore sign-out errors
       }

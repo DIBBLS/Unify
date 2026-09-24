@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, Check, X, Loader2 } from 'lucide-react';
 import Mascot from '../components/Mascot';
 import Flash from '../components/Flash';
-import { supabaseBrowser } from '../lib/supabase';
+import { supabaseBrowser, broadcastLogin } from '../lib/supabase';
 import { api } from '../lib/api';
 import { log } from '../lib/log';
 
@@ -102,7 +102,10 @@ export default function AuthRoute() {
         setError(err.message);
         return;
       }
-      if (data.session) await routeToApp();
+      if (data.session) {
+        broadcastLogin(data.session);
+        await routeToApp();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sign-in failed.');
     } finally {
@@ -142,6 +145,7 @@ export default function AuthRoute() {
       }
       if (data.session) {
         setPendingEmail('');
+        broadcastLogin(data.session);
         await routeToApp();
       } else {
         setPendingEmail(email);
@@ -226,7 +230,7 @@ export default function AuthRoute() {
         setError(err.message);
         return;
       }
-      await client.auth.signOut().catch(() => {});
+      await client.auth.signOut({ scope: 'local' }).catch(() => {});
       setRecovery(false);
       setRecoveryPw('');
       setTab('signin');

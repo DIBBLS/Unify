@@ -1,108 +1,69 @@
 import { createClient, type SupabaseClient, type Session } from "@supabase/supabase-js";
 
-let cachedMain: SupabaseClient | null = null;
-let decided: SupabaseClient | null = null;
-
-// ---- smart resume: persistent sign-in WITHOUT cross-tab auto-sign-in ----
-// The Supabase session persists in localStorage so returning users stay
-// signed in across browser restarts. But each open tab registers itself in
-// a localStorage tab registry, and a newly opened tab restores the shared
-// session ONLY when no OTHER live tab claims one. Otherwise it gets an
-// isolated client (own sessionStorage key) and starts signed out —
-// independent, so two tabs can even hold two different accounts.
-// Edge cases: two tabs opened in the same millisecond may both restore
-// (rare, harmless — same stored session); crashed tabs leave stale entries
-// that expire via lastSeen pruning.
-const TAB_REG_KEY = "unify.tabs.v1";
-const STALE_MS = 20000;
-const HEARTBEAT_MS = 5000;
+let cached: SupabaseClient | null = null;
 const tabId = Math.random().toString(36).slice(2) + Date.now().toString(36);
-let tabActive = false;
-let heartbeatOn = false;
+let ownLoginTs = 0;
 
-type TabEntry = { ts: number; active: boolean; lastSeen: number };
+// ---- single-session policy: last login wins across tabs ----
+// One shared session in localStorage (survives restarts, so returning users
+// stay signed in). When THIS tab signs in with credentials it broadcasts
+// the new session; every other tab holding a DIFFERENT session drops to
+// sign-in (local scope only, so the fresh login is never revoked).
+// Mount/restore/token-refresh never broadcast — only explicit sign-ins.
+// Simultaneous logins resolve deterministically: the later timestamp wins,
+// the earlier tab stands down.
+const LOGIN_CHANNEL = "unify-login";
 
-function readRegistry(): Record<string, TabEntry> {
+function loginChannel(): BroadcastChannel | null {
   try {
-    const raw = localStorage.getItem(TAB_REG_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw) as Record<string, TabEntry>;
-    if (!parsed || typeof parsed !== "object") return {};
-    return parsed;
+    if (typeof BroadcastChannel === "undefined") return null;
+    return new BroadcastChannel(LOGIN_CHANNEL);
   } catch {
-    return {};
+    return null;
   }
 }
 
-function writeRegistry(reg: Record<string, TabEntry>): void {
+// Call immediately after an explicit credential sign-in (NOT on restore).
+export function broadcastLogin(session: Session): void {
+  const ts = Date.now();
+  ownLoginTs = ts;
   try {
-    localStorage.setItem(TAB_REG_KEY, JSON.stringify(reg));
+    loginChannel()?.postMessage({ tabId, userId: session.user.id, token: session.access_token, ts });
   } catch {
-    // storage unavailable (e.g. private mode) — sign-in still works,
-    // just without tab coordination (falls back to shared behavior)
+    // coordination unavailable — shared session still works
   }
 }
 
-function prune(reg: Record<string, TabEntry>): Record<string, TabEntry> {
-  const now = Date.now();
-  for (const k of Object.keys(reg)) {
-    const e = reg[k];
-    if (!e || typeof e.lastSeen !== "number" || now - e.lastSeen > STALE_MS) delete reg[k];
-  }
-  return reg;
-}
-
-function touchRegistry(): void {
-  try {
-    const reg = prune(readRegistry());
-    const prev = reg[tabId];
-    reg[tabId] = { ts: prev?.ts ?? Date.now(), active: tabActive, lastSeen: Date.now() };
-    writeRegistry(reg);
-  } catch {
-    // ignore — coordination is best-effort
-  }
-}
-
-function startHeartbeat(): void {
-  if (heartbeatOn) return;
-  heartbeatOn = true;
-  touchRegistry();
-  window.setInterval(touchRegistry, HEARTBEAT_MS);
-  const remove = () => {
+// Listen once per tab (layout-level): drop to sign-in when another tab
+// establishes a newer session. Returns unsubscribe.
+export function onLoginElsewhere(): () => void {
+  const ch = loginChannel();
+  if (!ch) return () => {};
+  ch.onmessage = (ev: MessageEvent) => {
+    const msg = (ev.data || {}) as { tabId?: string; userId?: string; token?: string; ts?: number };
+    if (!msg || msg.tabId === tabId || !msg.userId || !msg.token) return;
+    if ((msg.ts || 0) < ownLoginTs) return; // we logged in later; ignore
+    const sb = supabaseBrowser();
+    if (!sb) return;
+    void sb.auth.getSession().then(({ data }) => {
+      const mine = data.session;
+      if (!mine) return; // already signed out here
+      if (mine.user.id !== msg.userId || mine.access_token !== msg.token) {
+        // A different session took over: clear THIS tab only. Local scope
+        // keeps the fresh login alive; guards navigate this tab to /auth.
+        sb.auth.signOut({ scope: "local" }).catch(() => {});
+      }
+    });
+  };
+  return () => {
     try {
-      const reg = readRegistry();
-      delete reg[tabId];
-      writeRegistry(reg);
+      ch.close();
     } catch {
       // ignore
     }
   };
-  window.addEventListener("pagehide", remove);
-  window.addEventListener("beforeunload", remove);
 }
-
-// Call when this tab gains or loses a session (sign-in, verified session,
-// session death). Drives what newly opened tabs decide.
-export function setTabActive(active: boolean): void {
-  tabActive = active;
-  touchRegistry();
-}
-
-// Call on explicit sign-out so this tab stops claiming immediately.
-export function handleTabSignOut(): void {
-  tabActive = false;
-  try {
-    const reg = readRegistry();
-    delete reg[tabId];
-    writeRegistry(reg);
-  } catch {
-    // ignore
-  }
-}
-
-// Browser Supabase client for Auth (email sign-in, session JWT).
-// First call per tab decides once (synchronously): restore the shared
-// localStorage session, or go isolated when another live tab is signed in.
+// Single shared client (localStorage session, survives restarts).
 export function supabaseBrowser(): SupabaseClient | null {
   // Built-in fallbacks (public values; env vars override when set).
   const FALLBACK_URL = 'https://xouxvmprrosstzlitcsp.supabase.co';
@@ -115,22 +76,8 @@ export function supabaseBrowser(): SupabaseClient | null {
       env.SUPABASE_ANON_KEY ||
       env.SUPABASE_PUBLISHABLE_KEY) as string | undefined) || FALLBACK_KEY;
   if (!url || !key) return null;
-  if (!cachedMain) cachedMain = createClient(url, key);
-  if (decided) return decided;
-  let isolated = false;
-  try {
-    const reg = prune(readRegistry());
-    isolated = Object.entries(reg).some(([k, v]) => k !== tabId && v.active);
-    reg[tabId] = { ts: Date.now(), active: false, lastSeen: Date.now() };
-    writeRegistry(reg);
-  } catch {
-    isolated = false;
-  }
-  startHeartbeat();
-  decided = isolated
-    ? createClient(url, key, { auth: { storage: window.sessionStorage, storageKey: `unify.tab.${tabId}` } })
-    : cachedMain;
-  return decided;
+  if (!cached) cached = createClient(url, key);
+  return cached;
 }
 
 // Module session cache: every route mounts its own auth gate, and without
