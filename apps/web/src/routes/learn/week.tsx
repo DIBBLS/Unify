@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Check, Download } from 'lucide-react';
 import { api, type TopicMeta } from '../../lib/api';
@@ -6,6 +6,7 @@ import { log } from '../../lib/log';
 import type { UnifyNote, Topic } from '../../types/note';
 import { TopicSlice } from '../../components/TopicSlice';
 import EoqQuiz from '../../components/EoqQuiz';
+import { ReadAloud } from '../../components/ReadAloud';
 import { useProgress } from '../../hooks/useProgress';
 import Mascot from '../../components/Mascot';
 import ErrorState from '../../components/ErrorState';
@@ -28,7 +29,11 @@ export default function LearnPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   // React Router already URL-decodes params — never decode again here.
-  const { toggle, isDone } = useProgress((courseCode || '').trim().toUpperCase(), weekNum);
+  const { toggle, isDone, doneCount } = useProgress((courseCode || '').trim().toUpperCase(), weekNum);
+  // Celebration burst on fresh completions (never on previews, never for
+  // progress that was already banked before this visit).
+  const [burst, setBurst] = useState<{ k: number; label: string; sub: string } | null>(null);
+  const firstCount = useRef(true);
   const [tab, setTab] = useState(0);
   const topics = note?.topics ?? [];
   const hasQuiz = (note?.eoq?.questions?.length || 0) > 0;
@@ -39,6 +44,22 @@ export default function LearnPage() {
     const t = Math.min(Math.max(Number(searchParams.get('t')) || 0, 0), Math.max(tabCount - 1, 0));
     setTab((cur) => (cur === t ? cur : t));
   }, [note, searchParams, tabCount]);
+
+  const previewMode = searchParams.get('preview') === '1';
+  useEffect(() => {
+    // Skip the initial server load (banked progress must never celebrate).
+    if (firstCount.current) {
+      firstCount.current = false;
+      return;
+    }
+    if (previewMode || topics.length === 0) return;
+    if (doneCount >= topics.length) {
+      setBurst({ k: Date.now(), label: 'Week complete!', sub: `${topics.length} topics done` });
+    } else {
+      setBurst({ k: Date.now(), label: '+10 XP', sub: 'Topic complete' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [doneCount]);
 
   useEffect(() => {
     async function load() {
@@ -233,6 +254,12 @@ export default function LearnPage() {
   return (
     <>
     <div className="screen-only" style={{ maxWidth: 640, margin: '0 auto', padding: '24px 20px 100px' }}>
+      {burst && (
+        <div key={burst.k} className="xp-burst" onAnimationEnd={() => setBurst(null)}>
+          <div><span className="xp-burst-pill">{burst.label}</span></div>
+          <div style={{ marginTop: 6 }}><span className="xp-burst-sub">{burst.sub}</span></div>
+        </div>
+      )}
       <button onClick={() => navigate(backTo)} style={{ marginBottom: 16, display: 'flex', gap: 6, alignItems: 'center', background: 'none', border: 'none', color: '#777', fontSize: 14 }}>
         <ChevronLeft size={18} /> Back
       </button>
@@ -339,12 +366,15 @@ export default function LearnPage() {
             </div>
           )}
           {shownTopic && (
-            <TopicTab
-              topic={shownTopic}
-              done={isDone(weekNum, tab)}
-              onToggle={() => toggle(weekNum, tab)}
-              preview={preview || viewingOld}
-            />
+            <>
+              <ReadAloud key={`${weekNum}-${tab}`} topic={shownTopic} />
+              <TopicTab
+                topic={shownTopic}
+                done={isDone(weekNum, tab)}
+                onToggle={() => toggle(weekNum, tab)}
+                preview={preview || viewingOld}
+              />
+            </>
           )}
         </>
       ) : (

@@ -148,26 +148,16 @@ export default function DashboardRoute() {
             </div>
           </div>
         )}
-        <div style={{ margin: '0 16px' }}>
-          <Link to="/browse" style={{ display: 'flex', gap: 12, alignItems: 'center', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 16, textDecoration: 'none', color: '#3c3c3c' }}>
-            <div style={{ width: 44, height: 44, background: '#ecfdf5', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <BookOpen size={20} color="#059669" />
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 700 }}>Browse notes</div>
-              <div style={{ fontSize: 12, color: '#777' }}>{profile?.level ? `${profile.level} · ` : ''}every published week at your level</div>
-            </div>
-            <ChevronRight size={18} color="#999" />
-          </Link>
-        </div>
         {isAdmin && platform && (
           <div style={{ margin: '0 16px', background: '#111827', borderRadius: 12, padding: 16, color: '#fff' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ fontWeight: 800, fontSize: 14 }}>Platform</div>
-              <div style={{ display: 'flex', gap: 12 }}>
-                <Link to="/admin/content" style={{ fontSize: 12, color: '#6ee7b7', fontWeight: 700, textDecoration: 'none' }}>All content</Link>
+              {/* Main admin (role) manages; normal admins (flag) get view-only notes. */}
+              {profile?.role === 'admin' ? (
                 <Link to="/admin" style={{ fontSize: 12, color: '#6ee7b7', fontWeight: 700, textDecoration: 'none' }}>Open Admin panel</Link>
-              </div>
+              ) : (
+                <Link to="/admin/content" style={{ fontSize: 12, color: '#6ee7b7', fontWeight: 700, textDecoration: 'none' }}>View notes</Link>
+              )}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center', marginTop: 10 }}>
               <div>
@@ -191,7 +181,9 @@ export default function DashboardRoute() {
         )}
         <div style={{ margin: '16px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ fontFamily: 'Nunito', fontWeight: 800 }}>Published notes</h2>
-          <span style={{ fontSize: 13, color: '#777' }}>{notes.length}</span>
+          <Link to="/browse" style={{ fontSize: 13, color: '#059669', fontWeight: 700, textDecoration: 'none', display: 'flex', gap: 4, alignItems: 'center' }}>
+            Browse {profile?.level ? `${profile.level} ` : ''}notes <ChevronRight size={14} />
+          </Link>
         </div>
         {noteError && (
           <div style={{ margin: '12px 16px 0' }}>
@@ -280,6 +272,18 @@ export default function DashboardRoute() {
           </Link>
         </div>
       ) : null}
+
+      {isAdmin && (
+        <div style={{ margin: '12px 16px 0', background: '#111827', borderRadius: 12, padding: 14, color: '#fff', display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ fontWeight: 800, fontSize: 14, flex: 1 }}>Platform</div>
+          {/* Normal admins (flag) are view-only; the main admin manages from the panel. */}
+          {profile?.role === 'admin' ? (
+            <Link to="/admin" style={{ fontSize: 12, color: '#6ee7b7', fontWeight: 700, textDecoration: 'none' }}>Open Admin panel</Link>
+          ) : (
+            <Link to="/admin/content" style={{ fontSize: 12, color: '#6ee7b7', fontWeight: 700, textDecoration: 'none' }}>View notes</Link>
+          )}
+        </div>
+      )}
 
       <div style={{ margin: '16px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ fontFamily: 'Nunito', fontWeight: 800 }}>Your Courses</h2>
