@@ -487,6 +487,7 @@ export default function AdminRoute() {
           <option value="student">Students</option>
           <option value="lecturer">Lecturers</option>
           <option value="collaborator">Collaborators</option>
+          <option value="admin">Admins</option>
         </select>
         <button onClick={() => refresh()} style={primaryBtn}>Search</button>
       </div>
@@ -496,7 +497,7 @@ export default function AdminRoute() {
           <div key={u.id} style={card}>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 700, fontSize: 14 }}>{u.first_name || 'Unnamed'}{u.is_admin ? ' · Admin' : ''}</div>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>{u.first_name || 'Unnamed'}{(u.is_admin || u.role === 'admin') ? ' · Admin' : ''}</div>
                 <div style={{ fontSize: 12, color: '#777' }}>{[u.university, u.department].filter(Boolean).join(' · ') || 'No profile details'}</div>
               </div>
               <button onClick={() => removeUser(u.id, u.first_name || '')} aria-label="Remove user" style={{ background: 'none', border: '1px solid #fecaca', borderRadius: 8, color: '#991b1b', padding: 8, display: 'flex' }}>
@@ -504,7 +505,7 @@ export default function AdminRoute() {
               </button>
             </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              {(['student', 'lecturer', 'collaborator'] as const).map((r) => (
+              {(['student', 'lecturer', 'collaborator', 'admin'] as const).map((r) => (
                 <button
                   key={r}
                   onClick={() => changeRole(u.id, r)}

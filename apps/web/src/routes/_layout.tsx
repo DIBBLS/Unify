@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, BookOpen, Search, User, PenTool, Bell } from 'lucide-react';
-import { supabaseBrowser } from '../lib/supabase';
+import { supabaseBrowser, touchActivity, isSessionExpired, expireSession } from '../lib/supabase';
 import { api } from '../lib/api';
 import OfflineBanner from '../components/OfflineBanner';
 
@@ -20,12 +20,31 @@ const STUDENT_TABS: Tab[] = [
   { to: '/profile', label: 'Profile', icon: User, match: ['/profile'] },
 ];
 
+const AUTHOR_TABS: Tab[] = [
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, match: ['/dashboard'] },
+  { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio'] },
+  { to: '/profile', label: 'Profile', icon: User, match: ['/profile'] },
+];
+
+// Admin role gets the union it needs: learn paths, studio, profile.
+// (Admin panel + all-content browser live on the dashboard cards.)
+const ADMIN_TABS: Tab[] = [
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, match: ['/dashboard'] },
+  { to: '/course', label: 'Learn', icon: BookOpen, match: ['/course', '/learn'] },
+  { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio'] },
+  { to: '/profile', label: 'Profile', icon: User, match: ['/profile'] },
+];
+
 export default function Layout() {
   const [authed, setAuthed] = useState(false);
   const [initial, setInitial] = useState('');
   const [role, setRole] = useState<string | null>(null);
+  // Role starts unknown: while authed-but-unknown the nav renders skeleton
+  // placeholders so authors/admins never flash the student tabs first.
+  const [roleLoaded, setRoleLoaded] = useState(false);
   const [unread, setUnread] = useState(0);
   const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const sb = supabaseBrowser();
@@ -46,14 +65,49 @@ export default function Layout() {
   useEffect(() => {
     if (!authed) {
       setRole(null);
+      setRoleLoaded(false);
       setUnread(0);
       return;
     }
+    setRoleLoaded(false);
     api
       .me()
-      .then((me) => setRole(me.profile?.role || 'student'))
-      .catch(() => {});
+      .then((me) => {
+        setRole(me.profile?.role || 'student');
+        setRoleLoaded(true);
+      })
+      .catch(() => {
+        // Profile check flaked: fall back to student tabs rather than
+        // hanging on skeletons (fail-open, same as content gates).
+        setRoleLoaded(true);
+      });
   }, [authed]);
+
+  // Activity tracking + 30-min idle expiry. touchActivity persists the last
+  // active moment (survives app close); the interval/focus check signs out
+  // idle tabs and bounces to /auth with the expired flag.
+  useEffect(() => {
+    if (!authed) return;
+    touchActivity();
+    const onActivity = () => touchActivity();
+    window.addEventListener('pointerdown', onActivity);
+    window.addEventListener('keydown', onActivity);
+    const enforce = async () => {
+      if (!isSessionExpired()) return;
+      await expireSession();
+      setAuthed(false);
+      navigate('/auth?expired=1');
+    };
+    const t = setInterval(() => void enforce(), 30000);
+    const onFocus = () => void enforce();
+    window.addEventListener('focus', onFocus);
+    return () => {
+      clearInterval(t);
+      window.removeEventListener('pointerdown', onActivity);
+      window.removeEventListener('keydown', onActivity);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [authed, navigate]);
 
   // Bell badge: unread count refreshes on navigation, on tab refocus, and
   // every 30s while the app is open (lightweight count query).
@@ -79,13 +133,8 @@ export default function Layout() {
   }, [authed, pathname]);
 
   const isAuthor = role === 'lecturer' || role === 'collaborator';
-  const tabs: Tab[] = isAuthor
-    ? [
-        { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, match: ['/dashboard'] },
-        { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio'] },
-        { to: '/profile', label: 'Profile', icon: User, match: ['/profile'] },
-      ]
-    : STUDENT_TABS;
+  const tabs: Tab[] = isAuthor ? AUTHOR_TABS : role === 'admin' ? ADMIN_TABS : STUDENT_TABS;
+  const showSkeletonNav = authed && !roleLoaded;
 
   return (
     <div style={{ fontFamily: "'Nunito', system-ui" }}>
@@ -148,7 +197,14 @@ export default function Layout() {
       <OfflineBanner />
       <Outlet />
       <nav style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, display: 'flex', background: '#fff', borderTop: '1px solid #e5e5e5', padding: '8px 0 calc(8px + env(safe-area-inset-bottom))' }}>
-        {tabs.map((t) => {
+        {showSkeletonNav
+          ? [0, 1, 2, 3].map((i) => (
+              <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                <div className="skel" style={{ width: 22, height: 22, borderRadius: 6 }} />
+                <div className="skel" style={{ width: 44, height: 10, borderRadius: 5 }} />
+              </div>
+            ))
+          : tabs.map((t) => {
           const active = t.match.some((m) => pathname === m || pathname.startsWith(m + '/'));
           const Icon = t.icon;
           const style = {
@@ -173,7 +229,7 @@ export default function Layout() {
               {t.label}
             </Link>
           );
-        })}
+          })}
       </nav>
     </div>
   );
