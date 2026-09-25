@@ -23,6 +23,8 @@ export default function LearnPage() {
   const [loadingVersion, setLoadingVersion] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [enrolling, setEnrolling] = useState(false);
+  // Who's reading (for the preview-aware back target below).
+  const [viewer, setViewer] = useState<{ isAdmin: boolean; role: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   // React Router already URL-decodes params — never decode again here.
@@ -56,6 +58,7 @@ export default function LearnPage() {
           api.me().catch(() => null),
           api.week(code, weekNum),
         ]);
+        if (me) setViewer({ isAdmin: !!me.isAdmin, role: me.profile?.role || 'student' });
         if (me && !previewMode) {
           const role = me.profile?.role || 'student';
           const enrolled = (me.courses || []).map((c) => c.toUpperCase().trim()).includes(code.toUpperCase());
@@ -164,10 +167,25 @@ export default function LearnPage() {
     );
 
   const preview = searchParams.get('preview') === '1';
+  // Preview landings (admin/author browsing) go back to their hub, never
+  // to the student course page.
+  const backTo =
+    preview && viewer
+      ? viewer.isAdmin
+        ? '/admin/content'
+        : viewer.role === 'lecturer' || viewer.role === 'collaborator'
+          ? '/browse'
+          : `/course/${encodeURIComponent(courseCode || '')}`
+      : `/course/${encodeURIComponent(courseCode || '')}`;
   const goTab = (t: number) => {
     const clamped = Math.min(Math.max(t, 0), tabCount - 1);
     setTab(clamped);
-    setSearchParams(clamped ? { t: String(clamped) } : {}, { replace: true });
+    // Preserve ?preview=1 across tab switches (losing it would drop the
+    // read-only banner and start recording resume on a preview).
+    setSearchParams(
+      { ...(preview ? { preview: '1' } : {}), ...(clamped ? { t: String(clamped) } : {}) },
+      { replace: true }
+    );
     // Every tab switch moves the Resume bookmark (never for previews).
     if (!preview && !blocked && note) {
       api.resume(note.course, weekNum, clamped).catch(() => {});
@@ -215,7 +233,7 @@ export default function LearnPage() {
   return (
     <>
     <div className="screen-only" style={{ maxWidth: 640, margin: '0 auto', padding: '24px 20px 100px' }}>
-      <button onClick={() => navigate(`/course/${encodeURIComponent(courseCode || '')}`)} style={{ marginBottom: 16, display: 'flex', gap: 6, alignItems: 'center', background: 'none', border: 'none', color: '#777', fontSize: 14 }}>
+      <button onClick={() => navigate(backTo)} style={{ marginBottom: 16, display: 'flex', gap: 6, alignItems: 'center', background: 'none', border: 'none', color: '#777', fontSize: 14 }}>
         <ChevronLeft size={18} /> Back
       </button>
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>

@@ -117,6 +117,7 @@ export default function ProfileRoute() {
   };
 
   const handleLogout = async () => {
+    if (!window.confirm('Are you sure you want to log out?')) return;
     const sb = supabaseBrowser();
     // Local scope: clear this tab/client only, never nuke another tab's
     // newer session (single-session policy kicks via broadcast instead).

@@ -25,6 +25,10 @@ export default function CourseDetailRoute() {
   const [error, setError] = useState('');
   const [blocked, setBlocked] = useState(false);
   const [enrolling, setEnrolling] = useState(false);
+  // Preview landings (admin/author browsing) go back to their hub, never
+  // to the student My Courses module.
+  const [backTo, setBackTo] = useState('/course');
+  const preview = searchParams.get('preview') === '1';
 
   useEffect(() => {
     (async () => {
@@ -32,15 +36,26 @@ export default function CourseDetailRoute() {
         // Weeks + profile load in parallel: a flaky profile check (cold
         // start) must never hide the weeks. The enrolled-only gate applies
         // only when the check succeeds (authors in ?preview=1 pass through).
-        const preview = searchParams.get('preview') === '1';
         const [me, res] = await Promise.all([
           api.me().catch(() => null),
           api.courseWeeks(courseCode),
         ]);
-        if (me && !preview) {
+        if (me) {
           const role = me.profile?.role || 'student';
+          setBackTo(
+            preview
+              ? me.isAdmin
+                ? '/admin/content'
+                : role === 'lecturer' || role === 'collaborator'
+                  ? '/browse'
+                  : '/course'
+              : '/course'
+          );
+          if (preview) {
+            setWeeks(res.weeks);
+            return;
+          }
           const enrolled = (me.courses || []).map((c) => c.toUpperCase().trim()).includes(courseCode.toUpperCase());
-          // Admins (role or flag) browse every course without enrolling.
           if ((role === 'student' || !role) && !enrolled && !me.isAdmin) {
             setBlocked(true);
             setLoading(false);
@@ -75,7 +90,7 @@ export default function CourseDetailRoute() {
   if (loading)
     return (
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px' }}>
-        <BackButton to="/course" />
+        <BackButton to={backTo} />
         <div className="skel" style={{ height: 32, width: '55%', marginTop: 4 }} />
         <div className="skel" style={{ height: 14, width: '75%', marginTop: 10 }} />
         <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -102,7 +117,7 @@ export default function CourseDetailRoute() {
   if (blocked)
     return (
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px', textAlign: 'center' }}>
-        <BackButton to="/course" />
+        <BackButton to={backTo} />
         <Mascot size={110} />
         <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 20, marginTop: 12 }}>You're not enrolled in {courseCode}</h1>
         <p style={{ color: '#777', fontSize: 14, margin: '8px 0 20px' }}>Enroll to unlock its weeks, topics and quizzes.</p>
@@ -120,7 +135,7 @@ export default function CourseDetailRoute() {
 
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px' }}>
-      <BackButton to="/course" />
+      <BackButton to={backTo} />
       <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28 }}>{courseCode}</h1>
       <p style={{ color: '#777', marginTop: 6, fontSize: 13 }}>
         {weeks.length} {weeks.length === 1 ? 'week' : 'weeks'} · pick one to start learning
@@ -136,7 +151,7 @@ export default function CourseDetailRoute() {
         {weeks.map((w) => (
           <Link
             key={w.week}
-            to={`/learn/${encodeURIComponent(courseCode)}/week/${w.week}`}
+            to={`/learn/${encodeURIComponent(courseCode)}/week/${w.week}${preview ? '?preview=1' : ''}`}
             style={{
               padding: '14px 16px',
               background: '#fff',

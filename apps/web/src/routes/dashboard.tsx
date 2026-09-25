@@ -148,6 +148,18 @@ export default function DashboardRoute() {
             </div>
           </div>
         )}
+        <div style={{ margin: '0 16px' }}>
+          <Link to="/browse" style={{ display: 'flex', gap: 12, alignItems: 'center', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 16, textDecoration: 'none', color: '#3c3c3c' }}>
+            <div style={{ width: 44, height: 44, background: '#ecfdf5', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <BookOpen size={20} color="#059669" />
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700 }}>Browse notes</div>
+              <div style={{ fontSize: 12, color: '#777' }}>{profile?.level ? `${profile.level} · ` : ''}every published week at your level</div>
+            </div>
+            <ChevronRight size={18} color="#999" />
+          </Link>
+        </div>
         {isAdmin && platform && (
           <div style={{ margin: '0 16px', background: '#111827', borderRadius: 12, padding: 16, color: '#fff' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
