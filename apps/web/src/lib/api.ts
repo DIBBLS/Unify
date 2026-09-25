@@ -171,6 +171,19 @@ export type TopicMeta = {
   versions: TopicVersionMeta[];
 };
 
+export type NotificationItem = {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  course?: string | null;
+  week?: number | null;
+  topic?: number | null;
+  link?: string | null;
+  read?: boolean;
+  created_at?: string;
+};
+
 export const api = {
   universities: () => apiFetch<University[]>("/v1/universities"),
   settings: () => apiFetch<{ currentSemester: string }>("/v1/settings"),
@@ -266,6 +279,12 @@ export const api = {
     apiFetch<{ id: string; course: string; week: number; topic: number; version: number; title: string; noteJson: unknown; authorId: string | null }>(`/v1/notes/${id}`),
   noteDelete: (id: string) =>
     apiFetch<{ ok: boolean; remaining: number }>(`/v1/notes/${id}`, { method: 'DELETE' }),
+  notifications: (limit = 20) =>
+    apiFetch<{ notifications: NotificationItem[]; unread: number }>(`/v1/notifications?limit=${limit}`),
+  notificationsMarkRead: (payload: { ids?: string[]; all?: boolean }) =>
+    apiFetch<{ ok: boolean }>('/v1/notifications/read', { method: 'POST', body: JSON.stringify(payload) }),
+  adminAnnounce: (title: string, body: string, link?: string) =>
+    apiFetch<{ ok: boolean; reached: number }>('/v1/admin/announce', { method: 'POST', body: JSON.stringify({ title, body, link }) }),
   adminStats: () =>
     apiFetch<{
       users: number;

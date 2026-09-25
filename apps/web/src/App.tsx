@@ -9,6 +9,7 @@ import AuthRoute from './routes/auth';
 import DashboardRoute from './routes/dashboard';
 import OnboardingRoute from './routes/onboarding';
 import ProfileRoute from './routes/profile';
+import NotificationsRoute from './routes/notifications';
 import AdminRoute from './routes/admin';
 import StudioRoute from './routes/studio/index';
 import Mascot from './components/Mascot';
@@ -199,6 +200,14 @@ export default function App() {
             element={
               <RequireAuth>
                 <ProfileRoute />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <RequireAuth>
+                <NotificationsRoute />
               </RequireAuth>
             }
           />

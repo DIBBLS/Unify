@@ -211,6 +211,31 @@ export default function AdminRoute() {
     }
   };
 
+  const [announceTitle, setAnnounceTitle] = useState('');
+  const [announceBody, setAnnounceBody] = useState('');
+  const [announcing, setAnnouncing] = useState(false);
+
+  // Broadcast an announcement to every user's bell.
+  const announce = async () => {
+    if (!announceTitle.trim() || !announceBody.trim()) {
+      setError('Announcement needs a title and a message.');
+      return;
+    }
+    if (!window.confirm('Send this announcement to ALL users?')) return;
+    setAnnouncing(true);
+    setError('');
+    try {
+      const res = await api.adminAnnounce(announceTitle.trim(), announceBody.trim());
+      setAnnounceTitle('');
+      setAnnounceBody('');
+      setSuccess(`Announcement sent to ${res.reached} user${res.reached === 1 ? '' : 's'}.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Announce failed.');
+    } finally {
+      setAnnouncing(false);
+    }
+  };
+
   const removeUser = async (id: string, name: string) => {
     if (!window.confirm(`Remove ${name || 'this user'} from Unify Learn? This cannot be undone.`)) return;
     setError('');
@@ -433,6 +458,16 @@ export default function AdminRoute() {
           {promoting ? 'Promoting…' : 'Promote all students one level'}
         </button>
         <div style={{ fontSize: 11, color: '#777', marginTop: 6 }}>500 Level graduates; enrollments reset for promoted students.</div>
+      </div>
+
+      <h2 style={section}>Announce to users</h2>
+      <div style={card}>
+        <div style={{ fontSize: 12, color: '#777', marginBottom: 8 }}>Lands on every user's bell instantly.</div>
+        <input value={announceTitle} onChange={(e) => setAnnounceTitle(e.target.value)} placeholder="Announcement title" style={{ ...input, width: '100%', marginBottom: 8 }} />
+        <textarea value={announceBody} onChange={(e) => setAnnounceBody(e.target.value)} rows={3} placeholder="What should everyone know?" style={{ ...input, width: '100%', resize: 'vertical', marginBottom: 8 }} />
+        <button onClick={announce} disabled={announcing} style={{ ...primaryBtn, width: '100%', opacity: announcing ? 0.6 : 1 }}>
+          {announcing ? 'Sending…' : 'Send to all users'}
+        </button>
       </div>
 
       <h2 style={section}>Users & roles</h2>
