@@ -43,7 +43,10 @@ export default function OnboardingRoute() {
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [availableCourses, setAvailableCourses] = useState<{ code: string; title: string }[]>([]);
   const [coursesLoading, setCoursesLoading] = useState(false);
-  const [lecturerLevel, setLecturerLevel] = useState<string | null>(null);
+  // Level the author contributes to (lecturer teaches it, collaborator
+  // co-creates for it). Drives the course picker; never saved as the
+  // user's own level — authors don't take courses.
+  const [contribLevel, setContribLevel] = useState<string | null>(null);
 
   useEffect(() => {
     const sb = supabaseBrowser();
@@ -137,10 +140,14 @@ export default function OnboardingRoute() {
   };
 
   // Courses step: active-semester (admin-owned) + level-aware checkboxes.
-  // Students use their level; lecturers pick the level they teach.
+  // Students use their own level; authors only ever see the courses of the
+  // level they picked to contribute to (lecturer teaches, collaborator builds).
   useEffect(() => {
-    const lvl = role === 'lecturer' ? lecturerLevel : level;
-    const showCourses = (step === 5 && role === 'lecturer') || (step === 6 && (role === 'student' || !role));
+    const lvl = role === 'lecturer' || role === 'collaborator' ? contribLevel : level;
+    const showCourses =
+      (step === 5 && role === 'lecturer') ||
+      (step === 2 && role === 'collaborator') ||
+      (step === 6 && (role === 'student' || !role));
     if (!showCourses || !lvl) {
       if (showCourses) setAvailableCourses([]);
       return;
@@ -161,7 +168,7 @@ export default function OnboardingRoute() {
     return () => {
       cancelled = true;
     };
-  }, [step, role, lecturerLevel, level, activeSemester]);
+  }, [step, role, contribLevel, level, activeSemester]);
 
   const toggleCourse = (code: string) =>
     setSelectedCourses((prev) => (prev.includes(code) ? prev.filter((x) => x !== code) : [...prev, code]));
@@ -219,16 +226,18 @@ export default function OnboardingRoute() {
     'Which courses are you taking?',
     "What's your graduation target?",
   ];
-  // The flow length follows the chosen role: collaborator 2, lecturer 6, student 8.
-  // Lecturers pick teaching courses at step 5; students pick at step 6.
-  const totalSteps = role === 'collaborator' ? 2 : role === 'lecturer' ? 6 : 8;
+  // The flow length follows the chosen role: collaborator 3 (role, name,
+  // contributing level + courses), lecturer 6, student 8.
+  const totalSteps = role === 'collaborator' ? 3 : role === 'lecturer' ? 6 : 8;
   const shownStep = Math.min(step, totalSteps - 1);
   const stepTitle =
-    step === 5 && role === 'lecturer'
-      ? 'Which courses do you teach?'
-      : step === 6 && role === 'student'
-        ? 'Which courses are you taking?'
-        : STEP_TITLES[shownStep];
+    step === 2 && role === 'collaborator'
+      ? 'Which level are you contributing to?'
+      : step === 5 && role === 'lecturer'
+        ? 'Which courses do you teach?'
+        : step === 6 && role === 'student'
+          ? 'Which courses are you taking?'
+          : STEP_TITLES[shownStep];
   const left = { s: `Step ${shownStep + 1} of ${totalSteps}`, t: stepTitle };
 
   return (
@@ -307,12 +316,27 @@ export default function OnboardingRoute() {
             </div>
             <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="e.g. Joshua" style={{ padding: 12, border: '1px solid #e5e5e5', borderRadius: 12, fontSize: 16 }} />
             {firstName && <div style={{ fontSize: 14 }}>{daypart}, <strong>{firstName}</strong></div>}
-            <button onClick={() => { if (!firstName.trim()) return; if (isEdit) { void save(false); return; } if (role === 'collaborator') { void save(false); return; } setStep(2); }} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
-              {isEdit || role === 'collaborator' ? (<>Finish setup <ArrowRight size={18} /></>) : (<>Continue <ArrowRight size={18} /></>)}
+            <button onClick={() => { if (!firstName.trim()) return; if (isEdit) { void save(false); return; } if (role === 'collaborator') { setStep(2); return; } setStep(2); }} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+              {isEdit ? (<>Finish setup <ArrowRight size={18} /></>) : (<>Continue <ArrowRight size={18} /></>)}
             </button>
           </>
         )}
-        {step === 2 && (
+        {step === 2 && role === 'collaborator' && (
+          <>
+            <div style={{ fontSize: 13, fontWeight: 700 }}>Contributing level — only this level's courses are listed</div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {levels.map((l) => (
+                <button key={l} onClick={() => setContribLevel(l)} style={pill(contribLevel === l)}>{l.replace(' Level', '')}</button>
+              ))}
+            </div>
+            {semesterNote}
+            {courseList}
+            <button onClick={() => save(false)} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8 }}>
+              Finish setup <ArrowRight size={18} />
+            </button>
+          </>
+        )}
+        {step === 2 && role !== 'collaborator' && (
           <>
             {universities.map((u) => (
               <button key={u.id} onClick={() => { setUniversity(u); setStep(3); }} style={{ padding: 14, border: `1px solid ${university?.id === u.id ? '#10b981' : '#e5e5e5'}`, borderRadius: 12, background: '#fff', textAlign: 'left' }}>
@@ -338,7 +362,7 @@ export default function OnboardingRoute() {
             <div style={{ fontSize: 13, fontWeight: 700 }}>Teaching level</div>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {levels.map((l) => (
-                <button key={l} onClick={() => setLecturerLevel(l)} style={pill(lecturerLevel === l)}>{l.replace(' Level', '')}</button>
+                <button key={l} onClick={() => setContribLevel(l)} style={pill(contribLevel === l)}>{l.replace(' Level', '')}</button>
               ))}
             </div>
             {semesterNote}
