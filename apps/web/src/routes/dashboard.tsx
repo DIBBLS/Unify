@@ -6,7 +6,9 @@ import { api, type Profile } from '../lib/api';
 import Loading from '../components/Loading';
 import ErrorState from '../components/ErrorState';
 import Mascot from '../components/Mascot';
+import Typewriter from '../components/Typewriter';
 import Flash from '../components/Flash';
+import { greeting, dailyLine, dailyKey, daypart } from '../lib/greet';
 
 type CourseStat = { course: string; topics: number };
 
@@ -113,15 +115,21 @@ export default function DashboardRoute() {
   if (isAuthor)
     return (
       <div style={{ maxWidth: 480, margin: '0 auto', paddingBottom: 80 }}>
-        <div style={{ padding: '20px 16px 12px', background: '#fff' }}>
-          <div style={{ fontSize: 11, color: '#afafaf', letterSpacing: 1 }}>Your Dashboard</div>
-          <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28, marginTop: 4 }}>
-            Good to have you, <em style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', padding: '0 6px', borderRadius: 6, fontStyle: 'normal' }}>{firstName}</em>
-          </h1>
-          <div style={{ fontSize: 13, color: '#777', marginTop: 4 }}>{profile?.department || roleLabel}</div>
+        <div style={{ padding: '20px 16px 12px', background: '#fff', display: 'flex', gap: 12, alignItems: 'center' }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 11, color: '#afafaf', letterSpacing: 1 }}>Your Dashboard</div>
+            <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28, marginTop: 4 }}>
+              {greeting()}, <em style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', padding: '0 6px', borderRadius: 6, fontStyle: 'normal' }}>{firstName}</em>
+            </h1>
+            <div style={{ fontSize: 13, color: '#059669', marginTop: 4, minHeight: 18 }}>
+              <Typewriter key={dailyKey()} text={dailyLine()} speed={28} />
+            </div>
+            <div style={{ fontSize: 13, color: '#777', marginTop: 2 }}>{profile?.department || roleLabel}</div>
+          </div>
+          <Mascot size={64} animate={daypart() === 'morning' ? 'sip' : 'wave'} />
         </div>
         {astats && (
-          <div style={{ margin: '12px 16px', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
+          <div className="rise" style={{ margin: '12px 16px', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
             <div>
               <div style={{ fontSize: 18, fontWeight: 800 }}>{astats.topics}</div>
               <div style={{ fontSize: 11, color: '#777' }}>Topics</div>
@@ -204,15 +212,21 @@ export default function DashboardRoute() {
     );
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', paddingBottom: 80 }}>
-      <div style={{ padding: '20px 16px 12px', background: '#fff' }}>
-        <div style={{ fontSize: 11, color: '#afafaf', letterSpacing: 1 }}>Your Dashboard</div>
-        <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28, marginTop: 4 }}>
-          Good to have you, <em style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', padding: '0 6px', borderRadius: 6, fontStyle: 'normal' }}>{firstName}</em>
-        </h1>
-        <div style={{ fontSize: 13, color: '#777', marginTop: 4 }}>{profile?.department || ''}</div>
+      <div style={{ padding: '20px 16px 12px', background: '#fff', display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 11, color: '#afafaf', letterSpacing: 1 }}>Your Dashboard</div>
+          <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28, marginTop: 4 }}>
+            {greeting()}, <em style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', padding: '0 6px', borderRadius: 6, fontStyle: 'normal' }}>{firstName}</em>
+          </h1>
+          <div style={{ fontSize: 13, color: '#059669', marginTop: 4, minHeight: 18 }}>
+            <Typewriter key={dailyKey()} text={dailyLine()} speed={28} />
+          </div>
+          <div style={{ fontSize: 13, color: '#777', marginTop: 2 }}>{profile?.department || ''}</div>
+        </div>
+        <Mascot size={64} animate={daypart() === 'morning' ? 'sip' : 'wave'} />
       </div>
 
-      <div style={{ margin: '12px 16px', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
+      <div className="rise" style={{ margin: '12px 16px', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
         <div>
           <div style={{ fontSize: 18, fontWeight: 800 }}>{profile?.grad_target ?? '—'}</div>
           <div style={{ fontSize: 11, color: '#777' }}>Target</div>
@@ -268,8 +282,8 @@ export default function DashboardRoute() {
             </Link>
           </div>
         ) : (
-          shown.map((c) => (
-            <Link key={c.course} to={`/course/${encodeURIComponent(c.course.trim())}`} style={{ padding: 14, background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: '#3c3c3c' }}>
+          shown.map((c, i) => (
+            <Link key={c.course} to={`/course/${encodeURIComponent(c.course.trim())}`} className="rise" style={{ animationDelay: `${Math.min(i, 6) * 40}ms`, padding: 14, background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: '#3c3c3c' }}>
               <span style={{ fontWeight: 700 }}>{c.course}</span>
               <ChevronRight size={16} color="#059669" />
             </Link>

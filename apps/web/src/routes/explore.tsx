@@ -100,12 +100,14 @@ export default function ExplorePage() {
             <div style={{ marginTop: 8 }}>No courses for this level yet. Check back soon.</div>
           </div>
         )}
-        {shown.map((c) => {
+        {shown.map((c, i) => {
           const isIn = enrolledSet.has(c.code.toUpperCase());
           return (
             <div
               key={c.code}
+              className="rise"
               style={{
+                animationDelay: `${Math.min(i, 6) * 40}ms`,
                 padding: '14px 16px',
                 background: '#fff',
                 border: '1px solid #e5e5e5',

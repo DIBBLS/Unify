@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, Check, X, Loader2 } from 'lucide-react';
 import Mascot from '../components/Mascot';
+import Typewriter from '../components/Typewriter';
 import Flash from '../components/Flash';
 import { supabaseBrowser, saveRememberSession, restoreRememberedSession } from '../lib/supabase';
 import { api } from '../lib/api';
@@ -10,27 +11,6 @@ import { log } from '../lib/log';
 // Note: no client-side persistence here. Rate limiting is enforced
 // server-side (API rate limits + Supabase Auth built-in limits).
 const FLASH_TTL = 6000;
-
-// Typed-out tagline: types character by character, cursor blinks,
-// then disappears shortly after the line completes.
-function Typewriter({ text, speed = 45 }: { text: string; speed?: number }) {
-  const [n, setN] = useState(0);
-  const [cursorGone, setCursorGone] = useState(false);
-  useEffect(() => {
-    if (n >= text.length) {
-      const t = setTimeout(() => setCursorGone(true), 700);
-      return () => clearTimeout(t);
-    }
-    const t = setTimeout(() => setN((v) => v + 1), speed);
-    return () => clearTimeout(t);
-  }, [n, text, speed]);
-  return (
-    <span>
-      {text.slice(0, n)}
-      {!cursorGone && <span className="type-cursor" />}
-    </span>
-  );
-}
 
 export default function AuthRoute() {
   const navigate = useNavigate();

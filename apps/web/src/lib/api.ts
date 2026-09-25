@@ -139,6 +139,7 @@ export type Profile = {
   level?: string;
   grad_target?: number;
   role?: string;
+  notify_new_notes?: boolean;
 };
 
 export type AdminUser = {

@@ -48,12 +48,16 @@ input:focus,textarea:focus{outline:none;border-color:#10b981 !important;box-shad
 @keyframes flash-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 .type-cursor{display:inline-block;width:9px;height:1em;margin-left:3px;vertical-align:-0.12em;background:currentColor;animation:blink .8s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
+/* Gentle entrance: cards rise 6px once on mount. Restrained on purpose —
+   one motion language for lists and grids, nothing bouncy. */
+.rise{animation:rise-in .32s ease both}
+@keyframes rise-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 /* Loading skeletons: grey pulse blocks tracing the real layout so every
    wait shows WHERE content is coming (weeks list, reader hero + topics). */
 .skel{position:relative;overflow:hidden;background:#eef0f1;border-radius:8px}
 .skel::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);animation:skel-sweep 1.3s ease-in-out infinite}
 @keyframes skel-sweep{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
-@media(prefers-reduced-motion:reduce){.flash{animation:none}button:active:not(:disabled){transform:none}}
+@media(prefers-reduced-motion:reduce){.flash{animation:none}button:active:not(:disabled){transform:none}.rise{animation:none}.skel::after{animation:none}}
 .print-only{display:none}
 @media print{
   header,nav,button{display:none !important}

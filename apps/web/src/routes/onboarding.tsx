@@ -5,6 +5,8 @@ import { supabaseBrowser } from '../lib/supabase';
 import { api, type University } from '../lib/api';
 import Loading from '../components/Loading';
 import Mascot from '../components/Mascot';
+import Typewriter from '../components/Typewriter';
+import { greeting } from '../lib/greet';
 import Flash from '../components/Flash';
 
 type Uni = { id: string; name: string; shortName?: string };
@@ -36,8 +38,7 @@ export default function OnboardingRoute() {
   const [department, setDepartment] = useState<string | null>(null);
   const [level, setLevel] = useState<string | null>(null);
   const [gradTarget, setGradTarget] = useState<number | null>(null);
-  const hour = new Date().getHours();
-  const daypart = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const daypart = greeting();
   const [activeSemester, setActiveSemester] = useState('First Semester');
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [availableCourses, setAvailableCourses] = useState<{ code: string; title: string }[]>([]);
@@ -234,7 +235,9 @@ export default function OnboardingRoute() {
     <div style={{ maxWidth: 480, margin: '0 auto', minHeight: '100vh', background: '#fff' }}>
       <div style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', padding: 20 }}>
         <div style={{ fontSize: 11, letterSpacing: 1, opacity: 0.8 }}>{left.s}</div>
-        <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28, marginTop: 6 }}>{left.t}</h1>
+        <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28, marginTop: 6, minHeight: 76 }}>
+          <Typewriter key={step} text={left.t} speed={30} />
+        </h1>
         <div style={{ display: 'flex', gap: 6, marginTop: 12 }}>
           {Array.from({ length: totalSteps }).map((_, i) => (
             <div key={i} style={{ flex: 1, height: 4, borderRadius: 2, background: i <= shownStep ? '#fff' : 'rgba(255,255,255,0.3)' }} />
