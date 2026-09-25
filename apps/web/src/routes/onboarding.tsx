@@ -122,7 +122,9 @@ export default function OnboardingRoute() {
         university: university?.name,
         faculty,
         department,
-        level,
+        // Authors don't take courses: their level IS the level they
+        // contribute to (picked on the level step), used to scope browsing.
+        level: role === 'lecturer' || role === 'collaborator' ? (contribLevel ?? level) : level,
         // In edit mode the locked original role wins (role is immutable).
         role: (isEdit ? originalRole : null) ?? role ?? 'student',
         semester: activeSemester,

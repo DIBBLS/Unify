@@ -12,6 +12,7 @@ import ProfileRoute from './routes/profile';
 import NotificationsRoute from './routes/notifications';
 import AdminRoute from './routes/admin';
 import AdminContentRoute from './routes/admin/content';
+import BrowseRoute from './routes/browse';
 import StudioRoute from './routes/studio/index';
 import Mascot from './components/Mascot';
 import Loading from './components/Loading';
@@ -225,6 +226,16 @@ export default function App() {
             element={
               <RequireAuth>
                 <AdminContentRoute />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/browse"
+            element={
+              <RequireAuth>
+                <RequireRole allow={AUTHOR_ONLY}>
+                  <BrowseRoute />
+                </RequireRole>
               </RequireAuth>
             }
           />
