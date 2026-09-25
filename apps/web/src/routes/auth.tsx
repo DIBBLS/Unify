@@ -37,6 +37,17 @@ export default function AuthRoute() {
         navigate('/onboarding');
         return;
       }
+      // Unread first: coming back to waiting notifications opens them
+      // before anything else (dashboard/resume can wait one tap).
+      try {
+        const n = await api.notifications(1);
+        if ((n.unread || 0) > 0) {
+          navigate('/notifications');
+          return;
+        }
+      } catch {
+        // notification check flaked — fall through to resume/dashboard
+      }
       // Exact restore: land precisely where they stopped (course/week/topic).
       // Authors and fresh accounts have no resume → dashboard as usual.
       if (me.resume?.course) {

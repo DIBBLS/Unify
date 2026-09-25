@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, Trash2, PenTool } from 'lucide-react';
+import { Shield, Trash2, PenTool, ChevronDown, ChevronRight } from 'lucide-react';
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type AdminUser } from '../lib/api';
 import Loading from '../components/Loading';
@@ -12,6 +12,43 @@ type Uni = { id: string; name: string; short_name?: string };
 type Course = { code: string; title: string; levels: string[]; semesters: string[] };
 
 const LEVELS = ['100 Level', '200 Level', '300 Level', '400 Level', '500 Level'];
+
+// One collapsible module per admin area — the panel used to render
+// everything at once (endless scroll). Exactly one open at a time.
+function Module({
+  id,
+  title,
+  badge,
+  openId,
+  onToggle,
+  children,
+}: {
+  id: string;
+  title: string;
+  badge?: number;
+  openId: string;
+  onToggle: (id: string) => void;
+  children: React.ReactNode;
+}) {
+  const open = openId === id;
+  return (
+    <div style={{ marginTop: 10 }}>
+      <button
+        onClick={() => onToggle(open ? '' : id)}
+        style={{ width: '100%', display: 'flex', gap: 8, alignItems: 'center', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: '14px 16px', fontWeight: 800, fontSize: 15, color: '#111827' }}
+      >
+        <span style={{ flex: 1, textAlign: 'left' }}>{title}</span>
+        {badge != null && (
+          <span style={{ fontSize: 11, fontWeight: 800, background: '#ecfdf5', color: '#059669', borderRadius: 9999, padding: '2px 10px' }}>
+            {badge}
+          </span>
+        )}
+        {open ? <ChevronDown size={18} color="#999" /> : <ChevronRight size={18} color="#999" />}
+      </button>
+      {open && <div style={{ marginTop: 8 }}>{children}</div>}
+    </div>
+  );
+}
 
 export default function AdminRoute() {
   const navigate = useNavigate();
@@ -37,6 +74,12 @@ export default function AdminRoute() {
   const [models, setModels] = useState<{ model: string; failures: number; last_ok: string | null }[]>([]);
   const [provider, setProvider] = useState('');
   const [defaultModel, setDefaultModel] = useState('');
+  // Main-admin protection: your own row (matched by auth id) hides the
+  // role buttons + remove button, so the primary admin can never lock
+  // itself out by flipping its own role.
+  const [ownId, setOwnId] = useState('');
+  const [openModule, setOpenModule] = useState('users');
+  const [courseQ, setCourseQ] = useState('');
 
   const loadAll = async (query = q, role = roleFilter) => {
     try {
@@ -73,6 +116,7 @@ export default function AdminRoute() {
         navigate('/auth');
         return;
       }
+      setOwnId(sessionData.session.user.id);
       try {
         const me = await api.me();
         if (!me.isAdmin) {
@@ -250,10 +294,14 @@ export default function AdminRoute() {
 
   if (loading) return <Loading text="Loading admin…" />;
 
-  const section = { fontFamily: 'Nunito', fontWeight: 800, fontSize: 17, margin: '20px 0 8px' } as const;
   const card = { background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 12 } as const;
   const input = { padding: 10, border: '1px solid #e5e5e5', borderRadius: 10, fontSize: 14 } as const;
   const primaryBtn = { padding: '10px 18px', borderRadius: 12, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800 } as const;
+  const shownCourses = courses.filter((c) => {
+    const needle = courseQ.trim().toLowerCase();
+    if (!needle) return true;
+    return c.code.toLowerCase().includes(needle) || (c.title || '').toLowerCase().includes(needle);
+  });
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '20px 16px 100px' }}>
@@ -297,7 +345,7 @@ export default function AdminRoute() {
         </div>
       )}
 
-      <h2 style={section}>AI models</h2>
+      <Module id="models" title="AI models" badge={models.length} openId={openModule} onToggle={setOpenModule}>
       <div style={card}>
         <div style={{ fontSize: 13, color: '#777', marginBottom: 8 }}>
           Provider: <strong>{provider || '—'}</strong> · Default: <strong>{defaultModel || '—'}</strong>
@@ -349,8 +397,9 @@ export default function AdminRoute() {
           Refresh from Google
         </button>
       </div>
+      </Module>
 
-      <h2 style={section}>Universities</h2>
+      <Module id="unis" title="Universities" badge={unis.length} openId={openModule} onToggle={setOpenModule}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {unis.map((u) => (
           <div key={u.id} style={{ ...card, display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -369,10 +418,14 @@ export default function AdminRoute() {
           <button onClick={addUni} style={primaryBtn}>Add</button>
         </div>
       </div>
+      </Module>
 
-      <h2 style={section}>Courses per level</h2>
+      <Module id="courses" title="Courses per level" badge={courses.length} openId={openModule} onToggle={setOpenModule}>
+      <div style={{ ...card, display: 'flex', gap: 8, marginBottom: 8 }}>
+        <input value={courseQ} onChange={(e) => setCourseQ(e.target.value)} placeholder="Search code or title…" style={{ ...input, flex: 1 }} />
+      </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {courses.map((c) => (
+        {shownCourses.map((c) => (
           <div key={c.code} style={{ ...card, display: 'flex', gap: 8, alignItems: 'center' }}>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: 14 }}>{c.code} — {c.title}</div>
@@ -429,9 +482,11 @@ export default function AdminRoute() {
           </div>
           <button onClick={addCourse} style={{ ...primaryBtn, width: '100%' }}>Add course</button>
         </div>
+        {shownCourses.length === 0 && <div style={{ color: '#777', fontSize: 13, textAlign: 'center', padding: 16 }}>No courses match that search.</div>}
       </div>
+      </Module>
 
-      <h2 style={section}>Academic session</h2>
+      <Module id="session" title="Academic session" openId={openModule} onToggle={setOpenModule}>
       <div style={card}>
         <div style={{ fontSize: 12, color: '#777', marginBottom: 8 }}>Active semester — students only see this semester's courses.</div>
         <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
@@ -459,8 +514,9 @@ export default function AdminRoute() {
         </button>
         <div style={{ fontSize: 11, color: '#777', marginTop: 6 }}>500 Level graduates; enrollments reset for promoted students.</div>
       </div>
+      </Module>
 
-      <h2 style={section}>Announce to users</h2>
+      <Module id="announce" title="Announce to users" openId={openModule} onToggle={setOpenModule}>
       <div style={card}>
         <div style={{ fontSize: 12, color: '#777', marginBottom: 8 }}>Lands on every user's bell instantly.</div>
         <input value={announceTitle} onChange={(e) => setAnnounceTitle(e.target.value)} placeholder="Announcement title" style={{ ...input, width: '100%', marginBottom: 8 }} />
@@ -469,8 +525,9 @@ export default function AdminRoute() {
           {announcing ? 'Sending…' : 'Send to all users'}
         </button>
       </div>
+      </Module>
 
-      <h2 style={section}>Users & roles</h2>
+      <Module id="users" title="Users & roles" badge={users.length} openId={openModule} onToggle={setOpenModule}>
       <div style={{ ...card, display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
         <input value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="Invite by email…" style={{ ...input, flex: 2, minWidth: 140 }} />
         <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value)} style={{ ...input, flex: 1, minWidth: 110 }}>
@@ -497,13 +554,20 @@ export default function AdminRoute() {
           <div key={u.id} style={card}>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 700, fontSize: 14 }}>{u.first_name || 'Unnamed'}{(u.is_admin || u.role === 'admin') ? ' · Admin' : ''}</div>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>{u.first_name || 'Unnamed'}{(u.is_admin || u.role === 'admin') ? ' · Admin' : ''}{u.id === ownId ? ' · You' : ''}</div>
                 <div style={{ fontSize: 12, color: '#777' }}>{[u.university, u.department].filter(Boolean).join(' · ') || 'No profile details'}</div>
               </div>
-              <button onClick={() => removeUser(u.id, u.first_name || '')} aria-label="Remove user" style={{ background: 'none', border: '1px solid #fecaca', borderRadius: 8, color: '#991b1b', padding: 8, display: 'flex' }}>
-                <Trash2 size={16} />
-              </button>
+              {u.id !== ownId && (
+                <button onClick={() => removeUser(u.id, u.first_name || '')} aria-label="Remove user" style={{ background: 'none', border: '1px solid #fecaca', borderRadius: 8, color: '#991b1b', padding: 8, display: 'flex' }}>
+                  <Trash2 size={16} />
+                </button>
+              )}
             </div>
+            {u.id === ownId ? (
+              <div style={{ marginTop: 8, fontSize: 12, color: '#059669', fontWeight: 700, background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 8, padding: '8px 12px' }}>
+                This is you — your role is locked so you can't lock yourself out.
+              </div>
+            ) : (
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
               {(['student', 'lecturer', 'collaborator', 'admin'] as const).map((r) => (
                 <button
@@ -524,6 +588,7 @@ export default function AdminRoute() {
                 </button>
               ))}
             </div>
+            )}
             <div style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'center' }}>
               <span style={{ fontSize: 12, color: '#777', fontWeight: 700 }}>Level:</span>
               <select
@@ -540,6 +605,7 @@ export default function AdminRoute() {
           </div>
         ))}
       </div>
+      </Module>
     </div>
   );
 }
