@@ -57,7 +57,34 @@ input:focus,textarea:focus{outline:none;border-color:#10b981 !important;box-shad
 .skel{position:relative;overflow:hidden;background:#eef0f1;border-radius:8px}
 .skel::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);animation:skel-sweep 1.3s ease-in-out infinite}
 @keyframes skel-sweep{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
-@media(prefers-reduced-motion:reduce){.flash{animation:none}button:active:not(:disabled){transform:none}.rise{animation:none}.skel::after{animation:none}}
+/* Active recall deck: answers stay blurred until tapped (layout-stable,
+   no jump), then sharpen in. Self-grade chips feed the deck progress. */
+.recall-section{margin:28px 0}
+.recall-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--green-deep);margin-bottom:10px;font-weight:800}
+.recall-progress{display:flex;gap:8px;align-items:center;margin-bottom:12px;font-size:12px;color:var(--text2);font-weight:700}
+.recall-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.recall-badge{display:inline-block;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:var(--radius-pill);background:var(--green-bg);border:1px solid rgba(16,185,129,.28);color:var(--green-deep);margin-bottom:8px}
+.recall-q{font-weight:700;font-size:14px}
+.recall-answer{position:relative;margin-top:10px;font-size:13px;color:var(--text)}
+.recall-answer.blurred{filter:blur(6px);user-select:none;pointer-events:none;max-height:96px;overflow:hidden}
+.recall-answer.open{filter:blur(0);transition:filter .3s ease}
+.recall-veil{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.55);border:none;border-radius:8px;font-weight:800;font-size:13px;color:var(--green-deep);cursor:pointer;width:100%}
+.recall-grade{display:flex;gap:8px;margin-top:10px;animation:rise-in .25s ease}
+.recall-grade button{flex:1;padding:10px;border-radius:12px;font-weight:800;font-size:13px;border:1px solid var(--border);background:#fff;color:var(--text2)}
+.recall-grade button.got{background:#ecfdf5;border-color:var(--green-active);color:var(--green-deep)}
+.recall-grade button.fuzzy{background:#fffbeb;border-color:#f59e0b;color:#92400e}
+.recall-status{margin-top:8px;font-size:11px;font-weight:800}
+.recall-status.got{color:var(--green-deep)}
+.recall-status.fuzzy{color:#b45309}
+/* XP celebration burst: floats up from the complete button, then clears. */
+.xp-burst{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);z-index:60;pointer-events:none;text-align:center;animation:burst-rise 1.5s ease forwards}
+.xp-burst-pill{display:inline-block;background:linear-gradient(135deg,#34d399,#059669);color:#fff;font-weight:800;font-size:20px;padding:12px 26px;border-radius:var(--radius-pill);box-shadow:0 8px 24px rgba(5,150,105,.4)}
+.xp-burst-sub{margin-top:6px;font-size:12px;font-weight:800;color:var(--green-deep);background:#fff;border:1px solid #a7f3d0;border-radius:var(--radius-pill);padding:4px 14px;display:inline-block}
+@keyframes burst-rise{0%{opacity:0;transform:translate(-50%,16px) scale(.9)}15%{opacity:1;transform:translate(-50%,0) scale(1.04)}30%{transform:translate(-50%,-4px) scale(1)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-46px) scale(1)}}
+/* Read-aloud: gentle pulse on the active Listen button. */
+.listening{animation:listen-pulse 1.6s ease-in-out infinite}
+@keyframes listen-pulse{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.35)}50%{box-shadow:0 0 0 8px rgba(16,185,129,0)}}
+@media(prefers-reduced-motion:reduce){.flash{animation:none}button:active:not(:disabled){transform:none}.rise{animation:none}.skel::after{animation:none}.xp-burst{animation:none}.listening{animation:none}.recall-answer.open{transition:none}}
 .print-only{display:none}
 @media print{
   header,nav,button{display:none !important}
@@ -65,4 +92,5 @@ input:focus,textarea:focus{outline:none;border-color:#10b981 !important;box-shad
   .screen-only{display:none !important}
   .print-only{display:block !important}
   .topic-card,.mini-check,.formula-box,.insight-box,.analogy-box,.symbol-card{box-shadow:none;break-inside:avoid}
+  .recall-answer.blurred{filter:none;max-height:none;overflow:visible}
 }

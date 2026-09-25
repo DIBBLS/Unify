@@ -2,6 +2,7 @@ import { Target } from 'lucide-react';
 import type { Topic } from '../types/note';
 import { ContentBlockView } from './ContentBlock';
 import { MiniCheck } from './MiniCheck';
+import { RecallDeck } from './RecallDeck';
 
 export function TopicSlice({ topic }: { topic: Topic }) {
   return (
@@ -23,16 +24,7 @@ export function TopicSlice({ topic }: { topic: Topic }) {
         </div>
       ))}
       {topic.activeRecall && topic.activeRecall.length > 0 && (
-        <div className="recall-section">
-          <div className="recall-label">Topic Active Recall</div>
-          {topic.activeRecall.map((c, i) => (
-            <div key={i} className="recall-card">
-              <span className={`recall-badge badge-${c.badge.toLowerCase()}`}>{c.badge}</span>
-              <div className="recall-q">{c.question}</div>
-              <div className="recall-answer" style={{ display: 'block' }} dangerouslySetInnerHTML={{ __html: c.answer }} />
-            </div>
-          ))}
-        </div>
+        <RecallDeck items={topic.activeRecall} />
       )}
       {topic.pulseCheck && (
         <div className="mini-check" style={{ borderLeft: '3px solid var(--green-deep)', marginTop: 32 }}>

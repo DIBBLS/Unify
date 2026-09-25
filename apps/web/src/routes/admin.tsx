@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, Trash2, PenTool, ChevronDown, ChevronRight } from 'lucide-react';
+import { Shield, Trash2, PenTool, BookOpen, ChevronDown, ChevronRight } from 'lucide-react';
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type AdminUser } from '../lib/api';
 import Loading from '../components/Loading';
@@ -314,6 +314,9 @@ export default function AdminRoute() {
 
       <Link to="/studio" style={{ marginTop: 12, padding: 14, background: '#111827', color: '#fff', borderRadius: 16, fontWeight: 800, textDecoration: 'none', textAlign: 'center', display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
         <PenTool size={16} /> Open Authoring Studio
+      </Link>
+      <Link to="/admin/content" style={{ marginTop: 8, padding: 14, background: '#fff', color: '#059669', border: '1px solid #a7f3d0', borderRadius: 16, fontWeight: 800, textDecoration: 'none', textAlign: 'center', display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
+        <BookOpen size={16} /> View all content
       </Link>
 
       {stats && (
