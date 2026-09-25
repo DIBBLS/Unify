@@ -184,6 +184,18 @@ export type NotificationItem = {
   created_at?: string;
 };
 
+export type AdminContentTopic = { topic: number; versions: number; title: string };
+export type AdminContentWeek = { week: number; title: string; topics: AdminContentTopic[] };
+export type AdminContentCourse = {
+  code: string;
+  title: string;
+  level: string;
+  semester: string;
+  weekCount: number;
+  topicCount: number;
+  weeks: AdminContentWeek[];
+};
+
 export const api = {
   universities: () => apiFetch<University[]>("/v1/universities"),
   settings: () => apiFetch<{ currentSemester: string }>("/v1/settings"),
@@ -285,6 +297,8 @@ export const api = {
     apiFetch<{ ok: boolean }>('/v1/notifications/read', { method: 'POST', body: JSON.stringify(payload) }),
   adminAnnounce: (title: string, body: string, link?: string) =>
     apiFetch<{ ok: boolean; reached: number }>('/v1/admin/announce', { method: 'POST', body: JSON.stringify({ title, body, link }) }),
+  adminContent: () =>
+    apiFetch<{ courses: AdminContentCourse[] }>('/v1/admin/content'),
   adminStats: () =>
     apiFetch<{
       users: number;

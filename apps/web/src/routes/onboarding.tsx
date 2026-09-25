@@ -10,7 +10,7 @@ import { greeting } from '../lib/greet';
 import Flash from '../components/Flash';
 
 type Uni = { id: string; name: string; shortName?: string };
-type Role = 'student' | 'lecturer' | 'collaborator';
+type Role = 'student' | 'lecturer' | 'collaborator' | 'admin';
 
 // Fallback so onboarding never dead-ends when the backend has no universities yet.
 const FALLBACK_UNIS: Uni[] = [{ id: 'lasu', name: 'Lagos State University', shortName: 'LASU' }];
@@ -64,7 +64,7 @@ export default function OnboardingRoute() {
           return;
         }
         if (profile?.first_name) setFirstName(profile.first_name);
-        if (profile?.role === 'student' || profile?.role === 'lecturer' || profile?.role === 'collaborator') {
+        if (profile?.role === 'student' || profile?.role === 'lecturer' || profile?.role === 'collaborator' || profile?.role === 'admin') {
           setRole(profile.role);
           setOriginalRole(profile.role);
         }

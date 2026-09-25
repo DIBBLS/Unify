@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, Check, X, Loader2 } from 'lucide-react';
 import Mascot from '../components/Mascot';
 import Typewriter from '../components/Typewriter';
 import Flash from '../components/Flash';
-import { supabaseBrowser, saveRememberSession, restoreRememberedSession } from '../lib/supabase';
+import { supabaseBrowser, saveRememberSession, restoreRememberedSession, touchActivity, isSessionExpired, expireSession } from '../lib/supabase';
 import { api } from '../lib/api';
 import { log } from '../lib/log';
 
@@ -28,11 +28,23 @@ export default function AuthRoute() {
   const [remember, setRemember] = useState(false);
 
   const routeToApp = async () => {
+    touchActivity();
     setWelcomeBack(true);
     try {
-      const { onboarded } = await api.me();
-      log.info('session', `profile check ok (onboarded=${onboarded})`);
-      navigate(onboarded ? '/dashboard' : '/onboarding');
+      const me = await api.me();
+      log.info('session', `profile check ok (onboarded=${me.onboarded})`);
+      if (!me.onboarded) {
+        navigate('/onboarding');
+        return;
+      }
+      // Exact restore: land precisely where they stopped (course/week/topic).
+      // Authors and fresh accounts have no resume → dashboard as usual.
+      if (me.resume?.course) {
+        const c = encodeURIComponent(me.resume.course.trim());
+        navigate(`/learn/${c}/week/${me.resume.week}${me.resume.topic ? `?t=${me.resume.topic}` : ''}`, { replace: true });
+        return;
+      }
+      navigate('/dashboard');
     } catch {
       log.error('session', 'profile check failed (API unreachable?)');
       setWelcomeBack(false);
@@ -40,15 +52,37 @@ export default function AuthRoute() {
     }
   };
 
+  const [searchParams] = useSearchParams();
+
   useEffect(() => {
     if (!sb) return;
+    // Bounced here by the 30-min idle expiry (layout or a stale tab).
+    if (searchParams.get('expired') === '1') {
+      setError('Signed out after 30 minutes of inactivity. Sign in to continue.');
+    }
+    const expiredHalt = async () => {
+      await expireSession();
+      setWelcomeBack(false);
+      setError('Signed out after 30 minutes of inactivity. Sign in to continue.');
+    };
     sb.auth.getSession().then(async ({ data }) => {
       if (data.session) {
+        // Idle past the TTL (even with the app closed) → stay signed out.
+        if (isSessionExpired()) {
+          await expiredHalt();
+          return;
+        }
         void routeToApp();
         return;
       }
       // No tab session: adopt a remembered one (opt-in at last sign-in).
-      if (await restoreRememberedSession()) void routeToApp();
+      if (await restoreRememberedSession()) {
+        if (isSessionExpired()) {
+          await expiredHalt();
+          return;
+        }
+        void routeToApp();
+      }
     });
     const { data: sub } = sb.auth.onAuthStateChange((event, session) => {
       log.info('session', `event=${event} signedIn=${!!session}`);

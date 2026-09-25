@@ -59,7 +59,8 @@ export default function LearnPage() {
         if (me && !previewMode) {
           const role = me.profile?.role || 'student';
           const enrolled = (me.courses || []).map((c) => c.toUpperCase().trim()).includes(code.toUpperCase());
-          if ((role === 'student' || !role) && !enrolled) {
+          // Admins (role or flag) read every week without enrolling.
+          if ((role === 'student' || !role) && !enrolled && !me.isAdmin) {
             setBlocked(true);
             setLoading(false);
             return;

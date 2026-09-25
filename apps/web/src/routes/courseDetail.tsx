@@ -40,7 +40,8 @@ export default function CourseDetailRoute() {
         if (me && !preview) {
           const role = me.profile?.role || 'student';
           const enrolled = (me.courses || []).map((c) => c.toUpperCase().trim()).includes(courseCode.toUpperCase());
-          if ((role === 'student' || !role) && !enrolled) {
+          // Admins (role or flag) browse every course without enrolling.
+          if ((role === 'student' || !role) && !enrolled && !me.isAdmin) {
             setBlocked(true);
             setLoading(false);
             return;
