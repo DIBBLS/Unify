@@ -158,11 +158,13 @@ export default function CoursePage() {
             </Link>
           </div>
         )}
-        {courses.map((c) => (
+        {courses.map((c, i) => (
           <Link
             key={c.code}
             to={`/course/${encodeURIComponent(c.code.trim())}`}
+            className="rise"
             style={{
+              animationDelay: `${Math.min(i, 6) * 40}ms`,
               padding: '14px 16px',
               background: '#fff',
               border: '1px solid #e5e5e5',

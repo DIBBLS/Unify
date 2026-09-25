@@ -44,6 +44,7 @@ export default function ProfileRoute() {
   const [dDept, setDDept] = useState('');
   const [dLevel, setDLevel] = useState('');
   const [dTarget, setDTarget] = useState('');
+  const [dNotify, setDNotify] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
   const [saveError, setSaveError] = useState('');
@@ -76,6 +77,7 @@ export default function ProfileRoute() {
         setDDept(p.department || '');
         setDLevel(p.level || '');
         setDTarget(p.grad_target != null ? String(p.grad_target) : '');
+        setDNotify(p.notify_new_notes !== false);
         try {
           setUnis(await api.universities());
         } catch {
@@ -151,6 +153,7 @@ export default function ProfileRoute() {
         if (dLevel) payload.level = dLevel;
         if (dTarget) payload.gradTarget = Number(dTarget);
       }
+      payload.notifyNewNotes = dNotify;
       const res = await api.updateMe(payload);
       setProfile(res.profile);
       setEditing(false);
@@ -279,6 +282,10 @@ export default function ProfileRoute() {
             </>
           )}
           <div style={{ fontSize: 11, color: '#777' }}>Role and semester are locked — only admin can change those.</div>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, color: '#555', fontWeight: 600, cursor: 'pointer' }}>
+            <input type="checkbox" checked={dNotify} onChange={(e) => setDNotify(e.target.checked)} style={{ width: 16, height: 16, accentColor: '#10b981' }} />
+            Email me when new notes drop in my courses
+          </label>
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={() => setEditing(false)} style={{ flex: 1, padding: 12, background: '#fff', color: '#3c3c3c', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 12, fontWeight: 800, display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'center' }}>
               <X size={16} /> Cancel
