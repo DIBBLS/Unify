@@ -332,23 +332,33 @@ export default function AuthRoute() {
 
   return (
     <div className="auth-page">
-      <style>{`.auth-page{min-height:100vh;background:var(--bg)}.auth-side{display:none}.auth-card{maxWidth:480px;margin:0 auto}@media(min-width:900px){.auth-page{display:flex;flex-direction:row;background:var(--surface2)}.auth-side{display:flex;flex:1;flex-direction:column;justify-content:center;gap:18px;background:linear-gradient(135deg,#4ade80,#16a34a);color:#06281a;padding:64px;min-height:100vh}.auth-main{flex:1.2;display:flex;align-items:center;justify-content:center;padding:48px 32px;background:var(--bg)}.auth-card{width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;box-shadow:0 12px 32px rgba(6,95,70,.12);margin:0}.auth-hero-mobile{border-radius:16px !important}}`}</style>
+      <style>{`.auth-page{min-height:100vh;background:var(--bg)}.auth-side{display:none}.auth-card{maxWidth:480px;margin:0 auto}@media(min-width:900px){.auth-page{display:flex;flex-direction:row;background:var(--surface2)}.auth-side{display:flex;flex:1;flex-direction:column;justify-content:center;gap:18px;background:#0a0a0a;background-image:radial-gradient(circle at 85% 15%,rgba(74,222,128,.14),transparent 45%),radial-gradient(circle at 10% 90%,rgba(16,185,129,.1),transparent 40%);color:#f5f4f0;padding:64px;min-height:100vh}.auth-main{flex:1.2;display:flex;align-items:center;justify-content:center;padding:48px 32px;background:var(--bg)}.auth-card{width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;box-shadow:0 12px 32px rgba(6,95,70,.12);margin:0}.auth-hero-mobile{border-radius:16px !important}}`}</style>
       <aside className="auth-side">
-        <div style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 22 }}>Unify Learn</div>
-        <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 40, lineHeight: 1.1, margin: 0 }}>
-          Welcome to Unify Learn
+        <div style={{ fontSize: 11, letterSpacing: 2, color: '#4ade80', fontWeight: 800 }}>UNIFY LEARN · LASU ENGINEERING</div>
+        <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 44, lineHeight: 1.08, margin: 0, color: '#f5f4f0' }}>
+          Own every week<br />of your degree.
         </h1>
-        <p style={{ opacity: 0.92, fontSize: 16, margin: 0, minHeight: 24 }}><Typewriter text="Built for the ones who build" /></p>
+        <p style={{ color: 'rgba(245,244,240,.7)', fontSize: 16, margin: 0, maxWidth: 420 }}>
+          Guided notes, recall decks, quizzes and streaks — the whole semester, one story at a time.
+        </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 8 }}>
-          {['Guided 12-week paths', 'XP, streaks and badges', 'Notes that fit your courses'].map((t) => (
-            <div key={t} style={{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 15, fontWeight: 600 }}>
-              <span style={{ width: 26, height: 26, borderRadius: 9999, background: 'rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {[
+            { t: '158 courses, week by week', s: 'Every level, both semesters, always current' },
+            { t: 'XP and streaks that pull you back', s: '+10 XP a topic · Day-2 return is the whole game' },
+            { t: 'New notes buzz you instantly', s: 'Bell, email and push the moment authors publish' },
+          ].map((f) => (
+            <div key={f.t} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.09)', borderRadius: 12, padding: '12px 16px' }}>
+              <span style={{ width: 26, height: 26, borderRadius: 9999, background: 'rgba(74,222,128,.15)', color: '#4ade80', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
                 <Check size={14} />
               </span>
-              {t}
+              <span>
+                <span style={{ display: 'block', fontWeight: 800, fontSize: 15 }}>{f.t}</span>
+                <span style={{ display: 'block', fontSize: 13, color: 'rgba(245,244,240,.6)' }}>{f.s}</span>
+              </span>
             </div>
           ))}
         </div>
+        <p style={{ margin: 0, fontSize: 13, color: 'rgba(245,244,240,.45)' }}><Typewriter text="Built for the ones who build" /></p>
       </aside>
       <div className="auth-main">
       <div className="auth-card">
