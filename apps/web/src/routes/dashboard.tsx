@@ -13,6 +13,68 @@ import { greeting, dailyLine, dailyKey, daypart } from '../lib/greet';
 
 type CourseStat = { course: string; topics: number };
 
+type Platform = { users: number; weeks: number; topics: number; courses: number; xpTotal: number };
+type Activity = {
+  recentUsers: { first_name: string; email: string; role: string; created_at: string }[];
+  recentNotes: { course: string; week: number; topic: number; version: number; title: string; created_at: string }[];
+};
+
+// Admin oversight: platform totals + latest signups + latest published
+// notes in one dark card. Main admin (role) gets the manage link,
+// normal admins (flag) get the view-only notes link.
+function OversightCard({ platform, activity, mainAdmin }: { platform: Platform; activity: Activity | null; mainAdmin: boolean }) {
+  return (
+    <div style={{ margin: '12px 16px 0', background: '#111827', borderRadius: 12, padding: 16, color: '#fff' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ fontWeight: 800, fontSize: 14 }}>Platform</div>
+        {mainAdmin ? (
+          <Link to="/admin" style={{ fontSize: 12, color: '#6ee7b7', fontWeight: 700, textDecoration: 'none' }}>Open Admin panel</Link>
+        ) : (
+          <Link to="/admin/content" style={{ fontSize: 12, color: '#6ee7b7', fontWeight: 700, textDecoration: 'none' }}>View notes</Link>
+        )}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center', marginTop: 10 }}>
+        <div>
+          <div style={{ fontSize: 18, fontWeight: 800 }}>{platform.users}</div>
+          <div style={{ fontSize: 11, color: '#9ca3af' }}>Users</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 18, fontWeight: 800 }}>{platform.courses}</div>
+          <div style={{ fontSize: 11, color: '#9ca3af' }}>Courses</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 18, fontWeight: 800 }}>{platform.weeks}</div>
+          <div style={{ fontSize: 11, color: '#9ca3af' }}>Weeks</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 18, fontWeight: 800 }}>{platform.topics}</div>
+          <div style={{ fontSize: 11, color: '#9ca3af' }}>Topics</div>
+        </div>
+      </div>
+      {activity && (activity.recentUsers.length > 0 || activity.recentNotes.length > 0) && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 12 }}>
+          <div>
+            <div style={{ fontSize: 11, color: '#6ee7b7', fontWeight: 800, letterSpacing: 1, marginBottom: 6 }}>NEW USERS</div>
+            {activity.recentUsers.slice(0, 3).map((u, i) => (
+              <div key={i} style={{ fontSize: 12, color: '#e5e7eb', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {u.first_name || 'Unnamed'} · {u.role}
+              </div>
+            ))}
+          </div>
+          <div>
+            <div style={{ fontSize: 11, color: '#6ee7b7', fontWeight: 800, letterSpacing: 1, marginBottom: 6 }}>NEW NOTES</div>
+            {activity.recentNotes.slice(0, 3).map((n, i) => (
+              <div key={i} style={{ fontSize: 12, color: '#e5e7eb', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {n.course} W{n.week}T{n.topic}v{n.version}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function DashboardRoute() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -27,6 +89,10 @@ export default function DashboardRoute() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [astats, setAstats] = useState<{ courses: number; topics: number; versions: number; students: number; completions: number; quizzesTaken: number; quizAvg: number } | null>(null);
   const [platform, setPlatform] = useState<{ users: number; weeks: number; topics: number; courses: number; xpTotal: number } | null>(null);
+  const [activity, setActivity] = useState<{
+    recentUsers: { first_name: string; email: string; role: string; created_at: string }[];
+    recentNotes: { course: string; week: number; topic: number; version: number; title: string; created_at: string }[];
+  } | null>(null);
   const [notes, setNotes] = useState<{ id: string; course: string; week: number; topic: number; version: number; title: string }[]>([]);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [noteError, setNoteError] = useState('');
@@ -70,13 +136,19 @@ export default function DashboardRoute() {
           } catch {
             // stats stand empty
           }
-          if (me.isAdmin) {
-            try {
-              const s = await api.adminStats();
-              setPlatform({ users: s.users, weeks: s.weeks, topics: s.topics, courses: s.courses, xpTotal: s.xpTotal });
-            } catch {
-              // platform stats stand empty
-            }
+        }
+        // Oversight loads for every effective admin, both dashboard views.
+        if (me.isAdmin) {
+          try {
+            const s = await api.adminStats();
+            setPlatform({ users: s.users, weeks: s.weeks, topics: s.topics, courses: s.courses, xpTotal: s.xpTotal });
+          } catch {
+            // platform stats stand empty
+          }
+          try {
+            setActivity(await api.adminActivity());
+          } catch {
+            // activity stands empty
           }
         }
       } catch {
@@ -133,7 +205,11 @@ export default function DashboardRoute() {
           <div className="rise" style={{ margin: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
             <div>
               <div style={{ fontSize: 18, fontWeight: 800 }}>{astats.topics}</div>
-              <div style={{ fontSize: 11, color: 'var(--text2)' }}>Topics</div>
+              <div style={{ fontSize: 11, color: 'var(--text2)' }}>Notes</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 18, fontWeight: 800 }}>{astats.courses}</div>
+              <div style={{ fontSize: 11, color: 'var(--text2)' }}>Courses</div>
             </div>
             <div>
               <div style={{ fontSize: 18, fontWeight: 800 }}>{astats.students}</div>
@@ -143,42 +219,10 @@ export default function DashboardRoute() {
               <div style={{ fontSize: 18, fontWeight: 800 }}>{astats.completions}</div>
               <div style={{ fontSize: 11, color: 'var(--text2)' }}>Done</div>
             </div>
-            <div>
-              <div style={{ fontSize: 18, fontWeight: 800 }}>{astats.quizzesTaken}</div>
-              <div style={{ fontSize: 11, color: 'var(--text2)' }}>Quizzes</div>
-            </div>
           </div>
         )}
         {isAdmin && platform && (
-          <div style={{ margin: '0 16px', background: '#111827', borderRadius: 12, padding: 16, color: '#fff' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontWeight: 800, fontSize: 14 }}>Platform</div>
-              {/* Main admin (role) manages; normal admins (flag) get view-only notes. */}
-              {profile?.role === 'admin' ? (
-                <Link to="/admin" style={{ fontSize: 12, color: '#6ee7b7', fontWeight: 700, textDecoration: 'none' }}>Open Admin panel</Link>
-              ) : (
-                <Link to="/admin/content" style={{ fontSize: 12, color: '#6ee7b7', fontWeight: 700, textDecoration: 'none' }}>View notes</Link>
-              )}
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center', marginTop: 10 }}>
-              <div>
-                <div style={{ fontSize: 18, fontWeight: 800 }}>{platform.users}</div>
-                <div style={{ fontSize: 11, color: '#9ca3af' }}>Users</div>
-              </div>
-              <div>
-                <div style={{ fontSize: 18, fontWeight: 800 }}>{platform.courses}</div>
-                <div style={{ fontSize: 11, color: '#9ca3af' }}>Courses</div>
-              </div>
-              <div>
-                <div style={{ fontSize: 18, fontWeight: 800 }}>{platform.weeks}</div>
-                <div style={{ fontSize: 11, color: '#9ca3af' }}>Weeks</div>
-              </div>
-              <div>
-                <div style={{ fontSize: 18, fontWeight: 800 }}>{platform.topics}</div>
-                <div style={{ fontSize: 11, color: '#9ca3af' }}>Topics</div>
-              </div>
-            </div>
-          </div>
+          <OversightCard platform={platform} activity={activity} mainAdmin={profile?.role === 'admin'} />
         )}
         <div style={{ margin: '16px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ fontFamily: 'Nunito', fontWeight: 800 }}>Published notes</h2>
@@ -288,16 +332,8 @@ export default function DashboardRoute() {
         </div>
       ) : null}
 
-      {isAdmin && (
-        <div style={{ margin: '12px 16px 0', background: '#111827', borderRadius: 12, padding: 14, color: '#fff', display: 'flex', gap: 8, alignItems: 'center' }}>
-          <div style={{ fontWeight: 800, fontSize: 14, flex: 1 }}>Platform</div>
-          {/* Normal admins (flag) are view-only; the main admin manages from the panel. */}
-          {profile?.role === 'admin' ? (
-            <Link to="/admin" style={{ fontSize: 12, color: '#6ee7b7', fontWeight: 700, textDecoration: 'none' }}>Open Admin panel</Link>
-          ) : (
-            <Link to="/admin/content" style={{ fontSize: 12, color: '#6ee7b7', fontWeight: 700, textDecoration: 'none' }}>View notes</Link>
-          )}
-        </div>
+      {isAdmin && platform && (
+        <OversightCard platform={platform} activity={activity} mainAdmin={profile?.role === 'admin'} />
       )}
 
       <div style={{ margin: '16px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

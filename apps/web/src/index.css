@@ -106,8 +106,8 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-si
 .mini-check-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green-deep)}
 .mini-check-sub{font-size:11px;color:var(--text3);margin-left:auto}
 .mc-q{font-size:13px;font-weight:500;color:var(--text);margin-bottom:8px;max-width:66ch;line-height:1.6}
-.mc-reveal-btn{font-size:10px;font-weight:600;padding:5px 14px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer}
-.mc-reveal-btn:hover{background:var(--green-bg);color:var(--green-deep)}
+.mc-reveal-btn{font-size:12px;font-weight:800;padding:10px 22px;border-radius:12px;border:none;border-bottom:3px solid #14532d;background:var(--green-deep);color:#fff;cursor:pointer}
+.mc-reveal-btn:active{transform:translateY(2px);border-bottom-width:0}
 .mc-answer{display:none;margin-top:8px;padding:10px 14px;background:var(--surface);border-left:2px solid var(--green);border-radius:0 6px 6px 0;font-size:12px;color:var(--text2);line-height:1.7;max-width:66ch}
 .mc-answer.show{display:block}
 .mc-mcq-item{margin-bottom:14px}
@@ -197,6 +197,22 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-si
 .unlock-banner{background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25);border-radius:8px;padding:12px 16px;font-size:13px;font-weight:600;color:#4ade80}
 .review-nudge{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:12px 16px;font-size:13px;color:rgba(240,239,235,.7)}
 .review-nudge p{font-weight:600;color:#f87171;margin-bottom:8px}
+
+/* Mobile: tighter hero/worked/exam cards so headings never spill off-page */
+@media(max-width:480px){
+  .hero{padding:24px 20px;margin-bottom:20px}
+  .hero-title{font-size:24px;overflow-wrap:break-word;hyphens:auto}
+  .hero-subtitle{font-size:14px}
+  .worked-example{padding:20px}
+  .we-title{font-size:17px}
+  .eoq-card{padding:20px 16px}
+  .result-score-big{font-size:32px}
+  .topic-card{padding:18px}
+  .segbar button{font-size:10px}
+}
+
+/* Back-to-top floating button (reader) */
+.to-top{position:fixed;right:16px;bottom:76px;z-index:50;width:44px;height:44px;border-radius:9999px;border:1px solid var(--border);background:var(--surface);color:var(--green-deep);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);animation:rise-in .25s ease}
 
 /* DESIGNED CONFIRM MODAL — replaces every browser confirm() */
 .modal-veil{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:80;display:flex;align-items:flex-end;justify-content:center;animation:flash-in .2s ease}

@@ -26,11 +26,10 @@ const AUTHOR_TABS: Tab[] = [
   { to: '/profile', label: 'Profile', icon: User, match: ['/profile'] },
 ];
 
-// Admin role gets the union it needs: learn paths, studio, profile.
-// (Admin panel + all-content browser live on the dashboard cards.)
+// Admin role: manage, never learn. No Learn tab — the admin reads
+// everything through All content; learning paths are students-only.
 const ADMIN_TABS: Tab[] = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, match: ['/dashboard'] },
-  { to: '/course', label: 'Learn', icon: BookOpen, match: ['/course', '/learn'] },
   { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio'] },
   { to: '/profile', label: 'Profile', icon: User, match: ['/profile'] },
 ];
