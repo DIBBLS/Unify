@@ -5,6 +5,7 @@ import BackButton from '../components/BackButton';
 import ConfirmModal from '../components/ConfirmModal';
 import { useTheme } from '../hooks/useTheme';
 import { useDesign } from '../hooks/useDesign';
+import { APP_NAME, APP_VERSION } from '../lib/version';
 import { supabaseBrowser, clearRememberSession } from '../lib/supabase';
 import { api, type Profile, type University } from '../lib/api';
 import Loading from '../components/Loading';
@@ -370,6 +371,9 @@ export default function ProfileRoute() {
           onCancel={() => setConfirmLogout(false)}
         />
       )}
+      <div style={{ marginTop: 16, textAlign: 'center', fontSize: 11, color: 'var(--text3)', fontWeight: 700 }}>
+        {APP_NAME} v{APP_VERSION}
+      </div>
     </div>
   );
 }

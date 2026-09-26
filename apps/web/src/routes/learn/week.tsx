@@ -35,8 +35,19 @@ export default function LearnPage() {
   const [burst, setBurst] = useState<{ k: number; label: string; sub: string } | null>(null);
   const firstCount = useRef(true);
   const [tab, setTab] = useState(0);
-  // Return-to-top appears after scrolling deep into a chapter.
+  // Return-to-top lands on the topic head (below hero + chapter bar),
+  // not the very top of the page.
+  const topicTopRef = useRef<HTMLDivElement>(null);
   const [showTop, setShowTop] = useState(false);
+  const scrollToTopicTop = () => {
+    const el = topicTopRef.current;
+    const top = el ? el.getBoundingClientRect().top + window.scrollY - 70 : 0;
+    try {
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    } catch {
+      window.scrollTo(0, Math.max(0, top));
+    }
+  };
   useEffect(() => {
     const onScroll = () => setShowTop(window.scrollY > 600);
     onScroll();
@@ -280,14 +291,8 @@ export default function LearnPage() {
       {showTop && !loading && (
         <button
           className="to-top"
-          aria-label="Back to top"
-          onClick={() => {
-            try {
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            } catch {
-              window.scrollTo(0, 0);
-            }
-          }}
+          aria-label="Back to topic top"
+          onClick={scrollToTopicTop}
         >
           <ArrowUp size={20} />
         </button>
@@ -356,7 +361,7 @@ export default function LearnPage() {
       )}
 
       {tab < topics.length ? (
-        <>
+        <div ref={topicTopRef}>
           {activeMeta && activeMeta.versions.length > 1 && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginBottom: 8 }}>
               <span style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 700 }}>Versions:</span>
@@ -387,7 +392,7 @@ export default function LearnPage() {
               />
             </>
           )}
-        </>
+        </div>
       ) : (
         <EoqQuiz eoq={note.eoq ?? { questions: [] }} course={note.course} week={note.week} preview={preview} />
       )}
