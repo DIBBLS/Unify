@@ -161,6 +161,9 @@ export default function ProfileRoute() {
       if (!author) {
         if (dLevel) payload.level = dLevel;
         if (dTarget) payload.gradTarget = Number(dTarget);
+      } else if (dLevel) {
+        // Authors pick the level they contribute to (scopes Browse).
+        payload.level = dLevel;
       }
       payload.notifyNewNotes = dNotify;
       const res = await api.updateMe(payload);
@@ -190,6 +193,8 @@ export default function ProfileRoute() {
   if (!canAuthor) {
     rows.push(['Level', profile?.level || '—']);
     rows.push(['Graduation target', profile?.grad_target != null ? String(profile.grad_target) : '—']);
+  } else {
+    rows.push(['Contributing level', profile?.level || 'Not set']);
   }
 
   return (
@@ -208,7 +213,7 @@ export default function ProfileRoute() {
 
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', marginBottom: 16 }}>
         {rows.map(([label, value], i) => (
-          <div key={label} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '12px 16px', borderTop: i ? '1px solid #f0f0f0' : 'none' }}>
+          <div key={label} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '12px 16px', borderTop: i ? '1px solid var(--border)' : 'none' }}>
             <span style={{ fontSize: 13, color: 'var(--text2)' }}>{label}</span>
             <span style={{ fontSize: 13, fontWeight: 700, textAlign: 'right' }}>{value}</span>
           </div>
@@ -290,8 +295,19 @@ export default function ProfileRoute() {
               </label>
             </>
           )}
+          {canAuthor && (
+            <label style={{ fontSize: 12, fontWeight: 700 }}>
+              Contributing level
+              <select value={dLevel} onChange={(e) => setDLevel(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid var(--border)', borderRadius: 10, fontSize: 14, display: 'block' }}>
+                <option value="">Select…</option>
+                {LEVELS.map((l) => (
+                  <option key={l} value={l}>{l}</option>
+                ))}
+              </select>
+            </label>
+          )}
           <div style={{ fontSize: 11, color: 'var(--text2)' }}>Role and semester are locked — only admin can change those.</div>
-          <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, color: '#555', fontWeight: 600, cursor: 'pointer' }}>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, color: 'var(--text2)', fontWeight: 600, cursor: 'pointer' }}>
             <input type="checkbox" checked={dNotify} onChange={(e) => setDNotify(e.target.checked)} style={{ width: 16, height: 16, accentColor: '#10b981' }} />
             Email me when new notes drop in my courses
           </label>

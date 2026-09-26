@@ -17,6 +17,7 @@ import StudioRoute from './routes/studio/index';
 import Mascot from './components/Mascot';
 import Loading from './components/Loading';
 import ErrorState from './components/ErrorState';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { supabaseBrowser, ensureSession, setCachedSession, getCachedSession } from './lib/supabase';
 import { api } from './lib/api';
 
@@ -136,7 +137,8 @@ function RequireRole({ allow, children }: { allow: string[]; children: JSX.Eleme
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
+      <ErrorBoundary>
+        <Routes>
         {/* Chromeless: no top bar on sign in / onboarding */}
         <Route path="/auth" element={<AuthRoute />} />
         <Route
@@ -252,7 +254,8 @@ export default function App() {
 
           <Route path="*" element={<NotFound />} />
         </Route>
-      </Routes>
+        </Routes>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }

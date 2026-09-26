@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Check, Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Download, ArrowUp } from 'lucide-react';
 import { api, type TopicMeta } from '../../lib/api';
 import { log } from '../../lib/log';
 import type { UnifyNote, Topic } from '../../types/note';
@@ -35,6 +35,14 @@ export default function LearnPage() {
   const [burst, setBurst] = useState<{ k: number; label: string; sub: string } | null>(null);
   const firstCount = useRef(true);
   const [tab, setTab] = useState(0);
+  // Return-to-top appears after scrolling deep into a chapter.
+  const [showTop, setShowTop] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setShowTop(window.scrollY > 600);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
   const topics = note?.topics ?? [];
   const hasQuiz = (note?.eoq?.questions?.length || 0) > 0;
   const tabCount = topics.length + (hasQuiz ? 1 : 0);
@@ -46,13 +54,16 @@ export default function LearnPage() {
   }, [note, searchParams, tabCount]);
 
   const previewMode = searchParams.get('preview') === '1';
+  // Learning actions (complete buttons, XP bursts) are students-only.
+  // Authors/admins read without recording anything.
+  const nonLearner = !!viewer && viewer.role !== 'student';
   useEffect(() => {
     // Skip the initial server load (banked progress must never celebrate).
     if (firstCount.current) {
       firstCount.current = false;
       return;
     }
-    if (previewMode || topics.length === 0) return;
+    if (previewMode || nonLearner || topics.length === 0) return;
     if (doneCount >= topics.length) {
       setBurst({ k: Date.now(), label: 'Week complete!', sub: `${topics.length} topics done` });
     } else {
@@ -201,6 +212,12 @@ export default function LearnPage() {
   const goTab = (t: number) => {
     const clamped = Math.min(Math.max(t, 0), tabCount - 1);
     setTab(clamped);
+    // Chapters always start at the top — no manual scrolling after Next.
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch {
+      // ignore (older webviews)
+    }
     // Preserve ?preview=1 across tab switches (losing it would drop the
     // read-only banner and start recording resume on a preview).
     setSearchParams(
@@ -259,6 +276,21 @@ export default function LearnPage() {
           <div><span className="xp-burst-pill">{burst.label}</span></div>
           <div style={{ marginTop: 6 }}><span className="xp-burst-sub">{burst.sub}</span></div>
         </div>
+      )}
+      {showTop && !loading && (
+        <button
+          className="to-top"
+          aria-label="Back to top"
+          onClick={() => {
+            try {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch {
+              window.scrollTo(0, 0);
+            }
+          }}
+        >
+          <ArrowUp size={20} />
+        </button>
       )}
       <button onClick={() => navigate(backTo)} style={{ marginBottom: 16, display: 'flex', gap: 6, alignItems: 'center', background: 'none', border: 'none', color: 'var(--text2)', fontSize: 14 }}>
         <ChevronLeft size={18} /> Back
@@ -351,7 +383,7 @@ export default function LearnPage() {
                 topic={shownTopic}
                 done={isDone(weekNum, tab)}
                 onToggle={() => toggle(weekNum, tab)}
-                preview={preview || viewingOld}
+                preview={preview || viewingOld || nonLearner}
               />
             </>
           )}

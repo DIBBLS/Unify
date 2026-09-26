@@ -48,9 +48,8 @@ export default function AuthRoute() {
       } catch {
         // notification check flaked — fall through to resume/dashboard
       }
-      // Exact restore: land precisely where they stopped (course/week/topic).
-      // Authors and fresh accounts have no resume → dashboard as usual.
-      if (me.resume?.course) {
+      // Exact restore is a student path: authors/admins land on dashboard.
+      if (me.resume?.course && me.profile?.role === 'student') {
         const c = encodeURIComponent(me.resume.course.trim());
         navigate(`/learn/${c}/week/${me.resume.week}${me.resume.topic ? `?t=${me.resume.topic}` : ''}`, { replace: true });
         return;

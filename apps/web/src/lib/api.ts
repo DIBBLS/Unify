@@ -299,6 +299,11 @@ export const api = {
     apiFetch<{ ok: boolean; reached: number }>('/v1/admin/announce', { method: 'POST', body: JSON.stringify({ title, body, link }) }),
   adminContent: () =>
     apiFetch<{ courses: AdminContentCourse[] }>('/v1/admin/content'),
+  adminActivity: () =>
+    apiFetch<{
+      recentUsers: { first_name: string; email: string; role: string; created_at: string }[];
+      recentNotes: { course: string; week: number; topic: number; version: number; title: string; created_at: string }[];
+    }>('/v1/admin/activity'),
   adminStats: () =>
     apiFetch<{
       users: number;
