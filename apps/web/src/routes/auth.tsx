@@ -409,17 +409,18 @@ export default function AuthRoute() {
               <input name="email" type="email" required placeholder="you@email.com" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid var(--border)', borderRadius: 12, display: 'block' }} />
             </label>
             <label style={{ fontSize: 12, fontWeight: 700 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                Password <button type="button" onClick={() => setTab('forgot')} style={{ background: 'none', border: 'none', fontSize: 11, color: 'var(--text2)', textDecoration: 'underline' }}>Forgot password?</button>
-              </div>
+              Password
               <div style={{ position: 'relative', marginTop: 6 }}>
                 <input name="password" type={showPw ? 'text' : 'password'} required placeholder="Your password" style={{ width: '100%', padding: 12, paddingRight: 44, border: '1px solid var(--border)', borderRadius: 12, display: 'block' }} />
-                <button type="button" onClick={() => setShowPw(!showPw)} style={{ position: 'absolute', right: 0, top: 0, height: '100%', width: 44, background: 'none', border: 'none', color: 'var(--text2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 0, top: 0, height: '100%', width: 44, background: 'none', border: 'none', color: 'var(--text2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </label>
-            <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, color: '#555', fontWeight: 600, cursor: 'pointer' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: -8 }}>
+              <button type="button" onClick={() => setTab('forgot')} style={{ background: 'none', border: 'none', fontSize: 12, fontWeight: 700, color: '#059669', textDecoration: 'underline' }}>Forgot password?</button>
+            </div>
+            <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, color: 'var(--text2)', fontWeight: 600, cursor: 'pointer' }}>
               <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} style={{ width: 16, height: 16, accentColor: '#10b981' }} />
               Remember me on this device
             </label>

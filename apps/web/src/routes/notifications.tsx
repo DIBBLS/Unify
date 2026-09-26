@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BellRing, BookOpen, Megaphone, PartyPopper, CheckCheck } from 'lucide-react';
+import { BellRing, BookOpen, Megaphone, PartyPopper, ShieldCheck, CheckCheck } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import Loading from '../components/Loading';
 import Mascot from '../components/Mascot';
@@ -11,6 +11,7 @@ import { api, type NotificationItem } from '../lib/api';
 function iconFor(type: string) {
   if (type === 'announce') return Megaphone;
   if (type === 'welcome') return PartyPopper;
+  if (type === 'role') return ShieldCheck;
   return BellRing;
 }
 
