@@ -223,12 +223,9 @@ export default function LearnPage() {
   const goTab = (t: number) => {
     const clamped = Math.min(Math.max(t, 0), tabCount - 1);
     setTab(clamped);
-    // Chapters always start at the top — no manual scrolling after Next.
-    try {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch {
-      // ignore (older webviews)
-    }
+    // Chapters open at the topic head (below hero + chapter bar) — never
+    // the very top, no manual scrolling after Next.
+    scrollToTopicTop();
     // Preserve ?preview=1 across tab switches (losing it would drop the
     // read-only banner and start recording resume on a preview).
     setSearchParams(
@@ -360,8 +357,9 @@ export default function LearnPage() {
         </div>
       )}
 
+      <div ref={topicTopRef}>
       {tab < topics.length ? (
-        <div ref={topicTopRef}>
+        <>
           {activeMeta && activeMeta.versions.length > 1 && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginBottom: 8 }}>
               <span style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 700 }}>Versions:</span>
@@ -392,10 +390,11 @@ export default function LearnPage() {
               />
             </>
           )}
-        </div>
+        </>
       ) : (
         <EoqQuiz eoq={note.eoq ?? { questions: [] }} course={note.course} week={note.week} preview={preview} />
       )}
+      </div>
 
       {tabCount > 1 && (
         <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
