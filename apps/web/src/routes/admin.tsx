@@ -6,6 +6,7 @@ import { api, type AdminUser } from '../lib/api';
 import Loading from '../components/Loading';
 import Flash from '../components/Flash';
 import ConfirmModal from '../components/ConfirmModal';
+import { Bars, Donut, Spark } from '../components/Charts';
 import BackButton from '../components/BackButton';
 
 type Stats = { users: number; byRole: Record<string, number>; weeks: number; topics: number; courses: number; xpTotal: number };
@@ -81,16 +82,18 @@ export default function AdminRoute() {
   const [ownId, setOwnId] = useState('');
   const [openModule, setOpenModule] = useState('users');
   const [courseQ, setCourseQ] = useState('');
+  const [trends, setTrends] = useState<{ signups: { day: string; count: number }[]; notes: { day: string; count: number }[]; xp: { day: string; count: number }[] } | null>(null);
 
   const loadAll = async (query = q, role = roleFilter) => {
     try {
-      const [s, u, un, c, m, st] = await Promise.all([
+      const [s, u, un, c, m, st, t] = await Promise.all([
         api.adminStats(),
         api.adminUsers(query, role),
         api.universities(),
         api.courses(),
         api.adminModels(),
         api.settings().catch(() => ({ currentSemester: 'First Semester' })),
+        api.adminTrends().catch(() => null),
       ]);
       setStats(s);
       setUsers(u.users);
@@ -99,6 +102,7 @@ export default function AdminRoute() {
       setModels(m.models);
       setProvider(m.provider);
       setDefaultModel(m.default);
+      if (t) setTrends(t);
       if (st.currentSemester) setCurrentSemester(st.currentSemester);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Load failed.');
@@ -346,6 +350,48 @@ export default function AdminRoute() {
           </div>
         </div>
       )}
+
+      <Module id="analytics" title="Analytics" openId={openModule} onToggle={setOpenModule}>
+        {!stats && !trends && (
+          <div style={card}>
+            <div style={{ fontSize: 13, color: 'var(--text2)' }}>Charts load with the panel data above.</div>
+          </div>
+        )}
+        {stats && (
+          <div style={{ ...card, marginBottom: 8 }}>
+            <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 8 }}>Users by role</div>
+            <Donut
+              segments={[
+                { label: 'Students', value: stats.byRole.student || 0, color: '#16a34a' },
+                { label: 'Lecturers', value: stats.byRole.lecturer || 0, color: '#3b82f6' },
+                { label: 'Collaborators', value: stats.byRole.collaborator || 0, color: '#8b5cf6' },
+                { label: 'Admins', value: stats.byRole.admin || 0, color: '#f59e0b' },
+              ].filter((s) => s.value > 0)}
+            />
+          </div>
+        )}
+        {trends && (
+          <>
+            <div style={{ ...card, marginBottom: 8 }}>
+              <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 8 }}>Signups · last 14 days</div>
+              <Bars data={trends.signups.map((d) => ({ label: d.day, value: d.count }))} />
+            </div>
+            <div style={{ ...card, marginBottom: 8 }}>
+              <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 8 }}>Notes published · last 14 days</div>
+              <Bars data={trends.notes.map((d) => ({ label: d.day, value: d.count }))} />
+            </div>
+            <div style={card}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+                <div style={{ fontSize: 12, fontWeight: 800 }}>XP earned · last 14 days</div>
+                <div style={{ fontSize: 12, color: 'var(--text2)', fontWeight: 800 }}>
+                  {trends.xp.reduce((s, d) => s + d.count, 0).toLocaleString()} total
+                </div>
+              </div>
+              <Spark data={trends.xp.map((d) => ({ label: d.day, value: d.count }))} />
+            </div>
+          </>
+        )}
+      </Module>
 
       <Module id="models" title="AI models" badge={models.length} openId={openModule} onToggle={setOpenModule}>
       <div style={card}>

@@ -4,9 +4,11 @@ import App from './App';
 import './index.css';
 import { warmupApi } from './lib/api';
 import { bootTheme } from './hooks/useTheme';
+import { bootDesign } from './hooks/useDesign';
 import { log } from './lib/log';
 
 bootTheme();
+bootDesign();
 
 // Offline support: cache shell + readable content (see public/sw.js).
 if ('serviceWorker' in navigator) {
