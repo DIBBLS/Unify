@@ -1,9 +1,10 @@
 // Unify Learn offline worker: shell + readable content stay available offline.
 // Versioned cache; documents network-first (never a stale app), static assets
 // cache-first, API GETs network-first with cache fallback. Writes (POST/PUT/
-// DELETE) and everything else always bypass. v3 (bump on any shell-affecting
-// change so old clients pick up the new worker + fresh shell on next visit).
-const CACHE = 'unify-app-v3';
+// DELETE) and everything else always bypass. v4 (push events + bump on any
+// shell-affecting change so old clients pick up the new worker + fresh
+// shell on next visit).
+const CACHE = 'unify-app-v4';
 const SHELL = ['/', '/index.html', '/manifest.json'];
 
 // Update here if the backend moves (must match VITE_API_URL origin).
@@ -73,6 +74,50 @@ self.addEventListener('fetch', (e) => {
       if (fresh) return fresh;
       if (cached) return cached;
       return Response.error();
+    })()
+  );
+});
+
+// Web Push: lock-screen notification from the backend fan-out. Tapping
+// opens the linked page (falls back to /notifications).
+self.addEventListener('push', (e) => {
+  let data = {};
+  try {
+    data = e.data ? e.data.json() : {};
+  } catch {
+    data = {};
+  }
+  const title = (data && data.title) || 'Unify Learn';
+  const body = (data && data.body) || 'Something new is waiting for you.';
+  const url = (data && data.url) || '/notifications';
+  e.waitUntil(
+    self.registration.showNotification(title, {
+      body,
+      icon: '/icons/icon-192.png',
+      badge: '/icons/favicon-32.png',
+      data: { url },
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || '/notifications';
+  e.waitUntil(
+    (async () => {
+      const wins = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+      for (const w of wins) {
+        try {
+          const u = new URL(w.url);
+          if (u.pathname === new URL(url, self.location.origin).pathname) {
+            await w.focus();
+            return;
+          }
+        } catch {
+          // keep looking
+        }
+      }
+      await clients.openWindow(url);
     })()
   );
 });

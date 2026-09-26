@@ -6,6 +6,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import { useTheme } from '../hooks/useTheme';
 import { useDesign } from '../hooks/useDesign';
 import { APP_NAME, APP_VERSION } from '../lib/version';
+import { pushSupported, pushState, enablePush, disablePush, type PushState } from '../lib/push';
 import { supabaseBrowser, clearRememberSession } from '../lib/supabase';
 import { api, type Profile, type University } from '../lib/api';
 import Loading from '../components/Loading';
@@ -44,6 +45,40 @@ export default function ProfileRoute() {
   const [confirmLogout, setConfirmLogout] = useState(false);
   const { theme, toggle } = useTheme();
   const { design, setDesign } = useDesign();
+  const [pushSt, setPushSt] = useState<PushState>('off');
+  const [pushBusy, setPushBusy] = useState(false);
+  const [pushMsg, setPushMsg] = useState('');
+
+  useEffect(() => {
+    if (!pushSupported()) {
+      setPushSt('unsupported');
+      return;
+    }
+    void pushState().then(setPushSt).catch(() => {});
+  }, []);
+
+  const flipPush = async () => {
+    setPushBusy(true);
+    setPushMsg('');
+    try {
+      if (pushSt === 'on') {
+        await disablePush();
+        setPushSt('off');
+        setPushMsg('Push off on this device.');
+      } else {
+        const res = await enablePush();
+        if (res.ok) {
+          setPushSt('on');
+          setPushMsg('Push on — new notes and announcements will buzz you.');
+        } else {
+          if (Notification.permission === 'denied') setPushSt('denied');
+          setPushMsg(res.reason || 'Could not enable push.');
+        }
+      }
+    } finally {
+      setPushBusy(false);
+    }
+  };
   const [unis, setUnis] = useState<University[]>([]);
   const [dName, setDName] = useState('');
   const [dUni, setDUni] = useState('');
@@ -342,6 +377,23 @@ export default function ProfileRoute() {
         <button onClick={() => toggle()} style={{ width: '100%', padding: 12, background: 'var(--surface2)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 12, fontWeight: 800, fontSize: 13, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
           {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />} {theme === 'dark' ? 'Light mode' : 'Dark mode'}
         </button>
+        {pushSt !== 'unsupported' && (
+          <div style={{ marginTop: 10 }}>
+            <button
+              onClick={flipPush}
+              disabled={pushBusy || pushSt === 'denied'}
+              style={{ width: '100%', padding: 12, background: pushSt === 'on' ? '#ecfdf5' : 'var(--surface2)', color: pushSt === 'on' ? '#059669' : 'var(--text)', border: `1px solid ${pushSt === 'on' ? '#a7f3d0' : 'var(--border)'}`, borderRadius: 12, fontWeight: 800, fontSize: 13, opacity: pushBusy || pushSt === 'denied' ? 0.6 : 1 }}
+            >
+              {pushBusy ? 'Working…' : pushSt === 'on' ? 'Push notifications: ON' : 'Push notifications: OFF'}
+            </button>
+            <div style={{ fontSize: 11, color: 'var(--text2)', marginTop: 6 }}>
+              {pushSt === 'denied'
+                ? 'Blocked in browser settings — allow notifications for this site, then retry.'
+                : 'Lock-screen nudges for new notes and announcements, even with the app closed.'}
+            </div>
+            {pushMsg && <div style={{ fontSize: 12, color: '#059669', marginTop: 6 }}>{pushMsg}</div>}
+          </div>
+        )}
       </div>
 
       <div style={{ display: 'flex', gap: 8 }}>
