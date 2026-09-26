@@ -130,7 +130,7 @@ export default function CoursePage() {
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px' }}>
       <BackButton to="/dashboard" />
-      <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28 }}>My Courses</h1>
+      <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28 }}>My Courses</h1>
       <p style={{ color: 'var(--text2)', marginTop: 6, fontSize: 13 }}>
         Your enrolled courses — open one to keep learning
       </p>

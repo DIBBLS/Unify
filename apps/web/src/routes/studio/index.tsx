@@ -362,7 +362,7 @@ export default function StudioRoute() {
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 100px' }}>
       <BackButton to="/dashboard" />
-      <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 24 }}>Author a week</h1>
+      <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24 }}>Author a week</h1>
       <div style={{ display: 'flex', gap: 6, margin: '12px 0 20px' }}>
         {['Compose', 'Review', 'Live'].map((s, i) => (
           <div key={s} style={{ flex: 1, textAlign: 'center' }}>
@@ -515,7 +515,7 @@ export default function StudioRoute() {
             <div style={{ fontSize: 10, letterSpacing: 2, color: '#059669', fontWeight: 700, textTransform: 'uppercase' }}>
               Review · {meta.course} · Week {meta.week}
             </div>
-            <h2 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 20, margin: '8px 0 4px' }}>{note.title}</h2>
+            <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20, margin: '8px 0 4px' }}>{note.title}</h2>
             <p style={{ fontSize: 13, color: 'var(--text2)' }}>{note.subtitle}</p>
             {validation && (
               <div style={{ marginTop: 10, fontSize: 12, fontWeight: 700, display: 'flex', gap: 6, alignItems: 'center', color: validation.valid ? '#059669' : '#991b1b' }}>
@@ -583,7 +583,7 @@ export default function StudioRoute() {
       {step === 2 && (
         <div style={{ textAlign: 'center', padding: '24px 0' }}>
           <Mascot size={120} animate="wave" />
-          <h2 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 22, marginTop: 12 }}>Live for students</h2>
+          <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 22, marginTop: 12 }}>Live for students</h2>
           <p style={{ fontSize: 13, color: 'var(--text2)', margin: '8px 0 20px' }}>Find it under your level and course, and on your dashboard.</p>
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={reset} style={{ flex: 1, padding: 14, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 800 }}>

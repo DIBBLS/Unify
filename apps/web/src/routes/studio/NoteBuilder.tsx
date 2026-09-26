@@ -32,7 +32,7 @@ const card = {
   padding: 14,
   marginBottom: 12,
 } as const;
-const sectionTitle = { fontFamily: 'Nunito', fontWeight: 800, fontSize: 16, margin: '0 0 8px' } as const;
+const sectionTitle = { fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 16, margin: '0 0 8px' } as const;
 const hint = { fontSize: 11, color: '#b45309', fontWeight: 700, marginTop: 6 } as const;
 const iconBtn = {
   padding: 6,

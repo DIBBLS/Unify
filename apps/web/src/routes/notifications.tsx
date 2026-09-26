@@ -88,7 +88,7 @@ export default function NotificationsRoute() {
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px' }}>
       <BackButton to="/dashboard" />
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28, flex: 1 }}>Notifications</h1>
+        <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28, flex: 1 }}>Notifications</h1>
         {notes.some((n) => !n.read) && (
           <button onClick={markAll} disabled={marking} style={{ display: 'flex', gap: 4, alignItems: 'center', padding: '8px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: '#059669', opacity: marking ? 0.6 : 1 }}>
             <CheckCheck size={14} /> {marking ? 'Marking…' : 'Mark all read'}

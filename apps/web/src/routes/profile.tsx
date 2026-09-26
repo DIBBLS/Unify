@@ -207,7 +207,7 @@ export default function ProfileRoute() {
           {initial}
         </div>
         <div style={{ flex: 1 }}>
-          <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 22 }}>{profile?.first_name || 'Builder'}</h1>
+          <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 22 }}>{profile?.first_name || 'Builder'}</h1>
           <div style={{ fontSize: 13, color: 'var(--text2)' }}>{email}</div>
         </div>
         <Mascot size={64} />

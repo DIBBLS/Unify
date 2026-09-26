@@ -53,7 +53,7 @@ export default function ErrorState({
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
         <Mascot size={110} />
       </div>
-      <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 20 }}>
+      <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20 }}>
         {showOffline ? "You're offline" : title}
       </h1>
       <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px' }}>
