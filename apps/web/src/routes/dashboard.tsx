@@ -96,6 +96,9 @@ export default function DashboardRoute() {
   const [notes, setNotes] = useState<{ id: string; course: string; week: number; topic: number; version: number; title: string }[]>([]);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [noteError, setNoteError] = useState('');
+  // Delete-confirm target. Declared with the other hooks: a useState placed
+  // after an early return changes the hook count between renders (#310).
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   useEffect(() => {
     const sb = supabaseBrowser();
@@ -172,7 +175,6 @@ export default function DashboardRoute() {
   const roleLabel = profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : '';
 
   // Delete one published topic version (own notes; admins can remove any).
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const deleteNote = async (id: string) => {
     setDeleting(id);
     setNoteError('');
@@ -191,7 +193,7 @@ export default function DashboardRoute() {
         <div style={{ padding: '20px 16px 12px', background: 'var(--surface)', display: 'flex', gap: 12, alignItems: 'center' }}>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 11, color: 'var(--text3)', letterSpacing: 1 }}>Your Dashboard</div>
-            <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28, marginTop: 4 }}>
+            <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28, marginTop: 4 }}>
               {greeting()}, <em style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', padding: '0 6px', borderRadius: 6, fontStyle: 'normal' }}>{firstName}</em>
             </h1>
             <div style={{ fontSize: 13, color: '#059669', marginTop: 4, minHeight: 18 }}>
@@ -225,7 +227,7 @@ export default function DashboardRoute() {
           <OversightCard platform={platform} activity={activity} mainAdmin={profile?.role === 'admin'} />
         )}
         <div style={{ margin: '16px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontFamily: 'Nunito', fontWeight: 800 }}>Published notes</h2>
+          <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800 }}>Published notes</h2>
           <Link to="/browse" style={{ fontSize: 13, color: '#059669', fontWeight: 700, textDecoration: 'none', display: 'flex', gap: 4, alignItems: 'center' }}>
             Browse {profile?.level ? `${profile.level} ` : ''}notes <ChevronRight size={14} />
           </Link>
@@ -281,7 +283,7 @@ export default function DashboardRoute() {
       <div style={{ padding: '20px 16px 12px', background: 'var(--surface)', display: 'flex', gap: 12, alignItems: 'center' }}>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 11, color: 'var(--text3)', letterSpacing: 1 }}>Your Dashboard</div>
-          <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28, marginTop: 4 }}>
+          <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28, marginTop: 4 }}>
             {greeting()}, <em style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', padding: '0 6px', borderRadius: 6, fontStyle: 'normal' }}>{firstName}</em>
           </h1>
           <div style={{ fontSize: 13, color: '#059669', marginTop: 4, minHeight: 18 }}>
@@ -337,7 +339,7 @@ export default function DashboardRoute() {
       )}
 
       <div style={{ margin: '16px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ fontFamily: 'Nunito', fontWeight: 800 }}>Your Courses</h2>
+        <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800 }}>Your Courses</h2>
         <Link to="/course" style={{ fontSize: 13, color: '#059669', fontWeight: 700, textDecoration: 'none', display: 'flex', gap: 4, alignItems: 'center' }}>
           View all <ChevronRight size={14} />
         </Link>

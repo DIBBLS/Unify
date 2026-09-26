@@ -295,7 +295,7 @@ export default function AuthRoute() {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, maxWidth: 480, margin: '0 auto', background: 'var(--surface)', padding: 24, textAlign: 'center' }}>
         <Mascot size={140} animate="sip" />
-        <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28 }}>Own your journey.</h1>
+        <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28 }}>Own your journey.</h1>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', color: 'var(--text2)', fontSize: 13, fontWeight: 600 }}>
           <Loader2 size={16} style={{ animation: 'spin 0.8s linear infinite', color: '#10b981' }} />
           Getting your space ready…
@@ -309,7 +309,7 @@ export default function AuthRoute() {
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
           <Mascot size={110} />
         </div>
-        <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 26, textAlign: 'center' }}>Set a new password</h1>
+        <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 26, textAlign: 'center' }}>Set a new password</h1>
         <p style={{ fontSize: 13, color: 'var(--text2)', textAlign: 'center', margin: '8px 0 16px' }}>Choose the password you'll sign in with from now on.</p>
         {error && <Flash tone="error" message={error} ttl={6000} onDismiss={() => setError('')} />}
         {success && <Flash tone="success" message={success} ttl={6000} onDismiss={() => setSuccess('')} />}
@@ -334,8 +334,8 @@ export default function AuthRoute() {
     <div className="auth-page">
       <style>{`.auth-page{min-height:100vh;background:var(--bg)}.auth-side{display:none}.auth-card{maxWidth:480px;margin:0 auto}@media(min-width:900px){.auth-page{display:flex;flex-direction:row;background:var(--surface2)}.auth-side{display:flex;flex:1;flex-direction:column;justify-content:center;gap:18px;background:linear-gradient(135deg,#4ade80,#16a34a);color:#06281a;padding:64px;min-height:100vh}.auth-main{flex:1.2;display:flex;align-items:center;justify-content:center;padding:48px 32px;background:var(--bg)}.auth-card{width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;box-shadow:0 12px 32px rgba(6,95,70,.12);margin:0}.auth-hero-mobile{border-radius:16px !important}}`}</style>
       <aside className="auth-side">
-        <div style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 22 }}>Unify Learn</div>
-        <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 40, lineHeight: 1.1, margin: 0 }}>
+        <div style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 22 }}>Unify Learn</div>
+        <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 40, lineHeight: 1.1, margin: 0 }}>
           Welcome to Unify Learn
         </h1>
         <p style={{ opacity: 0.92, fontSize: 16, margin: 0, minHeight: 24 }}><Typewriter text="Built for the ones who build" /></p>
@@ -354,8 +354,8 @@ export default function AuthRoute() {
       <div className="auth-card">
       <div className="auth-hero-mobile" style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', padding: 28, borderRadius: '0 0 16px 16px', display: 'flex', gap: 16, alignItems: 'center' }}>
         <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 20 }}>Unify Learn</div>
-          <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 32, marginTop: 12, lineHeight: 1.1 }}>
+          <div style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20 }}>Unify Learn</div>
+          <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 32, marginTop: 12, lineHeight: 1.1 }}>
             Welcome to Unify Learn
           </h1>
           <p style={{ marginTop: 8, opacity: 0.92, fontSize: 14, minHeight: 20 }}><Typewriter text="Built for the ones who build" /></p>
@@ -472,7 +472,7 @@ export default function AuthRoute() {
 
         {tab === 'forgot' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <h3 style={{ fontFamily: 'Nunito', fontWeight: 800 }}>Reset your password</h3>
+            <h3 style={{ fontFamily: 'var(--fd)', fontWeight: 800 }}>Reset your password</h3>
             <p style={{ fontSize: 13, color: 'var(--text2)' }}>Enter your email and we'll send you a reset link.</p>
             <input id="forgotEmail" placeholder="you@email.com" style={{ padding: 12, border: '1px solid var(--border)', borderRadius: 12 }} />
             <button onClick={handleForgot} disabled={loading} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8 }}>

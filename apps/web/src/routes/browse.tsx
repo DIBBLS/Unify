@@ -72,7 +72,7 @@ export default function BrowseRoute() {
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 100px' }}>
       <BackButton to="/dashboard" />
-      <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 24, display: 'flex', gap: 8, alignItems: 'center' }}>
+      <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, display: 'flex', gap: 8, alignItems: 'center' }}>
         <LibraryBig size={22} color="#059669" /> Browse notes
       </h1>
       <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>

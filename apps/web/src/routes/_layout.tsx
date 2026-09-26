@@ -136,7 +136,7 @@ export default function Layout() {
   const showSkeletonNav = authed && !roleLoaded;
 
   return (
-    <div style={{ fontFamily: "'Nunito', system-ui" }}>
+    <div style={{ fontFamily: 'var(--font-body)' }}>
       <header style={{ display: 'flex', gap: 12, padding: '12px 16px', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, background: 'var(--surface)', zIndex: 10, alignItems: 'center' }}>
         <Link to="/dashboard" style={{ fontWeight: 800, textDecoration: 'none', color: 'var(--text)' }}>
           Unify<span style={{ color: '#10b981' }}> Learn</span>

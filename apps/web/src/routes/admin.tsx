@@ -309,7 +309,7 @@ export default function AdminRoute() {
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '20px 16px 100px' }}>
       <BackButton to="/dashboard" />
-      <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 24, display: 'flex', gap: 8, alignItems: 'center' }}>
+      <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, display: 'flex', gap: 8, alignItems: 'center' }}>
         <Shield size={22} color="#059669" /> Admin
       </h1>
       {error && <Flash tone="error" message={error} onDismiss={() => setError('')} />}

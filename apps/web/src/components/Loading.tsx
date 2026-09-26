@@ -22,7 +22,7 @@ export default function Loading({ text = 'Loading…' }: { text?: string }) {
       <div style={{ animation: 'mascot-fly 5s ease-in-out infinite' }}>
         <Mascot size={110} animate="float" />
       </div>
-      <div key={qi} className="flash" style={{ fontFamily: 'Nunito', fontWeight: 700, fontSize: 15, color: 'var(--text)', fontStyle: 'italic', maxWidth: 300 }}>
+      <div key={qi} className="flash" style={{ fontFamily: 'var(--fd)', fontWeight: 700, fontSize: 15, color: 'var(--text)', fontStyle: 'italic', maxWidth: 300 }}>
         &ldquo;{QUOTES[qi]}&rdquo;
       </div>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
