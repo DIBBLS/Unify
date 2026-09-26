@@ -95,7 +95,7 @@ export default function CourseDetailRoute() {
         <div className="skel" style={{ height: 14, width: '75%', marginTop: 10 }} />
         <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} style={{ padding: '14px 16px', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, display: 'flex', gap: 12, alignItems: 'center' }}>
+            <div key={i} style={{ padding: '14px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, display: 'flex', gap: 12, alignItems: 'center' }}>
               <div style={{ flex: 1 }}>
                 <div className="skel" style={{ height: 16, width: '60%' }} />
                 <div className="skel" style={{ height: 12, width: '85%', marginTop: 8 }} />
@@ -104,7 +104,7 @@ export default function CourseDetailRoute() {
             </div>
           ))}
         </div>
-        <div style={{ fontSize: 12, color: '#777', textAlign: 'center', marginTop: 12 }}>Loading weeks…</div>
+        <div style={{ fontSize: 12, color: 'var(--text2)', textAlign: 'center', marginTop: 12 }}>Loading weeks…</div>
       </div>
     );
   if (!code) {
@@ -120,7 +120,7 @@ export default function CourseDetailRoute() {
         <BackButton to={backTo} />
         <Mascot size={110} />
         <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 20, marginTop: 12 }}>You're not enrolled in {courseCode}</h1>
-        <p style={{ color: '#777', fontSize: 14, margin: '8px 0 20px' }}>Enroll to unlock its weeks, topics and quizzes.</p>
+        <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px' }}>Enroll to unlock its weeks, topics and quizzes.</p>
         {error && <Flash tone="error" message={error} onDismiss={() => setError('')} />}
         <button onClick={enrollHere} disabled={enrolling} style={{ padding: '12px 28px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800, fontSize: 14, opacity: enrolling ? 0.6 : 1 }}>
           {enrolling ? 'Enrolling…' : `Enroll in ${courseCode}`}
@@ -137,13 +137,13 @@ export default function CourseDetailRoute() {
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px' }}>
       <BackButton to={backTo} />
       <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28 }}>{courseCode}</h1>
-      <p style={{ color: '#777', marginTop: 6, fontSize: 13 }}>
+      <p style={{ color: 'var(--text2)', marginTop: 6, fontSize: 13 }}>
         {weeks.length} {weeks.length === 1 ? 'week' : 'weeks'} · pick one to start learning
       </p>
       {error && <Flash tone="error" message={error} onDismiss={() => setError('')} />}
       <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {weeks.length === 0 && !error && (
-          <div style={{ padding: 24, textAlign: 'center', color: '#777', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12 }}>
+          <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
             <Mascot size={96} />
             <div style={{ marginTop: 8 }}>No weeks published yet.</div>
           </div>
@@ -154,11 +154,11 @@ export default function CourseDetailRoute() {
             to={`/learn/${encodeURIComponent(courseCode)}/week/${w.week}${preview ? '?preview=1' : ''}`}
             style={{
               padding: '14px 16px',
-              background: '#fff',
-              border: '1px solid #e5e5e5',
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
               borderRadius: 12,
               textDecoration: 'none',
-              color: '#3c3c3c',
+              color: 'var(--text)',
               display: 'flex',
               gap: 12,
               alignItems: 'center',
@@ -166,7 +166,7 @@ export default function CourseDetailRoute() {
           >
             <span style={{ flex: 1 }}>
               <span style={{ fontWeight: 700, display: 'block' }}>Week {w.week}{w.title ? ` — ${w.title}` : ''}</span>
-              {w.subtitle && <span style={{ fontSize: 12, color: '#777' }}>{w.subtitle}</span>}
+              {w.subtitle && <span style={{ fontSize: 12, color: 'var(--text2)' }}>{w.subtitle}</span>}
             </span>
             <ChevronRight size={18} color="#059669" />
           </Link>

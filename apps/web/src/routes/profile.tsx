@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, Pencil, Shield, X } from 'lucide-react';
+import { LogOut, Pencil, Shield, X, Sun, Moon } from 'lucide-react';
 import BackButton from '../components/BackButton';
+import ConfirmModal from '../components/ConfirmModal';
+import { useTheme } from '../hooks/useTheme';
 import { supabaseBrowser, clearRememberSession } from '../lib/supabase';
 import { api, type Profile, type University } from '../lib/api';
 import Loading from '../components/Loading';
@@ -37,6 +39,8 @@ export default function ProfileRoute() {
   const [emailMsg, setEmailMsg] = useState('');
   // Inline edit (no onboarding detour): role + semester stay locked.
   const [editing, setEditing] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
+  const { theme, toggle } = useTheme();
   const [unis, setUnis] = useState<University[]>([]);
   const [dName, setDName] = useState('');
   const [dUni, setDUni] = useState('');
@@ -117,7 +121,11 @@ export default function ProfileRoute() {
   };
 
   const handleLogout = async () => {
-    if (!window.confirm('Are you sure you want to log out?')) return;
+    setConfirmLogout(true);
+  };
+
+  const doLogout = async () => {
+    setConfirmLogout(false);
     const sb = supabaseBrowser();
     // Local scope: clear this tab/client only, never nuke another tab's
     // newer session (single-session policy kicks via broadcast instead).
@@ -193,24 +201,24 @@ export default function ProfileRoute() {
         </div>
         <div style={{ flex: 1 }}>
           <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 22 }}>{profile?.first_name || 'Builder'}</h1>
-          <div style={{ fontSize: 13, color: '#777' }}>{email}</div>
+          <div style={{ fontSize: 13, color: 'var(--text2)' }}>{email}</div>
         </div>
         <Mascot size={64} />
       </div>
 
-      <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, overflow: 'hidden', marginBottom: 16 }}>
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', marginBottom: 16 }}>
         {rows.map(([label, value], i) => (
           <div key={label} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '12px 16px', borderTop: i ? '1px solid #f0f0f0' : 'none' }}>
-            <span style={{ fontSize: 13, color: '#777' }}>{label}</span>
+            <span style={{ fontSize: 13, color: 'var(--text2)' }}>{label}</span>
             <span style={{ fontSize: 13, fontWeight: 700, textAlign: 'right' }}>{value}</span>
           </div>
         ))}
       </div>
 
-      <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 14, marginBottom: 8 }}>
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 8 }}>
         <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 6 }}>Change email</div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <input value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="new@email.com" style={{ flex: 1, minWidth: 0, padding: 10, border: '1px solid #e5e5e5', borderRadius: 10, fontSize: 14 }} />
+          <input value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="new@email.com" style={{ flex: 1, minWidth: 0, padding: 10, border: '1px solid var(--border)', borderRadius: 10, fontSize: 14 }} />
           <button onClick={handleEmailChange} style={{ padding: '10px 16px', borderRadius: 10, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, fontSize: 13 }}>
             Send
           </button>
@@ -226,15 +234,15 @@ export default function ProfileRoute() {
       {saveError && <Flash tone="error" message={saveError} onDismiss={() => setSaveError('')} />}
 
       {editing && (
-        <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 14, marginBottom: 8, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 8, display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ fontSize: 12, fontWeight: 800 }}>Edit profile</div>
           <label style={{ fontSize: 12, fontWeight: 700 }}>
             First name
-            <input value={dName} onChange={(e) => setDName(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid #e5e5e5', borderRadius: 10, fontSize: 14, display: 'block' }} />
+            <input value={dName} onChange={(e) => setDName(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid var(--border)', borderRadius: 10, fontSize: 14, display: 'block' }} />
           </label>
           <label style={{ fontSize: 12, fontWeight: 700 }}>
             University
-            <select value={dUni} onChange={(e) => setDUni(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid #e5e5e5', borderRadius: 10, fontSize: 14, display: 'block' }}>
+            <select value={dUni} onChange={(e) => setDUni(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid var(--border)', borderRadius: 10, fontSize: 14, display: 'block' }}>
               <option value="">Select…</option>
               {!unis.some((u) => u.name === dUni) && dUni && <option value={dUni}>{dUni}</option>}
               {unis.map((u) => (
@@ -244,7 +252,7 @@ export default function ProfileRoute() {
           </label>
           <label style={{ fontSize: 12, fontWeight: 700 }}>
             Faculty
-            <select value={dFaculty} onChange={(e) => setDFaculty(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid #e5e5e5', borderRadius: 10, fontSize: 14, display: 'block' }}>
+            <select value={dFaculty} onChange={(e) => setDFaculty(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid var(--border)', borderRadius: 10, fontSize: 14, display: 'block' }}>
               <option value="">Select…</option>
               {!['Faculty of Engineering'].includes(dFaculty) && dFaculty && <option value={dFaculty}>{dFaculty}</option>}
               <option value="Faculty of Engineering">Faculty of Engineering</option>
@@ -252,7 +260,7 @@ export default function ProfileRoute() {
           </label>
           <label style={{ fontSize: 12, fontWeight: 700 }}>
             Department
-            <select value={dDept} onChange={(e) => setDDept(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid #e5e5e5', borderRadius: 10, fontSize: 14, display: 'block' }}>
+            <select value={dDept} onChange={(e) => setDDept(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid var(--border)', borderRadius: 10, fontSize: 14, display: 'block' }}>
               <option value="">Select…</option>
               {!DEPARTMENTS.includes(dDept) && dDept && <option value={dDept}>{dDept}</option>}
               {DEPARTMENTS.map((d) => (
@@ -264,7 +272,7 @@ export default function ProfileRoute() {
             <>
               <label style={{ fontSize: 12, fontWeight: 700 }}>
                 Level
-                <select value={dLevel} onChange={(e) => setDLevel(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid #e5e5e5', borderRadius: 10, fontSize: 14, display: 'block' }}>
+                <select value={dLevel} onChange={(e) => setDLevel(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid var(--border)', borderRadius: 10, fontSize: 14, display: 'block' }}>
                   <option value="">Select…</option>
                   {LEVELS.map((l) => (
                     <option key={l} value={l}>{l}</option>
@@ -273,7 +281,7 @@ export default function ProfileRoute() {
               </label>
               <label style={{ fontSize: 12, fontWeight: 700 }}>
                 Graduation target
-                <select value={dTarget} onChange={(e) => setDTarget(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid #e5e5e5', borderRadius: 10, fontSize: 14, display: 'block' }}>
+                <select value={dTarget} onChange={(e) => setDTarget(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid var(--border)', borderRadius: 10, fontSize: 14, display: 'block' }}>
                   <option value="">Select…</option>
                   {TARGETS.map((t) => (
                     <option key={t.val} value={String(t.val)}>{t.label} — {t.val}</option>
@@ -282,13 +290,13 @@ export default function ProfileRoute() {
               </label>
             </>
           )}
-          <div style={{ fontSize: 11, color: '#777' }}>Role and semester are locked — only admin can change those.</div>
+          <div style={{ fontSize: 11, color: 'var(--text2)' }}>Role and semester are locked — only admin can change those.</div>
           <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, color: '#555', fontWeight: 600, cursor: 'pointer' }}>
             <input type="checkbox" checked={dNotify} onChange={(e) => setDNotify(e.target.checked)} style={{ width: 16, height: 16, accentColor: '#10b981' }} />
             Email me when new notes drop in my courses
           </label>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={() => setEditing(false)} style={{ flex: 1, padding: 12, background: '#fff', color: '#3c3c3c', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 12, fontWeight: 800, display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'center' }}>
+            <button onClick={() => setEditing(false)} style={{ flex: 1, padding: 12, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 12, fontWeight: 800, display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'center' }}>
               <X size={16} /> Cancel
             </button>
             <button onClick={saveEdit} disabled={saving} style={{ flex: 1, padding: 12, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 12, fontWeight: 800, opacity: saving ? 0.6 : 1 }}>
@@ -300,18 +308,33 @@ export default function ProfileRoute() {
 
       <div style={{ display: 'flex', gap: 8 }}>
         {!editing && (
-          <button onClick={startEdit} style={{ flex: 1, padding: 14, background: '#fff', color: '#3c3c3c', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 16, fontWeight: 700, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
+          <button onClick={startEdit} style={{ flex: 1, padding: 14, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 700, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
             <Pencil size={16} /> Edit profile
           </button>
         )}
-        <button onClick={handleLogout} style={{ flex: 1, padding: 14, background: '#fff', color: '#991b1b', border: '1px solid #fecaca', borderBottom: '4px solid #fecaca', borderRadius: 16, fontWeight: 800, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
+        <button onClick={() => toggle()} aria-label="Toggle dark mode" style={{ padding: 14, background: 'var(--surface)', color: 'var(--text2)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 800, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
+          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+        </button>
+      </div>
+      <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+        <button onClick={handleLogout} style={{ flex: 1, padding: 14, background: 'var(--surface)', color: '#991b1b', border: '1px solid #fecaca', borderBottom: '4px solid #fecaca', borderRadius: 16, fontWeight: 800, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
           <LogOut size={16} /> Log out
         </button>
       </div>
       {canAuthor && (
-        <Link to="/studio" style={{ marginTop: 8, padding: 14, background: '#fff', color: '#059669', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 16, fontWeight: 800, textDecoration: 'none', textAlign: 'center', display: 'block' }}>
+        <Link to="/studio" style={{ marginTop: 8, padding: 14, background: 'var(--surface)', color: '#059669', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 800, textDecoration: 'none', textAlign: 'center', display: 'block' }}>
           Open Authoring Studio
         </Link>
+      )}
+      {confirmLogout && (
+        <ConfirmModal
+          title="Log out?"
+          body="Are you sure you want to sign out of Unify Learn on this device?"
+          confirmLabel="Log out"
+          tone="go"
+          onConfirm={() => void doLogout()}
+          onCancel={() => setConfirmLogout(false)}
+        />
       )}
     </div>
   );

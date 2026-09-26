@@ -82,7 +82,7 @@ export default function CoursePage() {
         <div className="skel" style={{ height: 14, width: '70%', marginTop: 10 }} />
         <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
           {[0, 1, 2].map((i) => (
-            <div key={i} style={{ padding: '14px 16px', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, display: 'flex', gap: 12, alignItems: 'center' }}>
+            <div key={i} style={{ padding: '14px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, display: 'flex', gap: 12, alignItems: 'center' }}>
               <div className="skel" style={{ width: 40, height: 40, borderRadius: 10, flexShrink: 0 }} />
               <div style={{ flex: 1 }}>
                 <div className="skel" style={{ height: 16, width: '45%' }} />
@@ -91,7 +91,7 @@ export default function CoursePage() {
             </div>
           ))}
         </div>
-        <div style={{ fontSize: 12, color: '#777', textAlign: 'center', marginTop: 12 }}>Loading your courses…</div>
+        <div style={{ fontSize: 12, color: 'var(--text2)', textAlign: 'center', marginTop: 12 }}>Loading your courses…</div>
       </div>
     );
 
@@ -131,7 +131,7 @@ export default function CoursePage() {
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px' }}>
       <BackButton to="/dashboard" />
       <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28 }}>My Courses</h1>
-      <p style={{ color: '#777', marginTop: 6, fontSize: 13 }}>
+      <p style={{ color: 'var(--text2)', marginTop: 6, fontSize: 13 }}>
         Your enrolled courses — open one to keep learning
       </p>
       {error && <Flash tone="error" message={error} onDismiss={() => setError('')} />}
@@ -142,7 +142,7 @@ export default function CoursePage() {
       {activity.length > 0 && (
         <div style={{ marginTop: 12, padding: 14, background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12 }}>
           <div style={{ fontWeight: 800, fontSize: 14 }}>You learned in {activity.length} course{activity.length === 1 ? '' : 's'} not on your list</div>
-          <div style={{ fontSize: 12, color: '#777', marginTop: 4 }}>{activity.join(' · ')}</div>
+          <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>{activity.join(' · ')}</div>
           <button onClick={repair} disabled={repairing} style={{ marginTop: 10, padding: '10px 18px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800, fontSize: 13, opacity: repairing ? 0.6 : 1 }}>
             {repairing ? 'Restoring…' : 'Restore my courses'}
           </button>
@@ -150,7 +150,7 @@ export default function CoursePage() {
       )}
       <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {courses.length === 0 && !error && (
-          <div style={{ padding: 24, textAlign: 'center', color: '#777', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12 }}>
+          <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
             <Mascot size={96} />
             <div style={{ marginTop: 8 }}>No enrolled courses yet.</div>
             <Link to="/explore" style={{ display: 'inline-block', marginTop: 12, padding: '10px 22px', background: '#10b981', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #059669' }}>
@@ -166,11 +166,11 @@ export default function CoursePage() {
             style={{
               animationDelay: `${Math.min(i, 6) * 40}ms`,
               padding: '14px 16px',
-              background: '#fff',
-              border: '1px solid #e5e5e5',
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
               borderRadius: 12,
               textDecoration: 'none',
-              color: '#3c3c3c',
+              color: 'var(--text)',
               display: 'flex',
               gap: 12,
               alignItems: 'center',
@@ -181,7 +181,7 @@ export default function CoursePage() {
             </span>
             <span style={{ flex: 1 }}>
               <span style={{ fontWeight: 700, display: 'block' }}>{c.code}</span>
-              <span style={{ fontSize: 12, color: '#777' }}>{c.title} · {c.weeks} {c.weeks === 1 ? 'week' : 'weeks'}</span>
+              <span style={{ fontSize: 12, color: 'var(--text2)' }}>{c.title} · {c.weeks} {c.weeks === 1 ? 'week' : 'weeks'}</span>
             </span>
             <ChevronRight size={18} color="#059669" />
           </Link>

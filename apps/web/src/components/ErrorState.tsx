@@ -56,7 +56,7 @@ export default function ErrorState({
       <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 20 }}>
         {showOffline ? "You're offline" : title}
       </h1>
-      <p style={{ color: '#777', fontSize: 14, margin: '8px 0 20px' }}>
+      <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px' }}>
         {showOffline
           ? 'Check your connection — your saved notes stay readable.'
           : message}

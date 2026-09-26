@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Check, X, RotateCcw } from 'lucide-react';
 import type { EOQ } from '../types/note';
 import { api } from '../lib/api';
+import Mascot from './Mascot';
 
 const PASS_PCT = 60;
 
@@ -17,6 +18,9 @@ function fitbAccepted(q: EOQ['questions'][number]): string[] {
   return q.correct ? [q.correct] : [];
 }
 
+// End-of-week exam on the dark card: progress dots, instant per-question
+// verdicts with author feedback, topic refs on misses, and a pass/fail
+// score screen. Recording is unchanged (one quizAttempt on completion).
 export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: EOQ; course: string; week: number; preview?: boolean }) {
   const [picked, setPicked] = useState<Record<number, number>>({});
   const [recorded, setRecorded] = useState(false);
@@ -41,6 +45,9 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
   const done = eoq.questions.every((_, i) => !gradeable[i] || answered[i]);
   const pct = total ? Math.round((score / total) * 100) : 0;
   const passed = done && total > 0 && pct >= PASS_PCT;
+  const missed = eoq.questions
+    .map((q, i) => ({ q, i }))
+    .filter(({ i }) => gradeable[i] && answered[i] && !correct[i]);
 
   useEffect(() => {
     if (!done || total === 0 || recorded || preview) return;
@@ -52,25 +59,35 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
     setPicked({});
     setFitb({});
     setChecked({});
+    setRecorded(false);
   };
 
   if (!eoq.questions.length) return null;
 
   return (
-    <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 20, marginBottom: 28 }}>
-      <div style={{ fontSize: 10, letterSpacing: 2, color: '#059669', fontWeight: 800, textTransform: 'uppercase' }}>
-        End-of-Week Quiz
+    <div className="eoq-card">
+      <div className="eoq-eyebrow">End-of-Week Quiz</div>
+      <div className="eoq-title">Prove it.</div>
+      <div className="eoq-sub">
+        {total} questions · {PASS_PCT}% to pass{preview ? ' · preview — not recorded' : ''}
       </div>
-      <div style={{ fontSize: 12, color: '#777', marginTop: 4 }}>
-        {total} questions · {PASS_PCT}% to pass
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, marginTop: 16 }}>
+      <div className="eoq-dots" aria-label="Quiz progress">
         {eoq.questions.map((q, i) => (
-          <div key={q.number ?? i}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: '#afafaf', letterSpacing: 1 }}>QUESTION {i + 1}</div>
-            <div className="mc-q">{q.question}</div>
+          <span
+            key={q.number ?? i}
+            className={`eoq-dot ${answered[i] ? (correct[i] ? 'correct' : gradeable[i] ? 'wrong' : 'answered') : ''}`}
+          >
+            {answered[i] && gradeable[i] ? (correct[i] ? <Check size={12} /> : <X size={12} />) : i + 1}
+          </span>
+        ))}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {eoq.questions.map((q, i) => (
+          <div key={q.number ?? i} className="eoq-question">
+            <div className="eoq-qnum">Question {i + 1}</div>
+            <div className="eoq-q-text">{q.question}</div>
             {q.type === 'mcq' && q.options && (
-              <div className="mc-mcq-opts">
+              <div className="eoq-options">
                 {q.options.map((opt, oi) => {
                   const show = picked[i] !== undefined;
                   const isCorrect = oi === mcqCorrectIndex(q);
@@ -78,49 +95,80 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
                   return (
                     <div
                       key={oi}
-                      className={`mc-mcq-opt ${show && isCorrect ? 'mc-correct' : ''} ${show && isSelected && !isCorrect ? 'mc-wrong' : ''} ${show ? 'mc-locked' : ''}`}
+                      className={`eoq-option ${show && isCorrect ? 'correct-reveal' : ''} ${show && isSelected && !isCorrect ? 'wrong-reveal' : ''} ${!show ? '' : 'locked'} ${!show && isSelected ? 'selected' : ''}`}
                       onClick={() => picked[i] === undefined && setPicked((p) => ({ ...p, [i]: oi }))}
                     >
-                      <span className="mc-ltr">{String.fromCharCode(65 + oi)}</span> {opt}
+                      <span className="eoq-letter">{String.fromCharCode(65 + oi)}</span> {opt}
                     </div>
                   );
                 })}
               </div>
             )}
             {q.type === 'fitb' && (
-              <div className="mc-fitb-row">
+              <div className="eoq-fitb-row">
                 <input
-                  className="mc-fitb-input"
                   value={fitb[i] || ''}
                   disabled={!!checked[i]}
                   onChange={(e) => setFitb((f) => ({ ...f, [i]: e.target.value }))}
-                  placeholder="Your answer…"
+                  placeholder="Type the missing word…"
+                  className={checked[i] ? (correct[i] ? 'correct-input' : 'wrong-input') : undefined}
                 />
                 {!checked[i] && (
-                  <button className="mc-fitb-btn" onClick={() => setChecked((c) => ({ ...c, [i]: true }))}>
+                  <button
+                    className="eoq-submit-btn"
+                    style={{ marginTop: 0 }}
+                    onClick={() => setChecked((c) => ({ ...c, [i]: true }))}
+                  >
                     Check
                   </button>
                 )}
               </div>
             )}
             {answered[i] && gradeable[i] && (
-              <div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, fontWeight: 700, marginTop: 6, color: correct[i] ? '#059669' : '#991b1b' }}>
+              <div className={`eoq-feedback ${correct[i] ? 'correct-fb' : 'wrong-fb'}`}>
                 {correct[i] ? <Check size={14} /> : <X size={14} />}
                 {correct[i] ? q.feedback?.correct || 'Correct!' : q.feedback?.wrong || 'Not quite.'}
+              </div>
+            )}
+            {answered[i] && gradeable[i] && !correct[i] && q.topicRef && (
+              <div className="eoq-topicref">
+                Review: <button onClick={() => document.querySelector('.screen-only')?.scrollTo?.({ top: 0, behavior: 'smooth' })}>Topic {q.topicRef} ↑</button>
               </div>
             )}
           </div>
         ))}
       </div>
+      {!done && (
+        <div className="eoq-submit-hint">
+          {answered.filter(Boolean).length}/{total} answered — finish every question to lock your score.
+        </div>
+      )}
       {done && total > 0 && (
-        <div style={{ marginTop: 20, padding: 16, borderRadius: 12, background: passed ? '#ecfdf5' : '#fef2f2', border: `1px solid ${passed ? '#a7f3d0' : '#fecaca'}`, textAlign: 'center' }}>
-          <div style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 18, color: passed ? '#065f46' : '#991b1b' }}>
-            {passed ? 'Passed!' : 'Not yet'} — {score}/{total} ({pct}%)
+        <div className={`eoq-result ${passed ? 'pass' : 'fail'}`}>
+          <Mascot size={84} animate={passed ? 'wave' : undefined} />
+          <div style={{ marginTop: 8 }}>
+            <span className={`result-pill ${passed ? 'pill-pass' : 'pill-fail'}`}>{passed ? 'PASSED' : 'NOT YET'}</span>
           </div>
-          {!passed && (
-            <button onClick={reset} style={{ marginTop: 10, padding: '8px 18px', borderRadius: 9999, background: '#fff', border: '1px solid #e5e5e5', fontWeight: 800, fontSize: 13, display: 'inline-flex', gap: 6, alignItems: 'center' }}>
-              <RotateCcw size={14} /> Try again
-            </button>
+          <div className="result-score-big">{score}/{total}</div>
+          <div className="result-msg">
+            {passed
+              ? `You scored ${pct}%. This week is yours — the next one builds on it.`
+              : `You scored ${pct}% (need ${PASS_PCT}%). The misses below point at exactly what to re-read.`}
+          </div>
+          {passed ? (
+            <div className="unlock-banner">Week cleared — XP banked on every completed topic.</div>
+          ) : (
+            <div className="review-nudge">
+              <p>Review these, then retry:</p>
+              <ul>
+                {missed.map(({ q, i }) => (
+                  <li key={i}>Q{i + 1}{q.topicRef ? ` · Topic ${q.topicRef}` : ''}</li>
+                ))}
+              </ul>
+              <button onClick={reset} className="eoq-submit-btn" style={{ marginTop: 12, display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+                <RotateCcw size={14} /> Try again
+              </button>
+            </div>
           )}
         </div>
       )}

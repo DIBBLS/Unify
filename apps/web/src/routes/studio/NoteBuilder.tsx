@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
+import ConfirmModal from '../../components/ConfirmModal';
 import type {
   ContentBlock,
   EOQ,
@@ -16,7 +18,7 @@ const input = {
   width: '100%',
   padding: 10,
   marginTop: 4,
-  border: '1px solid #e5e5e5',
+  border: '1px solid var(--border)',
   borderRadius: 10,
   display: 'block',
   fontSize: 14,
@@ -24,8 +26,8 @@ const input = {
 const area = { ...input, resize: 'vertical' } as const;
 const label = { fontSize: 12, fontWeight: 700, display: 'block' } as const;
 const card = {
-  background: '#fff',
-  border: '1px solid #e5e5e5',
+  background: 'var(--surface)',
+  border: '1px solid var(--border)',
   borderRadius: 12,
   padding: 14,
   marginBottom: 12,
@@ -35,9 +37,9 @@ const hint = { fontSize: 11, color: '#b45309', fontWeight: 700, marginTop: 6 } a
 const iconBtn = {
   padding: 6,
   borderRadius: 8,
-  background: '#fff',
-  border: '1px solid #e5e5e5',
-  color: '#777',
+  background: 'var(--surface)',
+  border: '1px solid var(--border)',
+  color: 'var(--text2)',
   display: 'flex',
 } as const;
 const dangerBtn = { ...iconBtn, color: '#991b1b', border: '1px solid #fecaca' } as const;
@@ -421,7 +423,7 @@ function BlockEditor({
         <button onClick={onDelete} style={dangerBtn} aria-label="Delete block"><Trash2 size={14} /></button>
       </div>
       <div style={{ fontSize: 13, fontWeight: 700, marginTop: 8 }}>{block.title || '(untitled example)'}</div>
-      <div style={{ fontSize: 12, color: '#777' }}>{block.steps.length} step(s){block.result ? ` · result: ${block.result.slice(0, 60)}` : ''}</div>
+      <div style={{ fontSize: 12, color: 'var(--text2)' }}>{block.steps.length} step(s){block.result ? ` · result: ${block.result.slice(0, 60)}` : ''}</div>
     </div>
   );
 }
@@ -491,12 +493,26 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
 
   const mcqCount = note.eoq.questions.filter((q) => q.type === 'mcq').length;
   const fitbCount = note.eoq.questions.filter((q) => q.type === 'fitb').length;
+  const [confirmTopic, setConfirmTopic] = useState<number | null>(null);
 
   return (
     <div>
+      {confirmTopic !== null && (
+        <ConfirmModal
+          title={`Delete Topic ${confirmTopic + 1}?`}
+          body="Its parts, checks and recalls go with it. This cannot be undone."
+          confirmLabel="Delete topic"
+          onConfirm={() => {
+            const ti = confirmTopic;
+            setConfirmTopic(null);
+            setTopics(renumber(note.topics.filter((_, xi) => xi !== ti)));
+          }}
+          onCancel={() => setConfirmTopic(null)}
+        />
+      )}
       <div style={card}>
         <h3 style={sectionTitle}>Week details</h3>
-        <div style={{ fontSize: 12, color: '#777', marginBottom: 8 }}>{note.course} · Week {note.week}</div>
+        <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 8 }}>{note.course} · Week {note.week}</div>
         <label style={label}>Week title<input value={note.title} onChange={(e) => set({ title: e.target.value })} placeholder="e.g. Energy Sources" style={input} /></label>
         <label style={{ ...label, marginTop: 8 }}>Subtitle<input value={note.subtitle} onChange={(e) => set({ subtitle: e.target.value })} placeholder="One-line summary" style={input} /></label>
         <label style={{ ...label, marginTop: 8 }}>Learning outcome<textarea value={note.learningOutcome} onChange={(e) => set({ learningOutcome: e.target.value })} rows={2} placeholder="By the end of this week…" style={area} /></label>
@@ -509,13 +525,13 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
             <h3 style={{ ...sectionTitle, margin: 0, flex: 1 }}>Topic {ti + 1}</h3>
             <button onClick={() => setTopics(renumber(move(note.topics, ti, -1)))} style={iconBtn} aria-label="Move topic up"><ChevronUp size={14} /></button>
             <button onClick={() => setTopics(renumber(move(note.topics, ti, 1)))} style={iconBtn} aria-label="Move topic down"><ChevronDown size={14} /></button>
-            <button onClick={() => { if (note.topics.length > 1 && window.confirm(`Delete Topic ${ti + 1}?`)) setTopics(renumber(note.topics.filter((_, xi) => xi !== ti))); }} disabled={note.topics.length <= 1} style={{ ...dangerBtn, opacity: note.topics.length <= 1 ? 0.4 : 1 }} aria-label="Delete topic"><Trash2 size={14} /></button>
+            <button onClick={() => { if (note.topics.length > 1) setConfirmTopic(ti); }} disabled={note.topics.length <= 1} style={{ ...dangerBtn, opacity: note.topics.length <= 1 ? 0.4 : 1 }} aria-label="Delete topic"><Trash2 size={14} /></button>
           </div>
           <label style={label}>Title<input value={t.title} onChange={(e) => { const topics = [...note.topics]; topics[ti] = { ...t, title: e.target.value }; setTopics(topics); }} placeholder="Topic title" style={input} /></label>
           <label style={{ ...label, marginTop: 8 }}>Short tag<input value={t.abbr} onChange={(e) => { const topics = [...note.topics]; topics[ti] = { ...t, abbr: e.target.value }; setTopics(topics); }} placeholder="e.g. HYDRO" style={input} /></label>
 
           {t.subtopics.map((s, si) => (
-            <div key={si} style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed #e5e5e5' }}>
+            <div key={si} style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed var(--border)' }}>
               <div style={{ fontSize: 12, fontWeight: 800, color: '#059669', marginBottom: 8 }}>Part {s.number} · {s.title || '(untitled)'}</div>
               <label style={label}>Part title<input value={s.title} onChange={(e) => { const topics = [...note.topics]; const subs = [...topics[ti].subtopics]; subs[si] = { ...s, title: e.target.value }; topics[ti] = { ...t, subtopics: subs }; setTopics(topics); }} placeholder="Section title" style={input} /></label>
               <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -567,7 +583,7 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
             <Plus size={12} /> Add part
           </button>
 
-          <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed #e5e5e5' }}>
+          <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed var(--border)' }}>
             <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 6 }}>Recall cards ({(t.activeRecall || []).length})</div>
             {(t.activeRecall || []).length === 0 && <div style={hint}>Add at least 1 recall card.</div>}
             {(t.activeRecall || []).map((c, ci) => (
@@ -587,7 +603,7 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
             </button>
           </div>
 
-          <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed #e5e5e5' }}>
+          <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed var(--border)' }}>
             <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 6 }}>Pulse check (fixed: MCQ, MCQ, Fill-in)</div>
             {(t.pulseCheck?.questions || []).map((q, qi) => (
               <QuestionEditor
@@ -624,7 +640,7 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
         </div>
       ))}
 
-      <button onClick={() => setTopics(renumber([...note.topics, blankTopic(note.topics.length + 1)]))} style={{ width: '100%', padding: 14, background: '#fff', border: '1px dashed #a7f3d0', borderRadius: 12, color: '#059669', fontWeight: 800, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
+      <button onClick={() => setTopics(renumber([...note.topics, blankTopic(note.topics.length + 1)]))} style={{ width: '100%', padding: 14, background: 'var(--surface)', border: '1px dashed #a7f3d0', borderRadius: 12, color: '#059669', fontWeight: 800, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
         <Plus size={16} /> Add topic
       </button>
 

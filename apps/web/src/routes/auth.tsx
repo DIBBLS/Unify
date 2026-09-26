@@ -294,10 +294,10 @@ export default function AuthRoute() {
 
   if (welcomeBack)
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, maxWidth: 480, margin: '0 auto', background: '#fff', padding: 24, textAlign: 'center' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, maxWidth: 480, margin: '0 auto', background: 'var(--surface)', padding: 24, textAlign: 'center' }}>
         <Mascot size={140} animate="sip" />
         <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28 }}>Own your journey.</h1>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', color: '#777', fontSize: 13, fontWeight: 600 }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', color: 'var(--text2)', fontSize: 13, fontWeight: 600 }}>
           <Loader2 size={16} style={{ animation: 'spin 0.8s linear infinite', color: '#10b981' }} />
           Getting your space ready…
         </div>
@@ -306,22 +306,22 @@ export default function AuthRoute() {
 
   if (recovery)
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', maxWidth: 480, margin: '0 auto', background: '#fff', padding: 20, justifyContent: 'center' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', maxWidth: 480, margin: '0 auto', background: 'var(--surface)', padding: 20, justifyContent: 'center' }}>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
           <Mascot size={110} />
         </div>
         <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 26, textAlign: 'center' }}>Set a new password</h1>
-        <p style={{ fontSize: 13, color: '#777', textAlign: 'center', margin: '8px 0 16px' }}>Choose the password you'll sign in with from now on.</p>
+        <p style={{ fontSize: 13, color: 'var(--text2)', textAlign: 'center', margin: '8px 0 16px' }}>Choose the password you'll sign in with from now on.</p>
         {error && <Flash tone="error" message={error} ttl={6000} onDismiss={() => setError('')} />}
         {success && <Flash tone="success" message={success} ttl={6000} onDismiss={() => setSuccess('')} />}
         <form onSubmit={handlePasswordUpdate} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <label style={{ fontSize: 12, fontWeight: 700 }}>
             New password
-            <input name="new-password" type={showPw ? 'text' : 'password'} value={recoveryPw} onChange={(e) => setRecoveryPw(e.target.value)} required placeholder="Min. 8 characters" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid #e5e5e5', borderRadius: 12, display: 'block' }} />
+            <input name="new-password" type={showPw ? 'text' : 'password'} value={recoveryPw} onChange={(e) => setRecoveryPw(e.target.value)} required placeholder="Min. 8 characters" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid var(--border)', borderRadius: 12, display: 'block' }} />
           </label>
           <label style={{ fontSize: 12, fontWeight: 700 }}>
             Confirm new password
-            <input name="confirm-password" type="password" required placeholder="Repeat it" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid #e5e5e5', borderRadius: 12, display: 'block' }} />
+            <input name="confirm-password" type="password" required placeholder="Repeat it" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid var(--border)', borderRadius: 12, display: 'block' }} />
           </label>
           <button disabled={loading} type="submit" style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
             {loading ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : null}
@@ -333,7 +333,7 @@ export default function AuthRoute() {
 
   return (
     <div className="auth-page">
-      <style>{`.auth-page{min-height:100vh;background:#fff}.auth-side{display:none}.auth-card{maxWidth:480px;margin:0 auto}@media(min-width:900px){.auth-page{display:flex;flex-direction:row;background:#d1fae5}.auth-side{display:flex;flex:1;flex-direction:column;justify-content:center;gap:18px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:64px;min-height:100vh}.auth-main{flex:1.2;display:flex;align-items:center;justify-content:center;padding:48px 32px;background:#ecfdf5}.auth-card{width:100%;max-width:440px;background:#fff;border:1px solid #e5e5e5;border-radius:20px;padding:32px;box-shadow:0 12px 32px rgba(6,95,70,.12);margin:0}.auth-hero-mobile{border-radius:16px !important}}`}</style>
+      <style>{`.auth-page{min-height:100vh;background:var(--bg)}.auth-side{display:none}.auth-card{maxWidth:480px;margin:0 auto}@media(min-width:900px){.auth-page{display:flex;flex-direction:row;background:var(--surface2)}.auth-side{display:flex;flex:1;flex-direction:column;justify-content:center;gap:18px;background:linear-gradient(135deg,#4ade80,#16a34a);color:#06281a;padding:64px;min-height:100vh}.auth-main{flex:1.2;display:flex;align-items:center;justify-content:center;padding:48px 32px;background:var(--bg)}.auth-card{width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;box-shadow:0 12px 32px rgba(6,95,70,.12);margin:0}.auth-hero-mobile{border-radius:16px !important}}`}</style>
       <aside className="auth-side">
         <div style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 22 }}>Unify Learn</div>
         <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 40, lineHeight: 1.1, margin: 0 }}>
@@ -364,7 +364,7 @@ export default function AuthRoute() {
         <Mascot size={104} animate="sip" />
       </div>
       <div style={{ padding: 20, flex: 1 }}>
-        <div style={{ display: 'flex', gap: 4, background: '#f7f7f7', border: '1px solid #e5e5e5', borderRadius: 9999, padding: 4, marginBottom: 20 }}>
+        <div style={{ display: 'flex', gap: 4, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 9999, padding: 4, marginBottom: 20 }}>
           <button
             onClick={() => setTab('signin')}
             style={{
@@ -373,7 +373,7 @@ export default function AuthRoute() {
               borderRadius: 9999,
               border: 'none',
               background: tab === 'signin' ? '#10b981' : 'transparent',
-              color: tab === 'signin' ? '#fff' : '#777',
+              color: tab === 'signin' ? '#fff' : 'var(--text2)',
               fontWeight: 700,
             }}
           >
@@ -387,7 +387,7 @@ export default function AuthRoute() {
               borderRadius: 9999,
               border: 'none',
               background: tab === 'signup' ? '#10b981' : 'transparent',
-              color: tab === 'signup' ? '#fff' : '#777',
+              color: tab === 'signup' ? '#fff' : 'var(--text2)',
               fontWeight: 700,
             }}
           >
@@ -407,15 +407,15 @@ export default function AuthRoute() {
           <form onSubmit={handleSignIn} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <label style={{ fontSize: 12, fontWeight: 700 }}>
               Email
-              <input name="email" type="email" required placeholder="you@email.com" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid #e5e5e5', borderRadius: 12, display: 'block' }} />
+              <input name="email" type="email" required placeholder="you@email.com" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid var(--border)', borderRadius: 12, display: 'block' }} />
             </label>
             <label style={{ fontSize: 12, fontWeight: 700 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                Password <button type="button" onClick={() => setTab('forgot')} style={{ background: 'none', border: 'none', fontSize: 11, color: '#777', textDecoration: 'underline' }}>Forgot password?</button>
+                Password <button type="button" onClick={() => setTab('forgot')} style={{ background: 'none', border: 'none', fontSize: 11, color: 'var(--text2)', textDecoration: 'underline' }}>Forgot password?</button>
               </div>
               <div style={{ position: 'relative', marginTop: 6 }}>
-                <input name="password" type={showPw ? 'text' : 'password'} required placeholder="Your password" style={{ width: '100%', padding: 12, paddingRight: 44, border: '1px solid #e5e5e5', borderRadius: 12, display: 'block' }} />
-                <button type="button" onClick={() => setShowPw(!showPw)} style={{ position: 'absolute', right: 0, top: 0, height: '100%', width: 44, background: 'none', border: 'none', color: '#777', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <input name="password" type={showPw ? 'text' : 'password'} required placeholder="Your password" style={{ width: '100%', padding: 12, paddingRight: 44, border: '1px solid var(--border)', borderRadius: 12, display: 'block' }} />
+                <button type="button" onClick={() => setShowPw(!showPw)} style={{ position: 'absolute', right: 0, top: 0, height: '100%', width: 44, background: 'none', border: 'none', color: 'var(--text2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
@@ -428,10 +428,10 @@ export default function AuthRoute() {
               {loading ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : null}
               {loading ? 'Signing in' : 'Sign In'} <ArrowRight size={18} />
             </button>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, color: '#777', fontSize: 11 }}>
-              <span style={{ flex: 1, height: 1, background: '#e5e5e5' }} /> or <span style={{ flex: 1, height: 1, background: '#e5e5e5' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, color: 'var(--text2)', fontSize: 11 }}>
+              <span style={{ flex: 1, height: 1, background: 'var(--border)' }} /> or <span style={{ flex: 1, height: 1, background: 'var(--border)' }} />
             </div>
-            <button type="button" disabled title="Coming soon — email sign-in for now" style={{ padding: 12, background: '#fff', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 16, fontWeight: 700, display: 'flex', justifyContent: 'center', gap: 8, opacity: 0.55 }}>
+            <button type="button" disabled title="Coming soon — email sign-in for now" style={{ padding: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 700, display: 'flex', justifyContent: 'center', gap: 8, opacity: 0.55 }}>
               Continue with Google · Coming soon
             </button>
           </form>
@@ -441,31 +441,31 @@ export default function AuthRoute() {
           <form onSubmit={handleSignUp} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <label style={{ fontSize: 12, fontWeight: 700 }}>
               Full Name
-              <input name="name" required placeholder="Your full name" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid #e5e5e5', borderRadius: 12, display: 'block' }} />
+              <input name="name" required placeholder="Your full name" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid var(--border)', borderRadius: 12, display: 'block' }} />
             </label>
             <label style={{ fontSize: 12, fontWeight: 700 }}>
               Email
-              <input name="email" type="email" required placeholder="you@email.com" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid #e5e5e5', borderRadius: 12, display: 'block' }} />
+              <input name="email" type="email" required placeholder="you@email.com" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid var(--border)', borderRadius: 12, display: 'block' }} />
             </label>
             <label style={{ fontSize: 12, fontWeight: 700 }}>
               Password
-              <input name="new-password" type={showPw ? 'text' : 'password'} value={signupPw} onChange={(e) => setSignupPw(e.target.value)} required placeholder="Min. 8 characters" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid #e5e5e5', borderRadius: 12, display: 'block' }} />
-              <div style={{ height: 4, background: '#e5e5e5', borderRadius: 2, marginTop: 8, overflow: 'hidden' }}>
+              <input name="new-password" type={showPw ? 'text' : 'password'} value={signupPw} onChange={(e) => setSignupPw(e.target.value)} required placeholder="Min. 8 characters" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid var(--border)', borderRadius: 12, display: 'block' }} />
+              <div style={{ height: 4, background: 'var(--border)', borderRadius: 2, marginTop: 8, overflow: 'hidden' }}>
                 <div style={{ width: `${([signupPw.length >= 8, /[A-Z]/.test(signupPw), /[0-9]/.test(signupPw)].filter(Boolean).length / 3) * 100}%`, height: '100%', background: score === 1 ? '#ff4b4b' : score === 2 ? '#ff9600' : '#10b981', transition: 'width .2s' }} />
               </div>
-              <div style={{ fontSize: 11, color: hasLength ? '#059669' : '#777', marginTop: 4, display: 'flex', gap: 6, alignItems: 'center' }}>{hasLength ? <Check size={12} /> : <X size={12} />} At least 8 characters</div>
-              <div style={{ fontSize: 11, color: hasUpper ? '#059669' : '#777', display: 'flex', gap: 6, alignItems: 'center' }}>{hasUpper ? <Check size={12} /> : <X size={12} />} One uppercase letter</div>
-              <div style={{ fontSize: 11, color: hasNumber ? '#059669' : '#777', display: 'flex', gap: 6, alignItems: 'center' }}>{hasNumber ? <Check size={12} /> : <X size={12} />} One number</div>
+              <div style={{ fontSize: 11, color: hasLength ? '#059669' : 'var(--text2)', marginTop: 4, display: 'flex', gap: 6, alignItems: 'center' }}>{hasLength ? <Check size={12} /> : <X size={12} />} At least 8 characters</div>
+              <div style={{ fontSize: 11, color: hasUpper ? '#059669' : 'var(--text2)', display: 'flex', gap: 6, alignItems: 'center' }}>{hasUpper ? <Check size={12} /> : <X size={12} />} One uppercase letter</div>
+              <div style={{ fontSize: 11, color: hasNumber ? '#059669' : 'var(--text2)', display: 'flex', gap: 6, alignItems: 'center' }}>{hasNumber ? <Check size={12} /> : <X size={12} />} One number</div>
             </label>
             <label style={{ fontSize: 12, fontWeight: 700 }}>
               Confirm Password
-              <input name="confirm-password" type="password" required placeholder="Repeat your password" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid #e5e5e5', borderRadius: 12, display: 'block' }} />
+              <input name="confirm-password" type="password" required placeholder="Repeat your password" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid var(--border)', borderRadius: 12, display: 'block' }} />
             </label>
             <button disabled={loading} type="submit" style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
               {loading ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : null}
               {loading ? 'Creating' : 'Create Account'} <ArrowRight size={18} />
             </button>
-            <button type="button" disabled title="Coming soon — email sign-up for now" style={{ padding: 12, background: '#fff', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 16, fontWeight: 700, opacity: 0.55 }}>
+            <button type="button" disabled title="Coming soon — email sign-up for now" style={{ padding: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 700, opacity: 0.55 }}>
               Continue with Google · Coming soon
             </button>
           </form>
@@ -474,12 +474,12 @@ export default function AuthRoute() {
         {tab === 'forgot' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <h3 style={{ fontFamily: 'Nunito', fontWeight: 800 }}>Reset your password</h3>
-            <p style={{ fontSize: 13, color: '#777' }}>Enter your email and we'll send you a reset link.</p>
-            <input id="forgotEmail" placeholder="you@email.com" style={{ padding: 12, border: '1px solid #e5e5e5', borderRadius: 12 }} />
+            <p style={{ fontSize: 13, color: 'var(--text2)' }}>Enter your email and we'll send you a reset link.</p>
+            <input id="forgotEmail" placeholder="you@email.com" style={{ padding: 12, border: '1px solid var(--border)', borderRadius: 12 }} />
             <button onClick={handleForgot} disabled={loading} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8 }}>
               {loading ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : null} Send Reset Link <ArrowRight size={18} />
             </button>
-            <button onClick={() => setTab('signin')} style={{ background: 'none', border: 'none', color: '#777', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            <button onClick={() => setTab('signin')} style={{ background: 'none', border: 'none', color: 'var(--text2)', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
               <ArrowRight size={14} style={{ transform: 'rotate(180deg)' }} /> Back to Sign In
             </button>
           </div>

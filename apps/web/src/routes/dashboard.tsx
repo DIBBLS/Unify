@@ -8,6 +8,7 @@ import ErrorState from '../components/ErrorState';
 import Mascot from '../components/Mascot';
 import Typewriter from '../components/Typewriter';
 import Flash from '../components/Flash';
+import ConfirmModal from '../components/ConfirmModal';
 import { greeting, dailyLine, dailyKey, daypart } from '../lib/greet';
 
 type CourseStat = { course: string; topics: number };
@@ -99,8 +100,8 @@ export default function DashboardRoute() {
   const roleLabel = profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : '';
 
   // Delete one published topic version (own notes; admins can remove any).
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const deleteNote = async (id: string) => {
-    if (!window.confirm('Delete this note version? Older versions stay live.')) return;
     setDeleting(id);
     setNoteError('');
     try {
@@ -115,36 +116,36 @@ export default function DashboardRoute() {
   if (isAuthor)
     return (
       <div style={{ maxWidth: 480, margin: '0 auto', paddingBottom: 80 }}>
-        <div style={{ padding: '20px 16px 12px', background: '#fff', display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div style={{ padding: '20px 16px 12px', background: 'var(--surface)', display: 'flex', gap: 12, alignItems: 'center' }}>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 11, color: '#afafaf', letterSpacing: 1 }}>Your Dashboard</div>
+            <div style={{ fontSize: 11, color: 'var(--text3)', letterSpacing: 1 }}>Your Dashboard</div>
             <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28, marginTop: 4 }}>
               {greeting()}, <em style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', padding: '0 6px', borderRadius: 6, fontStyle: 'normal' }}>{firstName}</em>
             </h1>
             <div style={{ fontSize: 13, color: '#059669', marginTop: 4, minHeight: 18 }}>
               <Typewriter key={dailyKey()} text={dailyLine()} speed={28} />
             </div>
-            <div style={{ fontSize: 13, color: '#777', marginTop: 2 }}>{profile?.department || roleLabel}</div>
+            <div style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{profile?.department || roleLabel}</div>
           </div>
           <Mascot size={64} animate={daypart() === 'morning' ? 'sip' : 'wave'} />
         </div>
         {astats && (
-          <div className="rise" style={{ margin: '12px 16px', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
+          <div className="rise" style={{ margin: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
             <div>
               <div style={{ fontSize: 18, fontWeight: 800 }}>{astats.topics}</div>
-              <div style={{ fontSize: 11, color: '#777' }}>Topics</div>
+              <div style={{ fontSize: 11, color: 'var(--text2)' }}>Topics</div>
             </div>
             <div>
               <div style={{ fontSize: 18, fontWeight: 800 }}>{astats.students}</div>
-              <div style={{ fontSize: 11, color: '#777' }}>Students</div>
+              <div style={{ fontSize: 11, color: 'var(--text2)' }}>Students</div>
             </div>
             <div>
               <div style={{ fontSize: 18, fontWeight: 800 }}>{astats.completions}</div>
-              <div style={{ fontSize: 11, color: '#777' }}>Done</div>
+              <div style={{ fontSize: 11, color: 'var(--text2)' }}>Done</div>
             </div>
             <div>
               <div style={{ fontSize: 18, fontWeight: 800 }}>{astats.quizzesTaken}</div>
-              <div style={{ fontSize: 11, color: '#777' }}>Quizzes</div>
+              <div style={{ fontSize: 11, color: 'var(--text2)' }}>Quizzes</div>
             </div>
           </div>
         )}
@@ -192,22 +193,22 @@ export default function DashboardRoute() {
         )}
         <div style={{ margin: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {notes.length === 0 ? (
-            <div style={{ padding: 24, textAlign: 'center', color: '#777', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12 }}>
+            <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
               <Mascot size={96} />
               <div style={{ marginTop: 8 }}>Nothing published yet. Open Studio to author your first week.</div>
             </div>
           ) : (
             notes.map((n) => (
-              <div key={n.id} style={{ padding: 14, background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
-                <Link to={`/learn/${encodeURIComponent(n.course)}/week/${n.week}?preview=1`} style={{ flex: 1, textDecoration: 'none', color: '#3c3c3c', display: 'block' }}>
+              <div key={n.id} style={{ padding: 14, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
+                <Link to={`/learn/${encodeURIComponent(n.course)}/week/${n.week}?preview=1`} style={{ flex: 1, textDecoration: 'none', color: 'var(--text)', display: 'block' }}>
                   <div style={{ fontSize: 11, color: '#059669', fontWeight: 800, letterSpacing: 1 }}>{n.course} · WEEK {n.week} · TOPIC {n.topic} · v{n.version}</div>
                   <div style={{ fontWeight: 700, marginTop: 2 }}>{n.title || `Topic ${n.topic}`}</div>
                 </Link>
                 <button
-                  onClick={() => deleteNote(n.id)}
+                  onClick={() => setConfirmDelete(n.id)}
                   disabled={deleting === n.id}
                   aria-label={`Delete ${n.course} week ${n.week} topic ${n.topic} version ${n.version}`}
-                  style={{ padding: 10, borderRadius: 10, background: '#fff', border: '1px solid #e5e5e5', color: '#991b1b', opacity: deleting === n.id ? 0.5 : 1 }}
+                  style={{ padding: 10, borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', color: '#991b1b', opacity: deleting === n.id ? 0.5 : 1 }}
                 >
                   <Trash2 size={16} />
                 </button>
@@ -215,57 +216,71 @@ export default function DashboardRoute() {
             ))
           )}
         </div>
+        {confirmDelete && (
+          <ConfirmModal
+            title="Delete this version?"
+            body="The version is removed but older versions stay live for students."
+            confirmLabel="Delete"
+            busy={deleting !== null}
+            onConfirm={() => {
+              const id = confirmDelete;
+              setConfirmDelete(null);
+              void deleteNote(id);
+            }}
+            onCancel={() => setConfirmDelete(null)}
+          />
+        )}
       </div>
     );
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', paddingBottom: 80 }}>
-      <div style={{ padding: '20px 16px 12px', background: '#fff', display: 'flex', gap: 12, alignItems: 'center' }}>
+      <div style={{ padding: '20px 16px 12px', background: 'var(--surface)', display: 'flex', gap: 12, alignItems: 'center' }}>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 11, color: '#afafaf', letterSpacing: 1 }}>Your Dashboard</div>
+          <div style={{ fontSize: 11, color: 'var(--text3)', letterSpacing: 1 }}>Your Dashboard</div>
           <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28, marginTop: 4 }}>
             {greeting()}, <em style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', padding: '0 6px', borderRadius: 6, fontStyle: 'normal' }}>{firstName}</em>
           </h1>
           <div style={{ fontSize: 13, color: '#059669', marginTop: 4, minHeight: 18 }}>
             <Typewriter key={dailyKey()} text={dailyLine()} speed={28} />
           </div>
-          <div style={{ fontSize: 13, color: '#777', marginTop: 2 }}>{profile?.department || ''}</div>
+          <div style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{profile?.department || ''}</div>
         </div>
         <Mascot size={64} animate={daypart() === 'morning' ? 'sip' : 'wave'} />
       </div>
 
-      <div className="rise" style={{ margin: '12px 16px', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
+      <div className="rise" style={{ margin: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
         <div>
           <div style={{ fontSize: 18, fontWeight: 800 }}>{profile?.grad_target ?? '—'}</div>
-          <div style={{ fontSize: 11, color: '#777' }}>Target</div>
+          <div style={{ fontSize: 11, color: 'var(--text2)' }}>Target</div>
         </div>
         <div>
           <div style={{ fontSize: 18, fontWeight: 800 }}>{xp}</div>
-          <div style={{ fontSize: 11, color: '#777' }}>XP</div>
+          <div style={{ fontSize: 11, color: 'var(--text2)' }}>XP</div>
         </div>
         <div>
           <div style={{ fontSize: 18, fontWeight: 800 }}>{streak}</div>
-          <div style={{ fontSize: 11, color: '#777' }}>Streak</div>
+          <div style={{ fontSize: 11, color: 'var(--text2)' }}>Streak</div>
         </div>
         <div>
           <div style={{ fontSize: 18, fontWeight: 800 }}>{shown.length}</div>
-          <div style={{ fontSize: 11, color: '#777' }}>Courses</div>
+          <div style={{ fontSize: 11, color: 'var(--text2)' }}>Courses</div>
         </div>
       </div>
 
       {quizzes.taken > 0 && (
-        <div style={{ margin: '0 16px 12px', fontSize: 12, color: '#777', textAlign: 'center' }}>
+        <div style={{ margin: '0 16px 12px', fontSize: 12, color: 'var(--text2)', textAlign: 'center' }}>
           {quizzes.taken} {quizzes.taken === 1 ? 'quiz' : 'quizzes'} taken · {quizzes.avg}% average
         </div>
       )}
 
       {resume && resume.course ? (
-        <div style={{ margin: '0 16px', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div style={{ margin: '0 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
           <div style={{ width: 44, height: 44, background: '#ecfdf5', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <BookOpen size={20} color="#059669" />
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 700 }}>Continue Learning</div>
-            <div style={{ fontSize: 12, color: '#777' }}>{resume.course} · Week {resume.week} · pick up where you stopped</div>
+            <div style={{ fontSize: 12, color: 'var(--text2)' }}>{resume.course} · Week {resume.week} · pick up where you stopped</div>
           </div>
           <Link to={`/learn/${encodeURIComponent(resume.course.trim())}/week/${resume.week}${resume.topic ? `?t=${resume.topic}` : ''}`} style={{ padding: '10px 16px', background: '#10b981', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #059669' }}>
             Resume
@@ -293,7 +308,7 @@ export default function DashboardRoute() {
       </div>
       <div style={{ margin: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {shown.length === 0 ? (
-          <div style={{ padding: 24, textAlign: 'center', color: '#777', background: '#fff', border: '2px solid #e5e5e5', borderRadius: 16 }}>
+          <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '2px solid var(--border)', borderRadius: 16 }}>
             <Mascot size={96} />
             <div style={{ marginTop: 8 }}>No courses yet.</div>
             <Link to="/explore" style={{ display: 'inline-block', marginTop: 12, padding: '10px 22px', background: '#10b981', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #059669' }}>
@@ -302,7 +317,7 @@ export default function DashboardRoute() {
           </div>
         ) : (
           shown.map((c, i) => (
-            <Link key={c.course} to={`/course/${encodeURIComponent(c.course.trim())}`} className="rise" style={{ animationDelay: `${Math.min(i, 6) * 40}ms`, padding: 14, background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: '#3c3c3c' }}>
+            <Link key={c.course} to={`/course/${encodeURIComponent(c.course.trim())}`} className="rise" style={{ animationDelay: `${Math.min(i, 6) * 40}ms`, padding: 14, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: 'var(--text)' }}>
               <span style={{ fontWeight: 700 }}>{c.course}</span>
               <ChevronRight size={16} color="#059669" />
             </Link>

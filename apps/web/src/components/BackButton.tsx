@@ -14,7 +14,7 @@ export default function BackButton({ to, label = 'Back' }: { to: string; label?:
         alignItems: 'center',
         background: 'none',
         border: 'none',
-        color: '#777',
+        color: 'var(--text2)',
         fontSize: 14,
         padding: 0,
       }}

@@ -5,6 +5,7 @@ import { supabaseBrowser } from '../lib/supabase';
 import { api, type AdminUser } from '../lib/api';
 import Loading from '../components/Loading';
 import Flash from '../components/Flash';
+import ConfirmModal from '../components/ConfirmModal';
 import BackButton from '../components/BackButton';
 
 type Stats = { users: number; byRole: Record<string, number>; weeks: number; topics: number; courses: number; xpTotal: number };
@@ -35,7 +36,7 @@ function Module({
     <div style={{ marginTop: 10 }}>
       <button
         onClick={() => onToggle(open ? '' : id)}
-        style={{ width: '100%', display: 'flex', gap: 8, alignItems: 'center', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: '14px 16px', fontWeight: 800, fontSize: 15, color: '#111827' }}
+        style={{ width: '100%', display: 'flex', gap: 8, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '14px 16px', fontWeight: 800, fontSize: 15, color: 'var(--text)' }}
       >
         <span style={{ flex: 1, textAlign: 'left' }}>{title}</span>
         {badge != null && (
@@ -149,8 +150,10 @@ export default function AdminRoute() {
     }
   };
 
+  // One designed sheet for every destructive/broadcast action below.
+  const [confirm, setConfirm] = useState<{ title: string; body: string; label: string; run: () => void } | null>(null);
+
   const delUni = async (id: string, name: string) => {
-    if (!window.confirm(`Delete ${name}? Profiles keep the name as text.`)) return;
     try {
       await api.adminDeleteUni(id);
       setSuccess('University deleted.');
@@ -182,7 +185,6 @@ export default function AdminRoute() {
   };
 
   const delCourse = async (code: string) => {
-    if (!window.confirm(`Delete ${code} and ALL its weeks? Students lose that content.`)) return;
     try {
       await api.adminDeleteCourse(code);
       setSuccess('Course deleted.');
@@ -230,7 +232,6 @@ export default function AdminRoute() {
 
   // One-click promotion: every student up one level (500 -> Graduated).
   const promoteAll = async () => {
-    if (!window.confirm('Promote ALL students up one level? 500 Level graduates. Course enrollments reset for promoted students.')) return;
     setPromoting(true);
     setError('');
     try {
@@ -265,7 +266,6 @@ export default function AdminRoute() {
       setError('Announcement needs a title and a message.');
       return;
     }
-    if (!window.confirm('Send this announcement to ALL users?')) return;
     setAnnouncing(true);
     setError('');
     try {
@@ -281,7 +281,6 @@ export default function AdminRoute() {
   };
 
   const removeUser = async (id: string, name: string) => {
-    if (!window.confirm(`Remove ${name || 'this user'} from Unify Learn? This cannot be undone.`)) return;
     setError('');
     try {
       await api.adminDeleteUser(id);
@@ -294,8 +293,8 @@ export default function AdminRoute() {
 
   if (loading) return <Loading text="Loading admin…" />;
 
-  const card = { background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 12 } as const;
-  const input = { padding: 10, border: '1px solid #e5e5e5', borderRadius: 10, fontSize: 14 } as const;
+  const card = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 12 } as const;
+  const input = { padding: 10, border: '1px solid var(--border)', borderRadius: 10, fontSize: 14 } as const;
   const primaryBtn = { padding: '10px 18px', borderRadius: 12, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800 } as const;
   const shownCourses = courses.filter((c) => {
     const needle = courseQ.trim().toLowerCase();
@@ -315,47 +314,47 @@ export default function AdminRoute() {
       <Link to="/studio" style={{ marginTop: 12, padding: 14, background: '#111827', color: '#fff', borderRadius: 16, fontWeight: 800, textDecoration: 'none', textAlign: 'center', display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
         <PenTool size={16} /> Open Authoring Studio
       </Link>
-      <Link to="/admin/content" style={{ marginTop: 8, padding: 14, background: '#fff', color: '#059669', border: '1px solid #a7f3d0', borderRadius: 16, fontWeight: 800, textDecoration: 'none', textAlign: 'center', display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
+      <Link to="/admin/content" style={{ marginTop: 8, padding: 14, background: 'var(--surface)', color: '#059669', border: '1px solid #a7f3d0', borderRadius: 16, fontWeight: 800, textDecoration: 'none', textAlign: 'center', display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
         <BookOpen size={16} /> View all content
       </Link>
 
       {stats && (
-        <div style={{ margin: '16px 0 0', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
+        <div style={{ margin: '16px 0 0', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
           <div>
             <div style={{ fontSize: 18, fontWeight: 800 }}>{stats.users}</div>
-            <div style={{ fontSize: 11, color: '#777' }}>Users</div>
+            <div style={{ fontSize: 11, color: 'var(--text2)' }}>Users</div>
           </div>
           <div>
             <div style={{ fontSize: 18, fontWeight: 800 }}>{stats.weeks}</div>
-            <div style={{ fontSize: 11, color: '#777' }}>Weeks</div>
+            <div style={{ fontSize: 11, color: 'var(--text2)' }}>Weeks</div>
           </div>
           <div>
             <div style={{ fontSize: 18, fontWeight: 800 }}>{stats.topics ?? 0}</div>
-            <div style={{ fontSize: 11, color: '#777' }}>Topics</div>
+            <div style={{ fontSize: 11, color: 'var(--text2)' }}>Topics</div>
           </div>
           <div>
             <div style={{ fontSize: 18, fontWeight: 800 }}>{stats.courses ?? 0}</div>
-            <div style={{ fontSize: 11, color: '#777' }}>Courses</div>
+            <div style={{ fontSize: 11, color: 'var(--text2)' }}>Courses</div>
           </div>
           <div>
             <div style={{ fontSize: 18, fontWeight: 800 }}>{stats.xpTotal}</div>
-            <div style={{ fontSize: 11, color: '#777' }}>XP</div>
+            <div style={{ fontSize: 11, color: 'var(--text2)' }}>XP</div>
           </div>
           <div>
             <div style={{ fontSize: 18, fontWeight: 800 }}>{stats.byRole.lecturer || 0}</div>
-            <div style={{ fontSize: 11, color: '#777' }}>Authors</div>
+            <div style={{ fontSize: 11, color: 'var(--text2)' }}>Authors</div>
           </div>
         </div>
       )}
 
       <Module id="models" title="AI models" badge={models.length} openId={openModule} onToggle={setOpenModule}>
       <div style={card}>
-        <div style={{ fontSize: 13, color: '#777', marginBottom: 8 }}>
+        <div style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 8 }}>
           Provider: <strong>{provider || '—'}</strong> · Default: <strong>{defaultModel || '—'}</strong>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {models.length === 0 && (
-            <div style={{ fontSize: 13, color: '#777' }}>No models recorded yet — generation attempts populate this list.</div>
+            <div style={{ fontSize: 13, color: 'var(--text2)' }}>No models recorded yet — generation attempts populate this list.</div>
           )}
           {models.map((m) => {
             const healthy = m.failures < 3;
@@ -365,7 +364,7 @@ export default function AdminRoute() {
                 <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {m.model}
                 </span>
-                <span style={{ fontSize: 12, color: '#777', whiteSpace: 'nowrap' }}>{m.failures} fails</span>
+                <span style={{ fontSize: 12, color: 'var(--text2)', whiteSpace: 'nowrap' }}>{m.failures} fails</span>
                 <button
                   onClick={async () => {
                     try {
@@ -375,7 +374,7 @@ export default function AdminRoute() {
                       setError(err instanceof Error ? err.message : 'Reset failed.');
                     }
                   }}
-                  style={{ padding: '6px 12px', borderRadius: 9999, background: '#fff', border: '1px solid #e5e5e5', fontWeight: 700, fontSize: 12 }}
+                  style={{ padding: '6px 12px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12 }}
                 >
                   Reset
                 </button>
@@ -408,9 +407,9 @@ export default function AdminRoute() {
           <div key={u.id} style={{ ...card, display: 'flex', gap: 8, alignItems: 'center' }}>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: 14 }}>{u.name}</div>
-              <div style={{ fontSize: 12, color: '#777' }}>{u.short_name || ''}</div>
+              <div style={{ fontSize: 12, color: 'var(--text2)' }}>{u.short_name || ''}</div>
             </div>
-            <button onClick={() => delUni(u.id, u.name)} aria-label={`Delete ${u.name}`} style={{ background: 'none', border: '1px solid #fecaca', borderRadius: 8, color: '#991b1b', padding: 8, display: 'flex' }}>
+            <button onClick={() => setConfirm({ title: `Delete ${u.name}?`, body: 'Profiles keep the name as text.', label: 'Delete', run: () => void delUni(u.id, u.name) })} aria-label={`Delete ${u.name}`} style={{ background: 'none', border: '1px solid #fecaca', borderRadius: 8, color: '#991b1b', padding: 8, display: 'flex' }}>
               <Trash2 size={16} />
             </button>
           </div>
@@ -432,9 +431,9 @@ export default function AdminRoute() {
           <div key={c.code} style={{ ...card, display: 'flex', gap: 8, alignItems: 'center' }}>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: 14 }}>{c.code} — {c.title}</div>
-              <div style={{ fontSize: 12, color: '#777' }}>{(c.levels || []).join(', ') || 'No levels'}{(c.semesters || []).length ? ` · ${(c.semesters || []).join(', ')}` : ''}</div>
+              <div style={{ fontSize: 12, color: 'var(--text2)' }}>{(c.levels || []).join(', ') || 'No levels'}{(c.semesters || []).length ? ` · ${(c.semesters || []).join(', ')}` : ''}</div>
             </div>
-            <button onClick={() => delCourse(c.code)} aria-label={`Delete ${c.code}`} style={{ background: 'none', border: '1px solid #fecaca', borderRadius: 8, color: '#991b1b', padding: 8, display: 'flex' }}>
+            <button onClick={() => setConfirm({ title: `Delete ${c.code}?`, body: 'ALL its weeks go with it. Students lose that content.', label: 'Delete course', run: () => void delCourse(c.code) })} aria-label={`Delete ${c.code}`} style={{ background: 'none', border: '1px solid #fecaca', borderRadius: 8, color: '#991b1b', padding: 8, display: 'flex' }}>
               <Trash2 size={16} />
             </button>
           </div>
@@ -452,9 +451,9 @@ export default function AdminRoute() {
                 style={{
                   padding: '8px 14px',
                   borderRadius: 9999,
-                  border: `1px solid ${courseLevels.includes(l) ? '#059669' : '#e5e5e5'}`,
-                  background: courseLevels.includes(l) ? '#10b981' : '#fff',
-                  color: courseLevels.includes(l) ? '#fff' : '#777',
+                  border: `1px solid ${courseLevels.includes(l) ? '#059669' : 'var(--border)'}`,
+                  background: courseLevels.includes(l) ? '#10b981' : 'var(--surface)',
+                  color: courseLevels.includes(l) ? '#fff' : 'var(--text2)',
                   fontSize: 12,
                   fontWeight: 700,
                 }}
@@ -472,9 +471,9 @@ export default function AdminRoute() {
                   flex: 1,
                   padding: '8px 14px',
                   borderRadius: 9999,
-                  border: `1px solid ${courseSemester === s ? '#059669' : '#e5e5e5'}`,
-                  background: courseSemester === s ? '#10b981' : '#fff',
-                  color: courseSemester === s ? '#fff' : '#777',
+                  border: `1px solid ${courseSemester === s ? '#059669' : 'var(--border)'}`,
+                  background: courseSemester === s ? '#10b981' : 'var(--surface)',
+                  color: courseSemester === s ? '#fff' : 'var(--text2)',
                   fontSize: 12,
                   fontWeight: 700,
                 }}
@@ -485,13 +484,13 @@ export default function AdminRoute() {
           </div>
           <button onClick={addCourse} style={{ ...primaryBtn, width: '100%' }}>Add course</button>
         </div>
-        {shownCourses.length === 0 && <div style={{ color: '#777', fontSize: 13, textAlign: 'center', padding: 16 }}>No courses match that search.</div>}
+        {shownCourses.length === 0 && <div style={{ color: 'var(--text2)', fontSize: 13, textAlign: 'center', padding: 16 }}>No courses match that search.</div>}
       </div>
       </Module>
 
       <Module id="session" title="Academic session" openId={openModule} onToggle={setOpenModule}>
       <div style={card}>
-        <div style={{ fontSize: 12, color: '#777', marginBottom: 8 }}>Active semester — students only see this semester's courses.</div>
+        <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 8 }}>Active semester — students only see this semester's courses.</div>
         <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
           {['First Semester', 'Second Semester'].map((s) => (
             <button
@@ -501,9 +500,9 @@ export default function AdminRoute() {
                 flex: 1,
                 padding: '10px 14px',
                 borderRadius: 9999,
-                border: `1px solid ${currentSemester === s ? '#059669' : '#e5e5e5'}`,
-                background: currentSemester === s ? '#10b981' : '#fff',
-                color: currentSemester === s ? '#fff' : '#777',
+                border: `1px solid ${currentSemester === s ? '#059669' : 'var(--border)'}`,
+                background: currentSemester === s ? '#10b981' : 'var(--surface)',
+                color: currentSemester === s ? '#fff' : 'var(--text2)',
                 fontSize: 13,
                 fontWeight: 800,
               }}
@@ -512,19 +511,19 @@ export default function AdminRoute() {
             </button>
           ))}
         </div>
-        <button onClick={promoteAll} disabled={promoting} style={{ ...primaryBtn, width: '100%', opacity: promoting ? 0.6 : 1 }}>
+        <button onClick={() => setConfirm({ title: 'Promote everyone?', body: 'ALL students move up one level. 500 Level graduates. Course enrollments reset for promoted students.', label: 'Promote all', run: () => void promoteAll() })} disabled={promoting} style={{ ...primaryBtn, width: '100%', opacity: promoting ? 0.6 : 1 }}>
           {promoting ? 'Promoting…' : 'Promote all students one level'}
         </button>
-        <div style={{ fontSize: 11, color: '#777', marginTop: 6 }}>500 Level graduates; enrollments reset for promoted students.</div>
+        <div style={{ fontSize: 11, color: 'var(--text2)', marginTop: 6 }}>500 Level graduates; enrollments reset for promoted students.</div>
       </div>
       </Module>
 
       <Module id="announce" title="Announce to users" openId={openModule} onToggle={setOpenModule}>
       <div style={card}>
-        <div style={{ fontSize: 12, color: '#777', marginBottom: 8 }}>Lands on every user's bell instantly.</div>
+        <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 8 }}>Lands on every user's bell instantly.</div>
         <input value={announceTitle} onChange={(e) => setAnnounceTitle(e.target.value)} placeholder="Announcement title" style={{ ...input, width: '100%', marginBottom: 8 }} />
         <textarea value={announceBody} onChange={(e) => setAnnounceBody(e.target.value)} rows={3} placeholder="What should everyone know?" style={{ ...input, width: '100%', resize: 'vertical', marginBottom: 8 }} />
-        <button onClick={announce} disabled={announcing} style={{ ...primaryBtn, width: '100%', opacity: announcing ? 0.6 : 1 }}>
+        <button onClick={() => setConfirm({ title: 'Send to everyone?', body: 'This announcement lands on every user\u2019s bell instantly.', label: 'Send', run: () => void announce() })} disabled={announcing} style={{ ...primaryBtn, width: '100%', opacity: announcing ? 0.6 : 1 }}>
           {announcing ? 'Sending…' : 'Send to all users'}
         </button>
       </div>
@@ -552,16 +551,16 @@ export default function AdminRoute() {
         <button onClick={() => refresh()} style={primaryBtn}>Search</button>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {users.length === 0 && <div style={{ color: '#777', fontSize: 13, textAlign: 'center', padding: 20 }}>No users found.</div>}
+        {users.length === 0 && <div style={{ color: 'var(--text2)', fontSize: 13, textAlign: 'center', padding: 20 }}>No users found.</div>}
         {users.map((u) => (
           <div key={u.id} style={card}>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 700, fontSize: 14 }}>{u.first_name || 'Unnamed'}{(u.is_admin || u.role === 'admin') ? ' · Admin' : ''}{u.id === ownId ? ' · You' : ''}</div>
-                <div style={{ fontSize: 12, color: '#777' }}>{[u.university, u.department].filter(Boolean).join(' · ') || 'No profile details'}</div>
+                <div style={{ fontSize: 12, color: 'var(--text2)' }}>{[u.university, u.department].filter(Boolean).join(' · ') || 'No profile details'}</div>
               </div>
               {u.id !== ownId && (
-                <button onClick={() => removeUser(u.id, u.first_name || '')} aria-label="Remove user" style={{ background: 'none', border: '1px solid #fecaca', borderRadius: 8, color: '#991b1b', padding: 8, display: 'flex' }}>
+                <button onClick={() => setConfirm({ title: `Remove ${u.first_name || 'this user'}?`, body: 'This cannot be undone.', label: 'Remove', run: () => void removeUser(u.id, u.first_name || '') })} aria-label="Remove user" style={{ background: 'none', border: '1px solid #fecaca', borderRadius: 8, color: '#991b1b', padding: 8, display: 'flex' }}>
                   <Trash2 size={16} />
                 </button>
               )}
@@ -580,9 +579,9 @@ export default function AdminRoute() {
                     flex: 1,
                     padding: 8,
                     borderRadius: 9999,
-                    border: `1px solid ${u.role === r ? '#059669' : '#e5e5e5'}`,
-                    background: u.role === r ? '#10b981' : '#fff',
-                    color: u.role === r ? '#fff' : '#777',
+                    border: `1px solid ${u.role === r ? '#059669' : 'var(--border)'}`,
+                    background: u.role === r ? '#10b981' : 'var(--surface)',
+                    color: u.role === r ? '#fff' : 'var(--text2)',
                     fontSize: 12,
                     fontWeight: 700,
                   }}
@@ -593,7 +592,7 @@ export default function AdminRoute() {
             </div>
             )}
             <div style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'center' }}>
-              <span style={{ fontSize: 12, color: '#777', fontWeight: 700 }}>Level:</span>
+              <span style={{ fontSize: 12, color: 'var(--text2)', fontWeight: 700 }}>Level:</span>
               <select
                 value={u.level || ''}
                 onChange={(e) => changeLevel(u.id, e.target.value)}
@@ -609,6 +608,20 @@ export default function AdminRoute() {
         ))}
       </div>
       </Module>
+      {confirm && (
+        <ConfirmModal
+          title={confirm.title}
+          body={confirm.body}
+          confirmLabel={confirm.label}
+          busy={promoting || announcing}
+          onConfirm={() => {
+            const run = confirm.run;
+            setConfirm(null);
+            run();
+          }}
+          onCancel={() => setConfirm(null)}
+        />
+      )}
     </div>
   );
 }
