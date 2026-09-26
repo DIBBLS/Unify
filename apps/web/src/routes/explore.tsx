@@ -42,17 +42,11 @@ export default function ExplorePage() {
         setEnrolledSet(new Set((me.courses || []).map((c) => c.toUpperCase())));
         if (settings.currentSemester) setActiveSemester(settings.currentSemester);
         const list = (await api.courses()).filter((c) => c.code && c.code.trim());
-        const withWeeks = await Promise.all(
-          list.map(async (c) => {
-            try {
-              const w = await api.courseWeeks(c.code);
-              return { code: c.code, title: c.title, weeks: w.weeks.length, levels: c.levels || [], semesters: c.semesters || [] };
-            } catch {
-              return { code: c.code, title: c.title, weeks: 0, levels: c.levels || [], semesters: c.semesters || [] };
-            }
-          })
+        // Week counts ride on the catalog response — no per-course fan-out
+        // (one Explore visit used to fire ~160 week requests).
+        setCourses(
+          list.map((c) => ({ code: c.code, title: c.title, weeks: c.weeks || 0, levels: c.levels || [], semesters: c.semesters || [] }))
         );
-        setCourses(withWeeks);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Could not load courses.');
       } finally {

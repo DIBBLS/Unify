@@ -295,6 +295,10 @@ export const api = {
     apiFetch<{ notifications: NotificationItem[]; unread: number }>(`/v1/notifications?limit=${limit}`),
   notificationsMarkRead: (payload: { ids?: string[]; all?: boolean }) =>
     apiFetch<{ ok: boolean }>('/v1/notifications/read', { method: 'POST', body: JSON.stringify(payload) }),
+  pushSubscribe: (endpoint: string, keys: { p256dh: string; auth: string }) =>
+    apiFetch<{ ok: boolean }>('/v1/push/subscribe', { method: 'POST', body: JSON.stringify({ endpoint, keys }) }),
+  pushUnsubscribe: (endpoint?: string) =>
+    apiFetch<{ ok: boolean }>('/v1/push/unsubscribe', { method: 'POST', body: JSON.stringify(endpoint ? { endpoint } : {}) }),
   adminAnnounce: (title: string, body: string, link?: string) =>
     apiFetch<{ ok: boolean; reached: number }>('/v1/admin/announce', { method: 'POST', body: JSON.stringify({ title, body, link }) }),
   adminContent: () =>
@@ -341,7 +345,7 @@ export const api = {
     if (level) p.set('level', level);
     if (semester) p.set('semester', semester);
     const q = p.toString();
-    return apiFetch<{ code: string; title: string; levels: string[]; semesters: string[] }[]>(`/v1/courses${q ? `?${q}` : ''}`);
+    return apiFetch<{ code: string; title: string; levels: string[]; semesters: string[]; weeks: number }[]>(`/v1/courses${q ? `?${q}` : ''}`);
   },
   adminCreateUni: (name: string, short_name?: string) =>
     apiFetch<{ ok: boolean }>('/v1/admin/universities', { method: 'POST', body: JSON.stringify({ name, short_name }) }),

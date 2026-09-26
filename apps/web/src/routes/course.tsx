@@ -35,10 +35,14 @@ export default function CoursePage() {
       try {
         const me = await api.me();
         const enrolled = (me.courses || []).map((c) => (c || '').toUpperCase().trim()).filter(Boolean);
+        // Titles + week counts come from the single catalog call — no
+        // per-course fan-out.
         let titles: Record<string, string> = {};
+        let weekCounts: Record<string, number> = {};
         try {
           const list = await api.courses();
           titles = Object.fromEntries(list.map((c) => [c.code.toUpperCase(), c.title]));
+          weekCounts = Object.fromEntries(list.map((c) => [c.code.toUpperCase(), c.weeks || 0]));
         } catch {
           // titles fall back to codes
         }
@@ -55,16 +59,11 @@ export default function CoursePage() {
         } catch {
           // activity notice optional
         }
-        const rows = await Promise.all(
-          enrolled.map(async (code) => {
-            try {
-              const w = await api.courseWeeks(code);
-              return { code, title: titles[code] || code, weeks: w.weeks.length };
-            } catch {
-              return { code, title: titles[code] || code, weeks: 0 };
-            }
-          })
-        );
+        const rows = enrolled.map((code) => ({
+          code,
+          title: titles[code] || code,
+          weeks: weekCounts[code] || 0,
+        }));
         setCourses(rows);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Could not load courses.');
@@ -102,17 +101,11 @@ export default function CoursePage() {
     try {
       const res = await api.repairEnrollments();
       const titleMap = Object.fromEntries(courses.map((c) => [c.code, c.title]));
-      const rows = await Promise.all(
-        (res.enrolled || []).map(async (code) => {
-          const clean = (code || '').toUpperCase().trim();
-          try {
-            const w = await api.courseWeeks(clean);
-            return { code: clean, title: titleMap[clean] || clean, weeks: w.weeks.length };
-          } catch {
-            return { code: clean, title: titleMap[clean] || clean, weeks: 0 };
-          }
-        })
-      );
+      const weekMap = Object.fromEntries(courses.map((c) => [c.code, c.weeks]));
+      const rows = (res.enrolled || []).map((code) => {
+        const clean = (code || '').toUpperCase().trim();
+        return { code: clean, title: titleMap[clean] || clean, weeks: weekMap[clean] || 0 };
+      });
       setCourses(rows.filter((c) => c.code));
       setActivity([]);
       setSuccess(
