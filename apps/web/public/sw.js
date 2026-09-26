@@ -1,9 +1,9 @@
 // Unify Learn offline worker: shell + readable content stay available offline.
 // Versioned cache; documents network-first (never a stale app), static assets
 // cache-first, API GETs network-first with cache fallback. Writes (POST/PUT/
-// DELETE) and everything else always bypass. v2 (bump on any shell-affecting
+// DELETE) and everything else always bypass. v3 (bump on any shell-affecting
 // change so old clients pick up the new worker + fresh shell on next visit).
-const CACHE = 'unify-app-v2';
+const CACHE = 'unify-app-v3';
 const SHELL = ['/', '/index.html', '/manifest.json'];
 
 // Update here if the backend moves (must match VITE_API_URL origin).

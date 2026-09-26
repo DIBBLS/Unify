@@ -304,6 +304,12 @@ export const api = {
       recentUsers: { first_name: string; email: string; role: string; created_at: string }[];
       recentNotes: { course: string; week: number; topic: number; version: number; title: string; created_at: string }[];
     }>('/v1/admin/activity'),
+  adminTrends: () =>
+    apiFetch<{
+      signups: { day: string; count: number }[];
+      notes: { day: string; count: number }[];
+      xp: { day: string; count: number }[];
+    }>('/v1/admin/trends'),
   adminStats: () =>
     apiFetch<{
       users: number;

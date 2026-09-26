@@ -4,6 +4,7 @@ import { LogOut, Pencil, Shield, X, Sun, Moon } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import ConfirmModal from '../components/ConfirmModal';
 import { useTheme } from '../hooks/useTheme';
+import { useDesign } from '../hooks/useDesign';
 import { supabaseBrowser, clearRememberSession } from '../lib/supabase';
 import { api, type Profile, type University } from '../lib/api';
 import Loading from '../components/Loading';
@@ -41,6 +42,7 @@ export default function ProfileRoute() {
   const [editing, setEditing] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
   const { theme, toggle } = useTheme();
+  const { design, setDesign } = useDesign();
   const [unis, setUnis] = useState<University[]>([]);
   const [dName, setDName] = useState('');
   const [dUni, setDUni] = useState('');
@@ -322,15 +324,31 @@ export default function ProfileRoute() {
         </div>
       )}
 
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 8 }}>
+        <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 4 }}>Appearance</div>
+        <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 10 }}>Design &amp; theme apply across the whole app.</div>
+        <div style={{ display: 'flex', gap: 6, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 9999, padding: 4, marginBottom: 10 }}>
+          {(['classic', 'story'] as const).map((d) => (
+            <button
+              key={d}
+              onClick={() => setDesign(d)}
+              style={{ flex: 1, padding: 10, borderRadius: 9999, border: 'none', background: design === d ? '#16a34a' : 'transparent', color: design === d ? '#fff' : 'var(--text2)', fontWeight: 800, fontSize: 13 }}
+            >
+              {d === 'classic' ? 'Classic' : 'Story'}
+            </button>
+          ))}
+        </div>
+        <button onClick={() => toggle()} style={{ width: '100%', padding: 12, background: 'var(--surface2)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 12, fontWeight: 800, fontSize: 13, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
+          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />} {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+        </button>
+      </div>
+
       <div style={{ display: 'flex', gap: 8 }}>
         {!editing && (
           <button onClick={startEdit} style={{ flex: 1, padding: 14, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 700, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
             <Pencil size={16} /> Edit profile
           </button>
         )}
-        <button onClick={() => toggle()} aria-label="Toggle dark mode" style={{ padding: 14, background: 'var(--surface)', color: 'var(--text2)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 800, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
-          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-        </button>
       </div>
       <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
         <button onClick={handleLogout} style={{ flex: 1, padding: 14, background: 'var(--surface)', color: '#991b1b', border: '1px solid #fecaca', borderBottom: '4px solid #fecaca', borderRadius: 16, fontWeight: 800, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
