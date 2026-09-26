@@ -21,6 +21,7 @@ firebase-debug.log
 # Local notes (do not commit — may hold pasted keys/logs)
 messages.txt
 messages.unify.txt
+vapid-keys.txt
 __out*.txt
 __full*.txt
 
