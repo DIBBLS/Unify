@@ -3,7 +3,10 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 import { warmupApi } from './lib/api';
+import { bootTheme } from './hooks/useTheme';
 import { log } from './lib/log';
+
+bootTheme();
 
 // Offline support: cache shell + readable content (see public/sw.js).
 if ('serviceWorker' in navigator) {

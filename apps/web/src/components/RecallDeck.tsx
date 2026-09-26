@@ -43,7 +43,7 @@ export function RecallDeck({ items }: { items: RecallItem[] }) {
           {graded === 0 ? 'test yourself' : `${got} nailed${fuzzy ? ` · ${fuzzy} fuzzy` : ''}`}
         </span>
         {graded > 0 && (
-          <button onClick={reset} aria-label="Restart recall deck" style={{ background: 'none', border: 'none', color: '#777', display: 'flex', padding: 4 }}>
+          <button onClick={reset} aria-label="Restart recall deck" style={{ background: 'none', border: 'none', color: 'var(--text2)', display: 'flex', padding: 4 }}>
             <RotateCcw size={14} />
           </button>
         )}
@@ -70,7 +70,7 @@ export function RecallDeck({ items }: { items: RecallItem[] }) {
             {open && g && (
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8 }}>
                 <span className={`recall-status ${g}`}>{g === 'got' ? 'Nailed it' : 'Marked for review'}</span>
-                <button onClick={() => toggle(i)} style={{ background: 'none', border: 'none', color: '#777', fontSize: 12, fontWeight: 700, textDecoration: 'underline' }}>
+                <button onClick={() => toggle(i)} style={{ background: 'none', border: 'none', color: 'var(--text2)', fontSize: 12, fontWeight: 700, textDecoration: 'underline' }}>
                   Hide
                 </button>
               </div>

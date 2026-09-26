@@ -178,23 +178,23 @@ export default function OnboardingRoute() {
   const pill = (active: boolean) => ({
     padding: '8px 14px',
     borderRadius: 9999,
-    border: `1px solid ${active ? '#059669' : '#e5e5e5'}`,
-    background: active ? '#10b981' : '#fff',
-    color: active ? '#fff' : '#777',
+    border: `1px solid ${active ? '#059669' : 'var(--border)'}`,
+    background: active ? '#10b981' : 'var(--surface)',
+    color: active ? '#fff' : 'var(--text2)',
     fontSize: 12,
     fontWeight: 700,
   });
 
   const semesterNote = (
-    <div style={{ fontSize: 12, color: '#777' }}>
+    <div style={{ fontSize: 12, color: 'var(--text2)' }}>
       Active semester: <strong>{activeSemester}</strong> (set by admin)
     </div>
   );
 
   const courseList = coursesLoading ? (
-    <div style={{ fontSize: 13, color: '#777', textAlign: 'center', padding: 12 }}>Loading courses…</div>
+    <div style={{ fontSize: 13, color: 'var(--text2)', textAlign: 'center', padding: 12 }}>Loading courses…</div>
   ) : availableCourses.length === 0 ? (
-    <div style={{ fontSize: 13, color: '#777', textAlign: 'center', padding: 12 }}>No courses found for this level and semester yet.</div>
+    <div style={{ fontSize: 13, color: 'var(--text2)', textAlign: 'center', padding: 12 }}>No courses found for this level and semester yet.</div>
   ) : (
     availableCourses.map((c) => {
       const on = selectedCourses.includes(c.code);
@@ -202,14 +202,14 @@ export default function OnboardingRoute() {
         <button
           key={c.code}
           onClick={() => toggleCourse(c.code)}
-          style={{ padding: 12, border: `1px solid ${on ? '#059669' : '#e5e5e5'}`, borderRadius: 12, background: on ? '#ecfdf5' : '#fff', textAlign: 'left', display: 'flex', gap: 8, alignItems: 'center' }}
+          style={{ padding: 12, border: `1px solid ${on ? '#059669' : 'var(--border)'}`, borderRadius: 12, background: on ? '#ecfdf5' : 'var(--surface)', textAlign: 'left', display: 'flex', gap: 8, alignItems: 'center' }}
         >
-          <span style={{ width: 20, height: 20, borderRadius: 6, border: `1px solid ${on ? '#059669' : '#e5e5e5'}`, background: on ? '#10b981' : '#fff', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800 }}>
+          <span style={{ width: 20, height: 20, borderRadius: 6, border: `1px solid ${on ? '#059669' : 'var(--border)'}`, background: on ? '#10b981' : 'var(--surface)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800 }}>
             {on ? '✓' : ''}
           </span>
           <span>
             <span style={{ fontWeight: 700, display: 'block', fontSize: 14 }}>{c.code}</span>
-            <span style={{ fontSize: 12, color: '#777' }}>{c.title}</span>
+            <span style={{ fontSize: 12, color: 'var(--text2)' }}>{c.title}</span>
           </span>
         </button>
       );
@@ -243,7 +243,7 @@ export default function OnboardingRoute() {
   const left = { s: `Step ${shownStep + 1} of ${totalSteps}`, t: stepTitle };
 
   return (
-    <div style={{ maxWidth: 480, margin: '0 auto', minHeight: '100vh', background: '#fff' }}>
+    <div style={{ maxWidth: 480, margin: '0 auto', minHeight: '100vh', background: 'var(--surface)' }}>
       <div style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', padding: 20 }}>
         <div style={{ fontSize: 11, letterSpacing: 1, opacity: 0.8 }}>{left.s}</div>
         <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 28, marginTop: 6, minHeight: 76 }}>
@@ -279,9 +279,9 @@ export default function OnboardingRoute() {
                   }}
                   style={{
                     padding: 14,
-                    border: `1px solid ${active ? '#10b981' : '#e5e5e5'}`,
+                    border: `1px solid ${active ? '#10b981' : 'var(--border)'}`,
                     borderRadius: 12,
-                    background: '#fff',
+                    background: 'var(--surface)',
                     textAlign: 'left',
                     display: 'flex',
                     gap: 12,
@@ -304,7 +304,7 @@ export default function OnboardingRoute() {
                   </span>
                   <span>
                     <span style={{ fontWeight: 700, display: 'block' }}>{r.label}</span>
-                    <span style={{ fontSize: 12, color: '#777' }}>{r.desc}</span>
+                    <span style={{ fontSize: 12, color: 'var(--text2)' }}>{r.desc}</span>
                   </span>
                 </button>
               );
@@ -316,7 +316,7 @@ export default function OnboardingRoute() {
             <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0 4px' }}>
               <Mascot size={110} />
             </div>
-            <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="e.g. Joshua" style={{ padding: 12, border: '1px solid #e5e5e5', borderRadius: 12, fontSize: 16 }} />
+            <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="e.g. Joshua" style={{ padding: 12, border: '1px solid var(--border)', borderRadius: 12, fontSize: 16 }} />
             {firstName && <div style={{ fontSize: 14 }}>{daypart}, <strong>{firstName}</strong></div>}
             <button onClick={() => { if (!firstName.trim()) return; if (isEdit) { void save(false); return; } if (role === 'collaborator') { setStep(2); return; } setStep(2); }} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
               {isEdit ? (<>Finish setup <ArrowRight size={18} /></>) : (<>Continue <ArrowRight size={18} /></>)}
@@ -341,23 +341,23 @@ export default function OnboardingRoute() {
         {step === 2 && role !== 'collaborator' && (
           <>
             {universities.map((u) => (
-              <button key={u.id} onClick={() => { setUniversity(u); setStep(3); }} style={{ padding: 14, border: `1px solid ${university?.id === u.id ? '#10b981' : '#e5e5e5'}`, borderRadius: 12, background: '#fff', textAlign: 'left' }}>
+              <button key={u.id} onClick={() => { setUniversity(u); setStep(3); }} style={{ padding: 14, border: `1px solid ${university?.id === u.id ? '#10b981' : 'var(--border)'}`, borderRadius: 12, background: 'var(--surface)', textAlign: 'left' }}>
                 <div style={{ fontWeight: 700 }}>{u.name}</div>
-                <div style={{ fontSize: 12, color: '#777' }}>{u.shortName}</div>
+                <div style={{ fontSize: 12, color: 'var(--text2)' }}>{u.shortName}</div>
               </button>
             ))}
           </>
         )}
         {step === 3 && faculties.map((f) => (
-          <button key={f.name} onClick={() => { setFaculty(f.name); setStep(4); }} style={{ padding: 14, border: '1px solid #e5e5e5', borderRadius: 12, background: '#fff', textAlign: 'left' }}>{f.name}</button>
+          <button key={f.name} onClick={() => { setFaculty(f.name); setStep(4); }} style={{ padding: 14, border: '1px solid var(--border)', borderRadius: 12, background: 'var(--surface)', textAlign: 'left' }}>{f.name}</button>
         ))}
         {step === 4 && departments.map((d) => (
-          <button key={d.name} onClick={() => { setDepartment(d.name); setStep(5); }} style={{ padding: 14, border: '1px solid #e5e5e5', borderRadius: 12, background: '#fff', textAlign: 'left' }}>
-            {d.name} <span style={{ color: '#777', fontSize: 12 }}>{d.sub}</span>
+          <button key={d.name} onClick={() => { setDepartment(d.name); setStep(5); }} style={{ padding: 14, border: '1px solid var(--border)', borderRadius: 12, background: 'var(--surface)', textAlign: 'left' }}>
+            {d.name} <span style={{ color: 'var(--text2)', fontSize: 12 }}>{d.sub}</span>
           </button>
         ))}
         {step === 5 && role !== 'lecturer' && levels.map((l) => (
-          <button key={l} onClick={() => { setLevel(l); setStep(6); }} style={{ padding: 14, border: '1px solid #e5e5e5', borderRadius: 12, background: level === l ? '#d1fae5' : '#fff' }}>{l}</button>
+          <button key={l} onClick={() => { setLevel(l); setStep(6); }} style={{ padding: 14, border: '1px solid var(--border)', borderRadius: 12, background: level === l ? '#d1fae5' : 'var(--surface)' }}>{l}</button>
         ))}
         {step === 5 && role === 'lecturer' && (
           <>
@@ -376,7 +376,7 @@ export default function OnboardingRoute() {
         )}
         {step === 6 && role !== 'lecturer' && (
           <>
-            <div style={{ fontSize: 13, color: '#777' }}>Level: <strong>{level || '—'}</strong></div>
+            <div style={{ fontSize: 13, color: 'var(--text2)' }}>Level: <strong>{level || '—'}</strong></div>
             {semesterNote}
             {courseList}
             <button onClick={() => setStep(7)} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8 }}>
@@ -392,20 +392,20 @@ export default function OnboardingRoute() {
               { label: '2nd Class Lower', val: 2.4 },
               { label: 'Pass', val: 1.5 },
             ].map((t) => (
-              <button key={t.label} onClick={() => setGradTarget(t.val)} style={{ padding: 14, border: `1px solid ${gradTarget === t.val ? '#10b981' : '#e5e5e5'}`, borderRadius: 12, background: gradTarget === t.val ? '#d1fae5' : '#fff' }}>
+              <button key={t.label} onClick={() => setGradTarget(t.val)} style={{ padding: 14, border: `1px solid ${gradTarget === t.val ? '#10b981' : 'var(--border)'}`, borderRadius: 12, background: gradTarget === t.val ? '#d1fae5' : 'var(--surface)' }}>
                 {t.label} — {t.val}
               </button>
             ))}
             <button onClick={() => save(false)} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8 }}>
               Finish setup <ArrowRight size={18} />
             </button>
-            <button onClick={() => save(true)} style={{ background: 'none', border: 'none', color: '#777', fontSize: 13 }}>
+            <button onClick={() => save(true)} style={{ background: 'none', border: 'none', color: 'var(--text2)', fontSize: 13 }}>
               Skip for now
             </button>
           </>
         )}
         {step > 0 && (
-          <button onClick={() => setStep(step - 1)} style={{ background: 'none', border: 'none', color: '#777', marginTop: 8, display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}>
+          <button onClick={() => setStep(step - 1)} style={{ background: 'none', border: 'none', color: 'var(--text2)', marginTop: 8, display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}>
             <ChevronLeft size={16} /> Back
           </button>
         )}

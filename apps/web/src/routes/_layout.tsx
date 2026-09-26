@@ -138,8 +138,8 @@ export default function Layout() {
 
   return (
     <div style={{ fontFamily: "'Nunito', system-ui" }}>
-      <header style={{ display: 'flex', gap: 12, padding: '12px 16px', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: 0, background: '#fff', zIndex: 10, alignItems: 'center' }}>
-        <Link to="/dashboard" style={{ fontWeight: 800, textDecoration: 'none', color: '#111827' }}>
+      <header style={{ display: 'flex', gap: 12, padding: '12px 16px', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, background: 'var(--surface)', zIndex: 10, alignItems: 'center' }}>
+        <Link to="/dashboard" style={{ fontWeight: 800, textDecoration: 'none', color: 'var(--text)' }}>
           Unify<span style={{ color: '#10b981' }}> Learn</span>
         </Link>
         <span style={{ flex: 1 }} />
@@ -196,7 +196,7 @@ export default function Layout() {
       </header>
       <OfflineBanner />
       <Outlet />
-      <nav style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, display: 'flex', background: '#fff', borderTop: '1px solid #e5e5e5', padding: '8px 0 calc(8px + env(safe-area-inset-bottom))' }}>
+      <nav style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, display: 'flex', background: 'var(--surface)', borderTop: '1px solid var(--border)', padding: '8px 0 calc(8px + env(safe-area-inset-bottom))' }}>
         {showSkeletonNav
           ? [0, 1, 2, 3].map((i) => (
               <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
@@ -214,7 +214,7 @@ export default function Layout() {
             alignItems: 'center',
             gap: 2,
             textDecoration: 'none',
-            color: active ? '#10b981' : '#777',
+            color: active ? '#10b981' : 'var(--text2)',
             fontSize: 11,
             fontWeight: active ? 800 : 500,
           } as const;

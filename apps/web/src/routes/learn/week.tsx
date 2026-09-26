@@ -117,7 +117,7 @@ export default function LearnPage() {
     return (
       <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 20px 100px' }}>
         <div className="skel" style={{ height: 14, width: 90, marginBottom: 16 }} />
-        <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 24, marginBottom: 20 }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 24, marginBottom: 20 }}>
           <div className="skel" style={{ height: 12, width: '40%' }} />
           <div className="skel" style={{ height: 26, width: '75%', marginTop: 10 }} />
           <div className="skel" style={{ height: 14, width: '90%', marginTop: 10 }} />
@@ -136,7 +136,7 @@ export default function LearnPage() {
           <div className="skel" style={{ height: 14, width: '80%', marginBottom: 8 }} />
           <div className="skel" style={{ height: 120, width: '100%', marginTop: 12 }} />
         </div>
-        <div style={{ fontSize: 12, color: '#777', textAlign: 'center', marginTop: 12 }}>Loading Week {weekNum}…</div>
+        <div style={{ fontSize: 12, color: 'var(--text2)', textAlign: 'center', marginTop: 12 }}>Loading Week {weekNum}…</div>
       </div>
     );
   if (!courseCode) {
@@ -153,9 +153,9 @@ export default function LearnPage() {
     );
   if (blocked)
     return (
-      <div style={{ padding: 40, textAlign: 'center', color: '#777', maxWidth: 480, margin: '0 auto' }}>
+      <div style={{ padding: 40, textAlign: 'center', color: 'var(--text2)', maxWidth: 480, margin: '0 auto' }}>
         <Mascot size={110} />
-        <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 20, color: '#3c3c3c', marginTop: 12 }}>You're not enrolled in {courseCode}</h1>
+        <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 20, color: 'var(--text)', marginTop: 12 }}>You're not enrolled in {courseCode}</h1>
         <p style={{ fontSize: 14, margin: '8px 0 20px' }}>Enroll to unlock its weeks, topics and quizzes.</p>
         <button
           onClick={async () => {
@@ -181,7 +181,7 @@ export default function LearnPage() {
     );
   if (!note)
     return (
-      <div style={{ padding: 40, textAlign: 'center', color: '#777' }}>
+      <div style={{ padding: 40, textAlign: 'center', color: 'var(--text2)' }}>
         <Mascot size={110} />
         <div style={{ marginTop: 12 }}>No content for {courseCode} Week {weekNum} yet.</div>
       </div>
@@ -260,30 +260,27 @@ export default function LearnPage() {
           <div style={{ marginTop: 6 }}><span className="xp-burst-sub">{burst.sub}</span></div>
         </div>
       )}
-      <button onClick={() => navigate(backTo)} style={{ marginBottom: 16, display: 'flex', gap: 6, alignItems: 'center', background: 'none', border: 'none', color: '#777', fontSize: 14 }}>
+      <button onClick={() => navigate(backTo)} style={{ marginBottom: 16, display: 'flex', gap: 6, alignItems: 'center', background: 'none', border: 'none', color: 'var(--text2)', fontSize: 14 }}>
         <ChevronLeft size={18} /> Back
       </button>
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
-        <button onClick={() => window.print()} style={{ display: 'flex', gap: 6, alignItems: 'center', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 700, color: '#059669' }}>
+        <button onClick={() => window.print()} style={{ display: 'flex', gap: 6, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 700, color: '#059669' }}>
           <Download size={14} /> Save PDF
         </button>
       </div>
-      <div className="hero" style={{ background: '#fff', color: '#3c3c3c', border: '1px solid #e5e5e5', borderRadius: 12, padding: 24, marginBottom: 20 }}>
-        <div style={{ fontSize: 10, letterSpacing: 2, color: '#059669', fontWeight: 700, textTransform: 'uppercase' }}>
-          {note.course} · Week {note.week}
-        </div>
-        <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 24, margin: '8px 0' }}>{note.title}</h1>
-        <p style={{ fontSize: 14, color: '#777' }}>{note.subtitle}</p>
-        {note.learningOutcome && <p style={{ fontSize: 13, color: '#3c3c3c', marginTop: 10 }}>{note.learningOutcome}</p>}
-        {(note.metaChips?.length || 0) > 0 && (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
-            {note.metaChips.map((chip) => (
-              <span key={chip} style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 9999, background: '#ecfdf5', color: '#059669' }}>
-                {chip}
-              </span>
-            ))}
-          </div>
+      <div className="hero">
+        <div className="hero-eyebrow">{note.course} · Week {note.week}</div>
+        <div className="hero-title">{note.title}</div>
+        {note.subtitle ? <div className="hero-subtitle">{note.subtitle}</div> : null}
+        {note.learningOutcome && (
+          <div className="hero-outcome"><strong>Outcome — </strong>{note.learningOutcome}</div>
         )}
+        <div className="hero-meta">
+          {(note.metaChips || []).map((chip) => (
+            <span key={chip} className="meta-chip">{chip}</span>
+          ))}
+          <span className="meta-chip">{doneCount * 10} XP earned</span>
+        </div>
       </div>
 
       {preview && (
@@ -296,47 +293,29 @@ export default function LearnPage() {
       )}
 
       {tabCount > 1 && (
-        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', padding: '4px 2px 12px' }}>
-          {topics.map((t, idx) => (
-            <button
-              key={t.number}
-              onClick={() => goTab(idx)}
-              style={{
-                flex: '1 0 auto',
-                padding: '8px 14px',
-                borderRadius: 9999,
-                border: `1px solid ${idx === tab ? '#059669' : '#e5e5e5'}`,
-                background: idx === tab ? '#10b981' : '#fff',
-                color: idx === tab ? '#fff' : '#777',
-                fontWeight: 700,
-                fontSize: 12,
-                display: 'flex',
-                gap: 4,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              {isDone(weekNum, idx) && <Check size={12} />} Topic {t.number}
-              {(versionByTopic[t.number]?.versions.length || 0) > 1 && (
-                <span style={{ fontSize: 10, fontWeight: 800, padding: '1px 7px', borderRadius: 9999, background: idx === tab ? '#fff' : '#ecfdf5', color: '#059669' }}>
-                  v{versionByTopic[t.number].version}
-                </span>
-              )}
-            </button>
-          ))}
+        <div className="segbar" role="tablist" aria-label="Week chapters">
+          {topics.map((t, idx) => {
+            const done = isDone(weekNum, idx);
+            return (
+              <button
+                key={t.number}
+                role="tab"
+                aria-selected={idx === tab}
+                title={`Topic ${t.number} · +10 XP`}
+                className={`${done ? 'done' : ''} ${idx === tab ? 'current' : ''}`}
+                onClick={() => goTab(idx)}
+              >
+                {done ? <Check size={12} /> : null} T{t.number}
+              </button>
+            );
+          })}
           {hasQuiz && (
             <button
+              role="tab"
+              aria-selected={topics.length === tab}
+              title="End-of-week quiz"
+              className={topics.length === tab ? 'current' : ''}
               onClick={() => goTab(topics.length)}
-              style={{
-                flex: '1 0 auto',
-                padding: '8px 14px',
-                borderRadius: 9999,
-                border: `1px solid ${topics.length === tab ? '#059669' : '#e5e5e5'}`,
-                background: topics.length === tab ? '#10b981' : '#fff',
-                color: topics.length === tab ? '#fff' : '#777',
-                fontWeight: 700,
-                fontSize: 12,
-              }}
             >
               Quiz
             </button>
@@ -348,7 +327,7 @@ export default function LearnPage() {
         <>
           {activeMeta && activeMeta.versions.length > 1 && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginBottom: 8 }}>
-              <span style={{ fontSize: 11, color: '#777', fontWeight: 700 }}>Versions:</span>
+              <span style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 700 }}>Versions:</span>
               {activeMeta.versions.map((v) => {
                 const current = (viewed[activeMeta.topic] ?? activeMeta.version) === v.version;
                 return (
@@ -356,7 +335,7 @@ export default function LearnPage() {
                     key={v.id}
                     disabled={loadingVersion}
                     onClick={() => viewVersion(activeMeta, v.version, v.id)}
-                    style={{ padding: '4px 12px', borderRadius: 9999, border: `1px solid ${current ? '#059669' : '#e5e5e5'}`, background: current ? '#10b981' : '#fff', color: current ? '#fff' : '#777', fontWeight: 800, fontSize: 11 }}
+                    style={{ padding: '4px 12px', borderRadius: 9999, border: `1px solid ${current ? '#059669' : 'var(--border)'}`, background: current ? '#10b981' : 'var(--surface)', color: current ? '#fff' : 'var(--text2)', fontWeight: 800, fontSize: 11 }}
                   >
                     v{v.version}
                   </button>
@@ -386,14 +365,16 @@ export default function LearnPage() {
           <button
             onClick={() => goTab(tab - 1)}
             disabled={tab === 0}
-            style={{ flex: 1, padding: 12, borderRadius: 12, background: '#fff', border: '1px solid #e5e5e5', fontWeight: 800, fontSize: 14, display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'center', opacity: tab === 0 ? 0.5 : 1 }}
+            className="beat-next"
+            style={{ flex: 1, justifyContent: 'center', opacity: tab === 0 ? 0.5 : 1 }}
           >
             <ChevronLeft size={16} /> Back
           </button>
           <button
             onClick={() => goTab(tab + 1)}
             disabled={tab >= tabCount - 1}
-            style={{ flex: 1, padding: 12, borderRadius: 12, background: '#fff', border: '1px solid #e5e5e5', fontWeight: 800, fontSize: 14, display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'center', opacity: tab >= tabCount - 1 ? 0.5 : 1 }}
+            className="beat-next"
+            style={{ flex: 1, justifyContent: 'center', opacity: tab >= tabCount - 1 ? 0.5 : 1 }}
           >
             Next <ChevronRight size={16} />
           </button>
@@ -422,9 +403,9 @@ function TopicTab({ topic, done, onToggle, preview }: { topic: Topic; done: bool
             marginTop: 12,
             padding: '10px 18px',
             borderRadius: 9999,
-            background: done ? '#059669' : '#fff',
-            color: done ? '#fff' : '#3c3c3c',
-            border: `1px solid ${done ? '#059669' : '#e5e5e5'}`,
+            background: done ? '#059669' : 'var(--surface)',
+            color: done ? '#fff' : 'var(--text)',
+            border: `1px solid ${done ? '#059669' : 'var(--border)'}`,
             cursor: 'pointer',
             display: 'flex',
             gap: 6,

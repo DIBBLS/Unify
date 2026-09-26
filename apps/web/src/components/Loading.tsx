@@ -18,11 +18,11 @@ export default function Loading({ text = 'Loading…' }: { text?: string }) {
     return () => clearInterval(t);
   }, []);
   return (
-    <div style={{ padding: 40, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, color: '#777', textAlign: 'center' }}>
+    <div style={{ padding: 40, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, color: 'var(--text2)', textAlign: 'center' }}>
       <div style={{ animation: 'mascot-fly 5s ease-in-out infinite' }}>
         <Mascot size={110} animate="float" />
       </div>
-      <div key={qi} className="flash" style={{ fontFamily: 'Nunito', fontWeight: 700, fontSize: 15, color: '#3c3c3c', fontStyle: 'italic', maxWidth: 300 }}>
+      <div key={qi} className="flash" style={{ fontFamily: 'Nunito', fontWeight: 700, fontSize: 15, color: 'var(--text)', fontStyle: 'italic', maxWidth: 300 }}>
         &ldquo;{QUOTES[qi]}&rdquo;
       </div>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>

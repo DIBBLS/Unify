@@ -139,13 +139,13 @@ export function ReadAloud({ topic }: { topic: Topic }) {
         onClick={playing ? stop : play}
         aria-label={playing ? 'Stop reading aloud' : 'Listen to this topic'}
         className={playing ? 'listening' : undefined}
-        style={{ display: 'flex', gap: 6, alignItems: 'center', background: playing ? '#059669' : '#fff', color: playing ? '#fff' : '#059669', border: `1px solid ${playing ? '#059669' : '#a7f3d0'}`, borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 800 }}
+        style={{ display: 'flex', gap: 6, alignItems: 'center', background: playing ? '#059669' : 'var(--surface)', color: playing ? '#fff' : '#059669', border: `1px solid ${playing ? '#059669' : '#a7f3d0'}`, borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 800 }}
       >
         {playing ? <Square size={14} /> : <Volume2 size={14} />}
         {playing ? 'Stop' : 'Listen'}
       </button>
       {playing && partIdx < parts.length && (
-        <div style={{ fontSize: 12, color: '#777', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <div style={{ fontSize: 12, color: 'var(--text2)', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {partIdx + 1}/{parts.length} · {parts[partIdx].title}
         </div>
       )}

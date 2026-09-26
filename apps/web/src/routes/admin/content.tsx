@@ -73,7 +73,7 @@ export default function AdminContentRoute() {
       <h1 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 24, display: 'flex', gap: 8, alignItems: 'center' }}>
         <Layers size={22} color="#059669" /> All content
       </h1>
-      <div style={{ fontSize: 12, color: '#777', marginTop: 4 }}>
+      <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>
         {courses.length} courses · {totalWeeks} weeks · {totalTopics} topics with notes
       </div>
       {error && (
@@ -87,21 +87,21 @@ export default function AdminContentRoute() {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search code or title…"
-          style={{ width: '100%', padding: '10px 12px 10px 36px', border: '1px solid #e5e5e5', borderRadius: 12, fontSize: 14 }}
+          style={{ width: '100%', padding: '10px 12px 10px 36px', border: '1px solid var(--border)', borderRadius: 12, fontSize: 14 }}
         />
       </div>
       <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {filtered.map((c) => {
           const isOpen = open === c.code;
           return (
-            <div key={c.code} style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, overflow: 'hidden' }}>
+            <div key={c.code} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
               <button
                 onClick={() => setOpen(isOpen ? null : c.code)}
-                style={{ width: '100%', display: 'flex', gap: 10, alignItems: 'center', padding: '12px 14px', background: 'none', border: 'none', textAlign: 'left', color: '#3c3c3c' }}
+                style={{ width: '100%', display: 'flex', gap: 10, alignItems: 'center', padding: '12px 14px', background: 'none', border: 'none', textAlign: 'left', color: 'var(--text)' }}
               >
                 <span style={{ flex: 1, minWidth: 0 }}>
                   <span style={{ fontWeight: 800, fontSize: 14 }}>{c.code}</span>
-                  <span style={{ display: 'block', fontSize: 12, color: '#777', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {c.title || 'Untitled course'}{c.level ? ` · ${c.level}` : ''}{c.semester ? ` · ${c.semester.replace(' Semester', '')}` : ''}
                   </span>
                 </span>
@@ -119,18 +119,18 @@ export default function AdminContentRoute() {
                     Open course page →
                   </Link>
                   {c.weeks.length === 0 && (
-                    <div style={{ fontSize: 12, color: '#999', padding: '4px 0' }}>No weeks yet.</div>
+                    <div style={{ fontSize: 12, color: 'var(--text3)', padding: '4px 0' }}>No weeks yet.</div>
                   )}
                   {c.weeks.map((w) => (
                     <div key={w.week} style={{ marginTop: 8 }}>
                       <Link
                         to={`/learn/${encodeURIComponent(c.code)}/week/${w.week}?preview=1`}
-                        style={{ fontSize: 13, fontWeight: 800, color: '#3c3c3c', textDecoration: 'none' }}
+                        style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)', textDecoration: 'none' }}
                       >
                         Week {w.week} · {w.title || 'Untitled'}
                       </Link>
                       {w.topics.length === 0 ? (
-                        <div style={{ fontSize: 12, color: '#999' }}>Shell only — no topics published.</div>
+                        <div style={{ fontSize: 12, color: 'var(--text3)' }}>Shell only — no topics published.</div>
                       ) : (
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
                           {w.topics.map((t) => (
@@ -153,7 +153,7 @@ export default function AdminContentRoute() {
           );
         })}
         {filtered.length === 0 && !error && (
-          <div style={{ padding: 24, textAlign: 'center', color: '#777', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12 }}>
+          <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
             {q ? 'No courses match that search.' : 'No courses yet.'}
           </div>
         )}

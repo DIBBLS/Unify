@@ -352,7 +352,7 @@ export default function StudioRoute() {
     width: '100%',
     padding: 12,
     marginTop: 6,
-    border: '1px solid #e5e5e5',
+    border: '1px solid var(--border)',
     borderRadius: 12,
     display: 'block',
     fontSize: 14,
@@ -366,8 +366,8 @@ export default function StudioRoute() {
       <div style={{ display: 'flex', gap: 6, margin: '12px 0 20px' }}>
         {['Compose', 'Review', 'Live'].map((s, i) => (
           <div key={s} style={{ flex: 1, textAlign: 'center' }}>
-            <div style={{ height: 4, borderRadius: 2, background: i <= step ? '#10b981' : '#e5e5e5' }} />
-            <div style={{ fontSize: 11, color: i <= step ? '#059669' : '#afafaf', fontWeight: 700, marginTop: 4 }}>{s}</div>
+            <div style={{ height: 4, borderRadius: 2, background: i <= step ? '#10b981' : 'var(--border)' }} />
+            <div style={{ fontSize: 11, color: i <= step ? '#059669' : 'var(--text3)', fontWeight: 700, marginTop: 4 }}>{s}</div>
           </div>
         ))}
       </div>
@@ -396,11 +396,11 @@ export default function StudioRoute() {
               <input value={week} onChange={(e) => setWeek(e.target.value)} inputMode="numeric" placeholder="1" style={input} />
             </label>
           </div>
-          <button onClick={suggestWeek} style={{ padding: 10, background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, fontWeight: 700, fontSize: 13, color: '#059669' }}>
+          <button onClick={suggestWeek} style={{ padding: 10, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, fontWeight: 700, fontSize: 13, color: '#059669' }}>
             Suggest next free week
           </button>
           {weeks.length > 0 && (
-            <div style={{ fontSize: 12, color: '#777' }}>
+            <div style={{ fontSize: 12, color: 'var(--text2)' }}>
               Already live: {weeks.map((w) => `W${w.week}`).join(', ')}
             </div>
           )}
@@ -413,9 +413,9 @@ export default function StudioRoute() {
                   flex: 1,
                   padding: '10px 8px',
                   borderRadius: 12,
-                  border: `1px solid ${method === m ? '#059669' : '#e5e5e5'}`,
-                  background: method === m ? '#10b981' : '#fff',
-                  color: method === m ? '#fff' : '#777',
+                  border: `1px solid ${method === m ? '#059669' : 'var(--border)'}`,
+                  background: method === m ? '#10b981' : 'var(--surface)',
+                  color: method === m ? '#fff' : 'var(--text2)',
                   fontWeight: 800,
                   fontSize: 12,
                 }}
@@ -431,7 +431,7 @@ export default function StudioRoute() {
                 Raw lecture notes
                 <textarea value={raw} onChange={(e) => setRaw(e.target.value)} rows={10} placeholder="Paste messy lecture notes here…" style={{ ...input, resize: 'vertical' }} />
               </label>
-              <details style={{ border: '1px solid #e5e5e5', borderRadius: 12, padding: '10px 14px' }}>
+              <details style={{ border: '1px solid var(--border)', borderRadius: 12, padding: '10px 14px' }}>
                 <summary style={{ fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Advanced (title, tags, mode)</summary>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 12 }}>
                   <label style={label}>
@@ -464,7 +464,7 @@ export default function StudioRoute() {
 
           {method === 'manual' && (
             <>
-              <div style={{ fontSize: 13, color: '#777', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 12, padding: 12 }}>
+              <div style={{ fontSize: 13, color: 'var(--text2)', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 12, padding: 12 }}>
                 Compose the week yourself with guided forms — same format the AI produces, no JSON, no tokens spent.
               </div>
               {!note ? (
@@ -484,15 +484,15 @@ export default function StudioRoute() {
 
           {method === 'external' && (
             <>
-              <div style={{ fontSize: 13, color: '#777', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 12, padding: 12 }}>
+              <div style={{ fontSize: 13, color: 'var(--text2)', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 12, padding: 12 }}>
                 Use your own AI (ChatGPT, Claude, Gemini app) and spend zero server tokens:
                 copy our format, paste it plus your raw notes into your AI, paste the JSON it returns below.
               </div>
-              <button onClick={copyFormat} disabled={formatLoading} style={{ padding: 12, background: '#fff', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 12, fontWeight: 800, fontSize: 14, color: '#059669', opacity: formatLoading ? 0.6 : 1 }}>
+              <button onClick={copyFormat} disabled={formatLoading} style={{ padding: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 12, fontWeight: 800, fontSize: 14, color: '#059669', opacity: formatLoading ? 0.6 : 1 }}>
                 {formatLoading ? 'Loading format…' : copied ? 'Copied — paste it into your AI' : 'Copy AI format'}
               </button>
               {formatPack && (
-                <details style={{ border: '1px solid #e5e5e5', borderRadius: 12, padding: '10px 14px' }}>
+                <details style={{ border: '1px solid var(--border)', borderRadius: 12, padding: '10px 14px' }}>
                   <summary style={{ fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>View format text (manual copy)</summary>
                   <pre style={{ whiteSpace: 'pre-wrap', fontSize: 11, background: '#fafafa', padding: 10, borderRadius: 8, marginTop: 8, maxHeight: 240, overflow: 'auto' }}>{formatPack}</pre>
                 </details>
@@ -511,12 +511,12 @@ export default function StudioRoute() {
 
       {step === 1 && note && meta && (
         <div>
-          <div style={{ background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
             <div style={{ fontSize: 10, letterSpacing: 2, color: '#059669', fontWeight: 700, textTransform: 'uppercase' }}>
               Review · {meta.course} · Week {meta.week}
             </div>
             <h2 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 20, margin: '8px 0 4px' }}>{note.title}</h2>
-            <p style={{ fontSize: 13, color: '#777' }}>{note.subtitle}</p>
+            <p style={{ fontSize: 13, color: 'var(--text2)' }}>{note.subtitle}</p>
             {validation && (
               <div style={{ marginTop: 10, fontSize: 12, fontWeight: 700, display: 'flex', gap: 6, alignItems: 'center', color: validation.valid ? '#059669' : '#991b1b' }}>
                 {validation.valid ? <Check size={14} /> : <X size={14} />}
@@ -534,11 +534,11 @@ export default function StudioRoute() {
               </ul>
             )}
             <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-              <button onClick={() => { setEditing((v) => !v); }} style={{ flex: 1, padding: 10, background: editing ? '#10b981' : '#fff', color: editing ? '#fff' : '#059669', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 12, fontWeight: 800, fontSize: 13 }}>
+              <button onClick={() => { setEditing((v) => !v); }} style={{ flex: 1, padding: 10, background: editing ? '#10b981' : 'var(--surface)', color: editing ? '#fff' : '#059669', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 12, fontWeight: 800, fontSize: 13 }}>
                 {editing ? 'Done editing' : 'Edit content'}
               </button>
               {!editing && (
-                <button onClick={revalidate} style={{ flex: 1, padding: 10, background: '#fff', color: '#3c3c3c', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 12, fontWeight: 800, fontSize: 13 }}>
+                <button onClick={revalidate} style={{ flex: 1, padding: 10, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 12, fontWeight: 800, fontSize: 13 }}>
                   Check again
                 </button>
               )}
@@ -555,7 +555,7 @@ export default function StudioRoute() {
                     <button
                       onClick={() => publishTopic(t.number)}
                       disabled={publishingTopic !== null}
-                      style={{ marginTop: 6, padding: '8px 14px', borderRadius: 9999, background: '#fff', border: '1px solid #e5e5e5', fontWeight: 700, fontSize: 12, color: '#059669' }}
+                      style={{ marginTop: 6, padding: '8px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: '#059669' }}
                     >
                       {publishingTopic === t.number ? 'Publishing…' : `Publish only Topic ${t.number}`}
                     </button>
@@ -570,7 +570,7 @@ export default function StudioRoute() {
             </>
           )}
           <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap' }}>
-            <button onClick={() => setStep(0)} style={{ flex: 1, minWidth: 120, padding: 14, background: '#fff', color: '#3c3c3c', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 16, fontWeight: 800 }}>
+            <button onClick={() => setStep(0)} style={{ flex: 1, minWidth: 120, padding: 14, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 800 }}>
               Back to compose
             </button>
             <button onClick={publish} disabled={publishing} style={{ flex: 2, minWidth: 160, padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
@@ -584,9 +584,9 @@ export default function StudioRoute() {
         <div style={{ textAlign: 'center', padding: '24px 0' }}>
           <Mascot size={120} animate="wave" />
           <h2 style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 22, marginTop: 12 }}>Live for students</h2>
-          <p style={{ fontSize: 13, color: '#777', margin: '8px 0 20px' }}>Find it under your level and course, and on your dashboard.</p>
+          <p style={{ fontSize: 13, color: 'var(--text2)', margin: '8px 0 20px' }}>Find it under your level and course, and on your dashboard.</p>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={reset} style={{ flex: 1, padding: 14, background: '#fff', color: '#3c3c3c', border: '1px solid #e5e5e5', borderBottom: '4px solid #e5e5e5', borderRadius: 16, fontWeight: 800 }}>
+            <button onClick={reset} style={{ flex: 1, padding: 14, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 800 }}>
               Author another
             </button>
             <button onClick={() => navigate('/dashboard')} style={{ flex: 1, padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800 }}>
