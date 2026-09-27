@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Check, Download, ArrowUp, Share2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Download, ArrowUp, Share2, Lock } from 'lucide-react';
 import { api, type TopicMeta } from '../../lib/api';
 import { log } from '../../lib/log';
 import type { UnifyNote, Topic } from '../../types/note';
@@ -8,6 +8,7 @@ import { TopicSlice } from '../../components/TopicSlice';
 import EoqQuiz from '../../components/EoqQuiz';
 import { ReadAloud } from '../../components/ReadAloud';
 import { ShareModal } from '../../components/ShareModal';
+import { XP_GATES, meetsXpGate } from '../../lib/xp';
 import { useProgress } from '../../hooks/useProgress';
 import Mascot from '../../components/Mascot';
 import ErrorState from '../../components/ErrorState';
@@ -36,6 +37,8 @@ export default function LearnPage() {
   const [burst, setBurst] = useState<{ k: number; label: string; sub: string } | null>(null);
   const firstCount = useRef(true);
   const [tab, setTab] = useState(0);
+  // Lifetime XP drives XP-gated perks (PDF unlocks at 50 XP).
+  const [myXp, setMyXp] = useState(0);
   // Return-to-top lands on the topic head (below hero + chapter bar),
   // not the very top of the page.
   const topicTopRef = useRef<HTMLDivElement>(null);
@@ -104,6 +107,8 @@ export default function LearnPage() {
           api.week(code, weekNum),
         ]);
         if (me) setViewer({ isAdmin: !!me.isAdmin, role: me.profile?.role || 'student' });
+        // Lifetime XP for XP-gated perks (fail-soft: locked display on error).
+        api.stats().then((s) => setMyXp(s.xp || 0)).catch(() => {});
         if (me && !previewMode) {
           const role = me.profile?.role || 'student';
           const enrolled = (me.courses || []).map((c) => c.toUpperCase().trim()).includes(code.toUpperCase());
@@ -305,6 +310,19 @@ export default function LearnPage() {
             <Share2 size={14} /> Share
           </button>
         )}
+        {(() => {
+          const unlocked = meetsXpGate(myXp, 'pdf', viewer ? { role: viewer.role, isAdmin: viewer.isAdmin } : undefined);
+          return (
+            <button
+              onClick={() => unlocked && window.print()}
+              disabled={!unlocked}
+              title={unlocked ? 'Save this week as PDF' : `Unlocks at ${XP_GATES.pdf} XP — you have ${myXp}`}
+              style={{ display: 'flex', gap: 6, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 700, color: unlocked ? '#059669' : 'var(--text3)', opacity: unlocked ? 1 : 0.75 }}
+            >
+              {unlocked ? <Download size={14} /> : <Lock size={14} />} {unlocked ? 'Save PDF' : `PDF · ${myXp}/${XP_GATES.pdf} XP`}
+            </button>
+          );
+        })()}
       </div>
       {sharing && note && (
         <ShareModal course={note.course} week={weekNum} title={note.title} topics={topics.map((t) => t.title || `Topic ${t.number}`)} onClose={() => setSharing(false)} />
@@ -423,6 +441,13 @@ export default function LearnPage() {
           </button>
         </div>
       )}
+    </div>
+    <div className="print-only">
+      <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 22 }}>{note.course} · Week {note.week}: {note.title}</h1>
+      <p style={{ fontSize: 13, color: '#555' }}>{note.subtitle}</p>
+      {topics.map((t) => (
+        <TopicSlice key={t.number} topic={t} />
+      ))}
     </div>
     </>
   );

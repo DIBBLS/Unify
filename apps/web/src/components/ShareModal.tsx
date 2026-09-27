@@ -35,7 +35,9 @@ export function ShareModal({ course, week, title, topics, onClose }: { course: s
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const urlFor = (token: string) => `${window.location.origin}/s/${token}`;
+  // Share links ride the OG function so WhatsApp/Telegram unfurl a rich
+  // preview card; humans land on the same page with an app CTA.
+  const urlFor = (token: string) => `${window.location.origin}/api/share/${token}`;
 
   const create = async () => {
     setCreating(true);

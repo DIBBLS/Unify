@@ -305,3 +305,12 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--green-de
   .recall-answer.blurred{filter:none;max-height:none;overflow:visible}
   .topic-card,.mini-check,.formula-box,.insight-box,.analogy-box,.symbol-card{box-shadow:none;break-inside:avoid}
 }
+.print-only{display:none}
+@media print{
+  header,nav,button{display:none !important}
+  body{background:#fff}
+  .screen-only{display:none !important}
+  .print-only{display:block !important}
+  .recall-answer.blurred{filter:none;max-height:none;overflow:visible}
+  .topic-card,.mini-check,.formula-box,.insight-box,.analogy-box,.symbol-card{box-shadow:none;break-inside:avoid}
+}
