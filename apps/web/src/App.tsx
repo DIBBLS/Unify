@@ -13,6 +13,7 @@ import NotificationsRoute from './routes/notifications';
 import AdminRoute from './routes/admin';
 import AdminContentRoute from './routes/admin/content';
 import BrowseRoute from './routes/browse';
+import ShareRoute from './routes/share';
 import StudioRoute from './routes/studio/index';
 import Mascot from './components/Mascot';
 import Loading from './components/Loading';
@@ -141,6 +142,8 @@ export default function App() {
         <Routes>
         {/* Chromeless: no top bar on sign in / onboarding */}
         <Route path="/auth" element={<AuthRoute />} />
+        {/* Public share landing: no session needed until expiry */}
+        <Route path="/s/:token" element={<ShareRoute />} />
         <Route
           path="/onboarding"
           element={
