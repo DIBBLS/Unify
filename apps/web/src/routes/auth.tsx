@@ -29,6 +29,11 @@ export default function AuthRoute() {
 
   const routeToApp = async () => {
     touchActivity();
+    // A live session always means the sign-in face — never leave a stale
+    // signup/recovery form mounted where it can flash mid-redirect.
+    setTab('signin');
+    setPendingEmail('');
+    setSuccess('');
     setWelcomeBack(true);
     try {
       const me = await api.me();
