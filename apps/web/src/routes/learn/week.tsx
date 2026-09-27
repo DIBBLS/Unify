@@ -37,8 +37,35 @@ export default function LearnPage() {
   const [burst, setBurst] = useState<{ k: number; label: string; sub: string } | null>(null);
   const firstCount = useRef(true);
   const [tab, setTab] = useState(0);
-  // Lifetime XP drives XP-gated perks (PDF unlocks at 50 XP).
-  const [myXp, setMyXp] = useState(0);
+  // Lifetime XP drives XP-gated perks (PDF unlocks at 300 XP). Null =
+  // unknown (never 0-by-default — a failed fetch must not fake-lock).
+  // Retries + refocus refetch keep it truthful; XP only grows.
+  const [myXp, setMyXp] = useState<number | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    let tries = 0;
+    const load = () => {
+      api
+        .stats()
+        .then((s) => {
+          if (!cancelled) setMyXp(s.xp || 0);
+        })
+        .catch(() => {
+          tries += 1;
+          if (!cancelled && tries < 4) window.setTimeout(() => !cancelled && load(), 2500 * tries);
+        });
+    };
+    load();
+    const onFocus = () => {
+      tries = 0;
+      load();
+    };
+    window.addEventListener('focus', onFocus);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('focus', onFocus);
+    };
+  }, []);
   // Return-to-top lands on the topic head (below hero + chapter bar),
   // not the very top of the page.
   const topicTopRef = useRef<HTMLDivElement>(null);
@@ -107,8 +134,6 @@ export default function LearnPage() {
           api.week(code, weekNum),
         ]);
         if (me) setViewer({ isAdmin: !!me.isAdmin, role: me.profile?.role || 'student' });
-        // Lifetime XP for XP-gated perks (fail-soft: locked display on error).
-        api.stats().then((s) => setMyXp(s.xp || 0)).catch(() => {});
         if (me && !previewMode) {
           const role = me.profile?.role || 'student';
           const enrolled = (me.courses || []).map((c) => c.toUpperCase().trim()).includes(code.toUpperCase());
@@ -311,15 +336,16 @@ export default function LearnPage() {
           </button>
         )}
         {(() => {
-          const unlocked = meetsXpGate(myXp, 'pdf', viewer ? { role: viewer.role, isAdmin: viewer.isAdmin } : undefined);
+          const known = myXp !== null;
+          const unlocked = known && meetsXpGate(myXp, 'pdf', viewer ? { role: viewer.role, isAdmin: viewer.isAdmin } : undefined);
           return (
             <button
               onClick={() => unlocked && window.print()}
               disabled={!unlocked}
-              title={unlocked ? 'Save this week as PDF' : `Unlocks at ${XP_GATES.pdf} XP — you have ${myXp}`}
+              title={unlocked ? 'Save this week as PDF' : known ? `Unlocks at ${XP_GATES.pdf} XP — you have ${myXp}` : 'Checking your XP…'}
               style={{ display: 'flex', gap: 6, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 700, color: unlocked ? '#059669' : 'var(--text3)', opacity: unlocked ? 1 : 0.75 }}
             >
-              {unlocked ? <Download size={14} /> : <Lock size={14} />} {unlocked ? 'Save PDF' : `PDF · ${myXp}/${XP_GATES.pdf} XP`}
+              {unlocked ? <Download size={14} /> : <Lock size={14} />} {unlocked ? 'Save PDF' : known ? `PDF · ${myXp}/${XP_GATES.pdf} XP` : 'PDF · …'}
             </button>
           );
         })()}

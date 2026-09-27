@@ -1,8 +1,8 @@
 // XP-gated access: features unlock as learners bank XP. Students earn
 // +10 XP per completed topic; staff bypass gates (work tools, not play).
 export const XP_GATES = {
-  /** Save/Print a week as PDF. */
-  pdf: 50,
+  /** Save/Print a week as PDF (30 completed topics). */
+  pdf: 300,
 } as const;
 
 export type XpGate = keyof typeof XP_GATES;
