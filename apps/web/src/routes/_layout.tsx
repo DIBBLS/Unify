@@ -46,6 +46,16 @@ export default function Layout() {
   // Role starts unknown: while authed-but-unknown the nav renders skeleton
   // placeholders so authors/admins never flash the student tabs first.
   const [roleLoaded, setRoleLoaded] = useState(false);
+  // Skeleton count follows the last-known role on THIS device (authors and
+  // admins get 3 pills, everyone else 4) so the loader matches the real nav.
+  const [skelCount] = useState(() => {
+    try {
+      const r = localStorage.getItem('unify.role.v1');
+      return r === 'lecturer' || r === 'collaborator' || r === 'admin' ? 3 : 4;
+    } catch {
+      return 4;
+    }
+  });
   const [unread, setUnread] = useState(0);
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -114,7 +124,13 @@ export default function Layout() {
     api
       .me()
       .then((me) => {
-        setRole(me.profile?.role || 'student');
+        const r = me.profile?.role || 'student';
+        setRole(r);
+        try {
+          localStorage.setItem('unify.role.v1', r);
+        } catch {
+          // hint only — skeleton falls back to 4
+        }
         setRoleLoaded(true);
       })
       .catch(() => {
@@ -244,7 +260,7 @@ export default function Layout() {
       <Outlet />
       <nav className="bottomnav" style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, display: 'flex', background: 'var(--surface)', borderTop: '1px solid var(--border)', padding: '8px 0 calc(8px + env(safe-area-inset-bottom))' }}>
         {showSkeletonNav
-          ? [0, 1, 2, 3].map((i) => (
+          ? Array.from({ length: skelCount }).map((_, i) => (
               <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                 <div className="skel" style={{ width: 22, height: 22, borderRadius: 6 }} />
                 <div className="skel" style={{ width: 44, height: 10, borderRadius: 5 }} />
