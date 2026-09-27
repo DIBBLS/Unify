@@ -27,6 +27,18 @@ export function useTheme(): { theme: Theme; toggle: () => void } {
     }
   }, [theme]);
 
+  // Same-browser tabs follow each other; other browsers/devices keep
+  // their own value (localStorage never leaves this browser).
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === KEY && (e.newValue === 'dark' || e.newValue === 'light')) {
+        setTheme(e.newValue);
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
   const toggle = useCallback(() => setTheme((t) => (t === 'light' ? 'dark' : 'light')), []);
   return { theme, toggle };
 }

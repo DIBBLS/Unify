@@ -27,6 +27,18 @@ export function useDesign(): { design: Design; setDesign: (d: Design) => void } 
     }
   }, [design]);
 
+  // Same-browser tabs follow each other; other browsers/devices keep
+  // their own value (localStorage never leaves this browser).
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === KEY && (e.newValue === 'story' || e.newValue === 'classic')) {
+        setDesignState(e.newValue);
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
   const setDesign = useCallback((d: Design) => setDesignState(d), []);
   return { design, setDesign };
 }
