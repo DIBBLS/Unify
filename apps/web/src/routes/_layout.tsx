@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, BookOpen, Search, User, PenTool, Bell } from 'lucide-react';
 import { supabaseBrowser, touchActivity, isSessionExpired, expireSession } from '../lib/supabase';
+import { pushSupported, enablePush } from '../lib/push';
+import ConfirmModal from '../components/ConfirmModal';
 import { api } from '../lib/api';
 import OfflineBanner from '../components/OfflineBanner';
 
@@ -44,6 +46,43 @@ export default function Layout() {
   const [unread, setUnread] = useState(0);
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  // Push permission prompt: once per device per 7 days, only while the
+  // browser permission is still undecided. Profile toggle covers the rest.
+  const [pushPrompt, setPushPrompt] = useState(false);
+  const [pushBusy, setPushBusy] = useState(false);
+
+  const dismissPushPrompt = () => {
+    setPushPrompt(false);
+    try {
+      localStorage.setItem('unify.pushprompt.v1', String(Date.now()));
+    } catch {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    if (!authed) return;
+    try {
+      if (!pushSupported() || Notification.permission !== 'default') return;
+      const last = Number(localStorage.getItem('unify.pushprompt.v1') || 0);
+      if (last && Date.now() - last < 7 * 86400000) return;
+    } catch {
+      return;
+    }
+    // Let the app settle first — never on the first paint.
+    const t = setTimeout(() => setPushPrompt(true), 3000);
+    return () => clearTimeout(t);
+  }, [authed]);
+
+  const acceptPush = async () => {
+    setPushBusy(true);
+    try {
+      await enablePush();
+    } finally {
+      setPushBusy(false);
+      dismissPushPrompt();
+    }
+  };
 
   useEffect(() => {
     const sb = supabaseBrowser();
@@ -230,6 +269,19 @@ export default function Layout() {
           );
           })}
       </nav>
+      {pushPrompt && (
+        <ConfirmModal
+          title="Get nudged for new notes?"
+          body="Unify can buzz this device the moment your authors publish — weeks, announcements and role updates, even with the app closed. You can switch it off anytime in Profile."
+          confirmLabel="Allow"
+          cancelLabel="Not now"
+          tone="go"
+          icon="bell"
+          busy={pushBusy}
+          onConfirm={() => void acceptPush()}
+          onCancel={dismissPushPrompt}
+        />
+      )}
     </div>
   );
 }
