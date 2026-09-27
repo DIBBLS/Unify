@@ -37,7 +37,10 @@ const ADMIN_TABS: Tab[] = [
 ];
 
 export default function Layout() {
-  const [authed, setAuthed] = useState(false);
+  // Tri-state: null = session not yet resolved. The header auth slot and
+  // nav render neutral placeholders until then, so a signed-in user never
+  // flashes the logged-out "Sign in" chrome after login.
+  const [authed, setAuthed] = useState<boolean | null>(null);
   const [initial, setInitial] = useState('');
   const [role, setRole] = useState<string | null>(null);
   // Role starts unknown: while authed-but-unknown the nav renders skeleton
@@ -172,7 +175,7 @@ export default function Layout() {
 
   const isAuthor = role === 'lecturer' || role === 'collaborator';
   const tabs: Tab[] = isAuthor ? AUTHOR_TABS : role === 'admin' ? ADMIN_TABS : STUDENT_TABS;
-  const showSkeletonNav = authed && !roleLoaded;
+  const showSkeletonNav = authed === null || (authed && !roleLoaded);
 
   return (
     <div style={{ fontFamily: 'var(--font-body)' }}>
@@ -181,7 +184,12 @@ export default function Layout() {
           Unify<span style={{ color: '#10b981' }}> Learn</span>
         </Link>
         <span style={{ flex: 1 }} />
-        {authed ? (
+        {authed === null ? (
+          <span style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <span className="skel" style={{ width: 32, height: 32, borderRadius: 9999 }} />
+            <span className="skel" style={{ width: 32, height: 32, borderRadius: 9999 }} />
+          </span>
+        ) : authed ? (
           <>
             <Link
               to="/notifications"
