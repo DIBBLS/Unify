@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Check, Download, ArrowUp } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Download, ArrowUp, Share2 } from 'lucide-react';
 import { api, type TopicMeta } from '../../lib/api';
 import { log } from '../../lib/log';
 import type { UnifyNote, Topic } from '../../types/note';
 import { TopicSlice } from '../../components/TopicSlice';
 import EoqQuiz from '../../components/EoqQuiz';
 import { ReadAloud } from '../../components/ReadAloud';
+import { ShareModal } from '../../components/ShareModal';
 import { useProgress } from '../../hooks/useProgress';
 import Mascot from '../../components/Mascot';
 import ErrorState from '../../components/ErrorState';
@@ -39,6 +40,7 @@ export default function LearnPage() {
   // not the very top of the page.
   const topicTopRef = useRef<HTMLDivElement>(null);
   const [showTop, setShowTop] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const scrollToTopicTop = () => {
     const el = topicTopRef.current;
     const top = el ? el.getBoundingClientRect().top + window.scrollY - 70 : 0;
@@ -297,11 +299,19 @@ export default function LearnPage() {
       <button onClick={() => navigate(backTo)} style={{ marginBottom: 16, display: 'flex', gap: 6, alignItems: 'center', background: 'none', border: 'none', color: 'var(--text2)', fontSize: 14 }}>
         <ChevronLeft size={18} /> Back
       </button>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginBottom: 8 }}>
+        {!preview && (
+          <button onClick={() => setSharing(true)} style={{ display: 'flex', gap: 6, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 700, color: '#059669' }}>
+            <Share2 size={14} /> Share
+          </button>
+        )}
         <button onClick={() => window.print()} style={{ display: 'flex', gap: 6, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 700, color: '#059669' }}>
           <Download size={14} /> Save PDF
         </button>
       </div>
+      {sharing && note && (
+        <ShareModal course={note.course} week={weekNum} onClose={() => setSharing(false)} />
+      )}
       <div className="hero">
         <div className="hero-eyebrow">{note.course} · Week {note.week}</div>
         <div className="hero-title">{note.title}</div>

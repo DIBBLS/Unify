@@ -299,6 +299,14 @@ export const api = {
     apiFetch<{ ok: boolean }>('/v1/push/subscribe', { method: 'POST', body: JSON.stringify({ endpoint, keys }) }),
   pushUnsubscribe: (endpoint?: string) =>
     apiFetch<{ ok: boolean }>('/v1/push/unsubscribe', { method: 'POST', body: JSON.stringify(endpoint ? { endpoint } : {}) }),
+  shareCreate: (course: string, week: number, ttlHours: number) =>
+    apiFetch<{ ok: boolean; token: string; expires_at: string; views: number }>('/v1/share', { method: 'POST', body: JSON.stringify({ course, week, ttlHours }) }),
+  shareGet: (token: string) =>
+    apiFetch<{ course: string; week: number; title: string; subtitle: string; note_json: unknown; topicMeta: TopicMeta[]; share: { token: string; expires_at: string; views: number } }>(`/v1/share/${encodeURIComponent(token)}`),
+  shareMine: () =>
+    apiFetch<{ links: { token: string; course: string; week: number; expires_at: string; views: number; created_at: string }[] }>('/v1/share/mine'),
+  shareDelete: (token: string) =>
+    apiFetch<{ ok: boolean }>(`/v1/share/${encodeURIComponent(token)}`, { method: 'DELETE' }),
   adminAnnounce: (title: string, body: string, link?: string) =>
     apiFetch<{ ok: boolean; reached: number }>('/v1/admin/announce', { method: 'POST', body: JSON.stringify({ title, body, link }) }),
   adminContent: () =>
