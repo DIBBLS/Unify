@@ -3,9 +3,9 @@ import { Link2, Copy, Check, Trash2, X, MessageCircle } from 'lucide-react';
 import { api } from '../lib/api';
 
 const TTLS = [
+  { hours: 8, label: '8 hours' },
+  { hours: 16, label: '16 hours' },
   { hours: 24, label: '24 hours' },
-  { hours: 168, label: '7 days' },
-  { hours: 720, label: '30 days' },
 ];
 
 function expiryLabel(iso: string): string {
@@ -19,7 +19,7 @@ function expiryLabel(iso: string): string {
 // Share sheet: mint an expiring /s/:token link for this week, copy it,
 // send it to WhatsApp, and manage your live links (views + revoke).
 export function ShareModal({ course, week, title, topics, onClose }: { course: string; week: number; title: string; topics: string[]; onClose: () => void }) {
-  const [ttl, setTtl] = useState(168);
+  const [ttl, setTtl] = useState(24);
   const [link, setLink] = useState<{ token: string; expires_at: string } | null>(null);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');

@@ -45,7 +45,10 @@ function page({ title, desc, image, body, appLink }) {
 
 module.exports = async (req, res) => {
   const token = String((req.query && req.query.token) || '').slice(0, 64);
-  res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+  // Short edge cache: share content/availability changes fast (expiry,
+  // new versions). WhatsApp keeps its own copy per message — new links
+  // always unfurl fresh.
+  res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600');
   if (!token) {
     res.status(400).send(page({ title: 'Unify Learn', desc: 'Shared note', image: APP_URL + '/og-image.png', body: '', appLink: APP_URL + '/auth' }));
     return;

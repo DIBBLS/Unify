@@ -63,6 +63,9 @@ export default function Layout() {
   // browser permission is still undecided. Profile toggle covers the rest.
   const [pushPrompt, setPushPrompt] = useState(false);
   const [pushBusy, setPushBusy] = useState(false);
+  // Shown once when the browser reports "denied" — the fix lives in
+  // browser settings, so plain retry would just fail again.
+  const [pushDenied, setPushDenied] = useState(false);
 
   const dismissPushPrompt = () => {
     setPushPrompt(false);
@@ -90,7 +93,14 @@ export default function Layout() {
   const acceptPush = async () => {
     setPushBusy(true);
     try {
-      await enablePush();
+      const res = await enablePush();
+      if (!res.ok) {
+        try {
+          if (Notification.permission === 'denied') setPushDenied(true);
+        } catch {
+          // ignore
+        }
+      }
     } finally {
       setPushBusy(false);
       dismissPushPrompt();
@@ -304,6 +314,18 @@ export default function Layout() {
           busy={pushBusy}
           onConfirm={() => void acceptPush()}
           onCancel={dismissPushPrompt}
+        />
+      )}
+      {pushDenied && (
+        <ConfirmModal
+          title="Browser is blocking push"
+          body="Your browser said no, so tapping Allow can't work until you re-enable it: open the lock (or ⋮ menu) next to the address bar → Site settings → Notifications → Allow — then come back and tap Allow here. On iPhone, add Unify to the Home Screen first, then allow."
+          confirmLabel="Got it"
+          cancelLabel="Later"
+          tone="go"
+          icon="bell"
+          onConfirm={() => setPushDenied(false)}
+          onCancel={() => setPushDenied(false)}
         />
       )}
     </div>
