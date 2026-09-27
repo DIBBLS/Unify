@@ -300,15 +300,14 @@ export default function LearnPage() {
         <ChevronLeft size={18} /> Back
       </button>
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginBottom: 8 }}>
-        <button onClick={() => setSharing(true)} style={{ display: 'flex', gap: 6, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 700, color: '#059669' }}>
-          <Share2 size={14} /> Share
-        </button>
-        <button onClick={() => window.print()} style={{ display: 'flex', gap: 6, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 700, color: '#059669' }}>
-          <Download size={14} /> Save PDF
-        </button>
+        {(!viewer || viewer.role === 'lecturer' || viewer.role === 'collaborator' || viewer.role === 'admin' || viewer.isAdmin) && (
+          <button onClick={() => setSharing(true)} style={{ display: 'flex', gap: 6, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 700, color: '#059669' }}>
+            <Share2 size={14} /> Share
+          </button>
+        )}
       </div>
       {sharing && note && (
-        <ShareModal course={note.course} week={weekNum} onClose={() => setSharing(false)} />
+        <ShareModal course={note.course} week={weekNum} title={note.title} topics={topics.map((t) => t.title || `Topic ${t.number}`)} onClose={() => setSharing(false)} />
       )}
       <div className="hero">
         <div className="hero-eyebrow">{note.course} · Week {note.week}</div>
@@ -424,13 +423,6 @@ export default function LearnPage() {
           </button>
         </div>
       )}
-    </div>
-    <div className="print-only">
-      <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 22 }}>{note.course} · Week {note.week}: {note.title}</h1>
-      <p style={{ fontSize: 13, color: '#555' }}>{note.subtitle}</p>
-      {topics.map((t) => (
-        <TopicSlice key={t.number} topic={t} />
-      ))}
     </div>
     </>
   );

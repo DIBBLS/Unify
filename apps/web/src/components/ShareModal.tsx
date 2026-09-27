@@ -18,7 +18,7 @@ function expiryLabel(iso: string): string {
 
 // Share sheet: mint an expiring /s/:token link for this week, copy it,
 // send it to WhatsApp, and manage your live links (views + revoke).
-export function ShareModal({ course, week, onClose }: { course: string; week: number; onClose: () => void }) {
+export function ShareModal({ course, week, title, topics, onClose }: { course: string; week: number; title: string; topics: string[]; onClose: () => void }) {
   const [ttl, setTtl] = useState(168);
   const [link, setLink] = useState<{ token: string; expires_at: string } | null>(null);
   const [creating, setCreating] = useState(false);
@@ -94,6 +94,17 @@ export function ShareModal({ course, week, onClose }: { course: string; week: nu
         </div>
         <div className="modal-body" style={{ textAlign: 'left', marginTop: 6 }}>
           Anyone with the link reads free until it expires — no account needed. Expiry is what pulls them back to join.
+        </div>
+        {/* Mini preview: exactly the hero + topics going out */}
+        <div style={{ marginTop: 10, background: '#0a0a0a', borderRadius: 12, padding: 16, color: '#f5f4f0' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: '#4ade80' }}>{course} · WEEK {week}</div>
+          <div style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 17, marginTop: 4 }}>{title || `Week ${week}`}</div>
+          <div style={{ fontSize: 12, color: 'rgba(245,244,240,.65)', marginTop: 6 }}>
+            {topics.length ? topics.slice(0, 3).map((t, i) => (
+              <span key={i} style={{ display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>T{i + 1} · {t}</span>
+            )) : 'No topics yet'}
+            {topics.length > 3 && <span style={{ display: 'block' }}>+{topics.length - 3} more topics</span>}
+          </div>
         </div>
         {error && <div style={{ marginTop: 8, fontSize: 13, color: '#991b1b' }}>{error}</div>}
         {!link ? (
