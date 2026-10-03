@@ -95,11 +95,12 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-si
 [data-design="story"] .topic-card mark,[data-design="story"] .recall-answer mark,[data-design="story"] .mc-q mark{background:linear-gradient(180deg,transparent 55%,rgba(74,222,128,.45) 55%,rgba(74,222,128,.45) 92%,transparent 92%)}
 
 /* SYMBOL / FORMULA / INSIGHT / ANALOGY */
-.symbol-card{display:flex;align-items:flex-start;gap:12px;background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:11px 15px;margin:10px 0 16px;max-width:66ch}
-.symbol-card .sym{font-family:Georgia,serif;font-size:17px;font-weight:700;color:var(--green-deep);min-width:30px;margin-top:2px}
+.symbol-card{display:flex;align-items:flex-start;gap:12px;background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:12px 15px;margin:14px 0 20px;max-width:66ch}
+.symbol-card .sym{font-family:Georgia,serif;font-size:17px;font-weight:700;color:var(--green-deep);flex:0 0 auto;min-width:30px;max-width:38%;overflow-x:auto;overflow-y:hidden;margin-top:2px}
+.symbol-card .sym-body{flex:1;min-width:0}
 .symbol-card .sym-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px}
 .symbol-card .sym-desc{font-size:12px;color:var(--text2);line-height:1.6}
-.formula-box{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:0 10px 10px 0;padding:18px 22px;margin:14px 0;overflow-x:auto}
+.formula-box{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:0 10px 10px 0;padding:18px 22px;margin:16px 0 20px;overflow-x:auto}
 .formula-box .f-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--green-deep);margin-bottom:10px}
 .formula-box .f-eq{font-size:15px;color:var(--text);line-height:2.4}
 .formula-box .f-note{font-size:12px;color:var(--text2);margin-top:10px;line-height:1.7;border-top:1px solid var(--border);padding-top:10px}
@@ -213,6 +214,10 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-si
 .eoq-topicref{font-size:11px;color:rgba(240,239,235,.55);margin-top:6px}
 .eoq-topicref button{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#4ade80;border-radius:9999px;font-size:11px;font-weight:700;padding:3px 12px;margin:2px 4px 2px 0;cursor:pointer}
 .eoq-submit-hint{font-size:12px;color:rgba(240,239,235,.5);margin-top:14px;text-align:center}
+/* BUG-014: Check score / Try again styled like every other primary
+button (was an unstyled plain box on student + Studio preview). */
+.eoq-submit-btn{font-family:var(--font-body);font-size:14px;font-weight:800;padding:14px 22px;border-radius:14px;border:none;border-bottom:4px solid #059669;background:#10b981;color:#fff;cursor:pointer;display:flex;justify-content:center;gap:8px;align-items:center}
+.eoq-submit-btn:active{transform:translateY(2px);border-bottom-width:0}
 .eoq-result{margin-top:24px;padding:22px;border-radius:10px;text-align:center}
 .eoq-result.pass{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25)}
 .eoq-result.fail{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2)}
