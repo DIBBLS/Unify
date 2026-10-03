@@ -3,6 +3,7 @@ import { Check, X, RotateCcw } from 'lucide-react';
 import type { EOQ } from '../types/note';
 import { api } from '../lib/api';
 import Mascot from './Mascot';
+import { MathPlain } from './MathText';
 
 const PASS_PCT = 60;
 
@@ -85,7 +86,9 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
         {eoq.questions.map((q, i) => (
           <div key={q.number ?? i} className="eoq-question">
             <div className="eoq-qnum">Question {i + 1}</div>
-            <div className="eoq-q-text">{q.question}</div>
+            <div className="eoq-q-text">
+              <MathPlain text={q.question} />
+            </div>
             {q.type === 'mcq' && q.options && (
               <div className="eoq-options">
                 {q.options.map((opt, oi) => {
@@ -98,7 +101,7 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
                       className={`eoq-option ${show && isCorrect ? 'correct-reveal' : ''} ${show && isSelected && !isCorrect ? 'wrong-reveal' : ''} ${!show ? '' : 'locked'} ${!show && isSelected ? 'selected' : ''}`}
                       onClick={() => picked[i] === undefined && setPicked((p) => ({ ...p, [i]: oi }))}
                     >
-                      <span className="eoq-letter">{String.fromCharCode(65 + oi)}</span> {opt}
+                      <span className="eoq-letter">{String.fromCharCode(65 + oi)}</span> <MathPlain text={opt} />
                     </div>
                   );
                 })}
@@ -127,7 +130,7 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
             {answered[i] && gradeable[i] && (
               <div className={`eoq-feedback ${correct[i] ? 'correct-fb' : 'wrong-fb'}`}>
                 {correct[i] ? <Check size={14} /> : <X size={14} />}
-                {correct[i] ? q.feedback?.correct || 'Correct!' : q.feedback?.wrong || 'Not quite.'}
+                <MathPlain text={correct[i] ? q.feedback?.correct || 'Correct!' : q.feedback?.wrong || 'Not quite.'} />
               </div>
             )}
             {answered[i] && gradeable[i] && !correct[i] && q.topicRef && (

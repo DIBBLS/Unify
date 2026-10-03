@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Zap, Check, X } from 'lucide-react';
 import type { MiniCheckQuestion } from '../types/note';
+import { MathText, MathPlain } from './MathText';
 
 export function MiniCheck({ questions, subTitle, topicNum, subAbbr }: { questions: MiniCheckQuestion[]; subTitle: string; topicNum: number; subAbbr: string }) {
   return (
@@ -26,7 +27,9 @@ function MiniCheckItem({ q, id }: { q: MiniCheckQuestion; id: string }) {
   if (q.type === 'mcq') {
     return (
       <div className="mc-mcq-item">
-        <div className="mc-q">{q.question}</div>
+        <div className="mc-q">
+          <MathPlain text={q.question} />
+        </div>
         <div className="mc-mcq-opts">
           {q.options.map((opt, i) => {
             const isCorrect = i === q.correctIndex;
@@ -38,7 +41,7 @@ function MiniCheckItem({ q, id }: { q: MiniCheckQuestion; id: string }) {
                 className={`mc-mcq-opt ${show && isCorrect ? 'mc-correct' : ''} ${show && isSelected && !isCorrect ? 'mc-wrong' : ''} ${show ? 'mc-locked' : ''}`}
                 onClick={() => selected === null && setSelected(i)}
               >
-                <span className="mc-ltr">{String.fromCharCode(65 + i)}</span> {opt}
+                <span className="mc-ltr">{String.fromCharCode(65 + i)}</span> <MathPlain text={opt} />
               </div>
             );
           })}
@@ -54,7 +57,9 @@ function MiniCheckItem({ q, id }: { q: MiniCheckQuestion; id: string }) {
   if (q.type === 'fitb') {
     return (
       <div className="mc-fitb-item">
-        <div className="mc-q">{q.question}</div>
+        <div className="mc-q">
+          <MathPlain text={q.question} />
+        </div>
         <div className="mc-fitb-row">
           <input className="mc-fitb-input" value={fitb} onChange={(e) => setFitb(e.target.value)} placeholder="Your answer…" />
           <button
@@ -77,11 +82,13 @@ function MiniCheckItem({ q, id }: { q: MiniCheckQuestion; id: string }) {
   }
   return (
     <div className="mc-reveal-item">
-      <div className="mc-q">{q.question}</div>
+      <div className="mc-q">
+        <MathPlain text={q.question} />
+      </div>
       <button className="mc-reveal-btn" onClick={() => setRevealed(!revealed)}>
         {revealed ? 'Hide Answer' : 'Reveal Answer'}
       </button>
-      {revealed && <div className="mc-answer show" dangerouslySetInnerHTML={{ __html: q.answer }} />}
+      {revealed && <MathText html={q.answer} className="mc-answer show" />}
     </div>
   );
 }
