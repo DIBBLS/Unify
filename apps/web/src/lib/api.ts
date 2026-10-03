@@ -252,7 +252,7 @@ export const api = {
       body: JSON.stringify({ course, week, topic, lectureNo: lecture }),
     }),
   authored: () =>
-    apiFetch<{ notes: { id: string; course: string; week: number; topic: number; version: number; title: string }[] }>('/v1/authored'),
+    apiFetch<{ notes: { id: string; course: string; week: number; topic: number; lecture: number; version: number; title: string }[] }>('/v1/authored'),
   authorStats: () =>
     apiFetch<{ courses: number; topics: number; versions: number; students: number; completions: number; quizzesTaken: number; quizAvg: number }>('/v1/author/stats'),
   courseWeeks: (course: string) => {
@@ -391,7 +391,7 @@ export const api = {
     if (level) p.set('level', level);
     if (semester) p.set('semester', semester);
     const q = p.toString();
-    return apiFetch<{ code: string; title: string; levels: string[]; semesters: string[]; weeks: number }[]>(`/v1/courses${q ? `?${q}` : ''}`);
+    return apiFetch<{ code: string; title: string; levels: string[]; semesters: string[]; weeks: number; lecturers: string[] }[]>(`/v1/courses${q ? `?${q}` : ''}`);
   },
   courseSearch: (q: string, level = '') => {
     const p = new URLSearchParams({ q });
