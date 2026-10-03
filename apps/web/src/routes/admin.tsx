@@ -83,6 +83,43 @@ export default function AdminRoute() {
   const [openModule, setOpenModule] = useState('users');
   const [courseQ, setCourseQ] = useState('');
   const [trends, setTrends] = useState<{ signups: { day: string; count: number }[]; notes: { day: string; count: number }[]; xp: { day: string; count: number }[] } | null>(null);
+  // Per-author course assignment (BUG-001): the collaborator's reachable
+  // set IS this teaching list; gates enforce it server-side.
+  const [courseMgr, setCourseMgr] = useState<string | null>(null);
+  const [assigned, setAssigned] = useState<string[]>([]);
+  const [assignInput, setAssignInput] = useState('');
+  const [assignBusy, setAssignBusy] = useState(false);
+
+  const openCourseMgr = async (id: string) => {
+    if (courseMgr === id) {
+      setCourseMgr(null);
+      return;
+    }
+    setCourseMgr(id);
+    setAssigned([]);
+    setAssignInput('');
+    setError('');
+    try {
+      const res = await api.adminUserCourses(id);
+      setAssigned(res.courses.filter((c) => c.kind === 'teaching').map((c) => c.course));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not load courses.');
+    }
+  };
+
+  const saveAssigned = async (id: string, next: string[]) => {
+    setAssignBusy(true);
+    setError('');
+    try {
+      const res = await api.adminSetUserCourses(id, next);
+      setAssigned(res.courses);
+      setSuccess(`Assigned ${res.courses.length} course${res.courses.length === 1 ? '' : 's'}.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Save failed.');
+    } finally {
+      setAssignBusy(false);
+    }
+  };
 
   const loadAll = async (query = q, role = roleFilter) => {
     try {
@@ -650,6 +687,57 @@ export default function AdminRoute() {
                 ))}
               </select>
             </div>
+            {(u.role === 'lecturer' || u.role === 'collaborator' || u.role === 'admin') && u.id !== ownId && (
+              <div style={{ marginTop: 8 }}>
+                <button
+                  onClick={() => openCourseMgr(u.id)}
+                  style={{ width: '100%', padding: 8, borderRadius: 10, background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text2)', fontWeight: 800, fontSize: 12 }}
+                >
+                  {courseMgr === u.id ? 'Hide assigned courses' : 'Manage assigned courses'}
+                </button>
+                {courseMgr === u.id && (
+                  <div style={{ marginTop: 8, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: 10 }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+                      {assigned.length === 0 && <span style={{ fontSize: 12, color: 'var(--text2)' }}>None assigned — reaches nothing.</span>}
+                      {assigned.map((c) => (
+                        <span key={c} style={{ display: 'inline-flex', gap: 6, alignItems: 'center', fontSize: 12, fontWeight: 800, background: '#ecfdf5', border: '1px solid #a7f3d0', color: '#059669', borderRadius: 9999, padding: '4px 6px 4px 12px' }}>
+                          {c}
+                          <button
+                            onClick={() => saveAssigned(u.id, assigned.filter((x) => x !== c))}
+                            disabled={assignBusy}
+                            aria-label={`Unassign ${c}`}
+                            style={{ background: 'none', border: 'none', color: '#991b1b', fontWeight: 800, display: 'flex', padding: 2 }}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <input
+                        value={assignInput}
+                        onChange={(e) => setAssignInput(e.target.value.toUpperCase())}
+                        placeholder="e.g. MEE 352"
+                        style={{ ...input, flex: 1, minWidth: 0 }}
+                      />
+                      <button
+                        onClick={() => {
+                          const code = assignInput.trim().toUpperCase();
+                          if (!code || assigned.includes(code)) return;
+                          setAssignInput('');
+                          void saveAssigned(u.id, [...assigned, code]);
+                        }}
+                        disabled={assignBusy}
+                        style={{ ...primaryBtn, opacity: assignBusy ? 0.6 : 1 }}
+                      >
+                        Assign
+                      </button>
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--text2)', marginTop: 6 }}>Codes must exist in the catalog — typos are rejected.</div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         ))}
       </div>

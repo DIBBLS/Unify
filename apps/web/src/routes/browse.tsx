@@ -14,6 +14,7 @@ export default function BrowseRoute() {
   const [courses, setCourses] = useState<AdminContentCourse[]>([]);
   const [level, setLevel] = useState('');
   const [role, setRole] = useState('');
+  const [enrolled, setEnrolled] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [forbidden, setForbidden] = useState(false);
   const [error, setError] = useState('');
@@ -36,6 +37,7 @@ export default function BrowseRoute() {
         const me = await api.me().catch(() => null);
         setLevel(me?.profile?.level || '');
         setRole(me?.profile?.role || '');
+        setEnrolled(new Set((me?.courses || []).map((c) => (c || '').toUpperCase().trim())));
         const res = await api.adminContent();
         setCourses(res.courses);
       } catch (err) {
@@ -47,15 +49,18 @@ export default function BrowseRoute() {
     })();
   }, [navigate]);
 
-  const isAuthor = role === 'lecturer' || role === 'collaborator';
+  const isCollab = role === 'collaborator';
+  const isAuthor = role === 'lecturer' || isCollab;
   const scoped = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return courses.filter((c) => {
-      if (isAuthor && level && c.level !== level) return false;
+      // Collaborators see ONLY assigned courses (server enforces too).
+      if (isCollab && !enrolled.has(c.code.toUpperCase().trim())) return false;
+      if (isAuthor && !isCollab && level && c.level !== level) return false;
       if (!needle) return true;
       return c.code.toLowerCase().includes(needle) || (c.title || '').toLowerCase().includes(needle);
     });
-  }, [courses, q, isAuthor, level]);
+  }, [courses, q, isAuthor, isCollab, enrolled, level]);
 
   if (loading) return <Loading text="Loading notes…" />;
   if (forbidden)
@@ -78,7 +83,13 @@ export default function BrowseRoute() {
       <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>
         {isAuthor && level ? `${level} · ` : ''}{scoped.length} courses · {totalWeeks} weeks · {totalTopics} topics with notes
       </div>
-      {isAuthor && !level && (
+      {isCollab && enrolled.size === 0 && (
+        <div style={{ marginTop: 12, padding: 12, background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, fontSize: 12, color: '#92400e', display: 'flex', gap: 8 }}>
+          <Info size={16} style={{ flexShrink: 0, marginTop: 1 }} />
+          <span>No courses assigned to you yet — ask an admin to assign your two courses.</span>
+        </div>
+      )}
+      {isAuthor && !isCollab && !level && (
         <div style={{ marginTop: 12, padding: 12, background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, fontSize: 12, color: '#92400e', display: 'flex', gap: 8 }}>
           <Info size={16} style={{ flexShrink: 0, marginTop: 1 }} />
           <span>No contributing level set — showing everything. Set it in Profile so this narrows to your level.</span>

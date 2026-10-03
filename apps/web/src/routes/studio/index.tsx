@@ -57,17 +57,25 @@ export default function StudioRoute() {
     return () => clearInterval(t);
   }, [working]);
 
-  // Course dropdown: only courses in the system (admin adds new ones).
+  // Course dropdown: collaborators see ONLY assigned courses (server
+  // enforces on publish too); everyone else sees the full catalog.
   useEffect(() => {
     let cancelled = false;
-    api
-      .courses()
-      .then((list) => {
-        if (!cancelled) setCatalog(list.map((c) => ({ code: c.code, title: c.title })));
-      })
-      .catch(() => {
+    (async () => {
+      try {
+        const [list, me] = await Promise.all([api.courses(), api.me().catch(() => null)]);
+        if (cancelled) return;
+        const role = me?.profile?.role;
+        const isCollab = role === 'collaborator' && !me?.isAdmin;
+        const assigned = new Set((me?.courses || []).map((c) => (c || '').toUpperCase().trim()));
+        const scoped = isCollab
+          ? list.filter((c) => assigned.has((c.code || '').toUpperCase().trim()))
+          : list;
+        setCatalog(scoped.map((c) => ({ code: c.code, title: c.title })));
+      } catch {
         // offline: manual input fallback below stays
-      });
+      }
+    })();
     return () => {
       cancelled = true;
     };
