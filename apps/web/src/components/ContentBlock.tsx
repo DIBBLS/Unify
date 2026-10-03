@@ -16,10 +16,16 @@ export function ContentBlockView({ block, fig }: { block: ContentBlock; fig?: nu
           ))}
         </ul>
       );
-    case 'symbol':
+    case 'symbol': {
+      // BUG-011: the symbol is math (often raw LaTeX like \alpha) — render
+      // it through MathJax, never as raw text running into the name.
+      const raw = block.symbol || '';
+      const symHtml = /^\\/.test(raw.trim()) ? `\\(${raw.trim()}\\)` : raw;
       return (
         <div className="symbol-card">
-          <div className="sym">{block.symbol}</div>
+          <div className="sym">
+            <MathText html={symHtml} />
+          </div>
           <div className="sym-body">
             <div className="sym-name">
               <MathPlain text={block.name} />
@@ -30,6 +36,7 @@ export function ContentBlockView({ block, fig }: { block: ContentBlock; fig?: nu
           </div>
         </div>
       );
+    }
     case 'formula':
       return (
         <div className="formula-box">
