@@ -1,10 +1,9 @@
 // Unify Learn offline worker: shell + readable content stay available offline.
 // Versioned cache; documents network-first (never a stale app), static assets
 // cache-first, API GETs network-first with cache fallback. Writes (POST/PUT/
-// DELETE) and everything else always bypass. v4 (push events + bump on any
-// shell-affecting change so old clients pick up the new worker + fresh
-// shell on next visit).
-const CACHE = 'unify-app-v4';
+// DELETE) and everything else always bypass. v5 (offline math + fonts:
+// third-party CDN assets below are version-pinned and immutable).
+const CACHE = 'unify-app-v5';
 const SHELL = ['/', '/index.html', '/manifest.json'];
 
 // Update here if the backend moves (must match VITE_API_URL origin).
@@ -54,22 +53,33 @@ self.addEventListener('fetch', (e) => {
     (url.pathname.startsWith('/assets/') ||
       url.pathname === '/og-image.png' ||
       url.pathname === '/favicon.svg');
-  if (!isAsset && !isApi) return;
+  // Offline math + typography: MathJax (script + its font files, same
+  // version-pinned path) and Google Fonts. Cached on first online visit,
+  // then equations render with zero network. Immutable URLs → cache-first.
+  const isMathCdn =
+    url.origin === 'cdn.jsdelivr.net' && url.pathname.startsWith('/npm/mathjax@3/');
+  const isFontCdn =
+    (url.origin === 'fonts.googleapis.com' && url.pathname === '/css2') ||
+    url.origin === 'fonts.gstatic.com';
+  if (!isAsset && !isApi && !isMathCdn && !isFontCdn) return;
 
   e.respondWith(
     (async () => {
       const cached = await caches.match(request);
       const network = fetch(request)
         .then((res) => {
-          if (res && res.ok) {
+          // Opaque (no-cors) CDN responses have status 0 but are perfectly
+          // cacheable — the MathJax <script> arrives this way.
+          if (res && (res.ok || res.type === 'opaque')) {
             const clone = res.clone();
             caches.open(CACHE).then((c) => c.put(request, clone));
           }
           return res;
         })
         .catch(() => null);
-      // Versioned bundles: cache-first. Content: fresh first, cached fallback.
-      if (isAsset && cached) return cached;
+      // Versioned bundles, MathJax and font files: cache-first. Content:
+      // fresh first, cached fallback.
+      if ((isAsset || isMathCdn || isFontCdn) && cached) return cached;
       const fresh = await network;
       if (fresh) return fresh;
       if (cached) return cached;
