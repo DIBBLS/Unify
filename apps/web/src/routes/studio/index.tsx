@@ -152,11 +152,12 @@ export default function StudioRoute() {
     // so a long conversion never looks stuck.
     const estParts = Math.min(3, Math.max(1, Math.ceil(raw.length / 20000)));
     if (estParts > 1) {
-      setConvertHint(`Large input (~${raw.length.toLocaleString()} chars) — converting in ~${estParts} parts. Stay on this page; it takes a few minutes.`);
+      setConvertHint(`Large input (~${raw.length.toLocaleString()} chars) — converting in ~${estParts} parts. Stay on this page; progress shows below.`);
     }
     setWorking(true);
     try {
-      const res = await api.convert({
+      // Async jobs: POST plans instantly, then poll for real part progress.
+      const started = await api.convert({
         course: code,
         week: weekNum,
         title: title.trim() || undefined,
@@ -165,6 +166,21 @@ export default function StudioRoute() {
         segmentationMode: mode,
         rawNotesText: raw,
       });
+      const total = Math.max(1, started.parts || 1);
+      const deadline = Date.now() + 10 * 60000;
+      let res: Awaited<ReturnType<typeof api.convertStatus>> | null = null;
+      for (;;) {
+        if (Date.now() > deadline) throw new Error('Conversion is taking too long — the job may still finish; press Generate again in a minute.');
+        await new Promise((r) => setTimeout(r, 3000));
+        const st = await api.convertStatus(started.jobId);
+        if (st.status === 'working') {
+          setConvertHint(`Converting part ${Math.min(st.partsDone + 1, total)} of ${total}${st.currentModel ? ` · ${st.currentModel}` : ''}…`);
+          continue;
+        }
+        res = st;
+        break;
+      }
+      if (!res || res.status !== 'done') throw new Error('Conversion ended unexpectedly.');
       setNote(res.note as UnifyNote);
       setMeta({ course: code, week: weekNum, title: title.trim(), subtitle: subtitle.trim() });
       setValidation(res.validation);
@@ -172,6 +188,8 @@ export default function StudioRoute() {
       if (res.split) {
         const made = (res.parts || []).map((p) => `part ${p.index} (${p.topics} topics, ${p.attempts} attempt${p.attempts === 1 ? '' : 's'})`).join(' + ');
         setConvertHint(made ? `Converted in parts and merged: ${made}. Review before publishing.` : 'Converted in parts and merged. Review before publishing.');
+      } else {
+        setConvertHint('');
       }
       setEditing(false);
       setStep(1);
