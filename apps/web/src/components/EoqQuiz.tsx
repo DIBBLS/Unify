@@ -19,20 +19,21 @@ function fitbAccepted(q: EOQ['questions'][number]): string[] {
   return q.correct ? [q.correct] : [];
 }
 
-// End-of-week exam on the dark card: progress dots, instant per-question
-// verdicts with author feedback, topic refs on misses, and a pass/fail
-// score screen. Recording is unchanged (one quizAttempt on completion).
+// End-of-week exam on the dark card. BUG-005: NO feedback while
+// answering — picks are neutral until the student taps Check score after
+// all questions are answered; only then do verdicts, dots, feedback and
+// the score screen appear. Recording fires on submit, never before.
 export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: EOQ; course: string; week: number; preview?: boolean }) {
   const [picked, setPicked] = useState<Record<number, number>>({});
   const [recorded, setRecorded] = useState(false);
   const [fitb, setFitb] = useState<Record<number, string>>({});
-  const [checked, setChecked] = useState<Record<number, boolean>>({});
+  const [submitted, setSubmitted] = useState(false);
 
   const gradeable = eoq.questions.map((q, i) =>
     q.type === 'mcq' ? mcqCorrectIndex(q) !== null : fitbAccepted(q).length > 0 ? true : false
   );
   const answered = eoq.questions.map((q, i) =>
-    q.type === 'mcq' ? picked[i] !== undefined : !!checked[i]
+    q.type === 'mcq' ? picked[i] !== undefined : (fitb[i] || '').trim().length > 0
   );
   const correct = eoq.questions.map((q, i) => {
     if (!gradeable[i] || !answered[i]) return false;
@@ -45,21 +46,21 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
   const score = correct.filter(Boolean).length;
   const done = eoq.questions.every((_, i) => !gradeable[i] || answered[i]);
   const pct = total ? Math.round((score / total) * 100) : 0;
-  const passed = done && total > 0 && pct >= PASS_PCT;
+  const passed = submitted && done && total > 0 && pct >= PASS_PCT;
   const missed = eoq.questions
     .map((q, i) => ({ q, i }))
-    .filter(({ i }) => gradeable[i] && answered[i] && !correct[i]);
+    .filter(({ i }) => submitted && gradeable[i] && answered[i] && !correct[i]);
 
   useEffect(() => {
-    if (!done || total === 0 || recorded || preview) return;
+    if (!submitted || !done || total === 0 || recorded || preview) return;
     setRecorded(true);
     api.quizAttempt(course, week, score, total).catch(() => {});
-  }, [done, total, recorded, course, week, score, preview]);
+  }, [submitted, done, total, recorded, course, week, score, preview]);
 
   const reset = () => {
     setPicked({});
     setFitb({});
-    setChecked({});
+    setSubmitted(false);
     setRecorded(false);
   };
 
@@ -76,9 +77,9 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
         {eoq.questions.map((q, i) => (
           <span
             key={q.number ?? i}
-            className={`eoq-dot ${answered[i] ? (correct[i] ? 'correct' : gradeable[i] ? 'wrong' : 'answered') : ''}`}
+            className={`eoq-dot ${answered[i] ? 'answered' : ''} ${submitted && answered[i] && gradeable[i] ? (correct[i] ? 'correct' : 'wrong') : ''}`}
           >
-            {answered[i] && gradeable[i] ? (correct[i] ? <Check size={12} /> : <X size={12} />) : i + 1}
+            {submitted && answered[i] && gradeable[i] ? (correct[i] ? <Check size={12} /> : <X size={12} />) : i + 1}
           </span>
         ))}
       </div>
@@ -92,14 +93,13 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
             {q.type === 'mcq' && q.options && (
               <div className="eoq-options">
                 {q.options.map((opt, oi) => {
-                  const show = picked[i] !== undefined;
-                  const isCorrect = oi === mcqCorrectIndex(q);
+                  const isCorrect = submitted && oi === mcqCorrectIndex(q);
                   const isSelected = picked[i] === oi;
                   return (
                     <div
                       key={oi}
-                      className={`eoq-option ${show && isCorrect ? 'correct-reveal' : ''} ${show && isSelected && !isCorrect ? 'wrong-reveal' : ''} ${!show ? '' : 'locked'} ${!show && isSelected ? 'selected' : ''}`}
-                      onClick={() => picked[i] === undefined && setPicked((p) => ({ ...p, [i]: oi }))}
+                      className={`eoq-option ${isCorrect ? 'correct-reveal' : ''} ${submitted && isSelected && !isCorrect ? 'wrong-reveal' : ''} ${submitted ? 'locked' : ''} ${isSelected ? 'selected' : ''}`}
+                      onClick={() => !submitted && picked[i] === undefined && setPicked((p) => ({ ...p, [i]: oi }))}
                     >
                       <span className="eoq-letter">{String.fromCharCode(65 + oi)}</span> <MathPlain text={opt} />
                     </div>
@@ -111,29 +111,20 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
               <div className="eoq-fitb-row">
                 <input
                   value={fitb[i] || ''}
-                  disabled={!!checked[i]}
+                  disabled={submitted}
                   onChange={(e) => setFitb((f) => ({ ...f, [i]: e.target.value }))}
                   placeholder="Type the missing word…"
-                  className={checked[i] ? (correct[i] ? 'correct-input' : 'wrong-input') : undefined}
+                  className={submitted ? (correct[i] ? 'correct-input' : 'wrong-input') : undefined}
                 />
-                {!checked[i] && (
-                  <button
-                    className="eoq-submit-btn"
-                    style={{ marginTop: 0 }}
-                    onClick={() => setChecked((c) => ({ ...c, [i]: true }))}
-                  >
-                    Check
-                  </button>
-                )}
               </div>
             )}
-            {answered[i] && gradeable[i] && (
+            {submitted && answered[i] && gradeable[i] && (
               <div className={`eoq-feedback ${correct[i] ? 'correct-fb' : 'wrong-fb'}`}>
                 {correct[i] ? <Check size={14} /> : <X size={14} />}
                 <MathPlain text={correct[i] ? q.feedback?.correct || 'Correct!' : q.feedback?.wrong || 'Not quite.'} />
               </div>
             )}
-            {answered[i] && gradeable[i] && !correct[i] && q.topicRef && (
+            {submitted && answered[i] && gradeable[i] && !correct[i] && q.topicRef && (
               <div className="eoq-topicref">
                 Review: <button onClick={() => document.querySelector('.screen-only')?.scrollTo?.({ top: 0, behavior: 'smooth' })}>Topic {q.topicRef} ↑</button>
               </div>
@@ -141,12 +132,17 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
           </div>
         ))}
       </div>
-      {!done && (
+      {!done && !submitted && (
         <div className="eoq-submit-hint">
-          {answered.filter(Boolean).length}/{total} answered — finish every question to lock your score.
+          {answered.filter(Boolean).length}/{total} answered — no answers shown until you check your score.
         </div>
       )}
-      {done && total > 0 && (
+      {done && !submitted && (
+        <button onClick={() => setSubmitted(true)} className="eoq-submit-btn" style={{ width: '100%', marginTop: 16 }}>
+          Check score
+        </button>
+      )}
+      {submitted && total > 0 && (
         <div className={`eoq-result ${passed ? 'pass' : 'fail'}`}>
           <Mascot size={84} animate={passed ? 'wave' : undefined} />
           <div style={{ marginTop: 8 }}>

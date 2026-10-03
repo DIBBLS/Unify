@@ -273,22 +273,31 @@ export const api = {
     segmentationMode?: string;
     rawNotesText: string;
   }) =>
-    apiFetch<{
-      success: boolean;
-      note: unknown;
-      validation: { valid: boolean; errors?: unknown };
-      split?: boolean;
-      parts?: { index: number; topics: number; model: string; attempts: number }[];
-      warnings?: string[];
-    }>(
+    // Async jobs: the POST only plans the split and returns instantly;
+    // poll convertStatus for part progress. Generous timeout for safety.
+    apiFetch<{ jobId: string; parts: number; split: boolean }>(
       '/api/convert',
       {
         method: 'POST',
         body: JSON.stringify(payload),
       },
-      0,
-      300000
+      1,
+      60000
     ),
+  convertStatus: (jobId: string) =>
+    apiFetch<
+      | { status: 'working'; partsTotal: number; partsDone: number; currentModel: string }
+      | {
+          status: 'done';
+          note: unknown;
+          validation: { valid: boolean; errors?: unknown };
+          provider: string;
+          model: string;
+          split: boolean;
+          parts: { index: number; topics: number; model: string; attempts: number }[];
+          warnings: string[];
+        }
+    >(`/api/convert/${encodeURIComponent(jobId)}`, {}, 0, 60000),
   validateNote: (note: unknown) =>
     apiFetch<{ valid: boolean; errors?: unknown }>('/api/validate', {
       method: 'POST',
