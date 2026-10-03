@@ -388,6 +388,11 @@ export const api = {
     const q = p.toString();
     return apiFetch<{ code: string; title: string; levels: string[]; semesters: string[]; weeks: number }[]>(`/v1/courses${q ? `?${q}` : ''}`);
   },
+  courseSearch: (q: string, level = '') => {
+    const p = new URLSearchParams({ q });
+    if (level) p.set('level', level);
+    return apiFetch<{ code: string; title: string; levels: string[]; semesters: string[]; weeks: number; matchedAlias: string | null }[]>(`/v1/courses/search?${p.toString()}`);
+  },
   adminCreateUni: (name: string, short_name?: string) =>
     apiFetch<{ ok: boolean }>('/v1/admin/universities', { method: 'POST', body: JSON.stringify({ name, short_name }) }),
   adminDeleteUni: (id: string) => apiFetch<{ ok: boolean }>(`/v1/admin/universities/${id}`, { method: 'DELETE' }),
