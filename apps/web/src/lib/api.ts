@@ -37,7 +37,7 @@ async function sessionToken(): Promise<string | null> {
   return data.session?.access_token ?? null;
 }
 
-export async function apiFetch<T>(path: string, init: RequestInit = {}, retries = 1): Promise<T> {
+export async function apiFetch<T>(path: string, init: RequestInit = {}, retries = 1, timeoutMs = 30000): Promise<T> {
   if (!API_URL) throw new Error("VITE_API_URL is not set");
   const started = Date.now();
   const method = (init.method || "GET").toUpperCase();
@@ -47,7 +47,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, retries 
   log.info("api", `→ ${method} ${path} ${token ? "(authed)" : "(anon)"}`);
 
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 30000);
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
     let response = await fetch(`${API_URL}${path}`, { ...init, headers, signal: ctrl.signal });
     if (response.status === 401) {
@@ -94,19 +94,27 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, retries 
     const res = response;
     if (!res.ok) {
       let detail = "";
+      let hint = "";
+      let code = "";
       try {
         const body = (await res.json()) as {
           error?: string;
           message?: string;
+          hint?: string;
+          code?: string;
           details?: { fieldErrors?: Record<string, string[]> };
         };
         const firstIssue = Object.values(body.details?.fieldErrors || {}).flat()[0];
         detail = [body.error || body.message, firstIssue].filter(Boolean).join(" — ") || "";
+        hint = body.hint || "";
+        code = body.code || "";
       } catch {
         detail = "";
       }
       const err = new Error(`API ${res.status}${detail ? `: ${detail}` : ""}`);
       (err as { status?: number }).status = res.status;
+      if (hint) (err as { hint?: string }).hint = hint;
+      if (code) (err as { code?: string }).code = code;
       throw err;
     }
     log.info("api", `← ${res.status} ${path} (${Date.now() - started}ms)`);
@@ -265,10 +273,22 @@ export const api = {
     segmentationMode?: string;
     rawNotesText: string;
   }) =>
-    apiFetch<{ success: boolean; note: unknown; validation: { valid: boolean; errors?: unknown } }>('/api/convert', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    }),
+    apiFetch<{
+      success: boolean;
+      note: unknown;
+      validation: { valid: boolean; errors?: unknown };
+      split?: boolean;
+      parts?: { index: number; topics: number; model: string; attempts: number }[];
+      warnings?: string[];
+    }>(
+      '/api/convert',
+      {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      },
+      0,
+      300000
+    ),
   validateNote: (note: unknown) =>
     apiFetch<{ valid: boolean; errors?: unknown }>('/api/validate', {
       method: 'POST',
