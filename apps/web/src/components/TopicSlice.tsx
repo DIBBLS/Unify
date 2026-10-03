@@ -39,6 +39,13 @@ function Beat({ children }: { children: React.ReactNode }) {
 }
 
 export function TopicSlice({ topic }: { topic: Topic }) {
+  // Number diagram blocks per topic so figures read "Fig 1, Fig 2…".
+  let figSeen = 0;
+  const figFor = (b: Topic['subtopics'][number]['content'][number]): number | undefined => {
+    if (b.type !== 'diagram') return undefined;
+    figSeen += 1;
+    return figSeen;
+  };
   return (
     <div>
       <div className="section-label">Topic {topic.number}</div>
@@ -55,7 +62,7 @@ export function TopicSlice({ topic }: { topic: Topic }) {
           </div>
           <div className="topic-card">
             {sub.content.map((b, i) => (
-              <ContentBlockView key={i} block={b} />
+              <ContentBlockView key={i} block={b} fig={figFor(b)} />
             ))}
           </div>
           <MiniCheck questions={sub.miniCheck.questions} subTitle={sub.title} topicNum={topic.number} subAbbr={sub.abbr} />

@@ -2,7 +2,7 @@ import type { ContentBlock } from '../types/note';
 import Formula from './Formula';
 import { MathText, MathPlain } from './MathText';
 
-export function ContentBlockView({ block }: { block: ContentBlock }) {
+export function ContentBlockView({ block, fig }: { block: ContentBlock; fig?: number }) {
   switch (block.type) {
     case 'paragraph':
       return <MathText html={block.text} />;
@@ -106,21 +106,34 @@ export function ContentBlockView({ block }: { block: ContentBlock }) {
       );
     case 'diagram':
       return (
-        <div className="diagram-wrap">
-          <div className="diagram-box">
-            {block.imageRef ? (
-              <img src={block.imageRef} alt={block.caption} style={{ maxWidth: '100%' }} />
-            ) : (
-              <div style={{ fontWeight: 700, color: 'var(--green-deep)' }}>[ DIAGRAM PLACEHOLDER ]</div>
-            )}
-            <div style={{ fontSize: 13, fontWeight: 600, marginTop: 8 }}>{block.caption}</div>
+        <figure className="diagram-wrap">
+          {block.imageRef ? (
+            <img src={block.imageRef} alt={block.caption} style={{ maxWidth: '100%', borderRadius: 8 }} />
+          ) : (
+            <div
+              style={{
+                border: '1px dashed var(--border)',
+                borderRadius: 8,
+                padding: '20px 16px',
+                color: 'var(--text3)',
+                fontSize: 12,
+                fontWeight: 700,
+              }}
+            >
+              Illustration{fig ? ` ${fig}` : ''} — see description below
+            </div>
+          )}
+          <figcaption>
+            <div className="d-caption">
+              {fig ? `Fig ${fig} — ` : ''}{block.caption}
+            </div>
             {block.description && (
-              <div style={{ fontSize: 12, color: 'var(--text2)' }}>
+              <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>
                 <MathPlain text={block.description} />
               </div>
             )}
-          </div>
-        </div>
+          </figcaption>
+        </figure>
       );
     default:
       return null;

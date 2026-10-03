@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 import ConfirmModal from '../../components/ConfirmModal';
+import { uploadDiagram } from '../../lib/storage';
 import type {
   ContentBlock,
   EOQ,
@@ -313,15 +314,105 @@ const CHECK_TYPES: { id: MiniCheckQuestion['type']; label: string }[] = [
   { id: 'reveal', label: 'Reveal' },
 ];
 
+// ---- diagram image attach (BUG-003): upload to Supabase Storage or paste
+// a URL. Stored as the block's imageRef; readers render it in the figure.
+function DiagramImage({
+  imageRef,
+  course,
+  week,
+  onChange,
+}: {
+  imageRef: string | null;
+  course: string;
+  week: number;
+  onChange: (url: string | null) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [urlInput, setUrlInput] = useState('');
+
+  const upload = async (file: File | undefined) => {
+    if (!file) return;
+    setBusy(true);
+    setError('');
+    try {
+      const res = await uploadDiagram(file, course, week);
+      if (res.url) {
+        onChange(res.url);
+        setUrlInput('');
+      } else {
+        setError(res.error || 'Upload failed.');
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div style={{ marginTop: 8 }}>
+      {imageRef ? (
+        <div>
+          <img src={imageRef} alt="Diagram preview" style={{ maxWidth: '100%', borderRadius: 8, border: '1px solid var(--border)' }} />
+          <button
+            onClick={() => onChange(null)}
+            style={{ marginTop: 6, background: 'none', border: 'none', color: '#991b1b', fontSize: 12, fontWeight: 700, textDecoration: 'underline' }}
+          >
+            Remove image
+          </button>
+        </div>
+      ) : (
+        <>
+          <label
+            style={{ display: 'block', padding: 12, border: '1px dashed var(--border)', borderRadius: 10, textAlign: 'center', fontSize: 13, fontWeight: 700, color: 'var(--text2)', cursor: busy ? 'wait' : 'pointer', opacity: busy ? 0.6 : 1 }}
+          >
+            {busy ? 'Uploading…' : 'Upload diagram image (PNG/JPG/SVG, ≤5 MB)'}
+            <input
+              type="file"
+              accept="image/*"
+              disabled={busy}
+              onChange={(e) => void upload(e.target.files?.[0])}
+              style={{ display: 'none' }}
+            />
+          </label>
+          <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+            <input
+              value={urlInput}
+              onChange={(e) => setUrlInput(e.target.value)}
+              placeholder="…or paste an image URL"
+              style={{ ...input, marginTop: 0, flex: 1, minWidth: 0 }}
+            />
+            <button
+              onClick={() => {
+                const u = urlInput.trim();
+                if (!u) return;
+                onChange(u);
+                setUrlInput('');
+              }}
+              style={{ ...addBtn }}
+            >
+              Use
+            </button>
+          </div>
+          {error && <div style={{ fontSize: 12, color: '#991b1b', marginTop: 6 }}>{error}</div>}
+        </>
+      )}
+    </div>
+  );
+}
+
 // ---- block editor ----
 function BlockEditor({
   block,
+  course,
+  week,
   onChange,
   onDelete,
   onUp,
   onDown,
 }: {
   block: ContentBlock;
+  course: string;
+  week: number;
   onChange: (b: ContentBlock) => void;
   onDelete: () => void;
   onUp: () => void;
@@ -409,6 +500,12 @@ function BlockEditor({
         {head('Diagram')}
         <label style={label}>Caption<input value={block.caption} onChange={(e) => onChange({ ...block, caption: e.target.value })} placeholder="Fig 2.1 — …" style={input} /></label>
         <label style={{ ...label, marginTop: 8 }}>Description<textarea value={block.description} onChange={(e) => onChange({ ...block, description: e.target.value })} rows={2} placeholder="What the figure shows…" style={area} /></label>
+        <DiagramImage
+          imageRef={block.imageRef}
+          course={course}
+          week={week}
+          onChange={(imageRef) => onChange({ ...block, imageRef })}
+        />
       </div>
     );
   }
@@ -539,6 +636,8 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
                   <BlockEditor
                     key={bi}
                     block={b}
+                    course={note.course}
+                    week={note.week}
                     onChange={(nb) => { const topics = [...note.topics]; const subs = [...topics[ti].subtopics]; const blocks = [...subs[si].content]; blocks[bi] = nb; subs[si] = { ...s, content: blocks }; topics[ti] = { ...t, subtopics: subs }; setTopics(topics); }}
                     onDelete={() => { const topics = [...note.topics]; const subs = [...topics[ti].subtopics]; subs[si] = { ...s, content: subs[si].content.filter((_, xi) => xi !== bi) }; topics[ti] = { ...t, subtopics: subs }; setTopics(topics); }}
                     onUp={() => { const topics = [...note.topics]; const subs = [...topics[ti].subtopics]; subs[si] = { ...s, content: move(subs[si].content, bi, -1) }; topics[ti] = { ...t, subtopics: subs }; setTopics(topics); }}
