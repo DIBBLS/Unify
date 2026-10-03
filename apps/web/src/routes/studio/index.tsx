@@ -35,6 +35,9 @@ export default function StudioRoute() {
   const [note, setNote] = useState<UnifyNote | null>(null);
   const [meta, setMeta] = useState<Meta | null>(null);
   const [validation, setValidation] = useState<{ valid: boolean; errors?: unknown } | null>(null);
+  const [warnings, setWarnings] = useState<string[]>([]);
+  const [convertHint, setConvertHint] = useState('');
+  const [canRetryConvert, setCanRetryConvert] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [working, setWorking] = useState(false);
@@ -132,6 +135,9 @@ export default function StudioRoute() {
 
   const convert = async () => {
     setError('');
+    setConvertHint('');
+    setCanRetryConvert(false);
+    setWarnings([]);
     if (!raw.trim()) {
       setError('Paste your raw lecture notes first.');
       return;
@@ -141,6 +147,12 @@ export default function StudioRoute() {
     if (!code || !Number.isInteger(weekNum) || weekNum < 1) {
       setError('Enter a course code and a valid week number.');
       return;
+    }
+    // Large inputs split server-side into sequential parts — warn upfront
+    // so a long conversion never looks stuck.
+    const estParts = Math.min(3, Math.max(1, Math.ceil(raw.length / 20000)));
+    if (estParts > 1) {
+      setConvertHint(`Large input (~${raw.length.toLocaleString()} chars) — converting in ~${estParts} parts. Stay on this page; it takes a few minutes.`);
     }
     setWorking(true);
     try {
@@ -156,10 +168,21 @@ export default function StudioRoute() {
       setNote(res.note as UnifyNote);
       setMeta({ course: code, week: weekNum, title: title.trim(), subtitle: subtitle.trim() });
       setValidation(res.validation);
+      if (res.warnings?.length) setWarnings(res.warnings);
+      if (res.split) {
+        const made = (res.parts || []).map((p) => `part ${p.index} (${p.topics} topics, ${p.attempts} attempt${p.attempts === 1 ? '' : 's'})`).join(' + ');
+        setConvertHint(made ? `Converted in parts and merged: ${made}. Review before publishing.` : 'Converted in parts and merged. Review before publishing.');
+      }
       setEditing(false);
       setStep(1);
     } catch (err) {
+      const hint = (err as { hint?: string })?.hint;
+      const code = (err as { code?: string })?.code;
       setError(err instanceof Error ? err.message : 'Conversion failed.');
+      if (hint) setConvertHint(hint);
+      // Retryable by design: rate limits, overloads, model failures.
+      // Auth/key and oversize errors need a fix first, not a retry.
+      setCanRetryConvert(!code || !['BAD_KEY', 'INPUT_TOO_LARGE'].includes(code));
     } finally {
       setWorking(false);
     }
@@ -382,6 +405,28 @@ export default function StudioRoute() {
 
       {error && <Flash tone="error" message={error} onDismiss={() => setError('')} />}
       {success && <Flash tone="success" message={success} onDismiss={() => setSuccess('')} />}
+      {convertHint && (
+        <div style={{ padding: 12, background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, fontSize: 13, color: '#92400e' }}>
+          {convertHint}
+          {canRetryConvert && !working && (
+            <div style={{ marginTop: 8 }}>
+              <button onClick={convert} style={{ padding: '8px 18px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', borderBottom: '3px solid #059669', fontWeight: 800, fontSize: 13 }}>
+                Retry conversion
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+      {warnings.length > 0 && (
+        <div style={{ padding: 12, background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, fontSize: 13, color: '#92400e' }}>
+          <div style={{ fontWeight: 800, marginBottom: 4 }}>Review before publishing:</div>
+          <ul style={{ paddingLeft: 18, margin: 0 }}>
+            {warnings.map((w, i) => (
+              <li key={i}>{w}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {step === 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
