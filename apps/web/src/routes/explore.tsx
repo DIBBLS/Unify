@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Search } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import Loading from '../components/Loading';
 import Mascot from '../components/Mascot';
@@ -7,7 +7,7 @@ import Flash from '../components/Flash';
 import { supabaseBrowser } from '../lib/supabase';
 import { api } from '../lib/api';
 
-type CatalogCourse = { code: string; title: string; weeks: number; levels: string[]; semesters: string[] };
+type CatalogCourse = { code: string; title: string; weeks: number; levels: string[]; semesters: string[]; matchedAlias: string | null };
 
 // Explore + enroll: browse your level's courses for the active semester
 // and join them. Enrolled courses live under My Courses (/course).
@@ -19,6 +19,11 @@ export default function ExplorePage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  // BUG-006 search: code, title or alias ("ME 352" finds "MEE 352"),
+  // spanning both semesters with badges so nothing hides.
+  const [q, setQ] = useState('');
+  const [searching, setSearching] = useState(false);
+  const [results, setResults] = useState<CatalogCourse[] | null>(null);
 
   useEffect(() => {
     const sb = supabaseBrowser();
@@ -45,7 +50,7 @@ export default function ExplorePage() {
         // Week counts ride on the catalog response — no per-course fan-out
         // (one Explore visit used to fire ~160 week requests).
         setCourses(
-          list.map((c) => ({ code: c.code, title: c.title, weeks: c.weeks || 0, levels: c.levels || [], semesters: c.semesters || [] }))
+          list.map((c) => ({ code: c.code, title: c.title, weeks: c.weeks || 0, levels: c.levels || [], semesters: c.semesters || [], matchedAlias: null }))
         );
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Could not load courses.');
@@ -58,9 +63,32 @@ export default function ExplorePage() {
   if (loading) return <Loading text="Loading courses…" />;
 
   // Strict scoping: your level + the admin's active semester, nothing else.
-  const shown = courses.filter(
+  // Search mode spans both semesters (badged) so no course can hide.
+  const shown = results !== null ? results : courses.filter(
     (c) => (!myLevel || c.levels.includes(myLevel)) && c.semesters.includes(activeSemester)
   );
+
+  // Debounced catalog search (min 2 chars, level-scoped when known).
+  useEffect(() => {
+    const needle = q.trim();
+    if (needle.length < 2) {
+      setResults(null);
+      setSearching(false);
+      return;
+    }
+    setSearching(true);
+    const t = window.setTimeout(async () => {
+      try {
+        const res = await api.courseSearch(needle, myLevel || '');
+        setResults(res);
+      } catch {
+        setResults([]);
+      } finally {
+        setSearching(false);
+      }
+    }, 350);
+    return () => window.clearTimeout(t);
+  }, [q, myLevel]);
 
   const toggleEnroll = async (code: string) => {
     const isIn = enrolledSet.has(code.toUpperCase());
@@ -87,15 +115,26 @@ export default function ExplorePage() {
       <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 8 }}>
         {myLevel || 'Your level'} · {activeSemester}
       </div>
+      <div style={{ position: 'relative', marginTop: 10 }}>
+        <Search size={16} color="#999" style={{ position: 'absolute', left: 12, top: 12 }} />
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search code, title or alias…"
+          style={{ width: '100%', padding: '10px 12px 10px 36px', border: '1px solid var(--border)', borderRadius: 12, fontSize: 14, background: 'var(--surface)', color: 'var(--text)' }}
+        />
+      </div>
+      {searching && <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 8 }}>Searching…</div>}
       <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {shown.length === 0 && !error && (
           <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
             <Mascot size={96} />
-            <div style={{ marginTop: 8 }}>No courses for this level yet. Check back soon.</div>
+            <div style={{ marginTop: 8 }}>{results !== null ? 'No courses match that search.' : 'No courses for this level yet. Check back soon.'}</div>
           </div>
         )}
         {shown.map((c, i) => {
           const isIn = enrolledSet.has(c.code.toUpperCase());
+          const isSearch = results !== null;
           return (
             <div
               key={c.code}
@@ -122,6 +161,11 @@ export default function ExplorePage() {
                 <span style={{ flex: 1, minWidth: 0 }}>
                   <span style={{ fontWeight: 700, display: 'block' }}>{c.code}</span>
                   <span style={{ fontSize: 12, color: 'var(--text2)' }}>{c.title} · {c.weeks} {c.weeks === 1 ? 'week' : 'weeks'}</span>
+                  {isSearch && (
+                    <span style={{ fontSize: 11, color: '#059669', fontWeight: 700, display: 'block' }}>
+                      {(c.semesters || []).map((s) => s.replace(' Semester', '')).join(' · ')}{c.matchedAlias ? ` · also “${c.matchedAlias}”` : ''}
+                    </span>
+                  )}
                 </span>
               </div>
               <button
