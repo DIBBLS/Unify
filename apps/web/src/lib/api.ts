@@ -335,6 +335,10 @@ export const api = {
     apiFetch<{ users: AdminUser[] }>(`/v1/admin/users?q=${encodeURIComponent(q)}&role=${encodeURIComponent(role)}`),
   adminPatchUser: (id: string, payload: { role?: string; is_admin?: boolean; level?: string }) =>
     apiFetch<{ ok: boolean }>(`/v1/admin/users/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  adminUserCourses: (id: string) =>
+    apiFetch<{ courses: { course: string; kind: string }[] }>(`/v1/admin/users/${id}/courses`),
+  adminSetUserCourses: (id: string, courses: string[]) =>
+    apiFetch<{ ok: boolean; courses: string[] }>(`/v1/admin/users/${id}/courses`, { method: 'PUT', body: JSON.stringify({ courses }) }),
   adminSetSemester: (semester: string) =>
     apiFetch<{ ok: boolean; currentSemester: string }>('/v1/admin/settings/semester', { method: 'PUT', body: JSON.stringify({ semester }) }),
   adminPromote: () =>
