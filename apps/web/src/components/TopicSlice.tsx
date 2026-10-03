@@ -4,6 +4,7 @@ import type { Topic } from '../types/note';
 import { ContentBlockView } from './ContentBlock';
 import { MiniCheck } from './MiniCheck';
 import { RecallDeck } from './RecallDeck';
+import { MathPlain } from './MathText';
 
 // Story beat: each block rises in the first time it scrolls into view,
 // so a topic reads like chapters unfolding, not a wall of text.
@@ -41,12 +42,16 @@ export function TopicSlice({ topic }: { topic: Topic }) {
   return (
     <div>
       <div className="section-label">Topic {topic.number}</div>
-      <div className="section-title">{topic.title}</div>
+      <div className="section-title">
+        <MathPlain text={topic.title} />
+      </div>
       {topic.subtopics.map((sub) => (
         <Beat key={sub.number}>
           <div className="subtopic-heading">
             <span className="subtopic-num">{sub.number}</span>
-            <h3>{sub.title}</h3>
+            <h3>
+              <MathPlain text={sub.title} />
+            </h3>
           </div>
           <div className="topic-card">
             {sub.content.map((b, i) => (

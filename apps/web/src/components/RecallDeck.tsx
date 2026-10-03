@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Eye, RotateCcw } from 'lucide-react';
+import { MathText, MathPlain } from './MathText';
 
 export type RecallItem = { badge: string; question: string; answer: string };
 
@@ -54,8 +55,10 @@ export function RecallDeck({ items }: { items: RecallItem[] }) {
         return (
           <div key={i} className="recall-card">
             <span className="recall-badge">{c.badge}</span>
-            <div className="recall-q">{c.question}</div>
-            <div className={`recall-answer ${open ? 'open' : 'blurred'}`} dangerouslySetInnerHTML={{ __html: c.answer }} />
+            <div className="recall-q">
+              <MathPlain text={c.question} />
+            </div>
+            <MathText html={c.answer} className={`recall-answer ${open ? 'open' : 'blurred'}`} />
             {!open && (
               <button className="recall-veil" onClick={() => toggle(i)} style={{ position: 'relative', marginTop: 8, padding: 10 }}>
                 <Eye size={14} /> Tap to reveal
