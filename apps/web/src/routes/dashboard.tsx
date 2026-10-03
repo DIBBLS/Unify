@@ -93,9 +93,14 @@ export default function DashboardRoute() {
     recentUsers: { first_name: string; email: string; role: string; created_at: string }[];
     recentNotes: { course: string; week: number; topic: number; version: number; title: string; created_at: string }[];
   } | null>(null);
-  const [notes, setNotes] = useState<{ id: string; course: string; week: number; topic: number; version: number; title: string }[]>([]);
+  const [notes, setNotes] = useState<{ id: string; course: string; week: number; topic: number; lecture: number; version: number; title: string }[]>([]);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [noteError, setNoteError] = useState('');
+  // BUG-012: catalog meta for course cards (title, weeks, lecturers) +
+  // elective removal target. Hooks stay above every early return (#310).
+  const [catalog, setCatalog] = useState<Record<string, { title: string; weeks: number; lecturers: string[] }>>({});
+  const [confirmUnenroll, setConfirmUnenroll] = useState<string | null>(null);
+  const [unenrolling, setUnenrolling] = useState(false);
   // Delete-confirm target. Declared with the other hooks: a useState placed
   // after an early return changes the hook count between renders (#310).
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
@@ -122,6 +127,30 @@ export default function DashboardRoute() {
         setEnrolled(me.courses || []);
         setResume(me.resume || null);
         setIsAdmin(!!me.isAdmin);
+        // BUG-012: one catalog fetch feeds every course card (title,
+        // weeks, lecturers) — never one request per card.
+        try {
+          const cat = await api.courses();
+          const map: Record<string, { title: string; weeks: number; lecturers: string[] }> = {};
+          for (const c of cat) map[c.code.toUpperCase().trim()] = { title: c.title, weeks: c.weeks || 0, lecturers: c.lecturers || [] };
+          setCatalog(map);
+        } catch {
+          // cards fall back to codes
+        }
+        // BUG-013: warm the enrolled course week-lists in the background
+        // so course pages open instantly (kills the slow-blank feel).
+        try {
+          const warm = () => {
+            for (const c of me.courses || []) {
+              if (c && c.trim()) api.courseWeeks(c.trim()).catch(() => {});
+            }
+          };
+          const ric = (window as unknown as { requestIdleCallback?: (cb: () => void) => void }).requestIdleCallback;
+          if (ric) ric(warm);
+          else window.setTimeout(warm, 1500);
+        } catch {
+          // warmup is best-effort
+        }
         const stats = await api.stats();
         setXp(stats.xp);
         setStreak(stats.streak);
@@ -174,6 +203,19 @@ export default function DashboardRoute() {
   const isAuthor = profile?.role === 'lecturer' || profile?.role === 'collaborator';
   const roleLabel = profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : '';
 
+  // BUG-012: electives leave with one tap (compulsory courses are
+  // re-added by repairEnrollments on next Explore visit if removed).
+  const unenroll = async (course: string) => {
+    setUnenrolling(true);
+    try {
+      await api.enroll(course, false);
+      setEnrolled((prev) => prev.filter((c) => c.toUpperCase().trim() !== course.toUpperCase().trim()));
+    } catch {
+      // card stays; retry from the course page
+    } finally {
+      setUnenrolling(false);
+    }
+  };
   // Delete one published topic version (own notes; admins can remove any).
   const deleteNote = async (id: string) => {
     setDeleting(id);
@@ -247,9 +289,10 @@ export default function DashboardRoute() {
             (() => {
               // BUG-008: one row per topic showing ONLY the latest version;
               // older versions stay reachable in the reader, not in the list.
+              // Lecture-scoped: L1·T1 and L2·T1 are different rows.
               const seen = new Map<string, { n: (typeof notes)[number]; older: number }>();
               for (const n of notes) {
-                const k = `${n.course}::${n.week}::${n.topic}`;
+                const k = `${n.course}::${n.week}::${n.lecture || 1}::${n.topic}`;
                 const g = seen.get(k);
                 if (!g) seen.set(k, { n, older: 0 });
                 else g.older += 1;
@@ -257,7 +300,7 @@ export default function DashboardRoute() {
               return [...seen.values()].map(({ n, older }) => (
               <div key={n.id} style={{ padding: 14, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
                 <Link to={`/learn/${encodeURIComponent(n.course)}/week/${n.week}?preview=1`} style={{ flex: 1, textDecoration: 'none', color: 'var(--text)', display: 'block' }}>
-                  <div style={{ fontSize: 11, color: '#059669', fontWeight: 800, letterSpacing: 1 }}>{n.course} · WEEK {n.week} · TOPIC {n.topic} · v{n.version}{older > 0 ? ` · ${older} older` : ''}</div>
+                  <div style={{ fontSize: 11, color: '#059669', fontWeight: 800, letterSpacing: 1 }}>{n.course} · WEEK {n.week} · L{n.lecture || 1}·T{n.topic} · v{n.version}{older > 0 ? ` · ${older} older` : ''}</div>
                   <div style={{ fontWeight: 700, marginTop: 2 }}>{n.title || `Topic ${n.topic}`}</div>
                 </Link>
                 <button
@@ -351,13 +394,13 @@ export default function DashboardRoute() {
 
       <div style={{ margin: '16px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800 }}>Your Courses</h2>
-        <Link to="/course" style={{ fontSize: 13, color: '#059669', fontWeight: 700, textDecoration: 'none', display: 'flex', gap: 4, alignItems: 'center' }}>
-          View all <ChevronRight size={14} />
+        <Link to="/explore" style={{ fontSize: 13, color: '#059669', fontWeight: 700, textDecoration: 'none', display: 'flex', gap: 4, alignItems: 'center' }}>
+          Add courses <ChevronRight size={14} />
         </Link>
       </div>
-      <div style={{ margin: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ margin: '12px 16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         {shown.length === 0 ? (
-          <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '2px solid var(--border)', borderRadius: 16 }}>
+          <div style={{ gridColumn: '1 / -1', padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '2px solid var(--border)', borderRadius: 16 }}>
             <Mascot size={96} />
             <div style={{ marginTop: 8 }}>No courses yet.</div>
             <Link to="/explore" style={{ display: 'inline-block', marginTop: 12, padding: '10px 22px', background: '#10b981', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #059669' }}>
@@ -365,14 +408,59 @@ export default function DashboardRoute() {
             </Link>
           </div>
         ) : (
-          shown.map((c, i) => (
-            <Link key={c.course} to={`/course/${encodeURIComponent(c.course.trim())}`} className="rise" style={{ animationDelay: `${Math.min(i, 6) * 40}ms`, padding: 14, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: 'var(--text)' }}>
-              <span style={{ fontWeight: 700 }}>{c.course}</span>
-              <ChevronRight size={16} color="#059669" />
-            </Link>
-          ))
+          shown.map((c, i) => {
+            const key = c.course.toUpperCase().trim();
+            const meta = catalog[key];
+            const stat = courses.find((s) => s.course.toUpperCase().trim() === key);
+            const lecturer = (meta?.lecturers || [])[0] || '';
+            return (
+              <div key={c.course} className="rise" style={{ animationDelay: `${Math.min(i, 6) * 40}ms`, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 12, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', minWidth: 0 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', fontWeight: 800, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    {(lecturer || c.course).trim().charAt(0).toUpperCase()}
+                  </div>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <Link to={`/course/${encodeURIComponent(c.course.trim())}`} style={{ fontWeight: 800, fontSize: 14, color: 'var(--text)', textDecoration: 'none', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {c.course}
+                    </Link>
+                    {lecturer ? (
+                      <div style={{ fontSize: 11, color: 'var(--text2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lecturer}</div>
+                    ) : null}
+                  </div>
+                </div>
+                <Link to={`/course/${encodeURIComponent(c.course.trim())}`} style={{ fontSize: 12, color: 'var(--text2)', textDecoration: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {meta?.title || 'Tap to open'}
+                </Link>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 11, color: 'var(--text2)' }}>
+                  <BookOpen size={12} color="#059669" />
+                  <span>{meta?.weeks || 0} weeks{stat && stat.topics > 0 ? ` · ${stat.topics} done` : ''}</span>
+                  <button
+                    onClick={() => setConfirmUnenroll(c.course)}
+                    aria-label={`Remove ${c.course} from your courses`}
+                    style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text3)', padding: 4 }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+            );
+          })
         )}
       </div>
+      {confirmUnenroll && (
+        <ConfirmModal
+          title={`Remove ${confirmUnenroll}?`}
+          body="It leaves your dashboard. Re-enroll anytime from Explore — your XP and progress stay."
+          confirmLabel="Remove"
+          busy={unenrolling}
+          onConfirm={() => {
+            const code = confirmUnenroll;
+            setConfirmUnenroll(null);
+            void unenroll(code);
+          }}
+          onCancel={() => setConfirmUnenroll(null)}
+        />
+      )}
 
     </div>
   );
