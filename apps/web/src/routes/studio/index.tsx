@@ -348,7 +348,7 @@ export default function StudioRoute() {
         noteJson: note,
         ...(mode ? { mode } : {}),
       });
-      const tags = (res.versions || []).map((v) => `Topic ${v.topic} → v${v.version}`).join(' · ');
+      const tags = (res.versions || []).map((v) => `L${v.lecture || 1}·Topic ${v.topic} → v${v.version}`).join(' · ');
       setSuccess(
         mode === 'replace'
           ? `${res.course} · Week ${res.week} replaced (${tags}). Old versions are gone.`
@@ -387,13 +387,14 @@ export default function StudioRoute() {
 
   // Occupied-week/topic choice sheet (BUG-007): Replace / Add as new
   // version / Cancel. Nothing stacks or overwrites silently.
-  const [occupy, setOccupy] = useState<null | { kind: 'week' | 'topic'; topic?: number; summary: string }>(null);
+  const [occupy, setOccupy] = useState<null | { kind: 'week' | 'topic'; topic?: number; lecture?: number; summary: string }>(null);
 
   // Publish a single topic as a new version (v1, v2, v3...) without
-  // touching the other topics in the week.
-  const publishTopic = async (topicNumber: number, mode?: 'add' | 'replace') => {
+  // touching the other topics in the week. Lecture-scoped: Lecture 1
+  // Topic 1 and Lecture 2 Topic 1 version independently.
+  const publishTopic = async (topicNumber: number, lecture = 1, mode?: 'add' | 'replace') => {
     if (!note || !meta || publishingTopic !== null) return;
-    const single = note.topics.find((t) => t.number === topicNumber);
+    const single = note.topics.find((t) => t.number === topicNumber && (t.lecture || 1) === lecture);
     if (!single) return;
     setError('');
     setSuccess('');
@@ -403,14 +404,15 @@ export default function StudioRoute() {
         course: meta.course,
         week: meta.week,
         topic: topicNumber,
+        lectureNo: lecture,
         title: single.title,
         noteJson: single,
         ...(mode ? { mode } : {}),
       });
       setSuccess(
         mode === 'replace'
-          ? `${meta.course} · Week ${meta.week} · Topic ${topicNumber} replaced as fresh v${res.version}. Old versions are gone.`
-          : `${meta.course} · Week ${meta.week} · Topic ${topicNumber} saved as v${res.version}. Old versions are kept.`
+          ? `${meta.course} · Week ${meta.week} · Lecture ${lecture} Topic ${topicNumber} replaced as fresh v${res.version}. Old versions are gone.`
+          : `${meta.course} · Week ${meta.week} · Lecture ${lecture} Topic ${topicNumber} saved as v${res.version}. Old versions are kept.`
       );
     } catch (err) {
       const code = (err as { code?: string })?.code;
@@ -419,7 +421,8 @@ export default function StudioRoute() {
         setOccupy({
           kind: 'topic',
           topic: topicNumber,
-          summary: `Topic ${topicNumber} already published (${(existing?.versions || []).map((v) => `v${v}`).join(', ') || 'existing versions'})${existing?.title ? ` — ${existing.title}` : ''}.`,
+          lecture,
+          summary: `Lecture ${lecture} Topic ${topicNumber} already published (${(existing?.versions || []).map((v) => `v${v}`).join(', ') || 'existing versions'})${existing?.title ? ` — ${existing.title}` : ''}.`,
         });
         return;
       }
@@ -655,14 +658,38 @@ export default function StudioRoute() {
             <>
               <div style={{ maxWidth: 640, margin: '0 auto' }}>
                 {note.topics.map((t) => (
-                  <div key={t.number} style={{ marginBottom: 12 }}>
+                  <div key={`${t.lecture || 1}-${t.number}`} style={{ marginBottom: 12 }}>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text2)' }}>
+                        Lecture {(t.lecture || 1)} · Topic {t.number}
+                      </span>
+                      <select
+                        aria-label={`Lecture for Topic ${t.number}`}
+                        value={t.lecture || 1}
+                        onChange={(e) => {
+                          const lec = Number(e.target.value) || 1;
+                          setNote({
+                            ...note,
+                            topics: note.topics.map((x) =>
+                              x === t ? { ...x, lecture: lec } : x
+                            ),
+                          });
+                          setValidation(null);
+                        }}
+                        style={{ fontSize: 12, fontWeight: 700, borderRadius: 9999, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', padding: '4px 8px' }}
+                      >
+                        {[1, 2, 3].map((l) => (
+                          <option key={l} value={l}>Lecture {l}</option>
+                        ))}
+                      </select>
+                    </div>
                     <TopicSlice topic={t} />
                     <button
-                      onClick={() => publishTopic(t.number)}
+                      onClick={() => publishTopic(t.number, t.lecture || 1)}
                       disabled={publishingTopic !== null}
                       style={{ marginTop: 6, padding: '8px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: '#059669' }}
                     >
-                      {publishingTopic === t.number ? 'Publishing…' : `Publish only Topic ${t.number}`}
+                      {publishingTopic === t.number ? 'Publishing…' : `Publish only Lecture ${t.lecture || 1} Topic ${t.number}`}
                     </button>
                   </div>
                 ))}
@@ -695,7 +722,7 @@ export default function StudioRoute() {
                       const o = occupy;
                       setOccupy(null);
                       if (o.kind === 'week') void publish('replace');
-                      else if (o.topic !== undefined) void publishTopic(o.topic, 'replace');
+                      else if (o.topic !== undefined) void publishTopic(o.topic, o.lecture || 1, 'replace');
                     }}
                     disabled={publishing || publishingTopic !== null}
                     style={{ padding: 13, borderRadius: 14, background: '#dc2626', color: '#fff', border: 'none', borderBottom: '3px solid #991b1b', fontWeight: 800, fontSize: 14 }}
@@ -707,7 +734,7 @@ export default function StudioRoute() {
                       const o = occupy;
                       setOccupy(null);
                       if (o.kind === 'week') void publish('add');
-                      else if (o.topic !== undefined) void publishTopic(o.topic, 'add');
+                      else if (o.topic !== undefined) void publishTopic(o.topic, o.lecture || 1, 'add');
                     }}
                     disabled={publishing || publishingTopic !== null}
                     style={{ padding: 13, borderRadius: 14, background: '#059669', color: '#fff', border: 'none', borderBottom: '3px solid #14532d', fontWeight: 800, fontSize: 14 }}

@@ -56,7 +56,11 @@ export default function AuthRoute() {
       // Exact restore is a student path: authors/admins land on dashboard.
       if (me.resume?.course && me.profile?.role === 'student') {
         const c = encodeURIComponent(me.resume.course.trim());
-        navigate(`/learn/${c}/week/${me.resume.week}${me.resume.topic ? `?t=${me.resume.topic}` : ''}`, { replace: true });
+        const q = new URLSearchParams();
+        if (me.resume.topic) q.set('t', String(me.resume.topic));
+        if (me.resume.lecture && me.resume.lecture > 1) q.set('c', String(me.resume.lecture));
+        const qs = q.toString();
+        navigate(`/learn/${c}/week/${me.resume.week}${qs ? `?${qs}` : ''}`, { replace: true });
         return;
       }
       navigate('/dashboard');

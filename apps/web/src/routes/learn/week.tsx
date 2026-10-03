@@ -20,9 +20,9 @@ export default function LearnPage() {
   const weekNum = Number(weekParam) || 1;
   const [note, setNote] = useState<UnifyNote | null>(null);
   const [topicMeta, setTopicMeta] = useState<TopicMeta[]>([]);
-  // Older-version views: topic number -> Topic payload + viewed version.
-  const [overrides, setOverrides] = useState<Record<number, Topic>>({});
-  const [viewed, setViewed] = useState<Record<number, number>>({});
+  // Older-version views: "lecture::topic" -> Topic payload + viewed version.
+  const [overrides, setOverrides] = useState<Record<string, Topic>>({});
+  const [viewed, setViewed] = useState<Record<string, number>>({});
   const [loadingVersion, setLoadingVersion] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [enrolling, setEnrolling] = useState(false);
@@ -37,6 +37,13 @@ export default function LearnPage() {
   const [burst, setBurst] = useState<{ k: number; label: string; sub: string } | null>(null);
   const firstCount = useRef(true);
   const [tab, setTab] = useState(0);
+  // BUG-009: a week is Lecture 1/2/3, each with its own numbered topics.
+  // The reader switches lectures without reload (?c= param); tabs are
+  // per-lecture, the EOQ quiz closes the final lecture.
+  const [lecture, setLecture] = useState(() => {
+    const c = Number(new URLSearchParams(window.location.search).get('c')) || 1;
+    return Math.min(Math.max(c, 1), 3);
+  });
   // Lifetime XP drives XP-gated perks (PDF unlocks at 300 XP). Null =
   // unknown (never 0-by-default — a failed fetch must not fake-lock).
   // Retries + refocus refetch keep it truthful; XP only grows.
@@ -87,13 +94,26 @@ export default function LearnPage() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
   const topics = note?.topics ?? [];
-  const hasQuiz = (note?.eoq?.questions?.length || 0) > 0;
-  const tabCount = topics.length + (hasQuiz ? 1 : 0);
+  const lectures = (() => {
+    const set = new Set<number>();
+    for (const t of topics) set.add(t.lecture || 1);
+    for (const m of topicMeta) set.add(m.lecture || 1);
+    if (set.size === 0) set.add(1);
+    return [...set].sort((a, b) => a - b);
+  })();
+  const selLecture = lectures.includes(lecture) ? lecture : lectures[0];
+  const lastLecture = lectures[lectures.length - 1];
+  const classTopics = topics.filter((t) => (t.lecture || 1) === selLecture);
+  const hasQuiz = (note?.eoq?.questions?.length || 0) > 0 && selLecture === lastLecture;
+  const tabCount = classTopics.length + (hasQuiz ? 1 : 0);
 
   useEffect(() => {
     if (!note) return;
+    const c = Number(searchParams.get('c')) || 0;
+    if (c && lectures.includes(c) && c !== lecture) setLecture(c);
     const t = Math.min(Math.max(Number(searchParams.get('t')) || 0, 0), Math.max(tabCount - 1, 0));
     setTab((cur) => (cur === t ? cur : t));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [note, searchParams, tabCount]);
 
   const previewMode = searchParams.get('preview') === '1';
@@ -153,9 +173,12 @@ export default function LearnPage() {
         // Track the live position for the dashboard Resume card
         // (previews never pollute it).
         if (valid && !previewMode) {
-          const count = valid.topics.length + ((valid.eoq?.questions?.length || 0) > 0 ? 1 : 0);
+          const c0 = Math.min(Math.max(Number(searchParams.get('c')) || 0, 0), 3) || 1;
+          const inClass = valid.topics.filter((t) => (t.lecture || 1) === c0);
+          const list = inClass.length > 0 ? inClass : valid.topics;
+          const count = list.length + ((valid.eoq?.questions?.length || 0) > 0 ? 1 : 0);
           const t0 = Math.min(Math.max(Number(searchParams.get('t')) || 0, 0), Math.max(count - 1, 0));
-          api.resume(data.course, weekNum, t0).catch(() => {});
+          api.resume(data.course, weekNum, t0, c0).catch(() => {});
         }
       } catch {
         setLoadError("Couldn't load this week. Check your connection and retry.");
@@ -252,8 +275,11 @@ export default function LearnPage() {
           ? '/browse'
           : `/course/${encodeURIComponent(courseCode || '')}`
       : `/course/${encodeURIComponent(courseCode || '')}`;
-  const goTab = (t: number) => {
-    const clamped = Math.min(Math.max(t, 0), tabCount - 1);
+  const goTab = (t: number, lec: number = selLecture) => {
+    const list = lec === selLecture ? classTopics : topics.filter((x) => (x.lecture || 1) === lec);
+    const count = list.length + (hasQuiz && lec === lastLecture ? 1 : 0);
+    const clamped = Math.min(Math.max(t, 0), Math.max(count - 1, 0));
+    if (lec !== selLecture && lectures.includes(lec)) setLecture(lec);
     setTab(clamped);
     // Chapters open at the topic head (below hero + chapter bar) — never
     // the very top, no manual scrolling after Next.
@@ -261,37 +287,57 @@ export default function LearnPage() {
     // Preserve ?preview=1 across tab switches (losing it would drop the
     // read-only banner and start recording resume on a preview).
     setSearchParams(
-      { ...(preview ? { preview: '1' } : {}), ...(clamped ? { t: String(clamped) } : {}) },
+      {
+        ...(preview ? { preview: '1' } : {}),
+        ...(lec !== lectures[0] ? { c: String(lec) } : {}),
+        ...(clamped ? { t: String(clamped) } : {}),
+      },
       { replace: true }
     );
     // Every tab switch moves the Resume bookmark (never for previews).
     if (!preview && !blocked && note) {
-      api.resume(note.course, weekNum, clamped).catch(() => {});
+      api.resume(note.course, weekNum, clamped, lec).catch(() => {});
     }
   };
 
-  const versionByTopic: Record<number, TopicMeta> = {};
-  for (const m of topicMeta) versionByTopic[m.topic] = m;
-  const activeTopic = tab < topics.length ? topics[tab] : undefined;
-  const activeMeta = activeTopic ? versionByTopic[activeTopic.number] : undefined;
+  const goLecture = (lec: number) => {
+    if (!lectures.includes(lec) || lec === selLecture) return;
+    setLecture(lec);
+    setTab(0);
+    scrollToTopicTop();
+    setSearchParams(
+      { ...(preview ? { preview: '1' } : {}), ...(lec !== lectures[0] ? { c: String(lec) } : {}) },
+      { replace: true }
+    );
+    if (!preview && !blocked && note) {
+      api.resume(note.course, weekNum, 0, lec).catch(() => {});
+    }
+  };
+
+  const vkey = (lec: number, topic: number) => `${lec}::${topic}`;
+  const versionByTopic: Record<string, TopicMeta> = {};
+  for (const m of topicMeta) versionByTopic[vkey(m.lecture || 1, m.topic)] = m;
+  const activeTopic = tab < classTopics.length ? classTopics[tab] : undefined;
+  const activeMeta = activeTopic ? versionByTopic[vkey(selLecture, activeTopic.number)] : undefined;
   const shownTopic =
-    activeTopic && viewed[activeTopic.number] !== undefined && overrides[activeTopic.number]
-      ? (overrides[activeTopic.number] as Topic)
+    activeTopic && viewed[vkey(selLecture, activeTopic.number)] !== undefined && overrides[vkey(selLecture, activeTopic.number)]
+      ? (overrides[vkey(selLecture, activeTopic.number)] as Topic)
       : activeTopic;
   const viewingOld =
-    !!activeMeta && viewed[activeMeta.topic] !== undefined && viewed[activeMeta.topic] !== activeMeta.version;
+    !!activeMeta && viewed[vkey(selLecture, activeMeta.topic)] !== undefined && viewed[vkey(selLecture, activeMeta.topic)] !== activeMeta.version;
 
   // View one version of the active topic (latest clears back to live).
   const viewVersion = async (m: TopicMeta, version: number, id: string) => {
+    const k = vkey(m.lecture || 1, m.topic);
     if (version === m.version) {
       setViewed((prev) => {
         const next = { ...prev };
-        delete next[m.topic];
+        delete next[k];
         return next;
       });
       setOverrides((prev) => {
         const next = { ...prev };
-        delete next[m.topic];
+        delete next[k];
         return next;
       });
       return;
@@ -299,8 +345,8 @@ export default function LearnPage() {
     setLoadingVersion(true);
     try {
       const d = await api.noteGet(id);
-      setOverrides((prev) => ({ ...prev, [m.topic]: d.noteJson as Topic }));
-      setViewed((prev) => ({ ...prev, [m.topic]: version }));
+      setOverrides((prev) => ({ ...prev, [k]: d.noteJson as Topic }));
+      setViewed((prev) => ({ ...prev, [k]: version }));
     } catch {
       // keep the live version on failure
     } finally {
@@ -377,13 +423,34 @@ export default function LearnPage() {
         </div>
       )}
 
-      {tabCount > 1 && (
-        <div className="segbar" role="tablist" aria-label="Week chapters">
-          {topics.map((t, idx) => {
-            const done = isDone(weekNum, idx);
+      {lectures.length > 1 && (
+        <div className="segbar" role="tablist" aria-label="Week lectures" style={{ marginBottom: 8 }}>
+          {lectures.map((lec) => {
+            const n = topics.filter((t) => (t.lecture || 1) === lec).length;
             return (
               <button
-                key={t.number}
+                key={lec}
+                role="tab"
+                aria-selected={lec === selLecture}
+                title={`Lecture ${lec} · ${n} topic${n === 1 ? '' : 's'}`}
+                className={lec === selLecture ? 'current' : ''}
+                onClick={() => goLecture(lec)}
+                style={{ flex: 1 }}
+              >
+                Lecture {lec}
+              </button>
+            );
+          })}
+        </div>
+      )}
+      {tabCount > 1 && (
+        <div className="segbar" role="tablist" aria-label={lectures.length > 1 ? `Lecture ${selLecture} chapters` : 'Week chapters'}>
+          {classTopics.map((t) => {
+            const done = isDone(weekNum, t.number, selLecture);
+            const idx = classTopics.indexOf(t);
+            return (
+              <button
+                key={`${selLecture}-${t.number}`}
                 role="tab"
                 aria-selected={idx === tab}
                 title={`Topic ${t.number} · +10 XP`}
@@ -397,10 +464,10 @@ export default function LearnPage() {
           {hasQuiz && (
             <button
               role="tab"
-              aria-selected={topics.length === tab}
+              aria-selected={classTopics.length === tab}
               title="End-of-week quiz"
-              className={topics.length === tab ? 'current' : ''}
-              onClick={() => goTab(topics.length)}
+              className={classTopics.length === tab ? 'current' : ''}
+              onClick={() => goTab(classTopics.length)}
             >
               Quiz
             </button>
@@ -409,13 +476,13 @@ export default function LearnPage() {
       )}
 
       <div ref={topicTopRef}>
-      {tab < topics.length ? (
+      {tab < classTopics.length ? (
         <>
           {activeMeta && activeMeta.versions.length > 1 && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginBottom: 8 }}>
               <span style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 700 }}>Versions:</span>
               {activeMeta.versions.map((v) => {
-                const current = (viewed[activeMeta.topic] ?? activeMeta.version) === v.version;
+                const current = (viewed[vkey(selLecture, activeMeta.topic)] ?? activeMeta.version) === v.version;
                 return (
                   <button
                     key={v.id}
@@ -432,11 +499,11 @@ export default function LearnPage() {
           )}
           {shownTopic && (
             <>
-              <ReadAloud key={`${weekNum}-${tab}`} topic={shownTopic} />
+              <ReadAloud key={`${weekNum}-${selLecture}-${tab}`} topic={shownTopic} />
               <TopicTab
                 topic={shownTopic}
-                done={isDone(weekNum, tab)}
-                onToggle={() => toggle(weekNum, tab)}
+                done={isDone(weekNum, shownTopic.number, selLecture)}
+                onToggle={() => toggle(weekNum, shownTopic.number, selLecture)}
                 preview={preview || viewingOld || nonLearner}
               />
             </>
@@ -447,26 +514,33 @@ export default function LearnPage() {
       )}
       </div>
 
-      {tabCount > 1 && (
-        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-          <button
-            onClick={() => goTab(tab - 1)}
-            disabled={tab === 0}
-            className="beat-next"
-            style={{ flex: 1, justifyContent: 'center', opacity: tab === 0 ? 0.5 : 1 }}
-          >
-            <ChevronLeft size={16} /> Back
-          </button>
-          <button
-            onClick={() => goTab(tab + 1)}
-            disabled={tab >= tabCount - 1}
-            className="beat-next"
-            style={{ flex: 1, justifyContent: 'center', opacity: tab >= tabCount - 1 ? 0.5 : 1 }}
-          >
-            Next <ChevronRight size={16} />
-          </button>
-        </div>
-      )}
+      {tabCount > 1 && (() => {
+        const li = lectures.indexOf(selLecture);
+        const atFirst = tab === 0 && li === 0;
+        const atLast = tab >= tabCount - 1 && li === lectures.length - 1;
+        const nextLabel = tab < tabCount - 1 ? null : li < lectures.length - 1 ? `Lecture ${lectures[li + 1]}` : null;
+        const backLabel = tab > 0 ? null : li > 0 ? `Lecture ${lectures[li - 1]}` : null;
+        return (
+          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+            <button
+              onClick={() => (tab > 0 ? goTab(tab - 1) : goLecture(lectures[li - 1]))}
+              disabled={atFirst}
+              className="beat-next"
+              style={{ flex: 1, justifyContent: 'center', opacity: atFirst ? 0.5 : 1 }}
+            >
+              <ChevronLeft size={16} /> {backLabel ? `Back · ${backLabel}` : 'Back'}
+            </button>
+            <button
+              onClick={() => (tab < tabCount - 1 ? goTab(tab + 1) : goLecture(lectures[li + 1]))}
+              disabled={atLast}
+              className="beat-next"
+              style={{ flex: 1, justifyContent: 'center', opacity: atLast ? 0.5 : 1 }}
+            >
+              {nextLabel ? `Next · ${nextLabel}` : 'Next'} <ChevronRight size={16} />
+            </button>
+          </div>
+        );
+      })()}
     </div>
     <div className="print-only">
       <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 22 }}>{note.course} · Week {note.week}: {note.title}</h1>

@@ -24,6 +24,7 @@ export type Subtopic = {
 
 export type Topic = {
   number: number;
+  lecture?: number;
   title: string;
   abbr: string;
   subtopics: Subtopic[];
