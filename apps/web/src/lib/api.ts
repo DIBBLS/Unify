@@ -96,18 +96,21 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, retries 
       let detail = "";
       let hint = "";
       let code = "";
+      let existing: unknown = null;
       try {
         const body = (await res.json()) as {
           error?: string;
           message?: string;
           hint?: string;
           code?: string;
+          existing?: unknown;
           details?: { fieldErrors?: Record<string, string[]> };
         };
         const firstIssue = Object.values(body.details?.fieldErrors || {}).flat()[0];
         detail = [body.error || body.message, firstIssue].filter(Boolean).join(" — ") || "";
         hint = body.hint || "";
         code = body.code || "";
+        existing = body.existing ?? null;
       } catch {
         detail = "";
       }
@@ -115,6 +118,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, retries 
       (err as { status?: number }).status = res.status;
       if (hint) (err as { hint?: string }).hint = hint;
       if (code) (err as { code?: string }).code = code;
+      if (existing) (err as { existing?: unknown }).existing = existing;
       throw err;
     }
     log.info("api", `← ${res.status} ${path} (${Date.now() - started}ms)`);
@@ -304,12 +308,12 @@ export const api = {
       body: JSON.stringify(note),
     }),
   formatPack: () => apiFetch<{ prompt: string }>('/api/format'),
-  publish: (payload: { course: string; week: number; title?: string; subtitle?: string; noteJson: unknown }) =>
+  publish: (payload: { course: string; week: number; title?: string; subtitle?: string; noteJson: unknown; mode?: 'add' | 'replace' }) =>
     apiFetch<{ ok: boolean; course: string; week: number; versions: { topic: number; version: number; id: string }[] }>('/v1/publish', {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
-  topicPublish: (payload: { course: string; week: number; topic: number; title?: string; noteJson: unknown }) =>
+  topicPublish: (payload: { course: string; week: number; topic: number; title?: string; noteJson: unknown; mode?: 'add' | 'replace' }) =>
     apiFetch<{ ok: boolean; id: string; version: number }>('/v1/topics/publish', {
       method: 'POST',
       body: JSON.stringify(payload),
