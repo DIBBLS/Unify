@@ -334,7 +334,7 @@ export default function StudioRoute() {
     }
   };
 
-  const publish = async () => {
+  const publish = async (mode?: 'add' | 'replace') => {
     if (!note || !meta) return;
     setError('');
     setSuccess('');
@@ -346,11 +346,26 @@ export default function StudioRoute() {
         title: meta.title || note.title,
         subtitle: meta.subtitle || note.subtitle,
         noteJson: note,
+        ...(mode ? { mode } : {}),
       });
       const tags = (res.versions || []).map((v) => `Topic ${v.topic} → v${v.version}`).join(' · ');
-      setSuccess(tags ? `${res.course} · Week ${res.week} is live (${tags}). Old versions are kept.` : `${res.course} · Week ${res.week} is now live for students.`);
+      setSuccess(
+        mode === 'replace'
+          ? `${res.course} · Week ${res.week} replaced (${tags}). Old versions are gone.`
+          : tags ? `${res.course} · Week ${res.week} is live (${tags}). Old versions are kept.` : `${res.course} · Week ${res.week} is now live for students.`
+      );
       setStep(2);
     } catch (err) {
+      const code = (err as { code?: string })?.code;
+      const existing = (err as { existing?: { topics?: number[]; versions?: number; titles?: string[] } })?.existing;
+      if (code === 'WEEK_OCCUPIED' && !mode) {
+        const t = (existing?.topics || []).join(', ');
+        setOccupy({
+          kind: 'week',
+          summary: `Week ${meta.week} already has ${existing?.versions || 'some'} published version(s)${t ? ` (topics ${t})` : ''}${existing?.titles?.length ? `: ${existing.titles.join(' · ')}` : ''}.`,
+        });
+        return;
+      }
       setError(err instanceof Error ? err.message : 'Publish failed.');
     } finally {
       setPublishing(false);
@@ -370,9 +385,13 @@ export default function StudioRoute() {
     setEditing(false);
   };
 
+  // Occupied-week/topic choice sheet (BUG-007): Replace / Add as new
+  // version / Cancel. Nothing stacks or overwrites silently.
+  const [occupy, setOccupy] = useState<null | { kind: 'week' | 'topic'; topic?: number; summary: string }>(null);
+
   // Publish a single topic as a new version (v1, v2, v3...) without
   // touching the other topics in the week.
-  const publishTopic = async (topicNumber: number) => {
+  const publishTopic = async (topicNumber: number, mode?: 'add' | 'replace') => {
     if (!note || !meta || publishingTopic !== null) return;
     const single = note.topics.find((t) => t.number === topicNumber);
     if (!single) return;
@@ -386,9 +405,24 @@ export default function StudioRoute() {
         topic: topicNumber,
         title: single.title,
         noteJson: single,
+        ...(mode ? { mode } : {}),
       });
-      setSuccess(`${meta.course} · Week ${meta.week} · Topic ${topicNumber} saved as v${res.version}. Old versions are kept.`);
+      setSuccess(
+        mode === 'replace'
+          ? `${meta.course} · Week ${meta.week} · Topic ${topicNumber} replaced as fresh v${res.version}. Old versions are gone.`
+          : `${meta.course} · Week ${meta.week} · Topic ${topicNumber} saved as v${res.version}. Old versions are kept.`
+      );
     } catch (err) {
+      const code = (err as { code?: string })?.code;
+      const existing = (err as { existing?: { versions?: number[]; title?: string } })?.existing;
+      if (code === 'TOPIC_OCCUPIED' && !mode) {
+        setOccupy({
+          kind: 'topic',
+          topic: topicNumber,
+          summary: `Topic ${topicNumber} already published (${(existing?.versions || []).map((v) => `v${v}`).join(', ') || 'existing versions'})${existing?.title ? ` — ${existing.title}` : ''}.`,
+        });
+        return;
+      }
       setError(err instanceof Error ? err.message : 'Topic publish failed.');
     } finally {
       setPublishingTopic(null);
@@ -644,10 +678,49 @@ export default function StudioRoute() {
             <button onClick={() => setStep(0)} style={{ flex: 1, minWidth: 120, padding: 14, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 800 }}>
               Back to compose
             </button>
-            <button onClick={publish} disabled={publishing} style={{ flex: 2, minWidth: 160, padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+            <button onClick={() => publish()} disabled={publishing} style={{ flex: 2, minWidth: 160, padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
               {publishing ? 'Publishing…' : 'Publish to students'} <ArrowRight size={18} />
             </button>
           </div>
+          {occupy && meta && (
+            <div className="modal-veil" onClick={() => setOccupy(null)} role="dialog" aria-modal="true" aria-label="Week already published">
+              <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-title" style={{ textAlign: 'center' }}>
+                  {occupy.kind === 'week' ? `${meta.course} · Week ${meta.week} is already live` : `Topic ${occupy.topic} is already live`}
+                </div>
+                <div className="modal-body" style={{ textAlign: 'center' }}>{occupy.summary}</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 18 }}>
+                  <button
+                    onClick={() => {
+                      const o = occupy;
+                      setOccupy(null);
+                      if (o.kind === 'week') void publish('replace');
+                      else if (o.topic !== undefined) void publishTopic(o.topic, 'replace');
+                    }}
+                    disabled={publishing || publishingTopic !== null}
+                    style={{ padding: 13, borderRadius: 14, background: '#dc2626', color: '#fff', border: 'none', borderBottom: '3px solid #991b1b', fontWeight: 800, fontSize: 14 }}
+                  >
+                    Replace — remove the old, publish mine as fresh
+                  </button>
+                  <button
+                    onClick={() => {
+                      const o = occupy;
+                      setOccupy(null);
+                      if (o.kind === 'week') void publish('add');
+                      else if (o.topic !== undefined) void publishTopic(o.topic, 'add');
+                    }}
+                    disabled={publishing || publishingTopic !== null}
+                    style={{ padding: 13, borderRadius: 14, background: '#059669', color: '#fff', border: 'none', borderBottom: '3px solid #14532d', fontWeight: 800, fontSize: 14 }}
+                  >
+                    Add as new version — keep everything
+                  </button>
+                  <button onClick={() => setOccupy(null)} className="modal-cancel" style={{ padding: 13 }}>
+                    Cancel — publish nothing
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
