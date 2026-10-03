@@ -60,15 +60,9 @@ export default function ExplorePage() {
     })();
   }, []);
 
-  if (loading) return <Loading text="Loading courses…" />;
-
-  // Strict scoping: your level + the admin's active semester, nothing else.
-  // Search mode spans both semesters (badged) so no course can hide.
-  const shown = results !== null ? results : courses.filter(
-    (c) => (!myLevel || c.levels.includes(myLevel)) && c.semesters.includes(activeSemester)
-  );
-
   // Debounced catalog search (min 2 chars, level-scoped when known).
+  // Declared above the loading early-return: a hook after a return
+  // changes the hook count between renders and crashes the page (#310).
   useEffect(() => {
     const needle = q.trim();
     if (needle.length < 2) {
@@ -89,6 +83,14 @@ export default function ExplorePage() {
     }, 350);
     return () => window.clearTimeout(t);
   }, [q, myLevel]);
+
+  if (loading) return <Loading text="Loading courses…" />;
+
+  // Strict scoping: your level + the admin's active semester, nothing else.
+  // Search mode spans both semesters (badged) so no course can hide.
+  const shown = results !== null ? results : courses.filter(
+    (c) => (!myLevel || c.levels.includes(myLevel)) && c.semesters.includes(activeSemester)
+  );
 
   const toggleEnroll = async (code: string) => {
     const isIn = enrolledSet.has(code.toUpperCase());
