@@ -176,6 +176,7 @@ export type TopicVersionMeta = {
 
 export type TopicMeta = {
   topic: number;
+  lecture: number;
   version: number;
   id: string;
   title: string;
@@ -196,7 +197,7 @@ export type NotificationItem = {
   created_at?: string;
 };
 
-export type AdminContentTopic = { topic: number; versions: number; title: string };
+export type AdminContentTopic = { topic: number; lecture: number; versions: number; title: string };
 export type AdminContentWeek = { week: number; title: string; topics: AdminContentTopic[] };
 export type AdminContentCourse = {
   code: string;
@@ -211,7 +212,7 @@ export type AdminContentCourse = {
 export const api = {
   universities: () => apiFetch<University[]>("/v1/universities"),
   settings: () => apiFetch<{ currentSemester: string }>("/v1/settings"),
-  me: () => apiFetch<{ onboarded: boolean; profile: Profile | null; isAdmin: boolean; courses: string[]; resume: { course: string; week: number; topic: number } | null }>("/v1/me"),
+  me: () => apiFetch<{ onboarded: boolean; profile: Profile | null; isAdmin: boolean; courses: string[]; resume: { course: string; week: number; topic: number; lecture: number } | null }>("/v1/me"),
   updateMe: (payload: Record<string, unknown>) =>
     apiFetch<{ ok: boolean; profile: Profile }>("/v1/me", {
       method: "PUT",
@@ -223,18 +224,18 @@ export const api = {
       body: JSON.stringify(payload),
     }),
   week: (course: string, week: number) =>
-    apiFetch<{ course: string; week: number; title: string; subtitle: string; note_json: unknown; topicMeta?: TopicMeta[] }>(
+    apiFetch<{ course: string; week: number; title: string; subtitle: string; note_json: unknown; topicMeta?: TopicMeta[]; lectures?: number[] }>(
       `/v1/courses/${encodeURIComponent(course)}/weeks/${week}`
     ),
-  progress: (course: string, week: number, topic: number) =>
+  progress: (course: string, week: number, topic: number, lectureNo = 1) =>
     apiFetch<{ ok: boolean; xp: number; streak: number }>("/v1/progress", {
       method: "POST",
-      body: JSON.stringify({ course, week, topic }),
+      body: JSON.stringify({ course, week, topic, lectureNo }),
     }),
   stats: () =>
     apiFetch<{ xp: number; streak: number; courses: { course: string; topics: number }[]; quizzesTaken: number; quizAvg: number }>("/v1/stats"),
   progressGet: (course: string, week: number) =>
-    apiFetch<{ done: number[] }>(`/v1/progress?course=${encodeURIComponent(course)}&week=${week}`),
+    apiFetch<{ done: ({ topic: number; lecture: number } | number)[] }>(`/v1/progress?course=${encodeURIComponent(course)}&week=${week}`),
   enroll: (course: string, enroll: boolean) =>
     apiFetch<{ ok: boolean; enrolled: string[] }>('/v1/enrollments', {
       method: 'POST',
@@ -245,10 +246,10 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({}),
     }),
-  resume: (course: string, week: number, topic: number) =>
+  resume: (course: string, week: number, topic: number, lecture = 1) =>
     apiFetch<{ ok: boolean }>('/v1/resume', {
       method: 'POST',
-      body: JSON.stringify({ course, week, topic }),
+      body: JSON.stringify({ course, week, topic, lectureNo: lecture }),
     }),
   authored: () =>
     apiFetch<{ notes: { id: string; course: string; week: number; topic: number; version: number; title: string }[] }>('/v1/authored'),
@@ -309,11 +310,11 @@ export const api = {
     }),
   formatPack: () => apiFetch<{ prompt: string }>('/api/format'),
   publish: (payload: { course: string; week: number; title?: string; subtitle?: string; noteJson: unknown; mode?: 'add' | 'replace' }) =>
-    apiFetch<{ ok: boolean; course: string; week: number; versions: { topic: number; version: number; id: string }[] }>('/v1/publish', {
+    apiFetch<{ ok: boolean; course: string; week: number; versions: { topic: number; lecture: number; version: number; id: string }[] }>('/v1/publish', {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
-  topicPublish: (payload: { course: string; week: number; topic: number; title?: string; noteJson: unknown; mode?: 'add' | 'replace' }) =>
+  topicPublish: (payload: { course: string; week: number; topic: number; lectureNo?: number; title?: string; noteJson: unknown; mode?: 'add' | 'replace' }) =>
     apiFetch<{ ok: boolean; id: string; version: number }>('/v1/topics/publish', {
       method: 'POST',
       body: JSON.stringify(payload),

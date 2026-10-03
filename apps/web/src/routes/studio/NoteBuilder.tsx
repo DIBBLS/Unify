@@ -79,6 +79,7 @@ export function blankSubtopic(topicNum: number): Subtopic {
 export function blankTopic(n: number): Topic {
   return {
     number: n,
+    lecture: 1,
     title: '',
     abbr: '',
     subtopics: [blankSubtopic(n)],
@@ -224,8 +225,10 @@ export function normalizeNote(raw: unknown): UnifyNote | null {
       tt.pulseCheck && typeof tt.pulseCheck === 'object'
         ? (tt.pulseCheck as { number?: unknown; questions?: unknown })
         : null;
+    const lec = tt.lecture === 2 || tt.lecture === 3 ? tt.lecture : 1;
     return {
       number: typeof tt.number === 'number' ? tt.number : ti + 1,
+      lecture: lec,
       title: typeof tt.title === 'string' ? tt.title : '',
       abbr: typeof tt.abbr === 'string' ? tt.abbr : '',
       subtopics: subs.map((s, si) => {
@@ -580,13 +583,22 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
   const set = (patch: Partial<UnifyNote>) => onChange({ ...note, ...patch });
   const setTopics = (topics: Topic[]) => set({ topics });
 
-  const renumber = (topics: Topic[]): Topic[] =>
-    topics.map((t, ti) => ({
-      ...t,
-      number: ti + 1,
-      pulseCheck: t.pulseCheck ? { ...t.pulseCheck, number: ti + 1 } : t.pulseCheck,
-      subtopics: t.subtopics.map((s, si) => ({ ...s, number: `${ti + 1}.${si + 1}` })),
-    }));
+  // BUG-009: topics number from 1 WITHIN each lecture, never globally.
+  const renumber = (topics: Topic[]): Topic[] => {
+    const counters: Record<number, number> = {};
+    return topics.map((t) => {
+      const lec = t.lecture || 1;
+      counters[lec] = (counters[lec] || 0) + 1;
+      const n = counters[lec];
+      return {
+        ...t,
+        lecture: lec,
+        number: n,
+        pulseCheck: t.pulseCheck ? { ...t.pulseCheck, number: n } : t.pulseCheck,
+        subtopics: t.subtopics.map((s, si) => ({ ...s, number: `${n}.${si + 1}` })),
+      };
+    });
+  };
 
   const mcqCount = note.eoq.questions.filter((q) => q.type === 'mcq').length;
   const fitbCount = note.eoq.questions.filter((q) => q.type === 'fitb').length;
@@ -619,7 +631,21 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
       {note.topics.map((t, ti) => (
         <div key={ti} style={card}>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8 }}>
-            <h3 style={{ ...sectionTitle, margin: 0, flex: 1 }}>Topic {ti + 1}</h3>
+            <h3 style={{ ...sectionTitle, margin: 0, flex: 1 }}>Lecture {t.lecture || 1} · Topic {t.number}</h3>
+            <select
+              aria-label="Lecture for this topic"
+              value={t.lecture || 1}
+              onChange={(e) => {
+                const topics = [...note.topics];
+                topics[ti] = { ...t, lecture: Number(e.target.value) || 1 };
+                setTopics(renumber(topics));
+              }}
+              style={{ fontSize: 12, fontWeight: 700, borderRadius: 9999, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', padding: '4px 8px' }}
+            >
+              {[1, 2, 3].map((l) => (
+                <option key={l} value={l}>Lecture {l}</option>
+              ))}
+            </select>
             <button onClick={() => setTopics(renumber(move(note.topics, ti, -1)))} style={iconBtn} aria-label="Move topic up"><ChevronUp size={14} /></button>
             <button onClick={() => setTopics(renumber(move(note.topics, ti, 1)))} style={iconBtn} aria-label="Move topic down"><ChevronDown size={14} /></button>
             <button onClick={() => { if (note.topics.length > 1) setConfirmTopic(ti); }} disabled={note.topics.length <= 1} style={{ ...dangerBtn, opacity: note.topics.length <= 1 ? 0.4 : 1 }} aria-label="Delete topic"><Trash2 size={14} /></button>

@@ -135,12 +135,12 @@ export default function AdminContentRoute() {
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
                           {w.topics.map((t) => (
                             <Link
-                              key={t.topic}
-                              to={`/learn/${encodeURIComponent(c.code)}/week/${w.week}?preview=1&t=${t.topic}`}
+                              key={`${t.lecture || 1}-${t.topic}`}
+                              to={`/learn/${encodeURIComponent(c.code)}/week/${w.week}?preview=1&t=${t.topic}${t.lecture && t.lecture > 1 ? `&c=${t.lecture}` : ''}`}
                               style={{ display: 'inline-flex', gap: 4, alignItems: 'center', fontSize: 12, fontWeight: 700, color: '#059669', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 9999, padding: '4px 10px', textDecoration: 'none' }}
-                              title={t.title || `Topic ${t.topic}`}
+                              title={t.title || `Lecture ${t.lecture || 1} Topic ${t.topic}`}
                             >
-                              <BookOpen size={12} /> T{t.topic} · v{t.versions}
+                              <BookOpen size={12} /> L{t.lecture || 1}·T{t.topic} · v{t.versions}
                             </Link>
                           ))}
                         </div>

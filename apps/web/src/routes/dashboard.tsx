@@ -82,7 +82,7 @@ export default function DashboardRoute() {
   const [streak, setStreak] = useState(0);
   const [courses, setCourses] = useState<CourseStat[]>([]);
   const [enrolled, setEnrolled] = useState<string[]>([]);
-  const [resume, setResume] = useState<{ course: string; week: number; topic: number } | null>(null);
+  const [resume, setResume] = useState<{ course: string; week: number; topic: number; lecture?: number } | null>(null);
   const [quizzes, setQuizzes] = useState({ taken: 0, avg: 0 });
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -244,10 +244,20 @@ export default function DashboardRoute() {
               <div style={{ marginTop: 8 }}>Nothing published yet. Open Studio to author your first week.</div>
             </div>
           ) : (
-            notes.map((n) => (
+            (() => {
+              // BUG-008: one row per topic showing ONLY the latest version;
+              // older versions stay reachable in the reader, not in the list.
+              const seen = new Map<string, { n: (typeof notes)[number]; older: number }>();
+              for (const n of notes) {
+                const k = `${n.course}::${n.week}::${n.topic}`;
+                const g = seen.get(k);
+                if (!g) seen.set(k, { n, older: 0 });
+                else g.older += 1;
+              }
+              return [...seen.values()].map(({ n, older }) => (
               <div key={n.id} style={{ padding: 14, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
                 <Link to={`/learn/${encodeURIComponent(n.course)}/week/${n.week}?preview=1`} style={{ flex: 1, textDecoration: 'none', color: 'var(--text)', display: 'block' }}>
-                  <div style={{ fontSize: 11, color: '#059669', fontWeight: 800, letterSpacing: 1 }}>{n.course} · WEEK {n.week} · TOPIC {n.topic} · v{n.version}</div>
+                  <div style={{ fontSize: 11, color: '#059669', fontWeight: 800, letterSpacing: 1 }}>{n.course} · WEEK {n.week} · TOPIC {n.topic} · v{n.version}{older > 0 ? ` · ${older} older` : ''}</div>
                   <div style={{ fontWeight: 700, marginTop: 2 }}>{n.title || `Topic ${n.topic}`}</div>
                 </Link>
                 <button
@@ -259,7 +269,8 @@ export default function DashboardRoute() {
                   <Trash2 size={16} />
                 </button>
               </div>
-            ))
+              ));
+            })()
           )}
         </div>
         {confirmDelete && (
@@ -328,7 +339,7 @@ export default function DashboardRoute() {
             <div style={{ fontWeight: 700 }}>Continue Learning</div>
             <div style={{ fontSize: 12, color: 'var(--text2)' }}>{resume.course} · Week {resume.week} · pick up where you stopped</div>
           </div>
-          <Link to={`/learn/${encodeURIComponent(resume.course.trim())}/week/${resume.week}${resume.topic ? `?t=${resume.topic}` : ''}`} style={{ padding: '10px 16px', background: '#10b981', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #059669' }}>
+          <Link to={`/learn/${encodeURIComponent(resume.course.trim())}/week/${resume.week}${(() => { const q = new URLSearchParams(); if (resume.topic) q.set('t', String(resume.topic)); if (resume.lecture && resume.lecture > 1) q.set('c', String(resume.lecture)); const s = q.toString(); return s ? `?${s}` : ''; })()}`} style={{ padding: '10px 16px', background: '#10b981', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #059669' }}>
             Resume
           </Link>
         </div>
