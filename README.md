@@ -1,6 +1,6 @@
-# Unify Learn — v1.8.0
+# Unify Learn — v1.11.1
 
-Student learning platform for LASU Engineering — story-like weekly notes, XP, streaks, quizzes, read-aloud with Nigerian voice pick, expiring share links, XP-gated PDF, and an authoring studio for lecturers and collaborators. Classic/Story designs + dark mode, mobile-first, Box Boy mascot.
+Student learning platform for LASU Engineering — Lecture-structured weekly notes (Lecture 1/2/3), XP, streaks, quizzes, read-aloud with Nigerian voice pick, expiring share links, XP-gated PDF, lecturer timetable + class management, offline-first reader, Google + email sign-in, and an authoring studio for lecturers and collaborators. Classic/Story designs + dark mode, mobile-first, Box Boy mascot.
 
 ## Architecture
 
@@ -15,7 +15,7 @@ Browser ──HTTPS──▶ Vercel (Unify Learn app) ──HTTPS──▶ Rende
 
 | Layer | Tech | Notes |
 |---|---|---|
-| Web app | **Vite 5 + React 18 + TypeScript 5 + React Router 6** (`apps/web`) | 480px shell, Classic/Story designs + dark mode, lucide icons, KaTeX formulas, SVG mascot, Web Push, offline worker |
+| Web app | **Vite 5 + React 18 + TypeScript 5 + React Router 6** (`apps/web`) | 480px shell, Classic/Story designs + dark mode, lucide icons, MathJax formulas, SVG mascot, Web Push, offline worker (SW v6 + write queue) |
 | API + authoring | **Express 4 + TypeScript** (`notes-engine/`) | `/v1/*` app API + `/api/*` authoring + `/api/share/*` OG unfurls, zod validation, rate limits, JSON logs |
 | Data + Auth | **Supabase** (Postgres + Auth) | RLS locked down; backend uses service role; Prisma `migrate deploy` on Render |
 | AI notes | **Gemini** (default) / Anthropic (opt-in) | Studio-only `/api/convert`; model registry with health-tracked rotation; students never touch AI |
@@ -28,17 +28,18 @@ Browser ──HTTPS──▶ Vercel (Unify Learn app) ──HTTPS──▶ Rende
 Unify/
 ├── apps/web/                  # Unify Learn app (deploys to Vercel from DIBBLS/Unify)
 │   ├── src/
-│   │   ├── routes/            # auth, onboarding, dashboard, course/explore,
-│   │   │                      # learn/week (story reader + EOQ exam), profile,
+│   │   ├── routes/            # auth (email + Google), onboarding, dashboard, course/explore,
+│   │   │                      # learn/week (lecture reader + EOQ exam), profile,
 │   │   │                      # admin (+content browser), browse, share (/s/:token),
-│   │   │                      # studio, notifications
+│   │   │                      # studio, classes (lecturer timetable + roster), notifications
 │   │   ├── components/        # Mascot, Flash, Loading, MiniCheck, TopicSlice,
-│   │   │                      # ContentBlock, Formula (KaTeX), EoqQuiz, RecallDeck,
+│   │   │                      # ContentBlock, Formula (MathJax), EoqQuiz, RecallDeck,
 │   │   │                      # ReadAloud, ShareModal, ConfirmModal, Charts,
-│   │   │                      # ErrorBoundary, BackButton
-│   │   ├── hooks/            # useProgress (server XP), useTheme, useDesign
+│   │   │                      # ErrorBoundary, BackButton, OfflineBanner
+│   │   ├── hooks/            # useProgress (server XP, lecture-keyed), useTheme, useDesign
 │   │   ├── lib/               # supabase (Auth), api (backend client), log,
-│   │   │                      # push (Web Push), xp (gates), version, greet
+│   │   │                      # push (Web Push), xp (gates), version, greet,
+│   │   │                      # offline (write queue + saved weeks)
 │   │   └── types/note.ts      # UnifyNote schema (topics, miniCheck, pulse, EOQ)
 │   ├── public/                # 404.html, manifest, sw.js (offline), og-image.png
 │   └── package.json, vite.config.ts (plain env names work, VITE_ optional)
@@ -46,6 +47,7 @@ Unify/
 │   ├── server.ts              # routes, CORS, logging, trust proxy, JSON 404
 │   ├── src/routes/v1.ts       # universities, me, onboarding, courses, weeks,
 │   │                          # progress (students-only XP), stats, publish,
+│   │                          # timetable + rosters, shares, notifications, admin
 │   ├── src/lib/               # supabase, ai (provider adapter + registry), seed
 │   ├── src/middleware/        # requireAuth, requireAuthor, requireAdmin, logger
 │   ├── prisma/                # schema + migrations (auto-applied on Render)
@@ -83,18 +85,19 @@ npm run dev      # tsx watch server.ts — needs SUPABASE_* + DIRECT_URL in .env
 
 ## Roles & Flows
 
-- **Student** (8 onboarding steps): dashboard (XP/streak/quizzes) → My Courses + Explore (bulk catalog) → story reader (recalls, read-aloud, EOQ exam) → PDF unlocks at 300 XP.
-- **Lecturer** (6 steps incl. teaching level) / **Collaborator** (3 steps incl. contributing level): Studio (AI/manual/external-AI), versioned publishing, level-scoped Browse, Notes/Courses stats. No Learn paths, no XP.
+- **Student** (8 onboarding steps): dashboard (XP/streak/resume/course cards) → My Courses + Explore (bulk catalog + alias search) → lecture reader (Lecture 1/2/3 switcher, recalls, read-aloud, EOQ exam) → PDF unlocks at 300 XP. Save weeks offline; progress banks offline and syncs on reconnect.
+- **Lecturer** (6 steps incl. teaching level) / **Collaborator** (3 steps incl. contributing level): Studio (AI/manual/external-AI + lecture pickers), versioned publishing with Replace/Add/Cancel on occupied weeks, level-scoped Browse, Notes/Courses stats, **My Classes** (weekly timetable + live roster). No Learn paths, no XP.
 - **Admin** (`admin` role or legacy flag): oversight dashboard (totals + latest users/notes), panel modules (Analytics charts, AI models, unis, courses, session, announce, users), All-content browser. Own role self-locked. Bootstrap via `ADMIN_EMAILS`.
 - Roles lock at assignment (server-enforced 403); every promote/demote notifies the recipient (bell + push).
 - **Sharing (authors/admins):** expiring `/s/:token` links (8/16/24h) with preview cards + WhatsApp OG unfurls; recipients read free, join on expiry.
 - **Notifications:** in-app bell + Brevo email + Web Push (VAPID, opt-in per device).
-- **Sessions:** independent per-tab, Remember-me opt-in, 30-min idle TTL, exact resume for students.
+- **Sessions:** email + Google sign-in, independent per-tab, Remember-me opt-in, 30-min idle TTL, exact resume (course/week/topic/lecture) for students.
 
 ## Docs
 
-- `SETUP.md` — full Supabase + Render + Vercel setup, env tables, troubleshooting.
-- `docs/unify-product-v1.6.0.pdf` (+ HTML source) — full product documentation; regenerate per release.
+- `SETUP.md` — full Supabase + Render + Vercel setup, env tables, Google OAuth enablement, troubleshooting.
+- `docs/DEVELOPER-REPORT.md` — every bug fix by version, what is left, and what still needs live verification.
+- `docs/unify-product-v1.11.0.pdf` (+ HTML source) — full product documentation; regenerate per release.
 - `docs/` — product specs. `supabase/` — reference SQL (Prisma migrations are authoritative).
 
 ## Versioning
