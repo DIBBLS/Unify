@@ -10,6 +10,34 @@ import { log } from './lib/log';
 bootTheme();
 bootDesign();
 
+// Sentry (free tier): render-crash + failed-request visibility. Env-gated
+// (VITE_SENTRY_DSN) — unset means local-only console logging. Loaded from
+// the pinned Sentry CDN at runtime (no npm dep, zero bundle cost when off).
+declare global {
+  interface Window {
+    Sentry?: { init: (opts: Record<string, unknown>) => void; captureException: (e: unknown, ctx?: unknown) => void };
+  }
+}
+try {
+  const dsn = (import.meta.env.VITE_SENTRY_DSN as string | undefined) || '';
+  if (dsn && typeof document !== 'undefined') {
+    const s = document.createElement('script');
+    s.src = 'https://browser.sentry-cdn.com/11.4.0/bundle.min.js';
+    s.crossOrigin = 'anonymous';
+    s.onload = () => {
+      try {
+        window.Sentry?.init({ dsn, tracesSampleRate: 0.1 });
+      } catch {
+        // ignore — app runs without reporting
+      }
+    };
+    s.onerror = () => {};
+    document.head.appendChild(s);
+  }
+} catch {
+  // ignore
+}
+
 // Offline support: cache shell + readable content (see public/sw.js).
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

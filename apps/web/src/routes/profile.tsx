@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, Pencil, Shield, X, Sun, Moon } from 'lucide-react';
+import { LogOut, Pencil, Shield, X, Sun, Moon, MessageCircle } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import ConfirmModal from '../components/ConfirmModal';
 import { useTheme } from '../hooks/useTheme';
@@ -24,6 +24,30 @@ const DEPARTMENTS = [
   'Aerospace Engineering',
 ];
 const LEVELS = ['100 Level', '200 Level', '300 Level', '400 Level', '500 Level'];
+
+// Support channel (WhatsApp): renders only when the backend has a support
+// number configured. Prefilled text carries the app version so support
+// knows what the student runs. Own hooks, own component — no ordering risk.
+function SupportRow() {
+  const [number, setNumber] = useState('');
+  useEffect(() => {
+    api.support().then((s) => {
+      if (s.supported && s.supportNumber) setNumber(s.supportNumber);
+    }).catch(() => {});
+  }, []);
+  if (!number) return null;
+  const text = encodeURIComponent(`Hello Unify support! I need help with the app (v${APP_VERSION}).`);
+  return (
+    <a
+      href={`https://wa.me/${number}?text=${text}`}
+      target="_blank"
+      rel="noreferrer"
+      style={{ marginTop: 8, padding: 14, background: '#25D366', color: '#fff', borderBottom: '4px solid #128C7E', borderRadius: 16, fontWeight: 800, textDecoration: 'none', textAlign: 'center', display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}
+    >
+      <MessageCircle size={16} /> Get help on WhatsApp
+    </a>
+  );
+}
 const TARGETS = [
   { label: 'First Class', val: 4.5 },
   { label: '2nd Class Upper', val: 3.5 },
@@ -413,6 +437,7 @@ export default function ProfileRoute() {
           Open Authoring Studio
         </Link>
       )}
+      <SupportRow />
       {confirmLogout && (
         <ConfirmModal
           title="Log out?"

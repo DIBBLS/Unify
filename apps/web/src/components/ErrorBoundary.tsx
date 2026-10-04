@@ -14,6 +14,33 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { error: E
 
   componentDidCatch(error: Error, info: { componentStack: string }) {
     log.error('render', `boundary: ${error.message}${info.componentStack}`);
+    // DB log (works with or without Sentry): admins read the latest
+    // crashes in the panel. Fire-and-forget, tiny payload, never throws.
+    try {
+      void import('../lib/api').then(({ api }) => {
+        void import('../lib/version').then(({ APP_VERSION }) => {
+          api.logError({
+            kind: 'render-crash',
+            message: String(error?.message || 'render crash').slice(0, 500),
+            stack: String(info?.componentStack || '').slice(0, 4000),
+            url: typeof window !== 'undefined' ? window.location.href.slice(0, 300) : '',
+            appVersion: APP_VERSION,
+          }).catch(() => {});
+        }).catch(() => {});
+      }).catch(() => {});
+    } catch {
+      // ignore
+    }
+    // Sentry (CDN-loaded in main.tsx when VITE_SENTRY_DSN is set): render
+    // crashes land in the dashboard with the component stack. Guarded.
+    try {
+      (window as { Sentry?: { captureException: (e: unknown, ctx?: unknown) => void } }).Sentry?.captureException(
+        error,
+        { extra: { componentStack: info.componentStack } }
+      );
+    } catch {
+      // reporting must never crash the crash screen
+    }
   }
 
   render() {
