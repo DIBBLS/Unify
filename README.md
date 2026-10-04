@@ -96,7 +96,7 @@ npm run dev      # tsx watch server.ts — needs SUPABASE_* + DIRECT_URL in .env
 ## Docs
 
 - `SETUP.md` — full Supabase + Render + Vercel setup, env tables, Google OAuth enablement, troubleshooting.
-- `docs/DEVELOPER-REPORT.md` — every bug fix by version, what is left, and what still needs live verification.
+- `docs/DEVELOPER-REPORT.md` (+ `.pdf`) — every bug fix by version, what is left, and what still needs live verification.
 - `docs/unify-product-v1.11.0.pdf` (+ HTML source) — full product documentation; regenerate per release.
 - `docs/` — product specs. `supabase/` — reference SQL (Prisma migrations are authoritative).
 
