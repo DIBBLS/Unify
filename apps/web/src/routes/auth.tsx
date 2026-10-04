@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Eye, EyeOff, ArrowRight, Check, X, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight, Check, X, Loader2, Chrome } from 'lucide-react';
 import Mascot from '../components/Mascot';
 import Typewriter from '../components/Typewriter';
 import Flash from '../components/Flash';
@@ -24,6 +24,7 @@ export default function AuthRoute() {
   const [recovery, setRecovery] = useState(false);
   const [recoveryPw, setRecoveryPw] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [welcomeBack, setWelcomeBack] = useState(false);
   const [remember, setRemember] = useState(false);
 
@@ -281,21 +282,19 @@ export default function AuthRoute() {
   };
 
   const handleGoogle = async () => {
+    if (!sb || googleLoading) return;
     setError('');
     setSuccess('');
-    const client = sb;
-    if (!client) {
-      setError('Something went wrong. Please reload and try again.');
-      return;
-    }
+    setGoogleLoading(true);
     try {
-      const { error: err } = await client.auth.signInWithOAuth({
+      const { error: err } = await sb.auth.signInWithOAuth({
         provider: 'google',
         options: { redirectTo: `${window.location.origin}/auth` },
       });
-      if (err) setError(err.message);
+      if (err) throw err;
       // Success redirects to Google; the return leg routes via the session listener.
     } catch (err) {
+      setGoogleLoading(false);
       setError(err instanceof Error ? err.message : 'Google sign-in failed.');
     }
   };
@@ -450,8 +449,9 @@ export default function AuthRoute() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, color: 'var(--text2)', fontSize: 11 }}>
               <span style={{ flex: 1, height: 1, background: 'var(--border)' }} /> or <span style={{ flex: 1, height: 1, background: 'var(--border)' }} />
             </div>
-            <button type="button" disabled title="Coming soon — email sign-in for now" style={{ padding: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 700, display: 'flex', justifyContent: 'center', gap: 8, opacity: 0.55 }}>
-              Continue with Google · Coming soon
+            <button type="button" onClick={handleGoogle} disabled={googleLoading || loading} style={{ padding: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 700, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center', opacity: googleLoading ? 0.6 : 1 }}>
+              {googleLoading ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : <Chrome size={18} color="#059669" />}
+              {googleLoading ? 'Redirecting…' : 'Continue with Google'}
             </button>
           </form>
         )}
@@ -484,8 +484,9 @@ export default function AuthRoute() {
               {loading ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : null}
               {loading ? 'Creating' : 'Create Account'} <ArrowRight size={18} />
             </button>
-            <button type="button" disabled title="Coming soon — email sign-up for now" style={{ padding: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 700, opacity: 0.55 }}>
-              Continue with Google · Coming soon
+            <button type="button" onClick={handleGoogle} disabled={googleLoading || loading} style={{ padding: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 700, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center', opacity: googleLoading ? 0.6 : 1 }}>
+              {googleLoading ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : <Chrome size={18} color="#059669" />}
+              {googleLoading ? 'Redirecting…' : 'Continue with Google'}
             </button>
           </form>
         )}
