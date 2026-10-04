@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BookOpen, Search } from 'lucide-react';
 import BackButton from '../components/BackButton';
-import Loading from '../components/Loading';
+import { SearchListSkeleton } from '../components/Skeletons';
 import Mascot from '../components/Mascot';
 import Flash from '../components/Flash';
 import { supabaseBrowser } from '../lib/supabase';
@@ -84,7 +84,7 @@ export default function ExplorePage() {
     return () => window.clearTimeout(t);
   }, [q, myLevel]);
 
-  if (loading) return <Loading text="Loading courses…" />;
+  if (loading) return <SearchListSkeleton titleWidth="60%" rows={5} />;
 
   // Strict scoping: your level + the admin's active semester, nothing else.
   // Search mode spans both semesters (badged) so no course can hide.

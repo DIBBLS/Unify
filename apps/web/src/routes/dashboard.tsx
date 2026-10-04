@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, ChevronRight, Trash2 } from 'lucide-react';
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type Profile } from '../lib/api';
-import Loading from '../components/Loading';
+import { DashboardSkeleton } from '../components/Skeletons';
 import ErrorState from '../components/ErrorState';
 import Mascot from '../components/Mascot';
 import Typewriter from '../components/Typewriter';
@@ -99,6 +99,20 @@ export default function DashboardRoute() {
   // BUG-012: catalog meta for course cards (title, weeks, lecturers) +
   // elective removal target. Hooks stay above every early return (#310).
   const [catalog, setCatalog] = useState<Record<string, { title: string; weeks: number; lecturers: string[] }>>({});
+  // Skeleton variant follows the last-known role on THIS device (same
+  // hint as the nav) so the loader matches the real dashboard — students
+  // and collaborators each see their own shape, even on first paint.
+  const [skelAuthor] = useState(() => {
+    try {
+      const r = localStorage.getItem('unify.role.v1');
+      return r === 'lecturer' || r === 'collaborator' || r === 'admin';
+    } catch {
+      return false;
+    }
+  });
+  // Teaching courses: lecturers always get My Classes; collaborators with
+  // assigned teaching courses do too (backend gates the page either way).
+  const [teaching, setTeaching] = useState<string[]>([]);
   const [confirmUnenroll, setConfirmUnenroll] = useState<string | null>(null);
   const [unenrolling, setUnenrolling] = useState(false);
   // Delete-confirm target. Declared with the other hooks: a useState placed
@@ -164,6 +178,11 @@ export default function DashboardRoute() {
             // empty list stands
           }
           try {
+            setTeaching((await api.teaching()).courses || []);
+          } catch {
+            // My Classes card falls back to role-only
+          }
+          try {
             setAstats(await api.authorStats());
           } catch {
             // stats stand empty
@@ -191,7 +210,7 @@ export default function DashboardRoute() {
     })();
   }, [navigate]);
 
-  if (loading) return <Loading text="Loading dashboard…" />;
+  if (loading) return <DashboardSkeleton author={skelAuthor} />;
   if (loadError)
     return <ErrorState title="Couldn't load your dashboard" message={loadError} />;
 
@@ -274,7 +293,7 @@ export default function DashboardRoute() {
             Browse {profile?.level ? `${profile.level} ` : ''}notes <ChevronRight size={14} />
           </Link>
         </div>
-        {profile?.role === 'lecturer' && (
+        {profile?.role === 'lecturer' || teaching.length > 0 ? (
           <Link to="/classes" style={{ margin: '12px 16px 0', padding: 14, background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center', textDecoration: 'none' }}>
             <BookOpen size={20} />
             <span style={{ flex: 1 }}>
@@ -283,7 +302,7 @@ export default function DashboardRoute() {
             </span>
             <ChevronRight size={16} />
           </Link>
-        )}
+        ) : null}
         {noteError && (
           <div style={{ margin: '12px 16px 0' }}>
             <Flash tone="error" message={noteError} onDismiss={() => setNoteError('')} />

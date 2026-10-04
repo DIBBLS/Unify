@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BookOpen, CalendarDays, MapPin, Trash2, Users } from 'lucide-react';
 import BackButton from '../components/BackButton';
-import Loading from '../components/Loading';
+import { ClassesSkeleton } from '../components/Skeletons';
 import ErrorState from '../components/ErrorState';
 import Mascot from '../components/Mascot';
 import Flash from '../components/Flash';
@@ -111,7 +111,7 @@ export default function ClassesRoute() {
     }
   };
 
-  if (loading) return <Loading text="Loading your classes…" />;
+  if (loading) return <ClassesSkeleton />;
 
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px' }}>

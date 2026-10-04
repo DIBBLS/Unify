@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, ChevronDown, ChevronRight, LibraryBig, Info } from 'lucide-react';
 import BackButton from '../components/BackButton';
-import Loading from '../components/Loading';
+import { SearchListSkeleton } from '../components/Skeletons';
 import ErrorState from '../components/ErrorState';
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type AdminContentCourse } from '../lib/api';
@@ -62,7 +62,7 @@ export default function BrowseRoute() {
     });
   }, [courses, q, isAuthor, isCollab, enrolled, level]);
 
-  if (loading) return <Loading text="Loading notes…" />;
+  if (loading) return <SearchListSkeleton titleWidth="55%" rows={4} withIcon={false} withAction={false} />;
   if (forbidden)
     return (
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px' }}>
