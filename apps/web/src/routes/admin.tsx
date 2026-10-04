@@ -82,6 +82,10 @@ export default function AdminRoute() {
   const [ownId, setOwnId] = useState('');
   const [openModule, setOpenModule] = useState('users');
   const [courseQ, setCourseQ] = useState('');
+  // App errors (client log + Sentry backup). Sentry presence is a build-time
+  // env flag, read here so the module says which window is live.
+  const [errors, setErrors] = useState<{ kind: string; message: string; stack: string; url: string; app_version: string; created_at: string }[]>([]);
+  const [sentryOn] = useState(() => Boolean((import.meta.env.VITE_SENTRY_DSN as string | undefined) || ''));
   const [trends, setTrends] = useState<{ signups: { day: string; count: number }[]; notes: { day: string; count: number }[]; xp: { day: string; count: number }[] } | null>(null);
   // Per-author course assignment (BUG-001): the collaborator's reachable
   // set IS this teaching list; gates enforce it server-side.
@@ -123,7 +127,7 @@ export default function AdminRoute() {
 
   const loadAll = async (query = q, role = roleFilter) => {
     try {
-      const [s, u, un, c, m, st, t] = await Promise.all([
+      const [s, u, un, c, m, st, t, er] = await Promise.all([
         api.adminStats(),
         api.adminUsers(query, role),
         api.universities(),
@@ -131,7 +135,9 @@ export default function AdminRoute() {
         api.adminModels(),
         api.settings().catch(() => ({ currentSemester: 'First Semester' })),
         api.adminTrends().catch(() => null),
+        api.adminErrors().catch(() => ({ errors: [] })),
       ]);
+      setErrors(er.errors || []);
       setStats(s);
       setUsers(u.users);
       setUnis(un);
@@ -609,6 +615,28 @@ export default function AdminRoute() {
         <button onClick={() => setConfirm({ title: 'Send to everyone?', body: 'This announcement lands on every user\u2019s bell instantly.', label: 'Send', run: () => void announce() })} disabled={announcing} style={{ ...primaryBtn, width: '100%', opacity: announcing ? 0.6 : 1 }}>
           {announcing ? 'Sending…' : 'Send to all users'}
         </button>
+      </div>
+      </Module>
+
+      <Module id="errors" title="App errors" badge={errors.length} openId={openModule} onToggle={setOpenModule}>
+      <div style={card}>
+        <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 8 }}>
+          Render crashes from user devices (Sentry backup — newest first, 30-day window).
+          {sentryOn ? ' Sentry is also live.' : ' Sentry DSN not set: this log is the only window.'}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {errors.length === 0 && <div style={{ color: 'var(--text2)', fontSize: 13, textAlign: 'center', padding: 20 }}>No errors logged. Quiet is good.</div>}
+          {errors.slice(0, 20).map((e, i) => (
+            <div key={i} style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px' }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <span style={{ fontSize: 10, fontWeight: 800, background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', borderRadius: 9999, padding: '2px 8px' }}>{e.kind || 'client'}</span>
+                <span style={{ fontSize: 11, color: 'var(--text3)', marginLeft: 'auto' }}>{e.created_at ? new Date(e.created_at).toLocaleString() : ''}</span>
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 700, marginTop: 6, wordBreak: 'break-word' }}>{e.message || '(no message)'}</div>
+              <div style={{ fontSize: 11, color: 'var(--text2)', marginTop: 2, wordBreak: 'break-all' }}>{e.app_version ? `v${e.app_version} · ` : ''}{e.url || ''}</div>
+            </div>
+          ))}
+        </div>
       </div>
       </Module>
 

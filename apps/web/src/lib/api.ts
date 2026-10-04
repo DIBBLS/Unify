@@ -422,6 +422,12 @@ export const api = {
   adminDeleteUni: (id: string) => apiFetch<{ ok: boolean }>(`/v1/admin/universities/${id}`, { method: 'DELETE' }),
   adminCreateCourse: (code: string, title: string, levels: string[], semester = 'First Semester') =>
     apiFetch<{ ok: boolean; course: string }>('/v1/admin/courses', { method: 'POST', body: JSON.stringify({ code, title, levels, semester }) }),
+  support: () =>
+    apiFetch<{ supported: boolean; supportNumber: string }>('/v1/support'),
+  logError: (payload: { kind: string; message: string; stack: string; url: string; appVersion: string }) =>
+    apiFetch<{ ok: boolean }>('/v1/errors', { method: 'POST', body: JSON.stringify(payload) }),
+  adminErrors: () =>
+    apiFetch<{ errors: { kind: string; message: string; stack: string; url: string; app_version: string; created_at: string }[] }>('/v1/admin/errors'),
   adminDeleteCourse: (code: string) =>
     apiFetch<{ ok: boolean }>(`/v1/admin/courses/${encodeURIComponent(code)}`, { method: 'DELETE' }),
   teaching: () => apiFetch<{ courses: string[] }>('/v1/teaching'),

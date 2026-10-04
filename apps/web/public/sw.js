@@ -1,11 +1,9 @@
 // Unify Learn offline worker: shell + readable content stay available offline.
 // Versioned cache; documents network-first (never a stale app), static assets
 // cache-first, API GETs network-first with cache fallback. Writes (POST/PUT/
-// DELETE) and everything else always bypass. v6 (offline-first foundation:
-// page-saved weeks live in a version-INDEPENDENT content cache so app
-// upgrades never wipe saved notes; third-party CDN assets below are
-// version-pinned and immutable).
-const CACHE = 'unify-app-v6';
+// DELETE) and everything else always bypass. v7 (push-driven bell:
+// postMessage to tabs on every push; content cache still version-proof).
+const CACHE = 'unify-app-v7';
 const CONTENT = 'unify-content-v1';
 const SHELL = ['/', '/index.html', '/manifest.json'];
 
@@ -106,12 +104,28 @@ self.addEventListener('push', (e) => {
   const body = (data && data.body) || 'Something new is waiting for you.';
   const url = (data && data.url) || '/notifications';
   e.waitUntil(
-    self.registration.showNotification(title, {
-      body,
-      icon: '/icons/icon-192.png',
-      badge: '/icons/favicon-32.png',
-      data: { url },
-    })
+    (async () => {
+      // Push-driven bell: tell every open tab to refresh its unread badge
+      // NOW instead of waiting for the next poll (see _layout.tsx).
+      try {
+        const wins = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+        for (const w of wins) {
+          try {
+            w.postMessage({ type: 'unify-notif' });
+          } catch {
+            // one deaf tab must not block the rest
+          }
+        }
+      } catch {
+        // postMessage unsupported — badge falls back to polling
+      }
+      await self.registration.showNotification(title, {
+        body,
+        icon: '/icons/icon-192.png',
+        badge: '/icons/favicon-32.png',
+        data: { url },
+      });
+    })()
   );
 });
 

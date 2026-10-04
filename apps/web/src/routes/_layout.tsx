@@ -177,8 +177,9 @@ export default function Layout() {
     };
   }, [authed, navigate]);
 
-  // Bell badge: unread count refreshes on navigation, on tab refocus, and
-  // every 30s while the app is open (lightweight count query).
+  // Bell badge: push-driven (SW postMessage on every push) with a slow
+  // 5-minute fallback poll + refresh on navigation and tab refocus. The old
+  // 30s poll per open tab is gone — at pilot scale it was pure waste.
   useEffect(() => {
     if (!authed) return;
     let cancelled = false;
@@ -191,12 +192,30 @@ export default function Layout() {
         .catch(() => {});
     };
     load();
-    const t = setInterval(load, 30000);
-    window.addEventListener('focus', load);
+    const t = setInterval(load, 300000);
+    const onPush = (e: MessageEvent) => {
+      if (e && e.data && (e.data as { type?: string }).type === 'unify-notif') load();
+    };
+    const onFocus = () => load();
+    window.addEventListener('focus', onFocus);
+    try {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', onPush as EventListener);
+      }
+    } catch {
+      // message events unsupported — poll + focus carry the badge
+    }
     return () => {
       cancelled = true;
       clearInterval(t);
-      window.removeEventListener('focus', load);
+      window.removeEventListener('focus', onFocus);
+      try {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.removeEventListener('message', onPush as EventListener);
+        }
+      } catch {
+        // ignore
+      }
     };
   }, [authed, pathname]);
 
