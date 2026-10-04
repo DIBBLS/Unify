@@ -1,5 +1,8 @@
 import { supabaseBrowser, clearRememberSession } from "./supabase";
 import { log } from "./log";
+// Offline write queue (progress/quiz/resume bank locally when offline).
+// Import is function-level only — no init-time cycle with ./offline.
+import { queueWrite } from "./offline";
 
 // Backend is now the source of truth (Supabase Auth + Render API).
 // Set VITE_USE_BACKEND=0 only to disable API calls (auth still needs Supabase).
@@ -197,6 +200,8 @@ export type NotificationItem = {
   created_at?: string;
 };
 
+export type ClassSlot = { id: string; course: string; day: number; start: string; end: string; venue: string; lecturer: string };
+export type RosterStudent = { id: string; name: string; email: string; level: string; topicsDone: number; quizzesTaken: number; lastActive: string | null };
 export type AdminContentTopic = { topic: number; lecture: number; versions: number; title: string };
 export type AdminContentWeek = { week: number; title: string; topics: AdminContentTopic[] };
 export type AdminContentCourse = {
@@ -227,11 +232,16 @@ export const api = {
     apiFetch<{ course: string; week: number; title: string; subtitle: string; note_json: unknown; topicMeta?: TopicMeta[]; lectures?: number[] }>(
       `/v1/courses/${encodeURIComponent(course)}/weeks/${week}`
     ),
-  progress: (course: string, week: number, topic: number, lectureNo = 1) =>
-    apiFetch<{ ok: boolean; xp: number; streak: number }>("/v1/progress", {
-      method: "POST",
-      body: JSON.stringify({ course, week, topic, lectureNo }),
-    }),
+  progress: (course: string, week: number, topic: number, lectureNo = 1) => {
+    const body = JSON.stringify({ course, week, topic, lectureNo });
+    // Offline-first: completing while offline banks locally and syncs on
+    // reconnect — XP is never lost to a dead connection.
+    if (queueWrite('/v1/progress', body)) return Promise.resolve({ ok: true, xp: 0, streak: 0 });
+    return apiFetch<{ ok: boolean; xp: number; streak: number }>('/v1/progress', {
+      method: 'POST',
+      body,
+    });
+  },
   stats: () =>
     apiFetch<{ xp: number; streak: number; courses: { course: string; topics: number }[]; quizzesTaken: number; quizAvg: number }>("/v1/stats"),
   progressGet: (course: string, week: number) =>
@@ -246,11 +256,16 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({}),
     }),
-  resume: (course: string, week: number, topic: number, lecture = 1) =>
-    apiFetch<{ ok: boolean }>('/v1/resume', {
+  resume: (course: string, week: number, topic: number, lecture = 1) => {
+    const body = JSON.stringify({ course, week, topic, lectureNo: lecture });
+    // Bookmarks are low-value offline (the local tab already holds
+    // position) — queue quietly, never error.
+    if (queueWrite('/v1/resume', body)) return Promise.resolve({ ok: true });
+    return apiFetch<{ ok: boolean }>('/v1/resume', {
       method: 'POST',
-      body: JSON.stringify({ course, week, topic, lectureNo: lecture }),
-    }),
+      body,
+    });
+  },
   authored: () =>
     apiFetch<{ notes: { id: string; course: string; week: number; topic: number; lecture: number; version: number; title: string }[] }>('/v1/authored'),
   authorStats: () =>
@@ -263,11 +278,15 @@ export const api = {
       `/v1/courses/${encodeURIComponent(course.trim())}/weeks`
     );
   },
-  quizAttempt: (course: string, week: number, score: number, total: number) =>
-    apiFetch<{ ok: boolean }>('/v1/quiz/attempt', {
+  quizAttempt: (course: string, week: number, score: number, total: number) => {
+    const body = JSON.stringify({ course, week, score, total });
+    // Quiz results bank locally offline and flush on reconnect.
+    if (queueWrite('/v1/quiz/attempt', body)) return Promise.resolve({ ok: true });
+    return apiFetch<{ ok: boolean }>('/v1/quiz/attempt', {
       method: 'POST',
-      body: JSON.stringify({ course, week, score, total }),
-    }),
+      body,
+    });
+  },
   convert: (payload: {
     course: string;
     week: number;
@@ -405,4 +424,13 @@ export const api = {
     apiFetch<{ ok: boolean; course: string }>('/v1/admin/courses', { method: 'POST', body: JSON.stringify({ code, title, levels, semester }) }),
   adminDeleteCourse: (code: string) =>
     apiFetch<{ ok: boolean }>(`/v1/admin/courses/${encodeURIComponent(code)}`, { method: 'DELETE' }),
+  teaching: () => apiFetch<{ courses: string[] }>('/v1/teaching'),
+  timetable: (course: string) =>
+    apiFetch<{ slots: ClassSlot[] }>(`/v1/timetable?course=${encodeURIComponent(course)}`),
+  slotAdd: (payload: { course: string; day: number; start: string; end: string; venue: string }) =>
+    apiFetch<{ ok: boolean; id: string }>('/v1/timetable', { method: 'POST', body: JSON.stringify(payload) }),
+  slotDelete: (id: string) =>
+    apiFetch<{ ok: boolean }>(`/v1/timetable/${id}`, { method: 'DELETE' }),
+  roster: (course: string) =>
+    apiFetch<{ students: RosterStudent[] }>(`/v1/courses/${encodeURIComponent(course)}/students`),
 };

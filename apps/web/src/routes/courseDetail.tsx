@@ -28,6 +28,7 @@ export default function CourseDetailRoute() {
   // Preview landings (admin/author browsing) go back to their hub, never
   // to the student My Courses module.
   const [backTo, setBackTo] = useState('/course');
+  const [slots, setSlots] = useState<{ day: number; start: string; end: string; venue: string; lecturer: string }[]>([]);
   const preview = searchParams.get('preview') === '1';
 
   useEffect(() => {
@@ -63,6 +64,9 @@ export default function CourseDetailRoute() {
           }
         }
         setWeeks(res.weeks);
+        // Class times ride alongside (read-only here; lecturers manage
+        // them under My Classes). Failure never blocks the weeks.
+        api.timetable(courseCode).then((tt) => setSlots(tt.slots || [])).catch(() => {});
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Could not load weeks.');
       } finally {
@@ -121,7 +125,24 @@ export default function CourseDetailRoute() {
         <Mascot size={110} />
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20, marginTop: 12 }}>You're not enrolled in {courseCode}</h1>
         <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px' }}>Enroll to unlock its weeks, topics and quizzes.</p>
-        {error && <Flash tone="error" message={error} onDismiss={() => setError('')} />}
+      {error && <Flash tone="error" message={error} onDismiss={() => setError('')} />}
+      {slots.length > 0 && (
+        <div style={{ marginTop: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: '#059669' }}>CLASS TIMES · REPEATS WEEKLY</div>
+          <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {slots.map((s) => (
+              <div key={`${s.day}-${s.start}`} style={{ fontSize: 13, fontWeight: 700 }}>
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][s.day] || `Day ${s.day}`} · {s.start}–{s.end}
+                {(s.venue || s.lecturer) && (
+                  <span style={{ fontWeight: 500, color: 'var(--text2)' }}>
+                    {' '}· {[s.venue, s.lecturer].filter(Boolean).join(' · ')}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
         <button onClick={enrollHere} disabled={enrolling} style={{ padding: '12px 28px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800, fontSize: 14, opacity: enrolling ? 0.6 : 1 }}>
           {enrolling ? 'Enrolling…' : `Enroll in ${courseCode}`}
         </button>

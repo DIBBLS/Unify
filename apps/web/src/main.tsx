@@ -17,6 +17,13 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+// Offline-first: flush any writes banked while offline (progress, quiz
+// results, bookmarks) on boot and every reconnect. Never blocks render.
+import('./lib/offline').then(({ flushQueue }) => {
+  flushQueue().catch(() => {});
+  window.addEventListener('online', () => flushQueue().catch(() => {}));
+}).catch(() => {});
+
 warmupApi();
 // Boot inventory: which connections exist (names only, never values).
 // If supabaseUrl/Key is false here, sign-in cannot even attempt —
