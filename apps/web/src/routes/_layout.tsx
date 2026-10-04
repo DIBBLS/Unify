@@ -24,15 +24,16 @@ const STUDENT_TABS: Tab[] = [
 
 const AUTHOR_TABS: Tab[] = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, match: ['/dashboard'] },
-  { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio'] },
+  { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio', '/browse', '/classes'] },
   { to: '/profile', label: 'Profile', icon: User, match: ['/profile'] },
 ];
 
 // Admin role: manage, never learn. No Learn tab — the admin reads
 // everything through All content; learning paths are students-only.
+// /browse + /classes light the Studio tab (the working area).
 const ADMIN_TABS: Tab[] = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, match: ['/dashboard'] },
-  { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio'] },
+  { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio', '/browse', '/classes'] },
   { to: '/profile', label: 'Profile', icon: User, match: ['/profile'] },
 ];
 
