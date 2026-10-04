@@ -30,7 +30,7 @@ export default function OfflineBanner() {
 
   if (online) return null;
   return (
-    <div style={{ maxWidth: 480, margin: '0 auto', padding: '12px 16px 0' }}>
+    <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '12px 16px 0' }}>
       <Flash
         tone="info"
         ttl={0}

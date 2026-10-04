@@ -74,7 +74,14 @@ function MiniCheckItem({ q, id }: { q: MiniCheckQuestion; id: string }) {
         </div>
         {fitbOk !== null && (
           <div style={{ display: 'flex', gap: 6, alignItems: 'center', color: fitbOk ? '#065f46' : '#991b1b', fontSize: 11, marginTop: 6 }}>
-            {fitbOk ? <Check size={12} /> : <X size={12} />} {fitbOk ? 'Correct!' : `Accepted: ${q.acceptedAnswers.join(' OR ')}`}
+            {fitbOk ? <Check size={12} /> : <X size={12} />}{' '}
+            {fitbOk ? (
+              'Correct!'
+            ) : (
+              // Accepted answers go through MathJax too — a formula answer
+              // must render, never show raw \(...\).
+              <MathPlain text={`Accepted: ${q.acceptedAnswers.join(' OR ')}`} />
+            )}
           </div>
         )}
       </div>

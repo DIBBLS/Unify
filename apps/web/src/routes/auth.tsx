@@ -301,7 +301,7 @@ export default function AuthRoute() {
 
   if (welcomeBack)
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, maxWidth: 480, margin: '0 auto', background: 'var(--surface)', padding: 24, textAlign: 'center' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, maxWidth: 'var(--shell, 480px)', margin: '0 auto', background: 'var(--surface)', padding: 24, textAlign: 'center' }}>
         <Mascot size={140} animate="sip" />
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28 }}>Own your journey.</h1>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', color: 'var(--text2)', fontSize: 13, fontWeight: 600 }}>
@@ -313,7 +313,7 @@ export default function AuthRoute() {
 
   if (recovery)
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', maxWidth: 480, margin: '0 auto', background: 'var(--surface)', padding: 20, justifyContent: 'center' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', maxWidth: 'var(--shell, 480px)', margin: '0 auto', background: 'var(--surface)', padding: 20, justifyContent: 'center' }}>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
           <Mascot size={110} />
         </div>

@@ -250,7 +250,7 @@ export default function DashboardRoute() {
   };
   if (isAuthor)
     return (
-      <div style={{ maxWidth: 480, margin: '0 auto', paddingBottom: 80 }}>
+      <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', paddingBottom: 80 }}>
         <div style={{ padding: '20px 16px 12px', background: 'var(--surface)', display: 'flex', gap: 12, alignItems: 'center' }}>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 11, color: 'var(--text3)', letterSpacing: 1 }}>Your Dashboard</div>
@@ -362,7 +362,7 @@ export default function DashboardRoute() {
       </div>
     );
   return (
-    <div style={{ maxWidth: 480, margin: '0 auto', paddingBottom: 80 }}>
+    <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', paddingBottom: 80 }}>
       <div style={{ padding: '20px 16px 12px', background: 'var(--surface)', display: 'flex', gap: 12, alignItems: 'center' }}>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 11, color: 'var(--text3)', letterSpacing: 1 }}>Your Dashboard</div>

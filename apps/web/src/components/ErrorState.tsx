@@ -49,7 +49,7 @@ export default function ErrorState({
   };
   const showOffline = !online;
   return (
-    <div style={{ padding: 40, maxWidth: 480, margin: '0 auto', textAlign: 'center' }}>
+    <div style={{ padding: 40, maxWidth: 'var(--shell, 480px)', margin: '0 auto', textAlign: 'center' }}>
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
         <Mascot size={110} />
       </div>

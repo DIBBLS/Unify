@@ -12,7 +12,11 @@
   --fd:'Nunito',system-ui,sans-serif;--fb:'Nunito',system-ui,sans-serif;
   --radius:12px;--shadow:none;
   --font-body:'Nunito',system-ui,sans-serif;
+  /* App shell width: lean on phones, roomier on desktop. Every screen
+  reads maxWidth:var(--shell) so one token moves the whole product. */
+  --shell:480px;
 }
+@media(min-width:768px){:root{--shell:720px}}
 [data-design="story"]{
   --bg:#f5f4f0;--surface:#ffffff;--surface2:#f8f7f3;--border:#e0deda;
   --text:#0a0a0a;--text2:#555555;--text3:#999999;
@@ -300,9 +304,9 @@ globally so Classic gets them too). */
   .segbar button{font-size:10px}
 }
 
-/* Desktop: floating rounded bottom nav */
+/* Desktop: floating rounded bottom nav, matched to the shell width */
 @media(min-width:560px){
-  nav.bottomnav{width:calc(480px - 32px) !important;border-radius:24px !important;bottom:16px !important;border:1px solid var(--border) !important;box-shadow:var(--shadow)}
+  nav.bottomnav{width:calc(var(--shell) - 32px) !important;border-radius:24px !important;bottom:16px !important;border:1px solid var(--border) !important;box-shadow:var(--shadow)}
 }
 
 /* Back-to-top floating button (reader) */

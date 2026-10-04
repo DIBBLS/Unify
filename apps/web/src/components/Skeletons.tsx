@@ -3,12 +3,12 @@
 // zero layout shift. Generic mascot spinners stay only on transient
 // screens (auth gates, studio jobs, share landings).
 export function PageShell({ children }: { children: React.ReactNode }) {
-  return <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px' }}>{children}</div>;
+  return <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>{children}</div>;
 }
 
 export function DashboardSkeleton({ author }: { author: boolean }) {
   return (
-    <div style={{ maxWidth: 480, margin: '0 auto', paddingBottom: 80 }}>
+    <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', paddingBottom: 80 }}>
       <div style={{ padding: '20px 16px 12px', background: 'var(--surface)', display: 'flex', gap: 12, alignItems: 'center' }}>
         <div style={{ flex: 1 }}>
           <div className="skel" style={{ height: 11, width: 110 }} />
