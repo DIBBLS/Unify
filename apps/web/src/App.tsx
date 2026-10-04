@@ -34,7 +34,7 @@ function NotFound() {
     borderBottom: '4px solid #059669',
   };
   return (
-    <div style={{ padding: 40, textAlign: 'center', maxWidth: 480, margin: '0 auto' }}>
+    <div style={{ padding: 40, textAlign: 'center', maxWidth: 'var(--shell, 480px)', margin: '0 auto' }}>
       <div style={{ marginBottom: 12 }}>
         <Mascot size={120} animate="wave" />
       </div>

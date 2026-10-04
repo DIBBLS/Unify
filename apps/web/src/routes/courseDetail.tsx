@@ -93,7 +93,7 @@ export default function CourseDetailRoute() {
 
   if (loading)
     return (
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px' }}>
+      <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
         <BackButton to={backTo} />
         <div className="skel" style={{ height: 32, width: '55%', marginTop: 4 }} />
         <div className="skel" style={{ height: 14, width: '75%', marginTop: 10 }} />
@@ -120,7 +120,7 @@ export default function CourseDetailRoute() {
   }
   if (blocked)
     return (
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px', textAlign: 'center' }}>
+      <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px', textAlign: 'center' }}>
         <BackButton to={backTo} />
         <Mascot size={110} />
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20, marginTop: 12 }}>You're not enrolled in {courseCode}</h1>
@@ -155,7 +155,7 @@ export default function CourseDetailRoute() {
     );
 
   return (
-    <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px' }}>
+    <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
       <BackButton to={backTo} />
       <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28 }}>{courseCode}</h1>
       <p style={{ color: 'var(--text2)', marginTop: 6, fontSize: 13 }}>

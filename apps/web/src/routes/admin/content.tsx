@@ -55,7 +55,7 @@ export default function AdminContentRoute() {
   if (loading) return <Loading text="Loading all content…" />;
   if (forbidden)
     return (
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px' }}>
+      <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
         <BackButton to="/dashboard" />
         <ErrorState
           title="Admin only"
@@ -68,7 +68,7 @@ export default function AdminContentRoute() {
   const totalTopics = courses.reduce((n, c) => n + c.topicCount, 0);
 
   return (
-    <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 100px' }}>
+    <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 100px' }}>
       <BackButton to="/dashboard" />
       <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, display: 'flex', gap: 8, alignItems: 'center' }}>
         <Layers size={22} color="#059669" /> All content

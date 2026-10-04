@@ -260,7 +260,7 @@ export default function ProfileRoute() {
   }
 
   return (
-    <div style={{ maxWidth: 480, margin: '0 auto', padding: '24px 16px 80px' }}>
+    <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '24px 16px 80px' }}>
       <BackButton to="/dashboard" />
       <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 20 }}>
         <div style={{ width: 64, height: 64, borderRadius: 9999, background: 'linear-gradient(135deg,#34d399,#059669)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 24 }}>

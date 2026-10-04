@@ -69,7 +69,7 @@ export default function ShareRoute() {
   if (!data) {
     if (status === 410) {
       return (
-        <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px', textAlign: 'center' }}>
+        <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px', textAlign: 'center' }}>
           <BackButton to="/auth" />
           <Mascot size={120} />
           <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, marginTop: 12 }}>This link expired</h1>
@@ -83,7 +83,7 @@ export default function ShareRoute() {
       );
     }
     return (
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px' }}>
+      <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
         <BackButton to="/auth" />
         <ErrorState title="Link not found" message={error || 'This share link is invalid or was revoked.'} />
       </div>

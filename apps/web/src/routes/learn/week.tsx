@@ -236,7 +236,7 @@ export default function LearnPage() {
     );
   if (blocked)
     return (
-      <div style={{ padding: 40, textAlign: 'center', color: 'var(--text2)', maxWidth: 480, margin: '0 auto' }}>
+      <div style={{ padding: 40, textAlign: 'center', color: 'var(--text2)', maxWidth: 'var(--shell, 480px)', margin: '0 auto' }}>
         <Mascot size={110} />
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20, color: 'var(--text)', marginTop: 12 }}>You're not enrolled in {courseCode}</h1>
         <p style={{ fontSize: 14, margin: '8px 0 20px' }}>Enroll to unlock its weeks, topics and quizzes.</p>

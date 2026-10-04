@@ -250,7 +250,7 @@ export default function OnboardingRoute() {
   const left = { s: `Step ${shownStep + 1} of ${totalSteps}`, t: stepTitle };
 
   return (
-    <div style={{ maxWidth: 480, margin: '0 auto', minHeight: '100vh', background: 'var(--surface)' }}>
+    <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', minHeight: '100vh', background: 'var(--surface)' }}>
       <div style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', padding: 20 }}>
         <div style={{ fontSize: 11, letterSpacing: 1, opacity: 0.8 }}>{left.s}</div>
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28, marginTop: 6, minHeight: 76 }}>

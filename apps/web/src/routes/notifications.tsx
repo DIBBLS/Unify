@@ -86,7 +86,7 @@ export default function NotificationsRoute() {
   if (loading) return <Loading text="Loading notifications…" />;
 
   return (
-    <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px' }}>
+    <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
       <BackButton to="/dashboard" />
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28, flex: 1 }}>Notifications</h1>

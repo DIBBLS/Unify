@@ -446,7 +446,7 @@ export default function StudioRoute() {
   const label = { fontSize: 12, fontWeight: 700 } as const;
 
   return (
-    <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 100px' }}>
+    <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 100px' }}>
       <BackButton to="/dashboard" />
       <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24 }}>Author a week</h1>
       <div style={{ display: 'flex', gap: 6, margin: '12px 0 20px' }}>

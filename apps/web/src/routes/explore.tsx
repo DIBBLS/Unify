@@ -107,7 +107,7 @@ export default function ExplorePage() {
   };
 
   return (
-    <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px' }}>
+    <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
       <BackButton to="/course" />
       <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28 }}>Explore courses</h1>
       <p style={{ color: 'var(--text2)', marginTop: 6, fontSize: 13 }}>
