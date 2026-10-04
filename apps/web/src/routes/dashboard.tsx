@@ -274,6 +274,16 @@ export default function DashboardRoute() {
             Browse {profile?.level ? `${profile.level} ` : ''}notes <ChevronRight size={14} />
           </Link>
         </div>
+        {profile?.role === 'lecturer' && (
+          <Link to="/classes" style={{ margin: '12px 16px 0', padding: 14, background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center', textDecoration: 'none' }}>
+            <BookOpen size={20} />
+            <span style={{ flex: 1 }}>
+              <span style={{ fontWeight: 800, display: 'block' }}>My Classes</span>
+              <span style={{ fontSize: 12, opacity: 0.9 }}>Timetable + roster for the courses you teach</span>
+            </span>
+            <ChevronRight size={16} />
+          </Link>
+        )}
         {noteError && (
           <div style={{ margin: '12px 16px 0' }}>
             <Flash tone="error" message={noteError} onDismiss={() => setNoteError('')} />

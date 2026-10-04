@@ -15,6 +15,7 @@ import AdminContentRoute from './routes/admin/content';
 import BrowseRoute from './routes/browse';
 import ShareRoute from './routes/share';
 import StudioRoute from './routes/studio/index';
+import ClassesRoute from './routes/classes';
 import Mascot from './components/Mascot';
 import Loading from './components/Loading';
 import ErrorState from './components/ErrorState';
@@ -250,6 +251,16 @@ export default function App() {
               <RequireAuth>
                 <RequireRole allow={AUTHOR_ONLY}>
                   <StudioRoute />
+                </RequireRole>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/classes"
+            element={
+              <RequireAuth>
+                <RequireRole allow={AUTHOR_ONLY}>
+                  <ClassesRoute />
                 </RequireRole>
               </RequireAuth>
             }

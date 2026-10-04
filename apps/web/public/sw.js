@@ -1,9 +1,12 @@
 // Unify Learn offline worker: shell + readable content stay available offline.
 // Versioned cache; documents network-first (never a stale app), static assets
 // cache-first, API GETs network-first with cache fallback. Writes (POST/PUT/
-// DELETE) and everything else always bypass. v5 (offline math + fonts:
-// third-party CDN assets below are version-pinned and immutable).
-const CACHE = 'unify-app-v5';
+// DELETE) and everything else always bypass. v6 (offline-first foundation:
+// page-saved weeks live in a version-INDEPENDENT content cache so app
+// upgrades never wipe saved notes; third-party CDN assets below are
+// version-pinned and immutable).
+const CACHE = 'unify-app-v6';
+const CONTENT = 'unify-content-v1';
 const SHELL = ['/', '/index.html', '/manifest.json'];
 
 // Update here if the backend moves (must match VITE_API_URL origin).
@@ -23,7 +26,9 @@ self.addEventListener('activate', (e) => {
   e.waitUntil(
     (async () => {
       const keys = await caches.keys();
-      await Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)));
+      // CONTENT survives upgrades: saved weeks must never vanish because
+      // the app shell moved on.
+      await Promise.all(keys.filter((k) => k !== CACHE && k !== CONTENT).map((k) => caches.delete(k)));
       await self.clients.claim();
     })()
   );

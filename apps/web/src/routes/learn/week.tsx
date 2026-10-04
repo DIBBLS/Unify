@@ -9,6 +9,7 @@ import EoqQuiz from '../../components/EoqQuiz';
 import { ReadAloud } from '../../components/ReadAloud';
 import { ShareModal } from '../../components/ShareModal';
 import { XP_GATES, meetsXpGate } from '../../lib/xp';
+import { saveWeekOffline, isWeekSaved } from '../../lib/offline';
 import { useProgress } from '../../hooks/useProgress';
 import Mascot from '../../components/Mascot';
 import ErrorState from '../../components/ErrorState';
@@ -78,6 +79,10 @@ export default function LearnPage() {
   const topicTopRef = useRef<HTMLDivElement>(null);
   const [showTop, setShowTop] = useState(false);
   const [sharing, setSharing] = useState(false);
+  // Offline-first: this week saved into Cache Storage opens with zero
+  // network (bus, dead hostel wifi). Marker mirrors the cached payload.
+  const [savedOff, setSavedOff] = useState(false);
+  const [savingOff, setSavingOff] = useState(false);
   const scrollToTopicTop = () => {
     const el = topicTopRef.current;
     const top = el ? el.getBoundingClientRect().top + window.scrollY - 70 : 0;
@@ -168,6 +173,7 @@ export default function LearnPage() {
         const valid = note && Array.isArray(note.topics) ? note : null;
         setNote(valid);
         setTopicMeta(data.topicMeta || []);
+        setSavedOff(isWeekSaved(code, weekNum));
         setOverrides({});
         setViewed({});
         // Track the live position for the dashboard Resume card
@@ -376,6 +382,26 @@ export default function LearnPage() {
         <ChevronLeft size={18} /> Back
       </button>
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginBottom: 8 }}>
+        <button
+          onClick={async () => {
+            if (savedOff || savingOff || !note) return;
+            setSavingOff(true);
+            try {
+              await saveWeekOffline(note.course, weekNum);
+              setSavedOff(true);
+            } catch {
+              // ErrorState/flash territory is overkill: the button just
+              // stays unsaved and retryable.
+            } finally {
+              setSavingOff(false);
+            }
+          }}
+          disabled={savedOff || savingOff}
+          title={savedOff ? 'Saved — opens without internet' : 'Save this week to read offline'}
+          style={{ display: 'flex', gap: 6, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 700, color: savedOff ? '#059669' : 'var(--text2)', opacity: savingOff ? 0.6 : 1 }}
+        >
+          {savedOff ? <Check size={14} /> : <Download size={14} />} {savedOff ? 'Saved offline' : savingOff ? 'Saving…' : 'Save offline'}
+        </button>
         {(!viewer || viewer.role === 'lecturer' || viewer.role === 'collaborator' || viewer.role === 'admin' || viewer.isAdmin) && (
           <button onClick={() => setSharing(true)} style={{ display: 'flex', gap: 6, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 700, color: '#059669' }}>
             <Share2 size={14} /> Share
