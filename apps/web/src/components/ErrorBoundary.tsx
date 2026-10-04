@@ -48,7 +48,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { error: E
       return (
         <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '60px 20px 80px', textAlign: 'center' }}>
           <Mascot size={120} />
-          <h1 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontWeight: 900, fontSize: 24, marginTop: 12, color: 'var(--text)' }}>
+          <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, marginTop: 12, color: 'var(--text)' }}>
             Something tripped.
           </h1>
           <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px' }}>
