@@ -266,7 +266,13 @@ button{transition:transform .12s ease,opacity .15s ease,background-color .15s ea
 button:active:not(:disabled){transform:scale(.97)}
 button:disabled{opacity:.7;cursor:default}
 input,textarea,select{transition:border-color .15s ease,box-shadow .15s ease}
-input:focus,textarea:focus,select:focus{outline:none;border-color:var(--green-deep) !important;box-shadow:0 0 0 3px rgba(16,185,129,.15)}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--text);outline-offset:2px;border-color:var(--green-deep) !important;box-shadow:0 0 0 3px rgba(16,185,129,.15)}
+/* Brand-kit rule that stands on accessibility alone: every interactive
+element shows a solid 2px outline with 2px offset when keyboard-focused. */
+button:focus-visible,a:focus-visible,[role="tab"]:focus-visible,[role="button"]:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+/* Big numbers are Playfair 900 in both themes (brand rule; the face ships
+globally so Classic gets them too). */
+.stat-num{font-family:'Playfair Display',Georgia,serif;font-weight:900}
 .flash{animation:flash-in .25s ease}
 @keyframes flash-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 .type-cursor{display:inline-block;width:9px;height:1em;margin-left:3px;vertical-align:-0.12em;background:currentColor;animation:blink .8s steps(1) infinite}

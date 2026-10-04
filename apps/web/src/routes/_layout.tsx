@@ -280,6 +280,7 @@ export default function Layout() {
           : tabs.map((t) => {
           const active = t.match.some((m) => pathname === m || pathname.startsWith(m + '/'));
           const Icon = t.icon;
+          // Brand-kit active state: the lit tab sits in a green-tint pill.
           const style = {
             flex: 1,
             display: 'flex',
@@ -287,7 +288,11 @@ export default function Layout() {
             alignItems: 'center',
             gap: 2,
             textDecoration: 'none',
-            color: active ? '#10b981' : 'var(--text2)',
+            color: active ? 'var(--text)' : 'var(--text2)',
+            background: active ? 'var(--green-bg)' : 'transparent',
+            borderRadius: 9999,
+            padding: '4px 0',
+            margin: '0 4px',
             fontSize: 11,
             fontWeight: active ? 800 : 500,
           } as const;
