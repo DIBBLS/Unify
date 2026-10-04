@@ -67,6 +67,13 @@ export default function OnboardingRoute() {
           return;
         }
         if (profile?.first_name) setFirstName(profile.first_name);
+        else {
+          // OAuth signups (Google) carry the name in auth metadata —
+          // prefill so the first step is already done.
+          const meta = sessionData.session?.user?.user_metadata as { full_name?: unknown; name?: unknown } | undefined;
+          const full = typeof meta?.full_name === 'string' ? meta.full_name : typeof meta?.name === 'string' ? meta.name : '';
+          if (full.trim()) setFirstName(full.trim().split(/\s+/)[0].slice(0, 60));
+        }
         if (profile?.role === 'student' || profile?.role === 'lecturer' || profile?.role === 'collaborator' || profile?.role === 'admin') {
           setRole(profile.role);
           setOriginalRole(profile.role);
