@@ -35,19 +35,19 @@ function OversightCard({ platform, activity, mainAdmin }: { platform: Platform; 
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center', marginTop: 10 }}>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 800 }}>{platform.users}</div>
+          <div className="stat-num" style={{ fontSize: 18 }}>{platform.users}</div>
           <div style={{ fontSize: 11, color: '#9ca3af' }}>Users</div>
         </div>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 800 }}>{platform.courses}</div>
+          <div className="stat-num" style={{ fontSize: 18 }}>{platform.courses}</div>
           <div style={{ fontSize: 11, color: '#9ca3af' }}>Courses</div>
         </div>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 800 }}>{platform.weeks}</div>
+          <div className="stat-num" style={{ fontSize: 18 }}>{platform.weeks}</div>
           <div style={{ fontSize: 11, color: '#9ca3af' }}>Weeks</div>
         </div>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 800 }}>{platform.topics}</div>
+          <div className="stat-num" style={{ fontSize: 18 }}>{platform.topics}</div>
           <div style={{ fontSize: 11, color: '#9ca3af' }}>Topics</div>
         </div>
       </div>
@@ -267,19 +267,19 @@ export default function DashboardRoute() {
         {astats && (
           <div className="rise" style={{ margin: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
             <div>
-              <div style={{ fontSize: 18, fontWeight: 800 }}>{astats.topics}</div>
+              <div className="stat-num" style={{ fontSize: 18 }}>{astats.topics}</div>
               <div style={{ fontSize: 11, color: 'var(--text2)' }}>Notes</div>
             </div>
             <div>
-              <div style={{ fontSize: 18, fontWeight: 800 }}>{astats.courses}</div>
+              <div className="stat-num" style={{ fontSize: 18 }}>{astats.courses}</div>
               <div style={{ fontSize: 11, color: 'var(--text2)' }}>Courses</div>
             </div>
             <div>
-              <div style={{ fontSize: 18, fontWeight: 800 }}>{astats.students}</div>
+              <div className="stat-num" style={{ fontSize: 18 }}>{astats.students}</div>
               <div style={{ fontSize: 11, color: 'var(--text2)' }}>Students</div>
             </div>
             <div>
-              <div style={{ fontSize: 18, fontWeight: 800 }}>{astats.completions}</div>
+              <div className="stat-num" style={{ fontSize: 18 }}>{astats.completions}</div>
               <div style={{ fontSize: 11, color: 'var(--text2)' }}>Done</div>
             </div>
           </div>
@@ -379,19 +379,19 @@ export default function DashboardRoute() {
 
       <div className="rise" style={{ margin: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 800 }}>{profile?.grad_target ?? '—'}</div>
+          <div className="stat-num" style={{ fontSize: 18 }}>{profile?.grad_target ?? '—'}</div>
           <div style={{ fontSize: 11, color: 'var(--text2)' }}>Target</div>
         </div>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 800 }}>{xp}</div>
+          <div className="stat-num" style={{ fontSize: 18 }}>{xp}</div>
           <div style={{ fontSize: 11, color: 'var(--text2)' }}>XP</div>
         </div>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 800 }}>{streak}</div>
+          <div className="stat-num" style={{ fontSize: 18 }}>{streak}</div>
           <div style={{ fontSize: 11, color: 'var(--text2)' }}>Streak</div>
         </div>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 800 }}>{shown.length}</div>
+          <div className="stat-num" style={{ fontSize: 18 }}>{shown.length}</div>
           <div style={{ fontSize: 11, color: 'var(--text2)' }}>Courses</div>
         </div>
       </div>
