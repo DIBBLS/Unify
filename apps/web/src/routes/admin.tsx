@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { toastError } from '../lib/toast';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, Trash2, PenTool, BookOpen, ChevronDown, ChevronRight } from 'lucide-react';
+import { Shield, Trash2, PenTool, BookOpen, ChevronDown, ChevronRight, BarChart3, UserCheck, Users, LibraryBig, Cpu, Building2, CalendarDays, Megaphone, AlertTriangle } from 'lucide-react';
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type AdminUser } from '../lib/api';
 import Loading from '../components/Loading';
@@ -15,14 +16,23 @@ type Course = { code: string; title: string; levels: string[]; semesters: string
 
 const LEVELS = ['100 Level', '200 Level', '300 Level', '400 Level', '500 Level'];
 
-// One collapsible module per admin area — the panel used to render
-// everything at once (endless scroll). Exactly one open at a time.
+// Full admin panel: sidebar navigation, one module view at a time (never
+// the old horizontal accordion). Modules below render into the view.
+const MODS = [
+  { id: 'requests', title: 'Staff requests', icon: UserCheck },
+  { id: 'users', title: 'Users & roles', icon: Users },
+  { id: 'courses', title: 'Courses per level', icon: LibraryBig },
+  { id: 'analytics', title: 'Analytics', icon: BarChart3 },
+  { id: 'models', title: 'AI models', icon: Cpu },
+  { id: 'unis', title: 'Universities', icon: Building2 },
+  { id: 'session', title: 'Academic session', icon: CalendarDays },
+  { id: 'announce', title: 'Announce', icon: Megaphone },
+  { id: 'errors', title: 'App errors', icon: AlertTriangle },
+];
+
 function Module({
   id,
-  title,
-  badge,
   openId,
-  onToggle,
   children,
 }: {
   id: string;
@@ -32,30 +42,16 @@ function Module({
   onToggle: (id: string) => void;
   children: React.ReactNode;
 }) {
-  const open = openId === id;
-  return (
-    <div style={{ marginTop: 10 }}>
-      <button
-        onClick={() => onToggle(open ? '' : id)}
-        style={{ width: '100%', display: 'flex', gap: 8, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '14px 16px', fontWeight: 800, fontSize: 15, color: 'var(--text)' }}
-      >
-        <span style={{ flex: 1, textAlign: 'left' }}>{title}</span>
-        {badge != null && (
-          <span style={{ fontSize: 11, fontWeight: 800, background: '#ecfdf5', color: '#059669', borderRadius: 9999, padding: '2px 10px' }}>
-            {badge}
-          </span>
-        )}
-        {open ? <ChevronDown size={18} color="#999" /> : <ChevronRight size={18} color="#999" />}
-      </button>
-      {open && <div style={{ marginTop: 8 }}>{children}</div>}
-    </div>
-  );
+  if (openId !== id) return null;
+  return <div>{children}</div>;
 }
 
 export default function AdminRoute() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setErrorState] = useState('');
+  // Toast mirror: every failure surfaces globally AND stays readable inline.
+  const setError = (m: string) => { setErrorState(m); if (m) toastError(m); };
   const [success, setSuccess] = useState('');
   const [stats, setStats] = useState<Stats | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -94,11 +90,18 @@ export default function AdminRoute() {
   // Staff requests queue.
   const [requests, setRequests] = useState<{ id: string; user_id: string; role: string; level: string; courses: string[]; status: string; created_at: string; name: string; email: string }[]>([]);
   const [deciding, setDeciding] = useState<string | null>(null);
+  // First paint lands on the requests queue when anything waits — pending
+  // applications outrank routine browsing. Later refreshes never yank.
+  const routedRef = useRef(false);
 
   const loadRequests = async () => {
     try {
       const r = await api.adminRoleRequests();
       setRequests(r.requests || []);
+      if (!routedRef.current && (r.requests || []).length > 0) {
+        routedRef.current = true;
+        setOpenModule('requests');
+      }
     } catch {
       // queue stands empty
     }
@@ -387,20 +390,49 @@ export default function AdminRoute() {
   });
 
   return (
-    <div style={{ maxWidth: 640, margin: '0 auto', padding: '20px 16px 100px' }}>
+    <div style={{ maxWidth: 960, margin: '0 auto', padding: '20px 16px 100px' }}>
       <BackButton to="/dashboard" />
       <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, display: 'flex', gap: 8, alignItems: 'center' }}>
         <Shield size={22} color="#059669" /> Admin
       </h1>
-      {error && <Flash tone="error" message={error} onDismiss={() => setError('')} />}
       {success && <Flash tone="success" message={success} onDismiss={() => setSuccess('')} />}
 
-      <Link to="/studio" style={{ marginTop: 12, padding: 14, background: '#111827', color: '#fff', borderRadius: 16, fontWeight: 800, textDecoration: 'none', textAlign: 'center', display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
-        <PenTool size={16} /> Open Authoring Studio
-      </Link>
-      <Link to="/admin/content" style={{ marginTop: 8, padding: 14, background: 'var(--surface)', color: '#059669', border: '1px solid #a7f3d0', borderRadius: 16, fontWeight: 800, textDecoration: 'none', textAlign: 'center', display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
-        <BookOpen size={16} /> View all content
-      </Link>
+      <div className="admin-shell" style={{ marginTop: 12 }}>
+        <nav className="admin-side" aria-label="Admin modules">
+          {MODS.map((m) => {
+            const Icon = m.icon;
+            const active = openModule === m.id;
+            const badge = m.id === 'requests' ? requests.length
+              : m.id === 'users' ? users.length
+              : m.id === 'courses' ? courses.length
+              : m.id === 'models' ? models.length
+              : m.id === 'errors' ? errors.length
+              : null;
+            return (
+              <button
+                key={m.id}
+                onClick={() => setOpenModule(m.id)}
+                aria-current={active ? 'page' : undefined}
+                className={`admin-navitem ${active ? 'active' : ''}`}
+              >
+                <Icon size={16} />
+                <span style={{ flex: 1, textAlign: 'left' }}>{m.title}</span>
+                {badge != null && badge > 0 && (
+                  <span className="admin-badge">{badge}</span>
+                )}
+              </button>
+            );
+          })}
+          <Link to="/admin/content" className="admin-navitem">
+            <BookOpen size={16} />
+            <span style={{ flex: 1, textAlign: 'left' }}>All content</span>
+          </Link>
+          <Link to="/studio" className="admin-navitem">
+            <PenTool size={16} />
+            <span style={{ flex: 1, textAlign: 'left' }}>Studio</span>
+          </Link>
+        </nav>
+        <div className="admin-view">
 
       {stats && (
         <div style={{ margin: '16px 0 0', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
@@ -834,6 +866,23 @@ export default function AdminRoute() {
                 </button>
                 {courseMgr === u.id && (
                   <div style={{ marginTop: 8, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: 10 }}>
+                    {(() => {
+                      const byLevel: Record<string, string[]> = {};
+                      for (const c of assigned) {
+                        const lv = (courses.find((x) => x.code === c)?.levels || [])[0] || 'Unscoped';
+                        (byLevel[lv] = byLevel[lv] || []).push(c);
+                      }
+                      const groups = Object.entries(byLevel).sort();
+                      return groups.length ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
+                          {groups.map(([lv, cs]) => (
+                            <div key={lv} style={{ fontSize: 12, color: cs.length >= 2 ? '#059669' : 'var(--text2)', fontWeight: 700 }}>
+                              {lv}: {cs.length}/2 {cs.length >= 2 ? '✓' : '· assign 2 per level'}
+                            </div>
+                          ))}
+                        </div>
+                      ) : null;
+                    })()}
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
                       {assigned.length === 0 && <span style={{ fontSize: 12, color: 'var(--text2)' }}>None assigned — reaches nothing.</span>}
                       {assigned.map((c) => (
@@ -883,6 +932,8 @@ export default function AdminRoute() {
       )}
       </div>
       </Module>
+        </div>
+      </div>
       {confirm && (
         <ConfirmModal
           title={confirm.title}

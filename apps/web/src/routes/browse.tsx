@@ -1,3 +1,4 @@
+import { toastError } from '../lib/toast';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, ChevronDown, ChevronRight, LibraryBig, Info } from 'lucide-react';
@@ -17,7 +18,9 @@ export default function BrowseRoute() {
   const [enrolled, setEnrolled] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [forbidden, setForbidden] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setErrorState] = useState('');
+  // Toast mirror: every failure surfaces globally AND stays readable inline.
+  const setError = (m: string) => { setErrorState(m); if (m) toastError(m); };
   const [q, setQ] = useState('');
   const [open, setOpen] = useState<string | null>(null);
 

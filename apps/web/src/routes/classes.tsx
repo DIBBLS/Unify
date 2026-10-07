@@ -1,3 +1,4 @@
+import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { BookOpen, CalendarDays, MapPin, Trash2, Users } from 'lucide-react';
 import BackButton from '../components/BackButton';
@@ -22,7 +23,9 @@ export default function ClassesRoute() {
   const [roster, setRoster] = useState<RosterStudent[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setErrorState] = useState('');
+  // Toast mirror: every failure surfaces globally AND stays readable inline.
+  const setError = (m: string) => { setErrorState(m); if (m) toastError(m); };
   const [day, setDay] = useState(1);
   const [start, setStart] = useState('10:00');
   const [end, setEnd] = useState('12:00');
@@ -137,7 +140,6 @@ export default function ClassesRoute() {
       <p style={{ color: 'var(--text2)', marginTop: 6, fontSize: 13 }}>
         Weekly timetable + live roster for every course you teach
       </p>
-      {error && <Flash tone="error" message={error} onDismiss={() => setError('')} />}
       {courses.length === 0 ? (
         <div style={{ marginTop: 16, padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
           <Mascot size={96} />

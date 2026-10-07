@@ -1,3 +1,4 @@
+import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, ChevronRight, Search } from 'lucide-react';
@@ -16,7 +17,9 @@ export default function CoursePage() {
   const [activity, setActivity] = useState<string[]>([]);
   const [repairing, setRepairing] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setErrorState] = useState('');
+  // Toast mirror: every failure surfaces globally AND stays readable inline.
+  const setError = (m: string) => { setErrorState(m); if (m) toastError(m); };
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
@@ -127,7 +130,6 @@ export default function CoursePage() {
       <p style={{ color: 'var(--text2)', marginTop: 6, fontSize: 13 }}>
         Your enrolled courses — open one to keep learning
       </p>
-      {error && <Flash tone="error" message={error} onDismiss={() => setError('')} />}
       {success && <Flash tone="success" message={success} onDismiss={() => setSuccess('')} />}
       <Link to="/explore" style={{ marginTop: 12, padding: 12, background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center', textDecoration: 'none', color: '#065f46', fontWeight: 700, fontSize: 14 }}>
         <Search size={18} /> Explore courses to enroll

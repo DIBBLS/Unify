@@ -1,3 +1,4 @@
+import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { BookOpen, Search } from 'lucide-react';
 import BackButton from '../components/BackButton';
@@ -18,7 +19,9 @@ export default function ExplorePage() {
   const [enrolledSet, setEnrolledSet] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setErrorState] = useState('');
+  // Toast mirror: every failure surfaces globally AND stays readable inline.
+  const setError = (m: string) => { setErrorState(m); if (m) toastError(m); };
   // BUG-006 search: code, title or alias ("ME 352" finds "MEE 352"),
   // spanning both semesters with badges so nothing hides.
   const [q, setQ] = useState('');
@@ -113,7 +116,6 @@ export default function ExplorePage() {
       <p style={{ color: 'var(--text2)', marginTop: 6, fontSize: 13 }}>
         Find courses and enroll{myLevel ? ` · ${myLevel}` : ''}
       </p>
-      {error && <Flash tone="error" message={error} onDismiss={() => setError('')} />}
       <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 8 }}>
         {myLevel || 'Your level'} · {activeSemester}
       </div>

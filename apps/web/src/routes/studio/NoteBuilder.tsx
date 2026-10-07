@@ -1,3 +1,4 @@
+import { toastError } from '../../lib/toast';
 import { useState } from 'react';
 import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 import ConfirmModal from '../../components/ConfirmModal';
@@ -331,7 +332,9 @@ function DiagramImage({
   onChange: (url: string | null) => void;
 }) {
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setErrorState] = useState('');
+  // Toast mirror: every failure surfaces globally AND stays readable inline.
+  const setError = (m: string) => { setErrorState(m); if (m) toastError(m); };
   const [urlInput, setUrlInput] = useState('');
 
   const upload = async (file: File | undefined) => {

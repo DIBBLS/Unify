@@ -1,3 +1,4 @@
+import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link2, Copy, Check, Trash2, X, MessageCircle } from 'lucide-react';
 import { api } from '../lib/api';
@@ -22,7 +23,9 @@ export function ShareModal({ course, week, title, topics, onClose }: { course: s
   const [ttl, setTtl] = useState(24);
   const [link, setLink] = useState<{ token: string; expires_at: string } | null>(null);
   const [creating, setCreating] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setErrorState] = useState('');
+  // Toast mirror: every failure surfaces globally AND stays readable inline.
+  const setError = (m: string) => { setErrorState(m); if (m) toastError(m); };
   const [copied, setCopied] = useState(false);
   const [mine, setMine] = useState<{ token: string; course: string; week: number; expires_at: string; views: number }[]>([]);
 

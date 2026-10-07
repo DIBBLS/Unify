@@ -1,3 +1,4 @@
+import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
@@ -22,7 +23,9 @@ export default function CourseDetailRoute() {
   const courseCode = (code || '').trim();
   const [weeks, setWeeks] = useState<WeekRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setErrorState] = useState('');
+  // Toast mirror: every failure surfaces globally AND stays readable inline.
+  const setError = (m: string) => { setErrorState(m); if (m) toastError(m); };
   const [blocked, setBlocked] = useState(false);
   const [enrolling, setEnrolling] = useState(false);
   // Preview landings (admin/author browsing) go back to their hub, never
@@ -125,7 +128,6 @@ export default function CourseDetailRoute() {
         <Mascot size={110} />
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20, marginTop: 12 }}>You're not enrolled in {courseCode}</h1>
         <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px' }}>Enroll to unlock its weeks, topics and quizzes.</p>
-      {error && <Flash tone="error" message={error} onDismiss={() => setError('')} />}
       {slots.length > 0 && (
         <div style={{ marginTop: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14 }}>
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: '#059669' }}>CLASS TIMES · REPEATS WEEKLY</div>
@@ -161,7 +163,6 @@ export default function CourseDetailRoute() {
       <p style={{ color: 'var(--text2)', marginTop: 6, fontSize: 13 }}>
         {weeks.length} {weeks.length === 1 ? 'week' : 'weeks'} · pick one to start learning
       </p>
-      {error && <Flash tone="error" message={error} onDismiss={() => setError('')} />}
       <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {weeks.length === 0 && !error && (
           <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>

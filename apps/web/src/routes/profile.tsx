@@ -1,3 +1,4 @@
+import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogOut, Pencil, Shield, X, Sun, Moon, MessageCircle } from 'lucide-react';
@@ -62,7 +63,9 @@ export default function ProfileRoute() {
   const [email, setEmail] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setErrorState] = useState('');
+  // Toast mirror: every failure surfaces globally AND stays readable inline.
+  const setError = (m: string) => { setErrorState(m); if (m) toastError(m); };
   const [newEmail, setNewEmail] = useState('');
   const [emailMsg, setEmailMsg] = useState('');
   // Inline edit (no onboarding detour): role + semester stay locked.
@@ -147,7 +150,9 @@ export default function ProfileRoute() {
   const [dNotify, setDNotify] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
-  const [saveError, setSaveError] = useState('');
+  const [saveError, setSaveErrorState] = useState('');
+  // Toast mirror: every failure surfaces globally AND stays readable inline.
+  const setSaveError = (m: string) => { setSaveErrorState(m); if (m) toastError(m); };
 
   useEffect(() => {
     const sb = supabaseBrowser();
@@ -290,9 +295,9 @@ export default function ProfileRoute() {
   if (!canAuthor) {
     rows.push(['Level', profile?.level || '—']);
     rows.push(['Graduation target', profile?.grad_target != null ? String(profile.grad_target) : '—']);
-  } else {
-    rows.push(['Contributing level', profile?.level || 'Not set']);
   }
+  // Staff never see or touch their contributing level here — it is assigned
+  // by admins (users table) and shown on the dashboard contributions card.
 
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '24px 16px 80px' }}>
@@ -348,7 +353,6 @@ export default function ProfileRoute() {
         </Link>
       )}
       {saveMsg && <Flash tone="success" message={saveMsg} onDismiss={() => setSaveMsg('')} />}
-      {saveError && <Flash tone="error" message={saveError} onDismiss={() => setSaveError('')} />}
 
       {editing && (
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 8, display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -408,15 +412,7 @@ export default function ProfileRoute() {
             </>
           )}
           {canAuthor && (
-            <label style={{ fontSize: 12, fontWeight: 700 }}>
-              Contributing level
-              <select value={dLevel} onChange={(e) => setDLevel(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid var(--border)', borderRadius: 10, fontSize: 14, display: 'block' }}>
-                <option value="">Select…</option>
-                {LEVELS.map((l) => (
-                  <option key={l} value={l}>{l}</option>
-                ))}
-              </select>
-            </label>
+            <div style={{ fontSize: 11, color: 'var(--text2)' }}>Your contributing level and courses are assigned by an admin — they show on your dashboard.</div>
           )}
           <div style={{ fontSize: 11, color: 'var(--text2)' }}>Role and semester are locked — only admin can change those.</div>
           <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, color: 'var(--text2)', fontWeight: 600, cursor: 'pointer' }}>

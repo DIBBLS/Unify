@@ -1,3 +1,4 @@
+import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { BookOpen, Clock, Eye, ArrowRight, Zap } from 'lucide-react';
@@ -40,7 +41,9 @@ export default function ShareRoute() {
   const [data, setData] = useState<ShareData | null>(null);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState(0);
-  const [error, setError] = useState('');
+  const [error, setErrorState] = useState('');
+  // Toast mirror: every failure surfaces globally AND stays readable inline.
+  const setError = (m: string) => { setErrorState(m); if (m) toastError(m); };
   const [authed, setAuthed] = useState(false);
 
   useEffect(() => {
