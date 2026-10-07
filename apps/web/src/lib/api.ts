@@ -447,6 +447,8 @@ export const api = {
     apiFetch<{ ok: boolean; id: string }>('/v1/role-requests', { method: 'POST', body: JSON.stringify(payload) }),
   myRoleRequest: () =>
     apiFetch<{ request: { id: string; role: string; level: string; courses: string[]; status: string; created_at: string } | null }>('/v1/role-requests/mine'),
+  cancelRoleRequest: () =>
+    apiFetch<{ ok: boolean }>('/v1/role-requests/mine', { method: 'DELETE' }),
   adminRoleRequests: () =>
     apiFetch<{ requests: { id: string; user_id: string; role: string; level: string; courses: string[]; status: string; created_at: string; name: string; email: string }[] }>('/v1/admin/role-requests'),
   decideRoleRequest: (id: string, approve: boolean) =>
