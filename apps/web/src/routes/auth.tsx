@@ -6,7 +6,7 @@ import Wordmark from '../components/Wordmark';
 import Typewriter from '../components/Typewriter';
 import Flash from '../components/Flash';
 import { supabaseBrowser, saveRememberSession, restoreRememberedSession, touchActivity, isSessionExpired, expireSession } from '../lib/supabase';
-import { api } from '../lib/api';
+import { api, clearMeCache } from '../lib/api';
 import { log } from '../lib/log';
 
 // Note: no client-side persistence here. Rate limiting is enforced
@@ -31,6 +31,8 @@ export default function AuthRoute() {
 
   const routeToApp = async () => {
     touchActivity();
+    // Fresh sign-in: never trust the me() memo from a previous account.
+    clearMeCache();
     // A live session always means the sign-in face — never leave a stale
     // signup/recovery form mounted where it can flash mid-redirect.
     setTab('signin');

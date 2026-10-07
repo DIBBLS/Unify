@@ -132,7 +132,13 @@ export default function DashboardRoute() {
         return;
       }
       try {
-        const me = await api.me();
+        // me + stats + catalog launch together: three sequential round
+        // trips used to gate the whole dashboard on cold start.
+        const [me, statsRes, catRes] = await Promise.all([
+          api.me(),
+          api.stats().catch(() => null),
+          api.courses().catch(() => [] as { code: string; title: string; weeks: number; lecturers: string[] }[]),
+        ]);
         if (!me.onboarded || !me.profile) {
           navigate('/onboarding');
           return;
@@ -144,9 +150,8 @@ export default function DashboardRoute() {
         // BUG-012: one catalog fetch feeds every course card (title,
         // weeks, lecturers) — never one request per card.
         try {
-          const cat = await api.courses();
           const map: Record<string, { title: string; weeks: number; lecturers: string[] }> = {};
-          for (const c of cat) map[c.code.toUpperCase().trim()] = { title: c.title, weeks: c.weeks || 0, lecturers: c.lecturers || [] };
+          for (const c of catRes) map[c.code.toUpperCase().trim()] = { title: c.title, weeks: c.weeks || 0, lecturers: c.lecturers || [] };
           setCatalog(map);
         } catch {
           // cards fall back to codes
@@ -165,11 +170,13 @@ export default function DashboardRoute() {
         } catch {
           // warmup is best-effort
         }
-        const stats = await api.stats();
-        setXp(stats.xp);
-        setStreak(stats.streak);
-        setCourses(stats.courses);
-        setQuizzes({ taken: stats.quizzesTaken || 0, avg: stats.quizAvg || 0 });
+        const stats = statsRes;
+        if (stats) {
+          setXp(stats.xp);
+          setStreak(stats.streak);
+          setCourses(stats.courses);
+          setQuizzes({ taken: stats.quizzesTaken || 0, avg: stats.quizAvg || 0 });
+        }
         if (me.profile?.role === 'lecturer' || me.profile?.role === 'collaborator') {
           try {
             const authored = await api.authored();

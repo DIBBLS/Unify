@@ -140,7 +140,7 @@ export default function ExplorePage() {
           return (
             <div
               key={c.code}
-              className="rise"
+              className="rise cv-row"
               style={{
                 animationDelay: `${Math.min(i, 6) * 40}ms`,
                 padding: '14px 16px',

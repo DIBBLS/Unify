@@ -113,10 +113,10 @@ export function ContentBlockView({ block, fig }: { block: ContentBlock; fig?: nu
       );
     case 'diagram':
       return (
-        <figure className="diagram-wrap">
-          {block.imageRef ? (
-            <img src={block.imageRef} alt={block.caption} style={{ maxWidth: '100%', borderRadius: 8 }} />
-          ) : (
+      <figure className="diagram-wrap">
+        {block.imageRef ? (
+          <img src={block.imageRef} alt={block.caption} loading="lazy" style={{ maxWidth: '100%', borderRadius: 8 }} />
+        ) : (
             <div
               style={{
                 border: '1px dashed var(--border)',

@@ -112,7 +112,7 @@ export default function BrowseRoute() {
         {scoped.map((c) => {
           const isOpen = open === c.code;
           return (
-            <div key={c.code} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
+            <div key={c.code} className="cv-row" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
               <button
                 onClick={() => setOpen(isOpen ? null : c.code)}
                 style={{ width: '100%', display: 'flex', gap: 10, alignItems: 'center', padding: '12px 14px', background: 'none', border: 'none', textAlign: 'left', color: 'var(--text)' }}

@@ -9,7 +9,7 @@ import { APP_VERSION } from '../lib/version';
 import Wordmark from '../components/Wordmark';
 import { pushSupported, pushState, enablePush, disablePush, type PushState } from '../lib/push';
 import { supabaseBrowser, clearRememberSession } from '../lib/supabase';
-import { api, type Profile, type University } from '../lib/api';
+import { api, clearMeCache, type Profile, type University } from '../lib/api';
 import Loading from '../components/Loading';
 import Mascot from '../components/Mascot';
 import ErrorState from '../components/ErrorState';
@@ -194,6 +194,7 @@ export default function ProfileRoute() {
     // newer session (single-session policy kicks via broadcast instead).
     if (sb) await sb.auth.signOut({ scope: 'local' }).catch(() => {});
     clearRememberSession();
+    clearMeCache();
     navigate('/auth');
   };
 
