@@ -29,6 +29,9 @@ export default function ClassesRoute() {
   const [venue, setVenue] = useState('');
   const [adding, setAdding] = useState(false);
   const [confirmSlot, setConfirmSlot] = useState<string | null>(null);
+  // Admins run the platform from the admin panel + content browser —
+  // classes and timetables are the lecturer's room, not theirs.
+  const [forbidden, setForbidden] = useState(false);
 
   useEffect(() => {
     const sb = supabaseBrowser();
@@ -44,6 +47,12 @@ export default function ClassesRoute() {
         return;
       }
       try {
+        const me = await api.me();
+        if ((me.profile?.role || '') === 'admin') {
+          setForbidden(true);
+          setLoading(false);
+          return;
+        }
         const t = await api.teaching();
         setCourses(t.courses || []);
         if (t.courses && t.courses.length) setSelected(t.courses[0]);
@@ -112,6 +121,14 @@ export default function ClassesRoute() {
   };
 
   if (loading) return <ClassesSkeleton />;
+
+  if (forbidden)
+    return (
+      <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
+        <BackButton to="/dashboard" />
+        <ErrorState title="Lecturers only" message="Classes and timetables belong to lecturers. Admins oversee the platform from the admin panel and content browser." />
+      </div>
+    );
 
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>

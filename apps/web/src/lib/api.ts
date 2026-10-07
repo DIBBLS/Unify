@@ -454,7 +454,7 @@ export const api = {
   decideRoleRequest: (id: string, approve: boolean) =>
     apiFetch<{ ok: boolean; approved: boolean; granted?: string[]; capped?: string[] }>(`/v1/admin/role-requests/${id}`, { method: 'POST', body: JSON.stringify({ approve }) }),
   contributions: () =>
-    apiFetch<{ courses: { course: string; level: string; semester: string; assigned: boolean; topics: number; versions: number }[] }>('/v1/contributions'),
+    apiFetch<{ courses: { course: string; level: string; semester: string; assigned: boolean; topics: number; versions: number; totalTopics: number }[] }>('/v1/contributions'),
   uploadAvatar: (image: string) =>
     apiFetch<{ ok: boolean; avatarUrl: string }>('/v1/avatar', { method: 'POST', body: JSON.stringify({ image }) }),
   logError: (payload: { kind: string; message: string; stack: string; url: string; appVersion: string }) =>
