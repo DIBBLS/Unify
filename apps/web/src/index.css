@@ -309,6 +309,10 @@ Playfair 900 in Story) — stats must read as the app, not as an import. */
   nav.bottomnav{width:calc(var(--shell) - 32px) !important;border-radius:24px !important;bottom:16px !important;border:1px solid var(--border) !important;box-shadow:var(--shadow)}
 }
 
+/* Long lists (catalog, browse, rosters): rows below the fold skip layout
++ paint until scrolled near. Massive scroll perf win, zero visual change. */
+.cv-row{content-visibility:auto;contain-intrinsic-size:auto 72px}
+
 /* Back-to-top floating button (reader) */
 .to-top{position:fixed;right:16px;bottom:76px;z-index:50;width:44px;height:44px;border-radius:9999px;border:1px solid var(--border);background:var(--surface);color:var(--green-deep);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);animation:rise-in .25s ease}
 .print-only{display:none}

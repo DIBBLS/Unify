@@ -214,10 +214,28 @@ export type AdminContentCourse = {
   weeks: AdminContentWeek[];
 };
 
+export type MeResponse = { onboarded: boolean; profile: Profile | null; isAdmin: boolean; courses: string[]; resume: { course: string; week: number; topic: number; lecture: number } | null };
+
+// Short-TTL memo for me(): the layout gate + every route each call it on
+// navigation — without this every page change costs a full round trip.
+// 15s is stale-safe (role changes are admin-driven and rare). Cleared on
+// sign-out and fresh sign-in so account switches never read another
+// user's profile.
+let meCache: { at: number; data: MeResponse } | null = null;
+export function clearMeCache(): void {
+  meCache = null;
+}
+
 export const api = {
   universities: () => apiFetch<University[]>("/v1/universities"),
   settings: () => apiFetch<{ currentSemester: string }>("/v1/settings"),
-  me: () => apiFetch<{ onboarded: boolean; profile: Profile | null; isAdmin: boolean; courses: string[]; resume: { course: string; week: number; topic: number; lecture: number } | null }>("/v1/me"),
+  me: () => {
+    if (meCache && Date.now() - meCache.at < 15000) return Promise.resolve(meCache.data);
+    return apiFetch<MeResponse>("/v1/me").then((d) => {
+      meCache = { at: Date.now(), data: d };
+      return d;
+    });
+  },
   updateMe: (payload: Record<string, unknown>) =>
     apiFetch<{ ok: boolean; profile: Profile }>("/v1/me", {
       method: "PUT",
