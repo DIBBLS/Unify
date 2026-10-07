@@ -60,7 +60,7 @@ export default function StudioRoute() {
     return () => clearInterval(t);
   }, [working]);
 
-  // Course dropdown: collaborators see ONLY assigned courses (server
+  // Course dropdown: contributors see ONLY assigned courses (server
   // enforces on publish too); everyone else sees the full catalog.
   useEffect(() => {
     let cancelled = false;
@@ -69,9 +69,9 @@ export default function StudioRoute() {
         const [list, me] = await Promise.all([api.courses(), api.me().catch(() => null)]);
         if (cancelled) return;
         const role = me?.profile?.role;
-        const isCollab = role === 'collaborator' && !me?.isAdmin;
+        const isContrib = role === 'contributor' && !me?.isAdmin;
         const assigned = new Set((me?.courses || []).map((c) => (c || '').toUpperCase().trim()));
-        const scoped = isCollab
+        const scoped = isContrib
           ? list.filter((c) => assigned.has((c.code || '').toUpperCase().trim()))
           : list;
         setCatalog(scoped.map((c) => ({ code: c.code, title: c.title })));

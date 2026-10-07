@@ -277,7 +277,7 @@ export default function LearnPage() {
     preview && viewer
       ? viewer.isAdmin
         ? '/admin/content'
-        : viewer.role === 'lecturer' || viewer.role === 'collaborator'
+        : viewer.role === 'lecturer' || viewer.role === 'contributor'
           ? '/browse'
           : `/course/${encodeURIComponent(courseCode || '')}`
       : `/course/${encodeURIComponent(courseCode || '')}`;
@@ -402,7 +402,7 @@ export default function LearnPage() {
         >
           {savedOff ? <Check size={14} /> : <Download size={14} />} {savedOff ? 'Saved offline' : savingOff ? 'Saving…' : 'Save offline'}
         </button>
-        {(!viewer || viewer.role === 'lecturer' || viewer.role === 'collaborator' || viewer.role === 'admin' || viewer.isAdmin) && (
+        {(!viewer || viewer.role === 'lecturer' || viewer.role === 'contributor' || viewer.role === 'admin' || viewer.isAdmin) && (
           <button onClick={() => setSharing(true)} style={{ display: 'flex', gap: 6, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 700, color: '#059669' }}>
             <Share2 size={14} /> Share
           </button>

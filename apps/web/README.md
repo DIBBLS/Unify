@@ -37,17 +37,17 @@ Built-in public fallbacks keep local dev working; env vars override.
 | Route | Who | What |
 |---|---|---|
 | `/auth` | public | Email + Google sign in/up, forgot-password, welcome-back splash |
-| `/onboarding` | signed in | Role-first setup (student 8 / lecturer 6 / collaborator 3 steps) |
+| `/onboarding` | signed in | Role-first setup (student 8 / lecturer 6 / contributor 3 steps) |
 | `/dashboard` | signed in | Students: XP/streak/resume/course cards; authors: notes/courses stats + My Classes entry; admins: oversight card |
 | `/course` | student | My Courses (bulk week counts) |
 | `/explore` | student | Enroll-only catalog (single bulk call + alias search) |
 | `/course/:code`, `/learn/:code/week/:week` | student (+preview roles) | Lecture reader (Lecture 1/2/3, `?c=`): hero, chapter tabs, recalls, read-aloud, EOQ exam, share, Save offline, XP-gated PDF |
 | `/s/:token` | public | Expiring share landing with preview card + join CTA |
-| `/browse` | lecturer/collaborator | Level-scoped note browser (read-only previews) |
-| `/classes` | lecturer/collaborator | My Classes: weekly timetable manager + live roster per taught course |
+| `/browse` | lecturer/contributor | Level-scoped note browser (read-only previews) |
+| `/classes` | lecturer/contributor | My Classes: weekly timetable manager + live roster per taught course |
 | `/notifications` | signed in | Bell list, auto-opens on fresh entry when unread |
 | `/profile` | signed in | Inline edit, email change, appearance (design/theme/push), version footer |
-| `/studio` | lecturer/collaborator/admin | AI / manual / external-AI authoring, lecture pickers, versioned publish |
+| `/studio` | lecturer/contributor/admin | AI / manual / external-AI authoring, lecture pickers, versioned publish |
 | `/admin`, `/admin/content` | admin | Modules (analytics, models, unis, courses, session, announce, users), all-content tree |
 | `*` | public | Mascot 404 with nav links |
 

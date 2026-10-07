@@ -154,6 +154,7 @@ export type Profile = {
   level?: string;
   grad_target?: number;
   role?: string;
+  avatar_url?: string;
   notify_new_notes?: boolean;
 };
 
@@ -214,7 +215,7 @@ export type AdminContentCourse = {
   weeks: AdminContentWeek[];
 };
 
-export type MeResponse = { onboarded: boolean; profile: Profile | null; isAdmin: boolean; courses: string[]; resume: { course: string; week: number; topic: number; lecture: number } | null };
+export type MeResponse = { onboarded: boolean; profile: Profile | null; isAdmin: boolean; courses: string[]; avatar: string; resume: { course: string; week: number; topic: number; lecture: number } | null };
 
 // Short-TTL memo for me(): the layout gate + every route each call it on
 // navigation — without this every page change costs a full round trip.
@@ -428,7 +429,7 @@ export const api = {
     if (level) p.set('level', level);
     if (semester) p.set('semester', semester);
     const q = p.toString();
-    return apiFetch<{ code: string; title: string; levels: string[]; semesters: string[]; weeks: number; lecturers: string[] }[]>(`/v1/courses${q ? `?${q}` : ''}`);
+    return apiFetch<{ code: string; title: string; levels: string[]; semesters: string[]; weeks: number; lecturers: string[]; staff: { name: string; avatar: string }[] }[]>(`/v1/courses${q ? `?${q}` : ''}`);
   },
   courseSearch: (q: string, level = '') => {
     const p = new URLSearchParams({ q });
@@ -442,6 +443,18 @@ export const api = {
     apiFetch<{ ok: boolean; course: string }>('/v1/admin/courses', { method: 'POST', body: JSON.stringify({ code, title, levels, semester }) }),
   support: () =>
     apiFetch<{ supported: boolean; supportNumber: string }>('/v1/support'),
+  roleRequest: (payload: { role: 'lecturer' | 'contributor'; level: string; courses: string[] }) =>
+    apiFetch<{ ok: boolean; id: string }>('/v1/role-requests', { method: 'POST', body: JSON.stringify(payload) }),
+  myRoleRequest: () =>
+    apiFetch<{ request: { id: string; role: string; level: string; courses: string[]; status: string; created_at: string } | null }>('/v1/role-requests/mine'),
+  adminRoleRequests: () =>
+    apiFetch<{ requests: { id: string; user_id: string; role: string; level: string; courses: string[]; status: string; created_at: string; name: string; email: string }[] }>('/v1/admin/role-requests'),
+  decideRoleRequest: (id: string, approve: boolean) =>
+    apiFetch<{ ok: boolean; approved: boolean; granted?: string[]; capped?: string[] }>(`/v1/admin/role-requests/${id}`, { method: 'POST', body: JSON.stringify({ approve }) }),
+  contributions: () =>
+    apiFetch<{ courses: { course: string; level: string; semester: string; assigned: boolean; topics: number; versions: number }[] }>('/v1/contributions'),
+  uploadAvatar: (image: string) =>
+    apiFetch<{ ok: boolean; avatarUrl: string }>('/v1/avatar', { method: 'POST', body: JSON.stringify({ image }) }),
   logError: (payload: { kind: string; message: string; stack: string; url: string; appVersion: string }) =>
     apiFetch<{ ok: boolean }>('/v1/errors', { method: 'POST', body: JSON.stringify(payload) }),
   adminErrors: () =>

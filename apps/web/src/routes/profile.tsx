@@ -68,6 +68,39 @@ export default function ProfileRoute() {
   // Inline edit (no onboarding detour): role + semester stay locked.
   const [editing, setEditing] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
+  // Profile picture: file → ≤2MB data URL → avatars bucket. Everyone else
+  // sees Gravatar-by-email automatically when no upload exists.
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarMsg, setAvatarMsg] = useState('');
+
+  const uploadAvatar = async (file: File | null) => {
+    if (!file || uploadingAvatar) return;
+    setAvatarMsg('');
+    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) {
+      setAvatarMsg('PNG, JPG or WEBP only.');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setAvatarMsg('Image must be ≤2MB.');
+      return;
+    }
+    setUploadingAvatar(true);
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(String(r.result || ''));
+        r.onerror = () => reject(new Error('read failed'));
+        r.readAsDataURL(file);
+      });
+      const res = await api.uploadAvatar(dataUrl);
+      setProfile((prev) => (prev ? { ...prev, avatar_url: res.avatarUrl } : prev));
+      setAvatarMsg('Picture updated.');
+    } catch {
+      setAvatarMsg("Couldn't upload that picture. Try a smaller file.");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
   const { theme, toggle } = useTheme();
   const { design, setDesign } = useDesign();
   const [pushSt, setPushSt] = useState<PushState>('off');
@@ -221,7 +254,7 @@ export default function ProfileRoute() {
       };
       const match = unis.find((u) => u.name === dUni);
       if (match && UUID_RE.test(match.id)) payload.universityId = match.id;
-      const author = profile?.role === 'lecturer' || profile?.role === 'collaborator';
+      const author = profile?.role === 'lecturer' || profile?.role === 'contributor';
       if (!author) {
         if (dLevel) payload.level = dLevel;
         if (dTarget) payload.gradTarget = Number(dTarget);
@@ -247,7 +280,7 @@ export default function ProfileRoute() {
 
   const initial = (profile?.first_name || email).charAt(0).toUpperCase() || 'U';
   const roleLabel = profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : '—';
-  const canAuthor = profile?.role === 'lecturer' || profile?.role === 'collaborator';
+  const canAuthor = profile?.role === 'lecturer' || profile?.role === 'contributor';
   const rows: [string, string][] = [
     ['Role', roleLabel],
     ['University', profile?.university || '—'],
@@ -265,12 +298,27 @@ export default function ProfileRoute() {
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '24px 16px 80px' }}>
       <BackButton to="/dashboard" />
       <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 20 }}>
-        <div style={{ width: 64, height: 64, borderRadius: 9999, background: 'linear-gradient(135deg,#34d399,#059669)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 24 }}>
-          {initial}
-        </div>
+        {profile?.avatar_url ? (
+          <img src={profile.avatar_url} alt="Profile picture" style={{ width: 64, height: 64, borderRadius: 9999, objectFit: 'cover', flexShrink: 0 }} />
+        ) : (
+          <div style={{ width: 64, height: 64, borderRadius: 9999, background: 'linear-gradient(135deg,#34d399,#059669)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 24, flexShrink: 0 }}>
+            {initial}
+          </div>
+        )}
         <div style={{ flex: 1 }}>
           <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 22 }}>{profile?.first_name || 'Builder'}</h1>
           <div style={{ fontSize: 13, color: 'var(--text2)' }}>{email}</div>
+          <label style={{ display: 'inline-block', marginTop: 6, fontSize: 12, fontWeight: 800, color: '#059669', cursor: 'pointer' }}>
+            {uploadingAvatar ? 'Uploading…' : profile?.avatar_url ? 'Change picture' : 'Add a picture'}
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              disabled={uploadingAvatar}
+              onChange={(e) => void uploadAvatar(e.target.files?.[0] || null)}
+              style={{ display: 'none' }}
+            />
+          </label>
+          {avatarMsg && <div style={{ fontSize: 12, color: '#059669', marginTop: 4 }}>{avatarMsg}</div>}
         </div>
         <Mascot size={64} />
       </div>

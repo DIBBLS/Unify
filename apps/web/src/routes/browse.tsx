@@ -49,25 +49,25 @@ export default function BrowseRoute() {
     })();
   }, [navigate]);
 
-  const isCollab = role === 'collaborator';
-  const isAuthor = role === 'lecturer' || isCollab;
+  const isContrib = role === 'contributor';
+  const isAuthor = role === 'lecturer' || isContrib;
   const scoped = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return courses.filter((c) => {
-      // Collaborators see ONLY assigned courses (server enforces too).
-      if (isCollab && !enrolled.has(c.code.toUpperCase().trim())) return false;
-      if (isAuthor && !isCollab && level && c.level !== level) return false;
+      // Contributors see ONLY assigned courses (server enforces too).
+      if (isContrib && !enrolled.has(c.code.toUpperCase().trim())) return false;
+      if (isAuthor && !isContrib && level && c.level !== level) return false;
       if (!needle) return true;
       return c.code.toLowerCase().includes(needle) || (c.title || '').toLowerCase().includes(needle);
     });
-  }, [courses, q, isAuthor, isCollab, enrolled, level]);
+  }, [courses, q, isAuthor, isContrib, enrolled, level]);
 
   if (loading) return <SearchListSkeleton titleWidth="55%" rows={4} withIcon={false} withAction={false} />;
   if (forbidden)
     return (
       <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
         <BackButton to="/dashboard" />
-        <ErrorState title="Authors only" message="This browser is for lecturers and collaborators." />
+        <ErrorState title="Authors only" message="This browser is for lecturers and contributors." />
       </div>
     );
 
@@ -83,13 +83,13 @@ export default function BrowseRoute() {
       <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>
         {isAuthor && level ? `${level} · ` : ''}{scoped.length} courses · {totalWeeks} weeks · {totalTopics} topics with notes
       </div>
-      {isCollab && enrolled.size === 0 && (
+      {isContrib && enrolled.size === 0 && (
         <div style={{ marginTop: 12, padding: 12, background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, fontSize: 12, color: '#92400e', display: 'flex', gap: 8 }}>
           <Info size={16} style={{ flexShrink: 0, marginTop: 1 }} />
           <span>No courses assigned to you yet — ask an admin to assign your two courses.</span>
         </div>
       )}
-      {isAuthor && !isCollab && !level && (
+      {isAuthor && !isContrib && !level && (
         <div style={{ marginTop: 12, padding: 12, background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, fontSize: 12, color: '#92400e', display: 'flex', gap: 8 }}>
           <Info size={16} style={{ flexShrink: 0, marginTop: 1 }} />
           <span>No contributing level set — showing everything. Set it in Profile so this narrows to your level.</span>
