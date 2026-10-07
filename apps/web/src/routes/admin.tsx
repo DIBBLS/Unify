@@ -1,7 +1,7 @@
 import { toastError } from '../lib/toast';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, Trash2, PenTool, BookOpen, ChevronDown, ChevronRight, BarChart3, UserCheck, Users, LibraryBig, Cpu, Building2, CalendarDays, Megaphone, AlertTriangle } from 'lucide-react';
+import { Shield, Trash2, PenTool, BookOpen, ChevronDown, ChevronRight, BarChart3, UserCheck, Users, LibraryBig, Cpu, Building2, CalendarDays, Megaphone, AlertTriangle, Scale } from 'lucide-react';
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type AdminUser } from '../lib/api';
 import Loading from '../components/Loading';
@@ -21,6 +21,7 @@ const LEVELS = ['100 Level', '200 Level', '300 Level', '400 Level', '500 Level']
 const MODS = [
   { id: 'requests', title: 'Staff requests', icon: UserCheck },
   { id: 'users', title: 'Users & roles', icon: Users },
+  { id: 'capaudit', title: 'Cap audit', icon: Scale },
   { id: 'courses', title: 'Courses per level', icon: LibraryBig },
   { id: 'analytics', title: 'Analytics', icon: BarChart3 },
   { id: 'models', title: 'AI models', icon: Cpu },
@@ -83,9 +84,32 @@ export default function AdminRoute() {
   const [errors, setErrors] = useState<{ kind: string; message: string; stack: string; url: string; app_version: string; created_at: string }[]>([]);
   const [sentryOn] = useState(() => Boolean((import.meta.env.VITE_SENTRY_DSN as string | undefined) || ''));
   const [trends, setTrends] = useState<{ signups: { day: string; count: number }[]; notes: { day: string; count: number }[]; xp: { day: string; count: number }[] } | null>(null);
-  // Table-style user management: one scanable row per user (name, role
-  // pill, level), tap to expand the full controls (role pills, level,
-  // course assignment). Sub-level linking without losing the overview.
+  // Contributor-cap audit: legacy over-assignments, trimmable in one tap.
+  const [violations, setViolations] = useState<{ user_id: string; name: string; email: string; level: string; courses: string[] }[]>([]);
+  const [trimming, setTrimming] = useState(false);
+
+  const loadAudit = async () => {
+    try {
+      const r = await api.capAudit();
+      setViolations(r.violations || []);
+    } catch {
+      // audit stands empty
+    }
+  };
+
+  const trimAudit = async () => {
+    setTrimming(true);
+    setError('');
+    try {
+      const res = await api.capTrim();
+      setViolations((res.remaining || []) as { user_id: string; name: string; email: string; level: string; courses: string[] }[]);
+      setSuccess(`Trimmed ${res.trimmed} excess assignment${res.trimmed === 1 ? '' : 's'} (earliest two per level kept).`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Trim failed.');
+    } finally {
+      setTrimming(false);
+    }
+  };
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
   // Staff requests queue.
   const [requests, setRequests] = useState<{ id: string; user_id: string; role: string; level: string; courses: string[]; status: string; created_at: string; name: string; email: string }[]>([]);
@@ -129,7 +153,10 @@ export default function AdminRoute() {
   // teaching list; gates enforce it server-side.
   const [courseMgr, setCourseMgr] = useState<string | null>(null);
   const [assigned, setAssigned] = useState<string[]>([]);
-  const [assignInput, setAssignInput] = useState('');
+  // Picker state: searchable catalog filtered by level (defaults to the
+  // author's own level for contributors — nothing typed that the DB knows).
+  const [assignSearch, setAssignSearch] = useState('');
+  const [assignLevel, setAssignLevel] = useState('');
   const [assignBusy, setAssignBusy] = useState(false);
 
   const openCourseMgr = async (id: string) => {
@@ -139,7 +166,10 @@ export default function AdminRoute() {
     }
     setCourseMgr(id);
     setAssigned([]);
-    setAssignInput('');
+    setAssignSearch('');
+    // Default filter to the author's level (contributors live in one).
+    const target = users.find((x) => x.id === id);
+    setAssignLevel(target?.level && LEVELS.includes(target.level) ? target.level : '');
     setError('');
     try {
       const res = await api.adminUserCourses(id);
@@ -183,6 +213,7 @@ export default function AdminRoute() {
       setModels(m.models);
       setProvider(m.provider);
       void loadRequests();
+      void loadAudit();
       setProvider(m.provider);
       setDefaultModel(m.default);
       if (t) setTrends(t);
@@ -899,27 +930,59 @@ export default function AdminRoute() {
                         </span>
                       ))}
                     </div>
-                    <div style={{ display: 'flex', gap: 6 }}>
+                    <div style={{ fontSize: 12, fontWeight: 800, margin: '10px 0 6px' }}>Add from catalog — pick, don't type</div>
+                    <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
                       <input
-                        value={assignInput}
-                        onChange={(e) => setAssignInput(e.target.value.toUpperCase())}
-                        placeholder="e.g. MEE 352"
-                        style={{ ...input, flex: 1, minWidth: 0 }}
+                        value={assignSearch}
+                        onChange={(e) => setAssignSearch(e.target.value)}
+                        placeholder="Search code or title…"
+                        style={{ ...input, flex: 2, minWidth: 0 }}
                       />
-                      <button
-                        onClick={() => {
-                          const code = assignInput.trim().toUpperCase();
-                          if (!code || assigned.includes(code)) return;
-                          setAssignInput('');
-                          void saveAssigned(u.id, [...assigned, code]);
-                        }}
-                        disabled={assignBusy}
-                        style={{ ...primaryBtn, opacity: assignBusy ? 0.6 : 1 }}
+                      <select
+                        value={assignLevel}
+                        onChange={(e) => setAssignLevel(e.target.value)}
+                        aria-label="Filter by level"
+                        style={{ ...input, flex: 1, minWidth: 100 }}
                       >
-                        Assign
-                      </button>
+                        <option value="">All levels</option>
+                        {LEVELS.map((l) => (
+                          <option key={l} value={l}>{l.replace(' Level', '')}</option>
+                        ))}
+                      </select>
                     </div>
-                    <div style={{ fontSize: 11, color: 'var(--text2)', marginTop: 6 }}>Codes must exist in the catalog — typos are rejected. Contributors cap at 2 per level.</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 220, overflowY: 'auto', marginBottom: 8 }}>
+                      {(() => {
+                        const needle = assignSearch.trim().toLowerCase();
+                        const pool = courses.filter((c) =>
+                          (!assignLevel || (c.levels || []).includes(assignLevel)) &&
+                          (!needle || c.code.toLowerCase().includes(needle) || (c.title || '').toLowerCase().includes(needle))
+                        );
+                        if (!pool.length) return <span style={{ fontSize: 12, color: 'var(--text2)' }}>No catalog courses match — adjust search or level.</span>;
+                        return pool.slice(0, 60).map((c) => {
+                          const on = assigned.includes(c.code);
+                          return (
+                            <button
+                              key={c.code}
+                              onClick={() => {
+                                if (on || assignBusy) return;
+                                void saveAssigned(u.id, [...assigned, c.code]);
+                              }}
+                              disabled={assignBusy || on}
+                              style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '10px 12px', borderRadius: 10, border: `1px solid ${on ? '#059669' : 'var(--border)'}`, background: on ? '#ecfdf5' : 'var(--surface)', textAlign: 'left', opacity: on ? 0.75 : 1 }}
+                            >
+                              <span style={{ width: 20, height: 20, borderRadius: 6, border: `1px solid ${on ? '#059669' : 'var(--border)'}`, background: on ? '#10b981' : 'var(--surface)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, flexShrink: 0 }}>
+                                {on ? '✓' : ''}
+                              </span>
+                              <span style={{ flex: 1, minWidth: 0 }}>
+                                <span style={{ fontWeight: 800, fontSize: 13, display: 'block' }}>{c.code}</span>
+                                <span style={{ fontSize: 11, color: 'var(--text2)', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.title}{(c.levels || []).length ? ` · ${c.levels.join(', ')}` : ''}</span>
+                              </span>
+                            </button>
+                          );
+                        });
+                      })()}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--text2)', marginTop: 6 }}>Catalog only — typos impossible. Contributors cap at 2 per level (server-enforced).</div>
                   </div>
                 )}
               </div>
@@ -934,12 +997,38 @@ export default function AdminRoute() {
       </Module>
         </div>
       </div>
+      <Module id="capaudit" title="Cap audit" badge={violations.length} openId={openModule} onToggle={setOpenModule}>
+      <div style={card}>
+        <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 8 }}>
+          Contributors holding more than 2 teaching courses in any level (legacy rows predate the server gate). Trim keeps the earliest two per level.
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {violations.length === 0 && <div style={{ color: 'var(--text2)', fontSize: 13, textAlign: 'center', padding: 20 }}>Everyone complies — no excess assignments.</div>}
+          {violations.map((v) => (
+            <div key={`${v.user_id}-${v.level}`} style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px' }}>
+              <div style={{ fontWeight: 800, fontSize: 14 }}>{v.name} <span style={{ fontWeight: 500, color: 'var(--text2)' }}>· {v.level}</span></div>
+              <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>{v.email}</div>
+              <div style={{ fontSize: 12, fontWeight: 700, marginTop: 4 }}>{v.courses.join(', ')}</div>
+            </div>
+          ))}
+        </div>
+        {violations.length > 0 && (
+          <button
+            onClick={() => setConfirm({ title: `Trim ${violations.length} violation${violations.length === 1 ? '' : 's'}?`, body: 'Excess teaching assignments are removed (earliest two per level kept). This cannot be undone.', label: 'Trim excess', run: () => void trimAudit() })}
+            disabled={trimming}
+            style={{ ...primaryBtn, width: '100%', marginTop: 10, opacity: trimming ? 0.6 : 1 }}
+          >
+            {trimming ? 'Trimming…' : 'Trim all excess'}
+          </button>
+        )}
+      </div>
+      </Module>
       {confirm && (
         <ConfirmModal
           title={confirm.title}
           body={confirm.body}
           confirmLabel={confirm.label}
-          busy={promoting || announcing}
+            busy={promoting || announcing || trimming}
           onConfirm={() => {
             const run = confirm.run;
             setConfirm(null);
