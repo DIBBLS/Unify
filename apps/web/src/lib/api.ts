@@ -466,6 +466,10 @@ export const api = {
     apiFetch<{ requests: { id: string; user_id: string; role: string; level: string; courses: string[]; status: string; created_at: string; name: string; email: string }[] }>('/v1/admin/role-requests'),
   decideRoleRequest: (id: string, approve: boolean) =>
     apiFetch<{ ok: boolean; approved: boolean; granted?: string[]; capped?: string[] }>(`/v1/admin/role-requests/${id}`, { method: 'POST', body: JSON.stringify({ approve }) }),
+  capAudit: () =>
+    apiFetch<{ violations: { user_id: string; name: string; email: string; level: string; courses: string[] }[] }>('/v1/admin/cap-audit'),
+  capTrim: () =>
+    apiFetch<{ ok: boolean; trimmed: number; remaining: unknown[] }>('/v1/admin/cap-audit', { method: 'POST', body: JSON.stringify({ trim: true }) }),
   contributions: () =>
     apiFetch<{ courses: { course: string; level: string; semester: string; assigned: boolean; topics: number; versions: number; totalTopics: number }[] }>('/v1/contributions'),
   uploadAvatar: (image: string) =>
