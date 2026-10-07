@@ -1,3 +1,4 @@
+import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, Check, X, Loader2, Chrome } from 'lucide-react';
@@ -17,7 +18,9 @@ export default function AuthRoute() {
   const navigate = useNavigate();
   const sb = supabaseBrowser();
   const [tab, setTab] = useState<'signin' | 'signup' | 'forgot'>('signin');
-  const [error, setError] = useState('');
+  const [error, setErrorState] = useState('');
+  // Toast mirror: every failure surfaces globally AND stays readable inline.
+  const setError = (m: string) => { setErrorState(m); if (m) toastError(m); };
   const [success, setSuccess] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [signupPw, setSignupPw] = useState('');
@@ -322,7 +325,6 @@ export default function AuthRoute() {
         </div>
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 26, textAlign: 'center' }}>Set a new password</h1>
         <p style={{ fontSize: 13, color: 'var(--text2)', textAlign: 'center', margin: '8px 0 16px' }}>Choose the password you'll sign in with from now on.</p>
-        {error && <Flash tone="error" message={error} ttl={6000} onDismiss={() => setError('')} />}
         {success && <Flash tone="success" message={success} ttl={6000} onDismiss={() => setSuccess('')} />}
         <form onSubmit={handlePasswordUpdate} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <label style={{ fontSize: 12, fontWeight: 700 }}>
@@ -415,7 +417,6 @@ export default function AuthRoute() {
           </button>
         </div>
 
-        {error && <Flash tone="error" message={error} ttl={FLASH_TTL} onDismiss={() => setError('')} />}
         {success && <Flash tone="success" message={success} ttl={FLASH_TTL} onDismiss={() => setSuccess('')} />}
         {success && pendingEmail && (
           <button onClick={handleResend} disabled={loading} style={{ background: 'none', border: 'none', color: '#059669', fontSize: 13, fontWeight: 700, textDecoration: 'underline', marginBottom: 12 }}>

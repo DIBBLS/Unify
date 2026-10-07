@@ -443,6 +443,19 @@ export const api = {
     apiFetch<{ ok: boolean; course: string }>('/v1/admin/courses', { method: 'POST', body: JSON.stringify({ code, title, levels, semester }) }),
   support: () =>
     apiFetch<{ supported: boolean; supportNumber: string }>('/v1/support'),
+  // Daily-activity heartbeat (streak fuel): at most one ping per device
+  // per day, fired when the student genuinely enters (dashboard, reader).
+  // Server dedupes by day; offline days simply don't count.
+  pingDaily: () => {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      if (localStorage.getItem('unify.ping.v1') === today) return Promise.resolve({ ok: true });
+      localStorage.setItem('unify.ping.v1', today);
+    } catch {
+      // storage blocked: still try, server dedupes
+    }
+    return apiFetch<{ ok: boolean }>('/v1/ping', { method: 'POST', body: JSON.stringify({}) }).catch(() => ({ ok: false }));
+  },
   roleRequest: (payload: { role: 'lecturer' | 'contributor'; level: string; courses: string[] }) =>
     apiFetch<{ ok: boolean; id: string }>('/v1/role-requests', { method: 'POST', body: JSON.stringify(payload) }),
   myRoleRequest: () =>

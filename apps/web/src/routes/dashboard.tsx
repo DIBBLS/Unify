@@ -1,3 +1,4 @@
+import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, ChevronRight, Trash2 } from 'lucide-react';
@@ -95,7 +96,9 @@ export default function DashboardRoute() {
   } | null>(null);
   const [notes, setNotes] = useState<{ id: string; course: string; week: number; topic: number; lecture: number; version: number; title: string }[]>([]);
   const [deleting, setDeleting] = useState<string | null>(null);
-  const [noteError, setNoteError] = useState('');
+  const [noteError, setNoteErrorState] = useState('');
+  // Toast mirror: every failure surfaces globally AND stays readable inline.
+  const setNoteError = (m: string) => { setNoteErrorState(m); if (m) toastError(m); };
   // BUG-012: catalog meta for course cards (title, weeks, lecturers) +
   // elective removal target. Hooks stay above every early return (#310).
   const [catalog, setCatalog] = useState<Record<string, { title: string; weeks: number; lecturers: string[]; staff: { name: string; avatar: string }[] }>>({});
@@ -164,6 +167,8 @@ export default function DashboardRoute() {
         setEnrolled(me.courses || []);
         setResume(me.resume || null);
         setIsAdmin(!!me.isAdmin);
+        // Streak heartbeat: showing up counts (server records one/day).
+        void api.pingDaily();
         // Waiting-room lookup: students who applied for staff see status.
         if ((me.profile?.role || 'student') === 'student') {
           try {
@@ -366,11 +371,6 @@ export default function DashboardRoute() {
                 </div>
               ))}
             </div>
-          </div>
-        )}
-        {noteError && (
-          <div style={{ margin: '12px 16px 0' }}>
-            <Flash tone="error" message={noteError} onDismiss={() => setNoteError('')} />
           </div>
         )}
         <div style={{ margin: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>

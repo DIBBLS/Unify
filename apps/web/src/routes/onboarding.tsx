@@ -1,3 +1,4 @@
+import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, GraduationCap, Presentation, Users } from 'lucide-react';
@@ -29,7 +30,9 @@ export default function OnboardingRoute() {
   const [step, setStep] = useState(0);
   const [originalRole, setOriginalRole] = useState<Role | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setErrorState] = useState('');
+  // Toast mirror: every failure surfaces globally AND stays readable inline.
+  const setError = (m: string) => { setErrorState(m); if (m) toastError(m); };
   const [role, setRole] = useState<Role | null>(null);
   const [universities, setUniversities] = useState<Uni[]>([]);
   const [firstName, setFirstName] = useState('');
@@ -276,7 +279,6 @@ export default function OnboardingRoute() {
         </div>
       </div>
       <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {error && <Flash tone="error" message={error} onDismiss={() => setError('')} />}
         {step === 0 && (
           <>
             <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0 4px' }}>

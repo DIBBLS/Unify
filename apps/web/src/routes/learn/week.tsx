@@ -172,6 +172,8 @@ export default function LearnPage() {
         const note = data.note_json as UnifyNote;
         const valid = note && Array.isArray(note.topics) ? note : null;
         setNote(valid);
+        // Opening a week to read is engagement: heartbeat for the streak.
+        void api.pingDaily();
         setTopicMeta(data.topicMeta || []);
         setSavedOff(isWeekSaved(code, weekNum));
         setOverrides({});

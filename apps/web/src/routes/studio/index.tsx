@@ -1,3 +1,4 @@
+import { toastError } from '../../lib/toast';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowRight, Check, X } from 'lucide-react';
@@ -38,7 +39,9 @@ export default function StudioRoute() {
   const [warnings, setWarnings] = useState<string[]>([]);
   const [convertHint, setConvertHint] = useState('');
   const [canRetryConvert, setCanRetryConvert] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setErrorState] = useState('');
+  // Toast mirror: every failure surfaces globally AND stays readable inline.
+  const setError = (m: string) => { setErrorState(m); if (m) toastError(m); };
   const [success, setSuccess] = useState('');
   const [working, setWorking] = useState(false);
   const [workMsg, setWorkMsg] = useState(0);
@@ -458,7 +461,6 @@ export default function StudioRoute() {
         ))}
       </div>
 
-      {error && <Flash tone="error" message={error} onDismiss={() => setError('')} />}
       {success && <Flash tone="success" message={success} onDismiss={() => setSuccess('')} />}
       {convertHint && (
         <div style={{ padding: 12, background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, fontSize: 13, color: '#92400e' }}>

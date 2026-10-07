@@ -1,3 +1,4 @@
+import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BellRing, BookOpen, Megaphone, PartyPopper, ShieldCheck, CheckCheck } from 'lucide-react';
@@ -30,7 +31,9 @@ export default function NotificationsRoute() {
   const navigate = useNavigate();
   const [notes, setNotes] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setErrorState] = useState('');
+  // Toast mirror: every failure surfaces globally AND stays readable inline.
+  const setError = (m: string) => { setErrorState(m); if (m) toastError(m); };
   const [marking, setMarking] = useState(false);
 
   const load = async () => {
@@ -96,7 +99,6 @@ export default function NotificationsRoute() {
           </button>
         )}
       </div>
-      {error && <Flash tone="error" message={error} onDismiss={() => setError('')} />}
       <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {notes.length === 0 && !error && (
           <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
