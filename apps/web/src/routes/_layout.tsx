@@ -44,6 +44,7 @@ export default function Layout() {
   // flashes the logged-out "Sign in" chrome after login.
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [initial, setInitial] = useState('');
+  const [avatar, setAvatar] = useState('');
   const [role, setRole] = useState<string | null>(null);
   // Role starts unknown: while authed-but-unknown the nav renders skeleton
   // placeholders so authors/admins never flash the student tabs first.
@@ -53,7 +54,7 @@ export default function Layout() {
   const [skelCount] = useState(() => {
     try {
       const r = localStorage.getItem('unify.role.v1');
-      return r === 'lecturer' || r === 'collaborator' || r === 'admin' ? 3 : 4;
+      return r === 'lecturer' || r === 'contributor' || r === 'admin' ? 3 : 4;
     } catch {
       return 4;
     }
@@ -128,6 +129,7 @@ export default function Layout() {
   useEffect(() => {
     if (!authed) {
       setRole(null);
+      setAvatar('');
       setRoleLoaded(false);
       setUnread(0);
       return;
@@ -138,6 +140,7 @@ export default function Layout() {
       .then((me) => {
         const r = me.profile?.role || 'student';
         setRole(r);
+        setAvatar(me.avatar || '');
         try {
           localStorage.setItem('unify.role.v1', r);
         } catch {
@@ -220,7 +223,7 @@ export default function Layout() {
     };
   }, [authed, pathname]);
 
-  const isAuthor = role === 'lecturer' || role === 'collaborator';
+  const isAuthor = role === 'lecturer' || role === 'contributor';
   const tabs: Tab[] = isAuthor ? AUTHOR_TABS : role === 'admin' ? ADMIN_TABS : STUDENT_TABS;
   const showSkeletonNav = authed === null || (authed && !roleLoaded);
 
@@ -257,7 +260,7 @@ export default function Layout() {
               width: 32,
               height: 32,
               borderRadius: 9999,
-              background: 'linear-gradient(135deg,#34d399,#059669)',
+              background: avatar ? 'transparent' : 'linear-gradient(135deg,#34d399,#059669)',
               color: '#fff',
               display: 'flex',
               alignItems: 'center',
@@ -265,9 +268,10 @@ export default function Layout() {
               fontWeight: 800,
               fontSize: 14,
               textDecoration: 'none',
+              overflow: 'hidden',
             }}
           >
-            {initial || 'U'}
+            {avatar ? <img src={avatar} alt="" style={{ width: 32, height: 32, objectFit: 'cover' }} /> : (initial || 'U')}
           </Link>
           </>
         ) : (

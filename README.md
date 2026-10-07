@@ -1,6 +1,6 @@
 # Unify Learn — v1.11.1
 
-Student learning platform for LASU Engineering — Lecture-structured weekly notes (Lecture 1/2/3), XP, streaks, quizzes, read-aloud with Nigerian voice pick, expiring share links, XP-gated PDF, lecturer timetable + class management, offline-first reader, Google + email sign-in, and an authoring studio for lecturers and collaborators. Classic/Story designs + dark mode, mobile-first, Box Boy mascot.
+Student learning platform for LASU Engineering — Lecture-structured weekly notes (Lecture 1/2/3), XP, streaks, quizzes, read-aloud with Nigerian voice pick, expiring share links, XP-gated PDF, lecturer timetable + class management, offline-first reader, Google + email sign-in, and an authoring studio for lecturers and contributors. Classic/Story designs + dark mode, mobile-first, Box Boy mascot.
 
 ## Architecture
 
@@ -86,7 +86,7 @@ npm run dev      # tsx watch server.ts — needs SUPABASE_* + DIRECT_URL in .env
 ## Roles & Flows
 
 - **Student** (8 onboarding steps): dashboard (XP/streak/resume/course cards) → My Courses + Explore (bulk catalog + alias search) → lecture reader (Lecture 1/2/3 switcher, recalls, read-aloud, EOQ exam) → PDF unlocks at 300 XP. Save weeks offline; progress banks offline and syncs on reconnect.
-- **Lecturer** (6 steps incl. teaching level) / **Collaborator** (3 steps incl. contributing level): Studio (AI/manual/external-AI + lecture pickers), versioned publishing with Replace/Add/Cancel on occupied weeks, level-scoped Browse, Notes/Courses stats, **My Classes** (weekly timetable + live roster). No Learn paths, no XP.
+- **Lecturer** (6 steps incl. teaching level) / **Contributor** (3 steps incl. contributing level): Studio (AI/manual/external-AI + lecture pickers), versioned publishing with Replace/Add/Cancel on occupied weeks, level-scoped Browse, Notes/Courses stats, **My Classes** (weekly timetable + live roster). No Learn paths, no XP.
 - **Admin** (`admin` role or legacy flag): oversight dashboard (totals + latest users/notes), panel modules (Analytics charts, AI models, unis, courses, session, announce, users), All-content browser. Own role self-locked. Bootstrap via `ADMIN_EMAILS`.
 - Roles lock at assignment (server-enforced 403); every promote/demote notifies the recipient (bell + push).
 - **Sharing (authors/admins):** expiring `/s/:token` links (8/16/24h) with preview cards + WhatsApp OG unfurls; recipients read free, join on expiry.

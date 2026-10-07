@@ -87,8 +87,43 @@ export default function AdminRoute() {
   const [errors, setErrors] = useState<{ kind: string; message: string; stack: string; url: string; app_version: string; created_at: string }[]>([]);
   const [sentryOn] = useState(() => Boolean((import.meta.env.VITE_SENTRY_DSN as string | undefined) || ''));
   const [trends, setTrends] = useState<{ signups: { day: string; count: number }[]; notes: { day: string; count: number }[]; xp: { day: string; count: number }[] } | null>(null);
-  // Per-author course assignment (BUG-001): the collaborator's reachable
-  // set IS this teaching list; gates enforce it server-side.
+  // Table-style user management: one scanable row per user (name, role
+  // pill, level), tap to expand the full controls (role pills, level,
+  // course assignment). Sub-level linking without losing the overview.
+  const [expandedUser, setExpandedUser] = useState<string | null>(null);
+  // Staff requests queue.
+  const [requests, setRequests] = useState<{ id: string; user_id: string; role: string; level: string; courses: string[]; status: string; created_at: string; name: string; email: string }[]>([]);
+  const [deciding, setDeciding] = useState<string | null>(null);
+
+  const loadRequests = async () => {
+    try {
+      const r = await api.adminRoleRequests();
+      setRequests(r.requests || []);
+    } catch {
+      // queue stands empty
+    }
+  };
+
+  const decideRequest = async (id: string, approve: boolean) => {
+    setDeciding(id);
+    setError('');
+    try {
+      const res = await api.decideRoleRequest(id, approve);
+      setRequests((prev) => prev.filter((r) => r.id !== id));
+      setSuccess(
+        approve
+          ? `Approved.${res.granted?.length ? ` Teaching: ${res.granted.join(', ')}.` : ''}${res.capped?.length ? ` Held by 2-per-level cap: ${res.capped.join(', ')}.` : ''}`
+          : 'Request declined. The applicant keeps student access.'
+      );
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Decision failed.');
+    } finally {
+      setDeciding(null);
+    }
+  };
+  // Per-author course assignment: the author's reachable set IS this
+  // teaching list; gates enforce it server-side.
   const [courseMgr, setCourseMgr] = useState<string | null>(null);
   const [assigned, setAssigned] = useState<string[]>([]);
   const [assignInput, setAssignInput] = useState('');
@@ -143,6 +178,8 @@ export default function AdminRoute() {
       setUnis(un);
       setCourses(c);
       setModels(m.models);
+      setProvider(m.provider);
+      void loadRequests();
       setProvider(m.provider);
       setDefaultModel(m.default);
       if (t) setTrends(t);
@@ -407,7 +444,7 @@ export default function AdminRoute() {
               segments={[
                 { label: 'Students', value: stats.byRole.student || 0, color: '#16a34a' },
                 { label: 'Lecturers', value: stats.byRole.lecturer || 0, color: '#3b82f6' },
-                { label: 'Collaborators', value: stats.byRole.collaborator || 0, color: '#8b5cf6' },
+                { label: 'Contributors', value: stats.byRole.contributor || 0, color: '#8b5cf6' },
                 { label: 'Admins', value: stats.byRole.admin || 0, color: '#f59e0b' },
               ].filter((s) => s.value > 0)}
             />
@@ -640,13 +677,50 @@ export default function AdminRoute() {
       </div>
       </Module>
 
+      <Module id="requests" title="Staff requests" badge={requests.length} openId={openModule} onToggle={setOpenModule}>
+      <div style={card}>
+        <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 8 }}>
+          Lecturer/contributor applications. Approve grants the role + teaching courses (contributor 2-per-level cap enforced); both sides notify by bell + email.
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {requests.length === 0 && <div style={{ color: 'var(--text2)', fontSize: 13, textAlign: 'center', padding: 20 }}>Queue clear — nothing waiting.</div>}
+          {requests.map((r) => (
+            <div key={r.id} style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px' }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 800, fontSize: 14 }}>{r.name} <span style={{ fontWeight: 500, color: 'var(--text2)' }}>wants {r.role}</span></div>
+                  <div style={{ fontSize: 12, color: 'var(--text2)' }}>{r.email}{r.level ? ` · ${r.level}` : ''}{r.courses?.length ? ` · ${r.courses.join(', ')}` : ''}</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                <button
+                  onClick={() => void decideRequest(r.id, true)}
+                  disabled={deciding === r.id}
+                  style={{ flex: 1, padding: 10, borderRadius: 12, background: '#10b981', color: '#fff', border: 'none', borderBottom: '3px solid #059669', fontWeight: 800, fontSize: 13, opacity: deciding === r.id ? 0.6 : 1 }}
+                >
+                  {deciding === r.id ? 'Working…' : 'Approve'}
+                </button>
+                <button
+                  onClick={() => void decideRequest(r.id, false)}
+                  disabled={deciding === r.id}
+                  style={{ flex: 1, padding: 10, borderRadius: 12, background: 'var(--surface)', color: '#991b1b', border: '1px solid #fecaca', borderBottom: '3px solid #fecaca', fontWeight: 800, fontSize: 13, opacity: deciding === r.id ? 0.6 : 1 }}
+                >
+                  Decline
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      </Module>
+
       <Module id="users" title="Users & roles" badge={users.length} openId={openModule} onToggle={setOpenModule}>
       <div style={{ ...card, display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
         <input value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="Invite by email…" style={{ ...input, flex: 2, minWidth: 140 }} />
         <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value)} style={{ ...input, flex: 1, minWidth: 110 }}>
           <option value="student">Student</option>
           <option value="lecturer">Lecturer</option>
-          <option value="collaborator">Collaborator</option>
+          <option value="contributor">Contributor</option>
         </select>
         <button onClick={invite} style={primaryBtn}>Invite</button>
       </div>
@@ -656,20 +730,55 @@ export default function AdminRoute() {
           <option value="">All roles</option>
           <option value="student">Students</option>
           <option value="lecturer">Lecturers</option>
-          <option value="collaborator">Collaborators</option>
+          <option value="contributor">Contributors</option>
           <option value="admin">Admins</option>
         </select>
         <button onClick={() => refresh()} style={primaryBtn}>Search</button>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto 24px', gap: 8, alignItems: 'center', padding: '0 14px', fontSize: 10, fontWeight: 800, letterSpacing: 1, color: 'var(--text3)' }}>
+          <span>USER</span>
+          <span>ROLE</span>
+          <span>LEVEL</span>
+          <span />
+        </div>
         {users.length === 0 && <div style={{ color: 'var(--text2)', fontSize: 13, textAlign: 'center', padding: 20 }}>No users found.</div>}
-        {users.map((u) => (
+        {users.map((u) => {
+          const open = expandedUser === u.id;
+          const pill = u.role === 'admin' || u.is_admin
+            ? { bg: '#111827', fg: '#fff' }
+            : u.role === 'lecturer'
+              ? { bg: '#dbeafe', fg: '#1d4ed8' }
+              : u.role === 'contributor'
+                ? { bg: '#ede9fe', fg: '#6d28d9' }
+                : { bg: 'var(--surface2)', fg: 'var(--text2)' };
+          return (
           <div key={u.id} style={card}>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 700, fontSize: 14 }}>{u.first_name || 'Unnamed'}{(u.is_admin || u.role === 'admin') ? ' · Admin' : ''}{u.id === ownId ? ' · You' : ''}</div>
-                <div style={{ fontSize: 12, color: 'var(--text2)' }}>{[u.university, u.department].filter(Boolean).join(' · ') || 'No profile details'}</div>
-              </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto 24px', gap: 8, alignItems: 'center' }}>
+              <button
+                onClick={() => setExpandedUser(open ? null : u.id)}
+                style={{ background: 'none', border: 'none', textAlign: 'left', color: 'var(--text)', minWidth: 0, padding: 0 }}
+                aria-label={open ? `Collapse ${u.first_name || 'user'}` : `Expand ${u.first_name || 'user'}`}
+              >
+                <div style={{ fontWeight: 700, fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.first_name || 'Unnamed'}{u.id === ownId ? ' · You' : ''}</div>
+                <div style={{ fontSize: 11, color: 'var(--text2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.email || ''}</div>
+              </button>
+              <span style={{ fontSize: 11, fontWeight: 800, background: pill.bg, color: pill.fg, borderRadius: 9999, padding: '3px 10px', whiteSpace: 'nowrap' }}>
+                {(u.is_admin && u.role !== 'admin' ? `admin·${u.role}` : u.role) || 'student'}
+              </span>
+              <span style={{ fontSize: 12, color: 'var(--text2)', whiteSpace: 'nowrap' }}>{(u.level || '').replace(' Level', '') || '—'}</span>
+              <button
+                onClick={() => setExpandedUser(open ? null : u.id)}
+                aria-label={open ? 'Collapse' : 'Expand'}
+                style={{ background: 'none', border: 'none', color: 'var(--text2)', display: 'flex', padding: 2 }}
+              >
+                {open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+              </button>
+            </div>
+            {open && (
+            <div style={{ marginTop: 10, borderTop: '1px solid var(--border)', paddingTop: 10 }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+              <div style={{ flex: 1, fontSize: 12, color: 'var(--text2)' }}>{[u.university, u.department].filter(Boolean).join(' · ') || 'No profile details'}</div>
               {u.id !== ownId && (
                 <button onClick={() => setConfirm({ title: `Remove ${u.first_name || 'this user'}?`, body: 'This cannot be undone.', label: 'Remove', run: () => void removeUser(u.id, u.first_name || '') })} aria-label="Remove user" style={{ background: 'none', border: '1px solid #fecaca', borderRadius: 8, color: '#991b1b', padding: 8, display: 'flex' }}>
                   <Trash2 size={16} />
@@ -682,7 +791,7 @@ export default function AdminRoute() {
               </div>
             ) : (
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              {(['student', 'lecturer', 'collaborator', 'admin'] as const).map((r) => (
+              {(['student', 'lecturer', 'contributor', 'admin'] as const).map((r) => (
                 <button
                   key={r}
                   onClick={() => changeRole(u.id, r)}
@@ -715,7 +824,7 @@ export default function AdminRoute() {
                 ))}
               </select>
             </div>
-            {(u.role === 'lecturer' || u.role === 'collaborator' || u.role === 'admin') && u.id !== ownId && (
+            {(u.role === 'lecturer' || u.role === 'contributor' || u.role === 'admin') && u.id !== ownId && (
               <div style={{ marginTop: 8 }}>
                 <button
                   onClick={() => openCourseMgr(u.id)}
@@ -761,13 +870,17 @@ export default function AdminRoute() {
                         Assign
                       </button>
                     </div>
-                    <div style={{ fontSize: 11, color: 'var(--text2)', marginTop: 6 }}>Codes must exist in the catalog — typos are rejected.</div>
+                    <div style={{ fontSize: 11, color: 'var(--text2)', marginTop: 6 }}>Codes must exist in the catalog — typos are rejected. Contributors cap at 2 per level.</div>
                   </div>
                 )}
               </div>
             )}
+            </div>
+          )}
           </div>
-        ))}
+          );
+        }
+      )}
       </div>
       </Module>
       {confirm && (

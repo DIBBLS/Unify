@@ -98,21 +98,22 @@ export default function DashboardRoute() {
   const [noteError, setNoteError] = useState('');
   // BUG-012: catalog meta for course cards (title, weeks, lecturers) +
   // elective removal target. Hooks stay above every early return (#310).
-  const [catalog, setCatalog] = useState<Record<string, { title: string; weeks: number; lecturers: string[] }>>({});
+  const [catalog, setCatalog] = useState<Record<string, { title: string; weeks: number; lecturers: string[]; staff: { name: string; avatar: string }[] }>>({});
   // Skeleton variant follows the last-known role on THIS device (same
   // hint as the nav) so the loader matches the real dashboard — students
-  // and collaborators each see their own shape, even on first paint.
+  // and contributors each see their own shape, even on first paint.
   const [skelAuthor] = useState(() => {
     try {
       const r = localStorage.getItem('unify.role.v1');
-      return r === 'lecturer' || r === 'collaborator' || r === 'admin';
+      return r === 'lecturer' || r === 'contributor' || r === 'admin';
     } catch {
       return false;
     }
   });
-  // Teaching courses: lecturers always get My Classes; collaborators with
+  // Teaching courses: lecturers always get My Classes; contributors with
   // assigned teaching courses do too (backend gates the page either way).
   const [teaching, setTeaching] = useState<string[]>([]);
+  const [myContribs, setMyContribs] = useState<{ course: string; level: string; semester: string; assigned: boolean; topics: number; versions: number }[]>([]);
   const [confirmUnenroll, setConfirmUnenroll] = useState<string | null>(null);
   const [unenrolling, setUnenrolling] = useState(false);
   // Delete-confirm target. Declared with the other hooks: a useState placed
@@ -137,7 +138,7 @@ export default function DashboardRoute() {
         const [me, statsRes, catRes] = await Promise.all([
           api.me(),
           api.stats().catch(() => null),
-          api.courses().catch(() => [] as { code: string; title: string; weeks: number; lecturers: string[] }[]),
+          api.courses().catch(() => [] as { code: string; title: string; weeks: number; lecturers: string[]; staff: { name: string; avatar: string }[] }[]),
         ]);
         if (!me.onboarded || !me.profile) {
           navigate('/onboarding');
@@ -150,8 +151,8 @@ export default function DashboardRoute() {
         // BUG-012: one catalog fetch feeds every course card (title,
         // weeks, lecturers) — never one request per card.
         try {
-          const map: Record<string, { title: string; weeks: number; lecturers: string[] }> = {};
-          for (const c of catRes) map[c.code.toUpperCase().trim()] = { title: c.title, weeks: c.weeks || 0, lecturers: c.lecturers || [] };
+          const map: Record<string, { title: string; weeks: number; lecturers: string[]; staff: { name: string; avatar: string }[] }> = {};
+          for (const c of catRes) map[c.code.toUpperCase().trim()] = { title: c.title, weeks: c.weeks || 0, lecturers: c.lecturers || [], staff: c.staff || [] };
           setCatalog(map);
         } catch {
           // cards fall back to codes
@@ -177,7 +178,7 @@ export default function DashboardRoute() {
           setCourses(stats.courses);
           setQuizzes({ taken: stats.quizzesTaken || 0, avg: stats.quizAvg || 0 });
         }
-        if (me.profile?.role === 'lecturer' || me.profile?.role === 'collaborator') {
+        if (me.profile?.role === 'lecturer' || me.profile?.role === 'contributor') {
           try {
             const authored = await api.authored();
             setNotes(authored.notes);
@@ -188,6 +189,11 @@ export default function DashboardRoute() {
             setTeaching((await api.teaching()).courses || []);
           } catch {
             // My Classes card falls back to role-only
+          }
+          try {
+            setMyContribs((await api.contributions()).courses || []);
+          } catch {
+            // contributions stand empty
           }
           try {
             setAstats(await api.authorStats());
@@ -226,7 +232,7 @@ export default function DashboardRoute() {
   const shown = cleanEnrolled.length
     ? cleanEnrolled.map((course) => ({ course }))
     : courses.map((c) => ({ course: c.course }));
-  const isAuthor = profile?.role === 'lecturer' || profile?.role === 'collaborator';
+  const isAuthor = profile?.role === 'lecturer' || profile?.role === 'contributor';
   const roleLabel = profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : '';
 
   // BUG-012: electives leave with one tap (compulsory courses are
@@ -310,6 +316,31 @@ export default function DashboardRoute() {
             <ChevronRight size={16} />
           </Link>
         ) : null}
+        {profile?.role === 'contributor' && (
+          <div style={{ margin: '16px 16px 0' }}>
+            <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800 }}>My contributions</h2>
+            <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>Assigned courses + what you've shipped (2-course cap per level).</div>
+            <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {myContribs.length === 0 && (
+                <div style={{ padding: 20, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 12, fontSize: 13 }}>
+                  No courses assigned yet — ask an admin to assign your two courses.
+                </div>
+              )}
+              {myContribs.map((c) => (
+                <div key={c.course} style={{ padding: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 800, fontSize: 14 }}>{c.course}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text2)' }}>{[c.level, (c.semester || '').replace(' Semester', '')].filter(Boolean).join(' · ') || 'Unscoped'}</div>
+                  </div>
+                  <div style={{ textAlign: 'right', fontSize: 11, color: 'var(--text2)' }}>
+                    <div><strong style={{ color: 'var(--text)', fontSize: 14 }}>{c.topics}</strong> topics</div>
+                    <div>{c.versions} versions</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         {noteError && (
           <div style={{ margin: '12px 16px 0' }}>
             <Flash tone="error" message={noteError} onDismiss={() => setNoteError('')} />
@@ -448,19 +479,34 @@ export default function DashboardRoute() {
             const key = c.course.toUpperCase().trim();
             const meta = catalog[key];
             const stat = courses.find((s) => s.course.toUpperCase().trim() === key);
-            const lecturer = (meta?.lecturers || [])[0] || '';
+            const staff = (meta?.staff || []).slice(0, 3);
+            const staffNames = staff.map((s) => s.name).join(' · ');
             return (
               <div key={c.course} className="rise" style={{ animationDelay: `${Math.min(i, 6) * 40}ms`, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 12, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', minWidth: 0 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', fontWeight: 800, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    {(lecturer || c.course).trim().charAt(0).toUpperCase()}
-                  </div>
+                  {staff.length ? (
+                    <div style={{ display: 'flex', flexShrink: 0 }}>
+                      {staff.map((s, si) => (
+                        s.avatar ? (
+                          <img key={si} src={s.avatar} alt={s.name} title={s.name} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--surface)', marginLeft: si === 0 ? 0 : -10 }} />
+                        ) : (
+                          <div key={si} title={s.name} style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', fontWeight: 800, fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid var(--surface)', marginLeft: si === 0 ? 0 : -10 }}>
+                            {s.name.trim().charAt(0).toUpperCase()}
+                          </div>
+                        )
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', fontWeight: 800, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      {c.course.trim().charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <Link to={`/course/${encodeURIComponent(c.course.trim())}`} style={{ fontWeight: 800, fontSize: 14, color: 'var(--text)', textDecoration: 'none', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {c.course}
                     </Link>
-                    {lecturer ? (
-                      <div style={{ fontSize: 11, color: 'var(--text2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lecturer}</div>
+                    {staffNames ? (
+                      <div style={{ fontSize: 11, color: 'var(--text2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{staffNames}</div>
                     ) : null}
                   </div>
                 </div>

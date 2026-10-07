@@ -10,7 +10,7 @@ import { greeting } from '../lib/greet';
 import Flash from '../components/Flash';
 
 type Uni = { id: string; name: string; shortName?: string };
-type Role = 'student' | 'lecturer' | 'collaborator' | 'admin';
+type Role = 'student' | 'lecturer' | 'contributor' | 'admin';
 
 // Fallback so onboarding never dead-ends when the backend has no universities yet.
 const FALLBACK_UNIS: Uni[] = [{ id: 'lasu', name: 'Lagos State University', shortName: 'LASU' }];
@@ -19,8 +19,8 @@ const UUID_RE = /^[0-9a-f-]{36}$/i;
 
 const ROLES = [
   { id: 'student', label: 'Student', desc: 'Learn with guided paths', icon: GraduationCap },
-  { id: 'lecturer', label: 'Lecturer', desc: 'Teach + author notes', icon: Presentation },
-  { id: 'collaborator', label: 'Collaborator', desc: 'Co-create content', icon: Users },
+  { id: 'lecturer', label: 'Lecturer', desc: 'Teach + author notes · admin approval needed', icon: Presentation },
+  { id: 'contributor', label: 'Contributor', desc: 'Co-create notes · admin approval needed', icon: Users },
 ] as const;
 
 export default function OnboardingRoute() {
@@ -43,10 +43,12 @@ export default function OnboardingRoute() {
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [availableCourses, setAvailableCourses] = useState<{ code: string; title: string }[]>([]);
   const [coursesLoading, setCoursesLoading] = useState(false);
-  // Level the author contributes to (lecturer teaches it, collaborator
+  // Level the author contributes to (lecturer teaches it, contributor
   // co-creates for it). Drives the course picker; never saved as the
   // user's own level — authors don't take courses.
   const [contribLevel, setContribLevel] = useState<string | null>(null);
+  // Staff request filed: applicant waits on admin approval as a student.
+  const [requestSent, setRequestSent] = useState(false);
 
   useEffect(() => {
     const sb = supabaseBrowser();
@@ -74,7 +76,7 @@ export default function OnboardingRoute() {
           const full = typeof meta?.full_name === 'string' ? meta.full_name : typeof meta?.name === 'string' ? meta.name : '';
           if (full.trim()) setFirstName(full.trim().split(/\s+/)[0].slice(0, 60));
         }
-        if (profile?.role === 'student' || profile?.role === 'lecturer' || profile?.role === 'collaborator' || profile?.role === 'admin') {
+        if (profile?.role === 'student' || profile?.role === 'lecturer' || profile?.role === 'contributor' || profile?.role === 'admin') {
           setRole(profile.role);
           setOriginalRole(profile.role);
         }
@@ -124,23 +126,35 @@ export default function OnboardingRoute() {
     setError('');
     setLoading(true);
     try {
+      const wantsStaff = !isEdit && (role === 'lecturer' || role === 'contributor');
       const payload: Record<string, unknown> = {
         firstName,
         university: university?.name,
         faculty,
         department,
-        // Authors don't take courses: their level IS the level they
-        // contribute to (picked on the level step), used to scope browsing.
-        level: role === 'lecturer' || role === 'collaborator' ? (contribLevel ?? level) : level,
-        // In edit mode the locked original role wins (role is immutable).
-        role: (isEdit ? originalRole : null) ?? role ?? 'student',
+        // Staff applicants onboard as students first; the staff role is
+        // granted only when an admin approves the request (no self-grant).
+        level: role === 'lecturer' || role === 'contributor' ? (contribLevel ?? level) : level,
+        role: isEdit ? (originalRole ?? role ?? 'student') : wantsStaff ? 'student' : (role ?? 'student'),
         semester: activeSemester,
-        courses: selectedCourses,
+        // Staff courses are requested, not enrolled: approval enrolls them
+        // as teaching (within the contributor cap).
+        courses: wantsStaff ? [] : selectedCourses,
         ...overrides,
       };
       if (university?.id && UUID_RE.test(university.id)) payload.universityId = university.id;
       if (!skipTarget && gradTarget) payload.gradTarget = gradTarget;
       await api.onboarding(payload);
+      if (wantsStaff && role) {
+        try {
+          await api.roleRequest({ role, level: contribLevel ?? level ?? '', courses: selectedCourses });
+        } catch {
+          // profile saved; request can be re-filed from the pending screen
+        }
+        setRequestSent(true);
+        setLoading(false);
+        return;
+      }
       navigate('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -150,12 +164,12 @@ export default function OnboardingRoute() {
 
   // Courses step: active-semester (admin-owned) + level-aware checkboxes.
   // Students use their own level; authors only ever see the courses of the
-  // level they picked to contribute to (lecturer teaches, collaborator builds).
+  // level they picked to contribute to (lecturer teaches, contributor builds).
   useEffect(() => {
-    const lvl = role === 'lecturer' || role === 'collaborator' ? contribLevel : level;
+    const lvl = role === 'lecturer' || role === 'contributor' ? contribLevel : level;
     const showCourses =
       (step === 5 && role === 'lecturer') ||
-      (step === 2 && role === 'collaborator') ||
+      (step === 2 && role === 'contributor') ||
       (step === 6 && (role === 'student' || !role));
     if (!showCourses || !lvl) {
       if (showCourses) setAvailableCourses([]);
@@ -225,6 +239,25 @@ export default function OnboardingRoute() {
 
   if (loading) return <Loading text="Loading onboarding…" />;
 
+  if (requestSent) {
+    return (
+      <div style={{ maxWidth: 480, margin: '0 auto', padding: '60px 20px 80px', textAlign: 'center' }}>
+        <Mascot size={120} />
+        <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, marginTop: 12 }}>Request sent for review</h1>
+        <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px', lineHeight: 1.6 }}>
+          An admin will review your {role} request — you'll get a bell notification and an email
+          the moment it's decided. Meanwhile you have full student access.
+        </p>
+        <button
+          onClick={() => navigate('/dashboard')}
+          style={{ padding: '12px 28px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800, fontSize: 14 }}
+        >
+          Continue as student
+        </button>
+      </div>
+    );
+  }
+
   const STEP_TITLES = [
     "What's your role?",
     "What's your first name?",
@@ -235,12 +268,12 @@ export default function OnboardingRoute() {
     'Which courses are you taking?',
     "What's your graduation target?",
   ];
-  // The flow length follows the chosen role: collaborator 3 (role, name,
+  // The flow length follows the chosen role: contributor 3 (role, name,
   // contributing level + courses), lecturer 6, student 8.
-  const totalSteps = role === 'collaborator' ? 3 : role === 'lecturer' ? 6 : 8;
+  const totalSteps = role === 'contributor' ? 3 : role === 'lecturer' ? 6 : 8;
   const shownStep = Math.min(step, totalSteps - 1);
   const stepTitle =
-    step === 2 && role === 'collaborator'
+    step === 2 && role === 'contributor'
       ? 'Which level are you contributing to?'
       : step === 5 && role === 'lecturer'
         ? 'Which courses do you teach?'
@@ -325,12 +358,12 @@ export default function OnboardingRoute() {
             </div>
             <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="e.g. Joshua" style={{ padding: 12, border: '1px solid var(--border)', borderRadius: 12, fontSize: 16 }} />
             {firstName && <div style={{ fontSize: 14 }}>{daypart}, <strong>{firstName}</strong></div>}
-            <button onClick={() => { if (!firstName.trim()) return; if (isEdit) { void save(false); return; } if (role === 'collaborator') { setStep(2); return; } setStep(2); }} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+            <button onClick={() => { if (!firstName.trim()) return; if (isEdit) { void save(false); return; } if (role === 'contributor') { setStep(2); return; } setStep(2); }} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
               {isEdit ? (<>Finish setup <ArrowRight size={18} /></>) : (<>Continue <ArrowRight size={18} /></>)}
             </button>
           </>
         )}
-        {step === 2 && role === 'collaborator' && (
+        {step === 2 && role === 'contributor' && (
           <>
             <div style={{ fontSize: 13, fontWeight: 700 }}>Contributing level — only this level's courses are listed</div>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -345,7 +378,7 @@ export default function OnboardingRoute() {
             </button>
           </>
         )}
-        {step === 2 && role !== 'collaborator' && (
+        {step === 2 && role !== 'contributor' && (
           <>
             {universities.map((u) => (
               <button key={u.id} onClick={() => { setUniversity(u); setStep(3); }} style={{ padding: 14, border: `1px solid ${university?.id === u.id ? '#10b981' : 'var(--border)'}`, borderRadius: 12, background: 'var(--surface)', textAlign: 'left' }}>

@@ -47,7 +47,7 @@ export default function CourseDetailRoute() {
             preview
               ? me.isAdmin
                 ? '/admin/content'
-                : role === 'lecturer' || role === 'collaborator'
+                : role === 'lecturer' || role === 'contributor'
                   ? '/browse'
                   : '/course'
               : '/course'

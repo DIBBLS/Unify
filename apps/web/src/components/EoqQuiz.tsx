@@ -126,7 +126,7 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
             )}
             {submitted && answered[i] && gradeable[i] && !correct[i] && q.topicRef && (
               <div className="eoq-topicref">
-                Review: <button onClick={() => document.querySelector('.screen-only')?.scrollTo?.({ top: 0, behavior: 'smooth' })}>Topic {q.topicRef} ↑</button>
+                Review: <button onClick={() => document.querySelector('.screen-only')?.scrollTo?.({ top: 0, behavior: 'smooth' })} style={{ background: 'rgba(16,185,129,.12)', border: '1px solid rgba(16,185,129,.3)', color: '#4ade80', borderRadius: 9999, fontSize: 11, fontWeight: 700, padding: '3px 12px', margin: '2px 4px 2px 0', cursor: 'pointer' }}>Topic {q.topicRef} ↑</button>
               </div>
             )}
           </div>

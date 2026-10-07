@@ -85,9 +85,9 @@ function RequireAuth({ children }: { children: JSX.Element }) {
 }
 
 const STUDENT_ONLY = ['student'];
-const AUTHOR_ONLY = ['lecturer', 'collaborator'];
+const AUTHOR_ONLY = ['lecturer', 'contributor'];
 
-// Gate: authors (lecturer/collaborator) have no learn paths — bounce to dashboard.
+// Gate: authors (lecturer/contributor) have no learn paths — bounce to dashboard.
 // Only a real 401 (dead session) bounces to /auth. Network/API failures show
 // a retry screen instead of kicking the user to sign-in and back (that loop
 // is what made sessions feel like they "refresh anyhow").
@@ -109,7 +109,7 @@ function RequireRole({ allow, children }: { allow: string[]; children: JSX.Eleme
         // Authors may open a single week read-only via ?preview=1 (dashboard links).
         const preview =
           searchParams.get('preview') === '1' &&
-          (role === 'lecturer' || role === 'collaborator' || me.isAdmin);
+          (role === 'lecturer' || role === 'contributor' || me.isAdmin);
         if (!me.onboarded) navigate('/onboarding');
         else if (!allow.includes(role) && !me.isAdmin && !preview) navigate('/dashboard');
         else setOk(true);
