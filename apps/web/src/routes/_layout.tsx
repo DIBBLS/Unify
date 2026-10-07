@@ -4,6 +4,7 @@ import { LayoutDashboard, BookOpen, Search, User, PenTool, Bell } from 'lucide-r
 import { supabaseBrowser, touchActivity, isSessionExpired, expireSession } from '../lib/supabase';
 import { pushSupported, enablePush } from '../lib/push';
 import ConfirmModal from '../components/ConfirmModal';
+import Wordmark from '../components/Wordmark';
 import { api } from '../lib/api';
 import OfflineBanner from '../components/OfflineBanner';
 
@@ -226,8 +227,8 @@ export default function Layout() {
   return (
     <div style={{ fontFamily: 'var(--font-body)' }}>
       <header style={{ display: 'flex', gap: 12, padding: '12px 16px', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, background: 'var(--surface)', zIndex: 10, alignItems: 'center' }}>
-        <Link to="/dashboard" style={{ fontWeight: 800, textDecoration: 'none', color: 'var(--text)' }}>
-          Unify<span style={{ color: '#10b981' }}> Learn</span>
+        <Link to="/dashboard" style={{ textDecoration: 'none' }} aria-label="Unify Learn home">
+          <Wordmark size={20} />
         </Link>
         <span style={{ flex: 1 }} />
         {authed === null ? (

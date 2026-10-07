@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { BookOpen, Clock, Eye, ArrowRight, Zap } from 'lucide-react';
 import BackButton from '../components/BackButton';
+import Wordmark from '../components/Wordmark';
 import Loading from '../components/Loading';
 import ErrorState from '../components/ErrorState';
 import Mascot from '../components/Mascot';
@@ -97,6 +98,9 @@ export default function ShareRoute() {
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '20px 16px 100px' }}>
       <BackButton to={authed ? '/dashboard' : '/auth'} />
+      <div style={{ display: 'flex', justifyContent: 'center', margin: '4px 0 12px' }}>
+        <Wordmark size={18} />
+      </div>
       {/* Preview card */}
       <div className="hero">
         <div className="hero-eyebrow">Shared note · {data.course}</div>
