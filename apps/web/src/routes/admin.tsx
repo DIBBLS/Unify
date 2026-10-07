@@ -824,7 +824,7 @@ export default function AdminRoute() {
                 ))}
               </select>
             </div>
-            {(u.role === 'lecturer' || u.role === 'contributor' || u.role === 'admin') && u.id !== ownId && (
+            {(u.role === 'lecturer' || u.role === 'contributor') && u.id !== ownId && (
               <div style={{ marginTop: 8 }}>
                 <button
                   onClick={() => openCourseMgr(u.id)}

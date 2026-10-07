@@ -54,7 +54,7 @@ function OversightCard({ platform, activity, mainAdmin }: { platform: Platform; 
       {activity && (activity.recentUsers.length > 0 || activity.recentNotes.length > 0) && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 12 }}>
           <div>
-            <div style={{ fontSize: 11, color: '#6ee7b7', fontWeight: 800, letterSpacing: 1, marginBottom: 6 }}>NEW USERS</div>
+            <div style={{ fontSize: 11, color: '#6ee7b7', fontWeight: 800, letterSpacing: 1, marginBottom: 6 }}>LATEST SIGNUPS</div>
             {activity.recentUsers.slice(0, 3).map((u, i) => (
               <div key={i} style={{ fontSize: 12, color: '#e5e7eb', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {u.first_name || 'Unnamed'} · {u.role}
@@ -62,7 +62,7 @@ function OversightCard({ platform, activity, mainAdmin }: { platform: Platform; 
             ))}
           </div>
           <div>
-            <div style={{ fontSize: 11, color: '#6ee7b7', fontWeight: 800, letterSpacing: 1, marginBottom: 6 }}>NEW NOTES</div>
+            <div style={{ fontSize: 11, color: '#6ee7b7', fontWeight: 800, letterSpacing: 1, marginBottom: 6 }}>LATEST PUBLISHED NOTES</div>
             {activity.recentNotes.slice(0, 3).map((n, i) => (
               <div key={i} style={{ fontSize: 12, color: '#e5e7eb', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {n.course} W{n.week}T{n.topic}v{n.version}
@@ -113,7 +113,7 @@ export default function DashboardRoute() {
   // Teaching courses: lecturers always get My Classes; contributors with
   // assigned teaching courses do too (backend gates the page either way).
   const [teaching, setTeaching] = useState<string[]>([]);
-  const [myContribs, setMyContribs] = useState<{ course: string; level: string; semester: string; assigned: boolean; topics: number; versions: number }[]>([]);
+  const [myContribs, setMyContribs] = useState<{ course: string; level: string; semester: string; assigned: boolean; topics: number; versions: number; totalTopics: number }[]>([]);
   const [confirmUnenroll, setConfirmUnenroll] = useState<string | null>(null);
   const [unenrolling, setUnenrolling] = useState(false);
   // Waiting room: a student with a pending staff request sees application
@@ -302,7 +302,7 @@ export default function DashboardRoute() {
           </div>
           <Mascot size={64} animate={daypart() === 'morning' ? 'sip' : 'wave'} />
         </div>
-        {astats && (
+        {astats && !isAdmin && (
           <div className="rise" style={{ margin: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
             <div>
               <div className="stat-num" style={{ fontSize: 18 }}>{astats.topics}</div>
@@ -344,7 +344,9 @@ export default function DashboardRoute() {
         {profile?.role === 'contributor' && (
           <div style={{ margin: '16px 16px 0' }}>
             <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800 }}>My contributions</h2>
-            <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>Assigned courses + what you've shipped (2-course cap per level).</div>
+            <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>
+              {myContribs.filter((c) => c.assigned).length} course{myContribs.filter((c) => c.assigned).length === 1 ? '' : 's'} assigned · 2-course cap per level · totals cover every author on shared courses.
+            </div>
             <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
               {myContribs.length === 0 && (
                 <div style={{ padding: 20, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 12, fontSize: 13 }}>
@@ -358,8 +360,8 @@ export default function DashboardRoute() {
                     <div style={{ fontSize: 11, color: 'var(--text2)' }}>{[c.level, (c.semester || '').replace(' Semester', '')].filter(Boolean).join(' · ') || 'Unscoped'}</div>
                   </div>
                   <div style={{ textAlign: 'right', fontSize: 11, color: 'var(--text2)' }}>
-                    <div><strong style={{ color: 'var(--text)', fontSize: 14 }}>{c.topics}</strong> topics</div>
-                    <div>{c.versions} versions</div>
+                    <div><strong style={{ color: 'var(--text)', fontSize: 14 }}>{c.totalTopics}</strong> notes in course</div>
+                    <div>{c.topics} yours · {c.versions} versions</div>
                   </div>
                 </div>
               ))}
