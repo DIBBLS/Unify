@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, Check, X, Loader2, Chrome } from 'lucide-react';
 import Mascot from '../components/Mascot';
+import Wordmark from '../components/Wordmark';
 import Typewriter from '../components/Typewriter';
 import Flash from '../components/Flash';
 import { supabaseBrowser, saveRememberSession, restoreRememberedSession, touchActivity, isSessionExpired, expireSession } from '../lib/supabase';
@@ -371,8 +372,8 @@ export default function AuthRoute() {
       <div className="auth-main">
       <div className="auth-card">
       <div className="auth-hero-mobile" style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', padding: 28, borderRadius: '0 0 16px 16px', display: 'flex', gap: 16, alignItems: 'center' }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20 }}>Unify Learn</div>
+          <div style={{ flex: 1 }}>
+          <Wordmark size={20} light />
           <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 32, marginTop: 12, lineHeight: 1.1 }}>
             Welcome to Unify Learn
           </h1>

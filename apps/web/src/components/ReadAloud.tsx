@@ -71,6 +71,8 @@ function supported(): boolean {
 }
 
 const VOICE_KEY = 'unify.voice.v1';
+const RATE_KEY = 'unify.speech.rate.v1';
+const RATES = [0.75, 1, 1.25, 1.5, 2];
 
 // All English voices on this device, Nigerian first. We can't invent an
 // accent — the voice must exist in the OS/browser TTS engine (many
@@ -121,7 +123,23 @@ export function ReadAloud({ topic }: { topic: Topic }) {
   const [ok, setOk] = useState(false);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [voiceURI, setVoiceURI] = useState('');
+  // Playback speed, persisted per device. Applied to every utterance;
+  // changing it mid-read takes effect from the next part.
+  const [rate, setRate] = useState(() => {
+    try {
+      const n = Number(localStorage.getItem(RATE_KEY));
+      return RATES.includes(n) ? n : 1;
+    } catch {
+      return 1;
+    }
+  });
   const cancelled = useRef(false);
+  // Live ref: the speaking loop outlives renders, so speed changes apply
+  // to the very next part, mid-read.
+  const rateRef = useRef(rate);
+  useEffect(() => {
+    rateRef.current = rate;
+  }, [rate]);
   const ranked = useMemo(() => rankVoices(voices), [voices]);
   const hasNaija = ranked.length > 0 && /ng|nigeria/i.test(ranked[0].lang + ' ' + ranked[0].name);
 
@@ -164,6 +182,15 @@ export function ReadAloud({ topic }: { topic: Topic }) {
     }
   };
 
+  const pickRate = (r: number) => {
+    setRate(r);
+    try {
+      localStorage.setItem(RATE_KEY, String(r));
+    } catch {
+      // ignore
+    }
+  };
+
   const stop = () => {
     cancelled.current = true;
     try {
@@ -191,7 +218,7 @@ export function ReadAloud({ topic }: { topic: Topic }) {
       }
       setPartIdx(i);
       const u = new SpeechSynthesisUtterance(parts[i].text);
-      u.rate = 1;
+      u.rate = rateRef.current;
       if (activeVoice) {
         u.voice = activeVoice;
         u.lang = activeVoice.lang;
@@ -227,6 +254,17 @@ export function ReadAloud({ topic }: { topic: Topic }) {
             {partIdx + 1}/{parts.length} · {parts[partIdx].title}
           </div>
         )}
+        <select
+          value={rate}
+          onChange={(e) => pickRate(Number(e.target.value))}
+          aria-label="Playback speed"
+          title="Playback speed"
+          style={{ padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 9999, fontSize: 12, fontWeight: 800, color: '#059669', background: 'var(--surface)', flexShrink: 0 }}
+        >
+          {RATES.map((r) => (
+            <option key={r} value={r}>{r}×</option>
+          ))}
+        </select>
         {!playing && ranked.length > 1 && (
           <select
             value={activeVoice?.voiceURI || ''}
