@@ -345,7 +345,7 @@ export default function AuthRoute() {
     <div className="auth-page">
       <style>{`.auth-page{min-height:100vh;background:var(--bg)}.auth-side{display:none}.auth-card{maxWidth:480px;margin:0 auto}@media(min-width:900px){.auth-page{display:flex;flex-direction:row;background:var(--surface2)}.auth-side{display:flex;flex:1;flex-direction:column;justify-content:center;gap:18px;background:#0a0a0a;background-image:radial-gradient(circle at 85% 15%,rgba(74,222,128,.14),transparent 45%),radial-gradient(circle at 10% 90%,rgba(16,185,129,.1),transparent 40%);color:#f5f4f0;padding:64px;min-height:100vh}.auth-main{flex:1.2;display:flex;align-items:center;justify-content:center;padding:48px 32px;background:var(--bg)}.auth-card{width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;box-shadow:0 12px 32px rgba(6,95,70,.12);margin:0}.auth-hero-mobile{border-radius:16px !important}}`}</style>
       <aside className="auth-side">
-        <div style={{ fontSize: 11, letterSpacing: 2, color: '#4ade80', fontWeight: 800 }}>UNIFY LEARN · LASU ENGINEERING</div>
+        <Wordmark size={30} light />
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 44, lineHeight: 1.08, margin: 0, color: '#f5f4f0' }}>
           Own every week<br />of your degree.
         </h1>

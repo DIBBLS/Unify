@@ -116,6 +116,22 @@ export default function DashboardRoute() {
   const [myContribs, setMyContribs] = useState<{ course: string; level: string; semester: string; assigned: boolean; topics: number; versions: number }[]>([]);
   const [confirmUnenroll, setConfirmUnenroll] = useState<string | null>(null);
   const [unenrolling, setUnenrolling] = useState(false);
+  // Waiting room: a student with a pending staff request sees application
+  // status + a way out — never a silent demotion to "just a student".
+  const [pendingReq, setPendingReq] = useState<{ id: string; role: string; level: string; courses: string[]; status: string; created_at: string } | null>(null);
+  const [cancellingReq, setCancellingReq] = useState(false);
+
+  const cancelRequest = async () => {
+    setCancellingReq(true);
+    try {
+      await api.cancelRoleRequest();
+      setPendingReq(null);
+    } catch {
+      // card stays; retry from here
+    } finally {
+      setCancellingReq(false);
+    }
+  };
   // Delete-confirm target. Declared with the other hooks: a useState placed
   // after an early return changes the hook count between renders (#310).
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
@@ -148,6 +164,15 @@ export default function DashboardRoute() {
         setEnrolled(me.courses || []);
         setResume(me.resume || null);
         setIsAdmin(!!me.isAdmin);
+        // Waiting-room lookup: students who applied for staff see status.
+        if ((me.profile?.role || 'student') === 'student') {
+          try {
+            const mine = await api.myRoleRequest();
+            if (mine.request && mine.request.status === 'pending') setPendingReq(mine.request);
+          } catch {
+            // no waiting room without a readable request
+          }
+        }
         // BUG-012: one catalog fetch feeds every course card (title,
         // weeks, lecturers) — never one request per card.
         try {
@@ -437,6 +462,26 @@ export default function DashboardRoute() {
       {quizzes.taken > 0 && (
         <div style={{ margin: '0 16px 12px', fontSize: 12, color: 'var(--text2)', textAlign: 'center' }}>
           {quizzes.taken} {quizzes.taken === 1 ? 'quiz' : 'quizzes'} taken · {quizzes.avg}% average
+        </div>
+      )}
+
+      {pendingReq && (
+        <div style={{ margin: '0 16px 12px', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, padding: 16 }}>
+          <div style={{ fontWeight: 800, fontSize: 15 }}>
+            Welcome{profile?.first_name ? `, ${profile.first_name}` : ''} — your {pendingReq.role} application is with the admin
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--text2)', marginTop: 4, lineHeight: 1.6 }}>
+            Applied{pendingReq.level ? ` for ${pendingReq.level}` : ''}{pendingReq.courses?.length ? ` · ${pendingReq.courses.join(', ')}` : ''} ·
+            sent {new Date(pendingReq.created_at).toLocaleDateString()}. Nothing is taken from you while you wait —
+            full student access stays, and approval lands on your bell and email.
+          </div>
+          <button
+            onClick={() => void cancelRequest()}
+            disabled={cancellingReq}
+            style={{ marginTop: 10, padding: '8px 16px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text2)', fontWeight: 700, fontSize: 12, opacity: cancellingReq ? 0.6 : 1 }}
+          >
+            {cancellingReq ? 'Withdrawing…' : 'Withdraw application'}
+          </button>
         </div>
       )}
 

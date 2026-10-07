@@ -240,19 +240,22 @@ export default function OnboardingRoute() {
   if (loading) return <Loading text="Loading onboarding…" />;
 
   if (requestSent) {
+    const staffLabel = role === 'lecturer' ? 'Lecturer' : 'Contributor';
     return (
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '60px 20px 80px', textAlign: 'center' }}>
         <Mascot size={120} />
-        <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, marginTop: 12 }}>Request sent for review</h1>
+        <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, marginTop: 12 }}>Welcome aboard — application received</h1>
         <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px', lineHeight: 1.6 }}>
-          An admin will review your {role} request — you'll get a bell notification and an email
-          the moment it's decided. Meanwhile you have full student access.
+          Your {staffLabel} application is with an admin now — you'll be notified on your bell
+          and by email the moment it's decided. This is verification, not a verdict: while you
+          wait you keep full access to everything, and your dashboard holds your waiting room
+          with a way to withdraw anytime.
         </p>
         <button
           onClick={() => navigate('/dashboard')}
           style={{ padding: '12px 28px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800, fontSize: 14 }}
         >
-          Continue as student
+          Enter my waiting room
         </button>
       </div>
     );
