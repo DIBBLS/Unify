@@ -1,9 +1,10 @@
 // Unify Learn offline worker: shell + readable content stay available offline.
 // Versioned cache; documents network-first (never a stale app), static assets
 // cache-first, API GETs network-first with cache fallback. Writes (POST/PUT/
-// DELETE) and everything else always bypass. v7 (push-driven bell:
-// postMessage to tabs on every push; content cache still version-proof).
-const CACHE = 'unify-app-v7';
+// DELETE) and everything else always bypass. v8 (narrator audio +
+// storage media cache-first for offline playback; content cache still
+// version-proof).
+const CACHE = 'unify-app-v8';
 const CONTENT = 'unify-content-v1';
 const SHELL = ['/', '/index.html', '/manifest.json'];
 
@@ -64,7 +65,11 @@ self.addEventListener('fetch', (e) => {
   const isFontCdn =
     (url.origin === 'fonts.googleapis.com' && url.pathname === '/css2') ||
     url.origin === 'fonts.gstatic.com';
-  if (!isAsset && !isApi && !isMathCdn && !isFontCdn) return;
+  // Narrator audio + diagrams from Supabase Storage: immutable uploads
+  // (timestamped paths) go cache-first so saved weeks play offline.
+  const isStorageMedia =
+    url.hostname.includes('supabase.co') && url.pathname.includes('/storage/v1/object/public/');
+  if (!isAsset && !isApi && !isMathCdn && !isFontCdn && !isStorageMedia) return;
 
   e.respondWith(
     (async () => {
@@ -80,9 +85,9 @@ self.addEventListener('fetch', (e) => {
           return res;
         })
         .catch(() => null);
-      // Versioned bundles, MathJax and font files: cache-first. Content:
-      // fresh first, cached fallback.
-      if ((isAsset || isMathCdn || isFontCdn) && cached) return cached;
+      // Versioned bundles, MathJax, fonts and storage media: cache-first.
+      // Content: fresh first, cached fallback.
+      if ((isAsset || isMathCdn || isFontCdn || isStorageMedia) && cached) return cached;
       const fresh = await network;
       if (fresh) return fresh;
       if (cached) return cached;
