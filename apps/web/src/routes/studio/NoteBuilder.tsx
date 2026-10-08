@@ -2,7 +2,7 @@ import { toastError } from '../../lib/toast';
 import { useState } from 'react';
 import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 import ConfirmModal from '../../components/ConfirmModal';
-import { uploadDiagram } from '../../lib/storage';
+import { uploadDiagram, uploadNarration } from '../../lib/storage';
 import type {
   ContentBlock,
   EOQ,
@@ -232,6 +232,7 @@ export function normalizeNote(raw: unknown): UnifyNote | null {
       lecture: lec,
       title: typeof tt.title === 'string' ? tt.title : '',
       abbr: typeof tt.abbr === 'string' ? tt.abbr : '',
+      audioRef: typeof tt.audioRef === 'string' ? tt.audioRef : null,
       subtopics: subs.map((s, si) => {
         const ss = (s && typeof s === 'object' ? s : {}) as Record<string, unknown>;
         const mc =
@@ -582,8 +583,49 @@ function QuestionEditor({
 }
 
 // ---- main builder ----
-export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n: UnifyNote) => void }) {
-  const set = (patch: Partial<UnifyNote>) => onChange({ ...note, ...patch });
+// Narrator audio attach: a Nigerian-voice MP3 per topic (recorded or
+// generated once, uploaded here). Readers play it with speed control;
+// device TTS stays the fallback when empty.
+function TopicAudio({ course, week, audioRef, onChange }: { course: string; week: number; audioRef: string | null; onChange: (url: string | null) => void }) {
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState('');
+  const pick = async (file: File | null) => {
+    if (!file || busy) return;
+    setBusy(true);
+    setMsg('');
+    try {
+      const res = await uploadNarration(file, course, week);
+      if (res.error) {
+        setMsg(res.error);
+        toastError(res.error);
+      } else if (res.url) {
+        onChange(res.url);
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div style={{ marginTop: 8, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: 10 }}>
+      <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 6 }}>Narrator audio {audioRef ? <span style={{ color: '#059669' }}>· attached</span> : <span style={{ color: 'var(--text3)' }}>· none (device voice reads instead)</span>}</div>
+      {audioRef && <audio controls src={audioRef} style={{ width: '100%', marginBottom: 6 }} />}
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <label style={{ flex: 1, padding: '8px 12px', borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: '#059669', textAlign: 'center', cursor: 'pointer', opacity: busy ? 0.6 : 1 }}>
+          {busy ? 'Uploading…' : audioRef ? 'Replace MP3' : 'Upload MP3 (≤15 MB)'}
+          <input type="file" accept="audio/mpeg,audio/mp4,audio/wav,audio/ogg,.mp3,.m4a,.wav,.ogg" disabled={busy} onChange={(e) => void pick(e.target.files?.[0] || null)} style={{ display: 'none' }} />
+        </label>
+        {audioRef && (
+          <button onClick={() => onChange(null)} style={{ padding: '8px 12px', borderRadius: 10, background: 'var(--surface)', border: '1px solid #fecaca', color: '#991b1b', fontWeight: 700, fontSize: 12 }}>
+            Remove
+          </button>
+        )}
+      </div>
+      {msg && <div style={{ fontSize: 12, color: '#991b1b', marginTop: 6 }}>{msg}</div>}
+    </div>
+  );
+}
+
+export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n: UnifyNote) => void }) {  const set = (patch: Partial<UnifyNote>) => onChange({ ...note, ...patch });
   const setTopics = (topics: Topic[]) => set({ topics });
 
   // BUG-009: topics number from 1 WITHIN each lecture, never globally.
@@ -655,6 +697,16 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
           </div>
           <label style={label}>Title<input value={t.title} onChange={(e) => { const topics = [...note.topics]; topics[ti] = { ...t, title: e.target.value }; setTopics(topics); }} placeholder="Topic title" style={input} /></label>
           <label style={{ ...label, marginTop: 8 }}>Short tag<input value={t.abbr} onChange={(e) => { const topics = [...note.topics]; topics[ti] = { ...t, abbr: e.target.value }; setTopics(topics); }} placeholder="e.g. HYDRO" style={input} /></label>
+          <TopicAudio
+            course={note.course}
+            week={note.week}
+            audioRef={t.audioRef || null}
+            onChange={(audioRef) => {
+              const topics = [...note.topics];
+              topics[ti] = { ...t, audioRef };
+              setTopics(topics);
+            }}
+          />
 
           {t.subtopics.map((s, si) => (
             <div key={si} style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed var(--border)' }}>

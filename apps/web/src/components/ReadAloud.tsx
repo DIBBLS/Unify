@@ -131,6 +131,11 @@ export function ReadAloud({ topic }: { topic: Topic }) {
   const [ok, setOk] = useState(false);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [voiceURI, setVoiceURI] = useState('');
+  // Narrator track: a human Nigerian-voice recording attached in Studio.
+  // It plays first; device TTS stays one tap away as fallback.
+  const hasNarrator = Boolean(topic.audioRef);
+  const [useNarrator, setUseNarrator] = useState(true);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   // Playback speed, persisted per device. Applied to every utterance;
   // changing it mid-read takes effect from the next part.
   const [rate, setRate] = useState(() => {
@@ -147,7 +152,15 @@ export function ReadAloud({ topic }: { topic: Topic }) {
   const rateRef = useRef(rate);
   useEffect(() => {
     rateRef.current = rate;
-  }, [rate]);
+    // Keep the narrator track on the same saved speed.
+    if (audioRef.current) {
+      try {
+        audioRef.current.playbackRate = rate;
+      } catch {
+        // ignore
+      }
+    }
+  });
   const ranked = useMemo(() => rankVoices(voices), [voices]);
   const hasNaija = ranked.length > 0 && /ng|nigeria/i.test(ranked[0].lang + ' ' + ranked[0].name);
   const naijaVoices = useMemo(
@@ -253,8 +266,65 @@ export function ReadAloud({ topic }: { topic: Topic }) {
   const playing = partIdx >= 0;
   const parts = speakable(topic);
 
+  // Narrator track present: native player with the same speed control.
+  if (hasNarrator && useNarrator) {
+    return (
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 10 }}>
+          <span style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Volume2 size={16} />
+          </span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 12, fontWeight: 800 }}>Narrated version</div>
+            <audio
+              ref={audioRef}
+              controls
+              src={topic.audioRef as string}
+              onRateChange={(e) => {
+                const r = (e.target as HTMLAudioElement).playbackRate;
+                if (RATES.includes(Math.round(r * 100) / 100)) pickRate(Math.round(r * 100) / 100);
+              }}
+              style={{ width: '100%', marginTop: 4, height: 32 }}
+            />
+          </div>
+          <select
+            value={rate}
+            onChange={(e) => {
+              const r = Number(e.target.value);
+              pickRate(r);
+              if (audioRef.current) {
+                try {
+                  audioRef.current.playbackRate = r;
+                } catch {
+                  // ignore
+                }
+              }
+            }}
+            aria-label="Playback speed"
+            title="Playback speed"
+            style={{ padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 9999, fontSize: 12, fontWeight: 800, color: '#059669', background: 'var(--surface)', flexShrink: 0 }}
+          >
+            {RATES.map((r) => (
+              <option key={r} value={r}>{r}×</option>
+            ))}
+          </select>
+        </div>
+        <button onClick={() => setUseNarrator(false)} style={{ background: 'none', border: 'none', color: 'var(--text3)', fontSize: 11, fontWeight: 700, marginTop: 4 }}>
+          Prefer the device voice instead?
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div style={{ marginBottom: 12 }}>
+      {hasNarrator && (
+        <div style={{ marginBottom: 6 }}>
+          <button onClick={() => setUseNarrator(true)} style={{ background: 'none', border: 'none', color: '#059669', fontSize: 11, fontWeight: 700 }}>
+            ← Back to narrated version
+          </button>
+        </div>
+      )}
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
         <button
           onClick={playing ? stop : play}

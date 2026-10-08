@@ -27,6 +27,7 @@ export type Topic = {
   lecture?: number;
   title: string;
   abbr: string;
+  audioRef?: string | null;
   subtopics: Subtopic[];
   activeRecall?: { badge: string; question: string; answer: string }[];
   pulseCheck?: { number: number; questions: MiniCheckQuestion[] };
