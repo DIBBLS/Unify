@@ -75,11 +75,17 @@ module.exports = async (req, res) => {
   }
   const topics = (data.note_json && Array.isArray(data.note_json.topics)) ? data.note_json.topics : [];
   const names = topics.slice(0, 5).map((t) => esc(t.title || ('Topic ' + t.number)));
+  // Per-link card: the actual note authors (contributors AND lecturers —
+  // whoever published these topics), not a generic brand line.
+  const byline = Array.isArray(data.authors) && data.authors.length
+    ? ' by ' + data.authors.slice(0, 3).map((a) => esc(a)).join(', ')
+    : '';
   const title = data.course + ' · Week ' + data.week + ' on Unify Learn';
-  const desc = (data.title || ('Week ' + data.week)) + ' — ' + topics.length + ' topics, free for ' + countdown(data.share.expires_at) + '.';
+  const desc = (data.title || ('Week ' + data.week)) + ' — ' + topics.length + ' topics' + byline + ', free for ' + countdown(data.share.expires_at) + '.';
   const body = '<div class="card"><div class="eyebrow">' + esc(data.course) + ' · SHARED NOTE</div><h1>Week '
     + data.week + ': ' + esc(data.title || '') + '</h1>'
     + (data.subtitle ? '<div class="sub">' + esc(data.subtitle) + '</div>' : '')
+    + (byline ? '<div class="sub">By' + byline + '</div>' : '')
     + '<div class="meta"><span class="chip">' + topics.length + ' topics</span><span class="chip">Free for ' + esc(countdown(data.share.expires_at)) + '</span><span class="chip">+' + (topics.length * 10) + ' XP inside</span></div></div>'
     + (names.length ? '<ol class="topics">' + names.map((n) => '<li>' + n + '</li>').join('') + '</ol>' : '');
   res.status(200).send(page({
