@@ -21,6 +21,7 @@ export default function LearnPage() {
   const weekNum = Number(weekParam) || 1;
   const [note, setNote] = useState<UnifyNote | null>(null);
   const [topicMeta, setTopicMeta] = useState<TopicMeta[]>([]);
+  const [authors, setAuthors] = useState<string[]>([]);
   // Older-version views: "lecture::topic" -> Topic payload + viewed version.
   const [overrides, setOverrides] = useState<Record<string, Topic>>({});
   const [viewed, setViewed] = useState<Record<string, number>>({});
@@ -175,6 +176,7 @@ export default function LearnPage() {
         // Opening a week to read is engagement: heartbeat for the streak.
         void api.pingDaily();
         setTopicMeta(data.topicMeta || []);
+        setAuthors(data.authors || []);
         setSavedOff(isWeekSaved(code, weekNum));
         setOverrides({});
         setViewed({});
@@ -439,6 +441,7 @@ export default function LearnPage() {
             <span key={chip} className="meta-chip">{chip}</span>
           ))}
           <span className="meta-chip">{doneCount * 10} XP earned</span>
+          {authors.length > 0 && <span className="meta-chip">by {authors.join(', ')}</span>}
         </div>
       </div>
 

@@ -248,7 +248,7 @@ export const api = {
       body: JSON.stringify(payload),
     }),
   week: (course: string, week: number) =>
-    apiFetch<{ course: string; week: number; title: string; subtitle: string; note_json: unknown; topicMeta?: TopicMeta[]; lectures?: number[] }>(
+    apiFetch<{ course: string; week: number; title: string; subtitle: string; note_json: unknown; topicMeta?: TopicMeta[]; lectures?: number[]; authors?: string[] }>(
       `/v1/courses/${encodeURIComponent(course)}/weeks/${week}`
     ),
   progress: (course: string, week: number, topic: number, lectureNo = 1) => {
@@ -293,7 +293,7 @@ export const api = {
     // Never request a blank code: it 404s by design and would only spam
     // retries (this exact storm showed up in production logs).
     if (!course || !course.trim()) return Promise.reject(new Error('No course selected.'));
-    return apiFetch<{ weeks: { week: number; title: string; subtitle: string }[] }>(
+    return apiFetch<{ weeks: { week: number; title: string; subtitle: string; authors: string[] }[] }>(
       `/v1/courses/${encodeURIComponent(course.trim())}/weeks`
     );
   },

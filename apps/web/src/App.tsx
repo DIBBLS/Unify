@@ -14,6 +14,14 @@ import AdminRoute from './routes/admin';
 import AdminContentRoute from './routes/admin/content';
 import BrowseRoute from './routes/browse';
 import ShareRoute from './routes/share';
+import { useParams } from 'react-router-dom';
+
+// /api/share/:token is served by the edge OG function for bots; if a
+// human lands here inside the SPA, forward to the real share landing.
+function ShareRedirect() {
+  const { token = '' } = useParams();
+  return <Navigate to={`/s/${encodeURIComponent(token)}`} replace />;
+}
 import StudioRoute from './routes/studio/index';
 import ClassesRoute from './routes/classes';
 import Mascot from './components/Mascot';
@@ -145,6 +153,10 @@ export default function App() {
         <Route path="/auth" element={<AuthRoute />} />
         {/* Public share landing: no session needed until expiry */}
         <Route path="/s/:token" element={<ShareRoute />} />
+        {/* Fallback: if the edge OG function ever misses (misconfigured
+        project root), humans opening /api/share links still land in-app
+        instead of a 404. Bots get the function; humans get this. */}
+        <Route path="/api/share/:token" element={<ShareRedirect />} />
         <Route
           path="/onboarding"
           element={

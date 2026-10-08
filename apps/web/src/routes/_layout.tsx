@@ -7,6 +7,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import Toasts from '../components/Toasts';
 import Wordmark from '../components/Wordmark';
 import { api } from '../lib/api';
+import { recordNav } from '../lib/navHistory';
 import OfflineBanner from '../components/OfflineBanner';
 
 type Tab = {
@@ -63,10 +64,55 @@ export default function Layout() {
   const [unread, setUnread] = useState(0);
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  // Return memory for every Back button (pathname only — tab switches
+  // don't pollute the trail).
+  useEffect(() => {
+    recordNav(pathname);
+  }, [pathname]);
   // Push permission prompt: once per device per 7 days, only while the
   // browser permission is still undecided. Profile toggle covers the rest.
   const [pushPrompt, setPushPrompt] = useState(false);
   const [pushBusy, setPushBusy] = useState(false);
+  // Desktop nav auto-collapse: 10s without pointer/keyboard activity hides
+  // the bar to a sliver; hovering the sliver brings it back. Touch devices
+  // and phones never collapse (no hover to resurface with).
+  const [navHidden, setNavHidden] = useState(false);
+
+  useEffect(() => {
+    let mq: MediaQueryList | null = null;
+    try {
+      mq = window.matchMedia('(hover: hover) and (min-width: 768px)');
+    } catch {
+      return;
+    }
+    if (!mq) return;
+    let timer = 0;
+    const arm = () => {
+      window.clearTimeout(timer);
+      setNavHidden(false);
+      timer = window.setTimeout(() => setNavHidden(true), 10000);
+    };
+    const onActivity = () => {
+      if (mq && mq.matches) arm();
+      else {
+        window.clearTimeout(timer);
+        setNavHidden(false);
+      }
+    };
+    const onMode = () => onActivity();
+    arm();
+    window.addEventListener('pointerdown', onActivity);
+    window.addEventListener('keydown', onActivity);
+    window.addEventListener('wheel', onActivity, { passive: true });
+    if (mq.addEventListener) mq.addEventListener('change', onMode);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener('pointerdown', onActivity);
+      window.removeEventListener('keydown', onActivity);
+      window.removeEventListener('wheel', onActivity);
+      if (mq && mq.removeEventListener) mq.removeEventListener('change', onMode);
+    };
+  }, []);
   // Shown once when the browser reports "denied" — the fix lives in
   // browser settings, so plain retry would just fail again.
   const [pushDenied, setPushDenied] = useState(false);
@@ -295,7 +341,7 @@ export default function Layout() {
       <OfflineBanner />
       <Outlet />
       <Toasts />
-      <nav className="bottomnav" style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 'var(--shell, 480px)', display: 'flex', background: 'var(--surface)', borderTop: '1px solid var(--border)', padding: '8px 0 calc(8px + env(safe-area-inset-bottom))' }}>
+      <nav className="bottomnav" onMouseEnter={() => setNavHidden(false)} style={{ position: 'fixed', bottom: 0, left: '50%', transform: `translateX(-50%)${navHidden ? ' translateY(calc(100% - 14px))' : ''}`, transition: 'transform .3s ease', width: '100%', maxWidth: 'var(--shell, 480px)', display: 'flex', background: 'var(--surface)', borderTop: '1px solid var(--border)', padding: '8px 0 calc(8px + env(safe-area-inset-bottom))' }}>
         {showSkeletonNav
           ? Array.from({ length: skelCount }).map((_, i) => (
               <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>

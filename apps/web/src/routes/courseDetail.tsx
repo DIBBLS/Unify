@@ -8,7 +8,7 @@ import Flash from '../components/Flash';
 import { api } from '../lib/api';
 import { log } from '../lib/log';
 
-type WeekRow = { week: number; title: string; subtitle: string };
+type WeekRow = { week: number; title: string; subtitle: string; authors?: string[] };
 
 export default function CourseDetailRoute() {
   // Param name must match the route (/course/:courseCode in App.tsx) —
@@ -189,6 +189,9 @@ export default function CourseDetailRoute() {
             <span style={{ flex: 1 }}>
               <span style={{ fontWeight: 700, display: 'block' }}>Week {w.week}{w.title ? ` — ${w.title}` : ''}</span>
               {w.subtitle && <span style={{ fontSize: 12, color: 'var(--text2)' }}>{w.subtitle}</span>}
+              {w.authors && w.authors.length > 0 && (
+                <span style={{ fontSize: 11, color: '#059669', fontWeight: 700, display: 'block', marginTop: 2 }}>by {w.authors.join(', ')}</span>
+              )}
             </span>
             <ChevronRight size={18} color="#059669" />
           </Link>

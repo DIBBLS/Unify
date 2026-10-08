@@ -79,6 +79,14 @@ const RATES = [0.75, 1, 1.25, 1.5, 2];
 // Androids ship Google's English (Nigeria); iPhones usually don't, and
 // fall back to British/American). Android users can download more under
 // Settings → Language → Text-to-speech → preferred engine voices.
+// Browsers don't expose gender; we read it from the voice name where the
+// engine prints it (e.g. "...Male"/"...Female" variants Google ships).
+function voiceGender(v: SpeechSynthesisVoice): '' | 'male' | 'female' {
+  const name = v.name.toLowerCase();
+  if (name.includes('female')) return 'female';
+  if (name.includes('male')) return 'male';
+  return '';
+}
 function rankVoices(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice[] {
   const en = voices.filter((v) => v.lang.toLowerCase().startsWith('en'));
   const score = (v: SpeechSynthesisVoice): number => {
@@ -142,6 +150,14 @@ export function ReadAloud({ topic }: { topic: Topic }) {
   }, [rate]);
   const ranked = useMemo(() => rankVoices(voices), [voices]);
   const hasNaija = ranked.length > 0 && /ng|nigeria/i.test(ranked[0].lang + ' ' + ranked[0].name);
+  const naijaVoices = useMemo(
+    () => ranked.filter((v) => /ng|nigeria/i.test(v.lang + ' ' + v.name)),
+    [ranked]
+  );
+  const naijaGenders = useMemo(
+    () => [...new Set(naijaVoices.map(voiceGender).filter(Boolean))],
+    [naijaVoices]
+  );
 
   useEffect(() => {
     setOk(supported());
@@ -272,18 +288,22 @@ export function ReadAloud({ topic }: { topic: Topic }) {
             aria-label="Reading voice"
             style={{ flex: 1, minWidth: 0, padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 9999, fontSize: 12, fontWeight: 700, color: 'var(--text2)', background: 'var(--surface)' }}
           >
-            {ranked.map((v) => (
-              <option key={v.voiceURI} value={v.voiceURI}>
-                {v.name} ({v.lang}){hasNaija && v.voiceURI === ranked[0].voiceURI ? ' · Naija' : ''}
-              </option>
-            ))}
+            {ranked.map((v) => {
+              const g = voiceGender(v);
+              const naija = /ng|nigeria/i.test(v.lang + ' ' + v.name);
+              return (
+                <option key={v.voiceURI} value={v.voiceURI}>
+                  {v.name} ({v.lang}){naija ? ' · Naija' : ''}{g ? ` · ${g}` : ''}
+                </option>
+              );
+            })}
           </select>
         )}
       </div>
       {!playing && (
         <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 6 }}>
           {hasNaija
-            ? `Voice: ${ranked[0].name} — Nigerian English found on this device.`
+            ? `Voice: ${ranked[0].name} — ${naijaVoices.length} Nigerian voice${naijaVoices.length === 1 ? '' : 's'} on this device${naijaGenders.length ? ` (${naijaGenders.join(' + ')})` : ''}. Pick another above any time.`
             : 'No Nigerian voice on this device yet — Android: download “English (Nigeria)” under Settings → Language → Text-to-speech.'}
         </div>
       )}
