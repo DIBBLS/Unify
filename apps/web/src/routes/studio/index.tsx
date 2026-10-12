@@ -1,10 +1,9 @@
 import { toastError } from '../../lib/toast';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowRight, Check, X } from 'lucide-react';
+import { ArrowRight, Check, X, ChevronDown } from 'lucide-react';
 import BackButton from '../../components/BackButton';
 import Flash from '../../components/Flash';
-import Loading from '../../components/Loading';
 import Mascot from '../../components/Mascot';
 import { TopicSlice } from '../../components/TopicSlice';
 import EoqQuiz from '../../components/EoqQuiz';
@@ -47,6 +46,13 @@ export default function StudioRoute() {
   const [workMsg, setWorkMsg] = useState(0);
   const [publishing, setPublishing] = useState(false);
   const [publishingTopic, setPublishingTopic] = useState<number | null>(null);
+  // Live convert progress (parts done/total + model), so long generations
+  // never look stuck on a generic spinner.
+  const [convertProg, setConvertProg] = useState<{ done: number; total: number; model: string } | null>(null);
+  // Review summaries: topics + quiz collapse to one-line summaries
+  // (expand for the full preview). Long generations stop being a scroll.
+  const [expandedTopic, setExpandedTopic] = useState<string | null>(null);
+  const [showQuizPreview, setShowQuizPreview] = useState(false);
   const [catalog, setCatalog] = useState<{ code: string; title: string }[]>([]);
   const [method, setMethod] = useState<'ai' | 'manual' | 'external'>('ai');
   const [editing, setEditing] = useState(false);
@@ -171,12 +177,14 @@ export default function StudioRoute() {
       });
       const total = Math.max(1, started.parts || 1);
       const deadline = Date.now() + 10 * 60000;
+      setConvertProg({ done: 0, total, model: '' });
       let res: Awaited<ReturnType<typeof api.convertStatus>> | null = null;
       for (;;) {
         if (Date.now() > deadline) throw new Error('Conversion is taking too long — the job may still finish; press Generate again in a minute.');
         await new Promise((r) => setTimeout(r, 3000));
         const st = await api.convertStatus(started.jobId);
         if (st.status === 'working') {
+          setConvertProg({ done: Math.min(st.partsDone, total), total, model: st.currentModel || '' });
           setConvertHint(`Converting part ${Math.min(st.partsDone + 1, total)} of ${total}${st.currentModel ? ` · ${st.currentModel}` : ''}…`);
           continue;
         }
@@ -435,7 +443,24 @@ export default function StudioRoute() {
     }
   };
 
-  if (working) return <Loading text={WORK_MSGS[workMsg]} />;
+  if (working) {
+    const pct = convertProg && convertProg.total > 0 ? Math.round((convertProg.done / convertProg.total) * 100) : 0;
+    return (
+      <div style={{ maxWidth: 480, margin: '0 auto', padding: '60px 20px 80px', textAlign: 'center' }}>
+        <Mascot size={110} animate="float" />
+        <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 22, marginTop: 12 }}>
+          {convertProg && convertProg.total > 1 ? `Converting part ${Math.min(convertProg.done + 1, convertProg.total)} of ${convertProg.total}` : WORK_MSGS[workMsg]}
+        </h1>
+        <div style={{ marginTop: 16, height: 12, borderRadius: 9999, background: 'var(--surface2)', border: '1px solid var(--border)', overflow: 'hidden' }}>
+          <div className="progress-fill" style={{ width: `${convertProg ? Math.max(pct, 6) : 12}%` }} />
+        </div>
+        <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 8 }}>
+          {convertProg && convertProg.total > 1 ? `${pct}%${convertProg.model ? ` · ${convertProg.model}` : ''}` : 'Talking to the model…'}
+        </div>
+        <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>Stay on this page — your draft appears here when it's ready.</div>
+      </div>
+    );
+  }
 
   const input = {
     width: '100%',
@@ -539,7 +564,10 @@ export default function StudioRoute() {
             <>
               <label style={label}>
                 Raw lecture notes
-                <textarea value={raw} onChange={(e) => setRaw(e.target.value)} rows={10} placeholder="Paste messy lecture notes here…" style={{ ...input, resize: 'vertical' }} />
+                <textarea value={raw} onChange={(e) => setRaw(e.target.value.slice(0, 60000))} rows={10} placeholder="Paste messy lecture notes here…" style={{ ...input, resize: 'vertical' }} />
+                <span style={{ display: 'block', fontSize: 11, color: raw.length >= 60000 ? '#991b1b' : 'var(--text3)', marginTop: 4, fontWeight: 700 }}>
+                  {raw.length.toLocaleString()} / 60,000 chars{raw.length >= 60000 ? ' — limit reached: split into classes or generate per topic' : ` · ~${Math.min(3, Math.max(1, Math.ceil((raw.length || 1) / 20000)))} part${Math.min(3, Math.max(1, Math.ceil((raw.length || 1) / 20000))) === 1 ? '' : 's'}`}
+                </span>
               </label>
               <details style={{ border: '1px solid var(--border)', borderRadius: 12, padding: '10px 14px' }}>
                 <summary style={{ fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Advanced (title, tags, mode)</summary>
@@ -609,7 +637,10 @@ export default function StudioRoute() {
               )}
               <label style={label}>
                 AI output (JSON)
-                <textarea value={pasted} onChange={(e) => setPasted(e.target.value)} rows={8} spellCheck={false} placeholder="Paste the JSON your AI returned…" style={{ ...input, resize: 'vertical', fontFamily: 'monospace', fontSize: 12 }} />
+                <textarea value={pasted} onChange={(e) => setPasted(e.target.value.slice(0, 300000))} rows={8} spellCheck={false} placeholder="Paste the JSON your AI returned…" style={{ ...input, resize: 'vertical', fontFamily: 'monospace', fontSize: 12 }} />
+                <span style={{ display: 'block', fontSize: 11, color: pasted.length >= 300000 ? '#991b1b' : 'var(--text3)', marginTop: 4, fontWeight: 700 }}>
+                  {pasted.length.toLocaleString()} / 300,000 chars{pasted.length >= 300000 ? ' — limit reached: paste one week at a time' : ''}
+                </span>
               </label>
               <button onClick={importPasted} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
                 Import into review <ArrowRight size={18} />
@@ -659,48 +690,93 @@ export default function StudioRoute() {
           ) : (
             <>
               <div style={{ maxWidth: 640, margin: '0 auto' }}>
-                {note.topics.map((t) => (
-                  <div key={`${t.lecture || 1}-${t.number}`} style={{ marginBottom: 12 }}>
-                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
-                      <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text2)' }}>
-                        Lecture {(t.lecture || 1)} · Topic {t.number}
-                      </span>
-                      <select
-                        aria-label={`Lecture for Topic ${t.number}`}
-                        value={t.lecture || 1}
-                        onChange={(e) => {
-                          const lec = Number(e.target.value) || 1;
-                          setNote({
-                            ...note,
-                            topics: note.topics.map((x) =>
-                              x === t ? { ...x, lecture: lec } : x
-                            ),
-                          });
-                          setValidation(null);
-                        }}
-                        style={{ fontSize: 12, fontWeight: 700, borderRadius: 9999, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', padding: '4px 8px' }}
-                      >
-                        {[1, 2, 3].map((l) => (
-                          <option key={l} value={l}>Lecture {l}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <TopicSlice topic={t} />
+                {note.topics.map((t) => {
+                  const key = `${t.lecture || 1}-${t.number}`;
+                  const open = expandedTopic === key;
+                  const checks = t.subtopics.reduce((n, s) => n + (s.miniCheck?.questions?.length || 0), 0);
+                  const recalls = t.activeRecall?.length || 0;
+                  const pulse = t.pulseCheck?.questions?.length || 0;
+                  return (
+                  <div key={key} style={{ marginBottom: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
                     <button
-                      onClick={() => publishTopic(t.number, t.lecture || 1)}
-                      disabled={publishingTopic !== null}
-                      style={{ marginTop: 6, padding: '8px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: '#059669' }}
+                      onClick={() => setExpandedTopic(open ? null : key)}
+                      aria-expanded={open}
+                      style={{ width: '100%', display: 'flex', gap: 8, alignItems: 'center', padding: '12px 14px', background: 'none', border: 'none', textAlign: 'left', color: 'var(--text)' }}
                     >
-                      {publishingTopic === t.number ? 'Publishing…' : `Publish only Lecture ${t.lecture || 1} Topic ${t.number}`}
+                      <span style={{ flex: 1, minWidth: 0 }}>
+                        <span style={{ fontWeight: 800, fontSize: 14, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          L{t.lecture || 1}·T{t.number} — {t.title || '(untitled)'}
+                        </span>
+                        <span style={{ fontSize: 11, color: 'var(--text2)' }}>
+                          {t.subtopics.length} parts · {checks} checks{recalls ? ` · ${recalls} recalls` : ''}{pulse ? ` · pulse ${pulse}` : ''}
+                        </span>
+                      </span>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: '#059669', whiteSpace: 'nowrap', display: 'flex', gap: 2, alignItems: 'center' }}>{open ? 'Hide' : 'Preview'} <ChevronDown size={12} style={{ transform: open ? 'rotate(180deg)' : 'none' }} /></span>
                     </button>
+                    {open && (
+                      <div style={{ borderTop: '1px solid var(--border)', padding: 12 }}>
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
+                          <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text2)' }}>
+                            Lecture {(t.lecture || 1)} · Topic {t.number}
+                          </span>
+                          <select
+                            aria-label={`Lecture for Topic ${t.number}`}
+                            value={t.lecture || 1}
+                            onChange={(e) => {
+                              const lec = Number(e.target.value) || 1;
+                              setNote({
+                                ...note,
+                                topics: note.topics.map((x) =>
+                                  x === t ? { ...x, lecture: lec } : x
+                                ),
+                              });
+                              setValidation(null);
+                            }}
+                            style={{ fontSize: 12, fontWeight: 700, borderRadius: 9999, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', padding: '4px 8px' }}
+                          >
+                            {[1, 2, 3].map((l) => (
+                              <option key={l} value={l}>Lecture {l}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <TopicSlice topic={t} />
+                        <button
+                          onClick={() => publishTopic(t.number, t.lecture || 1)}
+                          disabled={publishingTopic !== null}
+                          style={{ marginTop: 6, padding: '8px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: '#059669' }}
+                        >
+                          {publishingTopic === t.number ? 'Publishing…' : `Publish only Lecture ${t.lecture || 1} Topic ${t.number}`}
+                        </button>
+                      </div>
+                    )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
-              {note.eoq.questions.length > 0 && (
-                <div style={{ maxWidth: 640, margin: '16px auto 0' }}>
-                  <EoqQuiz eoq={note.eoq} course={note.course} week={note.week} preview />
-                </div>
-              )}
+              {note.eoq.questions.length > 0 && (() => {
+                const mcq = note.eoq.questions.filter((q) => q.type === 'mcq').length;
+                const fitb = note.eoq.questions.length - mcq;
+                return (
+                  <div style={{ maxWidth: 640, margin: '16px auto 0', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
+                    <button
+                      onClick={() => setShowQuizPreview((v) => !v)}
+                      aria-expanded={showQuizPreview}
+                      style={{ width: '100%', display: 'flex', gap: 8, alignItems: 'center', padding: '12px 14px', background: 'none', border: 'none', textAlign: 'left', color: 'var(--text)' }}
+                    >
+                      <span style={{ flex: 1 }}>
+                        <span style={{ fontWeight: 800, fontSize: 14, display: 'block' }}>End-of-week quiz — {note.eoq.questions.length} questions</span>
+                        <span style={{ fontSize: 11, color: 'var(--text2)' }}>{mcq} MCQ · {fitb} fill-in · 60% to pass</span>
+                      </span>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: '#059669', whiteSpace: 'nowrap', display: 'flex', gap: 2, alignItems: 'center' }}>{showQuizPreview ? 'Hide' : 'Preview'} <ChevronDown size={12} style={{ transform: showQuizPreview ? 'rotate(180deg)' : 'none' }} /></span>
+                    </button>
+                    {showQuizPreview && (
+                      <div style={{ borderTop: '1px solid var(--border)', padding: 12 }}>
+                        <EoqQuiz eoq={note.eoq} course={note.course} week={note.week} preview />
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </>
           )}
           <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap' }}>

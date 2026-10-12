@@ -28,6 +28,8 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
   const [recorded, setRecorded] = useState(false);
   const [fitb, setFitb] = useState<Record<number, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  // Score surfaces as an overlay, never buried down the quiz sheet.
+  const [showResult, setShowResult] = useState(true);
 
   const gradeable = eoq.questions.map((q, i) =>
     q.type === 'mcq' ? mcqCorrectIndex(q) !== null : fitbAccepted(q).length > 0 ? true : false
@@ -61,6 +63,7 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
     setPicked({});
     setFitb({});
     setSubmitted(false);
+    setShowResult(true);
     setRecorded(false);
   };
 
@@ -138,12 +141,14 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
         </div>
       )}
       {done && !submitted && (
-        <button onClick={() => setSubmitted(true)} className="eoq-submit-btn" style={{ width: '100%', marginTop: 16 }}>
+        <button onClick={() => { setSubmitted(true); setShowResult(true); }} className="eoq-submit-btn" style={{ width: '100%', marginTop: 16 }}>
           Check score
         </button>
       )}
-      {submitted && total > 0 && (
-        <div className={`eoq-result ${passed ? 'pass' : 'fail'}`}>
+      {submitted && total > 0 && showResult && (
+        <div className="modal-veil" onClick={() => setShowResult(false)} role="dialog" aria-modal="true" aria-label="Quiz result">
+          <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxHeight: '85vh', overflowY: 'auto', background: '#0a0a0a', border: '1px solid rgba(255,255,255,.1)' }}>
+        <div className={`eoq-result ${passed ? 'pass' : 'fail'}`} style={{ marginTop: 0 }}>
           <Mascot size={84} animate={passed ? 'wave' : undefined} />
           <div style={{ marginTop: 8 }}>
             <span className={`result-pill ${passed ? 'pill-pass' : 'pill-fail'}`}>{passed ? 'PASSED' : 'NOT YET'}</span>
@@ -169,6 +174,11 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
               </button>
             </div>
           )}
+          <button onClick={() => setShowResult(false)} className="eoq-submit-btn" style={{ width: '100%', marginTop: 12, background: 'rgba(255,255,255,.08)', borderBottom: '3px solid rgba(255,255,255,.15)' }}>
+            Review answers
+          </button>
+        </div>
+          </div>
         </div>
       )}
     </div>

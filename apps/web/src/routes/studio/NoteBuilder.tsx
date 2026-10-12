@@ -1,7 +1,9 @@
 import { toastError } from '../../lib/toast';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 import ConfirmModal from '../../components/ConfirmModal';
+import Formula from '../../components/Formula';
+import { MathText } from '../../components/MathText';
 import { uploadDiagram, uploadNarration } from '../../lib/storage';
 import type {
   ContentBlock,
@@ -408,6 +410,52 @@ function DiagramImage({
 }
 
 // ---- block editor ----
+// Word-like mini toolbar: Bold / Italic wrap the current selection (or the
+// caret point) with <strong> / <em>, the same HTML the reader renders.
+// Live formula preview below every equation input: what you see is what
+// students get, rendered by the same MathJax pipeline.
+function RichArea({ value, onChange, rows, placeholder, ariaLabel }: { value: string; onChange: (v: string) => void; rows: number; placeholder?: string; ariaLabel?: string }) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  const wrap = (open: string, close: string) => {
+    const el = ref.current;
+    if (!el) {
+      onChange(`${value}${open}${close}`);
+      return;
+    }
+    const start = el.selectionStart ?? value.length;
+    const end = el.selectionEnd ?? value.length;
+    const sel = value.slice(start, end) || 'text';
+    const next = value.slice(0, start) + open + sel + close + value.slice(end);
+    onChange(next);
+    requestAnimationFrame(() => {
+      try {
+        el.focus();
+        const pos = start + open.length + sel.length + close.length;
+        el.setSelectionRange(pos, pos);
+      } catch {
+        // focus restore is cosmetic
+      }
+    });
+  };
+  const btn = {
+    padding: '4px 12px',
+    borderRadius: 8,
+    border: '1px solid var(--border)',
+    background: 'var(--surface)',
+    fontWeight: 800,
+    fontSize: 12,
+    cursor: 'pointer',
+  } as const;
+  return (
+    <div>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 6 }} role="toolbar" aria-label="Text formatting">
+        <button type="button" onClick={() => wrap('<strong>', '</strong>')} style={{ ...btn, fontWeight: 900 }} aria-label="Bold">B</button>
+        <button type="button" onClick={() => wrap('<em>', '</em>')} style={{ ...btn, fontStyle: 'italic' }} aria-label="Italic">I</button>
+      </div>
+      <textarea ref={ref} value={value} onChange={(e) => onChange(e.target.value)} rows={rows} placeholder={placeholder} aria-label={ariaLabel} style={area} />
+    </div>
+  );
+}
 function BlockEditor({
   block,
   course,
@@ -447,7 +495,13 @@ function BlockEditor({
     return (
       <div style={{ ...card, background: '#fafafa' }}>
         {head('Text')}
-        <textarea value={block.text} onChange={(e) => onChange({ ...block, text: e.target.value })} rows={3} placeholder="Paragraph text (HTML like <strong> allowed)…" style={area} />
+        <RichArea value={block.text} onChange={(v) => onChange({ ...block, text: v })} rows={3} placeholder="Paragraph text — select words and hit B / I…" ariaLabel="Paragraph text" />
+        {block.text.trim() && (
+          <div style={{ marginTop: 8, background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 8, padding: '10px 12px' }}>
+            <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, color: 'var(--text3)', marginBottom: 4 }}>READER PREVIEW</div>
+            <MathText html={block.text} />
+          </div>
+        )}
       </div>
     );
   }
@@ -455,12 +509,12 @@ function BlockEditor({
     return (
       <div style={{ ...card, background: '#fafafa' }}>
         {head('Bullets')}
-        <textarea
+        <RichArea
           value={block.items.join('\n')}
-          onChange={(e) => onChange({ ...block, items: e.target.value.split('\n') })}
+          onChange={(v) => onChange({ ...block, items: v.split('\n') })}
           rows={4}
           placeholder={'One bullet per line…'}
-          style={area}
+          ariaLabel="Bullets, one per line"
         />
       </div>
     );
@@ -471,6 +525,14 @@ function BlockEditor({
         {head('Formula')}
         <label style={label}>Label<input value={block.label} onChange={(e) => onChange({ ...block, label: e.target.value })} placeholder="e.g. Arithmetic mean" style={input} /></label>
         <label style={{ ...label, marginTop: 8 }}>Equation (LaTeX)<textarea value={block.equation} onChange={(e) => onChange({ ...block, equation: e.target.value })} rows={2} placeholder="\[ P = \frac{a}{b} \]" style={area} /></label>
+        {block.equation.trim() ? (
+          <div style={{ marginTop: 8, background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 8, padding: '10px 12px' }}>
+            <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, color: 'var(--text3)', marginBottom: 4 }}>READER PREVIEW — LIVE</div>
+            <Formula latex={block.equation} />
+          </div>
+        ) : (
+          <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 6 }}>Type the equation above — it renders here exactly as students see it.</div>
+        )}
         <label style={{ ...label, marginTop: 8 }}>Note (optional)<input value={block.note || ''} onChange={(e) => onChange({ ...block, note: e.target.value })} placeholder="What the symbols mean…" style={input} /></label>
       </div>
     );
@@ -480,6 +542,12 @@ function BlockEditor({
       <div style={{ ...card, background: '#fafafa' }}>
         {head('Symbol')}
         <label style={label}>Symbol<input value={block.symbol} onChange={(e) => onChange({ ...block, symbol: e.target.value })} placeholder="e.g. Ns" style={input} /></label>
+        {block.symbol.trim() && (
+          <div style={{ marginTop: 8, background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 8, padding: '10px 12px' }}>
+            <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, color: 'var(--text3)', marginBottom: 4 }}>READER PREVIEW — LIVE</div>
+            <MathText html={/^\\/.test(block.symbol.trim()) ? `\\(${block.symbol.trim()}\\)` : block.symbol} />
+          </div>
+        )}
         <label style={{ ...label, marginTop: 8 }}>Name<input value={block.name} onChange={(e) => onChange({ ...block, name: e.target.value })} placeholder="e.g. Synchronous speed" style={input} /></label>
         <label style={{ ...label, marginTop: 8 }}>Description<textarea value={block.desc} onChange={(e) => onChange({ ...block, desc: e.target.value })} rows={2} style={area} /></label>
       </div>
@@ -489,7 +557,7 @@ function BlockEditor({
     return (
       <div style={{ ...card, background: '#fafafa' }}>
         {head('Insight')}
-        <textarea value={block.text} onChange={(e) => onChange({ ...block, text: e.target.value })} rows={2} placeholder="Key insight, common mistake…" style={area} />
+        <RichArea value={block.text} onChange={(v) => onChange({ ...block, text: v })} rows={2} placeholder="Key insight, common mistake…" ariaLabel="Insight text" />
       </div>
     );
   }
@@ -497,7 +565,7 @@ function BlockEditor({
     return (
       <div style={{ ...card, background: '#fafafa' }}>
         {head('Analogy')}
-        <textarea value={block.text} onChange={(e) => onChange({ ...block, text: e.target.value })} rows={2} placeholder="Real-world analogy…" style={area} />
+        <RichArea value={block.text} onChange={(v) => onChange({ ...block, text: v })} rows={2} placeholder="Real-world analogy…" ariaLabel="Analogy text" />
       </div>
     );
   }
