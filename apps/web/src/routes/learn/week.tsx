@@ -9,6 +9,7 @@ import EoqQuiz from '../../components/EoqQuiz';
 import { ReadAloud } from '../../components/ReadAloud';
 import { ShareModal } from '../../components/ShareModal';
 import { XP_GATES, meetsXpGate } from '../../lib/xp';
+import { previousPath } from '../../lib/navHistory';
 import { saveWeekOffline, isWeekSaved } from '../../lib/offline';
 import { useProgress } from '../../hooks/useProgress';
 import Mascot from '../../components/Mascot';
@@ -382,7 +383,7 @@ export default function LearnPage() {
           <ArrowUp size={20} />
         </button>
       )}
-      <button onClick={() => navigate(backTo)} style={{ marginBottom: 16, display: 'flex', gap: 6, alignItems: 'center', background: 'none', border: 'none', color: 'var(--text2)', fontSize: 14 }}>
+      <button onClick={() => navigate(previousPath() || backTo)} style={{ marginBottom: 16, display: 'flex', gap: 6, alignItems: 'center', background: 'none', border: 'none', color: 'var(--text2)', fontSize: 14 }}>
         <ChevronLeft size={18} /> Back
       </button>
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginBottom: 8 }}>

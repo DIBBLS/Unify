@@ -346,16 +346,16 @@ export default function DashboardRoute() {
             <ChevronRight size={16} />
           </Link>
         ) : null}
-        {profile?.role === 'contributor' && (
+        {(profile?.role === 'contributor' || profile?.role === 'lecturer') && (
           <div style={{ margin: '16px 16px 0' }}>
             <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800 }}>My contributions</h2>
             <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>
-              {myContribs.filter((c) => c.assigned).length} course{myContribs.filter((c) => c.assigned).length === 1 ? '' : 's'} assigned · 2-course cap per level · totals cover every author on shared courses.
+              {myContribs.filter((c) => c.assigned).length} course{myContribs.filter((c) => c.assigned).length === 1 ? '' : 's'} assigned{profile?.role === 'contributor' ? ' · 2-course cap per level' : ''} · totals cover every author on shared courses.
             </div>
             <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
               {myContribs.length === 0 && (
                 <div style={{ padding: 20, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 12, fontSize: 13 }}>
-                  No courses assigned yet — ask an admin to assign your two courses.
+                  No courses assigned yet — ask an admin to assign your courses.
                 </div>
               )}
               {myContribs.map((c) => (
