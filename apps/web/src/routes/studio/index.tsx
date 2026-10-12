@@ -674,6 +674,41 @@ export default function StudioRoute() {
                 )}
               </ul>
             )}
+            {(() => {
+              // Beware checklist: live counts of everything authors must
+              // verify before publishing. Anything red blocks nothing, but
+              // nothing here should surprise you after pressing Publish.
+              const lectures = [...new Set(note.topics.map((t) => t.lecture || 1))].sort();
+              const diagrams = note.topics.flatMap((t) =>
+                t.subtopics.flatMap((s) => s.content.filter((b) => b.type === 'diagram'))
+              );
+              const diagramsBare = diagrams.filter((b) => b.type === 'diagram' && !b.imageRef).length;
+              const formulas = note.topics.flatMap((t) =>
+                t.subtopics.flatMap((s) => s.content.filter((b) => b.type === 'formula'))
+              ).length;
+              const audio = note.topics.filter((t) => t.audioRef).length;
+              const mcq = note.eoq.questions.filter((q) => q.type === 'mcq').length;
+              const fitb = note.eoq.questions.length - mcq;
+              const quizOk = note.eoq.questions.length === 10 && mcq === 8 && fitb === 2;
+              const rows: { ok: boolean; text: string }[] = [
+                { ok: note.topics.length > 0, text: `${note.topics.length} topic${note.topics.length === 1 ? '' : 's'} in Lecture${lectures.length === 1 ? '' : 's'} ${lectures.join(', ')}` },
+                { ok: quizOk, text: quizOk ? `Quiz complete: 10 questions (8 MCQ + 2 fill-in)` : `Quiz short: ${note.eoq.questions.length}/10 (${mcq} MCQ + ${fitb} fill-in) — regenerate or top up` },
+                { ok: diagramsBare === 0, text: diagrams.length ? (diagramsBare ? `${diagramsBare} diagram${diagramsBare === 1 ? '' : 's'} still need${diagramsBare === 1 ? 's' : ''} uploaded images` : `All ${diagrams.length} diagrams have images`) : 'No diagrams called for' },
+                { ok: true, text: `${formulas} formula${formulas === 1 ? '' : 's'} — open each Reader preview to confirm the render` },
+                { ok: true, text: audio ? `${audio}/${note.topics.length} topics carry narrator audio` : 'No narrator audio — device voices read instead' },
+              ];
+              return (
+                <div style={{ marginTop: 10, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px' }}>
+                  <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, marginBottom: 6 }}>BEFORE YOU PUBLISH — CHECK</div>
+                  {rows.map((r, i) => (
+                    <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 12, color: r.ok ? 'var(--text)' : '#991b1b', fontWeight: r.ok ? 500 : 700, marginTop: i ? 4 : 0 }}>
+                      <span style={{ flexShrink: 0 }}>{r.ok ? <Check size={14} color="#059669" /> : <X size={14} />}</span>
+                      <span>{r.text}</span>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
             <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
               <button onClick={() => { setEditing((v) => !v); }} style={{ flex: 1, padding: 10, background: editing ? '#10b981' : 'var(--surface)', color: editing ? '#fff' : '#059669', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 12, fontWeight: 800, fontSize: 13 }}>
                 {editing ? 'Done editing' : 'Edit content'}

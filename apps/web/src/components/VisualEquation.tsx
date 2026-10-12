@@ -115,14 +115,14 @@ function NodeView({ node, at, activeKey, onPick }: { node: MNode; at: Path; acti
     const dk = [...at, 'd'].join('|');
     return (
       <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'stretch', verticalAlign: 'middle', margin: '0 3px' }}>
-        <span style={boxStyle(activeKey === nk)} onClick={() => onPick([...at, 'n'])}>
+        <span style={boxStyle(activeKey === nk)} onClick={(e) => { e.stopPropagation(); onPick([...at, 'n']); }}>
           {node.n.map((c, i) => (
             <NodeView key={i} node={c} at={[...at, 'n', i]} activeKey={activeKey} onPick={onPick} />
           ))}
           {!node.n.length && <span style={{ color: 'var(--text3)', fontSize: 11 }}>top</span>}
         </span>
         <span style={{ height: 2, background: 'var(--text)', borderRadius: 2, margin: '2px 0' }} />
-        <span style={boxStyle(activeKey === dk)} onClick={() => onPick([...at, 'd'])}>
+        <span style={boxStyle(activeKey === dk)} onClick={(e) => { e.stopPropagation(); onPick([...at, 'd']); }}>
           {node.d.map((c, i) => (
             <NodeView key={i} node={c} at={[...at, 'd', i]} activeKey={activeKey} onPick={onPick} />
           ))}
@@ -136,13 +136,13 @@ function NodeView({ node, at, activeKey, onPick }: { node: MNode; at: Path; acti
     const ek = [...at, 'e'].join('|');
     return (
       <span style={{ display: 'inline-flex', alignItems: node.t === 'sup' ? 'flex-start' : 'flex-end', margin: '0 2px' }}>
-        <span style={boxStyle(activeKey === bk)} onClick={() => onPick([...at, 'b'])}>
+        <span style={boxStyle(activeKey === bk)} onClick={(e) => { e.stopPropagation(); onPick([...at, 'b']); }}>
           {node.b.map((c, i) => (
             <NodeView key={i} node={c} at={[...at, 'b', i]} activeKey={activeKey} onPick={onPick} />
           ))}
           {!node.b.length && <span style={{ color: 'var(--text3)', fontSize: 11 }}>base</span>}
         </span>
-        <span style={{ ...boxStyle(activeKey === ek), minWidth: 24, minHeight: 24, fontSize: 13, marginLeft: 2 }} onClick={() => onPick([...at, 'e'])}>
+        <span style={{ ...boxStyle(activeKey === ek), minWidth: 24, minHeight: 24, fontSize: 13, marginLeft: 2 }} onClick={(e) => { e.stopPropagation(); onPick([...at, 'e']); }}>
           {node.e.map((c, i) => (
             <NodeView key={i} node={c} at={[...at, 'e', i]} activeKey={activeKey} onPick={onPick} />
           ))}
@@ -155,7 +155,7 @@ function NodeView({ node, at, activeKey, onPick }: { node: MNode; at: Path; acti
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', margin: '0 2px' }}>
       <span style={{ fontSize: 18 }}>√</span>
-      <span style={{ ...boxStyle(activeKey === xk), borderTopLeftRadius: 0, borderBottomLeftRadius: 0, marginLeft: 1 }} onClick={() => onPick([...at, 'x'])}>
+      <span style={{ ...boxStyle(activeKey === xk), borderTopLeftRadius: 0, borderBottomLeftRadius: 0, marginLeft: 1 }} onClick={(e) => { e.stopPropagation(); onPick([...at, 'x']); }}>
         {node.x.map((c, i) => (
           <NodeView key={i} node={c} at={[...at, 'x', i]} activeKey={activeKey} onPick={onPick} />
         ))}
