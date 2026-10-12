@@ -410,6 +410,82 @@ function DiagramImage({
 }
 
 // ---- block editor ----
+// Equation input with tap-to-insert templates: nobody hand-types LaTeX.
+// Fractions, scripts, roots, operators and Greek letters drop into the
+// caret position (cursor lands inside the first braces); the live preview
+// underneath confirms the render.
+const TEMPLATES: { label: string; insert: string; back: number }[] = [
+  { label: 'a⁄b', insert: '\\frac{}{}', back: 3 },
+  { label: 'x²', insert: '^{}', back: 1 },
+  { label: 'x₂', insert: '_{}', back: 1 },
+  { label: '√', insert: '\\sqrt{}', back: 1 },
+  { label: '∑', insert: '\\sum_{}^{}', back: 5 },
+  { label: '∫', insert: '\\int_{}^{}', back: 5 },
+  { label: '×', insert: '\\times ', back: 0 },
+  { label: '·', insert: '\\cdot ', back: 0 },
+  { label: '≤', insert: '\\leq ', back: 0 },
+  { label: '≥', insert: '\\geq ', back: 0 },
+  { label: '≠', insert: '\\neq ', back: 0 },
+  { label: '≈', insert: '\\approx ', back: 0 },
+  { label: 'π', insert: '\\pi ', back: 0 },
+  { label: 'Δ', insert: '\\Delta ', back: 0 },
+];
+const GREEK = ['\\alpha', '\\beta', '\\gamma', '\\delta', '\\epsilon', '\\theta', '\\lambda', '\\mu', '\\rho', '\\sigma', '\\phi', '\\omega', '\\Omega'];
+
+function EquationInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  const insert = (snippet: string, back: number) => {
+    const el = ref.current;
+    const cur = value;
+    if (!el) {
+      onChange(cur + snippet);
+      return;
+    }
+    const start = el.selectionStart ?? cur.length;
+    const end = el.selectionEnd ?? cur.length;
+    const next = cur.slice(0, start) + snippet + cur.slice(end);
+    onChange(next);
+    requestAnimationFrame(() => {
+      try {
+        el.focus();
+        const pos = start + snippet.length - back;
+        el.setSelectionRange(pos, pos);
+      } catch {
+        // focus restore is cosmetic
+      }
+    });
+  };
+  const key = {
+    minWidth: 34,
+    padding: '5px 4px',
+    borderRadius: 8,
+    border: '1px solid var(--border)',
+    background: 'var(--surface)',
+    fontSize: 13,
+    fontWeight: 700,
+    cursor: 'pointer',
+    textAlign: 'center' as const,
+  };
+  return (
+    <div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }} role="toolbar" aria-label="Equation templates">
+        {TEMPLATES.map((t) => (
+          <button key={t.label} type="button" onClick={() => insert(t.insert, t.back)} style={key} title={`Insert ${t.insert}`}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }} role="toolbar" aria-label="Greek letters">
+        {GREEK.map((g) => (
+          <button key={g} type="button" onClick={() => insert(g + ' ', 0)} style={{ ...key, color: '#059669' }} title={`Insert ${g}`}>
+            {g.replace('\\', '')}
+          </button>
+        ))}
+      </div>
+      <textarea ref={ref} value={value} onChange={(e) => onChange(e.target.value)} rows={2} placeholder="Tap templates above, or type — e.g. \[ P = \frac{a}{b} \]" style={area} aria-label="Equation (LaTeX)" />
+    </div>
+  );
+}
 // Word-like mini toolbar: Bold / Italic wrap the current selection (or the
 // caret point) with <strong> / <em>, the same HTML the reader renders.
 // Live formula preview below every equation input: what you see is what
@@ -524,7 +600,11 @@ function BlockEditor({
       <div style={{ ...card, background: '#fafafa' }}>
         {head('Formula')}
         <label style={label}>Label<input value={block.label} onChange={(e) => onChange({ ...block, label: e.target.value })} placeholder="e.g. Arithmetic mean" style={input} /></label>
-        <label style={{ ...label, marginTop: 8 }}>Equation (LaTeX)<textarea value={block.equation} onChange={(e) => onChange({ ...block, equation: e.target.value })} rows={2} placeholder="\[ P = \frac{a}{b} \]" style={area} /></label>
+        <label style={{ ...label, marginTop: 8 }}>Equation (LaTeX)
+          <span style={{ display: 'block', marginTop: 6 }}>
+            <EquationInput value={block.equation} onChange={(v) => onChange({ ...block, equation: v })} />
+          </span>
+        </label>
         {block.equation.trim() ? (
           <div style={{ marginTop: 8, background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 8, padding: '10px 12px' }}>
             <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, color: 'var(--text3)', marginBottom: 4 }}>READER PREVIEW — LIVE</div>
