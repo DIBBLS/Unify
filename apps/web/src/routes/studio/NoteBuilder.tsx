@@ -4,6 +4,7 @@ import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 import ConfirmModal from '../../components/ConfirmModal';
 import Formula from '../../components/Formula';
 import { MathText } from '../../components/MathText';
+import VisualEquation from '../../components/VisualEquation';
 import { uploadDiagram, uploadNarration } from '../../lib/storage';
 import type {
   ContentBlock,
@@ -432,57 +433,95 @@ const TEMPLATES: { label: string; insert: string; back: number }[] = [
 ];
 const GREEK = ['\\alpha', '\\beta', '\\gamma', '\\delta', '\\epsilon', '\\theta', '\\lambda', '\\mu', '\\rho', '\\sigma', '\\phi', '\\omega', '\\Omega'];
 
+const key = {
+  minWidth: 34,
+  padding: '5px 4px',
+  borderRadius: 8,
+  border: '1px solid var(--border)',
+  background: 'var(--surface)',
+  fontSize: 13,
+  fontWeight: 700,
+  cursor: 'pointer',
+  textAlign: 'center' as const,
+};
+
+function insertSnippet(ref: React.RefObject<HTMLTextAreaElement>, cur: string, onChange: (v: string) => void, snippet: string, back: number) {
+  const el = ref.current;
+  if (!el) {
+    onChange(cur + snippet);
+    return;
+  }
+  const start = el.selectionStart ?? cur.length;
+  const end = el.selectionEnd ?? cur.length;
+  const next = cur.slice(0, start) + snippet + cur.slice(end);
+  onChange(next);
+  requestAnimationFrame(() => {
+    try {
+      el.focus();
+      const pos = start + snippet.length - back;
+      el.setSelectionRange(pos, pos);
+    } catch {
+      // focus restore is cosmetic
+    }
+  });
+}
+
 function EquationInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const ref = useRef<HTMLTextAreaElement>(null);
-  const insert = (snippet: string, back: number) => {
-    const el = ref.current;
-    const cur = value;
-    if (!el) {
-      onChange(cur + snippet);
-      return;
-    }
-    const start = el.selectionStart ?? cur.length;
-    const end = el.selectionEnd ?? cur.length;
-    const next = cur.slice(0, start) + snippet + cur.slice(end);
-    onChange(next);
-    requestAnimationFrame(() => {
-      try {
-        el.focus();
-        const pos = start + snippet.length - back;
-        el.setSelectionRange(pos, pos);
-      } catch {
-        // focus restore is cosmetic
-      }
-    });
-  };
-  const key = {
-    minWidth: 34,
-    padding: '5px 4px',
-    borderRadius: 8,
-    border: '1px solid var(--border)',
-    background: 'var(--surface)',
-    fontSize: 13,
+  // Visual first for empty equations (non-technical authors never meet
+  // LaTeX); existing equations open as code with a rebuild escape hatch.
+  const [mode, setMode] = useState<'visual' | 'code'>(value.trim() ? 'code' : 'visual');
+  const [built, setBuilt] = useState('');
+  const tab = (active: boolean): React.CSSProperties => ({
+    flex: 1,
+    padding: '8px 10px',
+    borderRadius: 9999,
+    border: 'none',
+    background: active ? '#10b981' : 'transparent',
+    color: active ? '#fff' : 'var(--text2)',
     fontWeight: 700,
-    cursor: 'pointer',
-    textAlign: 'center' as const,
-  };
+    fontSize: 12,
+  });
   return (
     <div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }} role="toolbar" aria-label="Equation templates">
-        {TEMPLATES.map((t) => (
-          <button key={t.label} type="button" onClick={() => insert(t.insert, t.back)} style={key} title={`Insert ${t.insert}`}>
-            {t.label}
-          </button>
-        ))}
+      <div style={{ display: 'flex', gap: 4, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 9999, padding: 4, marginBottom: 8 }}>
+        <button type="button" onClick={() => setMode('visual')} style={tab(mode === 'visual')}>Build visually</button>
+        <button type="button" onClick={() => setMode('code')} style={tab(mode === 'code')}>Type code</button>
       </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }} role="toolbar" aria-label="Greek letters">
-        {GREEK.map((g) => (
-          <button key={g} type="button" onClick={() => insert(g + ' ', 0)} style={{ ...key, color: '#059669' }} title={`Insert ${g}`}>
-            {g.replace('\\', '')}
-          </button>
-        ))}
-      </div>
-      <textarea ref={ref} value={value} onChange={(e) => onChange(e.target.value)} rows={2} placeholder="Tap templates above, or type — e.g. \[ P = \frac{a}{b} \]" style={area} aria-label="Equation (LaTeX)" />
+      {mode === 'visual' ? (
+        <>
+          <VisualEquation
+            onBuild={(latex) => {
+              setBuilt(latex);
+              if (latex) onChange(latex);
+            }}
+          />
+          {(built || value).trim() ? (
+            <div style={{ marginTop: 8, background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 8, padding: '10px 12px' }}>
+              <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, color: 'var(--text3)', marginBottom: 4 }}>READER PREVIEW — LIVE</div>
+              <Formula latex={built || value} />
+            </div>
+          ) : null}
+        </>
+      ) : (
+        <>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }} role="toolbar" aria-label="Equation templates">
+            {TEMPLATES.map((t) => (
+              <button key={t.label} type="button" onClick={() => insertSnippet(ref, value, onChange, t.insert, t.back)} style={key} title={`Insert ${t.insert}`}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }} role="toolbar" aria-label="Greek letters">
+            {GREEK.map((g) => (
+              <button key={g} type="button" onClick={() => insertSnippet(ref, value, onChange, g + ' ', 0)} style={{ ...key, color: '#059669' }} title={`Insert ${g}`}>
+                {g.replace('\\', '')}
+              </button>
+            ))}
+          </div>
+          <textarea ref={ref} value={value} onChange={(e) => onChange(e.target.value)} rows={2} placeholder="\[ P = \frac{a}{b} \]" style={area} aria-label="Equation (LaTeX)" />
+        </>
+      )}
     </div>
   );
 }
@@ -618,10 +657,18 @@ function BlockEditor({
     );
   }
   if (block.type === 'symbol') {
+    const glyphs = ['α', 'β', 'γ', 'δ', 'ε', 'θ', 'λ', 'μ', 'ρ', 'σ', 'φ', 'ω', 'Ω', 'π', 'Δ'];
     return (
       <div style={{ ...card, background: '#fafafa' }}>
         {head('Symbol')}
-        <label style={label}>Symbol<input value={block.symbol} onChange={(e) => onChange({ ...block, symbol: e.target.value })} placeholder="e.g. Ns" style={input} /></label>
+        <label style={label}>Symbol<input value={block.symbol} onChange={(e) => onChange({ ...block, symbol: e.target.value })} placeholder="e.g. Ns — or tap a Greek letter below" style={input} /></label>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }} role="toolbar" aria-label="Greek letters">
+          {glyphs.map((g) => (
+            <button key={g} type="button" onClick={() => onChange({ ...block, symbol: `${block.symbol}${g}` })} style={{ minWidth: 32, padding: '5px 4px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: '#059669', fontSize: 14, fontWeight: 700, cursor: 'pointer', textAlign: 'center' }}>
+              {g}
+            </button>
+          ))}
+        </div>
         {block.symbol.trim() && (
           <div style={{ marginTop: 8, background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 8, padding: '10px 12px' }}>
             <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, color: 'var(--text3)', marginBottom: 4 }}>READER PREVIEW — LIVE</div>
