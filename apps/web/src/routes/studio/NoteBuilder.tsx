@@ -644,13 +644,8 @@ function BlockEditor({
             <EquationInput value={block.equation} onChange={(v) => onChange({ ...block, equation: v })} />
           </span>
         </label>
-        {block.equation.trim() ? (
-          <div style={{ marginTop: 8, background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 8, padding: '10px 12px' }}>
-            <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, color: 'var(--text3)', marginBottom: 4 }}>READER PREVIEW — LIVE</div>
-            <Formula latex={block.equation} />
-          </div>
-        ) : (
-          <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 6 }}>Type the equation above — it renders here exactly as students see it.</div>
+        {!block.equation.trim() && (
+          <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 6 }}>Build it visually above — it renders inside the editor exactly as students see it.</div>
         )}
         <label style={{ ...label, marginTop: 8 }}>Note (optional)<input value={block.note || ''} onChange={(e) => onChange({ ...block, note: e.target.value })} placeholder="What the symbols mean…" style={input} /></label>
       </div>
