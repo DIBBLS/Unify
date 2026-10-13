@@ -4,7 +4,7 @@ import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 import ConfirmModal from '../../components/ConfirmModal';
 import Formula from '../../components/Formula';
 import { MathText } from '../../components/MathText';
-import VisualEquation from '../../components/VisualEquation';
+import VisualEquation, { parseLatex, type MNode } from '../../components/VisualEquation';
 import { uploadDiagram, uploadNarration } from '../../lib/storage';
 import type {
   ContentBlock,
@@ -411,86 +411,51 @@ function DiagramImage({
 }
 
 // ---- block editor ----
-// Equation input with tap-to-insert templates: nobody hand-types LaTeX.
-// Fractions, scripts, roots, operators and Greek letters drop into the
-// caret position (cursor lands inside the first braces); the live preview
-// underneath confirms the render.
-const TEMPLATES: { label: string; insert: string; back: number }[] = [
-  { label: 'a⁄b', insert: '\\frac{}{}', back: 3 },
-  { label: 'x²', insert: '^{}', back: 1 },
-  { label: 'x₂', insert: '_{}', back: 1 },
-  { label: '√', insert: '\\sqrt{}', back: 1 },
-  { label: '∑', insert: '\\sum_{}^{}', back: 5 },
-  { label: '∫', insert: '\\int_{}^{}', back: 5 },
-  { label: '×', insert: '\\times ', back: 0 },
-  { label: '·', insert: '\\cdot ', back: 0 },
-  { label: '≤', insert: '\\leq ', back: 0 },
-  { label: '≥', insert: '\\geq ', back: 0 },
-  { label: '≠', insert: '\\neq ', back: 0 },
-  { label: '≈', insert: '\\approx ', back: 0 },
-  { label: 'π', insert: '\\pi ', back: 0 },
-  { label: 'Δ', insert: '\\Delta ', back: 0 },
-];
-const GREEK = ['\\alpha', '\\beta', '\\gamma', '\\delta', '\\epsilon', '\\theta', '\\lambda', '\\mu', '\\rho', '\\sigma', '\\phi', '\\omega', '\\Omega'];
-
-const key = {
-  minWidth: 34,
-  padding: '5px 4px',
-  borderRadius: 8,
-  border: '1px solid var(--border)',
-  background: 'var(--surface)',
-  fontSize: 13,
-  fontWeight: 700,
-  cursor: 'pointer',
-  textAlign: 'center' as const,
-};
-
-function insertSnippet(ref: React.RefObject<HTMLTextAreaElement>, cur: string, onChange: (v: string) => void, snippet: string, back: number) {
-  const el = ref.current;
-  if (!el) {
-    onChange(cur + snippet);
-    return;
-  }
-  const start = el.selectionStart ?? cur.length;
-  const end = el.selectionEnd ?? cur.length;
-  const next = cur.slice(0, start) + snippet + cur.slice(end);
-  onChange(next);
-  requestAnimationFrame(() => {
-    try {
-      el.focus();
-      const pos = start + snippet.length - back;
-      el.setSelectionRange(pos, pos);
-    } catch {
-      // focus restore is cosmetic
-    }
-  });
-}
-
 function EquationInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const ref = useRef<HTMLTextAreaElement>(null);
-  // Visual first for empty equations (non-technical authors never meet
-  // LaTeX); existing equations open as code with a rebuild escape hatch.
-  const [mode, setMode] = useState<'visual' | 'code'>(value.trim() ? 'code' : 'visual');
+  const [tree, setTree] = useState<MNode[] | null>(() => null);
+  const [tooHard, setTooHard] = useState(false);
   const [built, setBuilt] = useState('');
-  const tab = (active: boolean): React.CSSProperties => ({
-    flex: 1,
-    padding: '8px 10px',
-    borderRadius: 9999,
-    border: 'none',
-    background: active ? '#10b981' : 'transparent',
-    color: active ? '#fff' : 'var(--text2)',
-    fontWeight: 700,
-    fontSize: 12,
-  });
+  const openVisual = (initial: MNode[]) => {
+    setTree(initial);
+    setTooHard(false);
+    setBuilt('');
+  };
   return (
     <div>
-      <div style={{ display: 'flex', gap: 4, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 9999, padding: 4, marginBottom: 8 }}>
-        <button type="button" onClick={() => setMode('visual')} style={tab(mode === 'visual')}>Build visually</button>
-        <button type="button" onClick={() => setMode('code')} style={tab(mode === 'code')}>Type code</button>
-      </div>
-      {mode === 'visual' ? (
+      {tree === null && !tooHard && (
+        <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+          <button
+            type="button"
+            onClick={() => {
+              if (!value.trim()) {
+                openVisual([]);
+                return;
+              }
+              const parsed = parseLatex(value);
+              if (parsed) openVisual(parsed);
+              else setTooHard(true);
+            }}
+            style={{ flex: 1, padding: 10, borderRadius: 12, background: '#10b981', color: '#fff', border: 'none', borderBottom: '3px solid #059669', fontWeight: 800, fontSize: 13 }}
+          >
+            {value.trim() ? 'Open visual builder' : 'Build equation visually'}
+          </button>
+        </div>
+      )}
+      {tooHard && (
+        <div style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: 12, marginBottom: 8 }}>
+          <div style={{ fontSize: 12, fontWeight: 700 }}>This equation is too advanced to rebuild visually — kept exactly as published:</div>
+          <div style={{ marginTop: 8, background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 8, padding: '10px 12px' }}>
+            <Formula latex={value} />
+          </div>
+          <button type="button" onClick={() => openVisual([])} style={{ marginTop: 8, padding: '8px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: '#059669' }}>
+            Start over visually (replaces it)
+          </button>
+        </div>
+      )}
+      {tree !== null && (
         <>
           <VisualEquation
+            initial={tree}
             onBuild={(latex) => {
               setBuilt(latex);
               if (latex) onChange(latex);
@@ -502,24 +467,6 @@ function EquationInput({ value, onChange }: { value: string; onChange: (v: strin
               <Formula latex={built || value} />
             </div>
           ) : null}
-        </>
-      ) : (
-        <>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }} role="toolbar" aria-label="Equation templates">
-            {TEMPLATES.map((t) => (
-              <button key={t.label} type="button" onClick={() => insertSnippet(ref, value, onChange, t.insert, t.back)} style={key} title={`Insert ${t.insert}`}>
-                {t.label}
-              </button>
-            ))}
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }} role="toolbar" aria-label="Greek letters">
-            {GREEK.map((g) => (
-              <button key={g} type="button" onClick={() => insertSnippet(ref, value, onChange, g + ' ', 0)} style={{ ...key, color: '#059669' }} title={`Insert ${g}`}>
-                {g.replace('\\', '')}
-              </button>
-            ))}
-          </div>
-          <textarea ref={ref} value={value} onChange={(e) => onChange(e.target.value)} rows={2} placeholder="\[ P = \frac{a}{b} \]" style={area} aria-label="Equation (LaTeX)" />
         </>
       )}
     </div>

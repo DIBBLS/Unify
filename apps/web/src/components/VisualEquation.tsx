@@ -14,11 +14,11 @@ export type MNode =
 type Path = (number | string)[];
 
 export function compileNodes(nodes: MNode[]): string {
-  return nodes.map(compileOne).join(' ');
+  return nodes.map(compileOne).join('');
 }
 
 function compileList(nodes: MNode[]): string {
-  return nodes.map(compileOne).join(' ');
+  return nodes.map(compileOne).join('');
 }
 
 function compileOne(n: MNode): string {
@@ -38,7 +38,148 @@ function compileOne(n: MNode): string {
 
 export function compileEquation(nodes: MNode[]): string {
   const inner = compileNodes(nodes).trim();
-  return inner ? `\\[ ${inner} \\]` : '';
+  if (!inner) return '';
+  // Plain words stay plain text (never force math mode on prose); anything
+  // structural or symbolic gets display delimiters.
+  const hasMath = (function walk(ns: MNode[]): boolean {
+    return ns.some((n) => {
+      if (n.t === 'tok') return n.lx.startsWith('\\');
+      if (n.t === 'frac' || n.t === 'sqrt') return true;
+      return walk(n.b) || walk(n.e);
+    });
+  })(nodes);
+  return hasMath ? `\\[ ${inner} \\]` : inner;
+}
+
+// ---- one-way LaTeX subset parser ----
+// Reads back the common shapes our own builder + AI emit
+// (\frac, ^{}, _{}, \sqrt, \( \)/\[ \] wrappers, plain tokens) into a
+// visual tree. Anything fancier returns null: the equation is then kept
+// exactly as-is (never mangled), and the author rebuilds visually.
+const CMD_MAP: Record<string, { g: string; lx: string }> = {
+  alpha: { g: 'α', lx: '\\alpha' },
+  beta: { g: 'β', lx: '\\beta' },
+  gamma: { g: 'γ', lx: '\\gamma' },
+  delta: { g: 'δ', lx: '\\delta' },
+  epsilon: { g: 'ε', lx: '\\epsilon' },
+  theta: { g: 'θ', lx: '\\theta' },
+  lambda: { g: 'λ', lx: '\\lambda' },
+  mu: { g: 'μ', lx: '\\mu' },
+  rho: { g: 'ρ', lx: '\\rho' },
+  sigma: { g: 'σ', lx: '\\sigma' },
+  phi: { g: 'φ', lx: '\\phi' },
+  omega: { g: 'ω', lx: '\\omega' },
+  Omega: { g: 'Ω', lx: '\\Omega' },
+  pi: { g: 'π', lx: '\\pi' },
+  Delta: { g: 'Δ', lx: '\\Delta' },
+  times: { g: '×', lx: '\\times' },
+  cdot: { g: '·', lx: '\\cdot' },
+  leq: { g: '≤', lx: '\\leq' },
+  geq: { g: '≥', lx: '\\geq' },
+  neq: { g: '≠', lx: '\\neq' },
+  approx: { g: '≈', lx: '\\approx' },
+  sum: { g: '∑', lx: '\\sum' },
+  int: { g: '∫', lx: '\\int' },
+  prod: { g: '∏', lx: '\\prod' },
+};
+
+type Cursor = { s: string; i: number };
+
+function parseGroup(c: Cursor): MNode[] | null {
+  const out: MNode[] = [];
+  let text = '';
+  const flush = () => {
+    for (const ch of text) {
+      if (ch === ' ' || ch === '\n' || ch === '\t') continue;
+      out.push({ t: 'tok', g: ch, lx: ch });
+    }
+    text = '';
+  };
+  while (c.i < c.s.length) {
+    const ch = c.s[c.i];
+    if (ch === '}') break;
+    if (ch === '\\') {
+      const m = /^\\([a-zA-Z]+)/.exec(c.s.slice(c.i));
+      if (!m) return null;
+      const cmd = m[1];
+      c.i += m[0].length;
+      if (cmd === 'frac') {
+        if (c.s[c.i] !== '{') return null;
+        c.i += 1;
+        const n = parseGroup(c);
+        if (!n || c.s[c.i] !== '}') return null;
+        c.i += 1;
+        if (c.s[c.i] !== '{') return null;
+        c.i += 1;
+        const d = parseGroup(c);
+        if (!d || c.s[c.i] !== '}') return null;
+        c.i += 1;
+        flush();
+        out.push({ t: 'frac', n, d });
+        continue;
+      }
+      if (cmd === 'sqrt') {
+        if (c.s[c.i] !== '{') return null;
+        c.i += 1;
+        const x = parseGroup(c);
+        if (!x || c.s[c.i] !== '}') return null;
+        c.i += 1;
+        flush();
+        out.push({ t: 'sqrt', x });
+        continue;
+      }
+      const known = CMD_MAP[cmd];
+      if (!known) return null;
+      flush();
+      out.push({ t: 'tok', g: known.g, lx: known.lx });
+      continue;
+    }
+    if (ch === '^' || ch === '_') {
+      const isSup = ch === '^';
+      c.i += 1;
+      let exp: MNode[];
+      if (c.s[c.i] === '{') {
+        c.i += 1;
+        const g = parseGroup(c);
+        if (!g || c.s[c.i] !== '}') return null;
+        c.i += 1;
+        exp = g;
+      } else if (c.s[c.i] && /[0-9a-zA-Z]/.test(c.s[c.i])) {
+        exp = [{ t: 'tok', g: c.s[c.i], lx: c.s[c.i] }];
+        c.i += 1;
+      } else {
+        return null;
+      }
+      flush();
+      const base = out.length ? [out.pop() as MNode] : [];
+      out.push(isSup ? { t: 'sup', b: base, e: exp } : { t: 'sub', b: base, e: exp });
+      continue;
+    }
+    text += ch;
+    c.i += 1;
+  }
+  flush();
+  return out;
+}
+
+export function parseLatex(latex: string): MNode[] | null {
+  try {
+    let s = (latex || '').trim();
+    // Strip one display \[...\] or inline \(...\) wrapper.
+    const disp = s.match(/^\\\[([\s\S]*)\\\]$/);
+    if (disp) s = disp[1].trim();
+    else {
+      const inl = s.match(/^\\\(([\s\S]*)\\\)$/);
+      if (inl) s = inl[1].trim();
+    }
+    if (!s) return [];
+    const c: Cursor = { s, i: 0 };
+    const out = parseGroup(c);
+    if (!out || c.i !== s.length) return null;
+    return out;
+  } catch {
+    return null;
+  }
 }
 
 const GLYPHS: { g: string; lx: string }[] = [
@@ -57,6 +198,9 @@ const GLYPHS: { g: string; lx: string }[] = [
   { g: 'Ω', lx: '\\Omega' },
   { g: 'π', lx: '\\pi' },
   { g: 'Δ', lx: '\\Delta' },
+  { g: '∑', lx: '\\sum' },
+  { g: '∫', lx: '\\int' },
+  { g: '∏', lx: '\\prod' },
 ];
 
 const KEYS = ['7', '8', '9', '4', '5', '6', '1', '2', '3', '0', '.', '='];
@@ -165,8 +309,8 @@ function NodeView({ node, at, activeKey, onPick }: { node: MNode; at: Path; acti
   );
 }
 
-export default function VisualEquation({ onBuild }: { onBuild: (latex: string) => void }) {
-  const [tree, setTree] = useState<MNode[]>([]);
+export default function VisualEquation({ initial, onBuild }: { initial: MNode[]; onBuild: (latex: string) => void }) {
+  const [tree, setTree] = useState<MNode[]>(initial);
   const [active, setActive] = useState<Path>([]);
 
   const mutate = (fn: (list: MNode[]) => MNode[]) => {
