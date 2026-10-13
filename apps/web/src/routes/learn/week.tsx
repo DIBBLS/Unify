@@ -22,7 +22,7 @@ export default function LearnPage() {
   const weekNum = Number(weekParam) || 1;
   const [note, setNote] = useState<UnifyNote | null>(null);
   const [topicMeta, setTopicMeta] = useState<TopicMeta[]>([]);
-  const [authors, setAuthors] = useState<string[]>([]);
+  const [authors, setAuthors] = useState<{ name: string; avatar: string }[]>([]);
   // Older-version views: "lecture::topic" -> Topic payload + viewed version.
   const [overrides, setOverrides] = useState<Record<string, Topic>>({});
   const [viewed, setViewed] = useState<Record<string, number>>({});
@@ -442,7 +442,22 @@ export default function LearnPage() {
             <span key={chip} className="meta-chip">{chip}</span>
           ))}
           <span className="meta-chip">{doneCount * 10} XP earned</span>
-          {authors.length > 0 && <span className="meta-chip">by {authors.join(', ')}</span>}
+          {authors.length > 0 && (
+            <span className="meta-chip" style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+              <span style={{ display: 'inline-flex' }}>
+                {authors.slice(0, 3).map((a, ai) => (
+                  a.avatar ? (
+                    <img key={ai} src={a.avatar} alt={a.name} title={a.name} style={{ width: 18, height: 18, borderRadius: '50%', objectFit: 'cover', marginLeft: ai === 0 ? 0 : -5 }} />
+                  ) : (
+                    <span key={ai} title={a.name} style={{ width: 18, height: 18, borderRadius: '50%', background: 'rgba(16,185,129,.2)', color: '#4ade80', fontWeight: 800, fontSize: 10, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginLeft: ai === 0 ? 0 : -5 }}>
+                      {a.name.trim().charAt(0).toUpperCase()}
+                    </span>
+                  )
+                ))}
+              </span>
+              by {authors.map((a) => a.name).join(', ')}
+            </span>
+          )}
         </div>
       </div>
 

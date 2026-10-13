@@ -61,6 +61,76 @@ export default function StudioRoute() {
   const [copied, setCopied] = useState(false);
   const [pasted, setPasted] = useState('');
   const [searchParams] = useSearchParams();
+  // Draft persistence: refreshes, crashes and cold starts never eat a
+  // note again. The whole compose state saves debounced; returning
+  // restores it with a notice (explicit ?edit= links always win fresh).
+  const [draftRestored, setDraftRestored] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('edit')) return;
+    try {
+      const rawSaved = localStorage.getItem('unify.studio.draft.v1');
+      if (!rawSaved) return;
+      const d = JSON.parse(rawSaved) as Record<string, unknown>;
+      if (!d || typeof d !== 'object') return;
+      if (typeof d.course === 'string') setCourse(d.course);
+      if (typeof d.week === 'string') setWeek(d.week);
+      if (typeof d.title === 'string') setTitle(d.title);
+      if (typeof d.subtitle === 'string') setSubtitle(d.subtitle);
+      if (typeof d.tags === 'string') setTags(d.tags);
+      if (typeof d.raw === 'string') setRaw(d.raw.slice(0, 60000));
+      if (typeof d.method === 'string' && (['ai', 'manual', 'external'] as string[]).includes(d.method)) {
+        setMethod(d.method as 'ai' | 'manual' | 'external');
+      }
+      if (d.note && typeof d.note === 'object') {
+        const synced = normalizeNote(d.note);
+        if (synced) {
+          setNote(synced);
+          if (d.meta && typeof d.meta === 'object') {
+            const m = d.meta as Record<string, unknown>;
+            setMeta({
+              course: typeof m.course === 'string' ? m.course : synced.course,
+              week: typeof m.week === 'number' ? m.week : synced.week,
+              title: typeof m.title === 'string' ? m.title : synced.title,
+              subtitle: typeof m.subtitle === 'string' ? m.subtitle : synced.subtitle,
+            });
+          }
+          if (d.step === 1 || d.step === 2) setStep(d.step);
+        }
+      }
+      setDraftRestored(true);
+    } catch {
+      // corrupt draft: start clean
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      try {
+        if (!course && !raw && !note && !title) {
+          localStorage.removeItem('unify.studio.draft.v1');
+          return;
+        }
+        localStorage.setItem(
+          'unify.studio.draft.v1',
+          JSON.stringify({ course, week, title, subtitle, tags, raw: raw.slice(0, 60000), method, note, meta, step })
+        );
+      } catch {
+        // quota or private mode: session-only this time
+      }
+    }, 1000);
+    return () => window.clearTimeout(t);
+  }, [course, week, title, subtitle, tags, raw, method, note, meta, step]);
+
+  const discardDraft = () => {
+    try {
+      localStorage.removeItem('unify.studio.draft.v1');
+    } catch {
+      // ignore
+    }
+    setDraftRestored(false);
+  };
 
   useEffect(() => {
     if (!working) return;
@@ -366,6 +436,13 @@ export default function StudioRoute() {
           : tags ? `${res.course} · Week ${res.week} is live (${tags}). Old versions are kept.` : `${res.course} · Week ${res.week} is now live for students.`
       );
       setStep(2);
+      // Published: the saved draft has served its purpose.
+      try {
+        localStorage.removeItem('unify.studio.draft.v1');
+      } catch {
+        // ignore
+      }
+      setDraftRestored(false);
     } catch (err) {
       const code = (err as { code?: string })?.code;
       const existing = (err as { existing?: { topics?: number[]; versions?: number; titles?: string[] } })?.existing;
@@ -394,6 +471,7 @@ export default function StudioRoute() {
     setRaw('');
     setPasted('');
     setEditing(false);
+    discardDraft();
   };
 
   // Occupied-week/topic choice sheet (BUG-007): Replace / Add as new
@@ -487,6 +565,14 @@ export default function StudioRoute() {
       </div>
 
       {success && <Flash tone="success" message={success} onDismiss={() => setSuccess('')} />}
+      {draftRestored && (
+        <div style={{ padding: 12, background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 12, fontSize: 13, color: '#065f46', display: 'flex', gap: 8, alignItems: 'center' }}>
+          <span style={{ flex: 1 }}>Draft restored — right where you left it.</span>
+          <button onClick={() => { discardDraft(); reset(); }} style={{ padding: '6px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: 'var(--text2)' }}>
+            Discard
+          </button>
+        </div>
+      )}
       {convertHint && (
         <div style={{ padding: 12, background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, fontSize: 13, color: '#92400e' }}>
           {convertHint}
