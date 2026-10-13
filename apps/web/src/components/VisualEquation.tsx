@@ -14,7 +14,12 @@ export type MNode =
 type Path = (number | string)[];
 
 export function compileNodes(nodes: MNode[]): string {
-  return nodes.map(compileOne).join('');
+  // Control sequences must not glue to a following letter (\pir is one
+  // bad command, not \pi + r) — separate with a space (harmless in math).
+  return nodes
+    .map(compileOne)
+    .join('')
+    .replace(/(\\[a-zA-Z]+)(?=[a-zA-Z])/g, '$1 ');
 }
 
 function compileList(nodes: MNode[]): string {
@@ -207,6 +212,70 @@ const KEYS = ['7', '8', '9', '4', '5', '6', '1', '2', '3', '0', '.', '='];
 const LETTERS = ['x', 'y', 'z', 'a', 'b', 'c', 'm', 'n', 'P', 'Q', 'R', 'T'];
 const OPS = ['+', '−', '×', '=', '(', ')'];
 
+// ---- reusable formula library ----
+// Named presets authors drop in whole instead of rebuilding: categories +
+// tap-to-insert into the active box. Same trees the builder makes, so
+// everything stays editable after insertion.
+const tk = (g: string, lx?: string): MNode => ({ t: 'tok', g, lx: lx ?? g });
+const supN = (b: MNode[], e: MNode[]): MNode => ({ t: 'sup', b, e });
+const subN = (b: MNode[], e: MNode[]): MNode => ({ t: 'sub', b, e });
+const fracN = (n: MNode[], d: MNode[]): MNode => ({ t: 'frac', n, d });
+const sqrtN = (x: MNode[]): MNode => ({ t: 'sqrt', x });
+const G = (g: string): MNode => {
+  const found = GLYPHS.find((x) => x.g === g);
+  return found ? { t: 'tok', g: found.g, lx: found.lx } : tk(g);
+};
+
+export const FORMULA_LIBRARY: { category: string; items: { name: string; tree: MNode[] }[] }[] = [
+  {
+    category: 'Algebra',
+    items: [
+      { name: 'Pythagoras', tree: [supN([tk('a')], [tk('2')]), tk('+'), supN([tk('b')], [tk('2')]), tk('='), supN([tk('c')], [tk('2')])] },
+      {
+        name: 'Quadratic formula',
+        tree: [tk('x'), tk('='), fracN([tk('−'), tk('b'), tk('±'), sqrtN([supN([tk('b')], [tk('2')]), tk('−'), tk('4'), tk('a'), tk('c')])], [tk('2'), tk('a')])],
+      },
+      {
+        name: 'Slope',
+        tree: [tk('m'), tk('='), fracN([subN([tk('y')], [tk('2')]), tk('−'), subN([tk('y')], [tk('1')])], [subN([tk('x')], [tk('2')]), tk('−'), subN([tk('x')], [tk('1')])])],
+      },
+    ],
+  },
+  {
+    category: 'Geometry',
+    items: [
+      { name: 'Circle area', tree: [tk('A'), tk('='), G('π'), supN([tk('r')], [tk('2')])] },
+      { name: 'Circumference', tree: [tk('C'), tk('='), tk('2'), G('π'), tk('r')] },
+    ],
+  },
+  {
+    category: 'Physics',
+    items: [
+      { name: "Ohm's law", tree: [tk('V'), tk('='), tk('I'), tk('R')] },
+      { name: 'Density', tree: [G('ρ'), tk('='), fracN([tk('m')], [tk('V')])] },
+      { name: 'Motion (v = u + at)', tree: [tk('v'), tk('='), tk('u'), tk('+'), tk('a'), tk('t')] },
+      { name: 'Kinetic energy', tree: [subN([tk('E')], [tk('k')]), tk('='), fracN([tk('1')], [tk('2')]), tk('m'), supN([tk('v')], [tk('2')])] },
+    ],
+  },
+  {
+    category: 'Statistics',
+    items: [
+      { name: 'Mean', tree: [{ t: 'tok', g: 'x̄', lx: '\\bar{x}' }, tk('='), fracN([G('∑'), tk('x')], [tk('n')])] },
+      {
+        name: 'Std deviation',
+        tree: [G('σ'), tk('='), sqrtN([fracN([G('∑'), tk('('), tk('x'), tk('−'), { t: 'tok', g: 'x̄', lx: '\\bar{x}' }, supN([tk(')')], [tk('2')])], [tk('N')])])],
+      },
+    ],
+  },
+  {
+    category: 'Chemistry',
+    items: [
+      { name: 'Molarity', tree: [tk('M'), tk('='), fracN([tk('n')], [tk('V')])] },
+      { name: 'Ideal gas', tree: [tk('P'), tk('V'), tk('='), tk('n'), tk('R'), tk('T')] },
+    ],
+  },
+];
+
 function lxOf(g: string): string {
   const found = GLYPHS.find((x) => x.g === g);
   if (found) return found.lx;
@@ -312,6 +381,8 @@ function NodeView({ node, at, activeKey, onPick }: { node: MNode; at: Path; acti
 export default function VisualEquation({ initial, onBuild }: { initial: MNode[]; onBuild: (latex: string) => void }) {
   const [tree, setTree] = useState<MNode[]>(initial);
   const [active, setActive] = useState<Path>([]);
+  const [libOpen, setLibOpen] = useState(false);
+  const [libCat, setLibCat] = useState(FORMULA_LIBRARY[0].category);
 
   const mutate = (fn: (list: MNode[]) => MNode[]) => {
     const next = setList(tree, active, fn(getList(tree, active)));
@@ -387,6 +458,50 @@ export default function VisualEquation({ initial, onBuild }: { initial: MNode[];
         {GLYPHS.map((g) => (
           <button key={g.lx} type="button" onClick={() => addTok(g.g)} style={{ ...key, color: '#059669' }}>{g.g}</button>
         ))}
+      </div>
+      <div style={{ marginTop: 8 }}>
+        <button
+          type="button"
+          onClick={() => setLibOpen((v) => !v)}
+          aria-expanded={libOpen}
+          style={{ width: '100%', padding: '8px 12px', borderRadius: 10, background: '#ecfdf5', border: '1px solid #a7f3d0', color: '#065f46', fontWeight: 800, fontSize: 12 }}
+        >
+          {libOpen ? 'Hide formula library' : 'Reuse a saved formula instead of rebuilding'}
+        </button>
+        {libOpen && (
+          <div style={{ marginTop: 8, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 10 }}>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+              {FORMULA_LIBRARY.map((c) => (
+                <button
+                  key={c.category}
+                  type="button"
+                  onClick={() => setLibCat(c.category)}
+                  style={{ padding: '6px 12px', borderRadius: 9999, border: `1px solid ${libCat === c.category ? '#059669' : 'var(--border)'}`, background: libCat === c.category ? '#10b981' : 'var(--surface)', color: libCat === c.category ? '#fff' : 'var(--text2)', fontSize: 11, fontWeight: 800 }}
+                >
+                  {c.category}
+                </button>
+              ))}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {(FORMULA_LIBRARY.find((c) => c.category === libCat)?.items || []).map((item) => (
+                <button
+                  key={item.name}
+                  type="button"
+                  onClick={() => {
+                    const next = setList(tree, active, [...getList(tree, active), ...item.tree]);
+                    setTree(next);
+                    onBuild(compileEquation(next));
+                  }}
+                  style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '8px 12px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', textAlign: 'left', fontSize: 12, fontWeight: 700 }}
+                >
+                  <span style={{ flex: 1 }}>{item.name}</span>
+                  <span style={{ color: '#059669', fontWeight: 800 }}>Insert +</span>
+                </button>
+              ))}
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 6 }}>Inserts into the green box — still fully editable after.</div>
+          </div>
+        )}
       </div>
     </div>
   );

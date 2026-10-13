@@ -201,6 +201,7 @@ export type NotificationItem = {
   created_at?: string;
 };
 
+export type NoteAuthor = { name: string; avatar: string };
 export type ClassSlot = { id: string; course: string; day: number; start: string; end: string; venue: string; lecturer: string };
 export type RosterStudent = { id: string; name: string; email: string; level: string; topicsDone: number; quizzesTaken: number; lastActive: string | null };
 export type AdminContentTopic = { topic: number; lecture: number; versions: number; title: string };
@@ -248,7 +249,7 @@ export const api = {
       body: JSON.stringify(payload),
     }),
   week: (course: string, week: number) =>
-    apiFetch<{ course: string; week: number; title: string; subtitle: string; note_json: unknown; topicMeta?: TopicMeta[]; lectures?: number[]; authors?: string[] }>(
+    apiFetch<{ course: string; week: number; title: string; subtitle: string; note_json: unknown; topicMeta?: TopicMeta[]; lectures?: number[]; authors?: NoteAuthor[] }>(
       `/v1/courses/${encodeURIComponent(course)}/weeks/${week}`
     ),
   progress: (course: string, week: number, topic: number, lectureNo = 1) => {
@@ -293,7 +294,7 @@ export const api = {
     // Never request a blank code: it 404s by design and would only spam
     // retries (this exact storm showed up in production logs).
     if (!course || !course.trim()) return Promise.reject(new Error('No course selected.'));
-    return apiFetch<{ weeks: { week: number; title: string; subtitle: string; authors: string[] }[] }>(
+    return apiFetch<{ weeks: { week: number; title: string; subtitle: string; authors: NoteAuthor[] }[] }>(
       `/v1/courses/${encodeURIComponent(course.trim())}/weeks`
     );
   },
@@ -462,8 +463,8 @@ export const api = {
     apiFetch<{ request: { id: string; role: string; level: string; courses: string[]; status: string; created_at: string } | null }>('/v1/role-requests/mine'),
   cancelRoleRequest: () =>
     apiFetch<{ ok: boolean }>('/v1/role-requests/mine', { method: 'DELETE' }),
-  adminRoleRequests: () =>
-    apiFetch<{ requests: { id: string; user_id: string; role: string; level: string; courses: string[]; status: string; created_at: string; name: string; email: string }[] }>('/v1/admin/role-requests'),
+  adminRoleRequests: (history = false) =>
+    apiFetch<{ requests: { id: string; user_id: string; role: string; level: string; courses: string[]; status: string; created_at: string; decided_at?: string; name: string; email: string }[] }>(`/v1/admin/role-requests${history ? '?status=all' : ''}`),
   decideRoleRequest: (id: string, approve: boolean) =>
     apiFetch<{ ok: boolean; approved: boolean; granted?: string[]; capped?: string[] }>(`/v1/admin/role-requests/${id}`, { method: 'POST', body: JSON.stringify({ approve }) }),
   capAudit: () =>

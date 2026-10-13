@@ -472,23 +472,49 @@ function EquationInput({ value, onChange }: { value: string; onChange: (v: strin
     </div>
   );
 }
-// Word-like mini toolbar: Bold / Italic wrap the current selection (or the
-// caret point) with <strong> / <em>, the same HTML the reader renders.
-// Live formula preview below every equation input: what you see is what
-// students get, rendered by the same MathJax pipeline.
+// Marker shortcuts (WhatsApp-style, zero code): *bold*, _italic_,
+// ~strike~ compile to <strong>/<em>/<s> behind the scenes — the stored
+// note and the reader only ever see real tags. HTML regions and \(...\) /
+// \[...\] math are never touched; a backslash escapes (\* stays literal).
+export function convertMarkers(src: string): string {
+  if (!src || !/[*_~]/.test(src)) return src;
+  const parts: string[] = [];
+  const re = /(<[^>]*>|\\\([^]*?\\\)|\\\[[\s\S]*?\\\])/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  const pushText = (t: string) => {
+    if (t) parts.push(convertMarkerText(t));
+  };
+  while ((m = re.exec(src))) {
+    pushText(src.slice(last, m.index));
+    parts.push(m[0]);
+    last = m.index + m[0].length;
+  }
+  pushText(src.slice(last));
+  return parts.join('');
+}
+
+function convertMarkerText(t: string): string {
+  // Word-ish boundaries: snake_case and a*b stay literal, spaced markers compile.
+  return t
+    .replace(/(?<![\w\\])\*([^*\n]+?)\*(?![\w*])/g, '<strong>$1</strong>')
+    .replace(/(?<![\w\\])_([^_\n]+?)_(?![\w_])/g, '<em>$1</em>')
+    .replace(/(?<![\w\\])~([^~\n]+?)~(?![\w~])/g, '<s>$1</s>')
+    .replace(/\\([*_~])/g, '$1');
+}
 function RichArea({ value, onChange, rows, placeholder, ariaLabel }: { value: string; onChange: (v: string) => void; rows: number; placeholder?: string; ariaLabel?: string }) {
   const ref = useRef<HTMLTextAreaElement>(null);
   const wrap = (open: string, close: string) => {
     const el = ref.current;
     if (!el) {
-      onChange(`${value}${open}${close}`);
+      onChange(convertMarkers(`${value}${open}${close}`));
       return;
     }
     const start = el.selectionStart ?? value.length;
     const end = el.selectionEnd ?? value.length;
     const sel = value.slice(start, end) || 'text';
     const next = value.slice(0, start) + open + sel + close + value.slice(end);
-    onChange(next);
+    onChange(convertMarkers(next));
     requestAnimationFrame(() => {
       try {
         el.focus();
@@ -511,10 +537,11 @@ function RichArea({ value, onChange, rows, placeholder, ariaLabel }: { value: st
   return (
     <div>
       <div style={{ display: 'flex', gap: 6, marginBottom: 6 }} role="toolbar" aria-label="Text formatting">
-        <button type="button" onClick={() => wrap('<strong>', '</strong>')} style={{ ...btn, fontWeight: 900 }} aria-label="Bold">B</button>
-        <button type="button" onClick={() => wrap('<em>', '</em>')} style={{ ...btn, fontStyle: 'italic' }} aria-label="Italic">I</button>
+        <button type="button" onClick={() => wrap('*', '*')} style={{ ...btn, fontWeight: 900 }} aria-label="Bold (*text*)" title="Bold — or type *text*">B</button>
+        <button type="button" onClick={() => wrap('_', '_')} style={{ ...btn, fontStyle: 'italic' }} aria-label="Italic (_text_)" title="Italic — or type _text_">I</button>
+        <button type="button" onClick={() => wrap('~', '~')} style={{ ...btn, textDecoration: 'line-through' }} aria-label="Strikethrough (~text~)" title="Strikethrough — or type ~text~">S</button>
       </div>
-      <textarea ref={ref} value={value} onChange={(e) => onChange(e.target.value)} rows={rows} placeholder={placeholder} aria-label={ariaLabel} style={area} />
+      <textarea ref={ref} value={value} onChange={(e) => onChange(convertMarkers(e.target.value))} rows={rows} placeholder={placeholder} aria-label={ariaLabel} style={area} />
     </div>
   );
 }

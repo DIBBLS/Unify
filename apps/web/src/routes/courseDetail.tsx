@@ -8,7 +8,7 @@ import Flash from '../components/Flash';
 import { api } from '../lib/api';
 import { log } from '../lib/log';
 
-type WeekRow = { week: number; title: string; subtitle: string; authors?: string[] };
+type WeekRow = { week: number; title: string; subtitle: string; authors?: { name: string; avatar: string }[] };
 
 export default function CourseDetailRoute() {
   // Param name must match the route (/course/:courseCode in App.tsx) —
@@ -190,7 +190,20 @@ export default function CourseDetailRoute() {
               <span style={{ fontWeight: 700, display: 'block' }}>Week {w.week}{w.title ? ` — ${w.title}` : ''}</span>
               {w.subtitle && <span style={{ fontSize: 12, color: 'var(--text2)' }}>{w.subtitle}</span>}
               {w.authors && w.authors.length > 0 && (
-                <span style={{ fontSize: 11, color: '#059669', fontWeight: 700, display: 'block', marginTop: 2 }}>by {w.authors.join(', ')}</span>
+                <span style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 4 }}>
+                  <span style={{ display: 'flex' }}>
+                    {w.authors.slice(0, 3).map((a, ai) => (
+                      a.avatar ? (
+                        <img key={ai} src={a.avatar} alt={a.name} title={a.name} style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--surface)', marginLeft: ai === 0 ? 0 : -6 }} />
+                      ) : (
+                        <span key={ai} title={a.name} style={{ width: 20, height: 20, borderRadius: '50%', background: '#ecfdf5', color: '#059669', fontWeight: 800, fontSize: 10, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--surface)', marginLeft: ai === 0 ? 0 : -6 }}>
+                          {a.name.trim().charAt(0).toUpperCase()}
+                        </span>
+                      )
+                    ))}
+                  </span>
+                  <span style={{ fontSize: 11, color: '#059669', fontWeight: 700 }}>by {w.authors.map((a) => a.name).join(', ')}</span>
+                </span>
               )}
             </span>
             <ChevronRight size={18} color="#059669" />

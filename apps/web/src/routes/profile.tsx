@@ -83,17 +83,37 @@ export default function ProfileRoute() {
       setAvatarMsg('PNG, JPG or WEBP only.');
       return;
     }
-    if (file.size > 2 * 1024 * 1024) {
-      setAvatarMsg('Image must be ≤2MB.');
-      return;
-    }
     setUploadingAvatar(true);
     try {
+      // Standardize: downscale to a 256px JPEG (~20-40KB) on-device, so
+      // profile pictures stay tiny no matter what the camera produced.
       const dataUrl = await new Promise<string>((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = () => resolve(String(r.result || ''));
-        r.onerror = () => reject(new Error('read failed'));
-        r.readAsDataURL(file);
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+          try {
+            const S = 256;
+            const scale = Math.min(1, S / Math.max(img.width, img.height));
+            const w = Math.max(1, Math.round(img.width * scale));
+            const h = Math.max(1, Math.round(img.height * scale));
+            const cv = document.createElement('canvas');
+            cv.width = w;
+            cv.height = h;
+            const ctx = cv.getContext('2d');
+            if (!ctx) throw new Error('no canvas');
+            ctx.drawImage(img, 0, 0, w, h);
+            URL.revokeObjectURL(url);
+            resolve(cv.toDataURL('image/jpeg', 0.82));
+          } catch (e) {
+            URL.revokeObjectURL(url);
+            reject(e);
+          }
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error('unreadable image'));
+        };
+        img.src = url;
       });
       const res = await api.uploadAvatar(dataUrl);
       setProfile((prev) => (prev ? { ...prev, avatar_url: res.avatarUrl } : prev));

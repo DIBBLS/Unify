@@ -25,6 +25,7 @@ function ShareRedirect() {
 import StudioRoute from './routes/studio/index';
 import ClassesRoute from './routes/classes';
 import Mascot from './components/Mascot';
+import Toasts from './components/Toasts';
 import Loading from './components/Loading';
 import ErrorState from './components/ErrorState';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -148,6 +149,10 @@ export default function App() {
   return (
     <BrowserRouter>
       <ErrorBoundary>
+        {/* Global error toasts live here — above the routes — so failures
+        surface on EVERY screen including chromeless ones (/auth,
+        /onboarding, /s/:token) that never mount the layout. */}
+        <Toasts />
         <Routes>
         {/* Chromeless: no top bar on sign in / onboarding */}
         <Route path="/auth" element={<AuthRoute />} />

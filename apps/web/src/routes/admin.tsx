@@ -111,18 +111,19 @@ export default function AdminRoute() {
     }
   };
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
-  // Staff requests queue.
-  const [requests, setRequests] = useState<{ id: string; user_id: string; role: string; level: string; courses: string[]; status: string; created_at: string; name: string; email: string }[]>([]);
+  // Staff requests queue + decided history.
+  const [requests, setRequests] = useState<{ id: string; user_id: string; role: string; level: string; courses: string[]; status: string; created_at: string; decided_at?: string; name: string; email: string }[]>([]);
   const [deciding, setDeciding] = useState<string | null>(null);
+  const [reqTab, setReqTab] = useState<'pending' | 'history'>('pending');
   // First paint lands on the requests queue when anything waits — pending
   // applications outrank routine browsing. Later refreshes never yank.
   const routedRef = useRef(false);
 
-  const loadRequests = async () => {
+  const loadRequests = async (history = false) => {
     try {
-      const r = await api.adminRoleRequests();
+      const r = await api.adminRoleRequests(history);
       setRequests(r.requests || []);
-      if (!routedRef.current && (r.requests || []).length > 0) {
+      if (!history && !routedRef.current && (r.requests || []).length > 0) {
         routedRef.current = true;
         setOpenModule('requests');
       }
@@ -143,6 +144,8 @@ export default function AdminRoute() {
           : 'Request declined. The applicant keeps student access.'
       );
       await refresh();
+      // Decided rows leave the pending tab; history tab picks them up.
+      if (reqTab === 'history') void loadRequests(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Decision failed.');
     } finally {
@@ -745,16 +748,28 @@ export default function AdminRoute() {
         <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 8 }}>
           Lecturer/contributor applications. Approve grants the role + teaching courses (contributor 2-per-level cap enforced); both sides notify by bell + email.
         </div>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+          {(['pending', 'history'] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => { setReqTab(t); void loadRequests(t === 'history'); }}
+              style={{ flex: 1, padding: '8px 10px', borderRadius: 9999, border: `1px solid ${reqTab === t ? '#059669' : 'var(--border)'}`, background: reqTab === t ? '#10b981' : 'var(--surface)', color: reqTab === t ? '#fff' : 'var(--text2)', fontSize: 12, fontWeight: 800 }}
+            >
+              {t === 'pending' ? 'Pending' : 'History'}
+            </button>
+          ))}
+        </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {requests.length === 0 && <div style={{ color: 'var(--text2)', fontSize: 13, textAlign: 'center', padding: 20 }}>Queue clear — nothing waiting.</div>}
+          {requests.length === 0 && <div style={{ color: 'var(--text2)', fontSize: 13, textAlign: 'center', padding: 20 }}>{reqTab === 'pending' ? 'Queue clear — nothing waiting.' : 'No decisions yet.'}</div>}
           {requests.map((r) => (
             <div key={r.id} style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px' }}>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 800, fontSize: 14 }}>{r.name} <span style={{ fontWeight: 500, color: 'var(--text2)' }}>wants {r.role}</span></div>
+                  <div style={{ fontWeight: 800, fontSize: 14 }}>{r.name} <span style={{ fontWeight: 500, color: 'var(--text2)' }}>{r.status === 'pending' ? `wants ${r.role}` : `· ${r.role} ${r.status}`}</span></div>
                   <div style={{ fontSize: 12, color: 'var(--text2)' }}>{r.email}{r.level ? ` · ${r.level}` : ''}{r.courses?.length ? ` · ${r.courses.join(', ')}` : ''}</div>
                 </div>
               </div>
+              {r.status === 'pending' && (
               <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                 <button
                   onClick={() => void decideRequest(r.id, true)}
@@ -771,6 +786,7 @@ export default function AdminRoute() {
                   Decline
                 </button>
               </div>
+              )}
             </div>
           ))}
         </div>

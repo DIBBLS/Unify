@@ -307,6 +307,14 @@ export default function DashboardRoute() {
           </div>
           <Mascot size={64} animate={daypart() === 'morning' ? 'sip' : 'wave'} />
         </div>
+        {!profile?.avatar_url && (
+          <div style={{ margin: '12px 16px 0', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
+            <div style={{ flex: 1, fontSize: 13 }}><strong>Finish your profile</strong> <span style={{ color: 'var(--text2)' }}>— add a picture auditors see on your notes.</span></div>
+            <Link to="/profile" style={{ padding: '8px 16px', background: '#10b981', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, fontSize: 12, whiteSpace: 'nowrap' }}>
+              Add photo
+            </Link>
+          </div>
+        )}
         {astats && !isAdmin && (
           <div className="rise" style={{ margin: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
             <div>
@@ -464,6 +472,21 @@ export default function DashboardRoute() {
       {quizzes.taken > 0 && (
         <div style={{ margin: '0 16px 12px', fontSize: 12, color: 'var(--text2)', textAlign: 'center' }}>
           {quizzes.taken} {quizzes.taken === 1 ? 'quiz' : 'quizzes'} taken · {quizzes.avg}% average
+        </div>
+      )}
+
+      {!profile?.avatar_url && (
+        <div style={{ margin: '0 16px 12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--surface2)', border: '1px dashed var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: 'var(--text3)', flexShrink: 0 }}>
+            {(profile?.first_name || 'U').trim().charAt(0).toUpperCase()}
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 800, fontSize: 14 }}>Finish your profile</div>
+            <div style={{ fontSize: 12, color: 'var(--text2)' }}>Add a picture so coursemates and lecturers recognize you.</div>
+          </div>
+          <Link to="/profile" style={{ padding: '8px 16px', background: '#10b981', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, fontSize: 12, whiteSpace: 'nowrap' }}>
+            Add photo
+          </Link>
         </div>
       )}
 

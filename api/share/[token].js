@@ -77,8 +77,9 @@ module.exports = async (req, res) => {
   const names = topics.slice(0, 5).map((t) => esc(t.title || ('Topic ' + t.number)));
   // Per-link card: the actual note authors (contributors AND lecturers —
   // whoever published these topics), not a generic brand line.
+  const aname = (a) => (typeof a === 'string' ? a : (a && a.name) || '');
   const byline = Array.isArray(data.authors) && data.authors.length
-    ? ' by ' + data.authors.slice(0, 3).map((a) => esc(a)).join(', ')
+    ? ' by ' + data.authors.slice(0, 3).map((a) => esc(aname(a))).join(', ')
     : '';
   const title = data.course + ' · Week ' + data.week + ' on Unify Learn';
   const desc = (data.title || ('Week ' + data.week)) + ' — ' + topics.length + ' topics' + byline + ', free for ' + countdown(data.share.expires_at) + '.';

@@ -417,6 +417,7 @@ export default function AuthRoute() {
           </button>
         </div>
 
+        {error && <Flash tone="error" message={error} ttl={FLASH_TTL} onDismiss={() => setError('')} />}
         {success && <Flash tone="success" message={success} ttl={FLASH_TTL} onDismiss={() => setSuccess('')} />}
         {success && pendingEmail && (
           <button onClick={handleResend} disabled={loading} style={{ background: 'none', border: 'none', color: '#059669', fontSize: 13, fontWeight: 700, textDecoration: 'underline', marginBottom: 12 }}>
