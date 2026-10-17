@@ -2,6 +2,7 @@ import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { BookOpen, CalendarDays, MapPin, Trash2, Users } from 'lucide-react';
 import BackButton from '../components/BackButton';
+import Drop from '../components/Drop';
 import { ClassesSkeleton } from '../components/Skeletons';
 import ErrorState from '../components/ErrorState';
 import Mascot from '../components/Mascot';
@@ -192,11 +193,13 @@ export default function ClassesRoute() {
             <div style={{ display: 'flex', gap: 8 }}>
               <label style={{ flex: 1, fontSize: 12, fontWeight: 700 }}>
                 Day
-                <select value={day} onChange={(e) => setDay(Number(e.target.value))} style={{ display: 'block', width: '100%', marginTop: 4, padding: 10, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontWeight: 700 }}>
-                  {DAYS.map((d, i) => (
-                    <option key={d} value={i}>{d}</option>
-                  ))}
-                </select>
+                <Drop
+                  value={String(day)}
+                  onChange={(v) => setDay(Number(v))}
+                  label="Day"
+                  style={{ marginTop: 4 }}
+                  options={DAYS.map((d, i) => ({ value: String(i), label: d }))}
+                />
               </label>
               <label style={{ flex: 1, fontSize: 12, fontWeight: 700 }}>
                 Start

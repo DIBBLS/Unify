@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { LogOut, Pencil, Shield, X, Sun, Moon, MessageCircle } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import ConfirmModal from '../components/ConfirmModal';
+import Drop from '../components/Drop';
 import { useTheme } from '../hooks/useTheme';
 import { useDesign } from '../hooks/useDesign';
 import { APP_VERSION } from '../lib/version';
@@ -383,51 +384,64 @@ export default function ProfileRoute() {
           </label>
           <label style={{ fontSize: 12, fontWeight: 700 }}>
             University
-            <select value={dUni} onChange={(e) => setDUni(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid var(--border)', borderRadius: 10, fontSize: 14, display: 'block' }}>
-              <option value="">Select…</option>
-              {!unis.some((u) => u.name === dUni) && dUni && <option value={dUni}>{dUni}</option>}
-              {unis.map((u) => (
-                <option key={u.id} value={u.name}>{u.name}</option>
-              ))}
-            </select>
+            <Drop
+              value={dUni}
+              onChange={setDUni}
+              label="Select…"
+              style={{ width: '100%', marginTop: 4 }}
+              options={[
+                ...(dUni && !unis.some((u) => u.name === dUni) ? [{ value: dUni, label: dUni }] : []),
+                ...unis.map((u) => ({ value: u.name, label: u.name })),
+              ]}
+            />
           </label>
           <label style={{ fontSize: 12, fontWeight: 700 }}>
             Faculty
-            <select value={dFaculty} onChange={(e) => setDFaculty(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid var(--border)', borderRadius: 10, fontSize: 14, display: 'block' }}>
-              <option value="">Select…</option>
-              {!['Faculty of Engineering'].includes(dFaculty) && dFaculty && <option value={dFaculty}>{dFaculty}</option>}
-              <option value="Faculty of Engineering">Faculty of Engineering</option>
-            </select>
+            <Drop
+              value={dFaculty}
+              onChange={setDFaculty}
+              label="Select…"
+              style={{ width: '100%', marginTop: 4 }}
+              options={[
+                ...(dFaculty && !['Faculty of Engineering'].includes(dFaculty) ? [{ value: dFaculty, label: dFaculty }] : []),
+                { value: 'Faculty of Engineering', label: 'Faculty of Engineering' },
+              ]}
+            />
           </label>
           <label style={{ fontSize: 12, fontWeight: 700 }}>
             Department
-            <select value={dDept} onChange={(e) => setDDept(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid var(--border)', borderRadius: 10, fontSize: 14, display: 'block' }}>
-              <option value="">Select…</option>
-              {!DEPARTMENTS.includes(dDept) && dDept && <option value={dDept}>{dDept}</option>}
-              {DEPARTMENTS.map((d) => (
-                <option key={d} value={d}>{d}</option>
-              ))}
-            </select>
+            <Drop
+              value={dDept}
+              onChange={setDDept}
+              label="Select…"
+              style={{ width: '100%', marginTop: 4 }}
+              options={[
+                ...(dDept && !DEPARTMENTS.includes(dDept) ? [{ value: dDept, label: dDept }] : []),
+                ...DEPARTMENTS.map((d) => ({ value: d, label: d })),
+              ]}
+            />
           </label>
           {!canAuthor && (
             <>
               <label style={{ fontSize: 12, fontWeight: 700 }}>
                 Level
-                <select value={dLevel} onChange={(e) => setDLevel(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid var(--border)', borderRadius: 10, fontSize: 14, display: 'block' }}>
-                  <option value="">Select…</option>
-                  {LEVELS.map((l) => (
-                    <option key={l} value={l}>{l}</option>
-                  ))}
-                </select>
+                <Drop
+                  value={dLevel}
+                  onChange={setDLevel}
+                  label="Select…"
+                  style={{ width: '100%', marginTop: 4 }}
+                  options={LEVELS.map((l) => ({ value: l, label: l }))}
+                />
               </label>
               <label style={{ fontSize: 12, fontWeight: 700 }}>
                 Graduation target
-                <select value={dTarget} onChange={(e) => setDTarget(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid var(--border)', borderRadius: 10, fontSize: 14, display: 'block' }}>
-                  <option value="">Select…</option>
-                  {TARGETS.map((t) => (
-                    <option key={t.val} value={String(t.val)}>{t.label} — {t.val}</option>
-                  ))}
-                </select>
+                <Drop
+                  value={dTarget}
+                  onChange={setDTarget}
+                  label="Select…"
+                  style={{ width: '100%', marginTop: 4 }}
+                  options={TARGETS.map((t) => ({ value: String(t.val), label: `${t.label} — ${t.val}` }))}
+                />
               </label>
             </>
           )}

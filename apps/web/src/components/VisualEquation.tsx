@@ -284,6 +284,20 @@ function lxOf(g: string): string {
   return g;
 }
 
+function pathValid(tree: MNode[], path: Path): boolean {
+  let list: MNode[] = tree;
+  for (let i = 0; i < path.length; i += 2) {
+    const idx = path[i] as number;
+    const key = path[i + 1] as string;
+    const node = list[idx];
+    if (!node) return false;
+    const next = (node as unknown as Record<string, MNode[]>)[key];
+    if (!Array.isArray(next)) return false;
+    list = next;
+  }
+  return true;
+}
+
 function getList(tree: MNode[], path: Path): MNode[] {
   let list: MNode[] = tree;
   for (let i = 0; i < path.length; i += 2) {
@@ -385,13 +399,26 @@ export default function VisualEquation({ initial, onBuild }: { initial: MNode[];
   const [libCat, setLibCat] = useState(FORMULA_LIBRARY[0].category);
 
   const mutate = (fn: (list: MNode[]) => MNode[]) => {
-    const next = setList(tree, active, fn(getList(tree, active)));
+    // Self-heal: a cursor pointing at a node that no longer exists (cleared,
+    // deleted, replaced) would otherwise write into the wrong box — the old
+    // fraction kept "winning". Fall back to root.
+    const target = pathValid(tree, active) ? active : [];
+    if (target !== active) setActive(target);
+    const next = setList(tree, target, fn(getList(tree, target)));
     setTree(next);
     onBuild(compileEquation(next));
   };
 
   const addTok = (g: string) => mutate((list) => [...list, { t: 'tok', g, lx: lxOf(g) }]);
-  const back = () => mutate((list) => list.slice(0, -1));
+  const back = () => {
+    // In an empty slot (e.g. cleared numerator), Del steps out of the box
+    // instead of leaving the fraction "stuck" with nothing to delete.
+    if (active.length && pathValid(tree, active) && !getList(tree, active).length) {
+      setActive(active.slice(0, -2));
+      return;
+    }
+    mutate((list) => list.slice(0, -1));
+  };
   const clear = () => {
     setTree([]);
     setActive([]);
@@ -406,8 +433,17 @@ export default function VisualEquation({ initial, onBuild }: { initial: MNode[];
           : kind === 'sub'
             ? { t: 'sub', b: [], e: [] }
             : { t: 'sqrt', x: [] };
+    // Move the cursor INTO the structure just chosen (numerator / base /
+    // radicand) so it highlights as selected and keys land there — instead
+    // of the previously-tapped box (e.g. an old fraction) still capturing.
+    const target = pathValid(tree, active) ? active : [];
+    const idx = getList(tree, target).length;
     mutate((list) => [...list, node]);
+    const slot = kind === 'frac' ? 'n' : kind === 'sqrt' ? 'x' : 'b';
+    setActive([...target, idx, slot]);
   };
+
+  const activeKey = active.join('|');
 
   const key: React.CSSProperties = {
     minWidth: 38,
@@ -421,7 +457,6 @@ export default function VisualEquation({ initial, onBuild }: { initial: MNode[];
     textAlign: 'center',
   };
   const structBtn: React.CSSProperties = { ...key, borderColor: '#059669', color: '#059669' };
-  const activeKey = active.join('|');
 
   return (
     <div>
@@ -488,7 +523,9 @@ export default function VisualEquation({ initial, onBuild }: { initial: MNode[];
                   key={item.name}
                   type="button"
                   onClick={() => {
-                    const next = setList(tree, active, [...getList(tree, active), ...item.tree]);
+                    const target = pathValid(tree, active) ? active : [];
+                    if (target !== active) setActive(target);
+                    const next = setList(tree, target, [...getList(tree, target), ...item.tree]);
                     setTree(next);
                     onBuild(compileEquation(next));
                   }}

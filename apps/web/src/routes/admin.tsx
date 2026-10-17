@@ -9,6 +9,7 @@ import Flash from '../components/Flash';
 import ConfirmModal from '../components/ConfirmModal';
 import { Bars, Donut, Spark } from '../components/Charts';
 import BackButton from '../components/BackButton';
+import Drop from '../components/Drop';
 
 type Stats = { users: number; byRole: Record<string, number>; weeks: number; topics: number; courses: number; xpTotal: number };
 type Uni = { id: string; name: string; short_name?: string };
@@ -796,22 +797,37 @@ export default function AdminRoute() {
       <Module id="users" title="Users & roles" badge={users.length} openId={openModule} onToggle={setOpenModule}>
       <div style={{ ...card, display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
         <input value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="Invite by email…" style={{ ...input, flex: 2, minWidth: 140 }} />
-        <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value)} style={{ ...input, flex: 1, minWidth: 110 }}>
-          <option value="student">Student</option>
-          <option value="lecturer">Lecturer</option>
-          <option value="contributor">Contributor</option>
-        </select>
+        <Drop
+          value={inviteRole}
+          onChange={setInviteRole}
+          label="Invite role"
+          style={{ flex: 1, minWidth: 110 }}
+          options={[
+            { value: 'student', label: 'Student' },
+            { value: 'lecturer', label: 'Lecturer' },
+            { value: 'contributor', label: 'Contributor' },
+          ]}
+        />
         <button onClick={invite} style={primaryBtn}>Invite</button>
       </div>
       <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name…" style={{ ...input, flex: 1, minWidth: 140 }} />
-        <select value={roleFilter} onChange={(e) => { setRoleFilter(e.target.value); void loadAll(q, e.target.value); }} style={input}>
-          <option value="">All roles</option>
-          <option value="student">Students</option>
-          <option value="lecturer">Lecturers</option>
-          <option value="contributor">Contributors</option>
-          <option value="admin">Admins</option>
-        </select>
+        <Drop
+          value={roleFilter}
+          onChange={(v) => {
+            setRoleFilter(v);
+            void loadAll(q, v);
+          }}
+          label="Role filter"
+          style={{ minWidth: 130 }}
+          options={[
+            { value: '', label: 'All roles' },
+            { value: 'student', label: 'Students' },
+            { value: 'lecturer', label: 'Lecturers' },
+            { value: 'contributor', label: 'Contributors' },
+            { value: 'admin', label: 'Admins' },
+          ]}
+        />
         <button onClick={() => refresh()} style={primaryBtn}>Search</button>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -892,16 +908,13 @@ export default function AdminRoute() {
             )}
             <div style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'center' }}>
               <span style={{ fontSize: 12, color: 'var(--text2)', fontWeight: 700 }}>Level:</span>
-              <select
+              <Drop
                 value={u.level || ''}
-                onChange={(e) => changeLevel(u.id, e.target.value)}
-                style={{ ...input, flex: 1 }}
-              >
-                <option value="" disabled>{u.level || 'No level'}</option>
-                {[...LEVELS, 'Graduated'].map((l) => (
-                  <option key={l} value={l}>{l}</option>
-                ))}
-              </select>
+                onChange={(v) => changeLevel(u.id, v)}
+                label="Level"
+                style={{ flex: 1 }}
+                options={[...LEVELS, 'Graduated'].map((l) => ({ value: l, label: l }))}
+              />
             </div>
             {(u.role === 'lecturer' || u.role === 'contributor') && u.id !== ownId && (
               <div style={{ marginTop: 8 }}>
@@ -954,17 +967,16 @@ export default function AdminRoute() {
                         placeholder="Search code or title…"
                         style={{ ...input, flex: 2, minWidth: 0 }}
                       />
-                      <select
+                      <Drop
                         value={assignLevel}
-                        onChange={(e) => setAssignLevel(e.target.value)}
-                        aria-label="Filter by level"
-                        style={{ ...input, flex: 1, minWidth: 100 }}
-                      >
-                        <option value="">All levels</option>
-                        {LEVELS.map((l) => (
-                          <option key={l} value={l}>{l.replace(' Level', '')}</option>
-                        ))}
-                      </select>
+                        onChange={setAssignLevel}
+                        label="Filter by level"
+                        style={{ flex: 1, minWidth: 100 }}
+                        options={[
+                          { value: '', label: 'All levels' },
+                          ...LEVELS.map((l) => ({ value: l, label: l.replace(' Level', '') })),
+                        ]}
+                      />
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 220, overflowY: 'auto', marginBottom: 8 }}>
                       {(() => {
