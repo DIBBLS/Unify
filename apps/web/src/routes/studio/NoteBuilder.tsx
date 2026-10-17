@@ -613,11 +613,14 @@ function BlockEditor({
       <div style={{ ...card, background: '#fafafa' }}>
         {head('Formula')}
         <label style={label}>Label<input value={block.label} onChange={(e) => onChange({ ...block, label: e.target.value })} placeholder="e.g. Arithmetic mean" style={input} /></label>
-        <label style={{ ...label, marginTop: 8 }}>Equation (LaTeX)
+        {/* NOT a <label>: a tap on a non-interactive box inside a <label>
+        gets forwarded to the label's first button — which is the a/b key,
+        so every box tap inserted a fraction. Caption stays, semantics don't. */}
+        <div style={{ ...label, marginTop: 8 }}>Equation (LaTeX)
           <span style={{ display: 'block', marginTop: 6 }}>
             <EquationInput value={block.equation} onChange={(v) => onChange({ ...block, equation: v })} />
           </span>
-        </label>
+        </div>
         {!block.equation.trim() && (
           <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 6 }}>Build it visually above — it renders inside the editor exactly as students see it.</div>
         )}
