@@ -458,7 +458,7 @@ function EquationInput({ value, onChange }: { value: string; onChange: (v: strin
             initial={tree}
             onBuild={(latex) => {
               setBuilt(latex);
-              if (latex) onChange(latex);
+              onChange(latex);
             }}
           />
           {(built || value).trim() ? (

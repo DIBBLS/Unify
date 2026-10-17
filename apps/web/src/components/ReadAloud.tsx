@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Volume2, Square } from 'lucide-react';
+import Drop from './Drop';
 import type { ContentBlock, Topic } from '../types/note';
 
 function stripHtml(s: string): string {
@@ -287,10 +288,10 @@ export function ReadAloud({ topic }: { topic: Topic }) {
               style={{ width: '100%', marginTop: 4, height: 32 }}
             />
           </div>
-          <select
-            value={rate}
-            onChange={(e) => {
-              const r = Number(e.target.value);
+          <Drop
+            value={String(rate)}
+            onChange={(v) => {
+              const r = Number(v);
               pickRate(r);
               if (audioRef.current) {
                 try {
@@ -300,14 +301,10 @@ export function ReadAloud({ topic }: { topic: Topic }) {
                 }
               }
             }}
-            aria-label="Playback speed"
-            title="Playback speed"
-            style={{ padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 9999, fontSize: 12, fontWeight: 800, color: '#059669', background: 'var(--surface)', flexShrink: 0 }}
-          >
-            {RATES.map((r) => (
-              <option key={r} value={r}>{r}×</option>
-            ))}
-          </select>
+            label="Playback speed"
+            style={{ width: 74, flexShrink: 0 }}
+            options={RATES.map((r) => ({ value: String(r), label: `${r}×` }))}
+          />
         </div>
         <button onClick={() => setUseNarrator(false)} style={{ background: 'none', border: 'none', color: 'var(--text3)', fontSize: 11, fontWeight: 700, marginTop: 4 }}>
           Prefer the device voice instead?
@@ -340,34 +337,28 @@ export function ReadAloud({ topic }: { topic: Topic }) {
             {partIdx + 1}/{parts.length} · {parts[partIdx].title}
           </div>
         )}
-        <select
-          value={rate}
-          onChange={(e) => pickRate(Number(e.target.value))}
-          aria-label="Playback speed"
-          title="Playback speed"
-          style={{ padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 9999, fontSize: 12, fontWeight: 800, color: '#059669', background: 'var(--surface)', flexShrink: 0 }}
-        >
-          {RATES.map((r) => (
-            <option key={r} value={r}>{r}×</option>
-          ))}
-        </select>
+        <Drop
+          value={String(rate)}
+          onChange={(v) => pickRate(Number(v))}
+          label="Playback speed"
+          style={{ width: 74, flexShrink: 0 }}
+          options={RATES.map((r) => ({ value: String(r), label: `${r}×` }))}
+        />
         {!playing && ranked.length > 1 && (
-          <select
+          <Drop
             value={activeVoice?.voiceURI || ''}
-            onChange={(e) => pickVoice(e.target.value)}
-            aria-label="Reading voice"
-            style={{ flex: 1, minWidth: 0, padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 9999, fontSize: 12, fontWeight: 700, color: 'var(--text2)', background: 'var(--surface)' }}
-          >
-            {ranked.map((v) => {
+            onChange={pickVoice}
+            label="Reading voice"
+            style={{ flex: 1, minWidth: 0 }}
+            options={ranked.map((v) => {
               const g = voiceGender(v);
               const naija = /ng|nigeria/i.test(v.lang + ' ' + v.name);
-              return (
-                <option key={v.voiceURI} value={v.voiceURI}>
-                  {v.name} ({v.lang}){naija ? ' · Naija' : ''}{g ? ` · ${g}` : ''}
-                </option>
-              );
+              return {
+                value: v.voiceURI,
+                label: `${v.name} (${v.lang})${naija ? ' · Naija' : ''}${g ? ` · ${g}` : ''}`,
+              };
             })}
-          </select>
+          />
         )}
       </div>
       {!playing && (

@@ -1,8 +1,9 @@
 import { toastError } from '../../lib/toast';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowRight, Check, X, ChevronDown } from 'lucide-react';
 import BackButton from '../../components/BackButton';
+import Drop from '../../components/Drop';
 import Flash from '../../components/Flash';
 import Mascot from '../../components/Mascot';
 import { TopicSlice } from '../../components/TopicSlice';
@@ -49,6 +50,14 @@ export default function StudioRoute() {
   // Live convert progress (parts done/total + model), so long generations
   // never look stuck on a generic spinner.
   const [convertProg, setConvertProg] = useState<{ done: number; total: number; model: string } | null>(null);
+  // Wall-clock start of the current convert, for a live elapsed timer.
+  const [workStart, setWorkStart] = useState(0);
+  // Bumped once a second while working so the elapsed clock re-renders.
+  const [elapsedTick, setElapsedTick] = useState(0);
+  // Observed pace of conversion (ms per part) + when the last part
+  // completed — together they project the in-flight part's share.
+  const partPace = useRef(0);
+  const lastPartAt = useRef(0);
   // Review summaries: topics + quiz collapse to one-line summaries
   // (expand for the full preview). Long generations stop being a scroll.
   const [expandedTopic, setExpandedTopic] = useState<string | null>(null);
@@ -136,7 +145,12 @@ export default function StudioRoute() {
     if (!working) return;
     setWorkMsg(0);
     const t = setInterval(() => setWorkMsg((i) => (i + 1) % WORK_MSGS.length), 2500);
-    return () => clearInterval(t);
+    // Re-render every second while a job runs so the elapsed clock ticks.
+    const tick = setInterval(() => setElapsedTick((n) => n + 1), 1000);
+    return () => {
+      clearInterval(t);
+      clearInterval(tick);
+    };
   }, [working]);
 
   // Course dropdown: contributors see ONLY assigned courses (server
@@ -172,6 +186,7 @@ export default function StudioRoute() {
     let cancelled = false;
     (async () => {
       setError('');
+      setWorkStart(Date.now());
       setWorking(true);
       try {
         const data = await api.week(editCourse, editWeek);
@@ -233,6 +248,10 @@ export default function StudioRoute() {
     if (estParts > 1) {
       setConvertHint(`Large input (~${raw.length.toLocaleString()} chars) — converting in ~${estParts} parts. Stay on this page; progress shows below.`);
     }
+    // Start time so the loader can show a live elapsed clock.
+    setWorkStart(Date.now());
+    partPace.current = 0;
+    lastPartAt.current = 0;
     setWorking(true);
     try {
       // Async jobs: POST plans instantly, then poll for real part progress.
@@ -249,12 +268,21 @@ export default function StudioRoute() {
       const deadline = Date.now() + 10 * 60000;
       setConvertProg({ done: 0, total, model: '' });
       let res: Awaited<ReturnType<typeof api.convertStatus>> | null = null;
+      const pollStart = Date.now();
+      let seenDone = 0;
       for (;;) {
         if (Date.now() > deadline) throw new Error('Conversion is taking too long — the job may still finish; press Generate again in a minute.');
         await new Promise((r) => setTimeout(r, 3000));
         const st = await api.convertStatus(started.jobId);
         if (st.status === 'working') {
-          setConvertProg({ done: Math.min(st.partsDone, total), total, model: st.currentModel || '' });
+          const d = Math.min(st.partsDone, total);
+          if (d > seenDone) {
+            // Record observed pace so the bar can project the part in flight.
+            partPace.current = (Date.now() - pollStart) / d;
+            lastPartAt.current = Date.now();
+            seenDone = d;
+          }
+          setConvertProg({ done: d, total, model: st.currentModel || '' });
           setConvertHint(`Converting part ${Math.min(st.partsDone + 1, total)} of ${total}${st.currentModel ? ` · ${st.currentModel}` : ''}…`);
           continue;
         }
@@ -522,7 +550,21 @@ export default function StudioRoute() {
   };
 
   if (working) {
-    const pct = convertProg && convertProg.total > 0 ? Math.round((convertProg.done / convertProg.total) * 100) : 0;
+    // Start-to-finish %: completed parts + a smooth share of the in-flight
+    // one (time since the last part landed vs the observed per-part pace),
+    // so the bar always advances instead of stepping only when a part lands.
+    const elapsed = workStart ? Math.max(0, Math.floor((Date.now() - workStart) / 1000)) : 0;
+    let pct = 0;
+    if (convertProg && convertProg.total > 0) {
+      const { done, total } = convertProg;
+      const pace = partPace.current;
+      const sinceLast = lastPartAt.current ? Date.now() - lastPartAt.current : 0;
+      const inFlight = pace > 0 && done > 0 ? Math.min(0.98, sinceLast / pace) : 0;
+      pct = Math.round(((done + inFlight) / total) * 100);
+    }
+    const mm = String(Math.floor(elapsed / 60));
+    const ss = String(elapsed % 60).padStart(2, '0');
+    const elapsedLabel = `${mm}:${ss}`;
     return (
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '60px 20px 80px', textAlign: 'center' }}>
         <Mascot size={110} animate="float" />
@@ -533,7 +575,9 @@ export default function StudioRoute() {
           <div className="progress-fill" style={{ width: `${convertProg ? Math.max(pct, 6) : 12}%` }} />
         </div>
         <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 8 }}>
-          {convertProg && convertProg.total > 1 ? `${pct}%${convertProg.model ? ` · ${convertProg.model}` : ''}` : 'Talking to the model…'}
+          {convertProg && convertProg.total > 1
+            ? `${pct}% · ${elapsedLabel} elapsed${convertProg.model ? ` · ${convertProg.model}` : ''}`
+            : `Talking to the model… · ${elapsedLabel} elapsed`}
         </div>
         <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>Stay on this page — your draft appears here when it's ready.</div>
       </div>
@@ -602,12 +646,16 @@ export default function StudioRoute() {
             <label style={{ ...label, flex: 1, minWidth: 140 }}>
               Course
               {catalog.length > 0 ? (
-                <select value={course} onChange={(e) => setCourse(e.target.value)} style={input}>
-                  {!catalog.some((c) => c.code === course) && <option value={course}>{course}</option>}
-                  {catalog.map((c) => (
-                    <option key={c.code} value={c.code}>{c.code} — {c.title}</option>
-                  ))}
-                </select>
+                <Drop
+                  value={course}
+                  onChange={setCourse}
+                  label="Course"
+                  style={input}
+                  options={[
+                    ...(course && !catalog.some((c) => c.code === course) ? [{ value: course, label: course }] : []),
+                    ...catalog.map((c) => ({ value: c.code, label: `${c.code} — ${c.title}` })),
+                  ]}
+                />
               ) : (
                 <input value={course} onChange={(e) => setCourse(e.target.value)} placeholder="Course code" style={input} />
               )}
@@ -672,11 +720,13 @@ export default function StudioRoute() {
                   </label>
                   <label style={label}>
                     Segmentation
-                    <select value={mode} onChange={(e) => setMode(e.target.value)} style={input}>
-                      {MODES.map((m) => (
-                        <option key={m.id} value={m.id}>{m.label}</option>
-                      ))}
-                    </select>
+                    <Drop
+                      value={mode}
+                      onChange={setMode}
+                      label="Segmentation"
+                      style={input}
+                      options={MODES.map((m) => ({ value: m.id, label: m.label }))}
+                    />
                   </label>
                 </div>
               </details>
@@ -840,11 +890,10 @@ export default function StudioRoute() {
                           <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text2)' }}>
                             Lecture {(t.lecture || 1)} · Topic {t.number}
                           </span>
-                          <select
-                            aria-label={`Lecture for Topic ${t.number}`}
-                            value={t.lecture || 1}
-                            onChange={(e) => {
-                              const lec = Number(e.target.value) || 1;
+                          <Drop
+                            value={String(t.lecture || 1)}
+                            onChange={(v) => {
+                              const lec = Number(v) || 1;
                               setNote({
                                 ...note,
                                 topics: note.topics.map((x) =>
@@ -853,12 +902,10 @@ export default function StudioRoute() {
                               });
                               setValidation(null);
                             }}
-                            style={{ fontSize: 12, fontWeight: 700, borderRadius: 9999, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', padding: '4px 8px' }}
-                          >
-                            {[1, 2, 3].map((l) => (
-                              <option key={l} value={l}>Lecture {l}</option>
-                            ))}
-                          </select>
+                            label={`Lecture for Topic ${t.number}`}
+                            style={{ width: 108, flexShrink: 0 }}
+                            options={[1, 2, 3].map((l) => ({ value: String(l), label: `Lecture ${l}` }))}
+                          />
                         </div>
                         <TopicSlice topic={t} />
                         <button
