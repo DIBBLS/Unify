@@ -360,3 +360,6 @@ sticky icon sidebar; phones get a horizontal pill rail on top. */
   .recall-answer.blurred{filter:none;max-height:none;overflow:visible}
   .topic-card,.mini-check,.formula-box,.insight-box,.analogy-box,.symbol-card{box-shadow:none;break-inside:avoid}
 }
+
+.update-dot{width:8px;height:8px;border-radius:50%;background:#10b981;flex-shrink:0;animation:pulse-dot 1.6s ease-out infinite}
+@keyframes pulse-dot{0%{box-shadow:0 0 0 0 rgba(16,185,129,.55)}70%{box-shadow:0 0 0 8px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
