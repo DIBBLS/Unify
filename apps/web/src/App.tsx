@@ -27,6 +27,7 @@ import ClassesRoute from './routes/classes';
 import Mascot from './components/Mascot';
 import Toasts from './components/Toasts';
 import ZoomBar from './components/ZoomBar';
+import InstallBar from './components/InstallBar';
 import Loading from './components/Loading';
 import ErrorState from './components/ErrorState';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -155,6 +156,7 @@ export default function App() {
         /onboarding, /s/:token) that never mount the layout. */}
         <Toasts />
         <ZoomBar />
+        <InstallBar />
         <Routes>
         {/* Chromeless: no top bar on sign in / onboarding */}
         <Route path="/auth" element={<AuthRoute />} />
