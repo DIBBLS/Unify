@@ -7,6 +7,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import Wordmark from '../components/Wordmark';
 import { api } from '../lib/api';
 import { recordNav } from '../lib/navHistory';
+import { useFocusMode } from '../lib/focus';
 import OfflineBanner from '../components/OfflineBanner';
 
 type Tab = {
@@ -62,6 +63,9 @@ export default function Layout() {
   });
   const [unread, setUnread] = useState(0);
   const { pathname } = useLocation();
+  // Focus (reading) mode: the note reader owns the whole screen — both
+  // chrome bars stay out of the way (mobile included).
+  const focus = useFocusMode();
   const navigate = useNavigate();
   // Return memory for every Back button (pathname only — tab switches
   // don't pollute the trail).
@@ -172,6 +176,14 @@ export default function Layout() {
     };
   }, []);
 
+  // Live avatar refresh: profile uploads broadcast so the header chip
+  // updates without a reload (the URL itself cache-busts server-side).
+  useEffect(() => {
+    const onAvatar = (e: Event) => setAvatar((e as CustomEvent<string>).detail || '');
+    window.addEventListener('unify:avatar', onAvatar);
+    return () => window.removeEventListener('unify:avatar', onAvatar);
+  }, []);
+
   useEffect(() => {
     if (!authed) {
       setRole(null);
@@ -275,6 +287,7 @@ export default function Layout() {
 
   return (
     <div style={{ fontFamily: 'var(--font-body)' }}>
+      {!focus && (
       <header style={{ display: 'flex', gap: 12, padding: '12px 16px', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, background: 'var(--surface)', zIndex: 10, alignItems: 'center' }}>
         <Link to="/dashboard" style={{ textDecoration: 'none' }} aria-label="Unify Learn home">
           <Wordmark size={20} />
@@ -337,8 +350,10 @@ export default function Layout() {
           </Link>
         )}
       </header>
+      )}
       <OfflineBanner />
       <Outlet />
+      {!focus && (
       <nav className="bottomnav" onMouseEnter={() => setNavHidden(false)} style={{ position: 'fixed', bottom: 0, left: '50%', transform: `translateX(-50%)${navHidden ? ' translateY(calc(100% - 14px))' : ''}`, transition: 'transform .3s ease', width: '100%', maxWidth: 'var(--shell, 480px)', display: 'flex', background: 'var(--surface)', borderTop: '1px solid var(--border)', padding: '8px 0 calc(8px + env(safe-area-inset-bottom))' }}>
         {showSkeletonNav
           ? Array.from({ length: skelCount }).map((_, i) => (
@@ -379,6 +394,7 @@ export default function Layout() {
           );
           })}
       </nav>
+      )}
       {pushPrompt && (
         <ConfirmModal
           title="Get nudged for new notes?"

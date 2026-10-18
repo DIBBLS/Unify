@@ -72,16 +72,22 @@ export default function ProfileRoute() {
   // Inline edit (no onboarding detour): role + semester stay locked.
   const [editing, setEditing] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
-  // Profile picture: file → ≤2MB data URL → avatars bucket. Everyone else
-  // sees Gravatar-by-email automatically when no upload exists.
+  // Profile picture: file → on-device 256px JPEG (any input size) → avatars
+  // bucket. Reads fall back to /me's Gravatar-by-email when no upload exists.
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarMsg, setAvatarMsg] = useState('');
+  // Email verification CTA: unverified inboxes confirm right from here.
+  const [emailConfirmed, setEmailConfirmed] = useState(false);
+  const [verifBusy, setVerifBusy] = useState(false);
+  const [verifMsg, setVerifMsg] = useState('');
+  // /me's avatar (Gravatar/SSO photo) when the profile row has no upload.
+  const [meAvatar, setMeAvatar] = useState('');
 
   const uploadAvatar = async (file: File | null) => {
     if (!file || uploadingAvatar) return;
     setAvatarMsg('');
-    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) {
-      setAvatarMsg('PNG, JPG or WEBP only.');
+    if (!file.type.startsWith('image/')) {
+      setAvatarMsg('Pick an image file — JPG, PNG, WEBP and friends.');
       return;
     }
     setUploadingAvatar(true);
@@ -118,9 +124,11 @@ export default function ProfileRoute() {
       });
       const res = await api.uploadAvatar(dataUrl);
       setProfile((prev) => (prev ? { ...prev, avatar_url: res.avatarUrl } : prev));
+      // Header chip refreshes live (URL itself cache-busts server-side).
+      window.dispatchEvent(new CustomEvent('unify:avatar', { detail: res.avatarUrl }));
       setAvatarMsg('Picture updated.');
     } catch {
-      setAvatarMsg("Couldn't upload that picture. Try a smaller file.");
+      setAvatarMsg("Couldn't process that picture — try a different image.");
     } finally {
       setUploadingAvatar(false);
     }
@@ -188,6 +196,8 @@ export default function ProfileRoute() {
         return;
       }
       setEmail(sessionData.session.user.email || '');
+      const su = sessionData.session.user as { email_confirmed_at?: string; confirmed_at?: string };
+      setEmailConfirmed(Boolean(su.email_confirmed_at || su.confirmed_at));
       try {
         const me = await api.me();
         if (!me.onboarded || !me.profile) {
@@ -195,6 +205,7 @@ export default function ProfileRoute() {
           return;
         }
         setProfile(me.profile);
+        setMeAvatar(me.avatar || '');
         setIsAdmin(!!me.isAdmin);
         const p = me.profile;
         setDName(p.first_name || '');
@@ -237,8 +248,25 @@ export default function ProfileRoute() {
       }
       setEmailMsg(`Confirmation sent to ${next}. Tap the link there to finish.`);
       setNewEmail('');
+      // The new address is unconfirmed until that link is tapped.
+      setEmailConfirmed(false);
     } catch (err) {
       setEmailMsg(err instanceof Error ? err.message : 'Email change failed.');
+    }
+  };
+
+  const resendVerify = async () => {
+    const client = supabaseBrowser();
+    if (!client || !email) return;
+    setVerifBusy(true);
+    setVerifMsg('');
+    try {
+      const { error } = await client.auth.resend({ type: 'signup', email });
+      setVerifMsg(error ? error.message : 'Verification email sent — check your inbox and spam.');
+    } catch {
+      setVerifMsg("Couldn't send right now — try again in a minute.");
+    } finally {
+      setVerifBusy(false);
     }
   };
 
@@ -324,8 +352,8 @@ export default function ProfileRoute() {
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '24px 16px 80px' }}>
       <BackButton to="/dashboard" />
       <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 20 }}>
-        {profile?.avatar_url ? (
-          <img src={profile.avatar_url} alt="Profile picture" style={{ width: 64, height: 64, borderRadius: 9999, objectFit: 'cover', flexShrink: 0 }} />
+        {(profile?.avatar_url || meAvatar) ? (
+          <img src={profile?.avatar_url || meAvatar} alt="Profile picture" style={{ width: 64, height: 64, borderRadius: 9999, objectFit: 'cover', flexShrink: 0 }} />
         ) : (
           <div style={{ width: 64, height: 64, borderRadius: 9999, background: 'linear-gradient(135deg,#34d399,#059669)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 24, flexShrink: 0 }}>
             {initial}
@@ -334,11 +362,20 @@ export default function ProfileRoute() {
         <div style={{ flex: 1 }}>
           <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 22 }}>{profile?.first_name || 'Builder'}</h1>
           <div style={{ fontSize: 13, color: 'var(--text2)' }}>{email}</div>
+          {email && !emailConfirmed && (
+            <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+              <span style={{ fontSize: 11, fontWeight: 800, color: '#92400e', background: '#fef3c7', border: '1px solid #fde68a', borderRadius: 9999, padding: '3px 10px' }}>Email not verified</span>
+              <button onClick={() => void resendVerify()} disabled={verifBusy} style={{ fontSize: 12, fontWeight: 800, color: '#059669', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                {verifBusy ? 'Sending…' : 'Resend verification email'}
+              </button>
+            </div>
+          )}
+          {verifMsg && <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>{verifMsg}</div>}
           <label style={{ display: 'inline-block', marginTop: 6, fontSize: 12, fontWeight: 800, color: '#059669', cursor: 'pointer' }}>
             {uploadingAvatar ? 'Uploading…' : profile?.avatar_url ? 'Change picture' : 'Add a picture'}
             <input
               type="file"
-              accept="image/png,image/jpeg,image/webp"
+              accept="image/*"
               disabled={uploadingAvatar}
               onChange={(e) => void uploadAvatar(e.target.files?.[0] || null)}
               style={{ display: 'none' }}

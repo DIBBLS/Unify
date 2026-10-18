@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 
-// Brand dropdown that opens INLINE (expands in its own section, pushing
-// content down) instead of the OS fullscreen picker. Same button look as
-// the .brand-select rule so mixed screens stay uniform.
+// Brand dropdown that opens as a FLOATING OVERLAY above the page —
+// the panel never pushes content around or expands the frame it lives in.
 export default function Drop({
   value,
   options,
@@ -18,12 +17,39 @@ export default function Drop({
   style?: React.CSSProperties;
 }) {
   const [open, setOpen] = useState(false);
+  const [up, setUp] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
   const current = options.find((o) => o.value === value);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const toggle = () => {
+    if (!open && wrapRef.current) {
+      const r = wrapRef.current.getBoundingClientRect();
+      setUp(window.innerHeight - r.bottom < 240);
+    }
+    setOpen((v) => !v);
+  };
+
   return (
-    <div style={{ minWidth: 0, ...style }}>
+    <div ref={wrapRef} style={{ position: 'relative', minWidth: 0, ...style }}>
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={toggle}
         aria-expanded={open}
         aria-label={label}
         style={{
@@ -47,7 +73,20 @@ export default function Drop({
         <ChevronDown size={14} color="#059669" style={{ transform: open ? 'rotate(180deg)' : 'none', flexShrink: 0 }} />
       </button>
       {open && (
-        <div style={{ marginTop: 6, border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', background: 'var(--surface)' }}>
+        <div
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            [up ? 'bottom' : 'top']: 'calc(100% + 6px)',
+            zIndex: 130,
+            border: '1px solid var(--border)',
+            borderRadius: 10,
+            overflow: 'hidden',
+            background: 'var(--surface)',
+            boxShadow: '0 12px 32px rgba(0,0,0,0.16)',
+          } as React.CSSProperties}
+        >
           <div style={{ maxHeight: 220, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 2, padding: 6 }}>
             {options.map((o) => {
               const active = o.value === value;
