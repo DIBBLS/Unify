@@ -45,7 +45,20 @@ export async function typesetMath(el: Element | null): Promise<void> {
   try {
     await ensureMathJax();
     const w = window as unknown as MathJaxWindow;
-    await w.MathJax?.typesetPromise?.([el]);
+    // Script onload can fire before MathJax finishes startup, when
+    // typesetPromise is still undefined — that used to no-op silently and
+    // leave raw TeX (\sqrt ...) on screen. Wait for startup, then poll
+    // briefly for typesetPromise before giving up.
+    if (w.MathJax?.startup?.promise) {
+      await Promise.race([
+        Promise.resolve(w.MathJax.startup.promise),
+        new Promise((r) => setTimeout(r, 4000)),
+      ]).catch(() => undefined);
+    }
+    for (let i = 0; i < 25 && w.MathJax && !w.MathJax.typesetPromise; i++) {
+      await new Promise((r) => setTimeout(r, 200));
+    }
+    if (w.MathJax?.typesetPromise) await w.MathJax.typesetPromise([el]);
   } catch {
     // raw TeX remains visible — never blank
   }
