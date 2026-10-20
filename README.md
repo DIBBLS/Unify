@@ -1,6 +1,6 @@
-# Unify Learn — v1.11.1
+# Unify Learn — v1.26.1
 
-Student learning platform for LASU Engineering — Lecture-structured weekly notes (Lecture 1/2/3), XP, streaks, quizzes, read-aloud with Nigerian voice pick, expiring share links, XP-gated PDF, lecturer timetable + class management, offline-first reader, Google + email sign-in, and an authoring studio for lecturers and contributors. Classic/Story designs + dark mode, mobile-first, Box Boy mascot.
+Student learning platform for LASU Engineering — Lecture-structured weekly notes (Lecture 1/2/3), XP, streaks, quizzes, read-aloud with Nigerian voice pick, expiring share links, XP-gated PDF, lecturer timetable + class management, offline-first reader, Google + email sign-in, and an authoring studio for lecturers and contributors. Classic/Story designs + dark mode, mobile-first, Box Boy mascot. Note readers add focus mode + content-only zoom (desktop).
 
 ## Architecture
 
@@ -15,7 +15,7 @@ Browser ──HTTPS──▶ Vercel (Unify Learn app) ──HTTPS──▶ Rende
 
 | Layer | Tech | Notes |
 |---|---|---|
-| Web app | **Vite 5 + React 18 + TypeScript 5 + React Router 6** (`apps/web`) | 480px shell, Classic/Story designs + dark mode, lucide icons, MathJax formulas, SVG mascot, Web Push, offline worker (SW v6 + write queue) |
+| Web app | **Vite 5 + React 18 + TypeScript 5 + React Router 6** (`apps/web`) | 480px shell, Classic/Story designs + dark mode, lucide icons, MathJax formulas, SVG mascot, Web Push, offline worker (SW v8 + write queue), route-level code-splitting |
 | API + authoring | **Express 4 + TypeScript** (`notes-engine/`) | `/v1/*` app API + `/api/*` authoring + `/api/share/*` OG unfurls, zod validation, rate limits, JSON logs |
 | Data + Auth | **Supabase** (Postgres + Auth) | RLS locked down; backend uses service role; Prisma `migrate deploy` on Render |
 | AI notes | **Gemini** (default) / Anthropic (opt-in) | Studio-only `/api/convert`; model registry with health-tracked rotation; students never touch AI |
@@ -85,25 +85,24 @@ npm run dev      # tsx watch server.ts — needs SUPABASE_* + DIRECT_URL in .env
 
 ## Roles & Flows
 
-- **Student** (8 onboarding steps): dashboard (XP/streak/resume/course cards) → My Courses + Explore (bulk catalog + alias search) → lecture reader (Lecture 1/2/3 switcher, recalls, read-aloud, EOQ exam) → PDF unlocks at 300 XP. Save weeks offline; progress banks offline and syncs on reconnect.
+- **Student** (8 onboarding steps): dashboard (XP/streak/resume/course cards) → My Courses + Explore (bulk catalog + alias search) → lecture reader (Lecture 1/2/3 switcher, recalls, read-aloud with voice/speed dropdowns, EOQ exam) → PDF unlocks at 300 XP. Save weeks offline; progress banks offline and syncs on reconnect. Note readers carry the only floating control pill: Focus (hides bars, every device) and zoom-in 100–150% (desktop) that scales the content column only — the first zoom-in switches Focus on; the pill never appears outside notes.
 - **Lecturer** (6 steps incl. teaching level) / **Contributor** (3 steps incl. contributing level): Studio (AI/manual/external-AI + lecture pickers), versioned publishing with Replace/Add/Cancel on occupied weeks, level-scoped Browse, Notes/Courses stats, **My Classes** (weekly timetable + live roster). No Learn paths, no XP.
 - **Admin** (`admin` role or legacy flag): oversight dashboard (totals + latest users/notes), panel modules (Analytics charts, AI models, unis, courses, session, announce, users), All-content browser. Own role self-locked. Bootstrap via `ADMIN_EMAILS`.
 - Roles lock at assignment (server-enforced 403); every promote/demote notifies the recipient (bell + push).
 - **Sharing (authors/admins):** expiring `/s/:token` links (8/16/24h) with preview cards + WhatsApp OG unfurls; recipients read free, join on expiry.
-- **Notifications:** in-app bell + Brevo email + Web Push (VAPID, opt-in per device).
+- **Notifications:** in-app bell + Brevo email + Web Push (VAPID, opt-in per device). App emails send from `EMAIL_FROM` on Render via the Brevo API (the from-address must be a verified Brevo sender); new-note mail reaches enrolled, confirmed, non-opted-out students, announcements reach every confirmed inbox. Profile pictures upload at any size (downscaled on-device) and are magic-byte-verified server-side.
 - **Sessions:** email + Google sign-in, independent per-tab, Remember-me opt-in, 30-min idle TTL, exact resume (course/week/topic/lecture) for students.
 
 ## Docs
 
 - `SETUP.md` — full Supabase + Render + Vercel setup, env tables, Google OAuth enablement, troubleshooting.
-- `docs/UNIFY-UX-BEHAVIORS.md` — how reader controls (focus/zoom), dropdowns, formula rendering, avatar uploads, email notifications and delivery/caching behave; update it in the same commit when any of these change.
 - `docs/DEVELOPER-REPORT.md` (+ `.pdf`) — every bug fix by version, what is left, and what still needs live verification.
 - `docs/unify-product-v1.11.0.pdf` (+ HTML source) — full product documentation; regenerate per release.
 - `docs/` — product specs. `supabase/` — reference SQL (Prisma migrations are authoritative).
 
 ## Versioning
 
-SemVer `MAJOR.MINOR.PATCH` (Profile footer shows it): MAJOR = platform generation, MINOR = feature batch, PATCH = bugfix push.
+SemVer `MAJOR.MINOR.PATCH` (Profile footer shows it): MAJOR = platform generation, MINOR = feature batch, PATCH = bugfix push. **Bump `apps/web/src/lib/version.ts` → `APP_VERSION` on every push** (backend-only pushes bump PATCH too) and carry the version in the commit message.
 
 ## License
 

@@ -73,13 +73,23 @@ function mapChars(s: string, table: Record<string, string>): string | null {
 // (\sqrt{x} → √(x)) so a failed MathJax load never shows raw commands.
 function beautify(raw: string): string {
   let s = raw;
+  // AI-pasted LaTeX often spaces the command from its group ("\frac {a}{b}",
+  // "\sqrt {x}") — the matcher below only finds the canonical form, and a
+  // missed \frac/\sqrt degrades to literal "frac ab"/"\sqrt x" with NO sign.
+  // Collapse to canonical first so roots and fractions always glyph-ify.
+  s = s
+    .replace(/\\(dfrac|tfrac|frac)\s*\{/g, "\\frac{")
+    .replace(/\\sqrt\s*\[/g, "\\sqrt[")
+    .replace(/\\sqrt\s+\{/g, "\\sqrt{");
   for (let pass = 0; pass < 8; pass++) {
     const fi = s.indexOf('\\frac{');
     if (fi >= 0) {
       const a = takeGroup(s, fi + 5);
       const b = a ? takeGroup(s, a[1]) : null;
       if (a && b) {
-        s = s.slice(0, fi) + `(${a[0]})/(${b[0]})` + s.slice(b[1]);
+        // U+2044 fraction slash reads as a real fraction sign, not a divide.
+        const side = (t: string) => (/^[a-zA-Z0-9ΩΔ]+$/.test(t) ? t : `(${t})`);
+        s = s.slice(0, fi) + `${side(a[0].trim())}⁄${side(b[0].trim())}` + s.slice(b[1]);
         continue;
       }
       s = s.slice(0, fi) + s.slice(fi + 6);
@@ -124,6 +134,7 @@ function beautify(raw: string): string {
     .replace(/\\(displaystyle|textstyle|limits|nolimits|big|bigg|Big|Bigg|left|right)\b/g, '')
     .replace(/\\[,;:!]|\\quad\b|\\qquad\b|\\!|\\\\/g, ' ')
     .replace(/[{}]/g, '')
+    .replace(/\\/g, '') // unknown commands lose the backslash — never code-y
     .replace(/\s+/g, ' ')
     .trim();
   return s;
