@@ -55,6 +55,14 @@ export default function LearnPage() {
   // Focus mode (toggled from the floating reader controls) resets when
   // this reader unmounts — never leaks onto other screens.
   useEffect(() => () => setFocusMode(false), []);
+  // Hopping to a different note (new course/week) REUSES this component —
+  // no unmount — so the cleanup above never runs. New note = bars back,
+  // while the zoom level itself persists (ZoomBar keeps it in localStorage).
+  // Lecture/topic switches inside the same note keep focus as-is.
+  const noteKey = `${courseCode}::${weekNum}`;
+  useEffect(() => {
+    setFocusMode(false);
+  }, [noteKey]);
   useEffect(() => {
     let cancelled = false;
     let tries = 0;
