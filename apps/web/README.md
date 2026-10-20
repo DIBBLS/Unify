@@ -59,7 +59,7 @@ Built-in public fallbacks keep local dev working; env vars override.
 - Learning paths are students-only; authors/admins use `?preview=1` (read-only, no resume/XP).
 - 30-min sliding idle TTL (persisted), Remember-me opt-in, exact resume (course/week/topic/lecture) for students.
 - Offline-first: progress/quiz/resume bank in `lib/offline` queue when offline and flush on reconnect; reader weeks save into the SW content cache (`Save offline`).
-- Reader controls: Focus + zoom live only in the floating pill on note readers (`components/ZoomBar.tsx`); zoom is desktop, zoom-IN only (100–150%), targets `#unify-content` so header/nav stay normal, and the first zoom-in enables Focus. Focus always resets when the reader unmounts.
+- Reader controls: Focus + zoom live only in the floating pill on note readers (`components/ZoomBar.tsx`); zoom is desktop, zoom-IN only (100–150%), targets `#unify-content` so header/nav stay normal, and the first zoom-in enables Focus. Zoom persists per device (localStorage) across notes; Focus resets when the reader unmounts **and** when hopping to a different course/week (lecture/topic switches inside one note keep it).
 - Every selector uses the `Drop` overlay component — never a native `<select>`. The panel is a floating overlay with shared spacing; call-site `style` only styles the trigger (give triggers in tight rows a real `min-width`).
 - Math is one MathJax pipeline (`Formula`/`MathText`/`MathPlain`); Studio review and editor previews render real formulas through `Formula`, never plain text. Offline, `Formula` falls back to glyph text (`√(x)`, `a⁄b`).
 - Zero `window.confirm` — all confirmations use the designed `ConfirmModal`.
