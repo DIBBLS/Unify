@@ -322,7 +322,7 @@ export function ReadAloud({ topic }: { topic: Topic }) {
           </button>
         </div>
       )}
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
         <button
           onClick={playing ? stop : play}
           aria-label={playing ? 'Stop reading aloud' : 'Listen to this topic'}
@@ -349,7 +349,7 @@ export function ReadAloud({ topic }: { topic: Topic }) {
             value={activeVoice?.voiceURI || ''}
             onChange={pickVoice}
             label="Reading voice"
-            style={{ flex: 1, minWidth: 0 }}
+            style={{ flex: '1 1 170px', minWidth: 170 }}
             options={ranked.map((v) => {
               const g = voiceGender(v);
               const naija = /ng|nigeria/i.test(v.lang + ' ' + v.name);

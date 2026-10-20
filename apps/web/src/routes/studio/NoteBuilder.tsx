@@ -3,7 +3,7 @@ import { useRef, useState } from 'react';
 import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 import ConfirmModal from '../../components/ConfirmModal';
 import Drop from '../../components/Drop';
-import { beautifyMath } from '../../components/Formula';
+import Formula from '../../components/Formula';
 import { MathText } from '../../components/MathText';
 import VisualEquation, { parseLatex, type MNode } from '../../components/VisualEquation';
 import { uploadDiagram, uploadNarration } from '../../lib/storage';
@@ -446,7 +446,7 @@ function EquationInput({ value, onChange }: { value: string; onChange: (v: strin
         <div style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: 12, marginBottom: 8 }}>
           <div style={{ fontSize: 12, fontWeight: 700 }}>This equation is too advanced to rebuild visually — kept exactly as published:</div>
           <div style={{ marginTop: 8, background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 8, padding: '10px 12px' }}>
-            <div className="f-eq" style={{ fontSize: 15, lineHeight: 2 }}>{beautifyMath(value)}</div>
+            <Formula latex={value} />
           </div>
           <button type="button" onClick={() => openVisual([])} style={{ marginTop: 8, padding: '8px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: '#059669' }}>
             Start over visually (replaces it)
@@ -465,7 +465,7 @@ function EquationInput({ value, onChange }: { value: string; onChange: (v: strin
           {(built || value).trim() ? (
             <div style={{ marginTop: 8, background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 8, padding: '10px 12px' }}>
               <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, color: 'var(--text3)', marginBottom: 4 }}>READER PREVIEW — LIVE</div>
-              <div className="f-eq" style={{ fontSize: 15, lineHeight: 2 }}>{beautifyMath(built || value)}</div>
+              <Formula latex={built || value} />
             </div>
           ) : null}
         </>
