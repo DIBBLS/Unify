@@ -86,8 +86,10 @@ export default function ProfileRoute() {
   const uploadAvatar = async (file: File | null) => {
     if (!file || uploadingAvatar) return;
     setAvatarMsg('');
-    if (!file.type.startsWith('image/')) {
-      setAvatarMsg('Pick an image file — JPG, PNG, WEBP and friends.');
+    // Some pickers hand back an empty MIME for perfectly good photos —
+    // never reject on that; the decode below is the real test.
+    if (file.type && !file.type.startsWith('image/')) {
+      setAvatarMsg("That's not an image — pick a JPG, PNG or WEBP photo.");
       return;
     }
     setUploadingAvatar(true);
@@ -127,8 +129,15 @@ export default function ProfileRoute() {
       // Header chip refreshes live (URL itself cache-busts server-side).
       window.dispatchEvent(new CustomEvent('unify:avatar', { detail: res.avatarUrl }));
       setAvatarMsg('Picture updated.');
-    } catch {
-      setAvatarMsg("Couldn't process that picture — try a different image.");
+    } catch (e) {
+      // Surface the server's exact rejection when there is one — generic
+      // copy only for local decode/network failures.
+      const msg = e instanceof Error ? e.message : '';
+      setAvatarMsg(
+        msg && !/network|failed|fetch|offline|configured/i.test(msg)
+          ? msg
+          : "Couldn't read that photo — save it as JPG or PNG (some formats like HEIC need converting) and retry."
+      );
     } finally {
       setUploadingAvatar(false);
     }

@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Minus, Plus, Maximize2, Minimize2 } from 'lucide-react';
+import { Plus, Maximize2, Minimize2 } from 'lucide-react';
 import { useFocusMode, setFocusMode } from '../lib/focus';
 
-// Floating reader controls, bottom-right.
-//  - Focus (reader only, every device): hides the top bar + bottom tabs.
+// Floating reader controls, bottom-right — NOTE READERS ONLY (nowhere else).
+//  - Focus (every device): hides the top bar + bottom tabs.
 //  - Zoom (desktop only): scales ONLY the content column — the top bar and
-//    bottom nav keep their normal size. Steps of 10, clamped 70–150,
-//    persisted per device.
+//    bottom nav keep their normal size. Zoom-IN only, steps of 10, clamped
+//    100–150, persisted per device. The FIRST zoom-in switches Focus on;
+//    resetting to 100% switches it off. Leaving the reader clears the applied
+//    zoom so the rest of the app always renders at 100%.
 const ZOOM_KEY = 'unify.zoom.v1';
 const CONTENT_ID = 'unify-content';
-const MIN = 70;
+const MIN = 100;
 const MAX = 150;
 const STEP = 10;
 
@@ -40,14 +42,14 @@ export default function ZoomBar() {
     } catch {
       // private mode — zoom just won't persist
     }
-    // Content column only: header + bottom nav stay their normal size.
     const el = document.getElementById(CONTENT_ID);
     if (!el) return;
-    el.style.zoom = z === 100 ? '' : String(z / 100);
-  }, [z, pathname]);
+    // Notes section only: anywhere else the app renders at 100%.
+    el.style.zoom = reader && z !== 100 ? String(z / 100) : '';
+  }, [z, pathname, reader]);
 
-  // Mobile: no zoom — the reader's Focus toggle is the only control.
-  if (mobile && !reader) return null;
+  // Controls live only on note readers — never on dashboard/browse/etc.
+  if (!reader) return null;
 
   const btn: React.CSSProperties = {
     width: 26,
@@ -84,48 +86,39 @@ export default function ZoomBar() {
         color: 'var(--text2)',
       }}
     >
-      {reader && (
-        <button
-          type="button"
-          onClick={() => setFocusMode(!focus)}
-          aria-pressed={focus}
-          title={focus ? 'Exit focus mode' : 'Focus mode — hide the bars while reading'}
-          style={{
-            width: 'auto',
-            height: 26,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4,
-            padding: '0 8px',
-            border: 'none',
-            borderRadius: 8,
-            cursor: 'pointer',
-            fontSize: 12,
-            fontWeight: 800,
-            background: focus ? '#ecfdf5' : 'transparent',
-            color: focus ? '#059669' : 'var(--text2)',
-          }}
-        >
-          {focus ? <Minimize2 size={14} /> : <Maximize2 size={14} />} {focus ? 'Exit' : 'Focus'}
-        </button>
-      )}
-      {reader && !mobile && <span style={{ width: 1, height: 16, background: 'var(--border)', margin: '0 3px' }} />}
+      <button
+        type="button"
+        onClick={() => setFocusMode(!focus)}
+        aria-pressed={focus}
+        title={focus ? 'Exit focus mode' : 'Focus mode — hide the bars while reading'}
+        style={{
+          width: 'auto',
+          height: 26,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 4,
+          padding: '0 8px',
+          border: 'none',
+          borderRadius: 8,
+          cursor: 'pointer',
+          fontSize: 12,
+          fontWeight: 800,
+          background: focus ? '#ecfdf5' : 'transparent',
+          color: focus ? '#059669' : 'var(--text2)',
+        }}
+      >
+        {focus ? <Minimize2 size={14} /> : <Maximize2 size={14} />} {focus ? 'Exit' : 'Focus'}
+      </button>
       {!mobile && (
         <>
+          <span style={{ width: 1, height: 16, background: 'var(--border)', margin: '0 3px' }} />
           <button
             type="button"
-            style={{ ...btn, opacity: z <= MIN ? 0.35 : 1 }}
-            onClick={() => setZ((v) => Math.max(MIN, v - STEP))}
-            disabled={z <= MIN}
-            aria-label="Zoom out"
-            title="Zoom out"
-          >
-            <Minus size={14} />
-          </button>
-          <button
-            type="button"
-            onClick={() => setZ(100)}
-            title="Reset zoom to 100%"
+            onClick={() => {
+              setZ(100);
+              setFocusMode(false);
+            }}
+            title="Reset zoom to 100% and exit focus"
             aria-label="Zoom level, click to reset to 100 percent"
             style={{ ...btn, width: 'auto', minWidth: 40, fontSize: 12, fontWeight: 800, color: 'var(--text)' }}
           >
@@ -134,10 +127,14 @@ export default function ZoomBar() {
           <button
             type="button"
             style={{ ...btn, opacity: z >= MAX ? 0.35 : 1 }}
-            onClick={() => setZ((v) => Math.min(MAX, v + STEP))}
+            onClick={() => {
+              setZ((v) => Math.min(MAX, v + STEP));
+              // First zoom-in switches Focus mode on.
+              if (z === 100) setFocusMode(true);
+            }}
             disabled={z >= MAX}
             aria-label="Zoom in"
-            title="Zoom in"
+            title="Zoom in (focus mode turns on with the first step)"
           >
             <Plus size={14} />
           </button>

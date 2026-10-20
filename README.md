@@ -96,6 +96,7 @@ npm run dev      # tsx watch server.ts — needs SUPABASE_* + DIRECT_URL in .env
 ## Docs
 
 - `SETUP.md` — full Supabase + Render + Vercel setup, env tables, Google OAuth enablement, troubleshooting.
+- `docs/UNIFY-UX-BEHAVIORS.md` — how reader controls (focus/zoom), dropdowns, formula rendering, avatar uploads, email notifications and delivery/caching behave; update it in the same commit when any of these change.
 - `docs/DEVELOPER-REPORT.md` (+ `.pdf`) — every bug fix by version, what is left, and what still needs live verification.
 - `docs/unify-product-v1.11.0.pdf` (+ HTML source) — full product documentation; regenerate per release.
 - `docs/` — product specs. `supabase/` — reference SQL (Prisma migrations are authoritative).

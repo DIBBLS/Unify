@@ -1,20 +1,26 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from './routes/_layout';
 import CourseRoute from './routes/course';
-import ExploreRoute from './routes/explore';
 import CourseDetailRoute from './routes/courseDetail';
 import LearnWeek from './routes/learn/week';
 import AuthRoute from './routes/auth';
 import DashboardRoute from './routes/dashboard';
-import OnboardingRoute from './routes/onboarding';
 import ProfileRoute from './routes/profile';
-import NotificationsRoute from './routes/notifications';
-import AdminRoute from './routes/admin';
-import AdminContentRoute from './routes/admin/content';
-import BrowseRoute from './routes/browse';
-import ShareRoute from './routes/share';
 import { useParams } from 'react-router-dom';
+
+// Code-split the secondary/author routes: students' first load (auth →
+// dashboard → notes) never downloads Studio tables, admin panels or the
+// visual equation builder — each chunk fetches only when its route opens.
+const ExploreRoute = lazy(() => import('./routes/explore'));
+const OnboardingRoute = lazy(() => import('./routes/onboarding'));
+const NotificationsRoute = lazy(() => import('./routes/notifications'));
+const AdminRoute = lazy(() => import('./routes/admin'));
+const AdminContentRoute = lazy(() => import('./routes/admin/content'));
+const BrowseRoute = lazy(() => import('./routes/browse'));
+const ShareRoute = lazy(() => import('./routes/share'));
+const StudioRoute = lazy(() => import('./routes/studio/index'));
+const ClassesRoute = lazy(() => import('./routes/classes'));
 
 // /api/share/:token is served by the edge OG function for bots; if a
 // human lands here inside the SPA, forward to the real share landing.
@@ -22,8 +28,6 @@ function ShareRedirect() {
   const { token = '' } = useParams();
   return <Navigate to={`/s/${encodeURIComponent(token)}`} replace />;
 }
-import StudioRoute from './routes/studio/index';
-import ClassesRoute from './routes/classes';
 import Mascot from './components/Mascot';
 import Toasts from './components/Toasts';
 import ZoomBar from './components/ZoomBar';
@@ -157,6 +161,9 @@ export default function App() {
         <Toasts />
         <ZoomBar />
         <InstallBar />
+        {/* Lazy routes (Studio, admin, browse…) suspend on first open —
+            this fallback covers every chunk fetch. */}
+        <Suspense fallback={<Loading text="Loading…" />}>
         <Routes>
         {/* Chromeless: no top bar on sign in / onboarding */}
         <Route path="/auth" element={<AuthRoute />} />
@@ -290,6 +297,7 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Route>
         </Routes>
+        </Suspense>
       </ErrorBoundary>
     </BrowserRouter>
   );
