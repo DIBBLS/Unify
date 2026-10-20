@@ -352,7 +352,11 @@ export default function Layout() {
       </header>
       )}
       <OfflineBanner />
-      <Outlet />
+      {/* Content column: desktop zoom targets this element only — the
+          sticky header and bottom nav keep their normal size. */}
+      <main id="unify-content">
+        <Outlet />
+      </main>
       {!focus && (
       <nav className="bottomnav" onMouseEnter={() => setNavHidden(false)} style={{ position: 'fixed', bottom: 0, left: '50%', transform: `translateX(-50%)${navHidden ? ' translateY(calc(100% - 14px))' : ''}`, transition: 'transform .3s ease', width: '100%', maxWidth: 'var(--shell, 480px)', display: 'flex', background: 'var(--surface)', borderTop: '1px solid var(--border)', padding: '8px 0 calc(8px + env(safe-area-inset-bottom))' }}>
         {showSkeletonNav

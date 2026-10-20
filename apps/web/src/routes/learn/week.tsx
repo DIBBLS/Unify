@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Check, Download, ArrowUp, Share2, Lock, Maximize2, Minimize2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Download, ArrowUp, Share2, Lock } from 'lucide-react';
 import { api, type TopicMeta } from '../../lib/api';
 import { log } from '../../lib/log';
 import type { UnifyNote, Topic } from '../../types/note';
@@ -10,7 +10,7 @@ import { ReadAloud } from '../../components/ReadAloud';
 import { ShareModal } from '../../components/ShareModal';
 import { XP_GATES, meetsXpGate } from '../../lib/xp';
 import { previousPath } from '../../lib/navHistory';
-import { useFocusMode, setFocusMode } from '../../lib/focus';
+import { setFocusMode } from '../../lib/focus';
 import { saveWeekOffline, isWeekSaved } from '../../lib/offline';
 import { useProgress } from '../../hooks/useProgress';
 import Mascot from '../../components/Mascot';
@@ -52,8 +52,8 @@ export default function LearnPage() {
   // unknown (never 0-by-default — a failed fetch must not fake-lock).
   // Retries + refocus refetch keep it truthful; XP only grows.
   const [myXp, setMyXp] = useState<number | null>(null);
-  // Focus mode: only while this reader is mounted — shell hides its bars.
-  const focus = useFocusMode();
+  // Focus mode (toggled from the floating reader controls) resets when
+  // this reader unmounts — never leaks onto other screens.
   useEffect(() => () => setFocusMode(false), []);
   useEffect(() => {
     let cancelled = false;
@@ -387,20 +387,9 @@ export default function LearnPage() {
           <ArrowUp size={20} />
         </button>
       )}
-      <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <button onClick={() => navigate(previousPath() || backTo)} style={{ display: 'flex', gap: 6, alignItems: 'center', background: 'none', border: 'none', color: 'var(--text2)', fontSize: 14 }}>
-          <ChevronLeft size={18} /> Back
-        </button>
-        <span style={{ flex: 1 }} />
-        <button
-          onClick={() => setFocusMode(!focus)}
-          aria-pressed={focus}
-          title={focus ? 'Exit focus mode' : 'Focus mode — hide the top bar and tabs while reading'}
-          style={{ display: 'flex', gap: 6, alignItems: 'center', background: focus ? '#ecfdf5' : 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '7px 14px', fontSize: 13, fontWeight: 700, color: focus ? '#059669' : 'var(--text2)' }}
-        >
-          {focus ? <Minimize2 size={14} /> : <Maximize2 size={14} />} {focus ? 'Exit focus' : 'Focus'}
-        </button>
-      </div>
+      <button onClick={() => navigate(previousPath() || backTo)} style={{ marginBottom: 16, display: 'flex', gap: 6, alignItems: 'center', background: 'none', border: 'none', color: 'var(--text2)', fontSize: 14 }}>
+        <ChevronLeft size={18} /> Back
+      </button>
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginBottom: 8 }}>
         <button
           onClick={async () => {
