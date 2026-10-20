@@ -10,7 +10,6 @@ import { ReadAloud } from '../../components/ReadAloud';
 import { ShareModal } from '../../components/ShareModal';
 import { XP_GATES, meetsXpGate } from '../../lib/xp';
 import { previousPath } from '../../lib/navHistory';
-import { setFocusMode } from '../../lib/focus';
 import { saveWeekOffline, isWeekSaved } from '../../lib/offline';
 import { useProgress } from '../../hooks/useProgress';
 import Mascot from '../../components/Mascot';
@@ -52,17 +51,10 @@ export default function LearnPage() {
   // unknown (never 0-by-default — a failed fetch must not fake-lock).
   // Retries + refocus refetch keep it truthful; XP only grows.
   const [myXp, setMyXp] = useState<number | null>(null);
-  // Focus mode (toggled from the floating reader controls) resets when
-  // this reader unmounts — never leaks onto other screens.
-  useEffect(() => () => setFocusMode(false), []);
-  // Hopping to a different note (new course/week) REUSES this component —
-  // no unmount — so the cleanup above never runs. New note = bars back,
-  // while the zoom level itself persists (ZoomBar keeps it in localStorage).
-  // Lecture/topic switches inside the same note keep focus as-is.
-  const noteKey = `${courseCode}::${weekNum}`;
-  useEffect(() => {
-    setFocusMode(false);
-  }, [noteKey]);
+  // Focus + zoom are retained per device (localStorage stores) — switching
+  // notes keeps both exactly as the reader left them. The layout only
+  // hides the chrome bars on reader routes, so neither ever leaks onto
+  // dashboard/studio/etc.
   useEffect(() => {
     let cancelled = false;
     let tries = 0;

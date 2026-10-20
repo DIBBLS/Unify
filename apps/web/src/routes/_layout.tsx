@@ -64,8 +64,11 @@ export default function Layout() {
   const [unread, setUnread] = useState(0);
   const { pathname } = useLocation();
   // Focus (reading) mode: the note reader owns the whole screen — both
-  // chrome bars stay out of the way (mobile included).
+  // chrome bars stay out of the way (mobile included). The flag persists
+  // per device, but the bars are only hidden ON note readers: the rest of
+  // the app always renders normally, so focus never leaks elsewhere.
   const focus = useFocusMode();
+  const focusOnReader = focus && /^\/learn\/[^/]+\/week\/\d+/.test(pathname);
   const navigate = useNavigate();
   // Return memory for every Back button (pathname only — tab switches
   // don't pollute the trail).
@@ -287,7 +290,7 @@ export default function Layout() {
 
   return (
     <div style={{ fontFamily: 'var(--font-body)' }}>
-      {!focus && (
+      {!focusOnReader && (
       <header style={{ display: 'flex', gap: 12, padding: '12px 16px', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, background: 'var(--surface)', zIndex: 10, alignItems: 'center' }}>
         <Link to="/dashboard" style={{ textDecoration: 'none' }} aria-label="Unify Learn home">
           <Wordmark size={20} />
@@ -357,7 +360,7 @@ export default function Layout() {
       <main id="unify-content">
         <Outlet />
       </main>
-      {!focus && (
+      {!focusOnReader && (
       <nav className="bottomnav" onMouseEnter={() => setNavHidden(false)} style={{ position: 'fixed', bottom: 0, left: '50%', transform: `translateX(-50%)${navHidden ? ' translateY(calc(100% - 14px))' : ''}`, transition: 'transform .3s ease', width: '100%', maxWidth: 'var(--shell, 480px)', display: 'flex', background: 'var(--surface)', borderTop: '1px solid var(--border)', padding: '8px 0 calc(8px + env(safe-area-inset-bottom))' }}>
         {showSkeletonNav
           ? Array.from({ length: skelCount }).map((_, i) => (
