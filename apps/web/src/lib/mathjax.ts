@@ -40,8 +40,12 @@ export function ensureMathJax(): Promise<void> {
   return loadPromise;
 }
 
-export async function typesetMath(el: Element | null): Promise<void> {
-  if (!el || typeof window === 'undefined') return;
+// Typesets `el` and reports whether it actually succeeded. False means
+// "caller must fall back to glyph text" — a missing CDN, a rejected typeset
+// (malformed TeX) or a hung font fetch must never leave raw \( \) code on
+// screen. Races the typeset against a deadline so it can never hang.
+export async function typesetMath(el: Element | null): Promise<boolean> {
+  if (!el || typeof window === 'undefined') return false;
   try {
     await ensureMathJax();
     const w = window as unknown as MathJaxWindow;
@@ -58,9 +62,29 @@ export async function typesetMath(el: Element | null): Promise<void> {
     for (let i = 0; i < 25 && w.MathJax && !w.MathJax.typesetPromise; i++) {
       await new Promise((r) => setTimeout(r, 200));
     }
-    if (w.MathJax?.typesetPromise) await w.MathJax.typesetPromise([el]);
+    if (!w.MathJax?.typesetPromise) return false;
+    const run = async (): Promise<boolean> => {
+      try {
+        await w.MathJax!.typesetPromise!([el]);
+        return true;
+      } catch {
+        // One retry after a clear — a poisoned queue state rejects the
+        // first call; the second usually lands.
+        try {
+          (w.MathJax as { typesetClear?: (els?: Element[]) => void }).typesetClear?.([el]);
+          await w.MathJax!.typesetPromise!([el]);
+          return true;
+        } catch {
+          return false;
+        }
+      }
+    };
+    return await Promise.race([
+      run(),
+      new Promise<boolean>((r) => setTimeout(() => r(false), 6000)),
+    ]);
   } catch {
-    // raw TeX remains visible — never blank
+    return false;
   }
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { typesetMath, escHtml } from '../lib/mathjax';
 
 // Normalize any equation string to inline \(...\) so MathJax always has
@@ -151,31 +151,108 @@ export function beautifyMath(latex: string): string {
   return beautify(inner.trim());
 }
 
+// ---- saved-render cache (offline live preview) ----
+// The Studio "live preview" used to depend on the MathJax CDN, so with no
+// network it rendered nothing (or sat hidden waiting). Every successful
+// typeset is now saved per-equation in localStorage and re-injected on the
+// next mount — the preview renders instantly online AND offline. Entries
+// are small MathJax outputs; capped so the quota is never hit.
+const FX_CACHE = 'unify.fx.v1';
+type FxEntry = { t: number; h: string };
+
+function fxHash(s: string): string {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
+  return h.toString(36);
+}
+
+function fxCached(body: string): string | null {
+  try {
+    const raw = localStorage.getItem(FX_CACHE);
+    if (!raw) return null;
+    const map = JSON.parse(raw) as Record<string, FxEntry>;
+    const e = map[fxHash(body)];
+    return e && typeof e.h === 'string' ? e.h : null;
+  } catch {
+    return null;
+  }
+}
+
+function fxSave(body: string, html: string) {
+  if (!html || html.length > 40000) return;
+  try {
+    const raw = localStorage.getItem(FX_CACHE);
+    const map: Record<string, FxEntry> = raw ? JSON.parse(raw) : {};
+    map[fxHash(body)] = { t: Date.now(), h: html };
+    const keys = Object.keys(map);
+    if (keys.length > 80) {
+      keys
+        .sort((a, b) => map[a].t - map[b].t)
+        .slice(0, keys.length - 80)
+        .forEach((k) => delete map[k]);
+    }
+    localStorage.setItem(FX_CACHE, JSON.stringify(map));
+  } catch {
+    /* quota or private mode — cache is best-effort */
+  }
+}
+
 // innerHTML (not text children): MathJax rewrites the element's DOM, which
-// orphans React's text nodes — later updates would land on detached nodes
-// and the preview would go stale. React's innerHTML diffing resets cleanly.
+// would orphan React's text nodes — later updates would land on detached
+// nodes and the preview would go stale. React's innerHTML diffing resets
+// cleanly when the equation changes.
+//
+// Never-raw design: the card shows readable glyph math from first paint;
+// the raw TeX lives in an off-screen, visibility:hidden twin that is only
+// revealed once there is real math to show — a saved render (instant,
+// works offline) or a fresh MathJax typeset. typesetMath resolves false on
+// a missing CDN, a rejected typeset or a hung font fetch — all of which
+// used to leave raw \( \frac .. \) code on screen forever. Raw TeX is
+// therefore never shown, whatever the network is doing.
 export default function Formula({ latex }: { latex: string }) {
-  const ref = useRef<HTMLDivElement>(null);
+  const rawRef = useRef<HTMLSpanElement>(null);
   const body = useMemo(() => normalize(latex), [latex]);
+  const plain = useMemo(() => beautifyMath(body), [body]);
+  // Per-body so a same-tick equation change never reveals stale raw TeX.
+  const [revealedFor, setRevealedFor] = useState<string | null>(null);
+  const revealed = revealedFor === body && body !== '';
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    let dead = false;
+    const el = rawRef.current;
+    if (!el || !body) return () => { dead = true; };
+    // Saved render from a previous session: instant, offline-proof — skip
+    // the CDN round-trip entirely.
+    const cached = fxCached(body);
+    if (cached) {
+      el.innerHTML = cached;
+      setRevealedFor(body);
+      return () => { dead = true; };
+    }
     void (async () => {
-      await typesetMath(el);
-      // Offline / CDN blocked: MathJax never arrives — show clean math text
-      // instead of raw \( \) delimiters sitting in the card.
-      const w = window as unknown as { MathJax?: { typesetPromise?: unknown } };
-      if (!w.MathJax?.typesetPromise && el.isConnected) {
-        el.textContent = beautify(body.replace(/^\\\(([\s\S]*)\\\)$/, '$1').trim());
+      const ok = await typesetMath(el);
+      if (dead || !el.isConnected) return;
+      // A "successful" typeset that still shows TeX commands means some
+      // segment was skipped — keep the glyphs rather than half-raw output.
+      const txt = el.textContent || '';
+      if (ok && !/\\[a-zA-Z(]/.test(txt)) {
+        setRevealedFor(body);
+        fxSave(body, el.innerHTML);
       }
     })();
+    return () => { dead = true; };
   }, [body]);
   return (
     <div
-      ref={ref}
       className="f-eq"
-      style={{ overflowX: 'auto', fontSize: 15, lineHeight: 2.2, minHeight: body ? undefined : 0 }}
-      dangerouslySetInnerHTML={{ __html: escHtml(body) }}
-    />
+      style={{ position: 'relative', overflowX: 'auto', fontSize: 15, lineHeight: 2.2, minHeight: body ? undefined : 0 }}
+    >
+      <span
+        aria-hidden={!revealed}
+        ref={rawRef}
+        style={revealed ? undefined : { position: 'absolute', left: -9999, top: 0, visibility: 'hidden' }}
+        dangerouslySetInnerHTML={{ __html: escHtml(body) }}
+      />
+      {!revealed && <span>{plain}</span>}
+    </div>
   );
 }

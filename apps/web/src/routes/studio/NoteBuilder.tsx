@@ -424,23 +424,31 @@ function EquationInput({ value, onChange }: { value: string; onChange: (v: strin
   return (
     <div>
       {tree === null && !tooHard && (
-        <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-          <button
-            type="button"
-            onClick={() => {
-              if (!value.trim()) {
-                openVisual([]);
-                return;
-              }
-              const parsed = parseLatex(value);
-              if (parsed) openVisual(parsed);
-              else setTooHard(true);
-            }}
-            style={{ flex: 1, padding: 10, borderRadius: 12, background: '#10b981', color: '#fff', border: 'none', borderBottom: '3px solid #059669', fontWeight: 800, fontSize: 13 }}
-          >
-            {value.trim() ? 'Open visual builder' : 'Build equation visually'}
-          </button>
-        </div>
+        <>
+          {value.trim() ? (
+            <div style={{ background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 8, padding: '10px 12px', marginBottom: 8 }}>
+              <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, color: 'var(--text3)', marginBottom: 4 }}>RENDERED</div>
+              <Formula latex={value} />
+            </div>
+          ) : null}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+            <button
+              type="button"
+              onClick={() => {
+                if (!value.trim()) {
+                  openVisual([]);
+                  return;
+                }
+                const parsed = parseLatex(value);
+                if (parsed) openVisual(parsed);
+                else setTooHard(true);
+              }}
+              style={{ flex: 1, padding: 10, borderRadius: 12, background: '#10b981', color: '#fff', border: 'none', borderBottom: '3px solid #059669', fontWeight: 800, fontSize: 13 }}
+            >
+              {value.trim() ? 'Open visual builder' : 'Build equation visually'}
+            </button>
+          </div>
+        </>
       )}
       {tooHard && (
         <div style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: 12, marginBottom: 8 }}>
