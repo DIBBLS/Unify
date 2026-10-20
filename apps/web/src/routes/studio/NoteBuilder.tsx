@@ -2,7 +2,8 @@ import { toastError } from '../../lib/toast';
 import { useRef, useState } from 'react';
 import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 import ConfirmModal from '../../components/ConfirmModal';
-import Formula from '../../components/Formula';
+import Drop from '../../components/Drop';
+import { beautifyMath } from '../../components/Formula';
 import { MathText } from '../../components/MathText';
 import VisualEquation, { parseLatex, type MNode } from '../../components/VisualEquation';
 import { uploadDiagram, uploadNarration } from '../../lib/storage';
@@ -445,7 +446,7 @@ function EquationInput({ value, onChange }: { value: string; onChange: (v: strin
         <div style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: 12, marginBottom: 8 }}>
           <div style={{ fontSize: 12, fontWeight: 700 }}>This equation is too advanced to rebuild visually — kept exactly as published:</div>
           <div style={{ marginTop: 8, background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 8, padding: '10px 12px' }}>
-            <Formula latex={value} />
+            <div className="f-eq" style={{ fontSize: 15, lineHeight: 2 }}>{beautifyMath(value)}</div>
           </div>
           <button type="button" onClick={() => openVisual([])} style={{ marginTop: 8, padding: '8px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: '#059669' }}>
             Start over visually (replaces it)
@@ -464,7 +465,7 @@ function EquationInput({ value, onChange }: { value: string; onChange: (v: strin
           {(built || value).trim() ? (
             <div style={{ marginTop: 8, background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 8, padding: '10px 12px' }}>
               <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, color: 'var(--text3)', marginBottom: 4 }}>READER PREVIEW — LIVE</div>
-              <Formula latex={built || value} />
+              <div className="f-eq" style={{ fontSize: 15, lineHeight: 2 }}>{beautifyMath(built || value)}</div>
             </div>
           ) : null}
         </>
@@ -564,16 +565,13 @@ function BlockEditor({
 }) {
   const head = (title: string) => (
     <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8 }}>
-      <select
+      <Drop
         value={block.type}
-        onChange={(e) => onChange(blankBlock(e.target.value as ContentBlock['type']))}
-        style={{ ...input, marginTop: 0, width: 'auto', padding: '6px 10px', fontSize: 12, fontWeight: 700 }}
-        aria-label="Block type"
-      >
-        {BLOCK_TYPES.map((t) => (
-          <option key={t.id} value={t.id}>{t.label}</option>
-        ))}
-      </select>
+        options={BLOCK_TYPES.map((t) => ({ value: t.id, label: t.label }))}
+        onChange={(v) => onChange(blankBlock(v as ContentBlock['type']))}
+        label="Block type"
+        style={{ width: 'auto', maxWidth: 180, flexShrink: 0 }}
+      />
       <span style={{ flex: 1 }} />
       <button onClick={onUp} style={iconBtn} aria-label="Move up"><ChevronUp size={14} /></button>
       <button onClick={onDown} style={iconBtn} aria-label="Move down"><ChevronDown size={14} /></button>
@@ -717,11 +715,13 @@ function QuestionEditor({
         {lockType ? (
           <span style={{ fontSize: 11, fontWeight: 800, color: '#059669' }}>{lockType.toUpperCase()} (fixed)</span>
         ) : (
-          <select value={q.type} onChange={(e) => onChange(blankQuestion(e.target.value as MiniCheckQuestion['type']))} style={{ ...input, marginTop: 0, width: 'auto', padding: '6px 10px', fontSize: 12, fontWeight: 700 }} aria-label="Question type">
-            {CHECK_TYPES.map((t) => (
-              <option key={t.id} value={t.id}>{t.label}</option>
-            ))}
-          </select>
+          <Drop
+            value={q.type}
+            options={CHECK_TYPES.map((t) => ({ value: t.id, label: t.label }))}
+            onChange={(v) => onChange(blankQuestion(v as MiniCheckQuestion['type']))}
+            label="Question type"
+            style={{ width: 'auto', maxWidth: 180, flexShrink: 0 }}
+          />
         )}
         <span style={{ flex: 1 }} />
         <button onClick={onDelete} style={dangerBtn} aria-label="Delete question"><Trash2 size={14} /></button>
@@ -731,11 +731,13 @@ function QuestionEditor({
         <>
           <label style={{ ...label, marginTop: 8 }}>Options (one per line)<textarea value={q.options.join('\n')} onChange={(e) => { const options = e.target.value.split('\n'); onChange({ ...q, options, correctIndex: Math.min(q.correctIndex, Math.max(options.length - 1, 0)) }); }} rows={Math.max(q.options.length + 1, 2)} style={area} /></label>
           <label style={{ ...label, marginTop: 8 }}>Correct answer
-            <select value={q.correctIndex} onChange={(e) => onChange({ ...q, correctIndex: Number(e.target.value) })} style={input}>
-              {q.options.map((o, i) => (
-                <option key={i} value={i}>{String.fromCharCode(65 + i)} — {(o || '').slice(0, 40) || `(option ${i + 1})`}</option>
-              ))}
-            </select>
+            <Drop
+              value={String(q.correctIndex)}
+              options={q.options.map((o, i) => ({ value: String(i), label: `${String.fromCharCode(65 + i)} — ${(o || '').slice(0, 40) || `(option ${i + 1})`}` }))}
+              onChange={(v) => onChange({ ...q, correctIndex: Number(v) })}
+              label="Correct answer"
+              style={{ width: '100%', marginTop: 4 }}
+            />
           </label>
         </>
       )}
@@ -844,20 +846,17 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
         <div key={ti} style={card}>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8 }}>
             <h3 style={{ ...sectionTitle, margin: 0, flex: 1 }}>Lecture {t.lecture || 1} · Topic {t.number}</h3>
-            <select
-              aria-label="Lecture for this topic"
-              value={t.lecture || 1}
-              onChange={(e) => {
+            <Drop
+              label="Lecture"
+              value={String(t.lecture || 1)}
+              options={[1, 2, 3].map((l) => ({ value: String(l), label: `Lecture ${l}` }))}
+              onChange={(v) => {
                 const topics = [...note.topics];
-                topics[ti] = { ...t, lecture: Number(e.target.value) || 1 };
+                topics[ti] = { ...t, lecture: Number(v) || 1 };
                 setTopics(renumber(topics));
               }}
-              style={{ fontSize: 12, fontWeight: 700, borderRadius: 9999, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', padding: '4px 8px' }}
-            >
-              {[1, 2, 3].map((l) => (
-                <option key={l} value={l}>Lecture {l}</option>
-              ))}
-            </select>
+              style={{ width: 'auto', flexShrink: 0 }}
+            />
             <button onClick={() => setTopics(renumber(move(note.topics, ti, -1)))} style={iconBtn} aria-label="Move topic up"><ChevronUp size={14} /></button>
             <button onClick={() => setTopics(renumber(move(note.topics, ti, 1)))} style={iconBtn} aria-label="Move topic down"><ChevronDown size={14} /></button>
             <button onClick={() => { if (note.topics.length > 1) setConfirmTopic(ti); }} disabled={note.topics.length <= 1} style={{ ...dangerBtn, opacity: note.topics.length <= 1 ? 0.4 : 1 }} aria-label="Delete topic"><Trash2 size={14} /></button>
@@ -1000,16 +999,19 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
           <div key={qi} style={{ ...card, background: '#fafafa' }}>
             <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8 }}>
               <span style={{ fontSize: 11, fontWeight: 800, color: '#059669' }}>Q{qi + 1}</span>
-              <select value={q.type} onChange={(e) => {
-                const qs = [...note.eoq.questions];
-                qs[qi] = e.target.value === 'mcq'
-                  ? { number: qi + 1, type: 'mcq', question: q.question, options: ['', ''], correct: 'A', feedback: q.feedback || { correct: '', wrong: '' }, topicRef: q.topicRef || '1' }
-                  : { number: qi + 1, type: 'fitb', question: q.question, acceptedAnswers: [''], feedback: q.feedback || { correct: '', wrong: '' }, topicRef: q.topicRef || '1' };
-                set({ eoq: { questions: qs } });
-              }} style={{ ...input, marginTop: 0, width: 'auto', padding: '6px 10px', fontSize: 12, fontWeight: 700 }} aria-label="EOQ type">
-                <option value="mcq">MCQ</option>
-                <option value="fitb">Fill-in</option>
-              </select>
+              <Drop
+                value={q.type}
+                options={[{ value: 'mcq', label: 'MCQ' }, { value: 'fitb', label: 'Fill-in' }]}
+                onChange={(v) => {
+                  const qs = [...note.eoq.questions];
+                  qs[qi] = v === 'mcq'
+                    ? { number: qi + 1, type: 'mcq', question: q.question, options: ['', ''], correct: 'A', feedback: q.feedback || { correct: '', wrong: '' }, topicRef: q.topicRef || '1' }
+                    : { number: qi + 1, type: 'fitb', question: q.question, acceptedAnswers: [''], feedback: q.feedback || { correct: '', wrong: '' }, topicRef: q.topicRef || '1' };
+                  set({ eoq: { questions: qs } });
+                }}
+                label="EOQ type"
+                style={{ width: 'auto', maxWidth: 140, flexShrink: 0 }}
+              />
               <span style={{ flex: 1 }} />
               <button onClick={() => set({ eoq: { questions: note.eoq.questions.filter((_, xi) => xi !== qi) } })} style={dangerBtn} aria-label="Delete EOQ question"><Trash2 size={14} /></button>
             </div>
@@ -1018,11 +1020,13 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
               <>
                 <label style={{ ...label, marginTop: 8 }}>Options (one per line)<textarea value={q.options.join('\n')} onChange={(e) => { const qs = [...note.eoq.questions]; const options = e.target.value.split('\n'); qs[qi] = { ...q, options }; set({ eoq: { questions: qs } }); }} rows={Math.max(q.options.length + 1, 2)} style={area} /></label>
                 <label style={{ ...label, marginTop: 8 }}>Correct letter
-                  <select value={q.correct || 'A'} onChange={(e) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, correct: e.target.value }; set({ eoq: { questions: qs } }); }} style={input}>
-                    {(q.options.length ? q.options : ['']).map((o, i) => (
-                      <option key={i} value={String.fromCharCode(65 + i)}>{String.fromCharCode(65 + i)} — {(o || '').slice(0, 40) || `(option ${i + 1})`}</option>
-                    ))}
-                  </select>
+                  <Drop
+                    value={q.correct || 'A'}
+                    options={((q.options ?? []).length ? (q.options ?? []) : ['']).map((_o, i) => ({ value: String.fromCharCode(65 + i), label: `${String.fromCharCode(65 + i)} — ${(q.options?.[i] || '').slice(0, 40) || `(option ${i + 1})`}` }))}
+                    onChange={(v) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, correct: v }; set({ eoq: { questions: qs } }); }}
+                    label="Correct letter"
+                    style={{ width: '100%', marginTop: 4 }}
+                  />
                 </label>
               </>
             )}

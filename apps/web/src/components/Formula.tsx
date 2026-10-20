@@ -129,6 +129,17 @@ function beautify(raw: string): string {
   return s;
 }
 
+// Plain-text math for previews: strip any delimiters, then glyph-ify
+// (\sqrt{x} → √(x)). No MathJax, no async — always shows something readable.
+export function beautifyMath(latex: string): string {
+  const t = (latex || '').trim();
+  const inner = t
+    .replace(/^\\\(([\s\S]*)\\\)$/, '$1')
+    .replace(/^\\\[([\s\S]*)\\\]$/, '$1')
+    .replace(/^\$\$([\s\S]*)\$\$$/, '$1');
+  return beautify(inner.trim());
+}
+
 // innerHTML (not text children): MathJax rewrites the element's DOM, which
 // orphans React's text nodes — later updates would land on detached nodes
 // and the preview would go stale. React's innerHTML diffing resets cleanly.
