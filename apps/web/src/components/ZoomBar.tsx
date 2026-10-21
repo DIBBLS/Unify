@@ -66,6 +66,7 @@ export default function ZoomBar() {
   };
   return (
     <div
+      className="screen-only"
       role="group"
       aria-label="Reader controls"
       style={{
