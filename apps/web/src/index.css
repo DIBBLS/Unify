@@ -343,20 +343,15 @@ sticky icon sidebar; phones get a horizontal pill rail on top. */
 /* Back-to-top floating button (reader) */
 .to-top{position:fixed;right:16px;bottom:124px;z-index:50;width:44px;height:44px;border-radius:9999px;border:1px solid var(--border);background:var(--surface);color:var(--green-deep);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);animation:rise-in .25s ease}
 .print-only{display:none}
+/* Save PDF = browser print of the reader. Hide every screen chrome (the
+   floating controls pill, install bar, nav, buttons), unblur recall
+   answers, keep cards unbroken, and force content zoom back to 100% so a
+   zoomed reading session never prints a clipped page. */
 @media print{
-  header,nav,button{display:none !important}
+  header,nav,button,.screen-only{display:none !important}
   body{background:#fff}
-  .screen-only{display:none !important}
   .print-only{display:block !important}
-  .recall-answer.blurred{filter:none;max-height:none;overflow:visible}
-  .topic-card,.mini-check,.formula-box,.insight-box,.analogy-box,.symbol-card{box-shadow:none;break-inside:avoid}
-}
-.print-only{display:none}
-@media print{
-  header,nav,button{display:none !important}
-  body{background:#fff}
-  .screen-only{display:none !important}
-  .print-only{display:block !important}
+  #unify-content{zoom:1 !important}
   .recall-answer.blurred{filter:none;max-height:none;overflow:visible}
   .topic-card,.mini-check,.formula-box,.insight-box,.analogy-box,.symbol-card{box-shadow:none;break-inside:avoid}
 }

@@ -153,7 +153,7 @@ export default function InstallBar() {
   };
 
   return (
-    <div style={wrap}>
+    <div className="screen-only" style={wrap}>
       {update && (
         <button
           type="button"
