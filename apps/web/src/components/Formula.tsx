@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { typesetMath, escHtml } from '../lib/mathjax';
 
 // Normalize any equation string to inline \(...\) so MathJax always has
@@ -202,57 +202,42 @@ function fxSave(body: string, html: string) {
 // nodes and the preview would go stale. React's innerHTML diffing resets
 // cleanly when the equation changes.
 //
-// Never-raw design: the card shows readable glyph math from first paint;
-// the raw TeX lives in an off-screen, visibility:hidden twin that is only
-// revealed once there is real math to show — a saved render (instant,
-// works offline) or a fresh MathJax typeset. typesetMath resolves false on
-// a missing CDN, a rejected typeset or a hung font fetch — all of which
-// used to leave raw \( \frac .. \) code on screen forever. Raw TeX is
-// therefore never shown, whatever the network is doing.
+// Direct typesetting — the rendering that always worked: raw TeX goes in,
+// MathJax typesets it in place. The only change vs the original is the
+// failure path: typesetMath now resolves false (missing CDN, rejected TeX,
+// hung font fetch — previously swallowed, leaving raw \( \frac .. \) on
+// screen forever) and then we swap in glyph text. A saved render from a
+// previous session is injected instantly, so notes/previews also work
+// offline without waiting on the CDN.
 export default function Formula({ latex }: { latex: string }) {
-  const rawRef = useRef<HTMLSpanElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   const body = useMemo(() => normalize(latex), [latex]);
   const plain = useMemo(() => beautifyMath(body), [body]);
-  // Per-body so a same-tick equation change never reveals stale raw TeX.
-  const [revealedFor, setRevealedFor] = useState<string | null>(null);
-  const revealed = revealedFor === body && body !== '';
   useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
     let dead = false;
-    const el = rawRef.current;
-    if (!el || !body) return () => { dead = true; };
-    // Saved render from a previous session: instant, offline-proof — skip
-    // the CDN round-trip entirely.
-    const cached = fxCached(body);
-    if (cached) {
-      el.innerHTML = cached;
-      setRevealedFor(body);
-      return () => { dead = true; };
-    }
     void (async () => {
+      // Saved render from a previous session: instant, offline-proof — skip
+      // the CDN round-trip entirely.
+      const cached = fxCached(body);
+      if (cached) {
+        el.innerHTML = cached;
+        return;
+      }
       const ok = await typesetMath(el);
       if (dead || !el.isConnected) return;
-      // A "successful" typeset that still shows TeX commands means some
-      // segment was skipped — keep the glyphs rather than half-raw output.
-      const txt = el.textContent || '';
-      if (ok && !/\\[a-zA-Z(]/.test(txt)) {
-        setRevealedFor(body);
-        fxSave(body, el.innerHTML);
-      }
+      if (ok) fxSave(body, el.innerHTML);
+      else el.textContent = plain;
     })();
     return () => { dead = true; };
   }, [body]);
   return (
     <div
+      ref={ref}
       className="f-eq"
-      style={{ position: 'relative', overflowX: 'auto', fontSize: 15, lineHeight: 2.2, minHeight: body ? undefined : 0 }}
-    >
-      <span
-        aria-hidden={!revealed}
-        ref={rawRef}
-        style={revealed ? undefined : { position: 'absolute', left: -9999, top: 0, visibility: 'hidden' }}
-        dangerouslySetInnerHTML={{ __html: escHtml(body) }}
-      />
-      {!revealed && <span>{plain}</span>}
-    </div>
+      style={{ overflowX: 'auto', fontSize: 15, lineHeight: 2.2, minHeight: body ? undefined : 0 }}
+      dangerouslySetInnerHTML={{ __html: escHtml(body) }}
+    />
   );
 }
