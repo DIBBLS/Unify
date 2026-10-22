@@ -1,23 +1,20 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { typesetMath, escHtml } from '../lib/mathjax';
+import 'katex/dist/katex.min.css';
+import { escHtml } from '../lib/mathjax';
 
-// Normalize any equation string to inline \(...\) so MathJax always has
-// delimiters to work with:
-//  - bare builder output ("V=IR") was never typeset — it sat as plain text
-//    next to typeset neighbours (the "preview doesn't render" bug);
-//  - display \[...\] / $$...$$ renders as centred block math with heavy
-//    margins that looked broken inside narrow cards — inline keeps every
-//    formula the same compact rhythm.
-function normalize(raw: string): string {
+// Normalize any equation string to bare TeX for KaTeX:
+//  - bare builder output ("V=IR") — rendered as-is;
+//  - \(...\), \[...\], $$...$$ — delimiters stripped (KaTeX gets the inner
+//    TeX; display \[...\] still renders inline to keep the compact card
+//    rhythm the old MathJax version had).
+function stripTex(raw: string): string {
   const t = (raw || '').trim();
   if (!t) return '';
-  const disp = t.match(/^\\\[([\s\S]*)\\\]$/);
-  if (disp) return `\\(${disp[1].trim()}\\)`;
-  const dd = t.match(/^\$\$([\s\S]*)\$\$$/);
-  if (dd) return `\\(${dd[1].trim()}\\)`;
-  if (t.startsWith('\\(') && t.endsWith('\\)')) return t;
-  if (t.includes('\\(') || t.includes('\\[')) return t; // mixed content: leave alone
-  return `\\(${t}\\)`;
+  return t
+    .replace(/^\\\(([\s\S]*)\\\)$/, '$1')
+    .replace(/^\\\[([\s\S]*)\\\]$/, '$1')
+    .replace(/^\$\$([\s\S]*)\$\$$/, '$1')
+    .trim();
 }
 
 const GREEK: Record<string, string> = {
@@ -69,8 +66,8 @@ function mapChars(s: string, table: Record<string, string>): string | null {
   return out;
 }
 
-// Offline / CDN-blocked fallback: turn common TeX into readable glyphs
-// (\sqrt{x} → √(x)) so a failed MathJax load never shows raw commands.
+// Fallback for TeX KaTeX can't parse: turn common commands into readable
+// glyphs (\sqrt{x} → √(x)) so an unsupported equation never shows raw code.
 function beautify(raw: string): string {
   let s = raw;
   // AI-pasted LaTeX often spaces the command from its group ("\frac {a}{b}",
@@ -141,7 +138,7 @@ function beautify(raw: string): string {
 }
 
 // Plain-text math for previews: strip any delimiters, then glyph-ify
-// (\sqrt{x} → √(x)). No MathJax, no async — always shows something readable.
+// (\sqrt{x} → √(x)). Always shows something readable.
 export function beautifyMath(latex: string): string {
   const t = (latex || '').trim();
   const inner = t
@@ -151,93 +148,41 @@ export function beautifyMath(latex: string): string {
   return beautify(inner.trim());
 }
 
-// ---- saved-render cache (offline live preview) ----
-// The Studio "live preview" used to depend on the MathJax CDN, so with no
-// network it rendered nothing (or sat hidden waiting). Every successful
-// typeset is now saved per-equation in localStorage and re-injected on the
-// next mount — the preview renders instantly online AND offline. Entries
-// are small MathJax outputs; capped so the quota is never hit.
-const FX_CACHE = 'unify.fx.v1';
-type FxEntry = { t: number; h: string };
-
-function fxHash(s: string): string {
-  let h = 5381;
-  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
-  return h.toString(36);
-}
-
-function fxCached(body: string): string | null {
-  try {
-    const raw = localStorage.getItem(FX_CACHE);
-    if (!raw) return null;
-    const map = JSON.parse(raw) as Record<string, FxEntry>;
-    const e = map[fxHash(body)];
-    return e && typeof e.h === 'string' ? e.h : null;
-  } catch {
-    return null;
-  }
-}
-
-function fxSave(body: string, html: string) {
-  if (!html || html.length > 40000) return;
-  try {
-    const raw = localStorage.getItem(FX_CACHE);
-    const map: Record<string, FxEntry> = raw ? JSON.parse(raw) : {};
-    map[fxHash(body)] = { t: Date.now(), h: html };
-    const keys = Object.keys(map);
-    if (keys.length > 80) {
-      keys
-        .sort((a, b) => map[a].t - map[b].t)
-        .slice(0, keys.length - 80)
-        .forEach((k) => delete map[k]);
-    }
-    localStorage.setItem(FX_CACHE, JSON.stringify(map));
-  } catch {
-    /* quota or private mode — cache is best-effort */
-  }
-}
-
-// innerHTML (not text children): MathJax rewrites the element's DOM, which
-// would orphan React's text nodes — later updates would land on detached
-// nodes and the preview would go stale. React's innerHTML diffing resets
-// cleanly when the equation changes.
-//
-// Direct typesetting — the rendering that always worked: raw TeX goes in,
-// MathJax typesets it in place. The only change vs the original is the
-// failure path: typesetMath now resolves false (missing CDN, rejected TeX,
-// hung font fetch — previously swallowed, leaving raw \( \frac .. \) on
-// screen forever) and then we swap in glyph text. A saved render from a
-// previous session is injected instantly, so notes/previews also work
-// offline without waiting on the CDN.
+// Formula boxes render with KaTeX (bundled locally — the renderer this app
+// used before MathJax, restored at the user's request). No CDN, no network,
+// no typeset race: the chunk is served from our own origin and cached by the
+// service worker, so formulas render instantly online AND offline. TeX
+// KaTeX can't parse falls back to glyph text — never raw commands.
 export default function Formula({ latex }: { latex: string }) {
   const ref = useRef<HTMLDivElement>(null);
-  const body = useMemo(() => normalize(latex), [latex]);
-  const plain = useMemo(() => beautifyMath(body), [body]);
+  const tex = useMemo(() => stripTex(latex), [latex]);
+  const plain = useMemo(() => beautifyMath(latex), [latex]);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     let dead = false;
     void (async () => {
-      // Saved render from a previous session: instant, offline-proof — skip
-      // the CDN round-trip entirely.
-      const cached = fxCached(body);
-      if (cached) {
-        el.innerHTML = cached;
-        return;
+      let html: string | null = null;
+      if (tex) {
+        try {
+          const { default: katex } = await import('katex');
+          html = katex.renderToString(tex, { throwOnError: true, displayMode: false, strict: false });
+        } catch {
+          html = null;
+        }
       }
-      const ok = await typesetMath(el);
       if (dead || !el.isConnected) return;
-      if (ok) fxSave(body, el.innerHTML);
-      else el.textContent = plain;
+      if (html) el.innerHTML = html;
+      else el.textContent = tex ? plain : '';
     })();
     return () => { dead = true; };
-  }, [body]);
+  }, [tex, plain]);
   return (
     <div
       ref={ref}
       className="f-eq"
-      style={{ overflowX: 'auto', fontSize: 15, lineHeight: 2.2, minHeight: body ? undefined : 0 }}
-      dangerouslySetInnerHTML={{ __html: escHtml(body) }}
+      style={{ overflowX: 'auto', fontSize: 15, lineHeight: 2.2, minHeight: tex ? undefined : 0 }}
+      dangerouslySetInnerHTML={{ __html: escHtml(latex || '') }}
     />
   );
 }
