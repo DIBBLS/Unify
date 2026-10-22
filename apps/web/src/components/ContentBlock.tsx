@@ -18,7 +18,7 @@ export function ContentBlockView({ block, fig }: { block: ContentBlock; fig?: nu
       );
     case 'symbol': {
       // BUG-011: the symbol is math (often raw LaTeX like \alpha) — render
-      // it through MathJax, never as raw text running into the name.
+      // it through Formula (KaTeX), never as raw text running into the name.
       const raw = block.symbol || '';
       const symHtml = /^\\/.test(raw.trim()) ? `\\(${raw.trim()}\\)` : raw;
       return (
