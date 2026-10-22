@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useRef } from 'react';
 import 'katex/dist/katex.min.css';
-import { escHtml } from '../lib/mathjax';
+import katex from 'katex';
+
+export function escHtml(s: string): string {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
 
 // Normalize any equation string to bare TeX for KaTeX:
 //  - bare builder output ("V=IR") — rendered as-is;
@@ -148,11 +155,13 @@ export function beautifyMath(latex: string): string {
   return beautify(inner.trim());
 }
 
-// Formula boxes render with KaTeX (bundled locally — the renderer this app
-// used before MathJax, restored at the user's request). No CDN, no network,
-// no typeset race: the chunk is served from our own origin and cached by the
-// service worker, so formulas render instantly online AND offline. TeX
-// KaTeX can't parse falls back to glyph text — never raw commands.
+// Formula boxes render with KaTeX — the renderer this app used before
+// MathJax, restored at the user's request. STATIC import: the engine ships
+// inside the main bundle (one fetch the app already makes), so a flaky or
+// absent network can never strand a formula on a missing code-split chunk
+// (v1.26.9's failure mode — lazy katex chunk rejected → everything fell to
+// glyphs). No CDN, no typeset race, offline by construction. TeX KaTeX
+// can't parse falls back to glyph text — never raw commands.
 export default function Formula({ latex }: { latex: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const tex = useMemo(() => stripTex(latex), [latex]);
@@ -160,22 +169,16 @@ export default function Formula({ latex }: { latex: string }) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    let dead = false;
-    void (async () => {
-      let html: string | null = null;
-      if (tex) {
-        try {
-          const { default: katex } = await import('katex');
-          html = katex.renderToString(tex, { throwOnError: true, displayMode: false, strict: false });
-        } catch {
-          html = null;
-        }
+    let html: string | null = null;
+    if (tex) {
+      try {
+        html = katex.renderToString(tex, { throwOnError: true, displayMode: false, strict: false });
+      } catch {
+        html = null;
       }
-      if (dead || !el.isConnected) return;
-      if (html) el.innerHTML = html;
-      else el.textContent = tex ? plain : '';
-    })();
-    return () => { dead = true; };
+    }
+    if (html) el.innerHTML = html;
+    else el.textContent = tex ? plain : '';
   }, [tex, plain]);
   return (
     <div

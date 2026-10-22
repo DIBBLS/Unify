@@ -78,8 +78,8 @@ function MiniCheckItem({ q, id }: { q: MiniCheckQuestion; id: string }) {
             {fitbOk ? (
               'Correct!'
             ) : (
-              // Accepted answers go through MathJax too — a formula answer
-              // must render, never show raw \(...\).
+              // Accepted answers render through MathPlain (KaTeX) — a
+              // formula answer must render, never show raw \(...\).
               <MathPlain text={`Accepted: ${q.acceptedAnswers.join(' OR ')}`} />
             )}
           </div>
