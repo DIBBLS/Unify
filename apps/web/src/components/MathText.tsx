@@ -1,24 +1,27 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import 'katex/dist/katex.min.css';
 import katex from 'katex';
-import { beautifyMath, escHtml } from './Formula';
+import { typesetMath } from '../lib/mathjax';
+import { escHtml } from './Formula';
 
-// Paragraph math renders with KaTeX (v1.26.10) — the same engine as Formula
-// boxes, bundled locally, fully synchronous. The old path handed the subtree
-// to the MathJax CDN, so with no/blocked network every \( \sqrt{x} \) and
-// \( \frac{a}{b} \) inside note text fell back to glyph text.
-//
-// TeX-looking markup (<tag…) is left alone rather than mangled — it was
-// never TeX. Entities are decoded for the TeX attempt because MathPlain
-// pre-escapes its text; failures are glyph-ified and escaped.
+// TWO-STAGE paragraph math, same policy as Formula — no glyph fallback:
+//  1. KaTeX renders each \(...\)/\[...\] segment synchronously (offline,
+//     instant) — the common case;
+//  2. segments KaTeX rejects are LEFT as source and handed to MathJax in
+//     one pass over the subtree (complex/unsupported TeX — MathJax accepts
+//     nearly everything). Only when MathJax itself is unreachable does
+//     source stay visible, logged for diagnosis.
+// Entities are decoded for the KaTeX attempt because MathPlain pre-escapes
+// its text; MathJax reads the decoded DOM text, so leftovers also survive
+// escaping.
 const ENT: Record<string, string> = { '&lt;': '<', '&gt;': '>', '&amp;': '&' };
 
-function renderMathSegments(html: string): string {
-  if (!html || !/\\\(|\\\[/.test(html)) return html;
-  return html.replace(
+function kaTeXSegments(html: string): { html: string; leftover: boolean } {
+  if (!html || !/\\\(|\\\[/.test(html)) return { html, leftover: false };
+  let leftover = false;
+  const out = html.replace(
     /\\\(([\s\S]*?)\\\)|\\\[[\s\S]*?\\\]/g,
     (m, g1?: string, g2?: string) => {
-      if (/<\/?[a-zA-Z!]/.test(m)) return m;
       const tex = (g1 ?? g2 ?? '')
         .replace(/&(lt|gt|amp);/g, (e) => ENT[e] ?? e)
         .trim();
@@ -30,18 +33,31 @@ function renderMathSegments(html: string): string {
           strict: false,
         });
       } catch {
-        return escHtml(beautifyMath(tex));
+        leftover = true;
+        return m; // hand off to MathJax below
       }
     },
   );
+  return { html: out, leftover };
 }
 
-// HTML that may contain \(...\) / \[...\] math: rendered synchronously with
-// KaTeX — no effect, no CDN, no typeset race. Unsupported TeX falls back to
-// glyph math so nothing code-like stays on screen.
 export function MathText({ html, className, style }: { html: string; className?: string; style?: React.CSSProperties }) {
-  const rendered = useMemo(() => renderMathSegments(html), [html]);
-  return <div className={className} style={style} dangerouslySetInnerHTML={{ __html: rendered }} />;
+  const ref = useRef<HTMLDivElement>(null);
+  const stage1 = useMemo(() => kaTeXSegments(html), [html]);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !stage1.leftover) return;
+    let dead = false;
+    void (async () => {
+      const ok = await typesetMath(el);
+      if (dead || !el.isConnected) return;
+      if (!ok) console.warn('[MathText] MathJax unavailable for complex segment — source shown');
+    })();
+    return () => {
+      dead = true;
+    };
+  }, [stage1]);
+  return <div ref={ref} className={className} style={style} dangerouslySetInnerHTML={{ __html: stage1.html }} />;
 }
 
 // Plain text that may contain \(...\) / \[...\] math.
