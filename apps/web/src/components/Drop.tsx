@@ -78,7 +78,7 @@ export default function Drop({
             position: 'absolute',
             left: 0,
             right: 0,
-            [up ? 'bottom' : 'top']: 'calc(100% + 6px)',
+            [up ? 'bottom' : 'top']: 'calc(100% + 8px)',
             zIndex: 130,
             border: '1px solid var(--border)',
             borderRadius: 10,
@@ -87,7 +87,7 @@ export default function Drop({
             boxShadow: '0 12px 32px rgba(0,0,0,0.16)',
           } as React.CSSProperties}
         >
-          <div style={{ maxHeight: 220, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4, padding: 6 }}>
+          <div style={{ maxHeight: 240, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 3, padding: 5 }}>
             {options.map((o) => {
               const active = o.value === value;
               return (
@@ -102,7 +102,7 @@ export default function Drop({
                     display: 'block',
                     width: '100%',
                     textAlign: 'left',
-                    padding: '10px 12px',
+                    padding: '10px 14px',
                     lineHeight: 1.4,
                     borderRadius: 8,
                     border: 'none',
