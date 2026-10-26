@@ -381,7 +381,9 @@ export const api = {
   shareDelete: (token: string) =>
     apiFetch<{ ok: boolean }>(`/v1/share/${encodeURIComponent(token)}`, { method: 'DELETE' }),
   adminAnnounce: (title: string, body: string, link?: string) =>
-    apiFetch<{ ok: boolean; reached: number }>('/v1/admin/announce', { method: 'POST', body: JSON.stringify({ title, body, link }) }),
+    apiFetch<{ ok: boolean; reached: number; emailTo?: number }>('/v1/admin/announce', { method: 'POST', body: JSON.stringify({ title, body, link }) }),
+  adminEmailTest: (to: string) =>
+    apiFetch<{ ok: boolean; status: number; body: string; sender: string; keySet: boolean; fromSet: boolean }>('/v1/admin/email/test', { method: 'POST', body: JSON.stringify({ to }) }),
   adminContent: () =>
     apiFetch<{ courses: AdminContentCourse[] }>('/v1/admin/content'),
   adminActivity: () =>
