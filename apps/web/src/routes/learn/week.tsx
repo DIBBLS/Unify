@@ -5,6 +5,7 @@ import { api, type TopicMeta } from '../../lib/api';
 import { log } from '../../lib/log';
 import type { UnifyNote, Topic } from '../../types/note';
 import { TopicSlice } from '../../components/TopicSlice';
+import { MathPlain } from '../../components/MathText';
 import EoqQuiz from '../../components/EoqQuiz';
 import { ReadAloud } from '../../components/ReadAloud';
 import { ShareModal } from '../../components/ShareModal';
@@ -436,10 +437,10 @@ export default function LearnPage() {
       )}
       <div className="hero">
         <div className="hero-eyebrow">{note.course} · Week {note.week}</div>
-        <div className="hero-title">{note.title}</div>
-        {note.subtitle ? <div className="hero-subtitle">{note.subtitle}</div> : null}
+        <div className="hero-title"><MathPlain text={note.title} inline /></div>
+        {note.subtitle ? <div className="hero-subtitle"><MathPlain text={note.subtitle} inline /></div> : null}
         {note.learningOutcome && (
-          <div className="hero-outcome"><strong>Outcome — </strong>{note.learningOutcome}</div>
+          <div className="hero-outcome"><strong>Outcome — </strong><MathPlain text={note.learningOutcome} inline /></div>
         )}
         <div className="hero-meta">
           {(note.metaChips || []).map((chip) => (
@@ -594,8 +595,8 @@ export default function LearnPage() {
       })()}
     </div>
     <div className="print-only">
-      <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 22 }}>{note.course} · Week {note.week}: {note.title}</h1>
-      <p style={{ fontSize: 13, color: '#555' }}>{note.subtitle}</p>
+      <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 22 }}>{note.course} · Week {note.week}: <MathPlain text={note.title} inline /></h1>
+      <p style={{ fontSize: 13, color: '#555' }}><MathPlain text={note.subtitle} inline /></p>
       {topics.map((t) => (
         <TopicSlice key={t.number} topic={t} />
       ))}

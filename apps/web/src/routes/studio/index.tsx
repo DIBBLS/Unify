@@ -7,6 +7,7 @@ import Drop from '../../components/Drop';
 import Flash from '../../components/Flash';
 import Mascot from '../../components/Mascot';
 import { TopicSlice } from '../../components/TopicSlice';
+import { MathPlain } from '../../components/MathText';
 import EoqQuiz from '../../components/EoqQuiz';
 import { NoteBuilder, blankNote, normalizeNote, extractJsonPayload } from './NoteBuilder';
 import { api } from '../../lib/api';
@@ -792,8 +793,8 @@ export default function StudioRoute() {
             <div style={{ fontSize: 10, letterSpacing: 2, color: '#059669', fontWeight: 700, textTransform: 'uppercase' }}>
               Review · {meta.course} · Week {meta.week}
             </div>
-            <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20, margin: '8px 0 4px' }}>{note.title}</h2>
-            <p style={{ fontSize: 13, color: 'var(--text2)' }}>{note.subtitle}</p>
+            <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20, margin: '8px 0 4px' }}><MathPlain text={note.title} inline /></h2>
+            <p style={{ fontSize: 13, color: 'var(--text2)' }}><MathPlain text={note.subtitle} inline /></p>
             {validation && (
               <div style={{ marginTop: 10, fontSize: 12, fontWeight: 700, display: 'flex', gap: 6, alignItems: 'center', color: validation.valid ? '#059669' : '#991b1b' }}>
                 {validation.valid ? <Check size={14} /> : <X size={14} />}
@@ -876,7 +877,7 @@ export default function StudioRoute() {
                     >
                       <span style={{ flex: 1, minWidth: 0 }}>
                         <span style={{ fontWeight: 800, fontSize: 14, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          L{t.lecture || 1}·T{t.number} — {t.title || '(untitled)'}
+                          L{t.lecture || 1}·T{t.number} — <MathPlain text={t.title || '(untitled)'} inline />
                         </span>
                         <span style={{ fontSize: 11, color: 'var(--text2)' }}>
                           {t.subtopics.length} parts · {checks} checks{recalls ? ` · ${recalls} recalls` : ''}{pulse ? ` · pulse ${pulse}` : ''}
