@@ -170,8 +170,18 @@ export function kaTeXSegments(html: string): { html: string; leftover: boolean }
   return { html: out, leftover: state.leftover };
 }
 
-export function MathText({ html, className, style }: { html: string; className?: string; style?: React.CSSProperties }) {
-  const ref = useRef<HTMLDivElement>(null);
+export function MathText({
+  html,
+  className,
+  style,
+  inline,
+}: {
+  html: string;
+  className?: string;
+  style?: React.CSSProperties;
+  inline?: boolean;
+}) {
+  const ref = useRef<HTMLDivElement & HTMLSpanElement>(null);
   const stage1 = useMemo(() => kaTeXSegments(html), [html]);
   useEffect(() => {
     const el = ref.current;
@@ -186,10 +196,24 @@ export function MathText({ html, className, style }: { html: string; className?:
       dead = true;
     };
   }, [stage1]);
-  return <div ref={ref} className={className} style={style} dangerouslySetInnerHTML={{ __html: stage1.html }} />;
+  const inner = { dangerouslySetInnerHTML: { __html: stage1.html } };
+  if (inline) {
+    return <span ref={ref as React.RefObject<HTMLSpanElement>} className={className} style={style} {...inner} />;
+  }
+  return <div ref={ref as React.RefObject<HTMLDivElement>} className={className} style={style} {...inner} />;
 }
 
 // Plain text that may contain \(...\) / \[...\] / $$...$$ or bare TeX.
-export function MathPlain({ text, className, style }: { text: string; className?: string; style?: React.CSSProperties }) {
-  return <MathText html={escHtml(text)} className={className} style={style} />;
+export function MathPlain({
+  text,
+  className,
+  style,
+  inline,
+}: {
+  text: string;
+  className?: string;
+  style?: React.CSSProperties;
+  inline?: boolean;
+}) {
+  return <MathText html={escHtml(text)} className={className} style={style} inline={inline} />;
 }
