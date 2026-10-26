@@ -381,6 +381,9 @@ export default function AdminRoute() {
   const [announceTitle, setAnnounceTitle] = useState('');
   const [announceBody, setAnnounceBody] = useState('');
   const [announcing, setAnnouncing] = useState(false);
+  const [testEmail, setTestEmail] = useState('');
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ ok: boolean; status: number; body: string; sender: string; keySet: boolean; fromSet: boolean } | null>(null);
 
   // Broadcast an announcement to every user's bell.
   const announce = async () => {
@@ -394,11 +397,35 @@ export default function AdminRoute() {
       const res = await api.adminAnnounce(announceTitle.trim(), announceBody.trim());
       setAnnounceTitle('');
       setAnnounceBody('');
-      setSuccess(`Announcement sent to ${res.reached} user${res.reached === 1 ? '' : 's'}.`);
+      const bell = `Announcement sent to ${res.reached} user${res.reached === 1 ? '' : 's'}`;
+      setSuccess(
+        res.emailTo === undefined
+          ? `${bell}.`
+          : res.emailTo === 0
+            ? `${bell}, but no confirmed email addresses on file — inbox delivery skipped.`
+            : `${bell}. Email queued for ${res.emailTo} confirmed inbox${res.emailTo === 1 ? '' : 'es'}.`
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Announce failed.');
     } finally {
       setAnnouncing(false);
+    }
+  };
+
+  // One real email through the same Brevo path — shows Brevo's exact answer.
+  const sendTest = async () => {
+    if (!/^\S+@\S+\.\S+$/.test(testEmail.trim())) {
+      setTestResult({ ok: false, status: 0, body: 'Enter the address to test first.', sender: '', keySet: false, fromSet: false });
+      return;
+    }
+    setTesting(true);
+    setTestResult(null);
+    try {
+      setTestResult(await api.adminEmailTest(testEmail.trim()));
+    } catch (err) {
+      setTestResult({ ok: false, status: 0, body: err instanceof Error ? err.message : 'Test failed.', sender: '', keySet: false, fromSet: false });
+    } finally {
+      setTesting(false);
     }
   };
 
@@ -713,12 +740,36 @@ export default function AdminRoute() {
 
       <Module id="announce" title="Announce to users" openId={openModule} onToggle={setOpenModule}>
       <div style={card}>
-        <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 8 }}>Lands on every user's bell instantly.</div>
+        <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 8 }}>Lands on every user's bell instantly, and is emailed to every confirmed inbox.</div>
         <input value={announceTitle} onChange={(e) => setAnnounceTitle(e.target.value)} placeholder="Announcement title" style={{ ...input, width: '100%', marginBottom: 8 }} />
         <textarea value={announceBody} onChange={(e) => setAnnounceBody(e.target.value)} rows={3} placeholder="What should everyone know?" style={{ ...input, width: '100%', resize: 'vertical', marginBottom: 8 }} />
         <button onClick={() => setConfirm({ title: 'Send to everyone?', body: 'This announcement lands on every user\u2019s bell instantly.', label: 'Send', run: () => void announce() })} disabled={announcing} style={{ ...primaryBtn, width: '100%', opacity: announcing ? 0.6 : 1 }}>
           {announcing ? 'Sending…' : 'Send to all users'}
         </button>
+
+        <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px dashed var(--border)' }}>
+          <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text)' }}>Email check</div>
+          <div style={{ fontSize: 11, color: 'var(--text2)', margin: '2px 0 8px' }}>
+            Sends one real email and shows Brevo's own response — the fastest way to see why inboxes are empty.
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <input value={testEmail} onChange={(e) => setTestEmail(e.target.value)} placeholder="you@example.com" inputMode="email" style={{ ...input, flex: 1, minWidth: 0 }} />
+            <button onClick={() => void sendTest()} disabled={testing} style={{ ...primaryBtn, whiteSpace: 'nowrap', opacity: testing ? 0.6 : 1 }}>
+              {testing ? 'Testing…' : 'Send test'}
+            </button>
+          </div>
+          {testResult && (
+            <div style={{ marginTop: 8, padding: '10px 12px', borderRadius: 10, border: `1px solid ${testResult.ok ? '#a7f3d0' : '#fecaca'}`, background: testResult.ok ? '#ecfdf5' : '#fef2f2', fontSize: 12, color: testResult.ok ? '#065f46' : '#991b1b' }}>
+              <div style={{ fontWeight: 800, marginBottom: 4 }}>
+                {testResult.ok ? `Delivered — Brevo ${testResult.status}` : testResult.status ? `Brevo ${testResult.status}` : 'Not sent'}
+                {!testResult.keySet && ' · BREVO_API_KEY missing on the server'}
+                {testResult.keySet && !testResult.fromSet && ' · EMAIL_FROM defaulted (may be unverified)'}
+              </div>
+              {testResult.sender && <div style={{ marginBottom: 4 }}>From: {testResult.sender}</div>}
+              <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{testResult.body || '(empty response)'}</div>
+            </div>
+          )}
+        </div>
       </div>
       </Module>
 

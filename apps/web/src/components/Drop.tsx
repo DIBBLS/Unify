@@ -20,6 +20,34 @@ export default function Drop({
   const [up, setUp] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const current = options.find((o) => o.value === value);
+  // Call sites often pass a form-field style (padding, border, radius…) meant
+  // for the CONTROL. Those must land on the trigger button, not the wrapper —
+  // otherwise the box gets double padding and sits taller than the input
+  // beside it. Layout keys (width/flex/margins) stay on the wrapper.
+  const {
+    padding,
+    border,
+    borderRadius,
+    background,
+    color,
+    fontSize,
+    fontWeight,
+    lineHeight,
+    boxShadow,
+    display,
+    ...wrapStyle
+  } = style ?? {};
+  const controlStyle: React.CSSProperties = {
+    ...(padding !== undefined ? { padding } : null),
+    ...(border !== undefined ? { border } : null),
+    ...(borderRadius !== undefined ? { borderRadius } : null),
+    ...(background !== undefined ? { background } : null),
+    ...(color !== undefined ? { color } : null),
+    ...(fontSize !== undefined ? { fontSize } : null),
+    ...(fontWeight !== undefined ? { fontWeight } : null),
+    ...(lineHeight !== undefined ? { lineHeight } : null),
+    ...(boxShadow !== undefined ? { boxShadow } : null),
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -40,13 +68,13 @@ export default function Drop({
   const toggle = () => {
     if (!open && wrapRef.current) {
       const r = wrapRef.current.getBoundingClientRect();
-      setUp(window.innerHeight - r.bottom < 240);
+      setUp(window.innerHeight - r.bottom < 262);
     }
     setOpen((v) => !v);
   };
 
   return (
-    <div ref={wrapRef} style={{ position: 'relative', minWidth: 0, ...style }}>
+    <div ref={wrapRef} style={{ position: 'relative', minWidth: 0, ...wrapStyle }}>
       <button
         type="button"
         onClick={toggle}
@@ -63,8 +91,11 @@ export default function Drop({
           background: 'var(--surface)',
           color: 'var(--text)',
           fontSize: 13,
+          lineHeight: 1.3,
+          boxSizing: 'border-box',
           fontWeight: 700,
           cursor: 'pointer',
+          ...controlStyle,
         }}
       >
         <span style={{ flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -77,9 +108,14 @@ export default function Drop({
           style={{
             position: 'absolute',
             left: 0,
-            right: 0,
             [up ? 'bottom' : 'top']: 'calc(100% + 8px)',
             zIndex: 130,
+            // Wide enough to show long labels (course titles, question
+            // options) on one line instead of ragged truncation, but never
+            // wider than the viewport.
+            minWidth: '100%',
+            width: 'max-content',
+            maxWidth: 'min(380px, calc(100vw - 24px))',
             border: '1px solid var(--border)',
             borderRadius: 10,
             overflow: 'hidden',
@@ -87,13 +123,14 @@ export default function Drop({
             boxShadow: '0 12px 32px rgba(0,0,0,0.16)',
           } as React.CSSProperties}
         >
-          <div style={{ maxHeight: 240, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 3, padding: 5 }}>
+          <div style={{ maxHeight: 240, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 2, padding: 4 }}>
             {options.map((o) => {
               const active = o.value === value;
               return (
                 <button
                   key={o.value}
                   type="button"
+                  title={o.label}
                   onClick={() => {
                     onChange(o.value);
                     setOpen(false);
@@ -102,9 +139,9 @@ export default function Drop({
                     display: 'block',
                     width: '100%',
                     textAlign: 'left',
-                    padding: '10px 14px',
-                    lineHeight: 1.4,
-                    borderRadius: 8,
+                    padding: '9px 12px',
+                    lineHeight: 1.35,
+                    borderRadius: 7,
                     border: 'none',
                     background: active ? '#ecfdf5' : 'transparent',
                     color: active ? '#059669' : 'var(--text)',
