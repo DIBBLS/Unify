@@ -3,6 +3,31 @@ import { ChevronDown } from 'lucide-react';
 
 // Brand dropdown that opens as a FLOATING OVERLAY above the page —
 // the panel never pushes content around or expands the frame it lives in.
+//
+// Every instance shares the same visible metrics (height, padding, radius,
+// type size, item spacing). Call sites may only influence LAYOUT (width,
+// flex, margins) — passing a form-field style here will never make one
+// dropdown taller or chunkier than another. Long labels extend the panel
+// (up to a viewport-safe cap) and truncate cleanly with a title tooltip.
+const LAYOUT_KEYS = new Set([
+  'width',
+  'minWidth',
+  'maxWidth',
+  'flex',
+  'flexGrow',
+  'flexShrink',
+  'flexBasis',
+  'alignSelf',
+  'order',
+  'margin',
+  'marginTop',
+  'marginRight',
+  'marginBottom',
+  'marginLeft',
+]);
+
+const TRIGGER_HEIGHT = 44;
+
 export default function Drop({
   value,
   options,
@@ -18,36 +43,14 @@ export default function Drop({
 }) {
   const [open, setOpen] = useState(false);
   const [up, setUp] = useState(false);
+  const [maxW, setMaxW] = useState(380);
   const wrapRef = useRef<HTMLDivElement>(null);
   const current = options.find((o) => o.value === value);
-  // Call sites often pass a form-field style (padding, border, radius…) meant
-  // for the CONTROL. Those must land on the trigger button, not the wrapper —
-  // otherwise the box gets double padding and sits taller than the input
-  // beside it. Layout keys (width/flex/margins) stay on the wrapper.
-  const {
-    padding,
-    border,
-    borderRadius,
-    background,
-    color,
-    fontSize,
-    fontWeight,
-    lineHeight,
-    boxShadow,
-    display,
-    ...wrapStyle
-  } = style ?? {};
-  const controlStyle: React.CSSProperties = {
-    ...(padding !== undefined ? { padding } : null),
-    ...(border !== undefined ? { border } : null),
-    ...(borderRadius !== undefined ? { borderRadius } : null),
-    ...(background !== undefined ? { background } : null),
-    ...(color !== undefined ? { color } : null),
-    ...(fontSize !== undefined ? { fontSize } : null),
-    ...(fontWeight !== undefined ? { fontWeight } : null),
-    ...(lineHeight !== undefined ? { lineHeight } : null),
-    ...(boxShadow !== undefined ? { boxShadow } : null),
-  };
+
+  const wrapStyle: React.CSSProperties = {};
+  for (const [k, v] of Object.entries(style ?? {})) {
+    if (LAYOUT_KEYS.has(k)) (wrapStyle as Record<string, unknown>)[k] = v;
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -57,11 +60,14 @@ export default function Drop({
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setOpen(false);
     };
+    const onResize = () => setOpen(false);
     document.addEventListener('mousedown', onDown);
     document.addEventListener('keydown', onKey);
+    window.addEventListener('resize', onResize);
     return () => {
       document.removeEventListener('mousedown', onDown);
       document.removeEventListener('keydown', onKey);
+      window.removeEventListener('resize', onResize);
     };
   }, [open]);
 
@@ -69,6 +75,8 @@ export default function Drop({
     if (!open && wrapRef.current) {
       const r = wrapRef.current.getBoundingClientRect();
       setUp(window.innerHeight - r.bottom < 262);
+      // Never let a wide/long label push the panel past the viewport edge.
+      setMaxW(Math.max(180, Math.min(380, window.innerWidth - r.left - 12)));
     }
     setOpen((v) => !v);
   };
@@ -82,10 +90,11 @@ export default function Drop({
         aria-label={label}
         style={{
           width: '100%',
+          height: TRIGGER_HEIGHT,
           display: 'flex',
           gap: 8,
           alignItems: 'center',
-          padding: '10px 14px',
+          padding: '0 14px',
           borderRadius: 10,
           border: '1px solid var(--border)',
           background: 'var(--surface)',
@@ -95,7 +104,6 @@ export default function Drop({
           boxSizing: 'border-box',
           fontWeight: 700,
           cursor: 'pointer',
-          ...controlStyle,
         }}
       >
         <span style={{ flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -110,12 +118,9 @@ export default function Drop({
             left: 0,
             [up ? 'bottom' : 'top']: 'calc(100% + 8px)',
             zIndex: 130,
-            // Wide enough to show long labels (course titles, question
-            // options) on one line instead of ragged truncation, but never
-            // wider than the viewport.
             minWidth: '100%',
             width: 'max-content',
-            maxWidth: 'min(380px, calc(100vw - 24px))',
+            maxWidth: maxW,
             border: '1px solid var(--border)',
             borderRadius: 10,
             overflow: 'hidden',

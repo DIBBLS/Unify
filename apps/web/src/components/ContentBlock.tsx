@@ -41,7 +41,7 @@ export function ContentBlockView({ block, fig }: { block: ContentBlock; fig?: nu
       return (
         <div className="formula-box">
           <div className="f-label">{block.label}</div>
-          <Formula latex={block.equation} />
+          <Formula latex={block.equation} display />
           {block.note && (
             <div className="f-note">
               <MathText html={block.note} />
