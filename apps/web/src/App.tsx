@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from './routes/_layout';
 import CourseRoute from './routes/course';
@@ -12,15 +12,15 @@ import { useParams } from 'react-router-dom';
 // Code-split the secondary/author routes: students' first load (auth →
 // dashboard → notes) never downloads Studio tables, admin panels or the
 // visual equation builder — each chunk fetches only when its route opens.
-const ExploreRoute = lazy(() => import('./routes/explore'));
-const OnboardingRoute = lazy(() => import('./routes/onboarding'));
-const NotificationsRoute = lazy(() => import('./routes/notifications'));
-const AdminRoute = lazy(() => import('./routes/admin'));
-const AdminContentRoute = lazy(() => import('./routes/admin/content'));
-const BrowseRoute = lazy(() => import('./routes/browse'));
-const ShareRoute = lazy(() => import('./routes/share'));
-const StudioRoute = lazy(() => import('./routes/studio/index'));
-const ClassesRoute = lazy(() => import('./routes/classes'));
+const ExploreRoute = lazyRoute(() => import('./routes/explore'));
+const OnboardingRoute = lazyRoute(() => import('./routes/onboarding'));
+const NotificationsRoute = lazyRoute(() => import('./routes/notifications'));
+const AdminRoute = lazyRoute(() => import('./routes/admin'));
+const AdminContentRoute = lazyRoute(() => import('./routes/admin/content'));
+const BrowseRoute = lazyRoute(() => import('./routes/browse'));
+const ShareRoute = lazyRoute(() => import('./routes/share'));
+const StudioRoute = lazyRoute(() => import('./routes/studio/index'));
+const ClassesRoute = lazyRoute(() => import('./routes/classes'));
 
 // /api/share/:token is served by the edge OG function for bots; if a
 // human lands here inside the SPA, forward to the real share landing.
@@ -37,6 +37,7 @@ import ErrorState from './components/ErrorState';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { supabaseBrowser, ensureSession, setCachedSession, getCachedSession } from './lib/supabase';
 import { api } from './lib/api';
+import { lazyRoute } from './lib/lazyRoute';
 
 function NotFound() {
   const link: React.CSSProperties = {

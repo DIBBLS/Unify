@@ -39,7 +39,7 @@ function stripTex(raw: string): string {
 // Only if BOTH renderers fail (MathJax CDN unreachable AND never cached)
 // does the source remain visible — logged for diagnosis, never a styled
 // fake-out.
-export default function Formula({ latex }: { latex: string }) {
+export default function Formula({ latex, display = false }: { latex: string; display?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const tex = useMemo(() => stripTex(latex), [latex]);
   useEffect(() => {
@@ -52,13 +52,13 @@ export default function Formula({ latex }: { latex: string }) {
     }
     // Stage 1 — KaTeX.
     try {
-      el.innerHTML = katex.renderToString(tex, { throwOnError: true, displayMode: false, strict: false });
+      el.innerHTML = katex.renderToString(tex, { throwOnError: true, displayMode: display, strict: false });
       return;
     } catch {
       /* complex TeX → stage 2 */
     }
-    // Stage 2 — MathJax over the raw source (it reads \(...\) in place).
-    el.innerHTML = `\\(${escHtml(tex)}\\)`;
+    // Stage 2 — MathJax over the raw source (it reads the delimiters in place).
+    el.innerHTML = display ? `\\[${escHtml(tex)}\\]` : `\\(${escHtml(tex)}\\)`;
     void (async () => {
       const ok = await typesetMath(el);
       if (dead || !el.isConnected) return;
@@ -67,6 +67,18 @@ export default function Formula({ latex }: { latex: string }) {
     return () => {
       dead = true;
     };
-  }, [tex]);
-  return <div ref={ref} className="f-eq" style={{ overflowX: 'auto', fontSize: 15, lineHeight: 2.2, minHeight: tex ? undefined : 0 }} />;
+  }, [tex, display]);
+  return (
+    <div
+      ref={ref}
+      className="f-eq"
+      style={{
+        overflowX: 'auto',
+        textAlign: display ? 'center' : undefined,
+        fontSize: display ? 17 : 15,
+        lineHeight: display ? 2.6 : 2.2,
+        minHeight: tex ? undefined : 0,
+      }}
+    />
+  );
 }

@@ -428,7 +428,7 @@ function EquationInput({ value, onChange }: { value: string; onChange: (v: strin
           {value.trim() ? (
             <div style={{ background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 8, padding: '10px 12px', marginBottom: 8 }}>
               <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, color: 'var(--text3)', marginBottom: 4 }}>RENDERED</div>
-              <Formula latex={value} />
+              <Formula latex={value} display />
             </div>
           ) : null}
           <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
@@ -454,7 +454,7 @@ function EquationInput({ value, onChange }: { value: string; onChange: (v: strin
         <div style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: 12, marginBottom: 8 }}>
           <div style={{ fontSize: 12, fontWeight: 700 }}>This equation is too advanced to rebuild visually — kept exactly as published:</div>
           <div style={{ marginTop: 8, background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 8, padding: '10px 12px' }}>
-            <Formula latex={value} />
+            <Formula latex={value} display />
           </div>
           <button type="button" onClick={() => openVisual([])} style={{ marginTop: 8, padding: '8px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: '#059669' }}>
             Start over visually (replaces it)
@@ -473,7 +473,7 @@ function EquationInput({ value, onChange }: { value: string; onChange: (v: strin
           {(built || value).trim() ? (
             <div style={{ marginTop: 8, background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 8, padding: '10px 12px' }}>
               <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, color: 'var(--text3)', marginBottom: 4 }}>READER PREVIEW — LIVE</div>
-              <Formula latex={built || value} />
+              <Formula latex={built || value} display />
             </div>
           ) : null}
         </>
