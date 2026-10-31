@@ -1,7 +1,4 @@
 import { defineConfig } from 'vite';
-import { createRequire } from 'module';
-
-const require = createRequire(import.meta.url);
 
 // Keep Unify as static multi-page app — Vite just serves/builds the existing HTML files
 // No framework transform needed; Vercel will detect "Vite" from package.json
