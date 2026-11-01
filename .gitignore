@@ -1,0 +1,17 @@
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor directories
+.idea/
+
+# Node (if added later)
+node_modules/
+
+# Firebase
+.firebase/
+firebase-debug.log
+
+# Local environment
+config.bat
