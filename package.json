@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node api.js && vite --port 3000",
-    "build": "node api.js && vite build",
+    "dev": "vite --port 3000",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
