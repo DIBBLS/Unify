@@ -1,0 +1,145 @@
+/* Base + shared UI classes. Components in src/components use these. */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font-body);
+  color: var(--u-text);
+  background: #e8e6e0;
+  font-size: 15px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+input, select, textarea { font: inherit; color: inherit; }
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+
+/* ---------- Screen shell ---------- */
+.screen {
+  position: relative;
+  width: 100%;
+  max-width: var(--shell);
+  min-height: 100dvh;
+  margin: 0 auto;
+  background: var(--u-page);
+  overflow-x: clip; /* clip, not hidden: hidden would break the sticky bottom actions */
+  display: flex; flex-direction: column;
+}
+.screen--tabs { padding-bottom: calc(var(--tabbar-h) + 16px); }
+.screen--actions { padding-bottom: 0; }
+.pad { padding: 0 var(--gutter); }
+.stack { display: flex; flex-direction: column; }
+.row { display: flex; align-items: center; }
+.between { justify-content: space-between; }
+.grow { flex: 1; min-width: 0; }
+.wrap { flex-wrap: wrap; }
+.center { text-align: center; }
+
+/* ---------- Type ---------- */
+.display {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  white-space: pre-line;
+}
+.wordmark { font-family: var(--font-wordmark); font-weight: 700; }
+.math { font-family: var(--font-math); font-style: italic; }
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--u-text-3);
+}
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.muted { color: var(--u-text-2); }
+.faint { color: var(--u-text-3); }
+.t-12 { font-size: 12px; } .t-13 { font-size: 13px; } .t-14 { font-size: 14px; }
+.t-15 { font-size: 15px; } .t-16 { font-size: 16px; } .t-17 { font-size: 17px; }
+.t-19 { font-size: 19px; } .t-20 { font-size: 20px; }
+.w-5 { font-weight: 500; } .w-6 { font-weight: 600; } .w-7 { font-weight: 700; } .w-8 { font-weight: 800; }
+
+/* ---------- Surfaces ---------- */
+.card {
+  background: var(--u-card);
+  border: 1px solid var(--u-border);
+  border-radius: var(--r-card);
+}
+.card--dark { background: var(--u-black); color: var(--u-on-dark); border: 0; }
+.card--green { background: var(--u-green); border: 0; }
+.card--tint { background: var(--u-good-tint); border: 0; }
+.list > * + * { border-top: 1px solid var(--u-hairline); }
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: var(--btn-h); padding: 0 24px;
+  border-radius: var(--r-btn);
+  font-size: 17px; font-weight: 600;
+  transition: transform .08s ease, filter .15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(0.98); }
+.btn--block { width: 100%; }
+.btn--amber { background: var(--u-amber); color: var(--u-black); }
+.btn--dark { background: var(--u-black); color: #fff; }
+.btn--green { background: var(--u-green); color: var(--u-black); }
+.btn--white { background: #fff; color: var(--u-black); border: 1px solid var(--u-border); }
+.btn--outline { background: #fff; color: var(--u-black); border: 1.5px solid var(--u-black); }
+.btn--danger { background: #fff; color: var(--u-red); border: 1.5px solid var(--u-red); }
+.btn--ghost-dark { background: transparent; color: #fff; border: 1px solid #444; }
+.btn--sm { height: 36px; padding: 0 16px; font-size: 13px; font-weight: 700; border-radius: 18px; }
+.link-btn { font-weight: 700; font-size: 16px; padding: 12px; }
+
+/* ---------- Chips / pills ---------- */
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 16px; border-radius: var(--r-chip);
+  background: #fff; border: 1px solid var(--u-border);
+  font-size: 14px; font-weight: 600; white-space: nowrap;
+}
+.chip--on { background: var(--u-black); color: #fff; border-color: var(--u-black); }
+.chip--off { background: #ecebe6; color: #aaa; border-color: transparent; }
+.chip--sm { padding: 6px 12px; font-size: 13px; }
+.pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 700; white-space: nowrap;
+}
+.pill--good { background: var(--u-good-tint); color: var(--u-good); }
+.pill--amber { background: var(--u-amber); color: var(--u-black); }
+.pill--warn { background: var(--u-warn-tint); color: var(--u-warn-ink); }
+.pill--bad { background: var(--u-bad-tint); color: var(--u-red); }
+.pill--grey { background: var(--u-chip); color: var(--u-text-2); }
+.pill--dark { background: var(--u-black); color: var(--u-green); }
+
+/* ---------- Bars ---------- */
+.bottom-actions {
+  /* In the page flow, pinned to the bottom while scrolling. Content can never hide behind it. */
+  position: sticky; bottom: 0; margin-top: auto;
+  width: 100%;
+  padding: 28px 24px calc(20px + env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; gap: 12px;
+  background: linear-gradient(to bottom, rgba(245,245,240,0), var(--u-page) 28%);
+  z-index: 20;
+}
+.bottom-actions--dark { background: linear-gradient(to bottom, rgba(10,10,10,0), #0a0a0a 28%); }
+.bottom-actions--green { background: linear-gradient(to bottom, rgba(80,255,144,0), #50ff90 28%); }
+.bottom-actions--clear { background: none; }
+.screen--tabs .bottom-actions { bottom: var(--tabbar-h); padding-bottom: 12px; }
+
+/* ---------- Inputs ---------- */
+.field-label { font-size: 13px; font-weight: 600; color: var(--u-text-2); margin-bottom: 6px; }
+.input {
+  width: 100%; height: 54px; padding: 0 16px;
+  background: #fff; border: 1px solid var(--u-border); border-radius: 16px;
+  font-size: 16px; font-weight: 500; outline: none;
+}
+.input:focus { border-color: var(--u-black); }
+
+/* ---------- Misc ---------- */
+.divider { height: 1px; background: var(--u-hairline); }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { scrollbar-width: none; }
+.no-select { user-select: none; -webkit-user-select: none; }

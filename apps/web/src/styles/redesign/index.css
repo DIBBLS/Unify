@@ -1,0 +1,113 @@
+/* Unify Learn Redesign Integration (v2.0.0)
+   
+   This file bridges the current v1.26.15 design system with the new
+   redesign tokens from the Oct 27, 2026 handoff.
+   
+   STRATEGY:
+   1. Import redesign tokens FIRST (establishes new variables)
+   2. Import redesign UI utilities (new .btn/.card/.chip classes)
+   3. Existing components continue using current index.css
+   4. NEW screens import from @/components/redesign and use redesign/ styles
+   
+   USER DECISIONS (Nov 2, 2026):
+   - Typography: HYBRID — Keep Playfair/DM Sans/Nunito, add Bowlby for new screens
+   - Primary CTA: AMBER #fbbf24 (replaces emerald)
+   - Dark mode: KEEP LIVE (both Classic & Story variants)
+   - Avatars: Box Boy personas (5) + optional photo upload in Settings
+*/
+
+@import url('./tokens.css');
+@import url('./ui.css');
+@import url('https://fonts.googleapis.com/css2?family=Bowlby+One+SC&display=swap');
+
+/* Dark mode support (keeping it live per user decision) */
+[data-theme="dark"] {
+  color-scheme: dark;
+  
+  /* Override redesign tokens for dark mode */
+  --u-page: #0f0f0f;
+  --u-card: #1a1a1a;
+  --u-card-2: #222222;
+  --u-border: #2a2a2a;
+  --u-hairline: #333333;
+  --u-text: #f0efeb;
+  --u-text-2: #aaaaaa;
+  --u-text-3: #666666;
+  --u-chip: #2a2a2a;
+  
+  /* Amber stays same (high contrast on dark) */
+  /* Green dims slightly */
+  --u-green: #4ade80;
+  --u-good-tint: rgba(74, 222, 128, 0.15);
+  --u-warn-tint: rgba(251, 191, 36, 0.15);
+  --u-bad-tint: rgba(220, 38, 38, 0.15);
+}
+
+/* Story design variant support */
+[data-design="story"] {
+  /* Story keeps its own aesthetic, just with amber CTA */
+  --u-page: #f5f4f0;
+}
+
+[data-design="story"][data-theme="dark"] {
+  --u-page: #0f0f0f;
+  --u-card: #1a1a1a;
+}
+
+/* Utility: Force amber CTA on specific elements (migration helper) */
+.btn-primary-amber {
+  background: var(--u-amber) !important;
+  color: var(--u-black) !important;
+  border-color: var(--u-amber) !important;
+}
+
+/* Utility: Box Boy avatar container */
+.box-boy-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--u-card);
+  border: 2px solid var(--u-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.box-boy-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Semester week tracker bars */
+.semester-week-bar {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--u-card-2);
+  position: relative;
+  overflow: hidden;
+}
+
+.semester-week-bar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: var(--u-green);
+  transition: width 0.3s ease;
+}
+
+.semester-week-bar[data-status="normal"]::after {
+  background: var(--u-green);
+}
+
+.semester-week-bar[data-status="warning"]::after {
+  background: var(--u-amber);
+}
+
+.semester-week-bar[data-status="urgent"]::after {
+  background: var(--u-red);
+}

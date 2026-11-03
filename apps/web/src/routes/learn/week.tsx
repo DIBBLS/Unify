@@ -106,17 +106,12 @@ export default function LearnPage() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
   const topics = note?.topics ?? [];
-  const lectures = (() => {
-    const set = new Set<number>();
-    for (const t of topics) set.add(t.lecture || 1);
-    for (const m of topicMeta) set.add(m.lecture || 1);
-    if (set.size === 0) set.add(1);
-    return [...set].sort((a, b) => a - b);
-  })();
-  const selLecture = lectures.includes(lecture) ? lecture : lectures[0];
-  const lastLecture = lectures[lectures.length - 1];
-  const classTopics = topics.filter((t) => (t.lecture || 1) === selLecture);
-  const hasQuiz = (note?.eoq?.questions?.length || 0) > 0 && selLecture === lastLecture;
+  // Flatten Lecture 1/2/3 → week-level: always treat as single lecture
+  const lectures = [1];
+  const selLecture = 1;
+  const lastLecture = 1;
+  const classTopics = topics; // all topics for the week
+  const hasQuiz = (note?.eoq?.questions?.length || 0) > 0;
   const tabCount = classTopics.length + (hasQuiz ? 1 : 0);
 
   useEffect(() => {
@@ -417,20 +412,6 @@ export default function LearnPage() {
             <Share2 size={14} /> Share
           </button>
         )}
-        {(() => {
-          const known = myXp !== null;
-          const unlocked = known && meetsXpGate(myXp, 'pdf', viewer ? { role: viewer.role, isAdmin: viewer.isAdmin } : undefined);
-          return (
-            <button
-              onClick={() => unlocked && window.print()}
-              disabled={!unlocked}
-              title={unlocked ? 'Save this week as PDF' : known ? `Unlocks at ${XP_GATES.pdf} XP — you have ${myXp}` : 'Checking your XP…'}
-              style={{ display: 'flex', gap: 6, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 700, color: unlocked ? '#059669' : 'var(--text3)', opacity: unlocked ? 1 : 0.75 }}
-            >
-              {unlocked ? <Download size={14} /> : <Lock size={14} />} {unlocked ? 'Save PDF' : known ? `PDF · ${myXp}/${XP_GATES.pdf} XP` : 'PDF · …'}
-            </button>
-          );
-        })()}
       </div>
       {sharing && note && (
         <ShareModal course={note.course} week={weekNum} title={note.title} topics={topics.map((t) => t.title || `Topic ${t.number}`)} onClose={() => setSharing(false)} />

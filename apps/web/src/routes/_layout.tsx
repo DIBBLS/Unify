@@ -19,25 +19,25 @@ type Tab = {
 };
 
 const STUDENT_TABS: Tab[] = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, match: ['/dashboard'] },
-  { to: '/course', label: 'Learn', icon: BookOpen, match: ['/course', '/learn'] },
-  { to: '/explore', label: 'Explore', icon: Search, match: ['/explore'] },
-  { to: '/profile', label: 'Profile', icon: User, match: ['/profile'] },
+  { to: '/dashboard', label: 'Home', icon: LayoutDashboard, match: ['/dashboard'] },
+  { to: '/course', label: 'Timetable', icon: BookOpen, match: ['/course', '/learn'] },
+  { to: '/explore', label: 'Class', icon: Search, match: ['/explore'] },
+  { to: '/profile', label: 'Me', icon: User, match: ['/profile'] },
 ];
 
 const AUTHOR_TABS: Tab[] = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, match: ['/dashboard'] },
+  { to: '/dashboard', label: 'Home', icon: LayoutDashboard, match: ['/dashboard'] },
   { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio', '/browse', '/classes'] },
-  { to: '/profile', label: 'Profile', icon: User, match: ['/profile'] },
+  { to: '/profile', label: 'Me', icon: User, match: ['/profile'] },
 ];
 
 // Admin role: manage, never learn. No Learn tab — the admin reads
 // everything through All content; learning paths are students-only.
 // /browse + /classes light the Studio tab (the working area).
 const ADMIN_TABS: Tab[] = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, match: ['/dashboard'] },
+  { to: '/dashboard', label: 'Home', icon: LayoutDashboard, match: ['/dashboard'] },
   { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio', '/browse', '/classes'] },
-  { to: '/profile', label: 'Profile', icon: User, match: ['/profile'] },
+  { to: '/profile', label: 'Me', icon: User, match: ['/profile'] },
 ];
 
 export default function Layout() {

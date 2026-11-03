@@ -1,4 +1,4 @@
-# Unify Learn — v1.26.1
+# Unify Learn — v1.26.15
 
 Student learning platform for LASU Engineering — Lecture-structured weekly notes (Lecture 1/2/3), XP, streaks, quizzes, read-aloud with Nigerian voice pick, expiring share links, XP-gated PDF, lecturer timetable + class management, offline-first reader, Google + email sign-in, and an authoring studio for lecturers and contributors. Classic/Story designs + dark mode, mobile-first, Box Boy mascot. Note readers add focus mode + content-only zoom (desktop).
 

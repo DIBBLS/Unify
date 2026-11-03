@@ -11,6 +11,7 @@ import Typewriter from '../components/Typewriter';
 import Flash from '../components/Flash';
 import ConfirmModal from '../components/ConfirmModal';
 import { greeting, dailyLine, dailyKey, daypart } from '../lib/greet';
+import { HomeHero } from '../components/redesign/HomeHero';
 
 type CourseStat = { course: string; topics: number };
 
@@ -294,19 +295,7 @@ export default function DashboardRoute() {
   if (isAuthor)
     return (
       <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', paddingBottom: 80 }}>
-        <div style={{ padding: '20px 16px 12px', background: 'var(--surface)', display: 'flex', gap: 12, alignItems: 'center', borderBottomLeftRadius: 24, borderBottomRightRadius: 24 }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 11, color: 'var(--text3)', letterSpacing: 1 }}>Your Dashboard</div>
-            <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28, marginTop: 4 }}>
-              {greeting()}, <em style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', padding: '0 6px', borderRadius: 6, fontStyle: 'normal' }}>{firstName}</em>
-            </h1>
-            <div style={{ fontSize: 13, color: '#059669', marginTop: 4, minHeight: 18 }}>
-              <Typewriter key={dailyKey()} text={dailyLine()} speed={28} />
-            </div>
-            <div style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{profile?.department || roleLabel}</div>
-          </div>
-          <Mascot size={64} animate={daypart() === 'morning' ? 'sip' : 'wave'} />
-        </div>
+        <HomeHero profile={profile!} firstName={firstName} />
         {!profile?.avatar_url && (
           <div style={{ margin: '12px 16px 0', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
             <div style={{ flex: 1, fontSize: 13 }}><strong>Finish your profile</strong> <span style={{ color: 'var(--text2)' }}>— add a picture auditors see on your notes.</span></div>
@@ -436,19 +425,7 @@ export default function DashboardRoute() {
     );
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', paddingBottom: 80 }}>
-      <div style={{ padding: '20px 16px 12px', background: 'var(--surface)', display: 'flex', gap: 12, alignItems: 'center', borderBottomLeftRadius: 24, borderBottomRightRadius: 24 }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 11, color: 'var(--text3)', letterSpacing: 1 }}>Your Dashboard</div>
-          <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28, marginTop: 4 }}>
-            {greeting()}, <em style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', padding: '0 6px', borderRadius: 6, fontStyle: 'normal' }}>{firstName}</em>
-          </h1>
-          <div style={{ fontSize: 13, color: '#059669', marginTop: 4, minHeight: 18 }}>
-            <Typewriter key={dailyKey()} text={dailyLine()} speed={28} />
-          </div>
-          <div style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{profile?.department || ''}</div>
-        </div>
-        <Mascot size={64} animate={daypart() === 'morning' ? 'sip' : 'wave'} />
-      </div>
+      <HomeHero profile={profile!} firstName={firstName} />
 
       <div className="rise" style={{ margin: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
         <div>
