@@ -1,7 +1,6 @@
 import { Screen, TopBar } from '../components/redesign/chrome'
 import { BoxBoy } from '../components/redesign/brand'
 import { Card, Button } from '../components/redesign/ui'
-import './redesign-preview.css'
 
 export default function RedesignPreview(){
   return (
