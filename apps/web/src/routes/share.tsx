@@ -131,24 +131,15 @@ export default function ShareRoute() {
       </div>
 
       {(() => {
-        const lectures = [...new Set(topics.map((t) => t.lecture || 1))].sort((a, b) => a - b);
-        const showHeads = lectures.length > 1;
-        return lectures.map((lec) => (
-          <div key={lec} style={{ marginBottom: showHeads ? 16 : 8 }}>
-            {showHeads && (
-              <div style={{ fontSize: 12, fontWeight: 800, color: '#059669', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>
-                Lecture {lec}
+        return (
+          <>
+            {topics.map((t) => (
+              <div key={`1-${t.number}`} style={{ marginBottom: 8 }}>
+                <TopicSlice topic={t} />
               </div>
-            )}
-            {topics
-              .filter((t) => (t.lecture || 1) === lec)
-              .map((t) => (
-                <div key={`${lec}-${t.number}`} style={{ marginBottom: 8 }}>
-                  <TopicSlice topic={t} />
-                </div>
-              ))}
-          </div>
-        ));
+            ))}
+          </>
+        );
       })()}
       {topics.length === 0 && (
         <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>

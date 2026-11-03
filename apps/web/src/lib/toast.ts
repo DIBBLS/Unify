@@ -30,6 +30,17 @@ export function toastError(message: string): void {
   }, 6000);
 }
 
+export function toastSuccess(message: string): void {
+  const text = (message || 'Done.').slice(0, 220);
+  items = [...items.slice(-2), { id: nextId++, message: text }];
+  emit();
+  const id = nextId - 1;
+  window.setTimeout(() => {
+    items = items.filter((t) => t.id !== id);
+    emit();
+  }, 4000);
+}
+
 export function subscribeToasts(fn: (t: Toast[]) => void): () => void {
   listeners = [...listeners, fn];
   fn([...items]);
