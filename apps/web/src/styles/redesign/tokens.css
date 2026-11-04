@@ -46,11 +46,11 @@
   --u-bad-tint: #fde8e8;
 
   /* Type — HYBRID: Preserve current + add new headline font */
-  --font-display: 'Playfair Display', Georgia, serif;             /* Current: hero display text */
-  --font-body: 'DM Sans', 'Nunito', system-ui, sans-serif;        /* Current: body text */
+  --font-display: 'Nunito', system-ui, sans-serif;                /* App display - Nunito theme */
+  --font-body: 'Nunito', system-ui, sans-serif;                   /* App body - Nunito */
   --font-headline: 'Bowlby One SC', 'Arial Black', sans-serif;    /* NEW: caps headlines (redesign screens only) */
   --font-ui: 'Nunito', system-ui, sans-serif;                     /* Current: UI elements */
-  --font-wordmark: 'Playfair Display', Georgia, serif;            /* "Unify Learn" wordmark */
+  --font-wordmark: 'Playfair Display', Georgia, serif;            /* "Unify Learn" wordmark - keep Playfair */
   --font-math: 'STIX Two Text', 'Times New Roman', serif;         /* maths, italic */
   
   /* Legacy font mappings */

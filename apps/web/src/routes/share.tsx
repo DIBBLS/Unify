@@ -6,7 +6,7 @@ import BackButton from '../components/BackButton';
 import Wordmark from '../components/Wordmark';
 import Loading from '../components/Loading';
 import ErrorState from '../components/ErrorState';
-import Mascot from '../components/Mascot';
+import { BoxBoy } from '../components/redesign/brand';
 import { TopicSlice } from '../components/TopicSlice';
 import EoqQuiz from '../components/EoqQuiz';
 import { supabaseBrowser } from '../lib/supabase';
@@ -75,7 +75,7 @@ export default function ShareRoute() {
       return (
         <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px', textAlign: 'center' }}>
           <BackButton to="/auth" />
-          <Mascot size={120} />
+          <BoxBoy pose="readingStanding" width={120} />
           <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, marginTop: 12 }}>This link expired</h1>
           <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px' }}>
             Shared notes only live for a while — that is what makes them special. Join free and the whole library stays open.
@@ -152,7 +152,7 @@ export default function ShareRoute() {
 
       {/* Join CTA */}
       <div style={{ marginTop: 20, background: '#111827', borderRadius: 16, padding: 20, textAlign: 'center', color: '#fff' }}>
-        <Mascot size={84} />
+        <BoxBoy pose="cheer" width={84} />
         <div style={{ fontWeight: 800, fontSize: 18, marginTop: 8 }}>
           {authed ? 'Want the full journey?' : 'Like studying like this?'}
         </div>

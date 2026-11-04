@@ -4,8 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { BellRing, BookOpen, Megaphone, PartyPopper, ShieldCheck, CheckCheck } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import Loading from '../components/Loading';
-import Mascot from '../components/Mascot';
 import Flash from '../components/Flash';
+import { BoxBoy } from '../components/redesign/brand';
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type NotificationItem } from '../lib/api';
 
@@ -102,7 +102,7 @@ export default function NotificationsRoute() {
       <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {notes.length === 0 && !error && (
           <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
-            <Mascot size={96} />
+            <BoxBoy pose="readingStanding" width={96} />
             <div style={{ marginTop: 8 }}>All caught up. New notes and updates land here.</div>
           </div>
         )}

@@ -1,0 +1,17 @@
+/* Box Boy motion – starter CSS animations */
+@keyframes boxboy-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+@keyframes boxboy-wave {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(8deg); }
+  75% { transform: rotate(-6deg); }
+}
+.boxboy--bob {
+  animation: boxboy-bob 3s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+.boxboy--wave {
+  animation: boxboy-wave 1.2s ease-in-out infinite;
+}

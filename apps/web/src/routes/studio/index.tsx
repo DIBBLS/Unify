@@ -5,7 +5,7 @@ import { ArrowRight, Check, X, ChevronDown } from 'lucide-react';
 import BackButton from '../../components/BackButton';
 import Drop from '../../components/Drop';
 import Flash from '../../components/Flash';
-import Mascot from '../../components/Mascot';
+import { BoxBoy } from '../../components/redesign/brand';
 import { TopicSlice } from '../../components/TopicSlice';
 import { MathPlain } from '../../components/MathText';
 import EoqQuiz from '../../components/EoqQuiz';
@@ -568,7 +568,7 @@ export default function StudioRoute() {
     const elapsedLabel = `${mm}:${ss}`;
     return (
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '60px 20px 80px', textAlign: 'center' }}>
-        <Mascot size={110} animate="float" />
+        <BoxBoy pose="readingStanding" width={110} />
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 22, marginTop: 12 }}>
           {convertProg && convertProg.total > 1 ? `Converting part ${Math.min(convertProg.done + 1, convertProg.total)} of ${convertProg.total}` : WORK_MSGS[workMsg]}
         </h1>
@@ -1000,7 +1000,7 @@ export default function StudioRoute() {
 
       {step === 2 && (
         <div style={{ textAlign: 'center', padding: '24px 0' }}>
-          <Mascot size={120} animate="wave" />
+          <BoxBoy pose="cheer" width={120} />
           <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 22, marginTop: 12 }}>Live for students</h2>
           <p style={{ fontSize: 13, color: 'var(--text2)', margin: '8px 0 20px' }}>Find it under your level and course, and on your dashboard.</p>
           <div style={{ display: 'flex', gap: 8 }}>

@@ -214,7 +214,7 @@ export default function App() {
             }
           />
           <Route
-            path="/explore"
+            path="/class"
             element={
               <RequireAuth>
                 <RequireRole allow={STUDENT_ONLY}>
@@ -222,6 +222,10 @@ export default function App() {
                 </RequireRole>
               </RequireAuth>
             }
+          />
+          <Route
+            path="/explore"
+            element={<Navigate to="/class" replace />}
           />
           <Route
             path="/course/:courseCode"
