@@ -250,7 +250,6 @@ export default function CGPAPlannerRoute() {
             onClick={() => {
               if (step === 'enter') navigate(-1)
               else if (step === 'courses') setStep('enter')
-              else if (step === 'target') setStep('courses')
               else if (step === 'plan') setStep('target')
             }}
             className="row"
