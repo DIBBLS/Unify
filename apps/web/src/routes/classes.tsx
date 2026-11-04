@@ -5,7 +5,7 @@ import BackButton from '../components/BackButton';
 import Drop from '../components/Drop';
 import { ClassesSkeleton } from '../components/Skeletons';
 import ErrorState from '../components/ErrorState';
-import Mascot from '../components/Mascot';
+import { BoxBoy } from '../components/redesign/brand';
 import Flash from '../components/Flash';
 import ConfirmModal from '../components/ConfirmModal';
 import { supabaseBrowser } from '../lib/supabase';
@@ -143,7 +143,7 @@ export default function ClassesRoute() {
       </p>
       {courses.length === 0 ? (
         <div style={{ marginTop: 16, padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
-          <Mascot size={96} />
+          <BoxBoy pose="thinking" width={62} />
           <div style={{ marginTop: 8 }}>No teaching courses assigned yet. Ask an admin to assign your courses.</div>
         </div>
       ) : (
