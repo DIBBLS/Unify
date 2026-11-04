@@ -13,7 +13,7 @@ import { XP_GATES, meetsXpGate } from '../../lib/xp';
 import { previousPath } from '../../lib/navHistory';
 import { saveWeekOffline, isWeekSaved } from '../../lib/offline';
 import { useProgress } from '../../hooks/useProgress';
-import Mascot from '../../components/Mascot';
+import { BoxBoy } from '../../components/redesign/brand';
 import ErrorState from '../../components/ErrorState';
 
 export default function LearnPage() {
@@ -242,7 +242,7 @@ export default function LearnPage() {
   if (blocked)
     return (
       <div style={{ padding: 40, textAlign: 'center', color: 'var(--text2)', maxWidth: 'var(--shell, 480px)', margin: '0 auto' }}>
-        <Mascot size={110} />
+        <BoxBoy pose="thinking" width={72} />
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20, color: 'var(--text)', marginTop: 12 }}>You're not enrolled in {courseCode}</h1>
         <p style={{ fontSize: 14, margin: '8px 0 20px' }}>Enroll to unlock its weeks, topics and quizzes.</p>
         <button
@@ -270,7 +270,7 @@ export default function LearnPage() {
   if (!note)
     return (
       <div style={{ padding: 40, textAlign: 'center', color: 'var(--text2)' }}>
-        <Mascot size={110} />
+        <BoxBoy pose="thinking" width={72} />
         <div style={{ marginTop: 12 }}>No content for {courseCode} Week {weekNum} yet.</div>
       </div>
     );
