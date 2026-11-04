@@ -5,7 +5,7 @@ import { ArrowRight, ChevronLeft, GraduationCap, Presentation, Users } from 'luc
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type University } from '../lib/api';
 import Loading from '../components/Loading';
-import Mascot from '../components/Mascot';
+import { BoxBoy } from '../components/redesign/brand';
 import Typewriter from '../components/Typewriter';
 import { greeting } from '../lib/greet';
 import Flash from '../components/Flash';
@@ -225,7 +225,7 @@ export default function OnboardingRoute() {
     const staffLabel = role === 'lecturer' ? 'Lecturer' : 'Contributor';
     return (
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '60px 20px 80px', textAlign: 'center' }}>
-        <Mascot size={120} />
+        <BoxBoy pose="cheer" width={96} />
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, marginTop: 12 }}>Welcome aboard — application received</h1>
         <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px', lineHeight: 1.6 }}>
           Your {staffLabel} application is with an admin now — you'll be notified on your bell
@@ -282,7 +282,7 @@ export default function OnboardingRoute() {
         {step === 0 && (
           <>
             <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0 4px' }}>
-              <Mascot size={88} />
+              <BoxBoy pose="thinking" width={70} />
             </div>
             {isEdit && (
               <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 12, padding: 10, fontSize: 13, color: '#065f46', textAlign: 'center' }}>
@@ -336,7 +336,7 @@ export default function OnboardingRoute() {
         {step === 1 && (
           <>
             <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0 4px' }}>
-              <Mascot size={110} />
+              <BoxBoy pose="wavePhone" width={88} />
             </div>
             <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="e.g. Joshua" style={{ padding: 12, border: '1px solid var(--border)', borderRadius: 12, fontSize: 16 }} />
             {firstName && <div style={{ fontSize: 14 }}>{daypart}, <strong>{firstName}</strong></div>}
