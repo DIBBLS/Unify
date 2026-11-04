@@ -4,7 +4,6 @@ Thumbs.db
 desktop.ini
 
 # Editor directories
-.vscode/
 .idea/
 
 # Node (if added later)
@@ -15,8 +14,6 @@ node_modules/
 firebase-debug.log
 
 # Local environment
-.env
-.env.local
 
 # Local notes (do not commit — may hold pasted keys/logs)
 messages.txt
@@ -29,3 +26,4 @@ __full*.txt
 dist/
 apps/web/dist/
 notes-engine/dist/
+config.bat
