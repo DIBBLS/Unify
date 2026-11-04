@@ -826,7 +826,8 @@ export default function AdminRoute() {
                 <button
                   onClick={() => void decideRequest(r.id, true)}
                   disabled={deciding === r.id}
-                  style={{ flex: 1, padding: 10, borderRadius: 12, background: '#10b981', color: '#fff', border: 'none', borderBottom: '3px solid #059669', fontWeight: 800, fontSize: 13, opacity: deciding === r.id ? 0.6 : 1 }}
+                  className="btn btn--amber"
+                  style={{ flex: 1, fontSize: 13, opacity: deciding === r.id ? 0.6 : 1 }}
                 >
                   {deciding === r.id ? 'Working…' : 'Approve'}
                 </button>
