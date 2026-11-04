@@ -125,7 +125,7 @@ export default function CourseDetailRoute() {
     return (
       <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px', textAlign: 'center' }}>
         <BackButton to={backTo} />
-        <BoxBoy pose="thinking" width={72} />
+        <BoxBoy pose="readingStanding" width={72} />
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20, marginTop: 12 }}>You're not enrolled in {courseCode}</h1>
         <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px' }}>Enroll to unlock its weeks, topics and quizzes.</p>
       {slots.length > 0 && (
@@ -166,7 +166,7 @@ export default function CourseDetailRoute() {
       <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {weeks.length === 0 && !error && (
           <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
-            <BoxBoy pose="thinking" width={62} />
+            <BoxBoy pose="readingStanding" width={62} />
             <div style={{ marginTop: 8 }}>No weeks published yet.</div>
           </div>
         )}

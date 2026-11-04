@@ -373,7 +373,7 @@ export default function DashboardRoute() {
         <div style={{ margin: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {notes.length === 0 ? (
             <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
-              <BoxBoy pose="thinking" width={77} />
+              <BoxBoy pose="readingStanding" width={77} />
               <div style={{ marginTop: 8 }}>Nothing published yet. Open Studio to author your first week.</div>
             </div>
           ) : (
@@ -515,7 +515,7 @@ export default function DashboardRoute() {
       <div style={{ margin: '12px 16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         {shown.length === 0 ? (
           <div style={{ gridColumn: '1 / -1', padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '2px solid var(--border)', borderRadius: 16 }}>
-            <BoxBoy pose="thinking" width={77} />
+            <BoxBoy pose="readingStanding" width={77} />
             <div style={{ marginTop: 8 }}>No courses yet.</div>
             <Link to="/explore" style={{ display: 'inline-block', marginTop: 12, padding: '10px 22px', background: '#10b981', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #059669' }}>
               Explore courses to enroll

@@ -149,7 +149,7 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
         <div className="modal-veil" onClick={() => setShowResult(false)} role="dialog" aria-modal="true" aria-label="Quiz result">
           <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxHeight: '85vh', overflowY: 'auto', background: '#0a0a0a', border: '1px solid rgba(255,255,255,.1)' }}>
         <div className={`eoq-result ${passed ? 'pass' : 'fail'}`} style={{ marginTop: 0 }}>
-          <BoxBoy pose={passed ? "wavePhone" : "thinking"} width={55} />
+          <BoxBoy pose={passed ? "wavePhone" : "readingStanding"} width={55} />
           <div style={{ marginTop: 8 }}>
             <span className={`result-pill ${passed ? 'pill-pass' : 'pill-fail'}`}>{passed ? 'PASSED' : 'NOT YET'}</span>
           </div>

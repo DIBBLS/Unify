@@ -321,7 +321,7 @@ export default function AuthRoute() {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', maxWidth: 'var(--shell, 480px)', margin: '0 auto', background: 'var(--surface)', padding: 20, justifyContent: 'center' }}>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
-          <BoxBoy pose="thinking" width={88} />
+          <BoxBoy pose="readingStanding" width={88} />
         </div>
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 26, textAlign: 'center' }}>Set a new password</h1>
         <p style={{ fontSize: 13, color: 'var(--text2)', textAlign: 'center', margin: '8px 0 16px' }}>Choose the password you'll sign in with from now on.</p>

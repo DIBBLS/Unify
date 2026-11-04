@@ -132,7 +132,7 @@ export default function ExplorePage() {
       <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {shown.length === 0 && !error && (
           <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
-            <BoxBoy pose="thinking" width={62} />
+            <BoxBoy pose="readingStanding" width={62} />
             <div style={{ marginTop: 8 }}>{results !== null ? 'No courses match that search.' : 'No courses for this level yet. Check back soon.'}</div>
           </div>
         )}
