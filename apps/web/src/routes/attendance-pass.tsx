@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react'
 import { supabaseBrowser } from '../lib/supabase'
-import { Screen, TopBar } from '../components/redesign/chrome'
-import { Card, Button } from '../components/redesign/ui'
 import { BoxBoy } from '../components/redesign/brand'
 import { generateKeyPair, exportPublicKey, signPayload } from '../lib/crypto'
 
@@ -23,22 +21,18 @@ export default function AttendancePassRoute() {
       if(!sb) return
       const { data:{ user } } = await sb.auth.getUser()
       if(!user) return
-      // load or create keypair
       let priv = localStorage.getItem('attendance_priv')
       let pub = localStorage.getItem('attendance_pub')
       if(!priv || !pub){
         const kp = await generateKeyPair()
         const pubB64 = await exportPublicKey(kp.publicKey)
-        // store private key as JWK string for demo
         const jwk = await crypto.subtle.exportKey('jwk', kp.privateKey)
         localStorage.setItem('attendance_priv', JSON.stringify(jwk))
         localStorage.setItem('attendance_pub', pubB64)
-        // register pubkey
         await sb.from('device_keys').upsert({ user_id: user.id, device_pubkey: pubB64 })
       }
       const date = new Date().toISOString().slice(0,10)
       const pl = JSON.stringify({ uid: user.id, seed, date })
-      // sign
       const jwk = JSON.parse(localStorage.getItem('attendance_priv')||'{}')
       const privKey = await crypto.subtle.importKey('jwk', jwk, { name:'ECDSA', namedCurve:'P-256'}, true, ['sign'])
       const sig = await signPayload(pl, privKey)
@@ -55,23 +49,12 @@ export default function AttendancePassRoute() {
   }
 
   return (
-    <Screen>
-      <TopBar title="Attendance pass" />
-      <div style={{ padding: 16, display:'flex', flexDirection:'column', alignItems:'center', gap:16 }}>
-        <Card tone="dark" pad={24}>
-          <div style={{ textAlign:'center', display:'grid', placeItems:'center', gap:12 }}>
-            <BoxBoy pose="wavePhone" width={100}/>
-            <PassCode seed={seed}/>
-            <p style={{color:'var(--u-on-dark-2)'}}>New code in {left}s</p>
-            <p style={{color:'var(--u-on-dark-2)'}}>Crypto-signed · valid today</p>
-            <details style={{color:'var(--u-on-dark-2)', fontSize:12}}>
-              <summary>Debug payload</summary>
-              <pre style={{whiteSpace:'pre-wrap', wordBreak:'break-all'}}>{payload}</pre>
-            </details>
-          </div>
-        </Card>
-        <Button variant="amber">Refresh</Button>
-      </div>
-    </Screen>
+    <div style={{padding:24,display:'flex',flexDirection:'column',alignItems:'center',background:'#0a0a0a',color:'#fff',minHeight:'100vh'}}>
+      <BoxBoy pose="wavePhone" width={80} style={{marginBottom:12}}/>
+      <h2 style={{fontFamily:'var(--font-headline)', margin:'12px 0'}}>Attendance pass</h2>
+      <div style={{padding:12,borderRadius:24,background:'var(--u-green)',margin:'20px 0'}}><PassCode seed={seed}/></div>
+      <p>New code in {left}s</p>
+      <p style={{color:'#aaa'}}>Crypto-signed · pass valid today</p>
+    </div>
   )
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import Mascot from './Mascot';
+import { BoxBoy } from './redesign/brand';
 
 const QUOTES = [
   'Small steps every day build engineers.',
@@ -20,7 +20,7 @@ export default function Loading({ text = 'Loading…' }: { text?: string }) {
   return (
     <div style={{ padding: 40, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, color: 'var(--text2)', textAlign: 'center' }}>
       <div style={{ animation: 'mascot-fly 5s ease-in-out infinite' }}>
-        <Mascot size={110} animate="float" />
+        <BoxBoy pose="wavePhone" width={88} />
       </div>
       <div key={qi} className="flash" style={{ fontFamily: 'var(--fd)', fontWeight: 700, fontSize: 15, color: 'var(--text)', fontStyle: 'italic', maxWidth: 300 }}>
         &ldquo;{QUOTES[qi]}&rdquo;

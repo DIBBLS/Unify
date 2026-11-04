@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabaseBrowser } from '../lib/supabase'
 import { toastError, toastSuccess } from '../lib/toast'
-import { Screen, TopBar } from '../components/redesign/chrome'
-import { Card, Button, Field } from '../components/redesign/ui'
+import { Button } from '../components/redesign/ui'
 import { BoxBoy } from '../components/redesign/brand'
 
 export default function AttendanceSetupRoute() {
@@ -35,27 +34,17 @@ export default function AttendanceSetupRoute() {
   }
 
   return (
-    <Screen>
-      <TopBar title="Attendance setup" />
-      <div style={{ padding: 16 }}>
-        <Card tone="light">
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-            <BoxBoy pose="keyHandover" width={80} />
-            <div>
-              <h2 style={{ margin: 0, fontFamily: 'var(--font-headline)' }}>Set your pass details</h2>
-              <p style={{ color: 'var(--u-text-2)', marginTop: 4 }}>Heads of Class see this name when they scan your pass.</p>
-            </div>
-          </div>
-        </Card>
-
-        <div style={{ marginTop: 16, display: 'grid', gap: 12 }}>
-          <Field label="Full name" value={fullName} placeholder="Your full name" />
-          {/* Controlled input via simple state for now */}
-          <input value={fullName} onChange={e=>setFullName(e.target.value)} style={{ width:'100%', padding:12, borderRadius:12, border:'1px solid var(--u-border)', background:'var(--u-card)' }} />
-          <input value={matric} onChange={e=>setMatric(e.target.value)} placeholder="Matric number" style={{ width:'100%', padding:12, borderRadius:12, border:'1px solid var(--u-border)', background:'var(--u-card)' }} />
-          <Button onClick={save} disabled={saving} variant="amber">{saving?'Saving...':'Save and get pass'}</Button>
-        </div>
+    <div style={{ padding: 24, maxWidth: 480, margin: '0 auto' }}>
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 16 }}>
+        <BoxBoy pose="keyHandover" width={64} />
+        <h1 style={{ margin: 0, fontFamily: 'var(--font-headline)' }}>Attendance setup</h1>
       </div>
-    </Screen>
+      <p>This is for attendance. Heads of Class see this name when they scan your pass.</p>
+      <label>Full name</label>
+      <input value={fullName} onChange={e=>setFullName(e.target.value)} style={{ width:'100%', padding:8, margin:'8px 0', borderRadius:12, border:'1px solid var(--u-border)', background:'var(--u-card)' }} />
+      <label>Matric number</label>
+      <input value={matric} onChange={e=>setMatric(e.target.value)} style={{ width:'100%', padding:8, margin:'8px 0', borderRadius:12, border:'1px solid var(--u-border)', background:'var(--u-card)' }} />
+      <Button onClick={save} disabled={saving} variant="amber" style={{ marginTop:12 }}>{saving?'Saving...':'Save and get pass'}</Button>
+    </div>
   )
 }

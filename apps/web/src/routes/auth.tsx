@@ -2,7 +2,7 @@ import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, Check, X, Loader2, Chrome } from 'lucide-react';
-import Mascot from '../components/Mascot';
+import { BoxBoy } from '../components/redesign/brand';
 import Wordmark from '../components/Wordmark';
 import Typewriter from '../components/Typewriter';
 import Flash from '../components/Flash';
@@ -308,7 +308,7 @@ export default function AuthRoute() {
   if (welcomeBack)
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, maxWidth: 'var(--shell, 480px)', margin: '0 auto', background: 'var(--surface)', padding: 24, textAlign: 'center' }}>
-        <Mascot size={140} animate="sip" />
+        <BoxBoy pose="cheer" width={112} />
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28 }}>Own your journey.</h1>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', color: 'var(--text2)', fontSize: 13, fontWeight: 600 }}>
           <Loader2 size={16} style={{ animation: 'spin 0.8s linear infinite', color: '#10b981' }} />
@@ -321,7 +321,7 @@ export default function AuthRoute() {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', maxWidth: 'var(--shell, 480px)', margin: '0 auto', background: 'var(--surface)', padding: 20, justifyContent: 'center' }}>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
-          <Mascot size={110} />
+          <BoxBoy pose="thinking" width={88} />
         </div>
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 26, textAlign: 'center' }}>Set a new password</h1>
         <p style={{ fontSize: 13, color: 'var(--text2)', textAlign: 'center', margin: '8px 0 16px' }}>Choose the password you'll sign in with from now on.</p>
@@ -383,7 +383,7 @@ export default function AuthRoute() {
           </h1>
           <p style={{ marginTop: 8, opacity: 0.92, fontSize: 14, minHeight: 20 }}><Typewriter text="Built for the ones who build" /></p>
         </div>
-        <Mascot size={104} animate="sip" />
+        <BoxBoy pose="wavePhone" width={84} />
       </div>
       <div style={{ padding: 20, flex: 1 }}>
         <div style={{ display: 'flex', gap: 4, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 9999, padding: 4, marginBottom: 20 }}>

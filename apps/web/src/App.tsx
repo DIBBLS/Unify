@@ -25,7 +25,6 @@ const OnlineClassRoute = lazyRoute(() => import('./routes/online-class'));
 const LecturerHomeRoute = lazyRoute(() => import('./routes/lecturer-home'));
 const BecomeHocRoute = lazyRoute(() => import('./routes/become-hoc'));
 const LecturerRedesignRoute = lazyRoute(() => import('./routes/lecturer-redesign'));
-const RedesignPreviewRoute = lazyRoute(() => import('./routes/redesign-preview'));
 const NotificationsRoute = lazyRoute(() => import('./routes/notifications'));
 const AdminRoute = lazyRoute(() => import('./routes/admin'));
 const AdminContentRoute = lazyRoute(() => import('./routes/admin/content'));
@@ -40,7 +39,7 @@ function ShareRedirect() {
   const { token = '' } = useParams();
   return <Navigate to={`/s/${encodeURIComponent(token)}`} replace />;
 }
-import Mascot from './components/Mascot';
+import { BoxBoy } from './components/redesign/brand';
 import Toasts from './components/Toasts';
 import ZoomBar from './components/ZoomBar';
 import InstallBar from './components/InstallBar';
@@ -64,7 +63,7 @@ function NotFound() {
   return (
     <div style={{ padding: 40, textAlign: 'center', maxWidth: 'var(--shell, 480px)', margin: '0 auto' }}>
       <div style={{ marginBottom: 12 }}>
-        <Mascot size={120} animate="wave" />
+        <BoxBoy pose="wavePhone" width={120} />
       </div>
       <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24 }}>Page not found</h1>
       <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px' }}>This link doesn't exist. Try one of these:</p>
@@ -333,7 +332,6 @@ export default function App() {
           <Route path="/lecturer" element={<RequireAuth><LecturerHomeRoute /></RequireAuth>} />
           <Route path="/lecturer/redesign" element={<RequireAuth><LecturerRedesignRoute /></RequireAuth>} />
           <Route path="/hoc/request" element={<RequireAuth><BecomeHocRoute /></RequireAuth>} />
-          <Route path="/redesign/preview" element={<RequireAuth><RedesignPreviewRoute /></RequireAuth>} />
 
           <Route path="*" element={<NotFound />} />
         </Route>
