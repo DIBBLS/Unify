@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { BookOpen, Search } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import { SearchListSkeleton } from '../components/Skeletons';
-import Mascot from '../components/Mascot';
+import { BoxBoy } from '../components/redesign/brand';
 import Flash from '../components/Flash';
 import { supabaseBrowser } from '../lib/supabase';
 import { api } from '../lib/api';
@@ -132,7 +132,7 @@ export default function ExplorePage() {
       <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {shown.length === 0 && !error && (
           <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
-            <Mascot size={96} />
+            <BoxBoy pose="thinking" width={62} />
             <div style={{ marginTop: 8 }}>{results !== null ? 'No courses match that search.' : 'No courses for this level yet. Check back soon.'}</div>
           </div>
         )}
