@@ -444,7 +444,7 @@ export default function AdminRoute() {
 
   const card = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 12 } as const;
   const input = { padding: 10, border: '1px solid var(--border)', borderRadius: 10, fontSize: 14 } as const;
-  const primaryBtn = { padding: '10px 18px', borderRadius: 12, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800 } as const;
+  const primaryBtn = { padding: '10px 18px', borderRadius: 12, background: 'var(--u-green)', color: 'var(--u-on-dark)', border: 'none', fontWeight: 800 } as const;
   const shownCourses = courses.filter((c) => {
     const needle = courseQ.trim().toLowerCase();
     if (!needle) return true;
