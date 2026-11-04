@@ -282,7 +282,7 @@ export default function OnboardingRoute() {
         {step === 0 && (
           <>
             <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0 4px' }}>
-              <BoxBoy pose="thinking" width={70} />
+              <BoxBoy pose="readingStanding" width={70} />
             </div>
             {isEdit && (
               <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 12, padding: 10, fontSize: 13, color: '#065f46', textAlign: 'center' }}>
