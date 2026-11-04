@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, ChevronRight, Search } from 'lucide-react';
 import BackButton from '../components/BackButton';
-import Mascot from '../components/Mascot';
+import { BoxBoy } from '../components/redesign/brand';
 import Flash from '../components/Flash';
 import { supabaseBrowser } from '../lib/supabase';
 import { api } from '../lib/api';
@@ -146,7 +146,7 @@ export default function CoursePage() {
       <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {courses.length === 0 && !error && (
           <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
-            <Mascot size={96} />
+            <BoxBoy pose="thinking" width={62} />
             <div style={{ marginTop: 8 }}>No enrolled courses yet.</div>
             <Link to="/explore" style={{ display: 'inline-block', marginTop: 12, padding: '10px 22px', background: '#10b981', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #059669' }}>
               Explore courses
