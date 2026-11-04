@@ -337,7 +337,7 @@ export default function AuthRoute() {
             Confirm new password
             <input name="confirm-password" type="password" required placeholder="Repeat it" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid var(--border)', borderRadius: 12, display: 'block' }} />
           </label>
-          <button disabled={loading} type="submit" style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+          <button disabled={loading} type="submit" className="btn btn--amber" style={{ display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
             {loading ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : null}
             {loading ? 'Saving' : 'Save new password'} <ArrowRight size={18} />
           </button>
@@ -451,7 +451,7 @@ export default function AuthRoute() {
               <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} style={{ width: 16, height: 16, accentColor: '#10b981' }} />
               Remember me on this device
             </label>
-            <button disabled={loading} type="submit" style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+            <button disabled={loading} type="submit" className="btn btn--amber" style={{ fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
               {loading ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : null}
               {loading ? 'Signing in' : 'Sign In'} <ArrowRight size={18} />
             </button>
@@ -489,7 +489,7 @@ export default function AuthRoute() {
               Confirm Password
               <input name="confirm-password" type="password" required placeholder="Repeat your password" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid var(--border)', borderRadius: 12, display: 'block' }} />
             </label>
-            <button disabled={loading} type="submit" style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+            <button disabled={loading} type="submit" className="btn btn--amber" style={{ display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
               {loading ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : null}
               {loading ? 'Creating' : 'Create Account'} <ArrowRight size={18} />
             </button>
@@ -505,7 +505,7 @@ export default function AuthRoute() {
             <h3 style={{ fontFamily: 'var(--fd)', fontWeight: 800 }}>Reset your password</h3>
             <p style={{ fontSize: 13, color: 'var(--text2)' }}>Enter your email and we'll send you a reset link.</p>
             <input id="forgotEmail" placeholder="you@email.com" style={{ padding: 12, border: '1px solid var(--border)', borderRadius: 12 }} />
-            <button onClick={handleForgot} disabled={loading} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8 }}>
+            <button onClick={handleForgot} disabled={loading} className="btn btn--amber" style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
               {loading ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : null} Send Reset Link <ArrowRight size={18} />
             </button>
             <button onClick={() => setTab('signin')} style={{ background: 'none', border: 'none', color: 'var(--text2)', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
