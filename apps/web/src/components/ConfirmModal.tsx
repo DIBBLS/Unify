@@ -1,5 +1,5 @@
 import { AlertTriangle, LogOut, BellRing } from 'lucide-react';
-import Mascot from './Mascot';
+import { BoxBoy } from './redesign/brand';
 
 // Designed confirm sheet (bottom sheet on mobile) — the app-wide
 // replacement for browser window.confirm popups.
@@ -41,7 +41,7 @@ export function ConfirmModal({
               <BellRing size={24} />
             </span>
           ) : showMascot ? (
-            <Mascot size={72} />
+            <BoxBoy pose="cheer" width={58} />
           ) : (
             <span style={{ width: 52, height: 52, borderRadius: 9999, background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <AlertTriangle size={24} />

@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react'
 import { supabaseBrowser } from '../lib/supabase'
-import { Screen, TopBar } from '../components/redesign/chrome'
-import { Card, ListCard, ListRow } from '../components/redesign/ui'
 import { BoxBoy } from '../components/redesign/brand'
 
 export default function MyAttendanceRoute(){
@@ -16,25 +14,15 @@ export default function MyAttendanceRoute(){
     })
   },[])
   return (
-    <Screen>
-      <TopBar title="My attendance" />
-      <div style={{ padding: 16 }}>
-        <Card tone="light">
-          <div style={{ display:'flex', gap:12, alignItems:'center' }}>
-            <BoxBoy pose="readingStanding" width={80}/>
-            <div>
-              <h2 style={{margin:0, fontFamily:'var(--font-headline)'}}>Attendance history</h2>
-              <p style={{color:'var(--u-text-2)', marginTop:4}}>All scans you’ve completed</p>
-            </div>
-          </div>
-        </Card>
-        <ListCard style={{ marginTop:16 }}>
-          {rows.map(r=>(
-            <ListRow key={r.scanned_at} title={r.course_code} sub={new Date(r.scanned_at).toLocaleDateString()} />
-          ))}
-          {rows.length===0 && <div style={{padding:16,color:'var(--u-text-2)'}}>No records yet</div>}
-        </ListCard>
+    <div style={{padding:24}}>
+      <div style={{display:'flex',gap:12,alignItems:'center',marginBottom:16}}>
+        <BoxBoy pose="readingStanding" width={64}/>
+        <h1 style={{margin:0,fontFamily:'var(--font-headline)'}}>My Attendance</h1>
       </div>
-    </Screen>
+      <ul style={{listStyle:'none',padding:0}}>
+        {rows.map(r=><li key={r.scanned_at} style={{padding:'12px 0',borderBottom:'1px solid var(--u-border)'}}>{r.course_code} - {new Date(r.scanned_at).toLocaleDateString()}</li>)}
+      </ul>
+      {rows.length===0 && <p style={{color:'var(--u-text-2)'}}>No records yet</p>}
+    </div>
   )
 }

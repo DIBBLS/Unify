@@ -1,5 +1,5 @@
 import { Component, type ReactNode } from 'react';
-import Mascot from './Mascot';
+import { BoxBoy } from './redesign/brand';
 import { log } from '../lib/log';
 
 // Last-resort crash catcher: any render crash anywhere becomes a designed
@@ -47,7 +47,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { error: E
     if (this.state.error) {
       return (
         <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '60px 20px 80px', textAlign: 'center' }}>
-          <Mascot size={120} />
+          <BoxBoy pose="thinking" width={96} />
           <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, marginTop: 12, color: 'var(--text)' }}>
             Something tripped.
           </h1>

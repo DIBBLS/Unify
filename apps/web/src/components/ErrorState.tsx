@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import Mascot from './Mascot';
+import { BoxBoy } from './redesign/brand';
 
 // The one consistent full-page error state: connection failures, dead API,
 // anything that leaves a route with nothing to show.
@@ -51,7 +51,7 @@ export default function ErrorState({
   return (
     <div style={{ padding: 40, maxWidth: 'var(--shell, 480px)', margin: '0 auto', textAlign: 'center' }}>
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
-        <Mascot size={110} />
+        <BoxBoy pose="thinking" width={88} />
       </div>
       <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20 }}>
         {showOffline ? "You're offline" : title}
