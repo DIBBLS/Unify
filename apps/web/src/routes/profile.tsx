@@ -13,9 +13,9 @@ import { pushSupported, pushState, enablePush, disablePush, type PushState } fro
 import { supabaseBrowser, clearRememberSession } from '../lib/supabase';
 import { api, clearMeCache, type Profile, type University } from '../lib/api';
 import Loading from '../components/Loading';
-import Mascot from '../components/Mascot';
 import ErrorState from '../components/ErrorState';
 import Flash from '../components/Flash';
+import { BoxBoy } from '../components/redesign/brand';
 
 const UUID_RE = /^[0-9a-f-]{36}$/i;
 const DEPARTMENTS = [
@@ -392,7 +392,7 @@ export default function ProfileRoute() {
           </label>
           {avatarMsg && <div style={{ fontSize: 12, color: '#059669', marginTop: 4 }}>{avatarMsg}</div>}
         </div>
-        <Mascot size={64} />
+        <BoxBoy pose="readingStanding" width={64} />
       </div>
 
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', marginBottom: 16 }}>

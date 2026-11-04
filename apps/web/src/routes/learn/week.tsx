@@ -261,7 +261,7 @@ export default function LearnPage() {
           {enrolling ? 'Enrolling…' : 'Enroll & continue'}
         </button>
         <div style={{ marginTop: 12 }}>
-          <button onClick={() => navigate('/explore')} style={{ background: 'none', border: 'none', color: '#059669', fontWeight: 700, fontSize: 13 }}>
+          <button onClick={() => navigate('/class')} style={{ background: 'none', border: 'none', color: '#059669', fontWeight: 700, fontSize: 13 }}>
             or explore other courses
           </button>
         </div>

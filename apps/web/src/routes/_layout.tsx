@@ -21,7 +21,7 @@ type Tab = {
 const STUDENT_TABS: Tab[] = [
   { to: '/dashboard', label: 'Home', icon: LayoutDashboard, match: ['/dashboard'] },
   { to: '/course', label: 'Timetable', icon: BookOpen, match: ['/course', '/learn'] },
-  { to: '/explore', label: 'Class', icon: Search, match: ['/explore'] },
+  { to: '/class', label: 'Class', icon: Search, match: ['/class'] },
   { to: '/profile', label: 'Me', icon: User, match: ['/profile'] },
 ];
 

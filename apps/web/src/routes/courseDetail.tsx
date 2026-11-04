@@ -149,7 +149,7 @@ export default function CourseDetailRoute() {
           {enrolling ? 'Enrolling…' : `Enroll in ${courseCode}`}
         </button>
         <div style={{ marginTop: 12 }}>
-          <Link to="/explore" style={{ fontSize: 13, color: '#059669', fontWeight: 700, textDecoration: 'none' }}>
+          <Link to="/class" style={{ fontSize: 13, color: '#059669', fontWeight: 700, textDecoration: 'none' }}>
             or explore other courses
           </Link>
         </div>

@@ -488,15 +488,13 @@ export default function DashboardRoute() {
       )}
 
       {resume && resume.course ? (
-        <div style={{ margin: '0 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
-          <div style={{ width: 44, height: 44, background: '#ecfdf5', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <BookOpen size={20} color="#059669" />
-          </div>
+        <div className="card" style={{ margin: '0 16px 12px', display: 'flex', gap: 12, alignItems: 'center', padding: 16 }}>
+          <BoxBoy pose="readingStanding" width={56} style={{ flexShrink: 0 }} />
           <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 700 }}>Continue Learning</div>
-            <div style={{ fontSize: 12, color: 'var(--text2)' }}>{resume.course} · Week {resume.week} · pick up where you stopped</div>
+            <div className="t-15 w-7" style={{ marginBottom: 4 }}>Continue Learning</div>
+            <div className="t-13 muted">{resume.course} · Week {resume.week} · pick up where you stopped</div>
           </div>
-          <Link to={`/learn/${encodeURIComponent(resume.course.trim())}/week/${resume.week}${(() => { const q = new URLSearchParams(); if (resume.topic) q.set('t', String(resume.topic)); if (resume.lecture && resume.lecture > 1) q.set('c', String(resume.lecture)); const s = q.toString(); return s ? `?${s}` : ''; })()}`} style={{ padding: '10px 16px', background: '#10b981', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #059669' }}>
+          <Link to={`/learn/${encodeURIComponent(resume.course.trim())}/week/${resume.week}${(() => { const q = new URLSearchParams(); if (resume.topic) q.set('t', String(resume.topic)); if (resume.lecture && resume.lecture > 1) q.set('c', String(resume.lecture)); const s = q.toString(); return s ? `?${s}` : ''; })()}`} className="btn btn--amber" style={{ whiteSpace: 'nowrap' }}>
             Resume
           </Link>
         </div>
@@ -508,7 +506,7 @@ export default function DashboardRoute() {
 
       <div style={{ margin: '16px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800 }}>Your Courses</h2>
-        <Link to="/explore" style={{ fontSize: 13, color: '#059669', fontWeight: 700, textDecoration: 'none', display: 'flex', gap: 4, alignItems: 'center' }}>
+        <Link to="/class" style={{ fontSize: 13, color: '#059669', fontWeight: 700, textDecoration: 'none', display: 'flex', gap: 4, alignItems: 'center' }}>
           Add courses <ChevronRight size={14} />
         </Link>
       </div>
@@ -517,7 +515,7 @@ export default function DashboardRoute() {
           <div style={{ gridColumn: '1 / -1', padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '2px solid var(--border)', borderRadius: 16 }}>
             <BoxBoy pose="readingStanding" width={77} />
             <div style={{ marginTop: 8 }}>No courses yet.</div>
-            <Link to="/explore" style={{ display: 'inline-block', marginTop: 12, padding: '10px 22px', background: '#10b981', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #059669' }}>
+            <Link to="/class" style={{ display: 'inline-block', marginTop: 12, padding: '10px 22px', background: '#10b981', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #059669' }}>
               Explore courses to enroll
             </Link>
           </div>
