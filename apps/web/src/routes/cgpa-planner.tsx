@@ -244,27 +244,29 @@ export default function CGPAPlannerRoute() {
           borderBottom: '1px solid var(--u-hairline)' 
         }}
       >
-        <button
-          type="button"
-          onClick={() => {
-            if (step === 'enter') navigate(-1)
-            else if (step === 'courses') setStep('enter')
-            else if (step === 'target') setStep('courses')
-            else if (step === 'plan') setStep('target')
-          }}
-          className="row"
-          style={{ 
-            gap: 8, 
-            border: 0, 
-            background: 'transparent', 
-            cursor: 'pointer',
-            fontSize: 15,
-            fontWeight: 600
-          }}
-        >
-          <ChevronLeft size={20} />
-          Back
-        </button>
+        {step !== 'target' && (
+          <button
+            type="button"
+            onClick={() => {
+              if (step === 'enter') navigate(-1)
+              else if (step === 'courses') setStep('enter')
+              else if (step === 'target') setStep('courses')
+              else if (step === 'plan') setStep('target')
+            }}
+            className="row"
+            style={{ 
+              gap: 8, 
+              border: 0, 
+              background: 'transparent', 
+              cursor: 'pointer',
+              fontSize: 15,
+              fontWeight: 600
+            }}
+          >
+            <ChevronLeft size={20} />
+            Back
+          </button>
+        )}
         <div className="t-13 faint">
           Step {step === 'enter' ? 1 : step === 'courses' ? 2 : step === 'target' ? 3 : 4} of 4
         </div>
