@@ -235,7 +235,7 @@ export default function CGPAPlannerRoute() {
   if (loading) return <Loading text="Loading..." />
   
   return (
-    <div className="screen">
+    <div className="screen screen--tabs">
       {/* Top bar */}
       <div 
         className="row between" 
