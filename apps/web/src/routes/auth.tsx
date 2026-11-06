@@ -313,7 +313,7 @@ export default function AuthRoute() {
         <BoxBoy pose="cheer" width={112} />
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28 }}>Own your journey.</h1>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', color: 'var(--text2)', fontSize: 13, fontWeight: 600 }}>
-          <Loader2 size={16} style={{ animation: 'spin 0.8s linear infinite', color: 'var(--u-good)' }} />
+          <Loader2 size={16} style={{ animation: 'spin 0.8s linear infinite', color: '#4ade80' }} />
           Getting your space ready…
         </div>
       </div>
@@ -387,7 +387,7 @@ export default function AuthRoute() {
           </h1>
           <p style={{ marginTop: 8, opacity: 0.92, fontSize: 14, minHeight: 20 }}><Typewriter text="Built for the ones who build" /></p>
         </div>
-        <BoxBoy pose="wavePhone" width={84} />
+        <BoxBoy pose="wavePhone" width={96} style={{ WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent)', maskImage: 'linear-gradient(to bottom, black 85%, transparent)' }} />
       </div>
       <div style={{ padding: 20, flex: 1 }}>
         <div style={{ display: 'flex', gap: 4, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 9999, padding: 4, marginBottom: 20 }}>
@@ -398,8 +398,8 @@ export default function AuthRoute() {
               padding: 10,
               borderRadius: 9999,
               border: 'none',
-              background: tab === 'signin' ? 'var(--u-good)' : 'transparent',
-              color: tab === 'signin' ? '#fff' : 'var(--text2)',
+              background: tab === 'signin' ? '#4ade80' : 'transparent',
+              color: tab === 'signin' ? '#0a0a0a' : 'var(--text2)',
               fontWeight: 700,
             }}
           >
@@ -412,8 +412,8 @@ export default function AuthRoute() {
               padding: 10,
               borderRadius: 9999,
               border: 'none',
-              background: tab === 'signup' ? 'var(--u-good)' : 'transparent',
-              color: tab === 'signup' ? '#fff' : 'var(--text2)',
+              background: tab === 'signup' ? '#4ade80' : 'transparent',
+              color: tab === 'signup' ? '#0a0a0a' : 'var(--text2)',
               fontWeight: 700,
             }}
           >
@@ -448,7 +448,7 @@ export default function AuthRoute() {
               <button type="button" onClick={() => setTab('forgot')} style={{ background: 'none', border: 'none', fontSize: 12, fontWeight: 700, color: '#059669', textDecoration: 'underline' }}>Forgot password?</button>
             </div>
             <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, color: 'var(--text2)', fontWeight: 600, cursor: 'pointer' }}>
-              <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} style={{ width: 16, height: 16, accentColor: 'var(--u-good)' }} />
+              <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} style={{ width: 16, height: 16, accentColor: '#4ade80' }} />
               Remember me on this device
             </label>
             <button disabled={loading} type="submit" className="btn btn--amber" style={{ fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
@@ -479,7 +479,7 @@ export default function AuthRoute() {
               Password
               <input name="new-password" type={showPw ? 'text' : 'password'} value={signupPw} onChange={(e) => setSignupPw(e.target.value)} required placeholder="Min. 8 characters" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid var(--border)', borderRadius: 12, display: 'block' }} />
               <div style={{ height: 4, background: 'var(--border)', borderRadius: 2, marginTop: 8, overflow: 'hidden' }}>
-                <div style={{ width: `${([signupPw.length >= 8, /[A-Z]/.test(signupPw), /[0-9]/.test(signupPw)].filter(Boolean).length / 3) * 100}%`, height: '100%', background: score === 1 ? '#ff4b4b' : score === 2 ? '#ff9600' : 'var(--u-good)', transition: 'width .2s' }} />
+                <div style={{ width: `${([signupPw.length >= 8, /[A-Z]/.test(signupPw), /[0-9]/.test(signupPw)].filter(Boolean).length / 3) * 100}%`, height: '100%', background: score === 1 ? '#ff4b4b' : score === 2 ? '#ff9600' : '#4ade80', transition: 'width .2s' }} />
               </div>
               <div style={{ fontSize: 11, color: hasLength ? '#059669' : 'var(--text2)', marginTop: 4, display: 'flex', gap: 6, alignItems: 'center' }}>{hasLength ? <Check size={12} /> : <X size={12} />} At least 8 characters</div>
               <div style={{ fontSize: 11, color: hasUpper ? '#059669' : 'var(--text2)', display: 'flex', gap: 6, alignItems: 'center' }}>{hasUpper ? <Check size={12} /> : <X size={12} />} One uppercase letter</div>
