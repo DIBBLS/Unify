@@ -141,7 +141,7 @@ export default function CoursePage() {
         <div style={{ marginTop: 12, padding: 14, background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12 }}>
           <div style={{ fontWeight: 800, fontSize: 14 }}>You learned in {activity.length} course{activity.length === 1 ? '' : 's'} not on your list</div>
           <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>{activity.join(' · ')}</div>
-          <button onClick={repair} disabled={repairing} style={{ marginTop: 10, padding: '10px 18px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800, fontSize: 13, opacity: repairing ? 0.6 : 1 }}>
+          <button onClick={repair} disabled={repairing} style={{ marginTop: 10, padding: '10px 18px', borderRadius: 9999, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800, fontSize: 13, opacity: repairing ? 0.6 : 1 }}>
             {repairing ? 'Restoring…' : 'Restore my courses'}
           </button>
         </div>
@@ -184,3 +184,4 @@ export default function CoursePage() {
     </div>
   );
 }
+

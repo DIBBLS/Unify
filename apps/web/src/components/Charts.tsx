@@ -111,3 +111,4 @@ export function Spark({ data, height = 44 }: { data: Bar[]; height?: number }) {
     </svg>
   );
 }
+

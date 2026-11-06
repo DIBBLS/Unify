@@ -125,3 +125,4 @@ export function GreenBand({ children, height = 254 }: { children: ReactNode; hei
     </div>
   );
 }
+

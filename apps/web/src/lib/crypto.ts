@@ -33,3 +33,4 @@ export async function verifyPayload(payload: string, signatureB64: string, publi
   const sig = Uint8Array.from(atob(signatureB64), c => c.charCodeAt(0));
   return await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, publicKey, sig, data);
 }
+

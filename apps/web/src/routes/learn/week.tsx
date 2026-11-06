@@ -256,7 +256,7 @@ export default function LearnPage() {
             window.location.reload();
           }}
           disabled={enrolling}
-          style={{ padding: '12px 28px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800, fontSize: 14, opacity: enrolling ? 0.6 : 1 }}
+          style={{ padding: '12px 28px', borderRadius: 9999, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800, fontSize: 14, opacity: enrolling ? 0.6 : 1 }}
         >
           {enrolling ? 'Enrolling…' : 'Enroll & continue'}
         </button>
@@ -450,7 +450,7 @@ export default function LearnPage() {
       {preview && (
         <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 12, padding: 10, fontSize: 13, color: '#065f46', marginBottom: 12, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'space-between' }}>
           <span>Author preview — read-only, nothing is recorded.</span>
-          <button onClick={() => navigate(`/studio?edit=${encodeURIComponent(courseCode || '')}&week=${weekNum}`)} style={{ padding: '8px 14px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, fontSize: 12, whiteSpace: 'nowrap' }}>
+          <button onClick={() => navigate(`/studio?edit=${encodeURIComponent(courseCode || '')}&week=${weekNum}`)} style={{ padding: '8px 14px', borderRadius: 9999, background: 'var(--u-amber)', color: '#fff', border: 'none', fontWeight: 800, fontSize: 12, whiteSpace: 'nowrap' }}>
             Edit in Studio
           </button>
         </div>
@@ -521,7 +521,7 @@ export default function LearnPage() {
                     key={v.id}
                     disabled={loadingVersion}
                     onClick={() => viewVersion(activeMeta, v.version, v.id)}
-                    style={{ padding: '4px 12px', borderRadius: 9999, border: `1px solid ${current ? '#059669' : 'var(--border)'}`, background: current ? '#10b981' : 'var(--surface)', color: current ? '#fff' : 'var(--text2)', fontWeight: 800, fontSize: 11 }}
+                    style={{ padding: '4px 12px', borderRadius: 9999, border: `1px solid ${current ? '#059669' : 'var(--border)'}`, background: current ? 'var(--u-amber)' : 'var(--surface)', color: current ? '#fff' : 'var(--text2)', fontWeight: 800, fontSize: 11 }}
                   >
                     v{v.version}
                   </button>
@@ -613,3 +613,4 @@ function TopicTab({ topic, done, onToggle, preview }: { topic: Topic; done: bool
     </div>
   );
 }
+

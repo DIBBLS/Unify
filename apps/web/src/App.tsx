@@ -12,7 +12,6 @@ import { useParams } from 'react-router-dom';
 // Code-split the secondary/author routes: students' first load (auth →
 // dashboard → notes) never downloads Studio tables, admin panels or the
 // visual equation builder — each chunk fetches only when its route opens.
-const ExploreRoute = lazyRoute(() => import('./routes/explore'));
 const OnboardingRoute = lazyRoute(() => import('./routes/onboarding'));
 const OnboardingPersonaRoute = lazyRoute(() => import('./routes/onboarding-persona'));
 const CGPAPlannerRoute = lazyRoute(() => import('./routes/cgpa-planner'));
@@ -54,7 +53,7 @@ function NotFound() {
   const link: React.CSSProperties = {
     padding: '10px 18px',
     borderRadius: 9999,
-    background: '#10b981',
+    background: 'var(--u-amber)',
     color: '#fff',
     textDecoration: 'none',
     fontWeight: 800,
@@ -224,10 +223,6 @@ export default function App() {
             }
           />
           <Route
-            path="/explore"
-            element={<Navigate to="/class" replace />}
-          />
-          <Route
             path="/course/:courseCode"
             element={
               <RequireAuth>
@@ -345,3 +340,4 @@ export default function App() {
     </BrowserRouter>
   );
 }
+

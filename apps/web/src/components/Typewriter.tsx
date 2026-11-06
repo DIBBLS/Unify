@@ -24,3 +24,4 @@ export default function Typewriter({ text, speed = 45 }: { text: string; speed?:
     </span>
   );
 }
+

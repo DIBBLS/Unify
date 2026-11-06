@@ -217,3 +217,4 @@ export function MathPlain({
 }) {
   return <MathText html={escHtml(text)} className={className} style={style} inline={inline} />;
 }
+

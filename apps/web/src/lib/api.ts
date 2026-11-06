@@ -499,3 +499,4 @@ export const api = {
   roster: (course: string) =>
     apiFetch<{ students: RosterStudent[] }>(`/v1/courses/${encodeURIComponent(course)}/students`),
 };
+

@@ -179,7 +179,7 @@ export default function ExplorePage() {
                   padding: '8px 14px',
                   borderRadius: 9999,
                   border: `1px solid ${isIn ? '#059669' : 'var(--border)'}`,
-                  background: isIn ? '#10b981' : 'var(--surface)',
+                  background: isIn ? 'var(--u-amber)' : 'var(--surface)',
                   color: isIn ? '#fff' : '#059669',
                   fontWeight: 800,
                   fontSize: 12,
@@ -196,3 +196,4 @@ export default function ExplorePage() {
     </div>
   );
 }
+

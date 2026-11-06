@@ -60,3 +60,4 @@ export function dailyLine(part: Daypart = daypart(), now = new Date()): string {
 export function dailyKey(now = new Date()): string {
   return `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${daypart(now.getHours())}`;
 }
+

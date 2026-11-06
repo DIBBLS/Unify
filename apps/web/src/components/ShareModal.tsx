@@ -120,7 +120,7 @@ export function ShareModal({ course, week, title, topics, onClose }: { course: s
                 <button
                   key={t.hours}
                   onClick={() => setTtl(t.hours)}
-                  style={{ flex: 1, padding: '10px 6px', borderRadius: 12, border: `1px solid ${ttl === t.hours ? '#059669' : 'var(--border)'}`, background: ttl === t.hours ? '#10b981' : 'var(--surface)', color: ttl === t.hours ? '#fff' : 'var(--text2)', fontWeight: 800, fontSize: 12 }}
+                  style={{ flex: 1, padding: '10px 6px', borderRadius: 12, border: `1px solid ${ttl === t.hours ? '#059669' : 'var(--border)'}`, background: ttl === t.hours ? 'var(--u-amber)' : 'var(--surface)', color: ttl === t.hours ? '#fff' : 'var(--text2)', fontWeight: 800, fontSize: 12 }}
                 >
                   {t.label}
                 </button>
@@ -135,7 +135,7 @@ export function ShareModal({ course, week, title, topics, onClose }: { course: s
             <div style={{ fontSize: 12, color: 'var(--text2)', wordBreak: 'break-all' }}>{urlFor(link.token)}</div>
             <div style={{ fontSize: 11, color: '#059669', fontWeight: 800, marginTop: 4 }}>{expiryLabel(link.expires_at)}</div>
             <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-              <button onClick={() => copy(link.token)} style={{ flex: 1, padding: 10, borderRadius: 12, background: '#10b981', color: '#fff', border: 'none', borderBottom: '3px solid #059669', fontWeight: 800, fontSize: 13, display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'center' }}>
+              <button onClick={() => copy(link.token)} style={{ flex: 1, padding: 10, borderRadius: 12, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '3px solid #059669', fontWeight: 800, fontSize: 13, display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'center' }}>
                 {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? 'Copied!' : 'Copy'}
               </button>
               <a
@@ -179,3 +179,4 @@ export function ShareModal({ course, week, title, topics, onClose }: { course: s
     </div>
   );
 }
+

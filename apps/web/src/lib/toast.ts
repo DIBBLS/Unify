@@ -48,3 +48,4 @@ export function subscribeToasts(fn: (t: Toast[]) => void): () => void {
     listeners = listeners.filter((l) => l !== fn);
   };
 }
+

@@ -272,7 +272,7 @@ export function ReadAloud({ topic }: { topic: Topic }) {
     return (
       <div style={{ marginBottom: 12 }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 10 }}>
-          <span style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <span style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,var(--u-amber),#059669)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Volume2 size={16} />
           </span>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -371,3 +371,4 @@ export function ReadAloud({ topic }: { topic: Topic }) {
     </div>
   );
 }
+

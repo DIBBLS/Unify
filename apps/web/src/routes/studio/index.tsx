@@ -603,7 +603,7 @@ export default function StudioRoute() {
       <div style={{ display: 'flex', gap: 6, margin: '12px 0 20px' }}>
         {['Compose', 'Review', 'Live'].map((s, i) => (
           <div key={s} style={{ flex: 1, textAlign: 'center' }}>
-            <div style={{ height: 4, borderRadius: 2, background: i <= step ? '#10b981' : 'var(--border)' }} />
+            <div style={{ height: 4, borderRadius: 2, background: i <= step ? 'var(--u-amber)' : 'var(--border)' }} />
             <div style={{ fontSize: 11, color: i <= step ? '#059669' : 'var(--text3)', fontWeight: 700, marginTop: 4 }}>{s}</div>
           </div>
         ))}
@@ -623,7 +623,7 @@ export default function StudioRoute() {
           {convertHint}
           {canRetryConvert && !working && (
             <div style={{ marginTop: 8 }}>
-              <button onClick={convert} style={{ padding: '8px 18px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', borderBottom: '3px solid #059669', fontWeight: 800, fontSize: 13 }}>
+              <button onClick={convert} style={{ padding: '8px 18px', borderRadius: 9999, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '3px solid #059669', fontWeight: 800, fontSize: 13 }}>
                 Retry conversion
               </button>
             </div>
@@ -684,7 +684,7 @@ export default function StudioRoute() {
                   padding: '10px 8px',
                   borderRadius: 12,
                   border: `1px solid ${method === m ? '#059669' : 'var(--border)'}`,
-                  background: method === m ? '#10b981' : 'var(--surface)',
+                  background: method === m ? 'var(--u-amber)' : 'var(--surface)',
                   color: method === m ? '#fff' : 'var(--text2)',
                   fontWeight: 800,
                   fontSize: 12,
@@ -731,7 +731,7 @@ export default function StudioRoute() {
                   </label>
                 </div>
               </details>
-              <button onClick={convert} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+              <button onClick={convert} style={{ padding: 14, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
                 Generate note <ArrowRight size={18} />
               </button>
             </>
@@ -743,13 +743,13 @@ export default function StudioRoute() {
                 Compose the week yourself with guided forms — same format the AI produces, no JSON, no tokens spent.
               </div>
               {!note ? (
-                <button onClick={startManual} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+                <button onClick={startManual} style={{ padding: 14, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
                   Start composing <ArrowRight size={18} />
                 </button>
               ) : (
                 <>
                   <NoteBuilder note={note} onChange={setNote} />
-                  <button onClick={goReview} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+                  <button onClick={goReview} style={{ padding: 14, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
                     Continue to review <ArrowRight size={18} />
                   </button>
                 </>
@@ -779,7 +779,7 @@ export default function StudioRoute() {
                   {pasted.length.toLocaleString()} / 300,000 chars{pasted.length >= 300000 ? ' — limit reached: paste one week at a time' : ''}
                 </span>
               </label>
-              <button onClick={importPasted} style={{ padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+              <button onClick={importPasted} style={{ padding: 14, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
                 Import into review <ArrowRight size={18} />
               </button>
             </>
@@ -847,7 +847,7 @@ export default function StudioRoute() {
               );
             })()}
             <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-              <button onClick={() => { setEditing((v) => !v); }} style={{ flex: 1, padding: 10, background: editing ? '#10b981' : 'var(--surface)', color: editing ? '#fff' : '#059669', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 12, fontWeight: 800, fontSize: 13 }}>
+              <button onClick={() => { setEditing((v) => !v); }} style={{ flex: 1, padding: 10, background: editing ? 'var(--u-amber)' : 'var(--surface)', color: editing ? '#fff' : '#059669', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 12, fontWeight: 800, fontSize: 13 }}>
                 {editing ? 'Done editing' : 'Edit content'}
               </button>
               {!editing && (
@@ -952,7 +952,7 @@ export default function StudioRoute() {
             <button onClick={() => setStep(0)} style={{ flex: 1, minWidth: 120, padding: 14, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 800 }}>
               Back to compose
             </button>
-            <button onClick={() => publish()} disabled={publishing} style={{ flex: 2, minWidth: 160, padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+            <button onClick={() => publish()} disabled={publishing} style={{ flex: 2, minWidth: 160, padding: 14, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
               {publishing ? 'Publishing…' : 'Publish to students'} <ArrowRight size={18} />
             </button>
           </div>
@@ -1007,7 +1007,7 @@ export default function StudioRoute() {
             <button onClick={reset} style={{ flex: 1, padding: 14, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 800 }}>
               Author another
             </button>
-            <button onClick={() => navigate('/dashboard')} style={{ flex: 1, padding: 14, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800 }}>
+            <button onClick={() => navigate('/dashboard')} style={{ flex: 1, padding: 14, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800 }}>
               Done
             </button>
           </div>
@@ -1016,3 +1016,4 @@ export default function StudioRoute() {
     </div>
   );
 }
+

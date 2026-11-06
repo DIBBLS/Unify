@@ -42,3 +42,4 @@ export async function uploadNarration(file: File, course: string, week: number):
   if (!data?.publicUrl) return { error: 'Upload worked but no public URL came back.' };
   return { url: data.publicUrl };
 }
+

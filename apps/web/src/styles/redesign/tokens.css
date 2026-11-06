@@ -13,6 +13,7 @@
 :root {
   /* Brand */
   --u-green: #50ff90;          /* headers, active tab, success moments (not CTA) */
+  --u-green-accent: #4ade80;   /* desktop left side accent, auth tabs */
   --u-black: #0a0a0a;          /* text, dark cards, secondary buttons */
   --u-amber: #fbbf24;          /* PRIMARY CTA color - the ONE main action per screen */
   --u-red: #dc2626;            /* cancelled, destructive, now-line */

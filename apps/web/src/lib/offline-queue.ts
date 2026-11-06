@@ -156,3 +156,4 @@ if (typeof window !== 'undefined') {
   window.addEventListener('focus', () => void flushQueue())
   window.addEventListener('online', () => void flushQueue())
 }
+

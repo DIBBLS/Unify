@@ -138,3 +138,4 @@ export async function saveWeekOffline(course: string, week: number): Promise<voi
     // marker optional; the cached payload is what matters
   }
 }
+

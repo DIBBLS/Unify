@@ -114,7 +114,7 @@ export default function NotificationsRoute() {
               onClick={() => openNote(n)}
               style={{ padding: '14px 16px', background: n.read ? 'var(--surface)' : 'var(--green-bg)', border: `1px solid ${n.read ? 'var(--border)' : '#a7f3d0'}`, borderRadius: 12, display: 'flex', gap: 12, alignItems: 'flex-start', textAlign: 'left', width: '100%', color: 'var(--text)' }}
             >
-              <span style={{ width: 36, height: 36, borderRadius: 10, background: n.read ? 'var(--surface2)' : '#10b981', color: n.read ? 'var(--text2)' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ width: 36, height: 36, borderRadius: 10, background: n.read ? 'var(--surface2)' : 'var(--u-amber)', color: n.read ? 'var(--text2)' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 {n.type === 'new_note' ? <BookOpen size={18} /> : <Icon size={18} />}
               </span>
               <span style={{ flex: 1, minWidth: 0 }}>
@@ -122,7 +122,7 @@ export default function NotificationsRoute() {
                 <span style={{ fontSize: 13, color: '#555', display: 'block', marginTop: 2 }}>{n.body}</span>
                 <span style={{ fontSize: 11, color: 'var(--text3)', marginTop: 4, display: 'block' }}>{timeAgo(n.created_at)}</span>
               </span>
-              {!n.read && <span style={{ width: 10, height: 10, borderRadius: 9999, background: '#10b981', flexShrink: 0, marginTop: 6 }} />}
+              {!n.read && <span style={{ width: 10, height: 10, borderRadius: 9999, background: 'var(--u-amber)', flexShrink: 0, marginTop: 6 }} />}
             </button>
           );
         })}
@@ -135,3 +135,4 @@ export default function NotificationsRoute() {
     </div>
   );
 }
+

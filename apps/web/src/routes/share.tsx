@@ -80,7 +80,7 @@ export default function ShareRoute() {
           <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px' }}>
             Shared notes only live for a while — that is what makes them special. Join free and the whole library stays open.
           </p>
-          <Link to="/auth" style={{ display: 'inline-block', padding: '12px 28px', background: '#10b981', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #059669' }}>
+          <Link to="/auth" style={{ display: 'inline-block', padding: '12px 28px', background: 'var(--u-amber)', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #059669' }}>
             Join Unify free <ArrowRight size={16} style={{ verticalAlign: -3 }} />
           </Link>
         </div>
@@ -164,12 +164,12 @@ export default function ShareRoute() {
         {authed ? (
           <button
             onClick={() => navigate(`/learn/${encodeURIComponent(data.course)}/week/${data.week}`)}
-            style={{ padding: '12px 28px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800, fontSize: 14 }}
+            style={{ padding: '12px 28px', borderRadius: 9999, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800, fontSize: 14 }}
           >
             Open in my app
           </button>
         ) : (
-          <Link to="/auth" style={{ display: 'inline-block', padding: '12px 28px', borderRadius: 9999, background: '#10b981', color: '#fff', textDecoration: 'none', fontWeight: 800, fontSize: 14, borderBottom: '4px solid #059669' }}>
+          <Link to="/auth" style={{ display: 'inline-block', padding: '12px 28px', borderRadius: 9999, background: 'var(--u-amber)', color: '#fff', textDecoration: 'none', fontWeight: 800, fontSize: 14, borderBottom: '4px solid #059669' }}>
             Join Unify free
           </Link>
         )}
@@ -177,3 +177,4 @@ export default function ShareRoute() {
     </div>
   );
 }
+

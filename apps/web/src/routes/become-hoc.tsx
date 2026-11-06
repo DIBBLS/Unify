@@ -21,3 +21,4 @@ export default function BecomeHocRoute(){
   }
   return <div style={{padding:24}}><h1>Become Head of Class</h1><button onClick={request} disabled={saving}>{saving?'Sending...':'Request'}</button></div>
 }
+

@@ -195,3 +195,4 @@ export async function ensureSession(): Promise<Session | null> {
   sessionCache = { loaded: true, session: data.session };
   return data.session;
 }
+

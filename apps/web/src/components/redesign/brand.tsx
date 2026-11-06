@@ -137,3 +137,4 @@ export function StreakPill({ days, dark }: { days: number; dark?: boolean }) {
     </span>
   );
 }
+

@@ -142,7 +142,7 @@ export default function InstallBar() {
     padding: '7px 14px',
     borderRadius: 9999,
     border: 'none',
-    background: '#10b981',
+    background: 'var(--u-amber)',
     color: '#fff',
     fontWeight: 800,
     fontSize: 12,
@@ -236,3 +236,4 @@ export default function InstallBar() {
     </div>
   );
 }
+

@@ -580,7 +580,7 @@ export default function AdminRoute() {
             const healthy = m.failures < 3;
             return (
               <div key={m.model} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <span style={{ width: 10, height: 10, borderRadius: 9999, background: healthy ? '#10b981' : '#ff4b4b', flexShrink: 0 }} />
+                <span style={{ width: 10, height: 10, borderRadius: 9999, background: healthy ? 'var(--u-amber)' : '#ff4b4b', flexShrink: 0 }} />
                 <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {m.model}
                 </span>
@@ -672,7 +672,7 @@ export default function AdminRoute() {
                   padding: '8px 14px',
                   borderRadius: 9999,
                   border: `1px solid ${courseLevels.includes(l) ? '#059669' : 'var(--border)'}`,
-                  background: courseLevels.includes(l) ? '#10b981' : 'var(--surface)',
+                  background: courseLevels.includes(l) ? 'var(--u-amber)' : 'var(--surface)',
                   color: courseLevels.includes(l) ? '#fff' : 'var(--text2)',
                   fontSize: 12,
                   fontWeight: 700,
@@ -692,7 +692,7 @@ export default function AdminRoute() {
                   padding: '8px 14px',
                   borderRadius: 9999,
                   border: `1px solid ${courseSemester === s ? '#059669' : 'var(--border)'}`,
-                  background: courseSemester === s ? '#10b981' : 'var(--surface)',
+                  background: courseSemester === s ? 'var(--u-amber)' : 'var(--surface)',
                   color: courseSemester === s ? '#fff' : 'var(--text2)',
                   fontSize: 12,
                   fontWeight: 700,
@@ -721,7 +721,7 @@ export default function AdminRoute() {
                 padding: '10px 14px',
                 borderRadius: 9999,
                 border: `1px solid ${currentSemester === s ? '#059669' : 'var(--border)'}`,
-                background: currentSemester === s ? '#10b981' : 'var(--surface)',
+                background: currentSemester === s ? 'var(--u-amber)' : 'var(--surface)',
                 color: currentSemester === s ? '#fff' : 'var(--text2)',
                 fontSize: 13,
                 fontWeight: 800,
@@ -805,7 +805,7 @@ export default function AdminRoute() {
             <button
               key={t}
               onClick={() => { setReqTab(t); void loadRequests(t === 'history'); }}
-              style={{ flex: 1, padding: '8px 10px', borderRadius: 9999, border: `1px solid ${reqTab === t ? '#059669' : 'var(--border)'}`, background: reqTab === t ? '#10b981' : 'var(--surface)', color: reqTab === t ? '#fff' : 'var(--text2)', fontSize: 12, fontWeight: 800 }}
+              style={{ flex: 1, padding: '8px 10px', borderRadius: 9999, border: `1px solid ${reqTab === t ? '#059669' : 'var(--border)'}`, background: reqTab === t ? 'var(--u-amber)' : 'var(--surface)', color: reqTab === t ? '#fff' : 'var(--text2)', fontSize: 12, fontWeight: 800 }}
             >
               {t === 'pending' ? 'Pending' : 'History'}
             </button>
@@ -947,7 +947,7 @@ export default function AdminRoute() {
                     padding: 8,
                     borderRadius: 9999,
                     border: `1px solid ${u.role === r ? '#059669' : 'var(--border)'}`,
-                    background: u.role === r ? '#10b981' : 'var(--surface)',
+                    background: u.role === r ? 'var(--u-amber)' : 'var(--surface)',
                     color: u.role === r ? '#fff' : 'var(--text2)',
                     fontSize: 12,
                     fontWeight: 700,
@@ -1050,7 +1050,7 @@ export default function AdminRoute() {
                               disabled={assignBusy || on}
                               style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '10px 12px', borderRadius: 10, border: `1px solid ${on ? '#059669' : 'var(--border)'}`, background: on ? '#ecfdf5' : 'var(--surface)', textAlign: 'left', opacity: on ? 0.75 : 1 }}
                             >
-                              <span style={{ width: 20, height: 20, borderRadius: 6, border: `1px solid ${on ? '#059669' : 'var(--border)'}`, background: on ? '#10b981' : 'var(--surface)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, flexShrink: 0 }}>
+                              <span style={{ width: 20, height: 20, borderRadius: 6, border: `1px solid ${on ? '#059669' : 'var(--border)'}`, background: on ? 'var(--u-amber)' : 'var(--surface)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, flexShrink: 0 }}>
                                 {on ? '✓' : ''}
                               </span>
                               <span style={{ flex: 1, minWidth: 0 }}>
@@ -1120,3 +1120,4 @@ export default function AdminRoute() {
     </div>
   );
 }
+

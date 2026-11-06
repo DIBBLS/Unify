@@ -62,7 +62,7 @@ export default function ErrorState({
           : message}
       </p>
       <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-        <button onClick={retry} style={{ padding: '12px 28px', borderRadius: 9999, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800, fontSize: 14 }}>
+        <button onClick={retry} style={{ padding: '12px 28px', borderRadius: 9999, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800, fontSize: 14 }}>
           {retryLabel}
         </button>
         {action}
@@ -70,3 +70,4 @@ export default function ErrorState({
     </div>
   );
 }
+
