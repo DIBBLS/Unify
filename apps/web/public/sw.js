@@ -54,6 +54,8 @@ self.addEventListener('fetch', (e) => {
   const isAsset =
     sameOrigin &&
     (url.pathname.startsWith('/assets/') ||
+      url.pathname.startsWith('/boxboy/') ||
+      url.pathname.startsWith('/icons/') ||
       url.pathname === '/og-image.png' ||
       url.pathname === '/favicon.svg');
   // Offline math + typography: MathJax (script + its font files, same
