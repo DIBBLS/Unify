@@ -12,3 +12,4 @@ export const log = {
   warn: (area: string, msg: string, data?: Record<string, unknown>) => console.warn(...line(area, msg, data)),
   error: (area: string, msg: string, data?: Record<string, unknown>) => console.error(...line(area, msg, data)),
 };
+

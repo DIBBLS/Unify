@@ -35,3 +35,4 @@ export function lazyRoute<T extends ComponentType<any>>(fn: () => Promise<{ defa
     }
   });
 }
+

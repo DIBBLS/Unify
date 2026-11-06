@@ -25,3 +25,4 @@ export default function BackButton({ to, label = 'Back' }: { to: string; label?:
     </button>
   );
 }
+

@@ -66,3 +66,4 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { error: E
     return this.props.children;
   }
 }
+

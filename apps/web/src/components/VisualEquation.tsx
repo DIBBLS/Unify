@@ -511,7 +511,7 @@ export default function VisualEquation({ initial, onBuild }: { initial: MNode[];
                   key={c.category}
                   type="button"
                   onClick={() => setLibCat(c.category)}
-                  style={{ padding: '6px 12px', borderRadius: 9999, border: `1px solid ${libCat === c.category ? '#059669' : 'var(--border)'}`, background: libCat === c.category ? '#10b981' : 'var(--surface)', color: libCat === c.category ? '#fff' : 'var(--text2)', fontSize: 11, fontWeight: 800 }}
+                  style={{ padding: '6px 12px', borderRadius: 9999, border: `1px solid ${libCat === c.category ? '#059669' : 'var(--border)'}`, background: libCat === c.category ? 'var(--u-amber)' : 'var(--surface)', color: libCat === c.category ? '#fff' : 'var(--text2)', fontSize: 11, fontWeight: 800 }}
                 >
                   {c.category}
                 </button>
@@ -543,3 +543,4 @@ export default function VisualEquation({ initial, onBuild }: { initial: MNode[];
     </div>
   );
 }
+

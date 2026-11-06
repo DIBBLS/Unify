@@ -344,7 +344,7 @@ export default function Layout() {
               fontWeight: 800,
               textDecoration: 'none',
               color: '#fff',
-              background: '#10b981',
+              background: 'var(--u-amber)',
               padding: '8px 16px',
               borderRadius: 9999,
             }}
@@ -430,3 +430,4 @@ export default function Layout() {
     </div>
   );
 }
+

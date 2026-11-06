@@ -26,10 +26,11 @@ export default function Loading({ text = 'Loading…' }: { text?: string }) {
         &ldquo;{QUOTES[qi]}&rdquo;
       </div>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <Loader2 size={16} style={{ animation: 'spin 0.8s linear infinite', color: '#10b981' }} />
+        <Loader2 size={16} style={{ animation: 'spin 0.8s linear infinite', color: 'var(--u-amber)' }} />
         <span style={{ fontSize: 13, fontWeight: 600 }}>{text}</span>
       </div>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}@keyframes mascot-fly{0%,100%{transform:translate(0,0)}25%{transform:translate(10px,-10px)}50%{transform:translate(0,-16px)}75%{transform:translate(-10px,-8px)}}`}</style>
     </div>
   );
 }
+

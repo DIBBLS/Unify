@@ -140,3 +140,4 @@ export function validateCGPA(value: string): number | null {
   if (num < 0 || num > 5) return null
   return Math.round(num * 100) / 100
 }
+

@@ -87,3 +87,4 @@ export function TopicSlice({ topic }: { topic: Topic }) {
     </div>
   );
 }
+

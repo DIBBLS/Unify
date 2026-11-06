@@ -214,7 +214,7 @@ export default function ClassesRoute() {
               Venue
               <input value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="e.g. LT1, Engineering block" style={{ display: 'block', width: '100%', marginTop: 4, padding: 10, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }} />
             </label>
-            <button onClick={addSlot} disabled={adding} style={{ marginTop: 10, width: '100%', padding: 12, borderRadius: 14, border: 'none', borderBottom: '4px solid #059669', background: '#10b981', color: '#fff', fontWeight: 800, opacity: adding ? 0.6 : 1 }}>
+            <button onClick={addSlot} disabled={adding} style={{ marginTop: 10, width: '100%', padding: 12, borderRadius: 14, border: 'none', borderBottom: '4px solid #059669', background: 'var(--u-amber)', color: '#fff', fontWeight: 800, opacity: adding ? 0.6 : 1 }}>
               {adding ? 'Adding…' : 'Add slot'}
             </button>
           </div>
@@ -229,7 +229,7 @@ export default function ClassesRoute() {
             )}
             {roster.map((s) => (
               <div key={s.id} className="cv-row" style={{ padding: '12px 14px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
-                <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,var(--u-amber),#059669)', color: '#fff', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   {(s.name || '?').trim().charAt(0).toUpperCase()}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -259,3 +259,4 @@ export default function ClassesRoute() {
     </div>
   );
 }
+

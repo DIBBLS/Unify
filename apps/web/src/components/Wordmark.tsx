@@ -18,3 +18,4 @@ export default function Wordmark({ size = 20, light = false }: { size?: number; 
     </span>
   );
 }
+

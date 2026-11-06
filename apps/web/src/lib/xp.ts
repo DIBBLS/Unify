@@ -12,3 +12,4 @@ export function meetsXpGate(xp: number, gate: XpGate, opts?: { role?: string | n
   if (opts && (opts.isAdmin || opts.role === 'lecturer' || opts.role === 'contributor' || opts.role === 'admin')) return true;
   return xp >= XP_GATES[gate];
 }
+

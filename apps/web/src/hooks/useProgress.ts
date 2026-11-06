@@ -63,3 +63,4 @@ export function useProgress(courseCode: string, weekNum: number) {
 
   return { toggle, isDone, doneCount: done.size, doneInLecture };
 }
+

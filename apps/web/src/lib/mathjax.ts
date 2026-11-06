@@ -94,3 +94,4 @@ export function escHtml(s: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
 }
+

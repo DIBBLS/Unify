@@ -84,3 +84,4 @@ export function RecallDeck({ items }: { items: RecallItem[] }) {
     </div>
   );
 }
+

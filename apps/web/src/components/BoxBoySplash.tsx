@@ -20,3 +20,4 @@ export function BoxBoySplash({ onDone }: { onDone?: () => void }) {
     </div>
   );
 }
+

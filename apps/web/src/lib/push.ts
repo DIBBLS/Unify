@@ -78,3 +78,4 @@ export async function disablePush(): Promise<void> {
     // best-effort — the toggle still flips
   }
 }
+

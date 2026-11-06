@@ -15,3 +15,4 @@ export function recordNav(pathname: string): void {
 export function previousPath(): string | null {
   return prev && prev !== current ? prev : null;
 }
+

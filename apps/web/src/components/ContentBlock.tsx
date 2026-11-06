@@ -146,3 +146,4 @@ export function ContentBlockView({ block, fig }: { block: ContentBlock; fig?: nu
       return null;
   }
 }
+

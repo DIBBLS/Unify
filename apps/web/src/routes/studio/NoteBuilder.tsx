@@ -443,7 +443,7 @@ function EquationInput({ value, onChange }: { value: string; onChange: (v: strin
                 if (parsed) openVisual(parsed);
                 else setTooHard(true);
               }}
-              style={{ flex: 1, padding: 10, borderRadius: 12, background: '#10b981', color: '#fff', border: 'none', borderBottom: '3px solid #059669', fontWeight: 800, fontSize: 13 }}
+              style={{ flex: 1, padding: 10, borderRadius: 12, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '3px solid #059669', fontWeight: 800, fontSize: 13 }}
             >
               {value.trim() ? 'Open visual builder' : 'Build equation visually'}
             </button>
@@ -1058,3 +1058,4 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
     </div>
   );
 }
+

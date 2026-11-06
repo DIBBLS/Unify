@@ -82,3 +82,4 @@ export default function Formula({ latex, display = false }: { latex: string; dis
     />
   );
 }
+

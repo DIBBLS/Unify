@@ -184,3 +184,4 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
     </div>
   );
 }
+

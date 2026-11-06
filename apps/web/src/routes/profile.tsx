@@ -143,7 +143,6 @@ export default function ProfileRoute() {
     }
   };
   const { theme, toggle } = useTheme();
-  const { design, setDesign } = useDesign();
   const [pushSt, setPushSt] = useState<PushState>('off');
   const [pushBusy, setPushBusy] = useState(false);
   const [pushMsg, setPushMsg] = useState('');
@@ -408,7 +407,7 @@ export default function ProfileRoute() {
         <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 6 }}>Change email</div>
         <div style={{ display: 'flex', gap: 8 }}>
           <input value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="new@email.com" style={{ flex: 1, minWidth: 0, padding: 10, border: '1px solid var(--border)', borderRadius: 10, fontSize: 14 }} />
-          <button onClick={handleEmailChange} style={{ padding: '10px 16px', borderRadius: 10, background: '#10b981', color: '#fff', border: 'none', fontWeight: 800, fontSize: 13 }}>
+          <button onClick={handleEmailChange} style={{ padding: '10px 16px', borderRadius: 10, background: 'var(--u-amber)', color: '#fff', border: 'none', fontWeight: 800, fontSize: 13 }}>
             Send
           </button>
         </div>
@@ -496,14 +495,14 @@ export default function ProfileRoute() {
           )}
           <div style={{ fontSize: 11, color: 'var(--text2)' }}>Role and semester are locked — only admin can change those.</div>
           <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, color: 'var(--text2)', fontWeight: 600, cursor: 'pointer' }}>
-            <input type="checkbox" checked={dNotify} onChange={(e) => setDNotify(e.target.checked)} style={{ width: 16, height: 16, accentColor: '#10b981' }} />
+            <input type="checkbox" checked={dNotify} onChange={(e) => setDNotify(e.target.checked)} style={{ width: 16, height: 16, accentColor: 'var(--u-amber)' }} />
             Email me when new notes drop in my courses
           </label>
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={() => setEditing(false)} style={{ flex: 1, padding: 12, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 12, fontWeight: 800, display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'center' }}>
               <X size={16} /> Cancel
             </button>
-            <button onClick={saveEdit} disabled={saving} style={{ flex: 1, padding: 12, background: '#10b981', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 12, fontWeight: 800, opacity: saving ? 0.6 : 1 }}>
+            <button onClick={saveEdit} disabled={saving} style={{ flex: 1, padding: 12, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 12, fontWeight: 800, opacity: saving ? 0.6 : 1 }}>
               {saving ? 'Saving…' : 'Save'}
             </button>
           </div>
@@ -513,17 +512,6 @@ export default function ProfileRoute() {
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 8 }}>
         <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 4 }}>Appearance</div>
         <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 10 }}>Design &amp; theme apply across the whole app.</div>
-        <div style={{ display: 'flex', gap: 6, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 9999, padding: 4, marginBottom: 10 }}>
-          {(['classic', 'story'] as const).map((d) => (
-            <button
-              key={d}
-              onClick={() => setDesign(d)}
-              style={{ flex: 1, padding: 10, borderRadius: 9999, border: 'none', background: design === d ? '#16a34a' : 'transparent', color: design === d ? '#fff' : 'var(--text2)', fontWeight: 800, fontSize: 13 }}
-            >
-              {d === 'classic' ? 'Classic' : 'Story'}
-            </button>
-          ))}
-        </div>
         <button onClick={() => toggle()} style={{ width: '100%', padding: 12, background: 'var(--surface2)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 12, fontWeight: 800, fontSize: 13, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
           {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />} {theme === 'dark' ? 'Light mode' : 'Dark mode'}
         </button>
@@ -580,3 +568,4 @@ export default function ProfileRoute() {
     </div>
   );
 }
+
