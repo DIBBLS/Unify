@@ -62,6 +62,7 @@ export default function Layout() {
     }
   });
   const [unread, setUnread] = useState(0);
+  const [isDesktop, setIsDesktop] = useState(false);
   const { pathname } = useLocation();
   // Focus (reading) mode: the note reader owns the whole screen — both
   // chrome bars stay out of the way (mobile included). The flag persists
@@ -118,6 +119,13 @@ export default function Layout() {
       window.removeEventListener('wheel', onActivity);
       if (mq && mq.removeEventListener) mq.removeEventListener('change', onMode);
     };
+  }, []);
+
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 1024);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
   }, []);
   // Shown once when the browser reports "denied" — the fix lives in
   // browser settings, so plain retry would just fail again.
@@ -357,9 +365,31 @@ export default function Layout() {
       <OfflineBanner />
       {/* Content column: desktop zoom targets this element only — the
           sticky header and bottom nav keep their normal size. */}
-      <main id="unify-content">
-        <Outlet />
-      </main>
+      <div style={{ display: isDesktop ? 'flex' : 'block', minHeight: isDesktop ? 'calc(100vh - 56px)' : 'auto' }}>
+        {isDesktop && authed && (
+          <aside style={{ width: 240, borderRight: '1px solid var(--border)', background: 'var(--surface)', padding: 16, position: 'sticky', top: 56, height: 'calc(100vh - 56px)', overflowY: 'auto' }}>
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {showSkeletonNav
+                ? Array.from({ length: skelCount }).map((_, i) => (
+                    <div key={i} className="skel" style={{ height: 40, borderRadius: 8 }} />
+                  ))
+                : tabs.map((t) => {
+                    const active = t.match.some((m) => pathname === m || pathname.startsWith(m + '/'));
+                    const Icon = t.icon;
+                    return (
+                      <Link key={t.to} to={t.to} style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '10px 12px', borderRadius: 10, background: active ? 'var(--u-green-accent, #4ade80)' : 'transparent', color: active ? '#0a0a0a' : 'var(--text)', fontWeight: active ? 800 : 600, textDecoration: 'none' }}>
+                        <Icon size={18} />
+                        {t.label}
+                      </Link>
+                    );
+                  })}
+            </nav>
+          </aside>
+        )}
+        <main id="unify-content" style={{ flex: 1 }}>
+          <Outlet />
+        </main>
+      </div>
       {!focusOnReader && (
       <nav className="bottomnav" onMouseEnter={() => setNavHidden(false)} style={{ position: 'fixed', bottom: 0, left: '50%', transform: `translateX(-50%)${navHidden ? ' translateY(calc(100% - 14px))' : ''}`, transition: 'transform .3s ease', width: '100%', maxWidth: 'var(--shell, 480px)', display: 'flex', background: 'var(--surface)', borderTop: '1px solid var(--border)', padding: '8px 0 calc(8px + env(safe-area-inset-bottom))' }}>
         {showSkeletonNav
