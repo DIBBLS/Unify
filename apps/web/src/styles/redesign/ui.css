@@ -82,7 +82,7 @@ a { color: inherit; text-decoration: none; }
 }
 .btn:active { transform: scale(0.98); }
 .btn--block { width: 100%; }
-.btn--amber { background: var(--u-amber); color: var(--u-black); }
+.btn--amber { background: var(--u-amber); color: var(--u-black); box-shadow: 0 4px 0 #c69a1a; }
 .btn--dark { background: var(--u-black); color: #fff; }
 .btn--green { background: var(--u-green); color: var(--u-black); }
 .btn--white { background: #fff; color: var(--u-black); border: 1px solid var(--u-border); }
