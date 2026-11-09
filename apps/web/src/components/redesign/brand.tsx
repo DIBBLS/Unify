@@ -119,7 +119,7 @@ export function Wordmark({ size = 16, color }: { size?: number; color?: string }
 export function AppIcon({ size = 120 }: { size?: number }) {
   return (
     <div style={{ width: size, height: size, borderRadius: size * 0.22, background: '#0a0a0a', display: 'grid', placeItems: 'center' }}>
-      <span style={{ fontFamily: 'var(--font-body)', fontWeight: 900, fontSize: size * 0.56, lineHeight: 1, color: 'var(--u-green)' }}>U.</span>
+      <span style={{ fontFamily: 'var(--font-body)', fontWeight: 900, fontSize: size * 0.56, lineHeight: 1, color: 'var(--u-green)' }}>U</span>
     </div>
   )
 }

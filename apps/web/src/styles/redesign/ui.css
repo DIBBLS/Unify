@@ -189,3 +189,20 @@ button[style^="color: var(--u-text-3)"], button[style*="; color: var(--u-text-3)
   .btn--block { display: flex; width: 100%; max-width: 380px; margin-inline: auto; }
   .bottom-actions .btn--block { max-width: 420px; }
 }
+
+/* Form controls (sliders, checkboxes, radios) use the brand yellow, not the browser's default purple/blue. */
+:root { accent-color: var(--u-amber); }
+input[type="range"] { accent-color: var(--u-amber); }
+
+/* ---------- Custom slider (components/Slider.tsx) ---------- */
+.u-range { -webkit-appearance: none; appearance: none; width: 100%; height: 34px; background: transparent; margin: 0; cursor: pointer; --p: 50%; touch-action: pan-y; }
+.u-range:focus { outline: none; }
+.u-range::-webkit-slider-runnable-track { height: 12px; border-radius: 9999px; background: linear-gradient(to right, var(--u-amber) 0, var(--u-amber) var(--p), var(--u-border) var(--p), var(--u-border) 100%); border: 1px solid var(--u-border); }
+.u-range::-moz-range-track { height: 12px; border-radius: 9999px; background: var(--u-border); border: 1px solid var(--u-border); }
+.u-range::-moz-range-progress { height: 12px; border-radius: 9999px; background: var(--u-amber); }
+.u-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 28px; height: 28px; margin-top: -9px; border-radius: 9999px; background: var(--u-amber); border: 3px solid #fff; box-shadow: 0 3px 0 #c69a1a, 0 2px 8px rgba(0,0,0,.18); transition: transform .12s ease, box-shadow .12s ease; }
+.u-range::-moz-range-thumb { width: 22px; height: 22px; border-radius: 9999px; background: var(--u-amber); border: 3px solid #fff; box-shadow: 0 3px 0 #c69a1a, 0 2px 8px rgba(0,0,0,.18); }
+.u-range:active::-webkit-slider-thumb { transform: translateY(2px) scale(.96); box-shadow: 0 1px 0 #c69a1a, 0 1px 4px rgba(0,0,0,.18); }
+.u-range:focus-visible::-webkit-slider-thumb { outline: 3px solid var(--u-black); outline-offset: 2px; }
+.u-range:focus-visible::-moz-range-thumb { outline: 3px solid var(--u-black); outline-offset: 2px; }
+[data-theme="dark"] .u-range::-webkit-slider-thumb, [data-theme="dark"] .u-range::-moz-range-thumb { border-color: #1a1a1a; }
