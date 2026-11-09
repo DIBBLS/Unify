@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, CalendarDays, ClipboardCheck, Search, User, PenTool, Bell } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, ClipboardCheck, Search, User, PenTool, Bell, Shield, BookOpen, Users } from 'lucide-react';
 import { supabaseBrowser, touchActivity, isSessionExpired, expireSession } from '../lib/supabase';
 import { pushSupported, enablePush } from '../lib/push';
 import ConfirmModal from '../components/ConfirmModal';
@@ -19,10 +19,13 @@ type Tab = {
   external?: boolean;
 };
 
+import { GROUPS as ADMIN_GROUPS } from '../lib/adminNav';
+
 const STUDENT_TABS: Tab[] = [
   { to: '/home', label: 'Home', icon: LayoutDashboard, match: ['/home'] },
-  { to: '/timetable', label: 'Timetable', icon: CalendarDays, match: ['/timetable', '/courses', '/learn'] },
-  { to: '/class', label: 'Class', icon: Search, match: ['/class'] },
+  { to: '/courses', label: 'Courses', icon: BookOpen, match: ['/courses', '/learn'] },
+  { to: '/timetable', label: 'Timetable', icon: CalendarDays, match: ['/timetable'] },
+  { to: '/class', label: 'Class', icon: Users, match: ['/class', '/hoc', '/attendance/my', '/attendance/pass'] },
   { to: '/me', label: 'Me', icon: User, match: ['/me'] },
 ];
 
@@ -43,7 +46,7 @@ const LECTURER_TABS: Tab[] = [
 // everything through All content; learning paths are students-only.
 // /browse + /classes light the Studio tab (the working area).
 const ADMIN_TABS: Tab[] = [
-  { to: '/home', label: 'Home', icon: LayoutDashboard, match: ['/home'] },
+  { to: '/admin', label: 'Home', icon: LayoutDashboard, match: ['/admin', '/home'] },
   { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio', '/browse', '/my-classes'] },
   { to: '/me', label: 'Me', icon: User, match: ['/me'] },
 ];
@@ -322,6 +325,11 @@ export default function Layout() {
 
   const isAuthor = role === 'lecturer' || role === 'contributor';
   const tabs: Tab[] = role === 'lecturer' ? LECTURER_TABS : isAuthor ? AUTHOR_TABS : role === 'admin' ? ADMIN_TABS : STUDENT_TABS;
+  useEffect(() => {
+    const on = isDesktop && authed === true && !immersive;
+    document.documentElement.dataset.rail = on ? '1' : '';
+    return () => { document.documentElement.dataset.rail = ''; };
+  }, [isDesktop, authed, immersive]);
   const pic = resolvePicture(picProfile, avatar);
   const showSkeletonNav = authed === null || (authed && !roleLoaded);
 
@@ -408,6 +416,34 @@ export default function Layout() {
                 ? Array.from({ length: skelCount }).map((_, i) => (
                     <div key={i} className="side-pill"><div className="skel" style={{ width: 24, height: 24, borderRadius: 6 }} /></div>
                   ))
+                : role === 'admin'
+                ? (
+                  <>
+                    {ADMIN_GROUPS.map((g) => (
+                      <div key={g.label || 'top'} className="side-group">
+                        {g.label && <div className="side-grouplabel">{g.label}</div>}
+                        {g.items.map((it) => {
+                          const to = it.id === 'overview' ? '/admin' : '/admin/' + it.id;
+                          const active = it.id === 'overview' ? (pathname === '/admin' || pathname === '/home') : pathname === to;
+                          const Icon = it.icon;
+                          return (
+                            <Link key={it.id} to={to} className={'side-pill' + (active ? ' is-active' : '')} aria-current={active ? 'page' : undefined} aria-label={it.title}>
+                              <span className="side-ico"><Icon size={20} /></span>
+                              <span className="side-label">{it.id === 'overview' ? 'Home' : it.title}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    ))}
+                    <div className="side-group">
+                      <div className="side-grouplabel">Create</div>
+                      <Link to="/studio" className={'side-pill' + (pathname.startsWith('/studio') || pathname.startsWith('/browse') ? ' is-active' : '')} aria-label="Studio">
+                        <span className="side-ico"><PenTool size={20} /></span>
+                        <span className="side-label">Studio</span>
+                      </Link>
+                    </div>
+                  </>
+                )
                 : tabs.map((t) => {
                     const active = t.match.some((m) => pathname === m || pathname.startsWith(m + '/'));
                     const Icon = t.icon;
@@ -440,7 +476,7 @@ export default function Layout() {
         </main>
       </div>
       {!immersive && !isDesktop && (
-      <nav className="bottomnav" onMouseEnter={() => setNavHidden(false)} style={{ position: 'fixed', bottom: 0, left: '50%', transform: `translateX(-50%)${navHidden ? ' translateY(calc(100% - 14px))' : ''}`, transition: 'transform .3s ease', width: '100%', maxWidth: 'var(--shell, 480px)', display: 'flex', background: 'var(--surface)', borderTop: '1px solid var(--border)', padding: '8px 0 calc(8px + env(safe-area-inset-bottom))' }}>
+      <nav className="bottomnav" onMouseEnter={() => setNavHidden(false)} style={{ zIndex: 50, position: 'fixed', bottom: 0, left: '50%', transform: `translateX(-50%)${navHidden ? ' translateY(calc(100% - 14px))' : ''}`, transition: 'transform .3s ease', width: '100%', maxWidth: 'var(--shell, 480px)', display: 'flex', background: 'var(--surface)', borderTop: '1px solid var(--border)', padding: '8px 0 calc(8px + env(safe-area-inset-bottom))' }}>
         {showSkeletonNav
           ? Array.from({ length: skelCount }).map((_, i) => (
               <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>

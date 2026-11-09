@@ -13,6 +13,7 @@ export const ROUTES = {
   home: '/home',
   timetable: '/timetable',
   class: '/class',
+  findCourses: '/courses/find',
   me: '/me',
 
   // Student content
@@ -50,7 +51,7 @@ export const LEGACY_REDIRECTS: Record<string, string> = {
   '/profile': ROUTES.me,
   '/course': ROUTES.courses,
   '/course/:courseCode': '/courses/:courseCode',
-  '/explore': ROUTES.class,
+  '/explore': ROUTES.findCourses,
   '/classes': ROUTES.myClasses,
   '/lecturer/redesign': ROUTES.lecturer,
 };

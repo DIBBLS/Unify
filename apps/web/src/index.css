@@ -4,7 +4,7 @@
    --u-* token (styles/redesign/tokens.css, dark values in redesign/index.css),
    so unmigrated screens follow the redesign and dark mode automatically.
    New code should use --u-* directly. */
-:root{
+:root{--nav-h:88px;
   --bg:var(--u-page);--surface:var(--u-card);--surface2:var(--u-card-2);--border:var(--u-border);
   --text:var(--u-text);--text2:var(--u-text-2);--text3:var(--u-text-3);
   /* success/"done" semantics (amber is reserved for the primary CTA) */
@@ -218,8 +218,8 @@ button (was an unstyled plain box on student + Studio preview). */
 .review-nudge ul{padding-left:18px}.review-nudge li{margin-bottom:4px}
 
 /* DESIGNED CONFIRM MODAL */
-.modal-veil{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:80;display:flex;align-items:flex-end;justify-content:center;animation:flash-in .2s ease}
-.modal-card{width:100%;max-width:480px;background:var(--surface);border-radius:20px 20px 0 0;padding:24px 20px calc(20px + env(safe-area-inset-bottom));animation:modal-up .25s ease}
+.modal-veil{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:120;display:flex;align-items:center;justify-content:center;padding:12px 12px calc(12px + env(safe-area-inset-bottom));overflow:hidden;animation:flash-in .2s ease}
+.modal-card{width:100%;max-width:480px;max-height:calc(100dvh - 24px - env(safe-area-inset-bottom));overflow-y:auto;overscroll-behavior:contain;background:var(--surface);border-radius:24px;padding:24px 20px 20px;box-shadow:0 24px 64px rgba(0,0,0,.35);animation:modal-up .25s ease}
 @keyframes modal-up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 .modal-title{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--text);margin:12px 0 6px}
 [data-design="story"] .modal-title{font-weight:900}
@@ -231,7 +231,7 @@ button (was an unstyled plain box on student + Studio preview). */
 .modal-go{background:var(--u-amber);border:none;border-bottom:4px solid #c69a1a;color:var(--u-black)}
 
 /* XP CELEBRATION BURST */
-.xp-burst{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);z-index:60;pointer-events:none;text-align:center;animation:burst-rise 1.5s ease forwards}
+.xp-burst{position:fixed;left:50%;bottom:calc(var(--nav-h) + 24px);transform:translateX(-50%);z-index:60;pointer-events:none;text-align:center;animation:burst-rise 1.5s ease forwards}
 .xp-burst-pill{display:inline-block;background:linear-gradient(135deg,var(--u-green),var(--u-good-2));color:#06281a;font-weight:800;font-size:20px;padding:12px 26px;border-radius:9999px;box-shadow:0 8px 24px rgba(5,150,105,.4)}
 .xp-burst-sub{margin-top:6px;font-size:12px;font-weight:800;color:var(--green-deep);background:var(--surface);border:1px solid var(--border);border-radius:9999px;padding:4px 14px;display:inline-block}
 @keyframes burst-rise{0%{opacity:0;transform:translate(-50%,16px) scale(.9)}15%{opacity:1;transform:translate(-50%,0) scale(1.04)}30%{transform:translate(-50%,-4px) scale(1)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-46px) scale(1)}}
@@ -315,10 +315,19 @@ sticky icon sidebar; phones get a horizontal pill rail on top. */
 .admin-navitem.active{background:var(--green-bg);border-color:var(--border);color:var(--text)}
 .admin-badge{font-size:11px;font-weight:800;background:#10b981;color:#fff;border-radius:9999px;padding:2px 10px}
 .admin-view{flex:1;min-width:0}
+.admin-group{display:flex;flex-direction:column;gap:4px}
+.admin-grouplabel{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);padding:8px 12px 2px}
+/* phones use the native picker, desktop the sidebar */
+.admin-select-wrap{display:none}
+/* the desktop rail already lists every admin section */
+[data-rail="1"] .admin-side{display:none}
+[data-rail="1"] .admin-view{width:100%}
 @media(max-width:767px){
-  .admin-shell{flex-direction:column}
-  .admin-side{width:100%;position:static;flex-direction:row;overflow-x:auto;padding:8px}
-  .admin-navitem{width:auto;flex-shrink:0}
+  .admin-shell{flex-direction:column;align-items:stretch;gap:12px;width:100%}
+  .admin-view{width:100%}
+  .admin-side{display:none}
+  .admin-select-wrap{display:block;width:100%}
+  .admin-select{width:100%;min-height:48px;padding:0 14px;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text);font:700 15px var(--font-body, inherit)}
 }
 
 /* Back-to-top floating button (reader) */

@@ -124,6 +124,11 @@
     width: var(--rail-open); box-shadow: 0 0 0 1px var(--u-border), 12px 0 32px rgba(0,0,0,.14);
   }
   .side-spacer { flex: 1; }
+  .side-group { display: flex; flex-direction: column; gap: 2px; }
+  .side-grouplabel { height: 18px; margin: 8px 0 0 14px; font-size: 10px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: var(--u-text-3); opacity: 0; transition: opacity var(--dur-2) var(--ease-out); white-space: nowrap; }
+  .side-pills:hover .side-grouplabel, .side-pills:focus-within .side-grouplabel { opacity: 1; }
+  .side-rail { overflow-y: auto; scrollbar-width: none; }
+  .side-rail::-webkit-scrollbar { display: none; }
   .side-logo { display: flex; align-items: center; gap: 12px; height: 48px; margin: 0 0 12px 2px; text-decoration: none; color: var(--u-text); }
   .side-mark {
     flex: none; width: 48px; height: 48px; border-radius: 14px; background: var(--u-black); color: var(--u-green);

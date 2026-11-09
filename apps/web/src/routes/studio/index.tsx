@@ -569,7 +569,7 @@ export default function StudioRoute() {
     const elapsedLabel = `${mm}:${ss}`;
     return (
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '60px 20px 80px', textAlign: 'center' }}>
-        <BoxBoy pose="readingStanding" width={110} />
+        <BoxBoy pose="teaching" width={110} />
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 22, marginTop: 12 }}>
           {convertProg && convertProg.total > 1 ? `Converting part ${Math.min(convertProg.done + 1, convertProg.total)} of ${convertProg.total}` : WORK_MSGS[workMsg]}
         </h1>

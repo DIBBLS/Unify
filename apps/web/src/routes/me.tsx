@@ -375,6 +375,8 @@ export default function MeRoute() {
   if (isStudent) {
     rows.push(['Level', profile?.level || '—']);
     rows.push(['Graduation target', profile?.grad_target != null ? String(profile.grad_target) : '—']);
+    const ct = (profile as unknown as { cgpa_target?: number | null } | null)?.cgpa_target;
+    rows.push(['CGPA target', ct != null ? Number(ct).toFixed(2) : 'Not set']);
   }
   // Staff never see or touch their contributing level here — it is assigned
   // by admins (users table) and shown on the dashboard contributions card.
@@ -414,7 +416,7 @@ export default function MeRoute() {
           </label>
           {avatarMsg && <div style={{ fontSize: 12, color: 'var(--u-good)', marginTop: 4 }}>{avatarMsg}</div>}
         </div>
-        <BoxBoy pose="readingStanding" width={64} />
+        <BoxBoy pose="armsCrossed" width={64} />
       </div>
 
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 16 }}>
@@ -450,6 +452,11 @@ export default function MeRoute() {
             <span style={{ fontSize: 13, fontWeight: 700, textAlign: 'right' }}>{value}</span>
           </div>
         ))}
+        {isStudent && (
+          <Link to="/cgpa-planner?step=target" className="btn btn--white btn--sm" style={{ margin: '0 16px 12px', display: 'flex', justifyContent: 'center' }}>
+            {(profile as unknown as { cgpa_target?: number | null } | null)?.cgpa_target != null ? 'Edit CGPA target' : 'Set CGPA target'}
+          </Link>
+        )}
       </div>
 
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 8 }}>

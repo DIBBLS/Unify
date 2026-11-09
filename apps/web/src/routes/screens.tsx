@@ -17,7 +17,8 @@ const GROUPS: { title: string; entries: Entry[] }[] = [
     entries: [
       { path: ROUTES.home, name: 'Home', note: 'Hero, CGPA target, resume, activity', roles: ['any'] },
       { path: ROUTES.timetable, name: 'Timetable', note: 'This week’s classes across your courses', roles: ['student'] },
-      { path: ROUTES.class, name: 'Class', note: 'Find and join your class and courses', roles: ['student'] },
+      { path: ROUTES.class, name: 'Class', note: 'Your class board, attendance and Meet links', roles: ['student'] },
+      { path: ROUTES.findCourses, name: 'Add courses', note: 'Search and enroll in courses', roles: ['student'] },
       { path: ROUTES.me, name: 'Me', note: 'Profile, persona, theme, account', roles: ['any'] },
     ],
   },

@@ -100,7 +100,7 @@ export default function TimetableRoute() {
             <BoxBoy pose="peeking" width={110} />
             <div className="t-15 w-6">No courses yet</div>
             <div className="t-13 muted">Join your courses and their class times show up here.</div>
-            <Link to={ROUTES.class} className="btn btn--amber">Find my class</Link>
+            <Link to={ROUTES.findCourses} className="btn btn--amber">Add courses</Link>
           </Card>
         ) : daySlots.length === 0 ? (
           <Card style={{ alignItems: 'center', textAlign: 'center' }}>

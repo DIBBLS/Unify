@@ -27,23 +27,43 @@ const RATIO: Partial<Record<Pose, number>> = {
 };
 
 /**
- * Box Boy, half-body by default: the upper body only, fading out at the
- * bottom (a mask, so it sits on light, dark or green grounds alike, never a
- * hard crop line). `full` keeps the whole figure (splash, the target sign).
- * Poses that are already seated or peeking are never cropped.
+ * Box Boy, three-quarter body by default: head to hips, fading into the
+ * ground at the bottom (a mask, so it sits on light, dark or green grounds
+ * alike, never a hard crop line). `full` keeps the whole figure (splash,
+ * target sign). Seated or peeking poses are never cropped.
+ *
+ * Motion is quiet on purpose: he breathes (a slow, tiny grow) and a few
+ * sparkles drift around him. He never walks around the screen. Both stop
+ * under reduced-motion. `calm` turns the sparkles off (dense screens).
  */
-export function BoxBoy({ pose, width, style, full = false }: { pose: Pose; width: number; style?: CSSProperties; full?: boolean }) {
+export function BoxBoy({ pose, width, style, full = false, calm = false }: { pose: Pose; width: number; style?: CSSProperties; full?: boolean; calm?: boolean }) {
   // Below-the-fold art decodes off the main thread and loads lazily; the
   // loading screen and splash (`full`) are the first paint, so they stay eager.
   const img = <img src={POSES[pose]} alt="" width={width} loading={full ? 'eager' : 'lazy'} decoding="async" style={{ width, height: 'auto', display: 'block' }} draggable={false} />;
   const ratio = RATIO[pose];
-  if (full || !ratio) return <span style={{ display: 'inline-block', lineHeight: 0, ...style }}>{img}</span>;
-  const fade = 'linear-gradient(to bottom, #000 58%, transparent 100%)';
-  return (
+  const cropped = !full && !!ratio;
+  const fade = 'linear-gradient(to bottom, #000 74%, transparent 100%)';
+  const figure = cropped ? (
     <span
-      style={{ display: 'inline-block', lineHeight: 0, width, height: Math.round(width * ratio * 0.6), overflow: 'hidden', WebkitMaskImage: fade, maskImage: fade, ...style }}
+      className="bb-breathe"
+      style={{ display: 'inline-block', lineHeight: 0, width, height: Math.round(width * (ratio as number) * 0.84), overflow: 'hidden', WebkitMaskImage: fade, maskImage: fade }}
     >
       {img}
+    </span>
+  ) : (
+    <span className="bb-breathe" style={{ display: 'inline-block', lineHeight: 0 }}>{img}</span>
+  );
+  const sparkles = !calm && width >= 72;
+  return (
+    <span className="bb-wrap" style={{ display: 'inline-block', position: 'relative', lineHeight: 0, ...style }}>
+      {figure}
+      {sparkles && (
+        <span className="bb-orbit" aria-hidden="true">
+          <i className="bb-spark bb-spark--a" />
+          <i className="bb-spark bb-spark--b" />
+          <i className="bb-spark bb-spark--c" />
+        </span>
+      )}
     </span>
   );
 }

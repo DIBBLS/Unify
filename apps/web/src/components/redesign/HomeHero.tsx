@@ -68,14 +68,12 @@ export function HomeHero({ profile, firstName, showCgpa = false }: HomeHeroProps
       {showCgpa && (
       <div style={{ marginTop: 20 }}>
         {hasTarget && !profile.hide_cgpa ? (
-          <Link
-            to="/cgpa-planner"
+          <div
             style={{ 
               display: 'flex',
               alignItems: 'center',
               gap: 16,
               padding: 16,
-              textDecoration: 'none',
               background: 'var(--u-card)',
               borderRadius: 16,
               border: '1px solid var(--u-border)'
@@ -91,10 +89,7 @@ export function HomeHero({ profile, firstName, showCgpa = false }: HomeHeroProps
                 </div>
               )}
             </div>
-            <div className="t-13 w-6" style={{ color: 'var(--u-text-3)' }}>
-              Edit →
-            </div>
-          </Link>
+          </div>
         ) : (
           <Link
             to="/cgpa-planner"

@@ -114,11 +114,11 @@ export default function CoursesRoute() {
         Your enrolled courses — open one to keep learning
       </p>
       {success && <Flash tone="success" message={success} onDismiss={() => setSuccess('')} />}
-      <Link to="/class" className="card" style={{ marginTop: 12, display: 'flex', gap: 10, alignItems: 'center', textDecoration: 'none', color: 'var(--text)' }}>
+      <Link to="/courses/find" className="card" style={{ marginTop: 12, display: 'flex', gap: 10, alignItems: 'center', textDecoration: 'none', color: 'var(--text)' }}>
         <span style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--u-green-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Search size={18} color="var(--u-green)" />
         </span>
-        <span className="t-14 w-7">Find your class to enroll</span>
+        <span className="t-14 w-7">Add courses to enroll</span>
       </Link>
       {activity.length > 0 && (
         <div style={{ marginTop: 12, padding: 14, background: 'var(--u-warn-tint)', border: '1px solid #fde68a', borderRadius: 12 }}>
@@ -132,10 +132,10 @@ export default function CoursesRoute() {
       <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {courses.length === 0 && !error && (
           <div className="card" style={{ padding: 24, textAlign: 'center' }}>
-            <BoxBoy pose="readingStanding" width={72} />
+            <BoxBoy pose="peeking" width={72} />
             <div className="t-15" style={{ marginTop: 12 }}>No enrolled courses yet.</div>
-            <Link to="/class" className="btn btn--amber" style={{ marginTop: 12, display: 'inline-block' }}>
-              Find your class
+            <Link to="/courses/find" className="btn btn--amber" style={{ marginTop: 12, display: 'inline-block' }}>
+              Add courses
             </Link>
           </div>
         )}

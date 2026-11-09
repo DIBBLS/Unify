@@ -146,7 +146,7 @@ export default function InstallBar() {
   const wrap: React.CSSProperties = {
     position: 'fixed',
     left: 16,
-    bottom: 'calc(76px + env(safe-area-inset-bottom, 0px))',
+    bottom: 'calc(var(--nav-h) + env(safe-area-inset-bottom, 0px))',
     zIndex: 55,
     display: 'flex',
     flexDirection: 'column',
