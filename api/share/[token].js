@@ -33,6 +33,7 @@ function page({ title, desc, image, body, appLink }) {
     + '<meta property="og:title" content="' + esc(title) + '"/>'
     + '<meta property="og:description" content="' + esc(desc) + '"/>'
     + '<meta property="og:image" content="' + esc(image) + '"/>'
+    + '<meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/>'
     + '<meta name="twitter:card" content="summary_large_image"/>'
     + '<meta name="twitter:title" content="' + esc(title) + '"/>'
     + '<meta name="twitter:description" content="' + esc(desc) + '"/>'
@@ -50,7 +51,7 @@ module.exports = async (req, res) => {
   // always unfurl fresh.
   res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600');
   if (!token) {
-    res.status(400).send(page({ title: 'Unify Learn', desc: 'Shared note', image: APP_URL + '/og-image.png', body: '', appLink: APP_URL + '/auth' }));
+    res.status(400).send(page({ title: 'Unify Learn', desc: 'Shared note', image: APP_URL + '/og-image.png?v=3', body: '', appLink: APP_URL + '/auth' }));
     return;
   }
   let data = null;
@@ -67,7 +68,7 @@ module.exports = async (req, res) => {
     res.status(expired ? 410 : 404).send(page({
       title: expired ? 'This Unify link expired — Unify Learn' : 'Link not found — Unify Learn',
       desc: expired ? 'Shared notes live for a while. Join free and the library stays open.' : 'This share link is invalid or was revoked.',
-      image: APP_URL + '/og-image.png',
+      image: APP_URL + '/og-image.png?v=3',
       body: '<div class="card"><div class="eyebrow">Unify Learn</div><h1>' + (expired ? 'This link expired' : 'Link not found') + '</h1><div class="sub">Shared notes live for a while — that is what makes them special.</div></div>',
       appLink: APP_URL + '/auth',
     }));
@@ -92,7 +93,7 @@ module.exports = async (req, res) => {
   res.status(200).send(page({
     title,
     desc,
-    image: APP_URL + '/og-image.png',
+    image: APP_URL + '/og-image.png?v=3',
     body,
     appLink: APP_URL + '/s/' + encodeURIComponent(token),
   }));
