@@ -1,3 +1,4 @@
+import { startAutoUpdate } from './lib/autoUpdate';
 import { startVitals } from './lib/vitals';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -42,11 +43,7 @@ try {
 }
 
 // Offline support: cache shell + readable content (see public/sw.js).
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
-  });
-}
+startAutoUpdate();
 
 // Offline-first: flush any writes banked while offline (progress, quiz
 // results, bookmarks) on boot and every reconnect. Never blocks render.
