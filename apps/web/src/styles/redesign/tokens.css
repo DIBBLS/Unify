@@ -33,7 +33,7 @@
   /* Text */
   --u-text: #0a0a0a;
   --u-text-2: #555555;         /* secondary */
-  --u-text-3: #999999;         /* labels, hints */
+  --u-text-3: #666666;         /* labels, hints (about 5:1 on the page colour, was a washed-out #999) */
   --u-on-dark: #ffffff;
   --u-on-dark-2: #aaaaaa;
 

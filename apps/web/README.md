@@ -42,6 +42,7 @@ public/          sw.js (offline + cache), manifest.json, icons/, boxboy/ (mascot
 
 - **One loading look.** Page-level waits use the skeletons in `components/Skeletons.tsx` (they mirror the real screen); a wait inside a page uses `SectionSkeleton`; route-level waits (auth gate, lazy chunk) use `Loading`. All end with a rotating `LoadingQuote`. Do not add ad-hoc spinners.
 - **Buttons.** Only the main action is coloured (amber, green or dark). Everything else reads in the normal text colour (`ui.css` enforces this for inline-styled buttons too). Full-width buttons cap at 380px on desktop.
+- **Bars and sliders** are Duolingo-style: use `ProgressBar` / `StepBars` (`components/redesign/ui.tsx`) or `components/Slider.tsx`, never a plain thin bar or a native range input.
 - **Motion.** Soft and quiet: fades, a slow "breathe" on mascots and the logo dot. `backwards` fill mode, never `both`, so finished animations do not trap popups under the nav. Everything collapses under `prefers-reduced-motion`.
 - **Layers.** nav 50, modal veil 120, equation overlay 125, Drop panels 130, toasts 140.
 - **Pictures.** Profile photos and attendance selfies go through `lib/image.ts` (square crop, upright, white behind transparency, under 60 to 70 KB).

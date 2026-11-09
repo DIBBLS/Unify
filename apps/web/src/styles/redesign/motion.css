@@ -134,3 +134,18 @@ html[data-rail="1"] .nb-nav { bottom: 12px; }
 .selfie-shutter:disabled { opacity: .45; }
 @keyframes selfie-pulse { 0%, 100% { opacity: .5; transform: scale(1); } 50% { opacity: .95; transform: scale(1.025); } }
 @media (prefers-reduced-motion: reduce) { .scan-line, .scan-frame i, .selfie-ring { animation: none; } .scan-line { top: 50%; } }
+
+/* ---------- CGPA path (timeline of semesters and milestones) ---------- */
+.path { position: relative; display: flex; flex-direction: column; gap: 14px; padding: 2px 0 2px; }
+.path::before { content: ''; position: absolute; left: 17px; top: 18px; bottom: 18px; width: 5px; border-radius: 5px; background: repeating-linear-gradient(to bottom, var(--u-border) 0 9px, transparent 9px 16px); }
+.path-row { position: relative; display: flex; gap: 12px; align-items: flex-start; }
+.path-dot { flex: 0 0 36px; width: 36px; height: 36px; border-radius: 9999px; display: grid; place-items: center; font-weight: 900; font-size: 14px; background: var(--u-card); color: var(--u-text); border: 3px solid var(--u-amber); position: relative; z-index: 1; }
+.path-start .path-dot { background: var(--u-amber); color: var(--u-black); animation: dot-breathe 3.2s ease-in-out infinite; }
+.path-mile .path-dot { background: var(--u-black); color: var(--u-amber); border-color: var(--u-black); }
+.path-mile .path-dot svg { display: block; }
+.path-card { flex: 1; min-width: 0; padding: 8px 12px; border-radius: 14px; background: var(--u-card-2, var(--surface2)); border: 1px solid var(--u-border); }
+.path-mile .path-card { background: var(--green-bg); border-color: transparent; }
+.path-mile:last-child .path-card { background: var(--u-amber); }
+.path-mile:last-child .path-card .t-13 { color: var(--u-black) !important; }
+.path-start .path-card { background: var(--green-bg); border-color: transparent; }
+@media (prefers-reduced-motion: reduce) { .path-start .path-dot { animation: none; } }

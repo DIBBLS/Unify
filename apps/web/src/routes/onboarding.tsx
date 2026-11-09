@@ -1,4 +1,5 @@
 import { FormSkeleton } from '../components/Skeletons';
+import { StepBars } from '../components/redesign/ui';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -279,10 +280,8 @@ export default function OnboardingRoute() {
           </div>
           <BoxBoy pose="peeking" width={84} />
         </div>
-        <div style={{ display: 'flex', gap: 6, marginTop: 12 }}>
-          {Array.from({ length: totalSteps }).map((_, i) => (
-            <div key={i} style={{ flex: 1, height: 5, borderRadius: 3, background: i <= shownStep ? 'var(--u-black)' : 'rgba(10,10,10,0.2)' }} />
-          ))}
+        <div style={{ marginTop: 12 }}>
+          <StepBars step={shownStep + 1} total={totalSteps} />
         </div>
       </div>
       <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>

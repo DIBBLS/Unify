@@ -1,8 +1,9 @@
 import { FormSkeleton } from '../components/Skeletons'
+import { StepBars, ProgressBar } from '../components/redesign/ui'
 import Slider from '../components/Slider';
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, MapPin, Flag, Trophy } from 'lucide-react'
 import { toastError, toastSuccess } from '../lib/toast'
 import { errorToast } from '../lib/errors'
 import { api, type Profile } from '../lib/api'
@@ -246,6 +247,9 @@ export default function CGPAPlannerRoute() {
         <div className="t-13 faint">
           Step {step === 'enter' ? 1 : step === 'courses' ? 2 : step === 'target' ? 3 : 4} of 4
         </div>
+      </div>
+      <div style={{ padding: '0 16px' }}>
+        <StepBars step={step === 'enter' ? 1 : step === 'courses' ? 2 : step === 'target' ? 3 : 4} total={4} />
       </div>
       
       <div className="pad stack" style={{ flex: 1, paddingTop: 32, paddingBottom: 40 }}>
@@ -606,9 +610,9 @@ function TargetPicker({
         >
           <div className="t-13 faint center">You'd need a</div>
           <div className="t-32 w-8 center" style={{ color: calculation.color }}>
-            {calculation.neededGPA.toFixed(2)}
+            {Math.min(5, calculation.neededGPA).toFixed(2)}
           </div>
-          <div className="t-13 faint center">GPA each semester</div>
+          <div className="t-13 faint center">{calculation.neededGPA > 5 ? 'GPA each semester is the most anyone can score, and it still is not enough' : 'GPA each semester'}</div>
         </div>
       </div>
       
@@ -648,19 +652,47 @@ function ThePlan({
   onAdjust: () => void
   saving: boolean
 }) {
-  const semestersLeft = Math.max(1, Math.ceil(unitsRemaining / 18)) // Assume 18 units/semester
-  const roadmap = calculateRoadmap(target, currentCGPA, unitsDone, unitsRemaining, semestersLeft)
   // Label each remaining semester with the student's real level and semester (from their
   // profile), and say whether the target is possible from where they stand now.
   const lvl = parseInt((level || '').replace(/\D/g, ''), 10)
   const startAbs = Number.isFinite(lvl) && lvl >= 100 && lvl <= 600 ? (lvl / 100 - 1) * 2 + (semester === 'Second Semester' ? 1 : 0) : null
+  // The degree ends at 500 Level, second semester (ten semesters in all), so the path never runs past it.
+  const semestersLeft = startAbs != null ? Math.max(1, 10 - startAbs) : Math.max(1, Math.ceil(unitsRemaining / 18))
+  const roadmap = calculateRoadmap(target, currentCGPA, unitsDone, unitsRemaining, semestersLeft)
   const labelFor = (i: number) => {
     if (startAbs == null) return `Semester ${i + 1}`
     const abs = startAbs + i
     return `${(Math.floor(abs / 2) + 1) * 100} Level · ${abs % 2 === 0 ? '1st' : '2nd'} semester`
   }
-  const bestPossible = unitsRemaining > 0 ? Math.min(5, (currentCGPA * unitsDone + 5 * unitsRemaining) / Math.max(1, unitsDone + unitsRemaining)) : currentCGPA
   const possible = calculation.label !== 'out-of-reach'
+  type PathNode =
+    | { kind: 'start'; title: string; note: string }
+    | { kind: 'sem'; title: string; gpa: number; cgpa: number; first: boolean }
+    | { kind: 'mile'; title: string; note: string; trophy?: boolean };
+  const LEVEL_NOTES: Record<number, string> = {
+    100: 'Your first steps. Build good habits now and they carry you through.',
+    200: 'Foundations are done. Courses get more focused from here.',
+    300: 'Past the halfway mark. Your results really start to count.',
+    400: 'The final stretch begins. Keep your CGPA climbing.',
+    500: 'Final year. Finish strong and graduate with pride.',
+  };
+  const path: PathNode[] = [{ kind: 'start', title: startAbs != null ? `You are here · ${labelFor(0)}` : 'You are here', note: `Your CGPA is ${currentCGPA.toFixed(2)}. Every semester from now moves it.` }];
+  let prevLevel = startAbs != null ? Math.floor(startAbs / 2) + 1 : 0;
+  const midIdx = roadmap.length >= 4 ? Math.floor(roadmap.length / 2) - 1 : -1;
+  roadmap.forEach((sem, i) => {
+    if (startAbs != null) {
+      const levelNow = Math.floor((startAbs + i) / 2) + 1;
+      if (levelNow !== prevLevel) {
+        path.push({ kind: 'mile', title: `Welcome to ${levelNow * 100} Level`, note: LEVEL_NOTES[levelNow * 100] || 'Keep going. You are close.' });
+        prevLevel = levelNow;
+      }
+    }
+    path.push({ kind: 'sem', title: labelFor(i), gpa: Math.min(5, sem.gpa), cgpa: sem.cumulativeCGPA, first: i === 0 });
+    if (i === midIdx) path.push({ kind: 'mile', title: 'Halfway to graduation', note: `Hit your numbers so far and your CGPA will be about ${sem.cumulativeCGPA.toFixed(2)} here. Look how far you have come.` });
+  });
+  path.push({ kind: 'mile', title: `Graduate with ${target.toFixed(2)}`, note: possible ? 'This is the day all of it pays off. Every semester you hit your number brings it closer.' : 'Aim as high as you can. Even a stretch goal lifts your result.', trophy: true });
+  const pctThere = target > 0 ? Math.max(0, Math.min(100, Math.round((currentCGPA / target) * 100))) : 0;
+  const bestPossible = unitsRemaining > 0 ? Math.min(5, (currentCGPA * unitsDone + 5 * unitsRemaining) / Math.max(1, unitsDone + unitsRemaining)) : currentCGPA
   const whatIfGPA = 3.8
   const neededAfter = calculateWhatIf(target, currentCGPA, unitsDone, unitsRemaining, whatIfGPA, Math.min(18, unitsRemaining))
   
@@ -684,24 +716,46 @@ function ThePlan({
             ? `Possible. From where you are now, ${target.toFixed(1)} is reachable by the end of your degree.`
             : `Not possible with the units left. The most you could finish with is ${bestPossible.toFixed(2)}, so pick a little lower.`}
         </div>
-        {roadmap.map((sem, i) => (
-          <div key={i} className="row between" style={{ padding: '8px 0', borderBottom: i < roadmap.length - 1 ? '1px solid var(--u-hairline)' : 'none' }}>
-            <div className="t-14 w-6">{labelFor(i)}</div>
-            <div className="t-14" style={{ color: calculation.color }}>
-              {sem.gpa.toFixed(2)} GPA
-            </div>
-            <div className="t-13 faint">
-              → {sem.cumulativeCGPA.toFixed(2)} CGPA
-            </div>
+        <div style={{ marginBottom: 14 }}>
+          <div className="row between t-13 w-7" style={{ marginBottom: 6 }}>
+            <span>Your climb</span>
+            <span>{currentCGPA.toFixed(2)} → {target.toFixed(2)}</span>
           </div>
-        ))}
+          <ProgressBar value={pctThere / 100} color="var(--u-amber)" height={16} />
+          <div className="t-12" style={{ marginTop: 6, color: 'var(--text2)' }}>You are {pctThere}% of the way to your target. Each stop below takes you further.</div>
+        </div>
+        <div className="path" role="list" aria-label="Your path to graduation">
+          {path.map((n, idx) => (
+            <div key={idx} className={`path-row path-${n.kind}`} role="listitem">
+              <span className="path-dot" aria-hidden="true">
+                {n.kind === 'start' ? <MapPin size={18} /> : n.kind === 'mile' ? (n.trophy ? <Trophy size={18} /> : <Flag size={18} />) : <span>{path.slice(0, idx).filter((x) => x.kind === 'sem').length + 1}</span>}
+              </span>
+              <div className="path-card">
+                {n.kind === 'sem' ? (
+                  <>
+                    <div className="t-14 w-7">{n.title}</div>
+                    <div className="row" style={{ gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
+                      <span className="pill" style={{ background: calculation.color, color: '#fff' }}>Aim for {n.gpa.toFixed(2)} GPA</span>
+                      <span className="t-13" style={{ color: 'var(--text2)' }}>CGPA after: <strong style={{ color: 'var(--text)' }}>{n.cgpa.toFixed(2)}</strong></span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="t-14 w-8">{n.title}</div>
+                    <div className="t-13" style={{ marginTop: 2, color: 'var(--text2)', lineHeight: 1.4 }}>{n.note}</div>
+                  </>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
       
       {/* What-if */}
       <div className="card card--tint" style={{ padding: 20 }}>
         <div className="t-13 faint" style={{ marginBottom: 8 }}>WHAT IF...</div>
         <p className="t-14">
-          If you get <strong>{whatIfGPA.toFixed(1)} this semester</strong>, you'd need <strong style={{ color: calculation.color }}>{neededAfter.toFixed(2)}</strong> after
+          If you get <strong>{whatIfGPA.toFixed(1)} this semester</strong>, you'd need <strong style={{ color: calculation.color }}>{Math.min(5, neededAfter).toFixed(2)}</strong> after
         </p>
       </div>
       

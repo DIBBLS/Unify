@@ -38,7 +38,7 @@ export function getCGPALabel(neededGPA: number): CGPACalculation {
     return {
       neededGPA,
       label: 'out-of-reach',
-      color: 'var(--u-text-3)',
+      color: '#52525b',
       description: 'Mathematically impossible with remaining units'
     }
   }
@@ -47,7 +47,7 @@ export function getCGPALabel(neededGPA: number): CGPACalculation {
     return {
       neededGPA,
       label: 'very-difficult',
-      color: 'var(--u-amber)',
+      color: '#c2410c',
       description: 'Requires near-perfect performance every semester'
     }
   }
@@ -56,7 +56,7 @@ export function getCGPALabel(neededGPA: number): CGPACalculation {
     return {
       neededGPA,
       label: 'stretch',
-      color: 'var(--u-good)',
+      color: '#b45309',
       description: 'Challenging but possible with consistent effort'
     }
   }
@@ -64,7 +64,7 @@ export function getCGPALabel(neededGPA: number): CGPACalculation {
   return {
     neededGPA,
     label: 'achievable',
-    color: 'var(--u-good)',
+    color: '#15803d',
     description: 'Realistic target with steady progress'
   }
 }
@@ -80,7 +80,8 @@ export function calculateRoadmap(
   unitsRemaining: number,
   semestersLeft: number
 ): Array<{ semester: number; gpa: number; cumulativeCGPA: number }> {
-  const neededGPA = calculateNeededGPA(target, current, unitsDone, unitsRemaining)
+  // No semester can score above 5.00, so the roadmap never asks for more.
+  const neededGPA = Math.min(5, calculateNeededGPA(target, current, unitsDone, unitsRemaining))
   const unitsPerSemester = Math.ceil(unitsRemaining / semestersLeft)
   
   const roadmap: Array<{ semester: number; gpa: number; cumulativeCGPA: number }> = []

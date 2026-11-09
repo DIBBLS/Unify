@@ -194,15 +194,32 @@ button[style^="color: var(--u-text-3)"], button[style*="; color: var(--u-text-3)
 :root { accent-color: var(--u-amber); }
 input[type="range"] { accent-color: var(--u-amber); }
 
-/* ---------- Custom slider (components/Slider.tsx) ---------- */
-.u-range { -webkit-appearance: none; appearance: none; width: 100%; height: 34px; background: transparent; margin: 0; cursor: pointer; --p: 50%; touch-action: pan-y; }
+/* ---------- Duolingo-style bars and slider ----------
+   Chunky and rounded: a soft grey trough, a bright fill with a lighter highlight stripe on
+   top and a solid darker edge underneath, the same "pressed edge" as the buttons. */
+.duo-bar { --h: 16px; --duo-fill: var(--u-green); --duo-edge: rgba(0, 0, 0, .16); position: relative; height: var(--h); border-radius: 9999px; background: var(--duo-track, #e5e3dc); box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .07); overflow: hidden; }
+.duo-fill { position: relative; height: 100%; min-width: var(--h); border-radius: 9999px; background: var(--duo-fill); box-shadow: inset 0 -3px 0 var(--duo-edge); transition: width var(--dur-4, .5s) var(--ease-out, ease-out); }
+.duo-fill::after { content: ''; position: absolute; left: 7px; right: 7px; top: 3px; height: 28%; border-radius: 9999px; background: rgba(255, 255, 255, .38); }
+.duo-bar--amber { --duo-fill: var(--u-amber); --duo-edge: #c69a1a; }
+[data-theme="dark"] .duo-bar { --duo-track: #3a3a3a; }
+
+/* Segmented version for step flows: one chunky segment per step. */
+.duo-steps { display: flex; gap: 6px; }
+.duo-steps i { flex: 1; height: 14px; border-radius: 9999px; background: var(--duo-track, rgba(10, 10, 10, .14)); box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .07); position: relative; transition: background .3s ease; }
+.duo-steps i.on { background: var(--u-amber); box-shadow: inset 0 -3px 0 #c69a1a; }
+.duo-steps i.on::after { content: ''; position: absolute; left: 6px; right: 6px; top: 3px; height: 28%; border-radius: 9999px; background: rgba(255, 255, 255, .4); }
+
+.u-range { -webkit-appearance: none; appearance: none; width: 100%; height: 40px; background: transparent; margin: 0; cursor: pointer; --p: 50%; --track: #e5e3dc; touch-action: pan-y; }
+[data-theme="dark"] .u-range { --track: #3a3a3a; }
 .u-range:focus { outline: none; }
-.u-range::-webkit-slider-runnable-track { height: 12px; border-radius: 9999px; background: linear-gradient(to right, var(--u-amber) 0, var(--u-amber) var(--p), var(--u-border) var(--p), var(--u-border) 100%); border: 1px solid var(--u-border); }
-.u-range::-moz-range-track { height: 12px; border-radius: 9999px; background: var(--u-border); border: 1px solid var(--u-border); }
-.u-range::-moz-range-progress { height: 12px; border-radius: 9999px; background: var(--u-amber); }
-.u-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 28px; height: 28px; margin-top: -9px; border-radius: 9999px; background: var(--u-amber); border: 3px solid #fff; box-shadow: 0 3px 0 #c69a1a, 0 2px 8px rgba(0,0,0,.18); transition: transform .12s ease, box-shadow .12s ease; }
-.u-range::-moz-range-thumb { width: 22px; height: 22px; border-radius: 9999px; background: var(--u-amber); border: 3px solid #fff; box-shadow: 0 3px 0 #c69a1a, 0 2px 8px rgba(0,0,0,.18); }
-.u-range:active::-webkit-slider-thumb { transform: translateY(2px) scale(.96); box-shadow: 0 1px 0 #c69a1a, 0 1px 4px rgba(0,0,0,.18); }
+.u-range::-webkit-slider-runnable-track { height: 18px; border-radius: 9999px; background:
+  linear-gradient(rgba(255, 255, 255, .4), rgba(255, 255, 255, .4)) 7px 4px / max(0px, calc(var(--p) - 14px)) 5px no-repeat,
+  linear-gradient(to right, var(--u-amber) 0, var(--u-amber) var(--p), var(--track) var(--p), var(--track) 100%);
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .12); }
+.u-range::-moz-range-track { height: 18px; border-radius: 9999px; background: var(--track); box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .1); }
+.u-range::-moz-range-progress { height: 18px; border-radius: 9999px; background: var(--u-amber); box-shadow: inset 0 -3px 0 #c69a1a; }
+.u-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 36px; height: 36px; margin-top: -9px; border-radius: 9999px; background: var(--u-amber); border: 0; box-shadow: 0 4px 0 #c69a1a; transition: transform .12s ease, box-shadow .12s ease; }
+.u-range::-moz-range-thumb { width: 36px; height: 36px; border-radius: 9999px; background: var(--u-amber); border: 0; box-shadow: 0 4px 0 #c69a1a; }
+.u-range:active::-webkit-slider-thumb { transform: translateY(3px); box-shadow: 0 1px 0 #c69a1a; }
 .u-range:focus-visible::-webkit-slider-thumb { outline: 3px solid var(--u-black); outline-offset: 2px; }
 .u-range:focus-visible::-moz-range-thumb { outline: 3px solid var(--u-black); outline-offset: 2px; }
-[data-theme="dark"] .u-range::-webkit-slider-thumb, [data-theme="dark"] .u-range::-moz-range-thumb { border-color: #1a1a1a; }
