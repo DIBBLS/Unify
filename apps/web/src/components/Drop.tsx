@@ -113,6 +113,7 @@ export default function Drop({
       </button>
       {open && (
         <div
+          className="drop-panel"
           style={{
             position: 'absolute',
             left: 0,
@@ -141,11 +142,16 @@ export default function Drop({
                     setOpen(false);
                   }}
                   style={{
-                    display: 'block',
+                    // Fixed 44px rows: identical height and spacing for every
+                    // item, and a proper touch target on phones.
+                    display: 'flex',
+                    alignItems: 'center',
+                    flexShrink: 0,
                     width: '100%',
+                    height: 44,
                     textAlign: 'left',
-                    padding: '9px 12px',
-                    lineHeight: 1.35,
+                    padding: '0 12px',
+                    lineHeight: '20px',
                     borderRadius: 7,
                     border: 'none',
                     background: active ? 'var(--u-good-tint)' : 'transparent',
@@ -163,7 +169,7 @@ export default function Drop({
               );
             })}
             {options.length === 0 && (
-              <div style={{ padding: '9px 12px', fontSize: 12, color: 'var(--text3)' }}>No options.</div>
+              <div style={{ height: 44, display: 'flex', alignItems: 'center', padding: '0 12px', fontSize: 12, color: 'var(--text3)' }}>No options.</div>
             )}
           </div>
         </div>

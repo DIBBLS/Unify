@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, CalendarCheck, ChevronRight, ClipboardCheck, Megaphone, MapPin } from 'lucide-react';
+import { BookOpen, CalendarCheck, ChevronRight, ClipboardCheck, Megaphone, MapPin, Video } from 'lucide-react';
 import { api, type ClassSlot } from '../lib/api';
 import { supabaseBrowser } from '../lib/supabase';
 import { errorToast } from '../lib/errors';
@@ -132,7 +132,14 @@ export default function TimetableRoute() {
                     </span>
                   }
                   right={
-                    st === 'now' ? <Pill tone="good">Now</Pill> : st === 'next' ? <Pill tone="amber">Next</Pill> : undefined
+                    <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
+                      {st === 'now' ? <Pill tone="good">Now</Pill> : st === 'next' ? <Pill tone="amber">Next</Pill> : null}
+                      {s.meetLink && (
+                        <a href={s.meetLink} target="_blank" rel="noreferrer" className="btn btn--amber btn--sm" style={{ gap: 6 }}>
+                          <Video size={14} /> Join
+                        </a>
+                      )}
+                    </span>
                   }
                 />
               );

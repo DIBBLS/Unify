@@ -125,6 +125,9 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, retries 
       throw err;
     }
     log.info("api", `← ${res.status} ${path} (${Date.now() - started}ms)`);
+    // Any successful write may change who the user is (onboarding, profile,
+    // enrolment, role): never serve the memoised /v1/me after one.
+    if (method !== "GET") meCache = null;
     return (await res.json()) as T;
   } catch (e) {
     // Retry transient faults (cold starts, network blips) — never 4xx:
@@ -208,7 +211,7 @@ export type NotificationItem = {
 };
 
 export type NoteAuthor = { name: string; avatar: string };
-export type ClassSlot = { id: string; course: string; day: number; start: string; end: string; venue: string; lecturer: string };
+export type ClassSlot = { id: string; course: string; day: number; start: string; end: string; venue: string; lecturer: string; meetLink?: string };
 export type RosterStudent = { id: string; name: string; email: string; level: string; topicsDone: number; quizzesTaken: number; lastActive: string | null };
 export type AdminContentTopic = { topic: number; lecture: number; versions: number; title: string };
 export type AdminContentWeek = { week: number; title: string; topics: AdminContentTopic[] };
@@ -237,7 +240,10 @@ export function clearMeCache(): void {
 
 // ---- Head of Class + attendance ----
 export type HocPost = { id: string; type: 'announcement' | 'tip' | 'question'; title: string | null; content: string; createdAt: string; author: string; mine: boolean };
-export type AttendanceSession = { id: string; course: string; code: string; week: number | null; opensAt: string; closesAt: string; open: boolean };
+export type AttendanceSession = { id: string; course: string; code: string; rotatesAt: string; rotateSeconds: number; week: number | null; opensAt: string; closesAt: string; open: boolean };
+export type CgpaCourse = { code: string; title: string; status: 'done' | 'priority' | 'not_yet'; units: number; grade: number | null };
+export type CgpaData = { cgpaCurrent: number | null; cgpaTarget: number | null; hideCgpa: boolean; unitsDone: number | null; unitsTotal: number | null; level: string | null; courses: CgpaCourse[] };
+export type Material = { id: string; week: number; type: 'slides' | 'notes' | 'past-paper'; title: string; url: string; createdAt: string; mine: boolean };
 export type AttendanceRegister = { session: AttendanceSession | null; present: { studentId: string; at: string; name: string; matric: string }[]; enrolled: number };
 
 export const api = {
@@ -498,12 +504,26 @@ export const api = {
   teaching: () => apiFetch<{ courses: string[] }>('/v1/teaching'),
   timetable: (course: string) =>
     apiFetch<{ slots: ClassSlot[] }>(`/v1/timetable?course=${encodeURIComponent(course)}`),
-  slotAdd: (payload: { course: string; day: number; start: string; end: string; venue: string }) =>
+  slotAdd: (payload: { course: string; day: number; start: string; end: string; venue: string; meetLink?: string }) =>
     apiFetch<{ ok: boolean; id: string }>('/v1/timetable', { method: 'POST', body: JSON.stringify(payload) }),
+  slotSetLink: (id: string, meetLink: string) =>
+    apiFetch<{ ok: boolean }>(`/v1/timetable/${id}`, { method: 'PATCH', body: JSON.stringify({ meetLink }) }),
+  materials: (course: string) => apiFetch<{ materials: Material[] }>(`/v1/materials?course=${encodeURIComponent(course)}`),
+  materialAdd: (payload: { course: string; week: number; type: Material['type']; title: string; url: string }) =>
+    apiFetch<{ ok: boolean; id: string }>('/v1/materials', { method: 'POST', body: JSON.stringify(payload) }),
+  materialDelete: (id: string) => apiFetch<{ ok: boolean }>(`/v1/materials/${id}`, { method: 'DELETE' }),
   slotDelete: (id: string) =>
     apiFetch<{ ok: boolean }>(`/v1/timetable/${id}`, { method: 'DELETE' }),
   roster: (course: string) =>
     apiFetch<{ students: RosterStudent[] }>(`/v1/courses/${encodeURIComponent(course)}/students`),
+  setPersona: (persona: string, clearPhoto = false) =>
+    apiFetch<{ ok: boolean }>('/v1/persona', { method: 'PUT', body: JSON.stringify({ persona, clearPhoto }) }),
+  // CGPA planner (students)
+  cgpa: () => apiFetch<CgpaData>('/v1/cgpa'),
+  cgpaSave: (payload: {
+    cgpaCurrent?: number; cgpaTarget?: number; unitsDone?: number; unitsTotal?: number; hide?: boolean;
+    courses?: { code: string; status: CgpaCourse['status']; units: number; grade?: number | null }[];
+  }) => apiFetch<{ ok: boolean }>('/v1/cgpa', { method: 'PUT', body: JSON.stringify(payload) }),
   // Head of Class
   hocPosts: () => apiFetch<{ posts: HocPost[]; isHoc: boolean; department?: string; level?: string }>('/v1/hoc/posts'),
   hocPost: (payload: { type: HocPost['type']; title?: string; content: string }) =>

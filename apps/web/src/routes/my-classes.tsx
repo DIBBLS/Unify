@@ -1,6 +1,6 @@
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
-import { BookOpen, CalendarDays, MapPin, Trash2, Users } from 'lucide-react';
+import { BookOpen, CalendarDays, ExternalLink, FileText, MapPin, Trash2, Users, Video } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import Drop from '../components/Drop';
 import { ClassesSkeleton } from '../components/Skeletons';
@@ -9,7 +9,9 @@ import { BoxBoy } from '../components/redesign/brand';
 import Flash from '../components/Flash';
 import ConfirmModal from '../components/ConfirmModal';
 import { supabaseBrowser } from '../lib/supabase';
-import { api, type ClassSlot, type RosterStudent } from '../lib/api';
+import { api, type ClassSlot, type Material, type RosterStudent } from '../lib/api';
+import { describeError, errorToast } from '../lib/errors';
+import Loading from '../components/Loading';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -31,6 +33,15 @@ export default function MyClassesRoute() {
   const [start, setStart] = useState('10:00');
   const [end, setEnd] = useState('12:00');
   const [venue, setVenue] = useState('');
+  const [meetLink, setMeetLink] = useState('');
+  const [linkEditId, setLinkEditId] = useState<string | null>(null);
+  const [linkValue, setLinkValue] = useState('');
+  const [materials, setMaterials] = useState<Material[]>([]);
+  const [mWeek, setMWeek] = useState('1');
+  const [mType, setMType] = useState<Material['type']>('slides');
+  const [mTitle, setMTitle] = useState('');
+  const [mUrl, setMUrl] = useState('');
+  const [mBusy, setMBusy] = useState(false);
   const [adding, setAdding] = useState(false);
   const [confirmSlot, setConfirmSlot] = useState<string | null>(null);
   // Admins run the platform from the admin panel + content browser —
@@ -61,7 +72,7 @@ export default function MyClassesRoute() {
         setCourses(t.courses || []);
         if (t.courses && t.courses.length) setSelected(t.courses[0]);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Could not load your classes.');
+        setError(describeError(err, 'load your classes'));
       } finally {
         setLoading(false);
       }
@@ -84,7 +95,7 @@ export default function MyClassesRoute() {
           setRoster(rs.students || []);
         }
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Could not load class details.');
+        if (!cancelled) setError(describeError(err, 'load class details'));
       } finally {
         if (!cancelled) setRefreshing(false);
       }
@@ -103,14 +114,63 @@ export default function MyClassesRoute() {
     setAdding(true);
     setError('');
     try {
-      await api.slotAdd({ course: selected, day, start, end, venue: venue.trim() });
+      await api.slotAdd({ course: selected, day, start, end, venue: venue.trim(), meetLink: meetLink.trim() });
       setVenue('');
+      setMeetLink('');
       const tt = await api.timetable(selected);
       setSlots(tt.slots || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not add that slot.');
+      setError(describeError(err, 'add that slot'));
     } finally {
       setAdding(false);
+    }
+  };
+
+  const saveLink = async (id: string) => {
+    try {
+      await api.slotSetLink(id, linkValue.trim());
+      setSlots((prev) => prev.map((x) => (x.id === id ? { ...x, meetLink: linkValue.trim() } : x)));
+      setLinkEditId(null);
+    } catch (e) {
+      errorToast(e, 'save that link');
+    }
+  };
+
+  // Materials for the selected course (links, shown to enrolled students).
+  const loadMaterials = async (course: string) => {
+    try {
+      setMaterials((await api.materials(course)).materials);
+    } catch {
+      setMaterials([]);
+    }
+  };
+  useEffect(() => {
+    if (selected) void loadMaterials(selected);
+  }, [selected]);
+
+  const addMaterial = async () => {
+    if (!mTitle.trim() || !/^https:\/\//i.test(mUrl.trim())) {
+      errorToast(new Error('Add a title and paste a full https link.'), 'share that');
+      return;
+    }
+    setMBusy(true);
+    try {
+      await api.materialAdd({ course: selected, week: Number(mWeek) || 1, type: mType, title: mTitle.trim(), url: mUrl.trim() });
+      setMTitle('');
+      setMUrl('');
+      await loadMaterials(selected);
+    } catch (e) {
+      errorToast(e, 'share that');
+    } finally {
+      setMBusy(false);
+    }
+  };
+  const removeMaterial = async (id: string) => {
+    try {
+      await api.materialDelete(id);
+      setMaterials((m) => m.filter((x) => x.id !== id));
+    } catch (e) {
+      errorToast(e, 'remove that');
     }
   };
 
@@ -120,11 +180,11 @@ export default function MyClassesRoute() {
       await api.slotDelete(id);
       setSlots((prev) => prev.filter((s) => s.id !== id));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not remove that slot.');
+      setError(describeError(err, 'remove that slot'));
     }
   };
 
-  if (loading) return <ClassesSkeleton />;
+  if (loading) return <Loading />;
 
   if (forbidden)
     return (
@@ -181,6 +241,19 @@ export default function MyClassesRoute() {
                       <MapPin size={12} /> {s.venue}
                     </div>
                   ) : null}
+                  {linkEditId === s.id ? (
+                    <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+                      <input value={linkValue} onChange={(e) => setLinkValue(e.target.value)} placeholder="https://meet.google.com/…" style={{ flex: 1, padding: 8, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 13 }} />
+                      <button className="btn btn--amber btn--sm" onClick={() => void saveLink(s.id)}>Save</button>
+                    </div>
+                  ) : s.meetLink ? (
+                    <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 4, fontSize: 12 }}>
+                      <a href={s.meetLink} target="_blank" rel="noreferrer" style={{ color: 'var(--u-good)', fontWeight: 800, display: 'inline-flex', gap: 4, alignItems: 'center' }}><Video size={12} /> Online link</a>
+                      <button onClick={() => { setLinkEditId(s.id); setLinkValue(s.meetLink || ''); }} style={{ color: 'var(--text2)', fontWeight: 700 }}>Change</button>
+                    </div>
+                  ) : (
+                    <button onClick={() => { setLinkEditId(s.id); setLinkValue(''); }} style={{ marginTop: 4, fontSize: 12, fontWeight: 700, color: 'var(--text2)', display: 'inline-flex', gap: 4, alignItems: 'center' }}><Video size={12} /> Add online class link</button>
+                  )}
                 </div>
                 <button onClick={() => setConfirmSlot(s.id)} aria-label={`Remove ${DAYS[s.day]} ${s.start} slot`} style={{ padding: 8, borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--u-red)' }}>
                   <Trash2 size={14} />
@@ -214,9 +287,45 @@ export default function MyClassesRoute() {
               Venue
               <input value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="e.g. LT1, Engineering block" style={{ display: 'block', width: '100%', marginTop: 4, padding: 10, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }} />
             </label>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginTop: 8 }}>
+              Online class link (optional)
+              <input value={meetLink} onChange={(e) => setMeetLink(e.target.value)} placeholder="Paste your Google Meet link" inputMode="url" style={{ display: 'block', width: '100%', marginTop: 4, padding: 10, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }} />
+            </label>
             <button onClick={addSlot} disabled={adding} style={{ marginTop: 10, width: '100%', padding: 12, borderRadius: 14, border: 'none', borderBottom: '4px solid #c69a1a', background: 'var(--u-amber)', color: 'var(--u-black)', fontWeight: 800, opacity: adding ? 0.6 : 1 }}>
               {adding ? 'Adding…' : 'Add slot'}
             </button>
+          </div>
+          <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800, marginTop: 20, display: 'flex', gap: 6, alignItems: 'center' }}>
+            <FileText size={16} color="var(--u-good)" /> Materials · {selected}
+          </h2>
+          <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {materials.length === 0 && (
+              <div style={{ fontSize: 13, color: 'var(--text2)', background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 12, padding: 14 }}>
+                Nothing shared yet. Paste a link to slides, notes or a past paper below.
+              </div>
+            )}
+            {materials.map((m) => (
+              <div key={m.id} style={{ padding: '12px 14px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 800, fontSize: 14 }}>{m.title}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text2)' }}>Week {m.week} · {m.type}</div>
+                </div>
+                <a href={m.url} target="_blank" rel="noreferrer" aria-label={`Open ${m.title}`} style={{ padding: 8, display: 'flex', color: 'var(--u-good)' }}><ExternalLink size={16} /></a>
+                {m.mine && <button onClick={() => void removeMaterial(m.id)} aria-label={`Remove ${m.title}`} style={{ padding: 8, display: 'flex', color: 'var(--text2)' }}><Trash2 size={14} /></button>}
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 10, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14 }}>
+            <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', marginBottom: 8 }}>SHARE A MATERIAL · {selected}</div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+              {(['slides', 'notes', 'past-paper'] as const).map((t) => (
+                <button key={t} className={`chip chip--sm${t === mType ? ' chip--on' : ''}`} onClick={() => setMType(t)}>{t === 'past-paper' ? 'Past paper' : t === 'slides' ? 'Slides' : 'Notes'}</button>
+              ))}
+              <input type="number" min={1} max={30} value={mWeek} onChange={(e) => setMWeek(e.target.value)} aria-label="Week" style={{ width: 80, padding: 8, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }} placeholder="Week" />
+            </div>
+            <input value={mTitle} onChange={(e) => setMTitle(e.target.value)} placeholder="Title, e.g. Lecture 3 slides" maxLength={120} style={{ display: 'block', width: '100%', padding: 10, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', marginBottom: 8 }} />
+            <input value={mUrl} onChange={(e) => setMUrl(e.target.value)} placeholder="https://drive.google.com/…" inputMode="url" style={{ display: 'block', width: '100%', padding: 10, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }} />
+            <button className="btn btn--amber btn--block" disabled={mBusy} onClick={() => void addMaterial()} style={{ marginTop: 10 }}>{mBusy ? 'Sharing…' : 'Share with students'}</button>
           </div>
           <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800, marginTop: 20, display: 'flex', gap: 6, alignItems: 'center' }}>
             <Users size={16} color="var(--u-good)" /> Roster · {roster.length} student{roster.length === 1 ? '' : 's'}

@@ -4,27 +4,91 @@
   "installCommand": "npm --prefix apps/web install --no-audit --no-fund",
   "framework": "vite",
   "redirects": [
-    { "source": "/Auth.html", "destination": "/auth", "permanent": false },
-    { "source": "/auth.html", "destination": "/auth", "permanent": false },
-    { "source": "/dashboard.html", "destination": "/dashboard", "permanent": false },
-    { "source": "/Dashboard.html", "destination": "/dashboard", "permanent": false },
-    { "source": "/Learn.html", "destination": "/course", "permanent": false },
-    { "source": "/learn.html", "destination": "/course", "permanent": false }
+    {
+      "source": "/Auth.html",
+      "destination": "/auth",
+      "permanent": false
+    },
+    {
+      "source": "/auth.html",
+      "destination": "/auth",
+      "permanent": false
+    },
+    {
+      "source": "/dashboard.html",
+      "destination": "/home",
+      "permanent": false
+    },
+    {
+      "source": "/Dashboard.html",
+      "destination": "/home",
+      "permanent": false
+    },
+    {
+      "source": "/Learn.html",
+      "destination": "/courses",
+      "permanent": false
+    },
+    {
+      "source": "/learn.html",
+      "destination": "/courses",
+      "permanent": false
+    }
   ],
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Content-Security-Policy", "value": "frame-ancestors 'none'" }
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "frame-ancestors 'none'"
+        }
       ]
     },
     {
       "source": "/assets/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/boxboy/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/icons/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800, stale-while-revalidate=86400"
+        }
+      ]
     }
   ]
 }

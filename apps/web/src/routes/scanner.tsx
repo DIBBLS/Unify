@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import { api, type AttendanceRegister } from '../lib/api';
 import { errorToast } from '../lib/errors';
 import { ROUTES } from '../lib/routes';
@@ -7,8 +8,9 @@ import Drop from '../components/Drop';
 import { BoxBoy } from '../components/redesign/brand';
 import { Card, Display, Label, ListCard, ListRow, Pill } from '../components/redesign/ui';
 
-// Take attendance (lecturer): open a session for a course, show the 6-digit
-// code, watch students tick in live, close when class is settled.
+// Take attendance (lecturer): open a session for a course, show the rotating
+// 6-digit code + QR (a new one every 30s, so a photo of the screen goes stale),
+// watch students tick in live, close when class is settled.
 // Route kept at /attendance/scanner so existing links keep working.
 const MINUTES = [5, 10, 15, 30, 60];
 
@@ -65,6 +67,16 @@ export default function ScannerRoute() {
     return () => clearInterval(t);
   }, [open, refresh]);
 
+  // Fetch the new code the moment the current one rotates.
+  const rotatesAt = reg?.session?.rotatesAt;
+  useEffect(() => {
+    if (!open || !rotatesAt) return;
+    const ms = Math.max(300, new Date(rotatesAt).getTime() - Date.now() + 400);
+    const t = setTimeout(() => void refresh(), ms);
+    return () => clearTimeout(t);
+  }, [open, rotatesAt, refresh]);
+  const rotateIn = useCountdown(rotatesAt, open);
+
   const left = useCountdown(reg?.session?.closesAt, open);
   useEffect(() => { if (open && left === 0 && reg?.session) void refresh(); }, [left, open, reg?.session, refresh]);
 
@@ -110,10 +122,14 @@ export default function ScannerRoute() {
 
       {open && reg?.session ? (
         <Card tone="dark" style={{ alignItems: 'center', textAlign: 'center', marginTop: 16 }}>
-          <div className="eyebrow" style={{ opacity: 0.7 }}>Tell your class this code</div>
-          <div style={{ fontSize: 56, fontWeight: 900, letterSpacing: 10, fontFamily: 'var(--font-body)', color: 'var(--u-green)' }} aria-label="Attendance code">
+          <div className="eyebrow" style={{ opacity: 0.7 }}>Scan the QR or enter the code</div>
+          <div style={{ background: '#fff', padding: 12, borderRadius: 16, lineHeight: 0 }} aria-label="Attendance QR code">
+            <QRCodeSVG value={`${window.location.origin}/attendance/pass?c=${reg.session.code}`} size={200} level="M" />
+          </div>
+          <div style={{ fontSize: 48, fontWeight: 900, letterSpacing: 10, fontFamily: 'var(--font-body)', color: 'var(--u-green)' }} aria-label="Attendance code">
             {reg.session.code}
           </div>
+          <div className="t-13" style={{ opacity: 0.7 }}>Changes in {rotateIn}s</div>
           <Pill tone="amber">Closes in {mm}:{ss}</Pill>
           <div className="t-15" style={{ marginTop: 6 }}>{reg.present.length} of {reg.enrolled} present</div>
           <button className="btn btn--white" disabled={busy} onClick={() => void end()} style={{ marginTop: 10 }}>End session</button>

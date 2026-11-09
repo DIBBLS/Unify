@@ -7,10 +7,12 @@ import Wordmark from '../components/Wordmark';
 import Typewriter from '../components/Typewriter';
 import Flash from '../components/Flash';
 import { hasSeenWelcome } from '../lib/welcome';
+import { WELCOME_LINE } from '../lib/naija';
 import { BoxBoySplash } from '../components/BoxBoySplash';
 import { supabaseBrowser, saveRememberSession, restoreRememberedSession, touchActivity, isSessionExpired, expireSession } from '../lib/supabase';
 import { api, clearMeCache } from '../lib/api';
 import { log } from '../lib/log';
+import { describeError } from '../lib/errors';
 
 // Note: no client-side persistence here. Rate limiting is enforced
 // server-side (API rate limits + Supabase Auth built-in limits).
@@ -156,7 +158,7 @@ export default function AuthRoute() {
     try {
       const { data, error: err } = await client.auth.signInWithPassword({ email, password });
       if (err) {
-        setError(err.message);
+        setError(describeError(err, 'sign in'));
         return;
       }
       if (data.session) {
@@ -164,7 +166,7 @@ export default function AuthRoute() {
         await routeToApp();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Sign-in failed.');
+      setError(describeError(err, 'sign in'));
     } finally {
       setLoading(false);
     }
@@ -197,7 +199,7 @@ export default function AuthRoute() {
         },
       });
       if (err) {
-        setError(err.message);
+        setError(describeError(err, 'sign up'));
         return;
       }
       if (data.session) {
@@ -209,7 +211,7 @@ export default function AuthRoute() {
         setTab('signin');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Sign-up failed.');
+      setError(describeError(err, 'sign up'));
     } finally {
       setLoading(false);
     }
@@ -227,12 +229,12 @@ export default function AuthRoute() {
     try {
       const { error: err } = await client.auth.resend({ type: 'signup', email: pendingEmail });
       if (err) {
-        setError(err.message);
+        setError(describeError(err, 'resend the email'));
         return;
       }
       setSuccess(`Verification email re-sent to ${pendingEmail}. Check inbox and spam.`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Resend failed.');
+      setError(describeError(err, 'resend the email'));
     } finally {
       setLoading(false);
     }
@@ -254,12 +256,12 @@ export default function AuthRoute() {
         redirectTo: `${window.location.origin}/auth`,
       });
       if (err) {
-        setError(err.message);
+        setError(describeError(err, 'send the reset email'));
         return;
       }
       setSuccess('Reset link sent! Check your inbox (and spam folder).');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Reset failed.');
+      setError(describeError(err, 'send the reset email'));
     } finally {
       setLoading(false);
     }
@@ -283,7 +285,7 @@ export default function AuthRoute() {
     try {
       const { error: err } = await client.auth.updateUser({ password });
       if (err) {
-        setError(err.message);
+        setError(describeError(err, 'set your password'));
         return;
       }
       await client.auth.signOut({ scope: 'local' }).catch(() => {});
@@ -292,7 +294,7 @@ export default function AuthRoute() {
       setTab('signin');
       setSuccess('Password updated! Sign in with your new password.');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Update failed.');
+      setError(describeError(err, 'set your password'));
     } finally {
       setLoading(false);
     }
@@ -312,7 +314,7 @@ export default function AuthRoute() {
       // Success redirects to Google; the return leg routes via the session listener.
     } catch (err) {
       setGoogleLoading(false);
-      setError(err instanceof Error ? err.message : 'Google sign-in failed.');
+      setError(describeError(err, 'sign in with Google'));
     }
   };
 
@@ -359,7 +361,7 @@ export default function AuthRoute() {
       <BoxBoySplash onDone={() => setShowSplash(false)} />
       <div className="auth-page">
       <style>{`.auth-page{min-height:100vh;background:var(--u-page)}.auth-side{display:none}.auth-card{maxWidth:480px;margin:0 auto}@media(min-width:900px){.auth-page{display:flex;flex-direction:row;background:var(--surface2)}.auth-side{display:flex;flex:1;flex-direction:column;justify-content:center;gap:18px;background:#0a0a0a;background-image:radial-gradient(circle at 85% 15%,color-mix(in srgb,var(--u-green) 14%,transparent),transparent 45%),radial-gradient(circle at 10% 90%,rgba(16,185,129,.1),transparent 40%);color:#f5f4f0;padding:64px;min-height:100vh}.auth-main{flex:1.2;display:flex;align-items:center;justify-content:center;padding:48px 32px;background:var(--u-page)}.auth-card{width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;box-shadow:0 12px 32px rgba(6,95,70,.12);margin:0}.auth-hero-mobile{border-radius:16px !important}}`}</style>
-      <aside className="auth-side">
+      <aside className="auth-side african-dark">
         <Wordmark size={30} light />
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 44, lineHeight: 1.08, margin: 0, color: '#f5f4f0' }}>
           Own every week<br />of your degree.
@@ -388,9 +390,10 @@ export default function AuthRoute() {
       </aside>
       <div className="auth-main">
       <div className="auth-card">
-      <div className="auth-hero-mobile" style={{ background: 'var(--u-green)', color: 'var(--u-black)', padding: 28, borderRadius: '0 0 32px 32px', display: 'flex', gap: 16, alignItems: 'center' }}>
+      <div className="auth-hero-mobile african-band" style={{ background: 'var(--u-green)', color: 'var(--u-black)', padding: 28, borderRadius: '0 0 32px 32px', display: 'flex', gap: 16, alignItems: 'center' }}>
           <div style={{ flex: 1 }}>
           <Wordmark size={20} onGreen />
+          <div className="eyebrow" style={{ marginTop: 10, opacity: 0.75 }}>{WELCOME_LINE}</div>
           <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 32, marginTop: 12, lineHeight: 1.1 }}>
             Welcome to Unify Learn
           </h1>

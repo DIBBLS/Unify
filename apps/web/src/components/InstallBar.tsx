@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowDownToLine, RefreshCw, X } from 'lucide-react';
+import { INSTALL_EVENT, isIOS as detectIOS, isStandalone } from '../lib/install';
+import { toastSuccess } from '../lib/toast';
 
 // PWA install + update notifier, bottom-left (ZoomBar owns bottom-right).
 //  - Chrome/Android: captures beforeinstallprompt → full bar first;
@@ -96,6 +98,29 @@ export default function InstallBar() {
       window.removeEventListener('appinstalled', onInstalled);
     };
   }, []);
+
+  // "Install app" button elsewhere (Me page) asks us to start the flow.
+  useEffect(() => {
+    const onAsk = () => {
+      if (isStandalone()) {
+        toastSuccess('Unify is already installed on this device.');
+      } else if (pie) {
+        void install();
+      } else if (detectIOS()) {
+        try {
+          localStorage.removeItem(HIDE);
+        } catch {
+          // ignore
+        }
+        setStage('ios');
+      } else {
+        toastSuccess('Open your browser menu and choose "Install app" or "Add to Home screen".');
+      }
+    };
+    window.addEventListener(INSTALL_EVENT, onAsk);
+    return () => window.removeEventListener(INSTALL_EVENT, onAsk);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pie]);
 
   const install = async () => {
     if (!pie) return;

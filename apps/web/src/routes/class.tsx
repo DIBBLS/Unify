@@ -7,6 +7,8 @@ import { BoxBoy } from '../components/redesign/brand';
 import Flash from '../components/Flash';
 import { supabaseBrowser } from '../lib/supabase';
 import { api } from '../lib/api';
+import { describeError } from '../lib/errors';
+import Loading from '../components/Loading';
 
 type CatalogCourse = { code: string; title: string; weeks: number; levels: string[]; semesters: string[]; matchedAlias: string | null };
 
@@ -56,7 +58,7 @@ export default function ClassRoute() {
           list.map((c) => ({ code: c.code, title: c.title, weeks: c.weeks || 0, levels: c.levels || [], semesters: c.semesters || [], matchedAlias: null }))
         );
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Could not load courses.');
+        setError(describeError(err, 'load courses'));
       } finally {
         setLoading(false);
       }
@@ -87,7 +89,7 @@ export default function ClassRoute() {
     return () => window.clearTimeout(t);
   }, [q, myLevel]);
 
-  if (loading) return <SearchListSkeleton titleWidth="60%" rows={5} />;
+  if (loading) return <Loading />;
 
   // Strict scoping: your level + the admin's active semester, nothing else.
   // Search mode spans both semesters (badged) so no course can hide.
@@ -103,7 +105,7 @@ export default function ClassRoute() {
       const res = await api.enroll(code, !isIn);
       setEnrolledSet(new Set((res.enrolled || []).map((c) => c.toUpperCase())));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Enrollment failed.');
+      setError(describeError(err, 'enrollment that'));
     } finally {
       setBusy(null);
     }

@@ -10,8 +10,8 @@ import { BoxBoy } from '../components/redesign/brand';
 import Typewriter from '../components/Typewriter';
 import Flash from '../components/Flash';
 import ConfirmModal from '../components/ConfirmModal';
-import { greeting, dailyLine, dailyKey, daypart } from '../lib/greet';
 import { HomeHero } from '../components/redesign/HomeHero';
+import Loading from '../components/Loading';
 
 type CourseStat = { course: string; topics: number };
 
@@ -254,7 +254,7 @@ export default function HomeRoute() {
     })();
   }, [navigate]);
 
-  if (loading) return <DashboardSkeleton author={skelAuthor} />;
+  if (loading) return <Loading />;
   if (loadError)
     return <ErrorState title="Couldn't load Home" message={loadError} />;
 
@@ -425,7 +425,7 @@ export default function HomeRoute() {
     );
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', paddingBottom: 80 }}>
-      <HomeHero profile={profile!} firstName={firstName} />
+      <HomeHero profile={profile!} firstName={firstName} showCgpa={profile?.role === 'student'} />
 
       <div className="rise" style={{ margin: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
         <div>

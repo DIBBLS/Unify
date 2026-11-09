@@ -12,6 +12,7 @@ import EoqQuiz from '../components/EoqQuiz';
 import { supabaseBrowser } from '../lib/supabase';
 import { api } from '../lib/api';
 import type { Topic, UnifyNote } from '../types/note';
+import { describeError } from '../lib/errors';
 
 type ShareData = {
   course: string;
@@ -62,7 +63,7 @@ export default function ShareRoute() {
         setData(res);
       } catch (err) {
         setStatus((err as { status?: number })?.status || 0);
-        setError(err instanceof Error ? err.message : 'Could not open this link.');
+        setError(describeError(err, 'open this link'));
       } finally {
         setLoading(false);
       }
@@ -75,7 +76,7 @@ export default function ShareRoute() {
       return (
         <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px', textAlign: 'center' }}>
           <BackButton to="/auth" />
-          <BoxBoy pose="readingStanding" width={120} />
+          <div style={{ display: 'flex', justifyContent: 'center' }}><BoxBoy pose="readingStanding" width={120} /></div>
           <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, marginTop: 12 }}>This link expired</h1>
           <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px' }}>
             Shared notes only live for a while — that is what makes them special. Join free and the whole library stays open.

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ChevronLeft } from 'lucide-react'
-import { supabaseBrowser } from '../lib/supabase'
 import { toastError, toastSuccess } from '../lib/toast'
+import { errorToast } from '../lib/errors'
 import { api, type Profile } from '../lib/api'
 import { 
   calculateNeededGPA, 
@@ -40,9 +40,12 @@ export default function CGPAPlannerRoute() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [enrolledCourses, setEnrolledCourses] = useState<string[]>([])
   
-  // S15: Enter CGPA
+  // S15: Enter CGPA. The CGPA covers every semester so far, so the math also
+  // needs the units already completed and the degree total (estimates are fine).
   const [currentCGPA, setCurrentCGPA] = useState('')
   const [hasStarted, setHasStarted] = useState(true)
+  const [priorUnits, setPriorUnits] = useState('')
+  const [degreeUnits, setDegreeUnits] = useState('')
   
   // S16: Course status
   const [courses, setCourses] = useState<CourseStatus[]>([])
@@ -51,8 +54,11 @@ export default function CGPAPlannerRoute() {
   const [target, setTarget] = useState(4.0)
   
   // Calculated
-  const unitsDone = courses.filter(c => c.status === 'done').reduce((sum, c) => sum + c.units, 0)
-  const unitsRemaining = courses.filter(c => c.status !== 'done').reduce((sum, c) => sum + c.units, 0)
+  // Completed = earlier semesters + courses marked done this semester; what is
+  // left is the rest of the degree, not just this semester's courses.
+  const doneThisSem = courses.filter(c => c.status === 'done').reduce((sum, c) => sum + c.units, 0)
+  const unitsDone = (parseInt(priorUnits, 10) || 0) + doneThisSem
+  const unitsRemaining = Math.max(0, (parseInt(degreeUnits, 10) || 0) - unitsDone)
   const calculation = currentCGPA ? getCGPALabel(
     calculateNeededGPA(target, parseFloat(currentCGPA), unitsDone, unitsRemaining)
   ) : null
@@ -61,88 +67,52 @@ export default function CGPAPlannerRoute() {
     loadProfile()
   }, [])
   
+  // Sensible starting estimates from the student's level (about 40 units per
+  // year, 200 for the degree). They can overwrite both.
+  const levelYears = (level?: string | null) => {
+    const n = parseInt((level || '').replace(/\D/g, ''), 10)
+    return Number.isFinite(n) && n >= 100 ? Math.max(0, n / 100 - 1) : 0
+  }
+
   const loadProfile = async () => {
     try {
-      const sb = supabaseBrowser()
-      if (!sb) throw new Error('Not authenticated')
-      
-      const { data: { user } } = await sb.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
-      
-      const me = await api.me()
+      const [me, data] = await Promise.all([api.me(), api.cgpa()])
       if (!me.profile) throw new Error('Profile not found')
-      
       setProfile(me.profile)
-      
+
       // Pre-fill if already set
-      if (me.profile.cgpa_current != null) {
-        setCurrentCGPA(me.profile.cgpa_current.toString())
+      if (data.cgpaCurrent != null) {
+        setCurrentCGPA(data.cgpaCurrent.toString())
         setHasStarted(true)
       }
-      if (me.profile.cgpa_target != null) {
-        setTarget(parseFloat(me.profile.cgpa_target.toString()))
-      }
-      
-      // Load enrolled courses
-      const { data: enrollments } = await sb
-        .from('enrollments')
-        .select('course')
-        .eq('user_id', user.id)
-      
-      if (enrollments) {
-        const codes = enrollments.map(e => e.course)
-        setEnrolledCourses(codes)
-        
-        // Load course details
-        const { data: courseData } = await sb
-          .from('courses')
-          .select('code, title')
-          .in('code', codes)
-        
-        if (courseData) {
-          // Load saved course statuses
-          const { data: statusData } = await sb
-            .from('course_status')
-            .select('*')
-            .eq('user_id', user.id)
-          
-          const statusMap = new Map(
-            statusData?.map(s => [s.course_code, s]) || []
-          )
-          
-          const courseList: CourseStatus[] = courseData.map(c => {
-            const saved = statusMap.get(c.code)
-            return {
-              code: c.code,
-              title: c.title,
-              units: saved?.units || 3,
-              status: (saved?.status as 'done' | 'priority' | 'not_yet') || 'not_yet',
-              grade: saved?.grade || undefined
-            }
-          })
-          
-          setCourses(courseList)
-        }
-      }
-      
+      if (data.cgpaTarget != null) setTarget(data.cgpaTarget)
+      setPriorUnits(String(data.unitsDone ?? Math.round(levelYears(data.level) * 40)))
+      setDegreeUnits(String(data.unitsTotal ?? 200))
+      setEnrolledCourses(data.courses.map(c => c.code))
+      setCourses(data.courses.map(c => ({
+        code: c.code,
+        title: c.title,
+        units: c.units || 3,
+        status: c.status,
+        grade: c.grade ?? undefined
+      })))
+
       // Check query param for direct step
       const stepParam = searchParams.get('step') as Step | null
       if (stepParam && ['enter', 'courses', 'target', 'plan'].includes(stepParam)) {
         setStep(stepParam)
-      } else if (me.profile.cgpa_current != null) {
-        // Already has CGPA, jump to courses or plan
+      } else if (data.cgpaCurrent != null) {
+        // Already has CGPA, jump to courses
         setStep('courses')
       }
-      
     } catch (err) {
-      console.error('Load profile failed:', err)
-      toastError('Could not load profile')
+      errorToast(err, 'load the planner')
       navigate('/home')
     } finally {
       setLoading(false)
     }
   }
-  
+
   const handleEnterContinue = () => {
     if (!hasStarted) {
       // Skip to target (no courses to mark)
@@ -155,44 +125,41 @@ export default function CGPAPlannerRoute() {
       toastError('Enter a valid CGPA (0.00-5.00)')
       return
     }
-    
+    const done = parseInt(priorUnits, 10)
+    const total = parseInt(degreeUnits, 10)
+    if (!Number.isFinite(done) || done < 0 || !Number.isFinite(total) || total < 1) {
+      toastError('Enter your completed units and your degree total (estimates are fine).')
+      return
+    }
+    if (total < done) {
+      toastError("Your degree total can't be less than the units you've completed.")
+      return
+    }
+
     setStep('courses')
   }
   
+  const courseRows = () => courses.map(c => ({ code: c.code, status: c.status, units: c.units, grade: c.grade ?? null }))
+
   const handleCoursesContinue = async () => {
-    // Save course statuses
+    // Save course statuses (and the CGPA basics) through the API
     setSaving(true)
     try {
-      const sb = supabaseBrowser()
-      if (!sb) throw new Error('Not authenticated')
-      
-      const { data: { user } } = await sb.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
-      
-      // Upsert all course statuses
-      const rows = courses.map(c => ({
-        user_id: user.id,
-        course_code: c.code,
-        status: c.status,
-        units: c.units,
-        grade: c.grade
-      }))
-      
-      const { error } = await sb
-        .from('course_status')
-        .upsert(rows)
-      
-      if (error) throw error
-      
+      const cgpa = validateCGPA(currentCGPA)
+      await api.cgpaSave({
+        ...(cgpa != null ? { cgpaCurrent: cgpa } : {}),
+        unitsDone: parseInt(priorUnits, 10) || 0,
+        unitsTotal: parseInt(degreeUnits, 10) || 200,
+        courses: courseRows(),
+      })
       setStep('target')
     } catch (err) {
-      console.error('Save courses failed:', err)
-      toastError('Could not save course status')
+      errorToast(err, 'save your course status')
     } finally {
       setSaving(false)
     }
   }
-  
+
   const handleTargetContinue = () => {
     setStep('plan')
   }
@@ -200,38 +167,29 @@ export default function CGPAPlannerRoute() {
   const handleLockItIn = async () => {
     setSaving(true)
     try {
-      const sb = supabaseBrowser()
-      if (!sb) throw new Error('Not authenticated')
-      
-      const { data: { user } } = await sb.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
-      
       const cgpa = validateCGPA(currentCGPA)
-      if (cgpa == null) throw new Error('Invalid CGPA')
-      
-      // Save CGPA target to profile
-      const { error } = await sb
-        .from('profiles')
-        .update({
-          cgpa_current: cgpa,
-          cgpa_target: target,
-          hide_cgpa: false
-        })
-        .eq('id', user.id)
-      
-      if (error) throw error
-      
+      if (cgpa == null) {
+        toastError('Enter a valid CGPA (0.00-5.00)')
+        setStep('enter')
+        return
+      }
+      await api.cgpaSave({
+        cgpaCurrent: cgpa,
+        cgpaTarget: target,
+        unitsDone: parseInt(priorUnits, 10) || 0,
+        unitsTotal: parseInt(degreeUnits, 10) || 200,
+        hide: false,
+        courses: courseRows(),
+      })
       toastSuccess('CGPA target set!')
       navigate('/home')
-      
     } catch (err) {
-      console.error('Save target failed:', err)
-      toastError('Could not save target')
+      errorToast(err, 'save your target')
     } finally {
       setSaving(false)
     }
   }
-  
+
   if (loading) return <Loading text="Loading..." />
   
   return (
@@ -278,6 +236,10 @@ export default function CGPAPlannerRoute() {
             setCurrentCGPA={setCurrentCGPA}
             hasStarted={hasStarted}
             setHasStarted={setHasStarted}
+            priorUnits={priorUnits}
+            setPriorUnits={setPriorUnits}
+            degreeUnits={degreeUnits}
+            setDegreeUnits={setDegreeUnits}
             onContinue={handleEnterContinue}
           />
         )}
@@ -323,12 +285,20 @@ function EnterCGPA({
   setCurrentCGPA, 
   hasStarted, 
   setHasStarted, 
-  onContinue 
+  priorUnits,
+  setPriorUnits,
+  degreeUnits,
+  setDegreeUnits,
+  onContinue
 }: {
   currentCGPA: string
   setCurrentCGPA: (v: string) => void
   hasStarted: boolean
   setHasStarted: (v: boolean) => void
+  priorUnits: string
+  setPriorUnits: (v: string) => void
+  degreeUnits: string
+  setDegreeUnits: (v: string) => void
   onContinue: () => void
 }) {
   return (
@@ -344,7 +314,7 @@ function EnterCGPA({
       </div>
       
       {hasStarted ? (
-        <div style={{ maxWidth: 200, margin: '0 auto', width: '100%' }}>
+        <div style={{ maxWidth: 280, margin: '0 auto', width: '100%' }}>
           <input
             type="number"
             step="0.01"
@@ -364,6 +334,17 @@ function EnterCGPA({
           />
           <div className="t-12 faint center" style={{ marginTop: 8 }}>
             0.00 – 5.00
+          </div>
+          <div className="stack" style={{ gap: 12, marginTop: 24, textAlign: 'left' }}>
+            <label className="t-13 w-6">
+              Units completed so far
+              <input type="number" min="0" max="400" inputMode="numeric" value={priorUnits} onChange={(e) => setPriorUnits(e.target.value)} className="input" style={{ marginTop: 6 }} />
+            </label>
+            <label className="t-13 w-6">
+              Total units in your degree
+              <input type="number" min="1" max="500" inputMode="numeric" value={degreeUnits} onChange={(e) => setDegreeUnits(e.target.value)} className="input" style={{ marginTop: 6 }} />
+            </label>
+            <div className="t-12 faint">An estimate is fine. We use these to work out the GPA you need from here.</div>
           </div>
         </div>
       ) : (
@@ -620,10 +601,10 @@ function ThePlan({
   onAdjust: () => void
   saving: boolean
 }) {
-  const semestersLeft = Math.ceil(unitsRemaining / 18) // Assume 18 units/semester
+  const semestersLeft = Math.max(1, Math.ceil(unitsRemaining / 18)) // Assume 18 units/semester
   const roadmap = calculateRoadmap(target, currentCGPA, unitsDone, unitsRemaining, semestersLeft)
   const whatIfGPA = 3.8
-  const neededAfter = calculateWhatIf(target, currentCGPA, unitsDone, unitsRemaining, whatIfGPA, 18)
+  const neededAfter = calculateWhatIf(target, currentCGPA, unitsDone, unitsRemaining, whatIfGPA, Math.min(18, unitsRemaining))
   
   return (
     <div className="stack" style={{ gap: 24, flex: 1 }}>

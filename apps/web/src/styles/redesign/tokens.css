@@ -1,9 +1,9 @@
 /* Unify Learn redesign tokens (v2.0.0)
    
    HYBRID APPROACH (Nov 2, 2026 decision):
-   - Keep current fonts: Playfair Display + DM Sans + Nunito (brand identity)
+   - ONE app typeface: Nunito everywhere. Playfair Display is the wordmark only
    - Adopt AMBER (#fbbf24) as primary CTA color (replaces emerald)
-   - Add Bowlby One SC as --font-headline for NEW screens only
+   - --font-headline is Nunito too (weight 900 for caps headlines)
    - Keep dark mode live (both Classic & Story variants)
    
    Named by job, matching the Figma variable collection "Unify · Roles".
@@ -49,7 +49,7 @@
   /* Type — HYBRID: Preserve current + add new headline font */
   --font-display: 'Nunito', system-ui, sans-serif;                /* App display - Nunito theme */
   --font-body: 'Nunito', system-ui, sans-serif;                   /* App body - Nunito */
-  --font-headline: 'Bowlby One SC', 'Arial Black', sans-serif;    /* NEW: caps headlines (redesign screens only) */
+  --font-headline: 'Nunito', system-ui, sans-serif;    /* NEW: caps headlines (redesign screens only) */
   --font-ui: 'Nunito', system-ui, sans-serif;                     /* Current: UI elements */
   --font-wordmark: 'Playfair Display', Georgia, serif;            /* "Unify Learn" wordmark - keep Playfair */
   --font-math: 'STIX Two Text', 'Times New Roman', serif;         /* maths, italic */

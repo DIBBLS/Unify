@@ -20,15 +20,39 @@ export const POSES = {
 } as const;
 export type Pose = keyof typeof POSES;
 
-export function BoxBoy({ pose, width, style }: { pose: Pose; width: number; style?: CSSProperties }) {
-  return <img src={POSES[pose]} alt="" width={width} style={{ width, height: 'auto', ...style }} draggable={false} />;
+// Height / width of each cut-out, used to crop to the upper body.
+const RATIO: Partial<Record<Pose, number>> = {
+  cheer: 1.31, armsCrossed: 1.36, wavePhone: 1.33, thumbsUpPhone: 1.25, thumbsUp: 1.37,
+  readingStanding: 1.5, teaching: 1.72, phoneOut: 1.33, keyHandover: 1.37, sittingPhone: 1.5,
+};
+
+/**
+ * Box Boy, half-body by default: the upper body only, fading out at the
+ * bottom (a mask, so it sits on light, dark or green grounds alike, never a
+ * hard crop line). `full` keeps the whole figure (splash, the target sign).
+ * Poses that are already seated or peeking are never cropped.
+ */
+export function BoxBoy({ pose, width, style, full = false }: { pose: Pose; width: number; style?: CSSProperties; full?: boolean }) {
+  // Below-the-fold art decodes off the main thread and loads lazily; the
+  // loading screen and splash (`full`) are the first paint, so they stay eager.
+  const img = <img src={POSES[pose]} alt="" width={width} loading={full ? 'eager' : 'lazy'} decoding="async" style={{ width, height: 'auto', display: 'block' }} draggable={false} />;
+  const ratio = RATIO[pose];
+  if (full || !ratio) return <span style={{ display: 'inline-block', lineHeight: 0, ...style }}>{img}</span>;
+  const fade = 'linear-gradient(to bottom, #000 58%, transparent 100%)';
+  return (
+    <span
+      style={{ display: 'inline-block', lineHeight: 0, width, height: Math.round(width * ratio * 0.6), overflow: 'hidden', WebkitMaskImage: fade, maskImage: fade, ...style }}
+    >
+      {img}
+    </span>
+  );
 }
 
 /** Fades the bottom of a Box Boy cut-out into the background. Never leave a hard crop line. */
 export function FadedBoxBoy({ pose, width, bg = 'var(--u-green)', fade = 120, style }: { pose: Pose; width: number; bg?: string; fade?: number; style?: CSSProperties }) {
   return (
     <div style={{ position: 'relative', width, ...style }}>
-      <BoxBoy pose={pose} width={width} />
+      <BoxBoy pose={pose} width={width} full />
       <div style={{ position: 'absolute', left: -40, right: -40, bottom: 0, height: fade, background: `linear-gradient(to bottom, ${hexA(bg, 0)} 0%, ${hexA(bg, 0.75)} 55%, ${bg} 85%)` }} />
     </div>
   );

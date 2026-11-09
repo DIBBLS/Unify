@@ -1,33 +1,40 @@
 import { Link } from 'react-router-dom'
 import { SemesterWeek, BoxBoy } from './brand'
 import type { Profile } from '../../lib/api'
+import { localGreeting, dailyProverb } from '../../lib/naija'
 
 interface HomeHeroProps {
   profile: Profile
   firstName: string
+  /** CGPA target + planner link: students only. */
+  showCgpa?: boolean
 }
 
 /**
  * S14: Home hero with semester week tracker + CGPA target
  * Replaces generic greeting card
  */
-export function HomeHero({ profile, firstName }: HomeHeroProps) {
+export function HomeHero({ profile, firstName, showCgpa = false }: HomeHeroProps) {
   // Calculate current week (1-12)
   const currentWeek = getCurrentWeek(profile.semester_start, profile.semester_weeks || 12)
   
+  // Today's greeting in a rotating Nigerian language, English alongside.
+  const greet = localGreeting()
+
   // CGPA target set?
-  const hasTarget = profile.cgpa_target != null
+  const hasTarget = showCgpa && profile.cgpa_target != null
   
   return (
     <div 
-      className="card card--dark" 
+      className="card card--dark african-dark" 
       style={{ 
         margin: '16px', 
-        padding: '24px 20px',
+        padding: '24px 20px 30px',
         position: 'relative',
         overflow: 'hidden'
       }}
     >
+      <div className="kente-edge" aria-hidden="true" />
       {/* Semester week tracker */}
       {profile.semester_start && currentWeek > 0 && (
         <div style={{ marginBottom: 20 }}>
@@ -39,11 +46,12 @@ export function HomeHero({ profile, firstName }: HomeHeroProps) {
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
         <div style={{ flex: 1 }}>
           <div className="eyebrow" style={{ color: 'var(--u-amber)', marginBottom: 6 }}>
-            {getGreeting()}
+            {greet.text} <span style={{ opacity: 0.75 }}>· {greet.english}</span>
           </div>
           <h1 className="display" style={{ fontSize: 28, color: 'var(--u-on-dark)' }}>
             {firstName || 'Welcome'}
           </h1>
+          <div className="t-13" style={{ marginTop: 10, opacity: 0.8, lineHeight: 1.45, maxWidth: 420 }}>{dailyProverb()}</div>
           {profile.department && (
             <div 
               className="pill pill--dark" 
@@ -56,7 +64,8 @@ export function HomeHero({ profile, firstName }: HomeHeroProps) {
         <BoxBoy pose={hasTarget ? "targetSign" : "readingStanding"} width={72} style={{ flexShrink: 0 }} />
       </div>
 
-      {/* CGPA target / Set target - inside hero */}
+      {/* CGPA target / Set target - inside hero (students only) */}
+      {showCgpa && (
       <div style={{ marginTop: 20 }}>
         {hasTarget && !profile.hide_cgpa ? (
           <Link
@@ -72,7 +81,7 @@ export function HomeHero({ profile, firstName }: HomeHeroProps) {
               border: '1px solid var(--u-border)'
             }}
           >
-            <BoxBoy pose="targetSign" width={60} />
+            <BoxBoy full pose="targetSign" width={60} />
             <div style={{ flex: 1 }}>
               <div className="t-13 muted">CGPA Target</div>
               <div className="t-20 w-7">{profile.cgpa_target?.toFixed(2)}</div>
@@ -96,6 +105,7 @@ export function HomeHero({ profile, firstName }: HomeHeroProps) {
           </Link>
         )}
       </div>
+      )}
     </div>
   )
 }
@@ -124,10 +134,4 @@ function getCurrentWeek(semesterStart: string | null | undefined, totalWeeks: nu
 /**
  * Time-based greeting
  */
-function getGreeting(): string {
-  const hour = new Date().getHours()
-  if (hour < 12) return 'Good morning'
-  if (hour < 17) return 'Good afternoon'
-  return 'Good evening'
-}
 

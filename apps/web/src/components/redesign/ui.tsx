@@ -46,7 +46,7 @@ export function Card({ children, tone = 'light', pad = 18, gap = 12, style, clas
 
 /** A card whose children are rows separated by hairlines. */
 export function ListCard({ children, style }: Div) {
-  return <div className="card list" style={{ overflow: 'hidden', ...style }}>{children}</div>;
+  return <div className="card list stagger" style={{ overflow: 'hidden', ...style }}>{children}</div>;
 }
 
 export function ListRow({ title, sub, leading, right, onClick, titleStyle }: {
@@ -176,7 +176,7 @@ export function StepBars({ step, total = 3 }: { step: number; total?: number }) 
 export function ProgressBar({ value, color = 'var(--u-green)', track = '#e8e6e0', height = 6 }: { value: number; color?: string; track?: string; height?: number }) {
   return (
     <div style={{ height, borderRadius: height, background: track, overflow: 'hidden' }}>
-      <div style={{ width: `${Math.max(0, Math.min(1, value)) * 100}%`, height: '100%', background: color, borderRadius: height }} />
+      <div style={{ width: `${Math.max(0, Math.min(1, value)) * 100}%`, height: '100%', background: color, borderRadius: height, transition: 'width var(--dur-4) var(--ease-out)' }} />
     </div>
   );
 }

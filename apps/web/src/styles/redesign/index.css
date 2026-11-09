@@ -10,7 +10,7 @@
    4. NEW screens import from @/components/redesign and use redesign/ styles
    
    USER DECISIONS (Nov 2, 2026):
-   - Typography: HYBRID — Keep Playfair/DM Sans/Nunito, add Bowlby for new screens
+   - Typography: Nunito everywhere; Playfair Display for the wordmark only
    - Primary CTA: AMBER #fbbf24 (replaces emerald)
    - Dark mode: KEEP LIVE (Classic/Story design switch removed; Dark/Light only)
    - Avatars: Box Boy personas (5) + optional photo upload in Settings
@@ -18,7 +18,6 @@
 
 @import url('./tokens.css');
 @import url('./ui.css');
-@import url('https://fonts.googleapis.com/css2?family=Bowlby+One+SC&display=swap');
 
 /* Dark mode support (keeping it live per user decision) */
 [data-theme="dark"] {
@@ -107,24 +106,45 @@
 }
 
 
-/* ---------- Desktop (>=1024px): sidebar pills, not the phone column ----------
-   The sidebar is the bottom tab bar turned vertical: same icon-over-label
-   pills, same lit green pill for the active tab. The bottom bar is hidden
-   at this size and every page's max-width (var(--shell)) opens up. */
+/* ---------- Desktop (>=1024px): the sidebar is the bottom tab bar, vertical ----------
+   A slim icon rail that opens on hover (or keyboard focus) and closes when the
+   pointer leaves. It opens OVER the page, so content never shifts. The header
+   lives here too: brand mark on top, bell + avatar at the bottom. The bottom
+   bar is hidden at this size and every page's max-width opens up. */
 @media (min-width: 1024px) {
-  :root { --shell: 1040px; }
-  .side-pills {
-    position: sticky; top: 56px; align-self: flex-start;
-    width: 104px; flex-shrink: 0; height: calc(100vh - 56px);
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-    padding: 20px 8px; background: var(--u-card); border-right: 1px solid var(--u-border);
+  :root { --shell: 1040px; --rail: 80px; --rail-open: 232px; }
+  .side-pills { position: relative; flex-shrink: 0; width: var(--rail); align-self: stretch; z-index: 40; }
+  .side-rail {
+    position: fixed; top: 0; left: 0; height: 100vh; width: var(--rail);
+    display: flex; flex-direction: column; gap: 6px; padding: 18px 12px;
+    background: var(--u-card); border-right: 1px solid var(--u-border); overflow: hidden;
+    transition: width var(--dur-3) var(--ease-out), box-shadow var(--dur-3) var(--ease-out);
+  }
+  .side-pills:hover .side-rail, .side-pills:focus-within .side-rail {
+    width: var(--rail-open); box-shadow: 0 0 0 1px var(--u-border), 12px 0 32px rgba(0,0,0,.14);
+  }
+  .side-spacer { flex: 1; }
+  .side-logo { display: flex; align-items: center; gap: 12px; height: 48px; margin: 0 0 12px 2px; text-decoration: none; color: var(--u-text); }
+  .side-mark {
+    flex: none; width: 48px; height: 48px; border-radius: 14px; background: var(--u-black); color: var(--u-green);
+    display: grid; place-items: center; font-size: 26px; font-weight: 900;
   }
   .side-pill {
-    width: 84px; display: flex; flex-direction: column; align-items: center; gap: 4px;
-    padding: 10px 0; border-radius: 9999px; text-decoration: none;
-    color: var(--u-text-2); font-size: 11px; font-weight: 500;
-    transition: background .15s ease, color .15s ease;
+    display: flex; align-items: center; gap: 12px; height: 52px; padding: 0 0 0 4px; border-radius: 9999px;
+    color: var(--u-text-2); font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap;
+    transition: background var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), transform var(--dur-1) var(--ease-out);
   }
-  .side-pill:hover { background: var(--u-card-2); }
+  .side-pill:hover { background: var(--u-card-2); color: var(--u-text); }
+  .side-pill:active { transform: scale(.97); }
   .side-pill.is-active { background: var(--green-bg); color: var(--u-text); font-weight: 800; }
+  .side-ico { position: relative; flex: none; width: 44px; height: 44px; display: grid; place-items: center; }
+  .side-label { opacity: 0; transform: translateX(-6px); transition: opacity var(--dur-2) var(--ease-out), transform var(--dur-3) var(--ease-out); }
+  .side-pills:hover .side-label, .side-pills:focus-within .side-label { opacity: 1; transform: none; transition-delay: 60ms; }
+  .side-badge {
+    position: absolute; top: 2px; right: 2px; min-width: 18px; height: 18px; padding: 0 4px;
+    border-radius: 9999px; background: var(--u-red); color: #fff; font-size: 10px; font-weight: 800;
+    display: grid; place-items: center;
+  }
+  .side-avatar { border-radius: 9999px; overflow: hidden; background: var(--u-green); color: var(--u-black); font-weight: 800; font-size: 16px; }
+  .side-avatar img { width: 100%; height: 100%; object-fit: cover; }
 }

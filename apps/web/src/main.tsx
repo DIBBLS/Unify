@@ -4,6 +4,8 @@ import App from './App';
 import './index.css';
 import './styles/redesign/index.css';
 import './styles/redesign/boxboy-motion.css';
+import './styles/redesign/motion.css';
+import './styles/redesign/african.css';
 import { warmupApi } from './lib/api';
 import { bootTheme } from './hooks/useTheme';
 import { log } from './lib/log';

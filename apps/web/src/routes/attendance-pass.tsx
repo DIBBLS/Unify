@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { errorToast } from '../lib/errors';
 import { ROUTES } from '../lib/routes';
@@ -10,7 +10,10 @@ import { Card, Display } from '../components/redesign/ui';
 // Mark attendance: the lecturer shows a 6-digit code in class, you enter it.
 export default function AttendancePassRoute() {
   const navigate = useNavigate();
-  const [code, setCode] = useState('');
+  const [params] = useSearchParams();
+  // Scanning the lecturer's QR opens this page with ?c=123456.
+  const [code, setCode] = useState(() => (params.get('c') || '').replace(/\D/g, '').slice(0, 6));
+  const autoSent = useRef(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<{ course: string; already: boolean } | null>(null);
   const [ready, setReady] = useState(false);
@@ -21,11 +24,11 @@ export default function AttendancePassRoute() {
     api
       .attendanceProfile()
       .then((p) => {
-        if (!p.fullName || !p.matric) navigate(`${ROUTES.attendanceSetup}?next=${ROUTES.attendancePass}`, { replace: true });
+        if (!p.fullName || !p.matric) navigate(`${ROUTES.attendanceSetup}?next=${encodeURIComponent(ROUTES.attendancePass + (params.get('c') ? `?c=${params.get('c')}` : ''))}`, { replace: true });
         else setReady(true);
       })
       .catch(() => setReady(true));
-  }, [navigate]);
+  }, [navigate, params]);
 
   useEffect(() => {
     if (ready) inputRef.current?.focus();
@@ -47,6 +50,15 @@ export default function AttendancePassRoute() {
       setBusy(false);
     }
   };
+
+  // Opened from the QR: submit straight away, once, as soon as we know the profile is set.
+  useEffect(() => {
+    if (ready && !autoSent.current && params.get('c') && /^\d{6}$/.test(code)) {
+      autoSent.current = true;
+      void submit();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready]);
 
   const shell = { maxWidth: 'min(var(--shell, 480px), 560px)', margin: '0 auto', padding: '20px 16px 96px' } as const;
 

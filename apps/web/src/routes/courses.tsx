@@ -7,6 +7,8 @@ import { BoxBoy } from '../components/redesign/brand';
 import Flash from '../components/Flash';
 import { supabaseBrowser } from '../lib/supabase';
 import { api } from '../lib/api';
+import { describeError } from '../lib/errors';
+import Loading from '../components/Loading';
 
 type MyCourse = { code: string; title: string; weeks: number };
 
@@ -69,33 +71,14 @@ export default function CoursesRoute() {
         }));
         setCourses(rows);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Could not load courses.');
+        setError(describeError(err, 'load courses'));
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
-  if (loading)
-    return (
-      <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
-        <BackButton to="/home" />
-        <div className="skel" style={{ height: 32, width: '50%', marginTop: 4 }} />
-        <div className="skel" style={{ height: 14, width: '70%', marginTop: 10 }} />
-        <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {[0, 1, 2].map((i) => (
-            <div key={i} style={{ padding: '14px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, display: 'flex', gap: 12, alignItems: 'center' }}>
-              <div className="skel" style={{ width: 40, height: 40, borderRadius: 10, flexShrink: 0 }} />
-              <div style={{ flex: 1 }}>
-                <div className="skel" style={{ height: 16, width: '45%' }} />
-                <div className="skel" style={{ height: 12, width: '80%', marginTop: 8 }} />
-              </div>
-            </div>
-          ))}
-        </div>
-        <div style={{ fontSize: 12, color: 'var(--text2)', textAlign: 'center', marginTop: 12 }}>Loading your courses…</div>
-      </div>
-    );
+  if (loading) return <Loading />;
 
   const repair = async () => {
     setRepairing(true);
@@ -117,7 +100,7 @@ export default function CoursesRoute() {
           : 'Nothing to restore — your enrollments already match your activity.'
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Restore failed.');
+      setError(describeError(err, 'restore that'));
     } finally {
       setRepairing(false);
     }

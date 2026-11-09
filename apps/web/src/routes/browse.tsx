@@ -7,6 +7,8 @@ import { SearchListSkeleton } from '../components/Skeletons';
 import ErrorState from '../components/ErrorState';
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type AdminContentCourse } from '../lib/api';
+import { describeError } from '../lib/errors';
+import Loading from '../components/Loading';
 
 // Authors: the content tree scoped to the level they contribute to
 // (profile.level, picked at onboarding). Read-only previews throughout.
@@ -45,7 +47,7 @@ export default function BrowseRoute() {
         setCourses(res.courses);
       } catch (err) {
         if ((err as { status?: number })?.status === 403) setForbidden(true);
-        else setError(err instanceof Error ? err.message : 'Could not load content.');
+        else setError(describeError(err, 'load content'));
       } finally {
         setLoading(false);
       }
@@ -65,7 +67,7 @@ export default function BrowseRoute() {
     });
   }, [courses, q, isAuthor, isContrib, enrolled, level]);
 
-  if (loading) return <SearchListSkeleton titleWidth="55%" rows={4} withIcon={false} withAction={false} />;
+  if (loading) return <Loading />;
   if (forbidden)
     return (
       <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
@@ -179,7 +181,7 @@ export default function BrowseRoute() {
           </div>
         )}
       </div>
-      <div style={{ marginTop: 16, padding: 12, background: 'var(--u-good-tint)', border: '1px solid var(--u-good)', borderRadius: 12, fontSize: 12, color: '#065f46' }}>
+      <div style={{ marginTop: 16, padding: 12, background: 'var(--u-good-tint)', border: '1px solid var(--u-good)', borderRadius: 12, fontSize: 12, color: 'var(--u-good)' }}>
         Previews are read-only — nothing is recorded. To edit, open the week and tap Edit in Studio.
       </div>
     </div>

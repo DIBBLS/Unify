@@ -5,7 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Unify Learn — Own your journey</title>
     <meta name="description" content="Unify Learn — lecture-structured notes, EOQ quizzes, XP, streaks and offline reading for your courses." />
-    <meta name="theme-color" content="#10b981" />
+    <meta name="theme-color" content="#50ff90" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f0f0f" media="(prefers-color-scheme: dark)" />
+    <!-- Installable app: Android/Chrome needs the manifest link; iPhone needs the touch icon + web-app tags. -->
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Unify" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Unify Learn" />
     <meta property="og:title" content="Unify Learn — Own your journey" />
@@ -18,14 +26,15 @@
     <meta name="twitter:title" content="Unify Learn — Own your journey" />
     <meta name="twitter:description" content="Lecture-structured notes, EOQ quizzes, XP, streaks and offline reading for your courses." />
     <meta name="twitter:image" content="https://unify-virid.vercel.app/og-image.png" />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2310b981'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='Nunito,Arial,sans-serif' font-weight='800' font-size='34' fill='%23ffffff'%3EU%3C/text%3E%3C/svg%3E" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://unify-api-z4zm.onrender.com" />
     <link rel="preconnect" href="https://xouxvmprrosstzlitcsp.supabase.co" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Playfair+Display:wght@900&display=swap" rel="stylesheet" />
   </head>
   <body>
     <div id="root"></div>

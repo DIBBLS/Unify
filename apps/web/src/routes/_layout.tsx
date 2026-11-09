@@ -5,7 +5,8 @@ import { supabaseBrowser, touchActivity, isSessionExpired, expireSession } from 
 import { pushSupported, enablePush } from '../lib/push';
 import ConfirmModal from '../components/ConfirmModal';
 import Wordmark from '../components/Wordmark';
-import { api } from '../lib/api';
+import { api, type Profile } from '../lib/api';
+import { PICTURE_EVENT, resolvePicture } from '../lib/picture';
 import { recordNav } from '../lib/navHistory';
 import { useFocusMode } from '../lib/focus';
 import OfflineBanner from '../components/OfflineBanner';
@@ -77,6 +78,10 @@ export default function Layout() {
   // the app always renders normally, so focus never leaks elsewhere.
   const focus = useFocusMode();
   const focusOnReader = focus && /^\/learn\/[^/]+\/week\/\d+/.test(pathname);
+  // Immersive screens own the whole viewport: no header, no bottom bar on
+  // phones, no sidebar on desktop. Today that is the note reader in focus mode
+  // and any chat screen.
+  const immersive = focusOnReader || /^\/chat(\/|$)/.test(pathname);
   const navigate = useNavigate();
   // Return memory for every Back button (pathname only — tab switches
   // don't pollute the trail).
@@ -194,12 +199,27 @@ export default function Layout() {
     };
   }, []);
 
-  // Live avatar refresh: profile uploads broadcast so the header chip
-  // updates without a reload (the URL itself cache-busts server-side).
+  // Live picture refresh: an upload or a new Box Boy broadcasts so the header
+  // chip updates without a reload (the URL itself cache-busts server-side).
+  const [picProfile, setPicProfile] = useState<Pick<Profile, 'avatar_url' | 'box_boy_persona'> | null>(null);
   useEffect(() => {
-    const onAvatar = (e: Event) => setAvatar((e as CustomEvent<string>).detail || '');
+    const onAvatar = (e: Event) => {
+      const url = (e as CustomEvent<string>).detail || '';
+      setAvatar(url);
+      setPicProfile((p) => ({ ...(p || {}), avatar_url: url }));
+    };
+    const refresh = () => {
+      api.me().then((m) => {
+        setAvatar(m.avatar || '');
+        setPicProfile({ avatar_url: m.profile?.avatar_url, box_boy_persona: m.profile?.box_boy_persona });
+      }).catch(() => {});
+    };
     window.addEventListener('unify:avatar', onAvatar);
-    return () => window.removeEventListener('unify:avatar', onAvatar);
+    window.addEventListener(PICTURE_EVENT, refresh);
+    return () => {
+      window.removeEventListener('unify:avatar', onAvatar);
+      window.removeEventListener(PICTURE_EVENT, refresh);
+    };
   }, []);
 
   useEffect(() => {
@@ -217,6 +237,7 @@ export default function Layout() {
         const r = me.profile?.role || 'student';
         setRole(r);
         setAvatar(me.avatar || '');
+        setPicProfile({ avatar_url: me.profile?.avatar_url, box_boy_persona: me.profile?.box_boy_persona });
         try {
           localStorage.setItem('unify.role.v1', r);
         } catch {
@@ -301,11 +322,12 @@ export default function Layout() {
 
   const isAuthor = role === 'lecturer' || role === 'contributor';
   const tabs: Tab[] = role === 'lecturer' ? LECTURER_TABS : isAuthor ? AUTHOR_TABS : role === 'admin' ? ADMIN_TABS : STUDENT_TABS;
+  const pic = resolvePicture(picProfile, avatar);
   const showSkeletonNav = authed === null || (authed && !roleLoaded);
 
   return (
     <div style={{ fontFamily: 'var(--font-body)' }}>
-      {!focusOnReader && (
+      {!immersive && !(isDesktop && authed) && (
       <header style={{ display: 'flex', gap: 12, padding: '12px 16px', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, background: 'var(--surface)', zIndex: 10, alignItems: 'center' }}>
         <Link to="/home" style={{ textDecoration: 'none' }} aria-label="Unify Learn home">
           <Wordmark size={20} />
@@ -337,7 +359,7 @@ export default function Layout() {
               width: 32,
               height: 32,
               borderRadius: 9999,
-              background: avatar ? 'transparent' : 'var(--u-green)',
+              background: pic.src ? 'transparent' : 'var(--u-green)',
               color: 'var(--u-black)',
               display: 'flex',
               alignItems: 'center',
@@ -348,7 +370,7 @@ export default function Layout() {
               overflow: 'hidden',
             }}
           >
-            {avatar ? <img src={avatar} alt="" style={{ width: 32, height: 32, objectFit: 'cover' }} /> : (initial || 'U')}
+            {pic.src ? <img src={pic.src} alt="" style={{ width: 32, height: 32, objectFit: 'cover' }} /> : (initial || 'U')}
           </Link>
           </>
         ) : (
@@ -374,32 +396,50 @@ export default function Layout() {
       {/* Content column: desktop zoom targets this element only — the
           sticky header and bottom nav keep their normal size. */}
       <div style={{ display: isDesktop ? 'flex' : 'block', alignItems: 'flex-start', minHeight: isDesktop ? 'calc(100vh - 56px)' : 'auto' }}>
-        {isDesktop && authed && (
+        {isDesktop && authed && !immersive && (
           <aside className="side-pills" aria-label="Main">
-            {showSkeletonNav
-              ? Array.from({ length: skelCount }).map((_, i) => (
-                  <div key={i} style={{ width: 76, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                    <div className="skel" style={{ width: 22, height: 22, borderRadius: 6 }} />
-                    <div className="skel" style={{ width: 44, height: 10, borderRadius: 5 }} />
-                  </div>
-                ))
-              : tabs.map((t) => {
-                  const active = t.match.some((m) => pathname === m || pathname.startsWith(m + '/'));
-                  const Icon = t.icon;
-                  return (
-                    <Link key={t.to} to={t.to} className={`side-pill${active ? ' is-active' : ''}`} aria-current={active ? 'page' : undefined}>
-                      <Icon size={22} />
-                      {t.label}
-                    </Link>
-                  );
-                })}
+            {/* Collapsed icon rail; opens on hover or keyboard focus, closes when left. */}
+            <div className="side-rail">
+              <Link to="/home" className="side-logo" aria-label="Unify Learn home">
+                <span className="side-mark">U</span>
+                <span className="side-label side-brand"><Wordmark size={18} /></span>
+              </Link>
+              {showSkeletonNav
+                ? Array.from({ length: skelCount }).map((_, i) => (
+                    <div key={i} className="side-pill"><div className="skel" style={{ width: 24, height: 24, borderRadius: 6 }} /></div>
+                  ))
+                : tabs.map((t) => {
+                    const active = t.match.some((m) => pathname === m || pathname.startsWith(m + '/'));
+                    const Icon = t.icon;
+                    return (
+                      <Link key={t.to} to={t.to} className={`side-pill${active ? ' is-active' : ''}`} aria-current={active ? 'page' : undefined} aria-label={t.label}>
+                        <span className="side-ico"><Icon size={22} /></span>
+                        <span className="side-label">{t.label}</span>
+                      </Link>
+                    );
+                  })}
+              <span className="side-spacer" />
+              <Link to="/notifications" className="side-pill" aria-label="Notifications">
+                <span className="side-ico">
+                  <Bell size={20} />
+                  {unread > 0 && <span className="side-badge">{unread > 9 ? '9+' : unread}</span>}
+                </span>
+                <span className="side-label">Notifications</span>
+              </Link>
+              <Link to="/me" className="side-pill side-me" aria-label="Me">
+                <span className="side-ico side-avatar">{pic.src ? <img src={pic.src} alt="" /> : (initial || 'U')}</span>
+                <span className="side-label">Me</span>
+              </Link>
+            </div>
           </aside>
         )}
         <main id="unify-content" style={{ flex: 1, minWidth: 0 }}>
-          <Outlet />
+          <div key={pathname} className="page-enter">
+            <Outlet />
+          </div>
         </main>
       </div>
-      {!focusOnReader && !isDesktop && (
+      {!immersive && !isDesktop && (
       <nav className="bottomnav" onMouseEnter={() => setNavHidden(false)} style={{ position: 'fixed', bottom: 0, left: '50%', transform: `translateX(-50%)${navHidden ? ' translateY(calc(100% - 14px))' : ''}`, transition: 'transform .3s ease', width: '100%', maxWidth: 'var(--shell, 480px)', display: 'flex', background: 'var(--surface)', borderTop: '1px solid var(--border)', padding: '8px 0 calc(8px + env(safe-area-inset-bottom))' }}>
         {showSkeletonNav
           ? Array.from({ length: skelCount }).map((_, i) => (
