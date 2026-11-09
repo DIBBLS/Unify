@@ -118,10 +118,10 @@ export function Wordmark({ size = 16, color }: { size?: number; color?: string }
 
 export function AppIcon({ size = 120 }: { size?: number }) {
   return (
-    <div style={{ width: size, height: size, borderRadius: size * 0.24, background: 'var(--u-green)', display: 'grid', placeItems: 'center' }}>
-      <span style={{ fontFamily: 'var(--font-wordmark)', fontWeight: 900, fontSize: size * 0.58, lineHeight: 1, color: '#0a0a0a' }}>U<i style={{ fontStyle: 'normal', color: '#0a0a0a' }}>.</i></span>
+    <div style={{ width: size, height: size, borderRadius: size * 0.22, background: '#0a0a0a', display: 'grid', placeItems: 'center' }}>
+      <span style={{ fontFamily: 'var(--font-body)', fontWeight: 900, fontSize: size * 0.56, lineHeight: 1, color: 'var(--u-green)' }}>U.</span>
     </div>
-  );
+  )
 }
 
 /* ---------- Speech bubble ---------- */
