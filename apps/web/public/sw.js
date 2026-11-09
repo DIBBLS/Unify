@@ -5,7 +5,10 @@
 // saw (per-user keys: phones are shared, one student must never be handed
 // another's data). Live endpoints (attendance sessions, admin) are never
 // cached. Writes (POST/PUT/DELETE) always bypass.
-const CACHE = 'unify-app-v14';
+// The build id is stamped in at build time (vite.config.ts), so every release
+// is a new worker with its own cache and the previous build's cache is deleted.
+const BUILD = '__BUILD_ID__';
+const CACHE = 'unify-app-' + BUILD;
 const CONTENT = 'unify-content-v1';
 const API_CACHE = 'unify-api-v1';
 const API_WAIT_MS = 4000;
