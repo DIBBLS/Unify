@@ -38,7 +38,10 @@ export default function ScannerRoute() {
     (async () => {
       try {
         const me = await api.me();
-        const list = me.isAdmin ? (await api.courses()).map((c) => c.code) : (await api.teaching()).courses;
+        const isHoc = !!(me.profile as unknown as { is_hoc?: boolean } | null)?.is_hoc;
+        const taught = me.isAdmin ? (await api.courses()).map((c) => c.code) : (await api.teaching()).courses;
+        // Class reps can also run attendance for the courses they take.
+        const list = [...new Set([...taught, ...(isHoc ? (me.courses || []).map((x) => String(x)) : [])])];
         setCourses(list);
         if (list[0]) setCourse(list[0]);
       } catch (e) {
@@ -61,11 +64,13 @@ export default function ScannerRoute() {
   // Load on course change; poll while a session is open.
   useEffect(() => { setReg(null); void refresh(); }, [refresh]);
   const open = !!reg?.session?.open;
+  // Lecturer and class rep share one session per course, so keep checking even
+  // when nothing is open: the other person may start it any moment.
   useEffect(() => {
-    if (!open) return;
-    const t = setInterval(() => void refresh(), 5000);
+    if (!course) return;
+    const t = setInterval(() => { if (document.visibilityState === 'visible') void refresh(); }, open ? 5000 : 8000);
     return () => clearInterval(t);
-  }, [open, refresh]);
+  }, [open, course, refresh]);
 
   // Fetch the new code the moment the current one rotates.
   const rotatesAt = reg?.session?.rotatesAt;
@@ -122,14 +127,18 @@ export default function ScannerRoute() {
 
       {open && reg?.session ? (
         <Card tone="dark" style={{ alignItems: 'center', textAlign: 'center', marginTop: 16 }}>
-          <div className="eyebrow" style={{ opacity: 0.7 }}>Scan the QR or enter the code</div>
+          {reg.session.startedBy && (
+            <Pill tone="amber">{reg.session.startedBy.mine ? 'You started this' : `Started by ${reg.session.startedBy.name}${reg.session.startedBy.role ? ` (${reg.session.startedBy.role})` : ''}`} · shared live</Pill>
+          )}
+          <div className="eyebrow" style={{ opacity: 0.7 }}>Students scan this QR in the app</div>
           <div style={{ background: '#fff', padding: 12, borderRadius: 16, lineHeight: 0 }} aria-label="Attendance QR code">
-            <QRCodeSVG value={`${window.location.origin}/attendance/pass?c=${reg.session.code}`} size={200} level="M" />
+            <QRCodeSVG value={`${window.location.origin}/attendance/pass?c=${reg.session.code}`} size={260} level="M" />
           </div>
-          <div style={{ fontSize: 48, fontWeight: 900, letterSpacing: 10, fontFamily: 'var(--font-body)', color: 'var(--u-green)' }} aria-label="Attendance code">
+          <div className="t-13" style={{ opacity: 0.7 }}>QR changes in {rotateIn}s</div>
+          <div className="t-12" style={{ opacity: 0.6, marginTop: 2 }}>No camera? Students can type this code instead</div>
+          <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: 6, fontFamily: 'var(--font-body)', color: 'var(--u-green)' }} aria-label="Attendance code">
             {reg.session.code}
           </div>
-          <div className="t-13" style={{ opacity: 0.7 }}>Changes in {rotateIn}s</div>
           <Pill tone="amber">Closes in {mm}:{ss}</Pill>
           <div className="t-15" style={{ marginTop: 6 }}>{reg.present.length} of {reg.enrolled} present</div>
           <button className="btn btn--white" disabled={busy} onClick={() => void end()} style={{ marginTop: 10 }}>End session</button>
