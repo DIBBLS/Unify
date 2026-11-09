@@ -1,14 +1,15 @@
-/* Unify Learn design system — two looks, one token spine.
-   CLASSIC (default, the previous app): white surfaces, Nunito, emerald.
-   STORY (opt-in, from the MEE352 foundation): warm paper, Playfair + DM
-   Sans, editorial hero. [data-design] on <html> picks the look;
-   [data-theme="dark"] re-skins either. New interactive pieces (recall
-   deck, EOQ exam, segbar, modal, bursts) are shared by both. */
+/* Unify Learn legacy component styles. Colors come from the redesign
+   --u-* tokens via the aliases below; [data-theme="dark"] re-skins them. */
+/* LEGACY VARIABLE ALIASES — every old token below resolves to a redesign
+   --u-* token (styles/redesign/tokens.css, dark values in redesign/index.css),
+   so unmigrated screens follow the redesign and dark mode automatically.
+   New code should use --u-* directly. */
 :root{
-  --bg:#ffffff;--surface:#ffffff;--surface2:#f7f7f7;--border:#e5e5e5;
-  --text:#3c3c3c;--text2:#777777;--text3:#afafaf;
-  --green:#10b981;--green-deep:#059669;--green-bg:#ecfdf5;
-  --brand:#10b981;--brand-deep:#059669;--brand-pale:#d1fae5;
+  --bg:var(--u-page);--surface:var(--u-card);--surface2:var(--u-card-2);--border:var(--u-border);
+  --text:var(--u-text);--text2:var(--u-text-2);--text3:var(--u-text-3);
+  /* success/"done" semantics (amber is reserved for the primary CTA) */
+  --green:var(--u-good-2);--green-deep:var(--u-good);--green-bg:var(--u-good-tint);
+  --brand:var(--u-amber);--brand-deep:var(--u-warn-ink);--brand-pale:var(--u-warn-tint);
   --fd:'Nunito',system-ui,sans-serif;--fb:'Nunito',system-ui,sans-serif;
   --radius:12px;--shadow:none;
   --font-body:'Nunito',system-ui,sans-serif;
@@ -17,26 +18,7 @@
   --shell:480px;
 }
 @media(min-width:768px){:root{--shell:720px}}
-[data-design="story"]{
-  --bg:#f5f4f0;--surface:#ffffff;--surface2:#f8f7f3;--border:#e0deda;
-  --text:#0a0a0a;--text2:#555555;--text3:#999999;
-  --green:#4ade80;--green-deep:#16a34a;--green-bg:rgba(74,222,128,.1);
-  --fd:'Playfair Display',Georgia,serif;--fb:'DM Sans','Nunito',system-ui,sans-serif;
-  --radius:12px;--shadow:0 2px 12px rgba(0,0,0,.06);
-  --font-body:'DM Sans','Nunito',system-ui,sans-serif;
-}
-[data-theme="dark"]{
-  color-scheme:dark;
-  --bg:#101418;--surface:#1a1f27;--surface2:#161b22;--border:#2a2f38;
-  --text:#f3f4f6;--text2:#9ca3af;--text3:#6b7280;
-  --green-bg:rgba(16,185,129,.12);
-  --shadow:0 2px 12px rgba(0,0,0,.4);
-}
-[data-design="story"][data-theme="dark"]{
-  --bg:#0f0f0f;--surface:#1a1a1a;--surface2:#222222;--border:#2a2a2a;
-  --text:#f0efeb;--text2:#aaaaaa;--text3:#666666;
-  --green-bg:rgba(74,222,128,.12);
-}
+[data-theme="dark"]{--shadow:0 2px 12px rgba(0,0,0,.4)}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased;padding-bottom:env(safe-area-inset-bottom);transition:background .3s,color .3s}
@@ -220,7 +202,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-si
 .eoq-submit-hint{font-size:12px;color:rgba(240,239,235,.5);margin-top:14px;text-align:center}
 /* BUG-014: Check score / Try again styled like every other primary
 button (was an unstyled plain box on student + Studio preview). */
-.eoq-submit-btn{font-family:var(--font-body);font-size:14px;font-weight:800;padding:14px 22px;border-radius:14px;border:none;border-bottom:4px solid #059669;background:#10b981;color:#fff;cursor:pointer;display:flex;justify-content:center;gap:8px;align-items:center}
+.eoq-submit-btn{font-family:var(--font-body);font-size:14px;font-weight:800;padding:14px 22px;border-radius:14px;border:none;border-bottom:4px solid #c69a1a;background:var(--u-amber);color:var(--u-black);cursor:pointer;display:flex;justify-content:center;gap:8px;align-items:center}
 .eoq-submit-btn:active{transform:translateY(2px);border-bottom-width:0}
 .eoq-result{margin-top:24px;padding:22px;border-radius:10px;text-align:center}
 .eoq-result.pass{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25)}
@@ -244,9 +226,9 @@ button (was an unstyled plain box on student + Studio preview). */
 .modal-body{font-size:13px;color:var(--text2);line-height:1.6}
 .modal-actions{display:flex;gap:10px;margin-top:18px}
 .modal-actions button{flex:1;padding:13px;border-radius:14px;font-weight:800;font-size:14px}
-.modal-cancel{background:var(--surface2);border:1px solid var(--border);color:var(--text2)}
-.modal-danger{background:#dc2626;border:none;border-bottom:3px solid #991b1b;color:#fff}
-.modal-go{background:var(--green-deep);border:none;border-bottom:3px solid #14532d;color:#fff}
+.modal-cancel{background:var(--surface2);border:1px solid var(--border);border-bottom:4px solid var(--border);color:var(--text2)}
+.modal-danger{background:#dc2626;border:none;border-bottom:4px solid #991b1b;color:#fff}
+.modal-go{background:var(--u-amber);border:none;border-bottom:4px solid #c69a1a;color:var(--u-black)}
 
 /* XP CELEBRATION BURST */
 .xp-burst{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);z-index:60;pointer-events:none;text-align:center;animation:burst-rise 1.5s ease forwards}
@@ -259,9 +241,8 @@ button (was an unstyled plain box on student + Studio preview). */
 @keyframes listen-pulse{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.35)}50%{box-shadow:0 0 0 8px rgba(16,185,129,0)}}
 
 /* Buttons / inputs / entrances */
-.btn-primary{background:linear-gradient(135deg,#34d399 0%,#10b981 55%,#059669 100%);color:#fff;border:none;border-bottom:4px solid var(--brand-deep);border-radius:16px;padding:14px 24px;font-family:var(--font-body);font-weight:800;font-size:16px;cursor:pointer;transition:transform .12s}
+.btn-primary{background:var(--u-amber);color:var(--u-black);border:none;border-bottom:4px solid #c69a1a;border-radius:16px;padding:14px 24px;font-family:var(--font-body);font-weight:800;font-size:16px;cursor:pointer;transition:transform .12s}
 .btn-primary:active{transform:translateY(4px);border-bottom-width:0}
-[data-design="story"] .btn-primary{background:linear-gradient(135deg,#4ade80 0%,#16a34a 100%);color:#06281a}
 .btn-secondary{background:var(--surface);color:var(--text2);border:2px solid var(--border);border-bottom:4px solid var(--border);border-radius:16px;padding:14px 24px;font-weight:700}
 .progress-track{height:16px;background:var(--border);border-radius:9999px;overflow:hidden}
 .progress-fill{height:100%;background:linear-gradient(90deg,#34d399,#059669);border-radius:9999px;transition:width .32s ease-out}

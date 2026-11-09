@@ -104,8 +104,8 @@ export default function ZoomBar() {
           cursor: 'pointer',
           fontSize: 12,
           fontWeight: 800,
-          background: focus ? '#ecfdf5' : 'transparent',
-          color: focus ? '#059669' : 'var(--text2)',
+          background: focus ? 'var(--u-good-tint)' : 'transparent',
+          color: focus ? 'var(--u-good)' : 'var(--text2)',
         }}
       >
         {focus ? <Minimize2 size={14} /> : <Maximize2 size={14} />} {focus ? 'Exit' : 'Focus'}

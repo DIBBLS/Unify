@@ -69,7 +69,7 @@ export default function BrowseRoute() {
   if (forbidden)
     return (
       <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
-        <BackButton to="/dashboard" />
+        <BackButton to="/home" />
         <ErrorState title="Authors only" message="This browser is for lecturers and contributors." />
       </div>
     );
@@ -79,7 +79,7 @@ export default function BrowseRoute() {
 
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 100px' }}>
-      <BackButton to="/dashboard" />
+      <BackButton to="/home" />
       <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, display: 'flex', gap: 8, alignItems: 'center' }}>
         <LibraryBig size={22} color="#059669" /> Browse notes
       </h1>
@@ -87,19 +87,19 @@ export default function BrowseRoute() {
         {isAuthor && level ? `${level} · ` : ''}{scoped.length} courses · {totalWeeks} weeks · {totalTopics} topics with notes
       </div>
       {isContrib && enrolled.size === 0 && (
-        <div style={{ marginTop: 12, padding: 12, background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, fontSize: 12, color: '#92400e', display: 'flex', gap: 8 }}>
+        <div style={{ marginTop: 12, padding: 12, background: 'var(--u-warn-tint)', border: '1px solid #fde68a', borderRadius: 12, fontSize: 12, color: 'var(--u-warn-ink)', display: 'flex', gap: 8 }}>
           <Info size={16} style={{ flexShrink: 0, marginTop: 1 }} />
           <span>No courses assigned to you yet — ask an admin to assign your two courses.</span>
         </div>
       )}
       {isAuthor && !isContrib && !level && (
-        <div style={{ marginTop: 12, padding: 12, background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, fontSize: 12, color: '#92400e', display: 'flex', gap: 8 }}>
+        <div style={{ marginTop: 12, padding: 12, background: 'var(--u-warn-tint)', border: '1px solid #fde68a', borderRadius: 12, fontSize: 12, color: 'var(--u-warn-ink)', display: 'flex', gap: 8 }}>
           <Info size={16} style={{ flexShrink: 0, marginTop: 1 }} />
-          <span>No contributing level set — showing everything. Set it in Profile so this narrows to your level.</span>
+          <span>No contributing level set — showing everything. Set it in Me so this narrows to your level.</span>
         </div>
       )}
       {error && (
-        <div style={{ marginTop: 12, padding: 12, background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 12, fontSize: 13, color: '#991b1b' }}>
+        <div style={{ marginTop: 12, padding: 12, background: 'var(--u-bad-tint)', border: '1px solid #fecaca', borderRadius: 12, fontSize: 13, color: 'var(--u-red)' }}>
           {error}
         </div>
       )}
@@ -158,7 +158,7 @@ export default function BrowseRoute() {
                             <Link
                               key={t.topic}
                               to={`/learn/${encodeURIComponent(c.code)}/week/${w.week}?preview=1&t=${t.topic}`}
-                              style={{ display: 'inline-flex', gap: 4, alignItems: 'center', fontSize: 12, fontWeight: 700, color: '#059669', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 9999, padding: '4px 10px', textDecoration: 'none' }}
+                              style={{ display: 'inline-flex', gap: 4, alignItems: 'center', fontSize: 12, fontWeight: 700, color: '#059669', background: 'var(--u-good-tint)', border: '1px solid var(--u-good)', borderRadius: 9999, padding: '4px 10px', textDecoration: 'none' }}
                               title={t.title || `Topic ${t.topic}`}
                             >
                               <BookOpen size={12} /> T{t.topic} · v{t.versions}
@@ -179,7 +179,7 @@ export default function BrowseRoute() {
           </div>
         )}
       </div>
-      <div style={{ marginTop: 16, padding: 12, background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 12, fontSize: 12, color: '#065f46' }}>
+      <div style={{ marginTop: 16, padding: 12, background: 'var(--u-good-tint)', border: '1px solid var(--u-good)', borderRadius: 12, fontSize: 12, color: '#065f46' }}>
         Previews are read-only — nothing is recorded. To edit, open the week and tap Edit in Studio.
       </div>
     </div>

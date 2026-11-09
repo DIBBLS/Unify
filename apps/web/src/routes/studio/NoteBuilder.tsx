@@ -39,7 +39,7 @@ const card = {
   marginBottom: 12,
 } as const;
 const sectionTitle = { fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 16, margin: '0 0 8px' } as const;
-const hint = { fontSize: 11, color: '#b45309', fontWeight: 700, marginTop: 6 } as const;
+const hint = { fontSize: 11, color: 'var(--u-warn-ink)', fontWeight: 700, marginTop: 6 } as const;
 const iconBtn = {
   padding: 6,
   borderRadius: 8,
@@ -48,12 +48,12 @@ const iconBtn = {
   color: 'var(--text2)',
   display: 'flex',
 } as const;
-const dangerBtn = { ...iconBtn, color: '#991b1b', border: '1px solid #fecaca' } as const;
+const dangerBtn = { ...iconBtn, color: 'var(--u-red)', border: '1px solid #fecaca' } as const;
 const addBtn = {
   padding: '8px 14px',
   borderRadius: 9999,
-  background: '#ecfdf5',
-  border: '1px solid #a7f3d0',
+  background: 'var(--u-good-tint)',
+  border: '1px solid var(--u-good)',
   color: '#059669',
   fontWeight: 800,
   fontSize: 12,
@@ -366,7 +366,7 @@ function DiagramImage({
           <img src={imageRef} alt="Diagram preview" style={{ maxWidth: '100%', borderRadius: 8, border: '1px solid var(--border)' }} />
           <button
             onClick={() => onChange(null)}
-            style={{ marginTop: 6, background: 'none', border: 'none', color: '#991b1b', fontSize: 12, fontWeight: 700, textDecoration: 'underline' }}
+            style={{ marginTop: 6, background: 'none', border: 'none', color: 'var(--u-red)', fontSize: 12, fontWeight: 700, textDecoration: 'underline' }}
           >
             Remove image
           </button>
@@ -404,7 +404,7 @@ function DiagramImage({
               Use
             </button>
           </div>
-          {error && <div style={{ fontSize: 12, color: '#991b1b', marginTop: 6 }}>{error}</div>}
+          {error && <div style={{ fontSize: 12, color: 'var(--u-red)', marginTop: 6 }}>{error}</div>}
         </>
       )}
     </div>
@@ -443,7 +443,7 @@ function EquationInput({ value, onChange }: { value: string; onChange: (v: strin
                 if (parsed) openVisual(parsed);
                 else setTooHard(true);
               }}
-              style={{ flex: 1, padding: 10, borderRadius: 12, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '3px solid #059669', fontWeight: 800, fontSize: 13 }}
+              style={{ flex: 1, padding: 10, borderRadius: 12, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '3px solid #c69a1a', fontWeight: 800, fontSize: 13 }}
             >
               {value.trim() ? 'Open visual builder' : 'Build equation visually'}
             </button>
@@ -588,7 +588,7 @@ function BlockEditor({
   );
   if (block.type === 'paragraph') {
     return (
-      <div style={{ ...card, background: '#fafafa' }}>
+      <div style={{ ...card, background: 'var(--surface2)' }}>
         {head('Text')}
         <RichArea value={block.text} onChange={(v) => onChange({ ...block, text: v })} rows={3} placeholder="Paragraph text — select words and hit B / I…" ariaLabel="Paragraph text" />
         {block.text.trim() && (
@@ -602,7 +602,7 @@ function BlockEditor({
   }
   if (block.type === 'bullets') {
     return (
-      <div style={{ ...card, background: '#fafafa' }}>
+      <div style={{ ...card, background: 'var(--surface2)' }}>
         {head('Bullets')}
         <RichArea
           value={block.items.join('\n')}
@@ -616,7 +616,7 @@ function BlockEditor({
   }
   if (block.type === 'formula') {
     return (
-      <div style={{ ...card, background: '#fafafa' }}>
+      <div style={{ ...card, background: 'var(--surface2)' }}>
         {head('Formula')}
         <label style={label}>Label<input value={block.label} onChange={(e) => onChange({ ...block, label: e.target.value })} placeholder="e.g. Arithmetic mean" style={input} /></label>
         {/* NOT a <label>: a tap on a non-interactive box inside a <label>
@@ -637,7 +637,7 @@ function BlockEditor({
   if (block.type === 'symbol') {
     const glyphs = ['α', 'β', 'γ', 'δ', 'ε', 'θ', 'λ', 'μ', 'ρ', 'σ', 'φ', 'ω', 'Ω', 'π', 'Δ'];
     return (
-      <div style={{ ...card, background: '#fafafa' }}>
+      <div style={{ ...card, background: 'var(--surface2)' }}>
         {head('Symbol')}
         <label style={label}>Symbol<input value={block.symbol} onChange={(e) => onChange({ ...block, symbol: e.target.value })} placeholder="e.g. Ns — or tap a Greek letter below" style={input} /></label>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }} role="toolbar" aria-label="Greek letters">
@@ -660,7 +660,7 @@ function BlockEditor({
   }
   if (block.type === 'insight') {
     return (
-      <div style={{ ...card, background: '#fafafa' }}>
+      <div style={{ ...card, background: 'var(--surface2)' }}>
         {head('Insight')}
         <RichArea value={block.text} onChange={(v) => onChange({ ...block, text: v })} rows={2} placeholder="Key insight, common mistake…" ariaLabel="Insight text" />
       </div>
@@ -668,7 +668,7 @@ function BlockEditor({
   }
   if (block.type === 'analogy') {
     return (
-      <div style={{ ...card, background: '#fafafa' }}>
+      <div style={{ ...card, background: 'var(--surface2)' }}>
         {head('Analogy')}
         <RichArea value={block.text} onChange={(v) => onChange({ ...block, text: v })} rows={2} placeholder="Real-world analogy…" ariaLabel="Analogy text" />
       </div>
@@ -676,7 +676,7 @@ function BlockEditor({
   }
   if (block.type === 'diagram') {
     return (
-      <div style={{ ...card, background: '#fafafa' }}>
+      <div style={{ ...card, background: 'var(--surface2)' }}>
         {head('Diagram')}
         <label style={label}>Caption<input value={block.caption} onChange={(e) => onChange({ ...block, caption: e.target.value })} placeholder="Fig 2.1 — …" style={input} /></label>
         <label style={{ ...label, marginTop: 8 }}>Description<textarea value={block.description} onChange={(e) => onChange({ ...block, description: e.target.value })} rows={2} placeholder="What the figure shows…" style={area} /></label>
@@ -691,7 +691,7 @@ function BlockEditor({
   }
   // workedExample: advanced shape — preserved read-only, deletable.
   return (
-    <div style={{ ...card, background: '#fafafa' }}>
+    <div style={{ ...card, background: 'var(--surface2)' }}>
       <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
         <span style={{ fontSize: 12, fontWeight: 800 }}>Worked example (advanced — kept as-is)</span>
         <span style={{ flex: 1 }} />
@@ -718,7 +718,7 @@ function QuestionEditor({
   onDelete: () => void;
 }) {
   return (
-    <div style={{ ...card, background: '#fafafa' }}>
+    <div style={{ ...card, background: 'var(--surface2)' }}>
       <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8 }}>
         {lockType ? (
           <span style={{ fontSize: 11, fontWeight: 800, color: '#059669' }}>{lockType.toUpperCase()} (fixed)</span>
@@ -792,12 +792,12 @@ function TopicAudio({ course, week, audioRef, onChange }: { course: string; week
           <input type="file" accept="audio/mpeg,audio/mp4,audio/wav,audio/ogg,.mp3,.m4a,.wav,.ogg" disabled={busy} onChange={(e) => void pick(e.target.files?.[0] || null)} style={{ display: 'none' }} />
         </label>
         {audioRef && (
-          <button onClick={() => onChange(null)} style={{ padding: '8px 12px', borderRadius: 10, background: 'var(--surface)', border: '1px solid #fecaca', color: '#991b1b', fontWeight: 700, fontSize: 12 }}>
+          <button onClick={() => onChange(null)} style={{ padding: '8px 12px', borderRadius: 10, background: 'var(--surface)', border: '1px solid #fecaca', color: 'var(--u-red)', fontWeight: 700, fontSize: 12 }}>
             Remove
           </button>
         )}
       </div>
-      {msg && <div style={{ fontSize: 12, color: '#991b1b', marginTop: 6 }}>{msg}</div>}
+      {msg && <div style={{ fontSize: 12, color: 'var(--u-red)', marginTop: 6 }}>{msg}</div>}
     </div>
   );
 }
@@ -941,7 +941,7 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
             <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 6 }}>Recall cards ({(t.activeRecall || []).length})</div>
             {(t.activeRecall || []).length === 0 && <div style={hint}>Add at least 1 recall card.</div>}
             {(t.activeRecall || []).map((c, ci) => (
-              <div key={ci} style={{ ...card, background: '#fafafa' }}>
+              <div key={ci} style={{ ...card, background: 'var(--surface2)' }}>
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8 }}>
                   <span style={{ fontSize: 11, fontWeight: 800, color: '#059669' }}>CARD {ci + 1}</span>
                   <span style={{ flex: 1 }} />
@@ -994,17 +994,17 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
         </div>
       ))}
 
-      <button onClick={() => setTopics(renumber([...note.topics, blankTopic(note.topics.length + 1)]))} style={{ width: '100%', padding: 14, background: 'var(--surface)', border: '1px dashed #a7f3d0', borderRadius: 12, color: '#059669', fontWeight: 800, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
+      <button onClick={() => setTopics(renumber([...note.topics, blankTopic(note.topics.length + 1)]))} style={{ width: '100%', padding: 14, background: 'var(--surface)', border: '1px dashed var(--u-good)', borderRadius: 12, color: '#059669', fontWeight: 800, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
         <Plus size={16} /> Add topic
       </button>
 
       <div style={{ ...card, marginTop: 12 }}>
         <h3 style={sectionTitle}>End-of-week quiz</h3>
-        <div style={{ fontSize: 12, fontWeight: 700, color: mcqCount === 8 && fitbCount === 2 ? '#059669' : '#b45309', marginBottom: 8 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: mcqCount === 8 && fitbCount === 2 ? '#059669' : 'var(--u-warn-ink)', marginBottom: 8 }}>
           {note.eoq.questions.length}/10 questions · MCQ {mcqCount}/8 · Fill-in {fitbCount}/2
         </div>
         {note.eoq.questions.map((q, qi) => (
-          <div key={qi} style={{ ...card, background: '#fafafa' }}>
+          <div key={qi} style={{ ...card, background: 'var(--surface2)' }}>
             <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8 }}>
               <span style={{ fontSize: 11, fontWeight: 800, color: '#059669' }}>Q{qi + 1}</span>
               <Drop

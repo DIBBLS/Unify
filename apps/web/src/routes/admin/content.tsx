@@ -59,7 +59,7 @@ export default function AdminContentRoute() {
   if (forbidden)
     return (
       <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
-        <BackButton to="/dashboard" />
+        <BackButton to="/home" />
         <ErrorState
           title="Admin only"
           message="This page is for platform admins."
@@ -72,7 +72,7 @@ export default function AdminContentRoute() {
 
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 100px' }}>
-      <BackButton to="/dashboard" />
+      <BackButton to="/home" />
       <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, display: 'flex', gap: 8, alignItems: 'center' }}>
         <Layers size={22} color="#059669" /> All content
       </h1>
@@ -80,7 +80,7 @@ export default function AdminContentRoute() {
         {courses.length} courses · {totalWeeks} weeks · {totalTopics} topics with notes
       </div>
       {error && (
-        <div style={{ marginTop: 12, padding: 12, background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 12, fontSize: 13, color: '#991b1b' }}>
+        <div style={{ marginTop: 12, padding: 12, background: 'var(--u-bad-tint)', border: '1px solid #fecaca', borderRadius: 12, fontSize: 13, color: 'var(--u-red)' }}>
           {error}
         </div>
       )}
@@ -140,7 +140,7 @@ export default function AdminContentRoute() {
                             <Link
                               key={`${t.lecture || 1}-${t.topic}`}
                               to={`/learn/${encodeURIComponent(c.code)}/week/${w.week}?preview=1&t=${t.topic}${t.lecture && t.lecture > 1 ? `&c=${t.lecture}` : ''}`}
-                              style={{ display: 'inline-flex', gap: 4, alignItems: 'center', fontSize: 12, fontWeight: 700, color: '#059669', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 9999, padding: '4px 10px', textDecoration: 'none' }}
+                              style={{ display: 'inline-flex', gap: 4, alignItems: 'center', fontSize: 12, fontWeight: 700, color: '#059669', background: 'var(--u-good-tint)', border: '1px solid var(--u-good)', borderRadius: 9999, padding: '4px 10px', textDecoration: 'none' }}
                               title={t.title || `Lecture ${t.lecture || 1} Topic ${t.topic}`}
                             >
                               <BookOpen size={12} /> L{t.lecture || 1}·T{t.topic} · v{t.versions}
@@ -161,7 +161,7 @@ export default function AdminContentRoute() {
           </div>
         )}
       </div>
-      <div style={{ marginTop: 16, padding: 12, background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, fontSize: 12, color: '#92400e', display: 'flex', gap: 8 }}>
+      <div style={{ marginTop: 16, padding: 12, background: 'var(--u-warn-tint)', border: '1px solid #fde68a', borderRadius: 12, fontSize: 12, color: 'var(--u-warn-ink)', display: 'flex', gap: 8 }}>
         <ShieldAlert size={16} style={{ flexShrink: 0, marginTop: 1 }} />
         <span>Reading as admin never writes progress or XP and never moves your Resume bookmark.</span>
       </div>

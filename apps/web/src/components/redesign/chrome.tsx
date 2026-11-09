@@ -60,7 +60,7 @@ export function TabBar({ active, role = 'student', classBadge = 0 }: { active: T
       style={{
         position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
         width: '100%', maxWidth: 'var(--shell)', height: 'calc(var(--tabbar-h) + env(safe-area-inset-bottom))',
-        background: '#fff', borderTop: '1px solid var(--u-border)',
+        background: 'var(--u-card)', borderTop: '1px solid var(--u-border)',
         display: 'flex', justifyContent: 'space-around', alignItems: 'flex-start', padding: '11px 12px 0', zIndex: 30,
       }}
     >
@@ -107,7 +107,7 @@ export function Sheet({ children, height }: { children: ReactNode; height?: numb
         className="stack"
         style={{
           position: 'fixed', left: '50%', bottom: 0, transform: 'translateX(-50%)', width: '100%', maxWidth: 'var(--shell)',
-          minHeight: height, background: '#fff', borderRadius: '32px 32px 0 0', padding: '12px 16px calc(24px + env(safe-area-inset-bottom))', gap: 14, zIndex: 41,
+          minHeight: height, background: 'var(--u-card)', borderRadius: '32px 32px 0 0', padding: '12px 16px calc(24px + env(safe-area-inset-bottom))', gap: 14, zIndex: 41,
         }}
       >
         <span style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, background: '#dddbd5', marginBottom: 6 }} />

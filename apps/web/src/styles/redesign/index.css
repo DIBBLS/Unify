@@ -12,7 +12,7 @@
    USER DECISIONS (Nov 2, 2026):
    - Typography: HYBRID — Keep Playfair/DM Sans/Nunito, add Bowlby for new screens
    - Primary CTA: AMBER #fbbf24 (replaces emerald)
-   - Dark mode: KEEP LIVE (both Classic & Story variants)
+   - Dark mode: KEEP LIVE (Classic/Story design switch removed; Dark/Light only)
    - Avatars: Box Boy personas (5) + optional photo upload in Settings
 */
 
@@ -34,6 +34,11 @@
   --u-text-2: #aaaaaa;
   --u-text-3: #666666;
   --u-chip: #2a2a2a;
+  --u-good: #4ade80;
+  --u-good-2: #4ade80;
+  --u-good-ink: #bbf7d0;
+  --u-warn-ink: #fbbf24;
+  --u-red: #f87171;
   
   /* Amber stays same (high contrast on dark) */
   /* Green dims slightly */
@@ -41,17 +46,6 @@
   --u-good-tint: rgba(74, 222, 128, 0.15);
   --u-warn-tint: rgba(251, 191, 36, 0.15);
   --u-bad-tint: rgba(220, 38, 38, 0.15);
-}
-
-/* Story design variant support */
-[data-design="story"] {
-  /* Story keeps its own aesthetic, just with amber CTA */
-  --u-page: #f5f4f0;
-}
-
-[data-design="story"][data-theme="dark"] {
-  --u-page: #0f0f0f;
-  --u-card: #1a1a1a;
 }
 
 /* Utility: Force amber CTA on specific elements (migration helper) */

@@ -142,8 +142,9 @@ export default function InstallBar() {
     padding: '7px 14px',
     borderRadius: 9999,
     border: 'none',
+    borderBottom: '3px solid #c69a1a',
     background: 'var(--u-amber)',
-    color: '#fff',
+    color: 'var(--u-black)',
     fontWeight: 800,
     fontSize: 12,
     cursor: 'pointer',
@@ -170,7 +171,7 @@ export default function InstallBar() {
       {stage === 'bar' && (
         <div style={{ ...card, width: 300 }}>
           <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-            <span style={{ color: '#059669', marginTop: 1 }}>
+            <span style={{ color: 'var(--u-good)', marginTop: 1 }}>
               <ArrowDownToLine size={18} />
             </span>
             <div style={{ flex: 1 }}>

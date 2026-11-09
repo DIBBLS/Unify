@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, BookOpen, Search, User, PenTool, Bell } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, Search, User, PenTool, Bell } from 'lucide-react';
 import { supabaseBrowser, touchActivity, isSessionExpired, expireSession } from '../lib/supabase';
 import { pushSupported, enablePush } from '../lib/push';
 import ConfirmModal from '../components/ConfirmModal';
@@ -19,25 +19,25 @@ type Tab = {
 };
 
 const STUDENT_TABS: Tab[] = [
-  { to: '/dashboard', label: 'Home', icon: LayoutDashboard, match: ['/dashboard'] },
-  { to: '/course', label: 'Timetable', icon: BookOpen, match: ['/course', '/learn'] },
+  { to: '/home', label: 'Home', icon: LayoutDashboard, match: ['/home'] },
+  { to: '/timetable', label: 'Timetable', icon: CalendarDays, match: ['/timetable', '/courses', '/learn'] },
   { to: '/class', label: 'Class', icon: Search, match: ['/class'] },
-  { to: '/profile', label: 'Me', icon: User, match: ['/profile'] },
+  { to: '/me', label: 'Me', icon: User, match: ['/me'] },
 ];
 
 const AUTHOR_TABS: Tab[] = [
-  { to: '/dashboard', label: 'Home', icon: LayoutDashboard, match: ['/dashboard'] },
-  { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio', '/browse', '/classes'] },
-  { to: '/profile', label: 'Me', icon: User, match: ['/profile'] },
+  { to: '/home', label: 'Home', icon: LayoutDashboard, match: ['/home'] },
+  { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio', '/browse', '/my-classes'] },
+  { to: '/me', label: 'Me', icon: User, match: ['/me'] },
 ];
 
 // Admin role: manage, never learn. No Learn tab — the admin reads
 // everything through All content; learning paths are students-only.
 // /browse + /classes light the Studio tab (the working area).
 const ADMIN_TABS: Tab[] = [
-  { to: '/dashboard', label: 'Home', icon: LayoutDashboard, match: ['/dashboard'] },
-  { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio', '/browse', '/classes'] },
-  { to: '/profile', label: 'Me', icon: User, match: ['/profile'] },
+  { to: '/home', label: 'Home', icon: LayoutDashboard, match: ['/home'] },
+  { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio', '/browse', '/my-classes'] },
+  { to: '/me', label: 'Me', icon: User, match: ['/me'] },
 ];
 
 export default function Layout() {
@@ -300,7 +300,7 @@ export default function Layout() {
     <div style={{ fontFamily: 'var(--font-body)' }}>
       {!focusOnReader && (
       <header style={{ display: 'flex', gap: 12, padding: '12px 16px', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, background: 'var(--surface)', zIndex: 10, alignItems: 'center' }}>
-        <Link to="/dashboard" style={{ textDecoration: 'none' }} aria-label="Unify Learn home">
+        <Link to="/home" style={{ textDecoration: 'none' }} aria-label="Unify Learn home">
           <Wordmark size={20} />
         </Link>
         <span style={{ flex: 1 }} />
@@ -314,7 +314,7 @@ export default function Layout() {
             <Link
               to="/notifications"
               aria-label="Notifications"
-              style={{ position: 'relative', width: 32, height: 32, borderRadius: 9999, background: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
+              style={{ position: 'relative', width: 32, height: 32, borderRadius: 9999, background: 'var(--u-good-tint)', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
             >
               <Bell size={18} />
               {unread > 0 && (
@@ -324,7 +324,7 @@ export default function Layout() {
               )}
             </Link>
             <Link
-              to="/profile"
+              to="/me"
               aria-label="Profile"
             style={{
               width: 32,
@@ -351,8 +351,9 @@ export default function Layout() {
               fontSize: 12,
               fontWeight: 800,
               textDecoration: 'none',
-              color: '#fff',
+              color: 'var(--u-black)',
               background: 'var(--u-amber)',
+              borderBottom: '3px solid #c69a1a',
               padding: '8px 16px',
               borderRadius: 9999,
             }}

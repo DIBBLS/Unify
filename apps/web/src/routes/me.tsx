@@ -6,7 +6,6 @@ import BackButton from '../components/BackButton';
 import ConfirmModal from '../components/ConfirmModal';
 import Drop from '../components/Drop';
 import { useTheme } from '../hooks/useTheme';
-import { useDesign } from '../hooks/useDesign';
 import { APP_VERSION } from '../lib/version';
 import Wordmark from '../components/Wordmark';
 import { pushSupported, pushState, enablePush, disablePush, type PushState } from '../lib/push';
@@ -17,6 +16,7 @@ import ErrorState from '../components/ErrorState';
 import Flash from '../components/Flash';
 import { BoxBoy } from '../components/redesign/brand';
 
+import { describeError } from '../lib/errors';
 const UUID_RE = /^[0-9a-f-]{36}$/i;
 const DEPARTMENTS = [
   'Electronic & Computer Engineering',
@@ -58,7 +58,7 @@ const TARGETS = [
   { label: 'Pass', val: 1.5 },
 ];
 
-export default function ProfileRoute() {
+export default function MeRoute() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [email, setEmail] = useState('');
@@ -132,11 +132,11 @@ export default function ProfileRoute() {
     } catch (e) {
       // Surface the server's exact rejection when there is one — generic
       // copy only for local decode/network failures.
-      const msg = e instanceof Error ? e.message : '';
+      const msg = describeError(e, 'update your picture');
       setAvatarMsg(
-        msg && !/network|failed|fetch|offline|configured/i.test(msg)
-          ? msg
-          : "Couldn't read that photo — save it as JPG or PNG (some formats like HEIC need converting) and retry."
+        /^Couldn/.test(msg) || /reach the server|offline/i.test(msg)
+          ? "Couldn't read that photo — save it as JPG or PNG (some formats like HEIC need converting) and retry."
+          : msg
       );
     } finally {
       setUploadingAvatar(false);
@@ -251,7 +251,7 @@ export default function ProfileRoute() {
     try {
       const { error: err } = await client.auth.updateUser({ email: next });
       if (err) {
-        setEmailMsg(err.message);
+        setEmailMsg(describeError(err, 'change your email'));
         return;
       }
       setEmailMsg(`Confirmation sent to ${next}. Tap the link there to finish.`);
@@ -259,7 +259,7 @@ export default function ProfileRoute() {
       // The new address is unconfirmed until that link is tapped.
       setEmailConfirmed(false);
     } catch (err) {
-      setEmailMsg(err instanceof Error ? err.message : 'Email change failed.');
+      setEmailMsg(describeError(err, 'change your email'));
     }
   };
 
@@ -270,7 +270,7 @@ export default function ProfileRoute() {
     setVerifMsg('');
     try {
       const { error } = await client.auth.resend({ type: 'signup', email });
-      setVerifMsg(error ? error.message : 'Verification email sent — check your inbox and spam.');
+      setVerifMsg(error ? describeError(error, 'send the verification email') : 'Verification email sent — check your inbox and spam.');
     } catch {
       setVerifMsg("Couldn't send right now — try again in a minute.");
     } finally {
@@ -330,7 +330,7 @@ export default function ProfileRoute() {
       setEditing(false);
       setSaveMsg('Profile updated.');
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : 'Save failed.');
+      setSaveError(describeError(err, 'save your profile'));
     } finally {
       setSaving(false);
     }
@@ -358,7 +358,7 @@ export default function ProfileRoute() {
 
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '24px 16px 80px' }}>
-      <BackButton to="/dashboard" />
+      <BackButton to="/home" />
       <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 20 }}>
         {(profile?.avatar_url || meAvatar) ? (
           <img src={profile?.avatar_url || meAvatar} alt="Profile picture" style={{ width: 64, height: 64, borderRadius: 9999, objectFit: 'cover', flexShrink: 0 }} />
@@ -372,7 +372,7 @@ export default function ProfileRoute() {
           <div style={{ fontSize: 13, color: 'var(--text2)' }}>{email}</div>
           {email && !emailConfirmed && (
             <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-              <span style={{ fontSize: 11, fontWeight: 800, color: '#92400e', background: '#fef3c7', border: '1px solid #fde68a', borderRadius: 9999, padding: '3px 10px' }}>Email not verified</span>
+              <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--u-warn-ink)', background: 'var(--u-warn-tint)', border: '1px solid #fde68a', borderRadius: 9999, padding: '3px 10px' }}>Email not verified</span>
               <button onClick={() => void resendVerify()} disabled={verifBusy} style={{ fontSize: 12, fontWeight: 800, color: '#059669', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                 {verifBusy ? 'Sending…' : 'Resend verification email'}
               </button>
@@ -407,7 +407,7 @@ export default function ProfileRoute() {
         <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 6 }}>Change email</div>
         <div style={{ display: 'flex', gap: 8 }}>
           <input value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="new@email.com" style={{ flex: 1, minWidth: 0, padding: 10, border: '1px solid var(--border)', borderRadius: 10, fontSize: 14 }} />
-          <button onClick={handleEmailChange} style={{ padding: '10px 16px', borderRadius: 10, background: 'var(--u-amber)', color: '#fff', border: 'none', fontWeight: 800, fontSize: 13 }}>
+          <button onClick={handleEmailChange} style={{ padding: '10px 16px', borderRadius: 10, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '3px solid #c69a1a', fontWeight: 800, fontSize: 13 }}>
             Send
           </button>
         </div>
@@ -502,7 +502,7 @@ export default function ProfileRoute() {
             <button onClick={() => setEditing(false)} style={{ flex: 1, padding: 12, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 12, fontWeight: 800, display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'center' }}>
               <X size={16} /> Cancel
             </button>
-            <button onClick={saveEdit} disabled={saving} style={{ flex: 1, padding: 12, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 12, fontWeight: 800, opacity: saving ? 0.6 : 1 }}>
+            <button onClick={saveEdit} disabled={saving} style={{ flex: 1, padding: 12, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 12, fontWeight: 800, opacity: saving ? 0.6 : 1 }}>
               {saving ? 'Saving…' : 'Save'}
             </button>
           </div>
@@ -511,7 +511,7 @@ export default function ProfileRoute() {
 
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 8 }}>
         <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 4 }}>Appearance</div>
-        <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 10 }}>Design &amp; theme apply across the whole app.</div>
+        <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 10 }}>Theme applies across the whole app.</div>
         <button onClick={() => toggle()} style={{ width: '100%', padding: 12, background: 'var(--surface2)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 12, fontWeight: 800, fontSize: 13, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
           {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />} {theme === 'dark' ? 'Light mode' : 'Dark mode'}
         </button>
@@ -520,7 +520,7 @@ export default function ProfileRoute() {
             <button
               onClick={flipPush}
               disabled={pushBusy || pushSt === 'denied'}
-              style={{ width: '100%', padding: 12, background: pushSt === 'on' ? '#ecfdf5' : 'var(--surface2)', color: pushSt === 'on' ? '#059669' : 'var(--text)', border: `1px solid ${pushSt === 'on' ? '#a7f3d0' : 'var(--border)'}`, borderRadius: 12, fontWeight: 800, fontSize: 13, opacity: pushBusy || pushSt === 'denied' ? 0.6 : 1 }}
+              style={{ width: '100%', padding: 12, background: pushSt === 'on' ? 'var(--u-good-tint)' : 'var(--surface2)', color: pushSt === 'on' ? '#059669' : 'var(--text)', border: `1px solid ${pushSt === 'on' ? 'var(--u-good)' : 'var(--border)'}`, borderRadius: 12, fontWeight: 800, fontSize: 13, opacity: pushBusy || pushSt === 'denied' ? 0.6 : 1 }}
             >
               {pushBusy ? 'Working…' : pushSt === 'on' ? 'Push notifications: ON' : 'Push notifications: OFF'}
             </button>
@@ -542,7 +542,7 @@ export default function ProfileRoute() {
         )}
       </div>
       <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-        <button onClick={handleLogout} style={{ flex: 1, padding: 14, background: 'var(--surface)', color: '#991b1b', border: '1px solid #fecaca', borderBottom: '4px solid #fecaca', borderRadius: 16, fontWeight: 800, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
+        <button onClick={handleLogout} style={{ flex: 1, padding: 14, background: 'var(--surface)', color: 'var(--u-red)', border: '1px solid #fecaca', borderBottom: '4px solid #fecaca', borderRadius: 16, fontWeight: 800, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
           <LogOut size={16} /> Log out
         </button>
       </div>
@@ -561,6 +561,11 @@ export default function ProfileRoute() {
           onConfirm={() => void doLogout()}
           onCancel={() => setConfirmLogout(false)}
         />
+      )}
+      {(isAdmin || import.meta.env.DEV) && (
+        <Link to="/screens" className="btn btn--white btn--sm" style={{ marginTop: 16, display: 'flex', width: 'fit-content', marginInline: 'auto' }}>
+          All screens
+        </Link>
       )}
       <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontSize: 11, color: 'var(--text3)', fontWeight: 700 }}>
         <Wordmark size={13} /> <span>v{APP_VERSION}</span>

@@ -50,7 +50,7 @@ export default function OnboardingPersonaRoute() {
       
       // Continue to next onboarding step (or dashboard if editing)
       const isEdit = new URLSearchParams(window.location.search).get('edit') === '1'
-      navigate(isEdit ? '/profile' : '/onboarding?step=push')
+      navigate(isEdit ? '/me' : '/onboarding?step=push')
       
     } catch (err) {
       console.error('Persona save failed:', err)
@@ -63,7 +63,7 @@ export default function OnboardingPersonaRoute() {
   const handleSkip = () => {
     // Skip is allowed (persona is optional, photo upload in Settings)
     const isEdit = new URLSearchParams(window.location.search).get('edit') === '1'
-    navigate(isEdit ? '/profile' : '/onboarding?step=push')
+    navigate(isEdit ? '/me' : '/onboarding?step=push')
   }
   
   return (

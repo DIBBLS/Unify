@@ -71,7 +71,7 @@ export default function NotificationsRoute() {
       }
       setNotes((prev) => prev.map((x) => (x.id === n.id ? { ...x, read: true } : x)));
     }
-    navigate(n.link || '/dashboard');
+    navigate(n.link || '/home');
   };
 
   const markAll = async () => {
@@ -90,7 +90,7 @@ export default function NotificationsRoute() {
 
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
-      <BackButton to="/dashboard" />
+      <BackButton to="/home" />
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28, flex: 1 }}>Notifications</h1>
         {notes.some((n) => !n.read) && (
@@ -112,7 +112,7 @@ export default function NotificationsRoute() {
             <button
               key={n.id}
               onClick={() => openNote(n)}
-              style={{ padding: '14px 16px', background: n.read ? 'var(--surface)' : 'var(--green-bg)', border: `1px solid ${n.read ? 'var(--border)' : '#a7f3d0'}`, borderRadius: 12, display: 'flex', gap: 12, alignItems: 'flex-start', textAlign: 'left', width: '100%', color: 'var(--text)' }}
+              style={{ padding: '14px 16px', background: n.read ? 'var(--surface)' : 'var(--green-bg)', border: `1px solid ${n.read ? 'var(--border)' : 'var(--u-good)'}`, borderRadius: 12, display: 'flex', gap: 12, alignItems: 'flex-start', textAlign: 'left', width: '100%', color: 'var(--text)' }}
             >
               <span style={{ width: 36, height: 36, borderRadius: 10, background: n.read ? 'var(--surface2)' : 'var(--u-amber)', color: n.read ? 'var(--text2)' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 {n.type === 'new_note' ? <BookOpen size={18} /> : <Icon size={18} />}
@@ -128,7 +128,7 @@ export default function NotificationsRoute() {
         })}
       </div>
       <div style={{ marginTop: 12, textAlign: 'center' }}>
-        <Link to="/dashboard" style={{ fontSize: 13, color: '#059669', fontWeight: 700, textDecoration: 'none' }}>
+        <Link to="/home" style={{ fontSize: 13, color: '#059669', fontWeight: 700, textDecoration: 'none' }}>
           Back to dashboard
         </Link>
       </div>

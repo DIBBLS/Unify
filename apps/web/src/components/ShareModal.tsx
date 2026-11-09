@@ -91,7 +91,7 @@ export function ShareModal({ course, week, title, topics, onClose }: { course: s
       <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxHeight: '85vh', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontWeight: 800, fontSize: 16 }}>
-            <Link2 size={18} color="#059669" /> Share {course} · Week {week}
+            <Link2 size={18} color="var(--u-good)" /> Share {course} · Week {week}
           </div>
           <button onClick={onClose} aria-label="Close" style={{ background: 'none', border: 'none', color: 'var(--text2)', display: 'flex', padding: 4 }}>
             <X size={18} />
@@ -111,7 +111,7 @@ export function ShareModal({ course, week, title, topics, onClose }: { course: s
             {topics.length > 3 && <span style={{ display: 'block' }}>+{topics.length - 3} more topics</span>}
           </div>
         </div>
-        {error && <div style={{ marginTop: 8, fontSize: 13, color: '#991b1b' }}>{error}</div>}
+        {error && <div style={{ marginTop: 8, fontSize: 13, color: 'var(--u-red)' }}>{error}</div>}
         {!link ? (
           <>
             <div style={{ fontSize: 12, fontWeight: 800, margin: '14px 0 8px' }}>LINK LIFETIME</div>
@@ -120,7 +120,7 @@ export function ShareModal({ course, week, title, topics, onClose }: { course: s
                 <button
                   key={t.hours}
                   onClick={() => setTtl(t.hours)}
-                  style={{ flex: 1, padding: '10px 6px', borderRadius: 12, border: `1px solid ${ttl === t.hours ? '#059669' : 'var(--border)'}`, background: ttl === t.hours ? 'var(--u-amber)' : 'var(--surface)', color: ttl === t.hours ? '#fff' : 'var(--text2)', fontWeight: 800, fontSize: 12 }}
+                  style={{ flex: 1, padding: '10px 6px', borderRadius: 12, border: `1px solid ${ttl === t.hours ? 'var(--u-good)' : 'var(--border)'}`, background: ttl === t.hours ? 'var(--u-amber)' : 'var(--surface)', color: ttl === t.hours ? 'var(--u-black)' : 'var(--text2)', fontWeight: 800, fontSize: 12 }}
                 >
                   {t.label}
                 </button>
@@ -133,9 +133,9 @@ export function ShareModal({ course, week, title, topics, onClose }: { course: s
         ) : (
           <div style={{ marginTop: 12, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 12, padding: 12 }}>
             <div style={{ fontSize: 12, color: 'var(--text2)', wordBreak: 'break-all' }}>{urlFor(link.token)}</div>
-            <div style={{ fontSize: 11, color: '#059669', fontWeight: 800, marginTop: 4 }}>{expiryLabel(link.expires_at)}</div>
+            <div style={{ fontSize: 11, color: 'var(--u-good)', fontWeight: 800, marginTop: 4 }}>{expiryLabel(link.expires_at)}</div>
             <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-              <button onClick={() => copy(link.token)} style={{ flex: 1, padding: 10, borderRadius: 12, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '3px solid #059669', fontWeight: 800, fontSize: 13, display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'center' }}>
+              <button onClick={() => copy(link.token)} style={{ flex: 1, padding: 10, borderRadius: 12, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '3px solid #c69a1a', fontWeight: 800, fontSize: 13, display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'center' }}>
                 {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? 'Copied!' : 'Copy'}
               </button>
               <a
@@ -162,11 +162,11 @@ export function ShareModal({ course, week, title, topics, onClose }: { course: s
                       <div style={{ fontSize: 11, color: 'var(--text2)' }}>{l.views} views · {expiryLabel(l.expires_at)}</div>
                     </div>
                     {!dead && (
-                      <button onClick={() => copy(l.token)} aria-label="Copy link" style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 8, color: '#059669', padding: 7, display: 'flex' }}>
+                      <button onClick={() => copy(l.token)} aria-label="Copy link" style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--u-good)', padding: 7, display: 'flex' }}>
                         <Copy size={14} />
                       </button>
                     )}
-                    <button onClick={() => revoke(l.token)} aria-label="Revoke link" style={{ background: 'none', border: '1px solid #fecaca', borderRadius: 8, color: '#991b1b', padding: 7, display: 'flex' }}>
+                    <button onClick={() => revoke(l.token)} aria-label="Revoke link" style={{ background: 'none', border: '1px solid var(--u-bad-tint)', borderRadius: 8, color: 'var(--u-red)', padding: 7, display: 'flex' }}>
                       <Trash2 size={14} />
                     </button>
                   </div>

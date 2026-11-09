@@ -47,7 +47,7 @@ export function DashboardSkeleton({ author }: { author: boolean }) {
           </div>
         </>
       )}
-      <div style={{ fontSize: 12, color: 'var(--text2)', textAlign: 'center', marginTop: 12 }}>Loading dashboard…</div>
+      <div style={{ fontSize: 12, color: 'var(--text2)', textAlign: 'center', marginTop: 12 }}>Loading Home…</div>
     </div>
   );
 }

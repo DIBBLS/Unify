@@ -64,7 +64,7 @@ export default function OnboardingRoute() {
       try {
         const { onboarded, profile } = await api.me();
         if (onboarded && profile && !isEdit) {
-          navigate('/dashboard');
+          navigate('/home');
           return;
         }
         if (profile?.first_name) setFirstName(profile.first_name);
@@ -152,7 +152,7 @@ export default function OnboardingRoute() {
         setLoading(false);
         return;
       }
-      navigate('/dashboard');
+      navigate('/home');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
       setLoading(false);
@@ -205,7 +205,7 @@ export default function OnboardingRoute() {
         <button
           key={c.code}
           onClick={() => toggleCourse(c.code)}
-          style={{ padding: 12, border: `1px solid ${on ? '#059669' : 'var(--border)'}`, borderRadius: 12, background: on ? '#ecfdf5' : 'var(--surface)', textAlign: 'left', display: 'flex', gap: 8, alignItems: 'center' }}
+          style={{ padding: 12, border: `1px solid ${on ? '#059669' : 'var(--border)'}`, borderRadius: 12, background: on ? 'var(--u-good-tint)' : 'var(--surface)', textAlign: 'left', display: 'flex', gap: 8, alignItems: 'center' }}
         >
           <span style={{ width: 20, height: 20, borderRadius: 6, border: `1px solid ${on ? '#059669' : 'var(--border)'}`, background: on ? 'var(--u-amber)' : 'var(--surface)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800 }}>
             {on ? '✓' : ''}
@@ -234,8 +234,8 @@ export default function OnboardingRoute() {
           with a way to withdraw anytime.
         </p>
         <button
-          onClick={() => navigate('/dashboard')}
-          style={{ padding: '12px 28px', borderRadius: 9999, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800, fontSize: 14 }}
+          onClick={() => navigate('/home')}
+          style={{ padding: '12px 28px', borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', fontWeight: 800, fontSize: 14 }}
         >
           Enter my waiting room
         </button>
@@ -285,7 +285,7 @@ export default function OnboardingRoute() {
               <BoxBoy pose="readingStanding" width={70} />
             </div>
             {isEdit && (
-              <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 12, padding: 10, fontSize: 13, color: '#065f46', textAlign: 'center' }}>
+              <div style={{ background: 'var(--u-good-tint)', border: '1px solid var(--u-good)', borderRadius: 12, padding: 10, fontSize: 13, color: '#065f46', textAlign: 'center' }}>
                 Role{originalRole ? ` (${originalRole})` : ''} can't be changed here.
               </div>
             )}
@@ -315,7 +315,7 @@ export default function OnboardingRoute() {
                       width: 40,
                       height: 40,
                       borderRadius: 10,
-                      background: active ? 'var(--u-amber)' : '#ecfdf5',
+                      background: active ? 'var(--u-amber)' : 'var(--u-good-tint)',
                       color: active ? '#fff' : '#059669',
                       display: 'flex',
                       alignItems: 'center',
@@ -340,7 +340,7 @@ export default function OnboardingRoute() {
             </div>
             <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="e.g. Joshua" style={{ padding: 12, border: '1px solid var(--border)', borderRadius: 12, fontSize: 16 }} />
             {firstName && <div style={{ fontSize: 14 }}>{daypart}, <strong>{firstName}</strong></div>}
-            <button onClick={() => { if (!firstName.trim()) return; if (isEdit) { void save(false); return; } if (role === 'contributor') { setStep(2); return; } setStep(2); }} style={{ padding: 14, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+            <button onClick={() => { if (!firstName.trim()) return; if (isEdit) { void save(false); return; } if (role === 'contributor') { setStep(2); return; } setStep(2); }} style={{ padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
               {isEdit ? (<>Finish setup <ArrowRight size={18} /></>) : (<>Continue <ArrowRight size={18} /></>)}
             </button>
           </>
@@ -367,14 +367,14 @@ export default function OnboardingRoute() {
           </button>
         ))}
         {step === 5 && (role === 'student' || !role) && levels.map((l) => (
-          <button key={l} onClick={() => { setLevel(l); setStep(6); }} style={{ padding: 14, border: '1px solid var(--border)', borderRadius: 12, background: level === l ? '#d1fae5' : 'var(--surface)' }}>{l}</button>
+          <button key={l} onClick={() => { setLevel(l); setStep(6); }} style={{ padding: 14, border: '1px solid var(--border)', borderRadius: 12, background: level === l ? 'var(--u-good-tint)' : 'var(--surface)' }}>{l}</button>
         ))}
         {step === 6 && (role === 'student' || !role) && (
           <>
             <div style={{ fontSize: 13, color: 'var(--text2)' }}>Level: <strong>{level || '—'}</strong></div>
             {semesterNote}
             {courseList}
-            <button onClick={() => setStep(7)} style={{ padding: 14, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8 }}>
+            <button onClick={() => setStep(7)} style={{ padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8 }}>
               Continue <ArrowRight size={18} />
             </button>
           </>
@@ -387,11 +387,11 @@ export default function OnboardingRoute() {
               { label: '2nd Class Lower', val: 2.4 },
               { label: 'Pass', val: 1.5 },
             ].map((t) => (
-              <button key={t.label} onClick={() => setGradTarget(t.val)} style={{ padding: 14, border: `1px solid ${gradTarget === t.val ? 'var(--u-amber)' : 'var(--border)'}`, borderRadius: 12, background: gradTarget === t.val ? '#d1fae5' : 'var(--surface)' }}>
+              <button key={t.label} onClick={() => setGradTarget(t.val)} style={{ padding: 14, border: `1px solid ${gradTarget === t.val ? 'var(--u-amber)' : 'var(--border)'}`, borderRadius: 12, background: gradTarget === t.val ? 'var(--u-good-tint)' : 'var(--surface)' }}>
                 {t.label} — {t.val}
               </button>
             ))}
-            <button onClick={() => save(false)} style={{ padding: 14, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8 }}>
+            <button onClick={() => save(false)} style={{ padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8 }}>
               Finish setup <ArrowRight size={18} />
             </button>
             <button onClick={() => save(true)} style={{ background: 'none', border: 'none', color: 'var(--text2)', fontSize: 13 }}>

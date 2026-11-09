@@ -77,7 +77,7 @@ export function TopicSlice({ topic }: { topic: Topic }) {
         <Beat>
           <div className="mini-check" style={{ borderLeft: '3px solid var(--green-deep)', marginTop: 32 }}>
             <div className="mini-check-header">
-              <Target size={14} color="#059669" />
+              <Target size={14} color="var(--u-good)" />
               <span className="mini-check-title">Pulse Check 0{topic.pulseCheck.number}</span>
             </div>
             <MiniCheck questions={topic.pulseCheck.questions as any} subTitle="Pulse Check" topicNum={topic.number} subAbbr="pulse" />

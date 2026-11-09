@@ -56,7 +56,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { error: E
           </p>
           <button
             onClick={() => window.location.reload()}
-            style={{ padding: '12px 28px', borderRadius: 9999, background: '#16a34a', color: '#fff', border: 'none', borderBottom: '4px solid #14532d', fontWeight: 800, fontSize: 14 }}
+            style={{ padding: '12px 28px', borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', fontWeight: 800, fontSize: 14 }}
           >
             Reload app
           </button>

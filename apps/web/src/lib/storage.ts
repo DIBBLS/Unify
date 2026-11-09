@@ -1,4 +1,5 @@
 import { supabaseBrowser } from './supabase';
+import { describeError } from './errors';
 
 const BUCKET = 'diagrams';
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -13,7 +14,7 @@ export async function uploadDiagram(file: File, course: string, week: number): P
   const safeName = file.name.replace(/[^A-Za-z0-9._-]+/g, '_').slice(-60);
   const path = `${safeCourse}/w${week}/${Date.now()}-${safeName}`;
   const { error } = await sb.storage.from(BUCKET).upload(path, file, { contentType: file.type, upsert: false });
-  if (error) return { error: error.message };
+  if (error) return { error: describeError(error, 'upload that file') };
   const { data } = sb.storage.from(BUCKET).getPublicUrl(path);
   if (!data?.publicUrl) return { error: 'Upload worked but no public URL came back.' };
   return { url: data.publicUrl };
@@ -37,7 +38,7 @@ export async function uploadNarration(file: File, course: string, week: number):
   const safeName = file.name.replace(/[^A-Za-z0-9._-]+/g, '_').slice(-60);
   const path = `${safeCourse}/w${week}/${Date.now()}-${safeName}`;
   const { error } = await sb.storage.from(AUDIO_BUCKET).upload(path, file, { contentType: file.type || 'audio/mpeg', upsert: false });
-  if (error) return { error: error.message };
+  if (error) return { error: describeError(error, 'upload that file') };
   const { data } = sb.storage.from(AUDIO_BUCKET).getPublicUrl(path);
   if (!data?.publicUrl) return { error: 'Upload worked but no public URL came back.' };
   return { url: data.publicUrl };
