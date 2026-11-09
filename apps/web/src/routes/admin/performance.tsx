@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Activity, RefreshCw, Mail } from 'lucide-react';
 import { api, type PerfSnapshot, type PerfPoint } from '../../lib/api';
 import { Bars, Spark } from '../../components/Charts';
+import { SectionSkeleton } from '../../components/Skeletons';
 import { describeError } from '../../lib/errors';
 import { toastSuccess } from '../../lib/toast';
 
@@ -103,7 +104,7 @@ export default function PerformancePanel() {
         Updates every 10 seconds{updated ? ` · last ${hm(updated)}` : ''}. Kept in memory for the last 3 hours; a server restart clears it.
       </div>
       {err && <div role="alert" style={{ ...card, borderColor: '#fecaca', background: 'var(--u-bad-tint)', color: 'var(--u-red, #dc2626)', fontSize: 13 }}>{err}</div>}
-      {!snap && !err && <div className="skel" style={{ height: 180, borderRadius: 12 }} />}
+      {!snap && !err && <SectionSkeleton rows={3} quote={false} />}
 
       {snap && t && sys && (
         <>

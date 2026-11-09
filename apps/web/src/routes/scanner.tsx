@@ -166,6 +166,7 @@ export default function ScannerRoute() {
               <ListRow
                 key={p.studentId}
                 title={p.name}
+                leading={p.photo ? <img src={p.photo} alt="" width={40} height={40} loading="lazy" decoding="async" style={{ width: 40, height: 40, borderRadius: 9999, objectFit: 'cover', display: 'block' }} /> : undefined}
                 sub={p.matric || undefined}
                 right={<span className="t-13 muted">{new Date(p.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>}
               />

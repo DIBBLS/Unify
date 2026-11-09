@@ -7,6 +7,7 @@ import { ROUTES } from '../lib/routes';
 import BackButton from '../components/BackButton';
 import { BoxBoy } from '../components/redesign/brand';
 import { Card, Display } from '../components/redesign/ui';
+import SelfieCapture from '../components/SelfieCapture';
 
 // Mark attendance: the lecturer shows a rotating QR in class and you scan it
 // with the camera here. The 6-digit code underneath is the fallback (no camera,
@@ -27,6 +28,10 @@ export default function AttendancePassRoute() {
   const [scanMsg, setScanMsg] = useState('');
   const videoRef = useRef<HTMLVideoElement>(null);
   const sending = useRef(false);
+  // Step 1 is a quick selfie (kept in memory); step 2 is the QR. Scanning last keeps the rotating code fresh.
+  const [selfie, setSelfie] = useState<string | null>(null);
+  const selfieRef = useRef<string | null>(null);
+  selfieRef.current = selfie;
 
   // First time? Collect name + matric before the code.
   useEffect(() => {
@@ -45,7 +50,7 @@ export default function AttendancePassRoute() {
 
   // Camera: pull the 6 digits out of the class QR (a link with ?c=) and mark me.
   useEffect(() => {
-    if (!ready || showCode || done || !videoRef.current) return;
+    if (!ready || !selfie || showCode || done || !videoRef.current) return;
     let handle: { stop: () => void } | null = null;
     let gone = false;
     void startQrScan(
@@ -57,11 +62,13 @@ export default function AttendancePassRoute() {
         if (!/^\d{6}$/.test(digits)) { setScanMsg("That isn't a Unify attendance QR."); return; }
         sending.current = true;
         try {
-          const r = await api.attendanceCheckin(digits);
+          const r = await api.attendanceCheckin(digits, selfieRef.current || undefined);
           setDone({ course: r.course, already: r.already });
           try { navigator.vibrate?.(60); } catch { /* optional */ }
         } catch (e) {
-          setScanMsg(describeError(e, 'mark attendance'));
+          const m = describeError(e, 'mark attendance');
+          if (/photo/i.test(m)) setSelfie(null);
+          setScanMsg(m);
           window.setTimeout(() => { sending.current = false; }, 2500); // let the next rotation be read
           return;
         }
@@ -70,7 +77,7 @@ export default function AttendancePassRoute() {
       (m) => { setScanMsg(m); setShowCode(true); },
     ).then((h) => { if (gone) h.stop(); else handle = h; });
     return () => { gone = true; handle?.stop(); };
-  }, [ready, showCode, done]);
+  }, [ready, selfie, showCode, done]);
 
   const submit = async () => {
     if (!/^\d{6}$/.test(code)) {
@@ -79,11 +86,12 @@ export default function AttendancePassRoute() {
     }
     setBusy(true);
     try {
-      const r = await api.attendanceCheckin(code);
+      const r = await api.attendanceCheckin(code, selfieRef.current || undefined);
       setDone({ course: r.course, already: r.already });
     } catch (e) {
       errorToast(e, 'mark attendance');
-      setCode('');
+      if (/photo/i.test(describeError(e, 'mark attendance'))) setSelfie(null);
+      else setCode('');
     } finally {
       setBusy(false);
     }
@@ -91,12 +99,12 @@ export default function AttendancePassRoute() {
 
   // Opened from the QR: submit straight away, once, as soon as we know the profile is set.
   useEffect(() => {
-    if (ready && !autoSent.current && params.get('c') && /^\d{6}$/.test(code)) {
+    if (ready && selfie && !autoSent.current && params.get('c') && /^\d{6}$/.test(code)) {
       autoSent.current = true;
       void submit();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready]);
+  }, [ready, selfie]);
 
   const shell = { maxWidth: 'min(var(--shell, 480px), 560px)', margin: '0 auto', padding: '20px 16px 96px' } as const;
 
@@ -113,6 +121,19 @@ export default function AttendancePassRoute() {
       </div>
     );
 
+  if (ready && !selfie)
+    return (
+      <div style={shell}>
+        <BackButton to={ROUTES.timetable} />
+        <Card style={{ alignItems: 'center', textAlign: 'center', marginTop: 8, gap: 10 }}>
+          <div className="eyebrow" style={{ color: 'var(--green-deep)' }}>Step 1 of 2</div>
+          <Display size={26}>Take a quick selfie</Display>
+          <div className="t-13 muted">Your lecturer sees it next to your name so they know you are in class. It is not shared with anyone else, and it is deleted as soon as attendance for this class closes.</div>
+          <SelfieCapture onUse={setSelfie} />
+        </Card>
+      </div>
+    );
+
   return (
     <div style={shell}>
       <BackButton to={ROUTES.timetable} />
@@ -120,11 +141,12 @@ export default function AttendancePassRoute() {
         <>
           <Card style={{ alignItems: 'center', textAlign: 'center', marginTop: 8, gap: 10 }}>
             <BoxBoy pose="phoneOut" width={96} />
+            <div className="eyebrow" style={{ color: 'var(--green-deep)' }}>Step 2 of 2</div>
             <Display size={26}>Scan to mark attendance</Display>
             <div className="t-13 muted">Point your camera at the QR code your lecturer is showing.</div>
             <div style={{ position: 'relative', width: '100%', maxWidth: 320, aspectRatio: '1 / 1', borderRadius: 18, overflow: 'hidden', background: '#000' }}>
               <video ref={videoRef} muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} aria-label="Camera" />
-              <div style={{ position: 'absolute', inset: '14%', border: '3px solid var(--u-green)', borderRadius: 16, pointerEvents: 'none' }} />
+              <div className="scan-frame" aria-hidden="true"><i /><i /><i /><i /><span className="scan-line" /></div>
             </div>
             <div role="status" aria-live="polite" className="t-13" style={{ minHeight: 20, color: scanMsg ? 'var(--u-red, #dc2626)' : 'var(--text2)' }}>
               {scanMsg || 'The QR changes every 30 seconds, so scan it while you are in class.'}

@@ -23,6 +23,7 @@ import { describeError, errorToast } from '../lib/errors';
 import { toastSuccess } from '../lib/toast';
 import { askInstall, isStandalone } from '../lib/install';
 import { announcePicture, resolvePicture } from '../lib/picture';
+import { preparePhoto } from '../lib/image';
 import { Avatar, PERSONAS, type PersonaKey } from '../components/redesign/brand';
 const UUID_RE = /^[0-9a-f-]{36}$/i;
 const DEPARTMENTS = [
@@ -58,12 +59,6 @@ function SupportRow() {
     </a>
   );
 }
-const TARGETS = [
-  { label: 'First Class', val: 4.5 },
-  { label: '2nd Class Upper', val: 3.5 },
-  { label: '2nd Class Lower', val: 2.4 },
-  { label: 'Pass', val: 1.5 },
-];
 
 export default function MeRoute() {
   const navigate = useNavigate();
@@ -118,36 +113,8 @@ export default function MeRoute() {
     }
     setUploadingAvatar(true);
     try {
-      // Standardize: downscale to a 256px JPEG (~20-40KB) on-device, so
-      // profile pictures stay tiny no matter what the camera produced.
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const img = new Image();
-        const url = URL.createObjectURL(file);
-        img.onload = () => {
-          try {
-            const S = 256;
-            const scale = Math.min(1, S / Math.max(img.width, img.height));
-            const w = Math.max(1, Math.round(img.width * scale));
-            const h = Math.max(1, Math.round(img.height * scale));
-            const cv = document.createElement('canvas');
-            cv.width = w;
-            cv.height = h;
-            const ctx = cv.getContext('2d');
-            if (!ctx) throw new Error('no canvas');
-            ctx.drawImage(img, 0, 0, w, h);
-            URL.revokeObjectURL(url);
-            resolve(cv.toDataURL('image/jpeg', 0.82));
-          } catch (e) {
-            URL.revokeObjectURL(url);
-            reject(e);
-          }
-        };
-        img.onerror = () => {
-          URL.revokeObjectURL(url);
-          reject(new Error('unreadable image'));
-        };
-        img.src = url;
-      });
+      // Square 320px JPEG under ~60 KB, upright, no black behind transparency.
+      const { dataUrl } = await preparePhoto(file, { size: 320, maxBytes: 60 * 1024 });
       const res = await api.uploadAvatar(dataUrl);
       setProfile((prev) => (prev ? { ...prev, avatar_url: res.avatarUrl } : prev));
       // Header chip refreshes live (URL itself cache-busts server-side).
@@ -209,7 +176,6 @@ export default function MeRoute() {
   const [dFaculty, setDFaculty] = useState('');
   const [dDept, setDDept] = useState('');
   const [dLevel, setDLevel] = useState('');
-  const [dTarget, setDTarget] = useState('');
   const [dNotify, setDNotify] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
@@ -247,7 +213,6 @@ export default function MeRoute() {
         setDFaculty(p.faculty || '');
         setDDept(p.department || '');
         setDLevel(p.level || '');
-        setDTarget(p.grad_target != null ? String(p.grad_target) : '');
         setDNotify(p.notify_new_notes !== false);
         try {
           setUnis(await api.universities());
@@ -345,7 +310,6 @@ export default function MeRoute() {
       const author = profile?.role === 'lecturer' || profile?.role === 'contributor';
       if (!author && profile?.role === 'student') {
         if (dLevel) payload.level = dLevel;
-        if (dTarget) payload.gradTarget = Number(dTarget);
       } else if (dLevel) {
         // Authors pick the level they contribute to (scopes Browse).
         payload.level = dLevel;
@@ -379,7 +343,6 @@ export default function MeRoute() {
   ];
   if (isStudent) {
     rows.push(['Level', profile?.level || '—']);
-    rows.push(['Graduation target', profile?.grad_target != null ? String(profile.grad_target) : '—']);
     const ct = (profile as unknown as { cgpa_target?: number | null } | null)?.cgpa_target;
     rows.push(['CGPA target', ct != null ? Number(ct).toFixed(2) : 'Not set']);
   }
@@ -537,16 +500,6 @@ export default function MeRoute() {
                   label="Select…"
                   style={{ width: '100%', marginTop: 4 }}
                   options={LEVELS.map((l) => ({ value: l, label: l }))}
-                />
-              </label>
-              <label style={{ fontSize: 12, fontWeight: 700 }}>
-                Graduation target
-                <Drop
-                  value={dTarget}
-                  onChange={setDTarget}
-                  label="Select…"
-                  style={{ width: '100%', marginTop: 4 }}
-                  options={TARGETS.map((t) => ({ value: String(t.val), label: `${t.label} — ${t.val}` }))}
                 />
               </label>
             </>

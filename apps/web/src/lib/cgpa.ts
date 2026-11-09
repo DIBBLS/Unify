@@ -134,10 +134,24 @@ export function calculateWhatIf(
 /**
  * Validate CGPA input (0.00-5.00, 2 decimals)
  */
+// A CGPA is a plain decimal from 0.00 to 5.00 with at most two decimal places.
+// "3.5abc", "1e0", "-1", "5.01" and "" are all rejected (never silently rounded).
+export const CGPA_PATTERN = /^(?:[0-4](?:\.\d{1,2})?|5(?:\.0{1,2})?)$/
+
 export function validateCGPA(value: string): number | null {
-  const num = parseFloat(value)
-  if (isNaN(num)) return null
-  if (num < 0 || num > 5) return null
-  return Math.round(num * 100) / 100
+  const t = (value ?? '').trim()
+  if (!CGPA_PATTERN.test(t)) return null
+  return Math.round(Number(t) * 100) / 100
+}
+
+/** Keeps a CGPA field clean while typing: digits and one dot, one digit before it, two after, never above 5. */
+export function cleanCgpaInput(raw: string): string {
+  let s = (raw ?? '').replace(/[^0-9.]/g, '')
+  const dot = s.indexOf('.')
+  if (dot >= 0) s = s.slice(0, dot + 1) + s.slice(dot + 1).replace(/\./g, '')
+  const [whole, frac] = s.split('.')
+  s = whole.slice(0, 1) + (frac !== undefined ? '.' + frac.slice(0, 2) : '')
+  if (Number(s) > 5) s = '5'
+  return s
 }
 

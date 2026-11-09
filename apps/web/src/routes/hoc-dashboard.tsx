@@ -1,4 +1,4 @@
-import LoadingQuote from '../components/LoadingQuote';
+import { SectionSkeleton } from '../components/Skeletons';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
@@ -100,7 +100,7 @@ export default function HocDashboardRoute() {
 
       <section style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
         {posts === null ? (
-          <><div className="skel" style={{ height: 110, borderRadius: 24 }} /><LoadingQuote style={{ margin: '24px auto 0' }} /></>
+          <SectionSkeleton rows={2} />
         ) : posts.length === 0 ? (
           <Card style={{ alignItems: 'center', textAlign: 'center' }}>
             <BoxBoy pose="chairRelax" width={110} />

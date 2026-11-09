@@ -244,7 +244,7 @@ export type AttendanceSession = { id: string; course: string; code: string; rota
 export type CgpaCourse = { code: string; title: string; status: 'done' | 'priority' | 'not_yet'; units: number; grade: number | null };
 export type CgpaData = { cgpaCurrent: number | null; cgpaTarget: number | null; hideCgpa: boolean; unitsDone: number | null; unitsTotal: number | null; level: string | null; courses: CgpaCourse[] };
 export type Material = { id: string; week: number; type: 'slides' | 'notes' | 'past-paper'; title: string; url: string; createdAt: string; mine: boolean };
-export type AttendanceRegister = { session: AttendanceSession | null; present: { studentId: string; at: string; name: string; matric: string }[]; enrolled: number };
+export type AttendanceRegister = { session: AttendanceSession | null; present: { studentId: string; at: string; name: string; matric: string; photo?: string | null }[]; enrolled: number };
 
 export type PerfPoint = { t: number; n: number; e4: number; e5: number; p50: number; p95: number; max: number };
 export type PerfSnapshot = {
@@ -259,6 +259,8 @@ export type PerfSnapshot = {
   vitals: { page: string; metric: string; n: number; p50: number; p75: number }[];
   alerts: { at: string; signature: string; kind: string; message: string; emailed: boolean; note?: string }[];
 };
+
+export type HomeUpdate = { id: string; title: string; body: string; link?: string; cta?: string; pose: import('../components/redesign/brand').Pose; endsAt?: string; createdAt?: string };
 
 export const api = {
   universities: () => apiFetch<University[]>("/v1/universities"),
@@ -511,6 +513,9 @@ export const api = {
     apiFetch<{ ok: boolean; avatarUrl: string }>('/v1/avatar', { method: 'POST', body: JSON.stringify({ image }) }),
   logError: (payload: { kind: string; message: string; stack: string; url: string; appVersion: string }) =>
     apiFetch<{ ok: boolean }>('/v1/errors', { method: 'POST', body: JSON.stringify(payload) }),
+  updates: () => apiFetch<{ updates: HomeUpdate[] }>('/v1/updates'),
+  adminUpdates: () => apiFetch<{ updates: HomeUpdate[] }>('/v1/admin/updates'),
+  adminSaveUpdates: (updates: HomeUpdate[]) => apiFetch<{ ok: boolean; updates: HomeUpdate[] }>('/v1/admin/updates', { method: 'PUT', body: JSON.stringify({ updates }) }),
   adminMetrics: (minutes: 15 | 60 | 180) => apiFetch<PerfSnapshot>(`/v1/admin/metrics?minutes=${minutes}`),
   adminTestAlert: () => apiFetch<{ ok: boolean; note: string }>('/v1/admin/alerts/test', { method: 'POST', body: '{}' }),
   adminErrors: () =>
@@ -557,8 +562,8 @@ export const api = {
   attendanceRegister: (course: string) =>
     apiFetch<AttendanceRegister>(`/v1/attendance/sessions?course=${encodeURIComponent(course)}`),
   attendanceClose: (id: string) => apiFetch<{ ok: boolean }>(`/v1/attendance/sessions/${id}/close`, { method: 'POST', body: '{}' }),
-  attendanceCheckin: (code: string) =>
-    apiFetch<{ ok: boolean; already: boolean; course: string }>('/v1/attendance/checkin', { method: 'POST', body: JSON.stringify({ code }) }),
+  attendanceCheckin: (code: string, selfie?: string) =>
+    apiFetch<{ ok: boolean; already: boolean; course: string }>('/v1/attendance/checkin', { method: 'POST', body: JSON.stringify({ code, selfie }) }),
   attendanceMine: () =>
     apiFetch<{ courses: { course: string; held: number; attended: number }[]; recent: { course: string; at: string }[] }>('/v1/attendance/mine'),
 };

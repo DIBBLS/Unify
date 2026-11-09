@@ -29,7 +29,15 @@ export function HomeCgpa({ profile }: { profile: Profile }) {
           </div>
         </div>
       ) : hasTarget ? null : (
-        <Link to="/cgpa-planner" className="btn btn--amber btn--block">Set my target</Link>
+        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px' }}>
+          <BoxBoy full pose="targetSign" width={56} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="eyebrow" style={{ color: 'var(--green-deep)' }}>Your goal</div>
+            <div className="t-15 w-7" style={{ marginTop: 2 }}>Set your CGPA target</div>
+            <div className="t-12 muted" style={{ marginTop: 2 }}>One minute. We work out the grades you need.</div>
+          </div>
+          <Link to="/cgpa-planner" className="btn btn--amber btn--sm" style={{ whiteSpace: 'nowrap' }}>Set my target</Link>
+        </div>
       )}
     </div>
   )
