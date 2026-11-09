@@ -1,4 +1,5 @@
 import { toastError } from '../lib/toast';
+import { ProgressBar } from '../components/redesign/ui';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, Check, X, Loader2, Chrome } from 'lucide-react';
@@ -490,8 +491,8 @@ export default function AuthRoute() {
             <label style={{ fontSize: 12, fontWeight: 700 }}>
               Password
               <input name="new-password" type={showPw ? 'text' : 'password'} value={signupPw} onChange={(e) => setSignupPw(e.target.value)} required placeholder="Min. 8 characters" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid var(--border)', borderRadius: 12, display: 'block' }} />
-              <div style={{ height: 4, background: 'var(--border)', borderRadius: 2, marginTop: 8, overflow: 'hidden' }}>
-                <div style={{ width: `${([signupPw.length >= 8, /[A-Z]/.test(signupPw), /[0-9]/.test(signupPw)].filter(Boolean).length / 3) * 100}%`, height: '100%', background: score === 1 ? '#ff4b4b' : score === 2 ? '#ff9600' : 'var(--u-green)', transition: 'width .2s' }} />
+              <div style={{ marginTop: 8 }}>
+                <ProgressBar height={12} value={[signupPw.length >= 8, /[A-Z]/.test(signupPw), /[0-9]/.test(signupPw)].filter(Boolean).length / 3} color={score === 1 ? '#ef4444' : score === 2 ? '#f59e0b' : 'var(--u-green)'} />
               </div>
               <div style={{ fontSize: 11, color: hasLength ? 'var(--u-good)' : 'var(--text2)', marginTop: 4, display: 'flex', gap: 6, alignItems: 'center' }}>{hasLength ? <Check size={12} /> : <X size={12} />} At least 8 characters</div>
               <div style={{ fontSize: 11, color: hasUpper ? 'var(--u-good)' : 'var(--text2)', display: 'flex', gap: 6, alignItems: 'center' }}>{hasUpper ? <Check size={12} /> : <X size={12} />} One uppercase letter</div>

@@ -162,21 +162,23 @@ export function ProgressDots({ step, total = 3, color = 'var(--u-black)' }: { st
   );
 }
 
-/** Thin bars for multi-step flows (CGPA planner). */
+/** Chunky segments for multi-step flows (CGPA planner, onboarding): one per step, done ones lit. */
 export function StepBars({ step, total = 3 }: { step: number; total?: number }) {
   return (
-    <div className="row" style={{ gap: 6 }}>
+    <div className="duo-steps" role="progressbar" aria-valuemin={1} aria-valuemax={total} aria-valuenow={step} aria-label={`Step ${step} of ${total}`}>
       {Array.from({ length: total }, (_, i) => (
-        <span key={i} style={{ width: 40, height: 5, borderRadius: 3, background: i < step ? 'var(--u-black)' : '#dddbd5' }} />
+        <i key={i} className={i < step ? 'on' : ''} />
       ))}
     </div>
   );
 }
 
-export function ProgressBar({ value, color = 'var(--u-green)', track = '#e8e6e0', height = 6 }: { value: number; color?: string; track?: string; height?: number }) {
+/** Duolingo-style progress bar: chunky, rounded, a highlight stripe on the fill. `value` is 0 to 1. */
+export function ProgressBar({ value, color = 'var(--u-green)', height = 14 }: { value: number; color?: string; track?: string; height?: number }) {
+  const v = Math.max(0, Math.min(1, value));
   return (
-    <div style={{ height, borderRadius: height, background: track, overflow: 'hidden' }}>
-      <div style={{ width: `${Math.max(0, Math.min(1, value)) * 100}%`, height: '100%', background: color, borderRadius: height, transition: 'width var(--dur-4) var(--ease-out)' }} />
+    <div className="duo-bar" style={{ '--h': `${Math.max(10, height)}px`, '--duo-fill': color } as React.CSSProperties} role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(v * 100)}>
+      <div className="duo-fill" style={{ width: `${v * 100}%`, minWidth: v > 0 ? undefined : 0 }} />
     </div>
   );
 }
