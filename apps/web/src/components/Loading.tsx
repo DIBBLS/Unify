@@ -9,6 +9,7 @@ export default function Loading({ text = 'Loading…' }: { text?: string }) {
     <div
       role="status"
       aria-live="polite"
+      className="soft-in soft-in--late loading-screen"
       style={{ minHeight: '60vh', padding: 40, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 18 }}
     >
       <span className="boxboy--hop" style={{ display: 'inline-block', lineHeight: 0 }}>

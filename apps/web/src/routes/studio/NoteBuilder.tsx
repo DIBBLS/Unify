@@ -1,12 +1,13 @@
 import { toastError } from '../../lib/toast';
 import { useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Plus, Trash2, ChevronUp, ChevronDown, Check, X } from 'lucide-react';
 import ConfirmModal from '../../components/ConfirmModal';
 import Drop from '../../components/Drop';
 import Formula from '../../components/Formula';
 import { MathText } from '../../components/MathText';
 import VisualEquation, { parseLatex, type MNode } from '../../components/VisualEquation';
-import { uploadDiagram, uploadNarration } from '../../lib/storage';
+import { uploadDiagram, } from '../../lib/storage';
 import type {
   ContentBlock,
   EOQ,
@@ -420,7 +421,9 @@ function EquationInput({ value, onChange }: { value: string; onChange: (v: strin
   const [tree, setTree] = useState<MNode[] | null>(() => null);
   const [tooHard, setTooHard] = useState(false);
   const [built, setBuilt] = useState('');
+  const [before, setBefore] = useState('');
   const openVisual = (initial: MNode[]) => {
+    setBefore(value);
     setTree(initial);
     setTooHard(false);
     setBuilt('');
@@ -465,23 +468,30 @@ function EquationInput({ value, onChange }: { value: string; onChange: (v: strin
           </button>
         </div>
       )}
-      {tree !== null && (
-        <>
-          <VisualEquation
-            initial={tree}
-            onBuild={(latex) => {
-              setBuilt(latex);
-              onChange(latex);
-            }}
-          />
-          {(built || value).trim() ? (
-            <div style={{ marginTop: 8, background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 8, padding: '10px 12px' }}>
-              <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, color: 'var(--text3)', marginBottom: 4 }}>READER PREVIEW — LIVE</div>
-              <Formula latex={built || value} display />
+      {tree !== null &&
+        createPortal(
+          <div role="dialog" aria-modal="true" aria-label="Equation builder" className="eq-overlay">
+            <div className="eq-bar">
+              <button type="button" className="eq-x" onClick={() => { onChange(before); setTree(null); }}>Cancel</button>
+              <div style={{ flex: 1, textAlign: 'center', fontWeight: 800 }}>Equation builder</div>
+              <button type="button" className="eq-done" onClick={() => setTree(null)}>Done</button>
             </div>
-          ) : null}
-        </>
-      )}
+            <div className="eq-body">
+              <div className="eq-preview">
+                <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, color: 'var(--text3)', marginBottom: 4 }}>HOW STUDENTS WILL SEE IT</div>
+                {(built || value).trim() ? <Formula latex={built || value} display /> : <span style={{ color: 'var(--text3)', fontSize: 12 }}>Your equation appears here as you build it.</span>}
+              </div>
+              <VisualEquation
+                initial={tree}
+                onBuild={(latex) => {
+                  setBuilt(latex);
+                  onChange(latex);
+                }}
+              />
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
@@ -764,48 +774,6 @@ function QuestionEditor({
 }
 
 // ---- main builder ----
-// Narrator audio attach: a Nigerian-voice MP3 per topic (recorded or
-// generated once, uploaded here). Readers play it with speed control;
-// device TTS stays the fallback when empty.
-function TopicAudio({ course, week, audioRef, onChange }: { course: string; week: number; audioRef: string | null; onChange: (url: string | null) => void }) {
-  const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState('');
-  const pick = async (file: File | null) => {
-    if (!file || busy) return;
-    setBusy(true);
-    setMsg('');
-    try {
-      const res = await uploadNarration(file, course, week);
-      if (res.error) {
-        setMsg(res.error);
-        toastError(res.error);
-      } else if (res.url) {
-        onChange(res.url);
-      }
-    } finally {
-      setBusy(false);
-    }
-  };
-  return (
-    <div style={{ marginTop: 8, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: 10 }}>
-      <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 6 }}>Narrator audio {audioRef ? <span style={{ color: 'var(--u-good)' }}>· attached</span> : <span style={{ color: 'var(--text3)' }}>· none (device voice reads instead)</span>}</div>
-      {audioRef && <audio controls src={audioRef} style={{ width: '100%', marginBottom: 6 }} />}
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <label style={{ flex: 1, padding: '8px 12px', borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: 'var(--u-good)', textAlign: 'center', cursor: 'pointer', opacity: busy ? 0.6 : 1 }}>
-          {busy ? 'Uploading…' : audioRef ? 'Replace MP3' : 'Upload MP3 (≤15 MB)'}
-          <input type="file" accept="audio/mpeg,audio/mp4,audio/wav,audio/ogg,.mp3,.m4a,.wav,.ogg" disabled={busy} onChange={(e) => void pick(e.target.files?.[0] || null)} style={{ display: 'none' }} />
-        </label>
-        {audioRef && (
-          <button onClick={() => onChange(null)} style={{ padding: '8px 12px', borderRadius: 10, background: 'var(--surface)', border: '1px solid #fecaca', color: 'var(--u-red)', fontWeight: 700, fontSize: 12 }}>
-            Remove
-          </button>
-        )}
-      </div>
-      {msg && <div style={{ fontSize: 12, color: 'var(--u-red)', marginTop: 6 }}>{msg}</div>}
-    </div>
-  );
-}
-
 export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n: UnifyNote) => void }) {  const set = (patch: Partial<UnifyNote>) => onChange({ ...note, ...patch });
   const setTopics = (topics: Topic[]) => set({ topics });
 
@@ -833,6 +801,33 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
   const at = Math.max(0, Math.min(active, note.topics.length - 1));
   const multiLecture = new Set(note.topics.map((t) => t.lecture || 1)).size > 1;
 
+  // Manual mode edits one part at a time: Week, then each topic's details,
+  // parts, recall cards and pulse check, then the quiz. Back/Next walk the
+  // same order, so nothing is skipped and nothing is crowded onto one screen.
+  type View = 'week' | 'topics' | 'quiz';
+  const [view, setView] = useState<View>('week');
+  const [secRaw, setSec] = useState('details');
+  const curTopic = note.topics[at];
+  const sec = secRaw.startsWith('part') && Number(secRaw.slice(4)) >= (curTopic?.subtopics.length ?? 0) ? 'details' : secRaw;
+  type Step = { view: View; ti: number; sec: string; label: string };
+  const steps: Step[] = [{ view: 'week', ti: 0, sec: 'details', label: 'Week details' }];
+  note.topics.forEach((t, ti) => {
+    steps.push({ view: 'topics', ti, sec: 'details', label: `Topic ${t.number} · Details` });
+    t.subtopics.forEach((s, si) => steps.push({ view: 'topics', ti, sec: 'part' + si, label: `Topic ${t.number} · Part ${s.number}` }));
+    steps.push({ view: 'topics', ti, sec: 'recall', label: `Topic ${t.number} · Recall cards` });
+    steps.push({ view: 'topics', ti, sec: 'pulse', label: `Topic ${t.number} · Pulse check` });
+  });
+  steps.push({ view: 'quiz', ti: 0, sec: 'details', label: 'End-of-week quiz' });
+  const curIdx = Math.max(0, steps.findIndex((st) => st.view === view && (view !== 'topics' || (st.ti === at && st.sec === sec))));
+  const goStep = (st: Step) => {
+    setView(st.view);
+    if (st.view === 'topics') {
+      setActive(st.ti);
+      setSec(st.sec);
+    }
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch { /* ignore */ }
+  };
+
   return (
     <div>
       {confirmTopic !== null && (
@@ -849,7 +844,15 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
           onCancel={() => setConfirmTopic(null)}
         />
       )}
-      <div style={card}>
+      <div className="nb-steps" role="tablist" aria-label="Note sections">
+        {([['week', 'Week'], ['topics', 'Topics'], ['quiz', 'Quiz']] as const).map(([id, name]) => (
+          <button key={id} role="tab" aria-selected={view === id} className={`chip chip--sm${view === id ? ' chip--on' : ''}`} onClick={() => goStep(steps.find((s) => s.view === id) as Step)}>{name}</button>
+        ))}
+        <span className="nb-count">Step {curIdx + 1} of {steps.length}</span>
+      </div>
+
+      {view === 'week' && (
+      <div className="nb-pane" style={card}>
         <h3 style={sectionTitle}>Week details</h3>
         <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 8 }}>{note.course} · Week {note.week}</div>
         <label style={label}>Week title<input value={note.title} onChange={(e) => set({ title: e.target.value })} placeholder="e.g. Energy Sources" style={input} /></label>
@@ -857,7 +860,9 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
         <label style={{ ...label, marginTop: 8 }}>Learning outcome<textarea value={note.learningOutcome} onChange={(e) => set({ learningOutcome: e.target.value })} rows={2} placeholder="By the end of this week…" style={area} /></label>
         <label style={{ ...label, marginTop: 8 }}>Tags (comma-separated)<input value={note.tags.join(', ')} onChange={(e) => set({ tags: e.target.value.split(',').map((t) => t.trim()).filter(Boolean) })} placeholder="Turbine, Density" style={input} /></label>
       </div>
+      )}
 
+      {view === 'topics' && (
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', margin: '4px 0 12px' }} role="tablist" aria-label="Topics">
         {note.topics.map((t, ti) => (
           <button
@@ -865,21 +870,22 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
             role="tab"
             aria-selected={ti === at}
             className={`chip chip--sm${ti === at ? ' chip--on' : ''}`}
-            onClick={() => setActive(ti)}
+            onClick={() => { setActive(ti); setSec('details'); }}
           >
             {multiLecture ? `L${t.lecture || 1} · ` : ''}Topic {t.number}
           </button>
         ))}
         <button
           className="chip chip--sm"
-          onClick={() => { setTopics(renumber([...note.topics, blankTopic(note.topics.length + 1)])); setActive(note.topics.length); }}
+          onClick={() => { setTopics(renumber([...note.topics, blankTopic(note.topics.length + 1)])); setActive(note.topics.length); setSec('details'); }}
         >
           + Topic
         </button>
       </div>
+      )}
 
-      {note.topics.map((t, ti) => ti !== at ? null : (
-        <div key={ti} style={card}>
+      {note.topics.map((t, ti) => ti !== at || view !== 'topics' ? null : (
+        <div key={ti} className="nb-pane" style={card}>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8 }}>
             <h3 style={{ ...sectionTitle, margin: 0, flex: 1 }}>Lecture {t.lecture || 1} · Topic {t.number}</h3>
             <Drop
@@ -897,21 +903,24 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
             <button onClick={() => setTopics(renumber(move(note.topics, ti, 1)))} style={iconBtn} aria-label="Move topic down"><ChevronDown size={14} /></button>
             <button onClick={() => { if (note.topics.length > 1) setConfirmTopic(ti); }} disabled={note.topics.length <= 1} style={{ ...dangerBtn, opacity: note.topics.length <= 1 ? 0.4 : 1 }} aria-label="Delete topic"><Trash2 size={14} /></button>
           </div>
+          <div className="nb-secs" role="tablist" aria-label="Parts of this topic">
+            <button role="tab" aria-selected={sec === 'details'} className={`chip chip--sm${sec === 'details' ? ' chip--on' : ''}`} onClick={() => setSec('details')}>Details</button>
+            {t.subtopics.map((s, si) => (
+              <button key={si} role="tab" aria-selected={sec === 'part' + si} className={`chip chip--sm${sec === 'part' + si ? ' chip--on' : ''}`} onClick={() => setSec('part' + si)}>Part {s.number}</button>
+            ))}
+            <button className="chip chip--sm" onClick={() => { const topics = [...note.topics]; topics[ti] = { ...t, subtopics: [...t.subtopics, blankSubtopic(t.number)] }; setTopics(renumber(topics)); setSec('part' + t.subtopics.length); }}>+ Part</button>
+            <button role="tab" aria-selected={sec === 'recall'} className={`chip chip--sm${sec === 'recall' ? ' chip--on' : ''}`} onClick={() => setSec('recall')}>Recall ({(t.activeRecall || []).length})</button>
+            <button role="tab" aria-selected={sec === 'pulse'} className={`chip chip--sm${sec === 'pulse' ? ' chip--on' : ''}`} onClick={() => setSec('pulse')}>Pulse check</button>
+          </div>
+          {sec === 'details' && (
+          <>
           <label style={label}>Title<input value={t.title} onChange={(e) => { const topics = [...note.topics]; topics[ti] = { ...t, title: e.target.value }; setTopics(topics); }} placeholder="Topic title" style={input} /></label>
           <label style={{ ...label, marginTop: 8 }}>Short tag<input value={t.abbr} onChange={(e) => { const topics = [...note.topics]; topics[ti] = { ...t, abbr: e.target.value }; setTopics(topics); }} placeholder="e.g. HYDRO" style={input} /></label>
-          <TopicAudio
-            course={note.course}
-            week={note.week}
-            audioRef={t.audioRef || null}
-            onChange={(audioRef) => {
-              const topics = [...note.topics];
-              topics[ti] = { ...t, audioRef };
-              setTopics(topics);
-            }}
-          />
+          </>
+          )}
 
-          {t.subtopics.map((s, si) => (
-            <div key={si} style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed var(--border)' }}>
+          {t.subtopics.map((s, si) => sec !== 'part' + si ? null : (
+            <div key={si} style={{ marginTop: 12 }}>
               <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--u-good)', marginBottom: 8 }}>Part {s.number} · {s.title || '(untitled)'}</div>
               <label style={label}>Part title<input value={s.title} onChange={(e) => { const topics = [...note.topics]; const subs = [...topics[ti].subtopics]; subs[si] = { ...s, title: e.target.value }; topics[ti] = { ...t, subtopics: subs }; setTopics(topics); }} placeholder="Section title" style={input} /></label>
               <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -955,17 +964,15 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
                 </div>
               </div>
               {t.subtopics.length > 1 && (
-                <button onClick={() => { const topics = [...note.topics]; topics[ti] = { ...t, subtopics: t.subtopics.filter((_, xi) => xi !== si) }; setTopics(renumber(topics)); }} style={{ ...dangerBtn, marginTop: 8, fontSize: 12, fontWeight: 700, padding: '6px 12px' }}>
+                <button onClick={() => { const topics = [...note.topics]; topics[ti] = { ...t, subtopics: t.subtopics.filter((_, xi) => xi !== si) }; setTopics(renumber(topics)); setSec('details'); }} style={{ ...dangerBtn, marginTop: 8, fontSize: 12, fontWeight: 700, padding: '6px 12px' }}>
                   Remove this part
                 </button>
               )}
             </div>
           ))}
-          <button onClick={() => { const topics = [...note.topics]; const subs = [...t.subtopics, blankSubtopic(t.number)]; topics[ti] = { ...t, subtopics: subs }; setTopics(renumber(topics)); }} style={{ ...addBtn, marginTop: 10 }}>
-            <Plus size={12} /> Add part
-          </button>
 
-          <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed var(--border)' }}>
+          {sec === 'recall' && (
+          <div style={{ marginTop: 12 }}>
             <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 6 }}>Recall cards ({(t.activeRecall || []).length})</div>
             {(t.activeRecall || []).length === 0 && <div style={hint}>Add at least 1 recall card.</div>}
             {(t.activeRecall || []).map((c, ci) => (
@@ -984,8 +991,10 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
               <Plus size={12} /> Recall card
             </button>
           </div>
+          )}
 
-          <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed var(--border)' }}>
+          {sec === 'pulse' && (
+          <div style={{ marginTop: 12 }}>
             <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 6 }}>Pulse check (fixed: MCQ, MCQ, Fill-in)</div>
             {(t.pulseCheck?.questions || []).map((q, qi) => (
               <QuestionEditor
@@ -1019,14 +1028,13 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
               </button>
             )}
           </div>
+          )}
         </div>
       ))}
 
-      <button onClick={() => setTopics(renumber([...note.topics, blankTopic(note.topics.length + 1)]))} style={{ width: '100%', padding: 14, background: 'var(--surface)', border: '1px dashed var(--u-good)', borderRadius: 12, color: 'var(--u-good)', fontWeight: 800, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
-        <Plus size={16} /> Add topic
-      </button>
 
-      <div style={{ ...card, marginTop: 12 }}>
+      {view === 'quiz' && (
+      <div className="nb-pane" style={{ ...card, marginTop: 12 }}>
         <h3 style={sectionTitle}>End-of-week quiz</h3>
         <div style={{ fontSize: 12, fontWeight: 700, color: mcqCount === 8 && fitbCount === 2 ? 'var(--u-good)' : 'var(--u-warn-ink)', marginBottom: 8 }}>
           {note.eoq.questions.length}/10 questions · Objective {mcqCount} of 8 · Fill-in {fitbCount} of 2
@@ -1162,6 +1170,13 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
             <Plus size={12} /> Fill-in
           </button>
         </div>
+      </div>
+      )}
+
+      <div className="nb-nav">
+        <button className="chip" disabled={curIdx === 0} onClick={() => goStep(steps[curIdx - 1])}>← Back</button>
+        <span className="nb-where">{steps[curIdx]?.label}</span>
+        <button className="chip chip--on" disabled={curIdx === steps.length - 1} onClick={() => goStep(steps[curIdx + 1])}>Next →</button>
       </div>
     </div>
   );

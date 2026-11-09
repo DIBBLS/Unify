@@ -1,3 +1,5 @@
+import PushHelp, { GuideSteps } from '../components/PushHelp';
+import type { GuideKind } from '../lib/pushHelp';
 import { ProfileSkeleton } from '../components/Skeletons';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
@@ -166,6 +168,7 @@ export default function MeRoute() {
   };
   const { theme, toggle } = useTheme();
   const [pushSt, setPushSt] = useState<PushState>('off');
+  const [pushGuideKind, setPushGuideKind] = useState<GuideKind | null>(null);
   const [pushBusy, setPushBusy] = useState(false);
   const [pushMsg, setPushMsg] = useState('');
 
@@ -191,8 +194,9 @@ export default function MeRoute() {
           setPushSt('on');
           setPushMsg('Push on — new notes and announcements will buzz you.');
         } else {
-          if (Notification.permission === 'denied') setPushSt('denied');
+          if (res.kind === 'blocked') setPushSt('denied');
           setPushMsg(res.reason || 'Could not enable push.');
+          setPushGuideKind(res.kind ?? 'failed');
         }
       }
     } finally {
@@ -577,16 +581,18 @@ export default function MeRoute() {
             <button
               onClick={flipPush}
               disabled={pushBusy || pushSt === 'denied'}
-              style={{ width: '100%', padding: 12, background: pushSt === 'on' ? 'var(--u-good-tint)' : 'var(--surface2)', color: pushSt === 'on' ? 'var(--u-good)' : 'var(--text)', border: `1px solid ${pushSt === 'on' ? 'var(--u-good)' : 'var(--border)'}`, borderRadius: 12, fontWeight: 800, fontSize: 13, opacity: pushBusy || pushSt === 'denied' ? 0.6 : 1 }}
+              style={{ width: '100%', padding: 12, background: pushSt === 'on' ? 'var(--u-good-tint)' : 'var(--surface2)', color: pushSt === 'on' ? 'var(--u-good)' : 'var(--text)', border: `1px solid ${pushSt === 'on' ? 'var(--u-good)' : 'var(--border)'}`, borderRadius: 12, fontWeight: 800, fontSize: 13, opacity: pushBusy ? 0.6 : 1 }}
             >
               {pushBusy ? 'Working…' : pushSt === 'on' ? 'Push notifications: ON' : 'Push notifications: OFF'}
             </button>
             <div style={{ fontSize: 11, color: 'var(--text2)', marginTop: 6 }}>
               {pushSt === 'denied'
-                ? 'Blocked in browser settings — allow notifications for this site, then retry.'
+                ? 'Blocked in your browser settings. Here is how to allow it:'
                 : 'Lock-screen nudges for new notes and announcements, even with the app closed.'}
             </div>
-            {pushMsg && <div style={{ fontSize: 12, color: 'var(--u-good)', marginTop: 6 }}>{pushMsg}</div>}
+            {pushSt === 'denied' && <div style={{ fontSize: 12, marginTop: 6 }}><GuideSteps kind="blocked" /></div>}
+            {pushMsg && pushSt !== 'denied' && <div style={{ fontSize: 12, color: 'var(--u-good)', marginTop: 6 }}>{pushMsg}</div>}
+            {pushGuideKind && pushSt !== 'denied' && <PushHelp kind={pushGuideKind} onClose={() => setPushGuideKind(null)} />}
           </div>
         )}
       </div>

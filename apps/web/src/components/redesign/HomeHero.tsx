@@ -15,6 +15,26 @@ interface HomeHeroProps {
  * S14: Home hero with semester week tracker + CGPA target
  * Replaces generic greeting card
  */
+export function HomeCgpa({ profile }: { profile: Profile }) {
+  const hasTarget = profile.cgpa_target != null
+  return (
+    <div className="rise" style={{ margin: '0 16px 12px' }}>
+      {hasTarget && !profile.hide_cgpa ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: 16, background: 'var(--u-card)', borderRadius: 16, border: '1px solid var(--u-border)' }}>
+          <BoxBoy full pose="targetSign" width={60} />
+          <div style={{ flex: 1 }}>
+            <div className="t-13 muted">CGPA Target</div>
+            <div className="t-20 w-7">{profile.cgpa_target?.toFixed(2)}</div>
+            {profile.cgpa_current != null && <div className="t-12 faint">Current: {profile.cgpa_current.toFixed(2)}</div>}
+          </div>
+        </div>
+      ) : hasTarget ? null : (
+        <Link to="/cgpa-planner" className="btn btn--amber btn--block">Set my target</Link>
+      )}
+    </div>
+  )
+}
+
 export function HomeHero({ profile, firstName, showCgpa = false }: HomeHeroProps) {
   // Calculate current week (1-12)
   const currentWeek = getCurrentWeek(profile.semester_start, profile.semester_weeks || 12)
@@ -27,7 +47,7 @@ export function HomeHero({ profile, firstName, showCgpa = false }: HomeHeroProps
   
   return (
     <div 
-      className="card card--dark african-dark" 
+      className="card card--dark african-dark soft-in" 
       style={{ 
         margin: '16px', 
         padding: '24px 20px 30px',
@@ -65,43 +85,6 @@ export function HomeHero({ profile, firstName, showCgpa = false }: HomeHeroProps
         <BoxBoy pose={hasTarget ? "targetSign" : "readingStanding"} width={72} style={{ flexShrink: 0 }} />
       </div>
 
-      {/* CGPA target / Set target - inside hero (students only) */}
-      {showCgpa && (
-      <div style={{ marginTop: 20 }}>
-        {hasTarget && !profile.hide_cgpa ? (
-          <div
-            style={{ 
-              display: 'flex',
-              alignItems: 'center',
-              gap: 16,
-              padding: 16,
-              background: 'var(--u-card)',
-              borderRadius: 16,
-              border: '1px solid var(--u-border)'
-            }}
-          >
-            <BoxBoy full pose="targetSign" width={60} />
-            <div style={{ flex: 1 }}>
-              <div className="t-13 muted">CGPA Target</div>
-              <div className="t-20 w-7">{profile.cgpa_target?.toFixed(2)}</div>
-              {profile.cgpa_current != null && (
-                <div className="t-12 faint">
-                  Current: {profile.cgpa_current.toFixed(2)}
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <Link
-            to="/cgpa-planner"
-            className="btn btn--amber btn--block"
-            style={{ marginTop: 12 }}
-          >
-            Set my target
-          </Link>
-        )}
-      </div>
-      )}
     </div>
   )
 }

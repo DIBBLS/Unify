@@ -51,13 +51,13 @@ export default function WelcomeRoute() {
           )}
         </div>
         <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', overflow: 'hidden' }}>
-          <BoxBoy key={s.pose} pose={s.pose} width={240} style={{ animation: 'boxboy-bob 2.2s ease-in-out infinite' }} />
+          <span key={s.pose} className="soft-in" style={{ display: 'block', lineHeight: 0 }}><BoxBoy pose={s.pose} width={240} style={{ animation: 'boxboy-bob 2.2s ease-in-out infinite' }} /></span>
         </div>
       </div>
 
       <div style={{ padding: '24px 24px 28px', flex: 1, display: 'flex', flexDirection: 'column', gap: 14 }}>
         <ProgressDots step={i + 1} total={SLIDES.length} color="var(--u-text)" />
-        <div key={i} className="page-enter" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div key={i} className="soft-in" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <Display size={32}>{s.title}</Display>
           <p style={{ fontSize: 16, lineHeight: 1.5, color: 'var(--u-text-2)' }}>{s.body}</p>
         </div>

@@ -5,7 +5,7 @@
 // saw (per-user keys: phones are shared, one student must never be handed
 // another's data). Live endpoints (attendance sessions, admin) are never
 // cached. Writes (POST/PUT/DELETE) always bypass.
-const CACHE = 'unify-app-v13';
+const CACHE = 'unify-app-v14';
 const CONTENT = 'unify-content-v1';
 const API_CACHE = 'unify-api-v1';
 const API_WAIT_MS = 4000;

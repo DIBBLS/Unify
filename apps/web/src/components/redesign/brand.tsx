@@ -108,13 +108,17 @@ export function Avatar({ persona = 'go-getter', size = 40, ring, style }: { pers
 
 /* ---------- Wordmark / app icon ---------- */
 export function Wordmark({ size = 16, color }: { size?: number; color?: string }) {
-  return <span className="wordmark" style={{ fontSize: size, color }}>Unify Learn</span>;
+  return (
+    <span className="wordmark" style={{ fontSize: size, color, fontWeight: 900 }}>
+      Unify<span className="dot-breathe" style={{ color: 'var(--u-green)', display: 'inline-block' }}>.</span>
+    </span>
+  );
 }
 
 export function AppIcon({ size = 120 }: { size?: number }) {
   return (
-    <div style={{ width: size, height: size, borderRadius: size * 0.24, background: '#0a0a0a', display: 'grid', placeItems: 'center' }}>
-      <span className="display" style={{ fontSize: size * 0.47, color: 'var(--u-green)' }}>U</span>
+    <div style={{ width: size, height: size, borderRadius: size * 0.24, background: 'var(--u-green)', display: 'grid', placeItems: 'center' }}>
+      <span style={{ fontFamily: 'var(--font-wordmark)', fontWeight: 900, fontSize: size * 0.58, lineHeight: 1, color: '#0a0a0a' }}>U.</span>
     </div>
   );
 }

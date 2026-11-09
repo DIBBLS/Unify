@@ -186,7 +186,7 @@ export function parseLatex(latex: string): MNode[] | null {
   }
 }
 
-const GLYPHS: { g: string; lx: string }[] = [
+const GLYPHS: { g: string; lx: string; grp?: 'sym' | 'fn' }[] = [
   { g: 'α', lx: '\\alpha' },
   { g: 'β', lx: '\\beta' },
   { g: 'γ', lx: '\\gamma' },
@@ -205,11 +205,51 @@ const GLYPHS: { g: string; lx: string }[] = [
   { g: '∑', lx: '\\sum' },
   { g: '∫', lx: '\\int' },
   { g: '∏', lx: '\\prod' },
+  { g: 'η', lx: '\\eta' },
+  { g: 'κ', lx: '\\kappa' },
+  { g: 'ν', lx: '\\nu' },
+  { g: 'τ', lx: '\\tau' },
+  { g: 'ψ', lx: '\\psi' },
+  { g: 'χ', lx: '\\chi' },
+  { g: 'Σ', lx: '\\Sigma' },
+  { g: 'Φ', lx: '\\Phi' },
+  { g: 'Ψ', lx: '\\Psi' },
+  { g: 'Γ', lx: '\\Gamma' },
+  { g: 'Θ', lx: '\\Theta' },
+  { g: 'Λ', lx: '\\Lambda' },
+  // Relations, operators and marks
+  { g: '±', lx: '\\pm', grp: 'sym' },
+  { g: '÷', lx: '\\div', grp: 'sym' },
+  { g: '·', lx: '\\cdot', grp: 'sym' },
+  { g: '≠', lx: '\\neq', grp: 'sym' },
+  { g: '≈', lx: '\\approx', grp: 'sym' },
+  { g: '≤', lx: '\\leq', grp: 'sym' },
+  { g: '≥', lx: '\\geq', grp: 'sym' },
+  { g: '<', lx: '<', grp: 'sym' },
+  { g: '>', lx: '>', grp: 'sym' },
+  { g: '∝', lx: '\\propto', grp: 'sym' },
+  { g: '∞', lx: '\\infty', grp: 'sym' },
+  { g: '→', lx: '\\to', grp: 'sym' },
+  { g: '⇌', lx: '\\rightleftharpoons', grp: 'sym' },
+  { g: '°', lx: '\\degree', grp: 'sym' },
+  { g: '∂', lx: '\\partial', grp: 'sym' },
+  { g: '∇', lx: '\\nabla', grp: 'sym' },
+  { g: '%', lx: '\\%', grp: 'sym' },
+  // Functions
+  { g: 'sin', lx: '\\sin', grp: 'fn' },
+  { g: 'cos', lx: '\\cos', grp: 'fn' },
+  { g: 'tan', lx: '\\tan', grp: 'fn' },
+  { g: 'log', lx: '\\log', grp: 'fn' },
+  { g: 'ln', lx: '\\ln', grp: 'fn' },
+  { g: 'exp', lx: '\\exp', grp: 'fn' },
+  { g: 'lim', lx: '\\lim', grp: 'fn' },
+  { g: 'max', lx: '\\max', grp: 'fn' },
+  { g: 'min', lx: '\\min', grp: 'fn' },
 ];
 
 const KEYS = ['7', '8', '9', '4', '5', '6', '1', '2', '3', '0', '.', '='];
 const LETTERS = ['x', 'y', 'z', 'a', 'b', 'c', 'm', 'n', 'P', 'Q', 'R', 'T'];
-const OPS = ['+', '−', '×', '=', '(', ')'];
+const OPS = ['+', '−', '×', '=', '(', ')', '[', ']', ',', '/'];
 
 // ---- reusable formula library ----
 // Named presets authors drop in whole instead of rebuilding: categories +
@@ -488,11 +528,16 @@ export default function VisualEquation({ initial, onBuild }: { initial: MNode[];
           <button key={k} type="button" onClick={() => addTok(k)} style={key}>{k}</button>
         ))}
       </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }} role="toolbar" aria-label="Greek letters">
-        {GLYPHS.map((g) => (
-          <button key={g.lx} type="button" onClick={() => addTok(g.g)} style={{ ...key, color: 'var(--u-good)' }}>{g.g}</button>
-        ))}
-      </div>
+      {([['sym', 'Symbols'], ['fn', 'Functions'], [undefined, 'Greek letters']] as const).map(([grp, name]) => (
+        <div key={name} style={{ marginBottom: 6 }}>
+          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, color: 'var(--text3)', margin: '6px 0 4px', textTransform: 'uppercase' }}>{name}</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }} role="toolbar" aria-label={name}>
+            {GLYPHS.filter((g) => g.grp === grp).map((g) => (
+              <button key={g.lx} type="button" onClick={() => addTok(g.g)} style={{ ...key, color: 'var(--u-good)', minWidth: g.grp === 'fn' ? 48 : 38 }}>{g.g}</button>
+            ))}
+          </div>
+        </div>
+      ))}
       <div style={{ marginTop: 8 }}>
         <button
           type="button"

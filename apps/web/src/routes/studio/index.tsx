@@ -870,7 +870,6 @@ export default function StudioRoute() {
               const formulas = note.topics.flatMap((t) =>
                 t.subtopics.flatMap((s) => s.content.filter((b) => b.type === 'formula'))
               ).length;
-              const audio = note.topics.filter((t) => t.audioRef).length;
               const mcq = note.eoq.questions.filter((q) => q.type === 'mcq').length;
               const fitb = note.eoq.questions.length - mcq;
               const quizOk = note.eoq.questions.length === 10 && mcq === 8 && fitb === 2;
@@ -879,7 +878,6 @@ export default function StudioRoute() {
                 { ok: quizOk, text: quizOk ? `Quiz complete: 10 questions (8 MCQ + 2 fill-in)` : `Quiz short: ${note.eoq.questions.length}/10 (${mcq} MCQ + ${fitb} fill-in) — regenerate or top up` },
                 { ok: diagramsBare === 0, text: diagrams.length ? (diagramsBare ? `${diagramsBare} diagram${diagramsBare === 1 ? '' : 's'} still need${diagramsBare === 1 ? 's' : ''} uploaded images` : `All ${diagrams.length} diagrams have images`) : 'No diagrams called for' },
                 { ok: true, text: `${formulas} formula${formulas === 1 ? '' : 's'} — open each Reader preview to confirm the render` },
-                { ok: true, text: audio ? `${audio}/${note.topics.length} topics carry narrator audio` : 'No narrator audio — device voices read instead' },
               ];
               return (
                 <div style={{ marginTop: 10, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px' }}>
