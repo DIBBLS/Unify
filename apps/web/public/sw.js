@@ -100,7 +100,7 @@ self.addEventListener('fetch', (e) => {
     (url.pathname.startsWith('/assets/') ||
       url.pathname.startsWith('/boxboy/') ||
       url.pathname.startsWith('/icons/') ||
-      url.pathname === '/og-image.png' ||
+      url.pathname === '/og-image.jpg' ||
       url.pathname === '/favicon.svg');
   // Offline math + typography: MathJax (script + its font files, same
   // version-pinned path) and Google Fonts. Cached on first online visit,
