@@ -1,3 +1,4 @@
+import { FormSkeleton } from '../components/Skeletons';
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ChevronLeft } from 'lucide-react'
@@ -199,7 +200,7 @@ export default function CGPAPlannerRoute() {
     }
   }
 
-  if (loading) return <Loading text="Loading..." />
+  if (loading) return <FormSkeleton />
   
   return (
     <div className="screen screen--tabs">

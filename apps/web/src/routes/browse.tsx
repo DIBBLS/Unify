@@ -67,7 +67,7 @@ export default function BrowseRoute() {
     });
   }, [courses, q, isAuthor, isContrib, enrolled, level]);
 
-  if (loading) return <Loading />;
+  if (loading) return <SearchListSkeleton />;
   if (forbidden)
     return (
       <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>

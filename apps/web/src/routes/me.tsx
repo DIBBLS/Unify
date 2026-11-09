@@ -1,3 +1,4 @@
+import { ProfileSkeleton } from '../components/Skeletons';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -357,7 +358,7 @@ export default function MeRoute() {
     }
   };
 
-  if (loading) return <Loading text="Loading profile…" />;
+  if (loading) return <ProfileSkeleton />;
   if (error)
     return <ErrorState title="Couldn't load your profile" message={error} />;
 

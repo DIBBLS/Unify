@@ -1,3 +1,4 @@
+import LoadingQuote from '../components/LoadingQuote';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
@@ -32,7 +33,7 @@ export default function MyAttendanceRoute() {
       <Link to={ROUTES.attendancePass} className="btn btn--amber btn--block" style={{ marginTop: 16 }}>Mark attendance</Link>
 
       {!data ? (
-        <div className="skel" style={{ height: 140, borderRadius: 24, marginTop: 16 }} />
+        <><div className="skel" style={{ height: 140, borderRadius: 24, marginTop: 16 }} /><LoadingQuote style={{ margin: '24px auto 0' }} /></>
       ) : data.courses.length === 0 ? (
         <Card style={{ alignItems: 'center', textAlign: 'center', marginTop: 16 }}>
           <BoxBoy pose="peeking" width={110} />

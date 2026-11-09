@@ -1,3 +1,4 @@
+import { FormSkeleton } from '../components/Skeletons';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -220,7 +221,7 @@ export default function OnboardingRoute() {
     })
   );
 
-  if (loading) return <Loading text="Loading onboarding…" />;
+  if (loading) return <FormSkeleton />;
 
   if (requestSent) {
     const staffLabel = role === 'lecturer' ? 'Lecturer' : 'Contributor';

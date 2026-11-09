@@ -1,3 +1,4 @@
+import { ListSkeleton } from '../../components/Skeletons';
 import { toastError } from '../../lib/toast';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -43,7 +44,7 @@ export default function AdminContentPanel() {
     );
   }, [courses, q]);
 
-  if (loading) return <Loading text="Loading all content…" />;
+  if (loading) return <ListSkeleton rows={5} titleWidth="40%" />;
   if (forbidden)
     return (
       <div>

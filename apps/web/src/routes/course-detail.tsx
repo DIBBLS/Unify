@@ -1,3 +1,4 @@
+import { DetailSkeleton } from '../components/Skeletons';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
@@ -98,7 +99,7 @@ export default function CourseDetailRoute() {
     }
   };
 
-  if (loading) return <Loading />;
+  if (loading) return <DetailSkeleton />;
   if (!code) {
     // Unreachable via router links (course code is always present), but if
     // it ever happens, send the student to their courses instead of a

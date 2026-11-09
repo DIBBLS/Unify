@@ -1,3 +1,4 @@
+import { startVitals } from './lib/vitals';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
@@ -74,6 +75,7 @@ log.info('boot', 'env', {
   backend: (_pick('VITE_USE_BACKEND', 'USE_BACKEND') ?? '1') === '1',
 });
 
+startVitals();
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />

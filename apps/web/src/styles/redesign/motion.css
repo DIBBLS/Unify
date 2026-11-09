@@ -47,3 +47,7 @@
     animation-delay: 0ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important;
   }
 }
+
+/* Loading lines swap with a soft rise. */
+.quote-fade { animation: rise-in var(--dur-3) var(--ease-out) backwards; }
+@media (prefers-reduced-motion: reduce) { .quote-fade { animation: none; } }

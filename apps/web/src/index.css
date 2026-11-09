@@ -348,3 +348,7 @@ sticky icon sidebar; phones get a horizontal pill rail on top. */
 
 .update-dot{width:8px;height:8px;border-radius:50%;background:#10b981;flex-shrink:0;animation:pulse-dot 1.6s ease-out infinite}
 @keyframes pulse-dot{0%{box-shadow:0 0 0 0 rgba(16,185,129,.55)}70%{box-shadow:0 0 0 8px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
+
+/* Studio review: the actions stay in reach above the bottom nav (or the desktop rail). */
+.studio-actions{position:sticky;bottom:calc(var(--nav-h) - 6px + env(safe-area-inset-bottom));z-index:30;margin-top:20px;padding:10px;background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow)}
+[data-rail="1"] .studio-actions{bottom:12px}

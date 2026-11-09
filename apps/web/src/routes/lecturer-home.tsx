@@ -1,3 +1,4 @@
+import LoadingQuote from '../components/LoadingQuote';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CalendarDays, ClipboardCheck, PenTool, Search, ChevronRight } from 'lucide-react';
@@ -59,7 +60,7 @@ export default function LecturerHomeRoute() {
       <section style={{ marginTop: 22 }}>
         <Label>Today</Label>
         {today === null ? (
-          <div className="skel" style={{ height: 90, borderRadius: 24, marginTop: 8 }} />
+          <><div className="skel" style={{ height: 90, borderRadius: 24, marginTop: 8 }} /><LoadingQuote style={{ margin: '24px auto 0' }} /></>
         ) : today.length === 0 ? (
           <Card style={{ marginTop: 8 }}>
             <div className="t-15 w-6">No classes today</div>

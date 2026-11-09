@@ -246,6 +246,20 @@ export type CgpaData = { cgpaCurrent: number | null; cgpaTarget: number | null; 
 export type Material = { id: string; week: number; type: 'slides' | 'notes' | 'past-paper'; title: string; url: string; createdAt: string; mine: boolean };
 export type AttendanceRegister = { session: AttendanceSession | null; present: { studentId: string; at: string; name: string; matric: string }[]; enrolled: number };
 
+export type PerfPoint = { t: number; n: number; e4: number; e5: number; p50: number; p95: number; max: number };
+export type PerfSnapshot = {
+  minutes: number;
+  from: number;
+  to: number;
+  serverTime: number;
+  total: PerfPoint[];
+  totals: Omit<PerfPoint, 't'> & { rpm: number; errRate: number };
+  modules: (Omit<PerfPoint, 't'> & { name: string; rpm: number; errRate: number; series: PerfPoint[] })[];
+  system: { uptimeSec: number; rssMb: number; heapMb: number; lagMaxMs: number; lag: { t: number; ms: number }[]; db: { t: number; ms: number; ok: boolean }[]; node: string };
+  vitals: { page: string; metric: string; n: number; p50: number; p75: number }[];
+  alerts: { at: string; signature: string; kind: string; message: string; emailed: boolean; note?: string }[];
+};
+
 export const api = {
   universities: () => apiFetch<University[]>("/v1/universities"),
   settings: () => apiFetch<{ currentSemester: string }>("/v1/settings"),
@@ -497,6 +511,8 @@ export const api = {
     apiFetch<{ ok: boolean; avatarUrl: string }>('/v1/avatar', { method: 'POST', body: JSON.stringify({ image }) }),
   logError: (payload: { kind: string; message: string; stack: string; url: string; appVersion: string }) =>
     apiFetch<{ ok: boolean }>('/v1/errors', { method: 'POST', body: JSON.stringify(payload) }),
+  adminMetrics: (minutes: 15 | 60 | 180) => apiFetch<PerfSnapshot>(`/v1/admin/metrics?minutes=${minutes}`),
+  adminTestAlert: () => apiFetch<{ ok: boolean; note: string }>('/v1/admin/alerts/test', { method: 'POST', body: '{}' }),
   adminErrors: () =>
     apiFetch<{ errors: { kind: string; message: string; stack: string; url: string; app_version: string; created_at: string }[] }>('/v1/admin/errors'),
   adminDeleteCourse: (code: string) =>

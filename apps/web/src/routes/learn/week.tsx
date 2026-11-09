@@ -1,3 +1,4 @@
+import { ReaderSkeleton } from '../../components/Skeletons';
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Check, Download, ArrowUp, Share2, Lock } from 'lucide-react';
@@ -202,7 +203,7 @@ export default function LearnPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseCode, weekNum]);
 
-  if (loading) return <Loading />;
+  if (loading) return <ReaderSkeleton />;
   if (!courseCode) {
     // Unreachable via router links — redirect to courses instead of stranding.
     log.warn('route', `week with empty course (url=${window.location.href})`);
