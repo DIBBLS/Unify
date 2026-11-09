@@ -1,51 +1,64 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { supabaseBrowser } from '../lib/supabase'
-import { toastError, toastSuccess } from '../lib/toast'
-import { Button } from '../components/redesign/ui'
-import { BoxBoy } from '../components/redesign/brand'
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { api } from '../lib/api';
+import { errorToast } from '../lib/errors';
+import { ROUTES } from '../lib/routes';
+import BackButton from '../components/BackButton';
+import { BoxBoy } from '../components/redesign/brand';
+import { Card, Display, Label } from '../components/redesign/ui';
+
+// One-time: the name and matric number lecturers see on the register.
+const input: React.CSSProperties = {
+  width: '100%', padding: 14, marginTop: 6, borderRadius: 12, border: '1px solid var(--border)',
+  background: 'var(--surface)', color: 'var(--text)', fontSize: 16,
+};
 
 export default function AttendanceSetupRoute() {
-  const navigate = useNavigate()
-  const [fullName, setFullName] = useState('')
-  const [matric, setMatric] = useState('')
-  const [saving, setSaving] = useState(false)
+  const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const [fullName, setFullName] = useState('');
+  const [matric, setMatric] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    api.attendanceProfile().then((p) => { setFullName(p.fullName); setMatric(p.matric); }).catch(() => {});
+  }, []);
 
   const save = async () => {
-    if (!fullName || !matric) return toastError('Fill name and matric')
-    setSaving(true)
-    try {
-      const sb = supabaseBrowser()
-      if (!sb) throw new Error('Not authenticated')
-      const { data: { user } } = await sb.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
-      const { error } = await sb.from('profiles').update({
-        attendance_full_name: fullName,
-        attendance_matric: matric
-      }).eq('id', user.id)
-      if (error) throw error
-      toastSuccess('Attendance set up')
-      navigate('/attendance/pass')
-    } catch (e: any) {
-      toastError(e.message)
-    } finally {
-      setSaving(false)
+    if (fullName.trim().length < 2 || matric.trim().length < 3) {
+      errorToast(new Error('Enter your full name and matric number.'), 'save your details');
+      return;
     }
-  }
+    setBusy(true);
+    try {
+      await api.attendanceSetProfile(fullName.trim(), matric.trim());
+      navigate(params.get('next') || ROUTES.attendancePass, { replace: true });
+    } catch (e) {
+      errorToast(e, 'save your details');
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
-    <div style={{ padding: 24, maxWidth: 480, margin: '0 auto' }}>
-      <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 16 }}>
-        <BoxBoy pose="keyHandover" width={64} />
-        <h1 style={{ margin: 0, fontFamily: 'var(--font-headline)' }}>Attendance setup</h1>
+    <div style={{ maxWidth: 'min(var(--shell, 480px), 560px)', margin: '0 auto', padding: '20px 16px 96px' }}>
+      <BackButton to={ROUTES.timetable} />
+      <Card style={{ alignItems: 'center', textAlign: 'center', marginTop: 8 }}>
+        <BoxBoy pose="phoneOut" width={110} />
+        <Display size={26}>Your attendance details</Display>
+        <div className="t-13 muted">Your lecturer sees these on the register. You only do this once.</div>
+      </Card>
+      <div style={{ marginTop: 18 }}>
+        <Label>Full name (as on your ID)</Label>
+        <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="e.g. Adaeze Okafor" autoComplete="name" style={input} />
       </div>
-      <p>This is for attendance. Heads of Class see this name when they scan your pass.</p>
-      <label>Full name</label>
-      <input value={fullName} onChange={e=>setFullName(e.target.value)} style={{ width:'100%', padding:8, margin:'8px 0', borderRadius:12, border:'1px solid var(--u-border)', background:'var(--u-card)' }} />
-      <label>Matric number</label>
-      <input value={matric} onChange={e=>setMatric(e.target.value)} style={{ width:'100%', padding:8, margin:'8px 0', borderRadius:12, border:'1px solid var(--u-border)', background:'var(--u-card)' }} />
-      <Button onClick={save} disabled={saving} variant="amber" style={{ marginTop:12 }}>{saving?'Saving...':'Save and get pass'}</Button>
+      <div style={{ marginTop: 14 }}>
+        <Label>Matric number</Label>
+        <input value={matric} onChange={(e) => setMatric(e.target.value)} placeholder="e.g. 190401001" autoCapitalize="characters" style={input} />
+      </div>
+      <button className="btn btn--amber btn--block" disabled={busy} onClick={() => void save()} style={{ marginTop: 22 }}>
+        {busy ? 'Saving…' : 'Save and continue'}
+      </button>
     </div>
-  )
+  );
 }
-

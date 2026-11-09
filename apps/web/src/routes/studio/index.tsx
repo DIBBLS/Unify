@@ -604,7 +604,7 @@ export default function StudioRoute() {
         {['Compose', 'Review', 'Live'].map((s, i) => (
           <div key={s} style={{ flex: 1, textAlign: 'center' }}>
             <div style={{ height: 4, borderRadius: 2, background: i <= step ? 'var(--u-amber)' : 'var(--border)' }} />
-            <div style={{ fontSize: 11, color: i <= step ? '#059669' : 'var(--text3)', fontWeight: 700, marginTop: 4 }}>{s}</div>
+            <div style={{ fontSize: 11, color: i <= step ? 'var(--u-good)' : 'var(--text3)', fontWeight: 700, marginTop: 4 }}>{s}</div>
           </div>
         ))}
       </div>
@@ -666,7 +666,7 @@ export default function StudioRoute() {
               <input value={week} onChange={(e) => setWeek(e.target.value)} inputMode="numeric" placeholder="1" style={input} />
             </label>
           </div>
-          <button onClick={suggestWeek} style={{ padding: 10, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, fontWeight: 700, fontSize: 13, color: '#059669' }}>
+          <button onClick={suggestWeek} style={{ padding: 10, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, fontWeight: 700, fontSize: 13, color: 'var(--u-good)' }}>
             Suggest next free week
           </button>
           {weeks.length > 0 && (
@@ -683,7 +683,7 @@ export default function StudioRoute() {
                   flex: 1,
                   padding: '10px 8px',
                   borderRadius: 12,
-                  border: `1px solid ${method === m ? '#059669' : 'var(--border)'}`,
+                  border: `1px solid ${method === m ? 'var(--u-good)' : 'var(--border)'}`,
                   background: method === m ? 'var(--u-amber)' : 'var(--surface)',
                   color: method === m ? '#fff' : 'var(--text2)',
                   fontWeight: 800,
@@ -763,7 +763,7 @@ export default function StudioRoute() {
                 Use your own AI (ChatGPT, Claude, Gemini app) and spend zero server tokens:
                 copy our format, paste it plus your raw notes into your AI, paste the JSON it returns below.
               </div>
-              <button onClick={copyFormat} disabled={formatLoading} style={{ padding: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 12, fontWeight: 800, fontSize: 14, color: '#059669', opacity: formatLoading ? 0.6 : 1 }}>
+              <button onClick={copyFormat} disabled={formatLoading} style={{ padding: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 12, fontWeight: 800, fontSize: 14, color: 'var(--u-good)', opacity: formatLoading ? 0.6 : 1 }}>
                 {formatLoading ? 'Loading format…' : copied ? 'Copied — paste it into your AI' : 'Copy AI format'}
               </button>
               {formatPack && (
@@ -790,13 +790,13 @@ export default function StudioRoute() {
       {step === 1 && note && meta && (
         <div>
           <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-            <div style={{ fontSize: 10, letterSpacing: 2, color: '#059669', fontWeight: 700, textTransform: 'uppercase' }}>
+            <div style={{ fontSize: 10, letterSpacing: 2, color: 'var(--u-good)', fontWeight: 700, textTransform: 'uppercase' }}>
               Review · {meta.course} · Week {meta.week}
             </div>
             <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20, margin: '8px 0 4px' }}><MathPlain text={note.title} inline /></h2>
             <p style={{ fontSize: 13, color: 'var(--text2)' }}><MathPlain text={note.subtitle} inline /></p>
             {validation && (
-              <div style={{ marginTop: 10, fontSize: 12, fontWeight: 700, display: 'flex', gap: 6, alignItems: 'center', color: validation.valid ? '#059669' : 'var(--u-red)' }}>
+              <div style={{ marginTop: 10, fontSize: 12, fontWeight: 700, display: 'flex', gap: 6, alignItems: 'center', color: validation.valid ? 'var(--u-good)' : 'var(--u-red)' }}>
                 {validation.valid ? <Check size={14} /> : <X size={14} />}
                 {validation.valid ? 'Schema valid' : 'Schema has problems'}
               </div>
@@ -839,7 +839,7 @@ export default function StudioRoute() {
                   <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, marginBottom: 6 }}>BEFORE YOU PUBLISH — CHECK</div>
                   {rows.map((r, i) => (
                     <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 12, color: r.ok ? 'var(--text)' : 'var(--u-red)', fontWeight: r.ok ? 500 : 700, marginTop: i ? 4 : 0 }}>
-                      <span style={{ flexShrink: 0 }}>{r.ok ? <Check size={14} color="#059669" /> : <X size={14} />}</span>
+                      <span style={{ flexShrink: 0 }}>{r.ok ? <Check size={14} color="var(--u-good)" /> : <X size={14} />}</span>
                       <span>{r.text}</span>
                     </div>
                   ))}
@@ -847,7 +847,7 @@ export default function StudioRoute() {
               );
             })()}
             <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-              <button onClick={() => { setEditing((v) => !v); }} style={{ flex: 1, padding: 10, background: editing ? 'var(--u-amber)' : 'var(--surface)', color: editing ? '#fff' : '#059669', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 12, fontWeight: 800, fontSize: 13 }}>
+              <button onClick={() => { setEditing((v) => !v); }} style={{ flex: 1, padding: 10, background: editing ? 'var(--u-amber)' : 'var(--surface)', color: editing ? 'var(--u-black)' : 'var(--u-good)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 12, fontWeight: 800, fontSize: 13 }}>
                 {editing ? 'Done editing' : 'Edit content'}
               </button>
               {!editing && (
@@ -883,7 +883,7 @@ export default function StudioRoute() {
                           {t.subtopics.length} parts · {checks} checks{recalls ? ` · ${recalls} recalls` : ''}{pulse ? ` · pulse ${pulse}` : ''}
                         </span>
                       </span>
-                      <span style={{ fontSize: 11, fontWeight: 800, color: '#059669', whiteSpace: 'nowrap', display: 'flex', gap: 2, alignItems: 'center' }}>{open ? 'Hide' : 'Preview'} <ChevronDown size={12} style={{ transform: open ? 'rotate(180deg)' : 'none' }} /></span>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--u-good)', whiteSpace: 'nowrap', display: 'flex', gap: 2, alignItems: 'center' }}>{open ? 'Hide' : 'Preview'} <ChevronDown size={12} style={{ transform: open ? 'rotate(180deg)' : 'none' }} /></span>
                     </button>
                     {open && (
                       <div style={{ borderTop: '1px solid var(--border)', padding: 12 }}>
@@ -912,7 +912,7 @@ export default function StudioRoute() {
                         <button
                           onClick={() => publishTopic(t.number, t.lecture || 1)}
                           disabled={publishingTopic !== null}
-                          style={{ marginTop: 6, padding: '8px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: '#059669' }}
+                          style={{ marginTop: 6, padding: '8px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: 'var(--u-good)' }}
                         >
                           {publishingTopic === t.number ? 'Publishing…' : `Publish only Lecture ${t.lecture || 1} Topic ${t.number}`}
                         </button>
@@ -936,7 +936,7 @@ export default function StudioRoute() {
                         <span style={{ fontWeight: 800, fontSize: 14, display: 'block' }}>End-of-week quiz — {note.eoq.questions.length} questions</span>
                         <span style={{ fontSize: 11, color: 'var(--text2)' }}>{mcq} MCQ · {fitb} fill-in · 60% to pass</span>
                       </span>
-                      <span style={{ fontSize: 11, fontWeight: 800, color: '#059669', whiteSpace: 'nowrap', display: 'flex', gap: 2, alignItems: 'center' }}>{showQuizPreview ? 'Hide' : 'Preview'} <ChevronDown size={12} style={{ transform: showQuizPreview ? 'rotate(180deg)' : 'none' }} /></span>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--u-good)', whiteSpace: 'nowrap', display: 'flex', gap: 2, alignItems: 'center' }}>{showQuizPreview ? 'Hide' : 'Preview'} <ChevronDown size={12} style={{ transform: showQuizPreview ? 'rotate(180deg)' : 'none' }} /></span>
                     </button>
                     {showQuizPreview && (
                       <div style={{ borderTop: '1px solid var(--border)', padding: 12 }}>
@@ -984,7 +984,7 @@ export default function StudioRoute() {
                       else if (o.topic !== undefined) void publishTopic(o.topic, o.lecture || 1, 'add');
                     }}
                     disabled={publishing || publishingTopic !== null}
-                    style={{ padding: 13, borderRadius: 14, background: '#059669', color: '#fff', border: 'none', borderBottom: '3px solid #14532d', fontWeight: 800, fontSize: 14 }}
+                    style={{ padding: 13, borderRadius: 14, background: 'var(--u-good)', color: '#fff', border: 'none', borderBottom: '3px solid #14532d', fontWeight: 800, fontSize: 14 }}
                   >
                     Add as new version — keep everything
                   </button>

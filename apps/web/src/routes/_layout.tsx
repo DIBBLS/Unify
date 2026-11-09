@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, CalendarDays, Search, User, PenTool, Bell } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, ClipboardCheck, Search, User, PenTool, Bell } from 'lucide-react';
 import { supabaseBrowser, touchActivity, isSessionExpired, expireSession } from '../lib/supabase';
 import { pushSupported, enablePush } from '../lib/push';
 import ConfirmModal from '../components/ConfirmModal';
@@ -28,6 +28,13 @@ const STUDENT_TABS: Tab[] = [
 const AUTHOR_TABS: Tab[] = [
   { to: '/home', label: 'Home', icon: LayoutDashboard, match: ['/home'] },
   { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio', '/browse', '/my-classes'] },
+  { to: '/me', label: 'Me', icon: User, match: ['/me'] },
+];
+
+const LECTURER_TABS: Tab[] = [
+  { to: '/home', label: 'Home', icon: LayoutDashboard, match: ['/home'] },
+  { to: '/lecturer', label: 'Classroom', icon: ClipboardCheck, match: ['/lecturer', '/attendance', '/my-classes'] },
+  { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio', '/browse'] },
   { to: '/me', label: 'Me', icon: User, match: ['/me'] },
 ];
 
@@ -293,7 +300,7 @@ export default function Layout() {
   }, [authed, pathname]);
 
   const isAuthor = role === 'lecturer' || role === 'contributor';
-  const tabs: Tab[] = isAuthor ? AUTHOR_TABS : role === 'admin' ? ADMIN_TABS : STUDENT_TABS;
+  const tabs: Tab[] = role === 'lecturer' ? LECTURER_TABS : isAuthor ? AUTHOR_TABS : role === 'admin' ? ADMIN_TABS : STUDENT_TABS;
   const showSkeletonNav = authed === null || (authed && !roleLoaded);
 
   return (
@@ -314,7 +321,7 @@ export default function Layout() {
             <Link
               to="/notifications"
               aria-label="Notifications"
-              style={{ position: 'relative', width: 32, height: 32, borderRadius: 9999, background: 'var(--u-good-tint)', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
+              style={{ position: 'relative', width: 32, height: 32, borderRadius: 9999, background: 'var(--u-good-tint)', color: 'var(--u-good)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
             >
               <Bell size={18} />
               {unread > 0 && (
@@ -330,8 +337,8 @@ export default function Layout() {
               width: 32,
               height: 32,
               borderRadius: 9999,
-              background: avatar ? 'transparent' : 'linear-gradient(135deg,#34d399,#059669)',
-              color: '#fff',
+              background: avatar ? 'transparent' : 'var(--u-green)',
+              color: 'var(--u-black)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -366,32 +373,33 @@ export default function Layout() {
       <OfflineBanner />
       {/* Content column: desktop zoom targets this element only — the
           sticky header and bottom nav keep their normal size. */}
-      <div style={{ display: isDesktop ? 'flex' : 'block', minHeight: isDesktop ? 'calc(100vh - 56px)' : 'auto' }}>
+      <div style={{ display: isDesktop ? 'flex' : 'block', alignItems: 'flex-start', minHeight: isDesktop ? 'calc(100vh - 56px)' : 'auto' }}>
         {isDesktop && authed && (
-          <aside style={{ width: 240, borderRight: '1px solid var(--border)', background: 'var(--surface)', padding: 16, position: 'sticky', top: 56, height: 'calc(100vh - 56px)', overflowY: 'auto' }}>
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {showSkeletonNav
-                ? Array.from({ length: skelCount }).map((_, i) => (
-                    <div key={i} className="skel" style={{ height: 40, borderRadius: 8 }} />
-                  ))
-                : tabs.map((t) => {
-                    const active = t.match.some((m) => pathname === m || pathname.startsWith(m + '/'));
-                    const Icon = t.icon;
-                    return (
-                      <Link key={t.to} to={t.to} style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '10px 12px', borderRadius: 10, background: active ? 'var(--u-green-accent, #4ade80)' : 'transparent', color: active ? '#0a0a0a' : 'var(--text)', fontWeight: active ? 800 : 600, textDecoration: 'none' }}>
-                        <Icon size={18} />
-                        {t.label}
-                      </Link>
-                    );
-                  })}
-            </nav>
+          <aside className="side-pills" aria-label="Main">
+            {showSkeletonNav
+              ? Array.from({ length: skelCount }).map((_, i) => (
+                  <div key={i} style={{ width: 76, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                    <div className="skel" style={{ width: 22, height: 22, borderRadius: 6 }} />
+                    <div className="skel" style={{ width: 44, height: 10, borderRadius: 5 }} />
+                  </div>
+                ))
+              : tabs.map((t) => {
+                  const active = t.match.some((m) => pathname === m || pathname.startsWith(m + '/'));
+                  const Icon = t.icon;
+                  return (
+                    <Link key={t.to} to={t.to} className={`side-pill${active ? ' is-active' : ''}`} aria-current={active ? 'page' : undefined}>
+                      <Icon size={22} />
+                      {t.label}
+                    </Link>
+                  );
+                })}
           </aside>
         )}
-        <main id="unify-content" style={{ flex: 1 }}>
+        <main id="unify-content" style={{ flex: 1, minWidth: 0 }}>
           <Outlet />
         </main>
       </div>
-      {!focusOnReader && (
+      {!focusOnReader && !isDesktop && (
       <nav className="bottomnav" onMouseEnter={() => setNavHidden(false)} style={{ position: 'fixed', bottom: 0, left: '50%', transform: `translateX(-50%)${navHidden ? ' translateY(calc(100% - 14px))' : ''}`, transition: 'transform .3s ease', width: '100%', maxWidth: 'var(--shell, 480px)', display: 'flex', background: 'var(--surface)', borderTop: '1px solid var(--border)', padding: '8px 0 calc(8px + env(safe-area-inset-bottom))' }}>
         {showSkeletonNav
           ? Array.from({ length: skelCount }).map((_, i) => (

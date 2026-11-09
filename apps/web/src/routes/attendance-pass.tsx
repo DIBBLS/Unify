@@ -1,61 +1,91 @@
-import { useEffect, useState } from 'react'
-import { supabaseBrowser } from '../lib/supabase'
-import { BoxBoy } from '../components/redesign/brand'
-import { generateKeyPair, exportPublicKey, signPayload } from '../lib/crypto'
+import { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { api } from '../lib/api';
+import { errorToast } from '../lib/errors';
+import { ROUTES } from '../lib/routes';
+import BackButton from '../components/BackButton';
+import { BoxBoy } from '../components/redesign/brand';
+import { Card, Display } from '../components/redesign/ui';
 
+// Mark attendance: the lecturer shows a 6-digit code in class, you enter it.
 export default function AttendancePassRoute() {
-  const [seed, setSeed] = useState(1)
-  const [left, setLeft] = useState(30)
-  const [payload, setPayload] = useState('')
+  const navigate = useNavigate();
+  const [code, setCode] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState<{ course: string; already: boolean } | null>(null);
+  const [ready, setReady] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(()=>{
-    const t = setInterval(()=> {
-      setLeft(s=>{ if(s<=1){ setSeed(x=>x+1); return 30 } return s-1 })
-    },1000)
-    return ()=>clearInterval(t)
-  },[])
+  // First time? Collect name + matric before the code.
+  useEffect(() => {
+    api
+      .attendanceProfile()
+      .then((p) => {
+        if (!p.fullName || !p.matric) navigate(`${ROUTES.attendanceSetup}?next=${ROUTES.attendancePass}`, { replace: true });
+        else setReady(true);
+      })
+      .catch(() => setReady(true));
+  }, [navigate]);
 
-  useEffect(()=>{
-    const init = async ()=>{
-      const sb = supabaseBrowser()
-      if(!sb) return
-      const { data:{ user } } = await sb.auth.getUser()
-      if(!user) return
-      let priv = localStorage.getItem('attendance_priv')
-      let pub = localStorage.getItem('attendance_pub')
-      if(!priv || !pub){
-        const kp = await generateKeyPair()
-        const pubB64 = await exportPublicKey(kp.publicKey)
-        const jwk = await crypto.subtle.exportKey('jwk', kp.privateKey)
-        localStorage.setItem('attendance_priv', JSON.stringify(jwk))
-        localStorage.setItem('attendance_pub', pubB64)
-        await sb.from('device_keys').upsert({ user_id: user.id, device_pubkey: pubB64 })
-      }
-      const date = new Date().toISOString().slice(0,10)
-      const pl = JSON.stringify({ uid: user.id, seed, date })
-      const jwk = JSON.parse(localStorage.getItem('attendance_priv')||'{}')
-      const privKey = await crypto.subtle.importKey('jwk', jwk, { name:'ECDSA', namedCurve:'P-256'}, true, ['sign'])
-      const sig = await signPayload(pl, privKey)
-      setPayload(JSON.stringify({ payload: pl, sig, pub }))
+  useEffect(() => {
+    if (ready) inputRef.current?.focus();
+  }, [ready]);
+
+  const submit = async () => {
+    if (!/^\d{6}$/.test(code)) {
+      errorToast(new Error('Enter the 6-digit code from your lecturer.'), 'mark attendance');
+      return;
     }
-    init()
-  },[seed])
+    setBusy(true);
+    try {
+      const r = await api.attendanceCheckin(code);
+      setDone({ course: r.course, already: r.already });
+    } catch (e) {
+      errorToast(e, 'mark attendance');
+      setCode('');
+    } finally {
+      setBusy(false);
+    }
+  };
 
-  const PassCode = ({seed}:{seed:number})=>{
-    const cells = Array.from({length:21*21},(_,i)=>((i*7919+seed*104729)%13)<6)
-    return <div style={{display:'grid',gridTemplateColumns:'repeat(21,1fr)',width:220,height:220,background:'#fff',padding:10,borderRadius:16}}>
-      {cells.map((on,i)=><span key={i} style={{background:on?'#0a0a0a':'#fff',width:8,height:8}}/>)}
-    </div>
-  }
+  const shell = { maxWidth: 'min(var(--shell, 480px), 560px)', margin: '0 auto', padding: '20px 16px 96px' } as const;
+
+  if (done)
+    return (
+      <div style={shell}>
+        <Card style={{ alignItems: 'center', textAlign: 'center', marginTop: 24 }}>
+          <BoxBoy pose="cheer" width={140} />
+          <Display size={28}>{done.already ? 'Already marked' : "You're in!"}</Display>
+          <div className="t-15">{done.already ? `You were already marked present for ${done.course}.` : `Marked present for ${done.course}.`}</div>
+        </Card>
+        <Link to={ROUTES.attendanceMine} className="btn btn--amber btn--block" style={{ marginTop: 20 }}>See my attendance</Link>
+        <Link to={ROUTES.timetable} className="btn btn--white btn--block" style={{ marginTop: 12 }}>Back to timetable</Link>
+      </div>
+    );
 
   return (
-    <div style={{padding:24,display:'flex',flexDirection:'column',alignItems:'center',background:'#0a0a0a',color:'#fff',minHeight:'100vh'}}>
-      <BoxBoy pose="wavePhone" width={80} style={{marginBottom:12}}/>
-      <h2 style={{fontFamily:'var(--font-headline)', margin:'12px 0'}}>Attendance pass</h2>
-      <div style={{padding:12,borderRadius:24,background:'var(--u-green)',margin:'20px 0'}}><PassCode seed={seed}/></div>
-      <p>New code in {left}s</p>
-      <p style={{color:'#aaa'}}>Crypto-signed · pass valid today</p>
+    <div style={shell}>
+      <BackButton to={ROUTES.timetable} />
+      <Card style={{ alignItems: 'center', textAlign: 'center', marginTop: 8 }}>
+        <BoxBoy pose="phoneOut" width={110} />
+        <Display size={28}>Mark attendance</Display>
+        <div className="t-13 muted">Enter the 6-digit code your lecturer is showing in class.</div>
+      </Card>
+      <input
+        ref={inputRef}
+        value={code}
+        onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+        onKeyDown={(e) => { if (e.key === 'Enter') void submit(); }}
+        inputMode="numeric"
+        autoComplete="one-time-code"
+        placeholder="000000"
+        aria-label="Attendance code"
+        style={{ width: '100%', marginTop: 20, padding: 16, textAlign: 'center', fontSize: 34, letterSpacing: 10, fontWeight: 800, fontFamily: 'var(--font-body)', borderRadius: 16, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}
+      />
+      <button className="btn btn--amber btn--block" disabled={busy || code.length !== 6} onClick={() => void submit()} style={{ marginTop: 18 }}>
+        {busy ? 'Checking…' : 'Mark me present'}
+      </button>
+      <Link to={ROUTES.attendanceMine} className="btn btn--white btn--block" style={{ marginTop: 12 }}>My attendance</Link>
     </div>
-  )
+  );
 }
-

@@ -329,12 +329,12 @@ export default function HomeRoute() {
         )}
         <div style={{ margin: '16px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800 }}>Published notes</h2>
-          <Link to="/browse" style={{ fontSize: 13, color: '#059669', fontWeight: 700, textDecoration: 'none', display: 'flex', gap: 4, alignItems: 'center' }}>
+          <Link to="/browse" style={{ fontSize: 13, color: 'var(--u-good)', fontWeight: 700, textDecoration: 'none', display: 'flex', gap: 4, alignItems: 'center' }}>
             Browse {profile?.level ? `${profile.level} ` : ''}notes <ChevronRight size={14} />
           </Link>
         </div>
         {profile?.role === 'lecturer' || teaching.length > 0 ? (
-          <Link to="/my-classes" style={{ margin: '12px 16px 0', padding: 14, background: 'linear-gradient(135deg,var(--u-amber),#059669)', color: '#fff', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center', textDecoration: 'none' }}>
+          <Link to="/my-classes" style={{ margin: '12px 16px 0', padding: 14, background: 'var(--u-green)', color: 'var(--u-black)', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center', textDecoration: 'none' }}>
             <BookOpen size={20} />
             <span style={{ flex: 1 }}>
               <span style={{ fontWeight: 800, display: 'block' }}>My Classes</span>
@@ -391,7 +391,7 @@ export default function HomeRoute() {
               return [...seen.values()].map(({ n, older }) => (
               <div key={n.id} style={{ padding: 14, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
                 <Link to={`/learn/${encodeURIComponent(n.course)}/week/${n.week}?preview=1`} style={{ flex: 1, textDecoration: 'none', color: 'var(--text)', display: 'block' }}>
-                  <div style={{ fontSize: 11, color: '#059669', fontWeight: 800, letterSpacing: 1 }}>{n.course} · WEEK {n.week} · L{n.lecture || 1}·T{n.topic} · v{n.version}{older > 0 ? ` · ${older} older` : ''}</div>
+                  <div style={{ fontSize: 11, color: 'var(--u-good)', fontWeight: 800, letterSpacing: 1 }}>{n.course} · WEEK {n.week} · L{n.lecture || 1}·T{n.topic} · v{n.version}{older > 0 ? ` · ${older} older` : ''}</div>
                   <div style={{ fontWeight: 700, marginTop: 2 }}>{n.title || `Topic ${n.topic}`}</div>
                 </Link>
                 <button
@@ -506,7 +506,7 @@ export default function HomeRoute() {
 
       <div style={{ margin: '16px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800 }}>Your Courses</h2>
-        <Link to="/class" style={{ fontSize: 13, color: '#059669', fontWeight: 700, textDecoration: 'none', display: 'flex', gap: 4, alignItems: 'center' }}>
+        <Link to="/class" style={{ fontSize: 13, color: 'var(--u-good)', fontWeight: 700, textDecoration: 'none', display: 'flex', gap: 4, alignItems: 'center' }}>
           Add courses <ChevronRight size={14} />
         </Link>
       </div>
@@ -535,14 +535,14 @@ export default function HomeRoute() {
                         s.avatar ? (
                           <img key={si} src={s.avatar} alt={s.name} title={s.name} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--surface)', marginLeft: si === 0 ? 0 : -10 }} />
                         ) : (
-                          <div key={si} title={s.name} style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg,var(--u-amber),#059669)', color: '#fff', fontWeight: 800, fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid var(--surface)', marginLeft: si === 0 ? 0 : -10 }}>
+                          <div key={si} title={s.name} style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--u-green)', color: 'var(--u-black)', fontWeight: 800, fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid var(--surface)', marginLeft: si === 0 ? 0 : -10 }}>
                             {s.name.trim().charAt(0).toUpperCase()}
                           </div>
                         )
                       ))}
                     </div>
                   ) : (
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,var(--u-amber),#059669)', color: '#fff', fontWeight: 800, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--u-green)', color: 'var(--u-black)', fontWeight: 800, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       {c.course.trim().charAt(0).toUpperCase()}
                     </div>
                   )}
@@ -559,7 +559,7 @@ export default function HomeRoute() {
                   {meta?.title || 'Tap to open'}
                 </Link>
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 11, color: 'var(--text2)' }}>
-                  <BookOpen size={12} color="#059669" />
+                  <BookOpen size={12} color="var(--u-good)" />
                   <span>{meta?.weeks || 0} weeks{stat && stat.topics > 0 ? ` · ${stat.topics} done` : ''}</span>
                   <button
                     onClick={() => setConfirmUnenroll(c.course)}

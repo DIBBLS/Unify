@@ -1,46 +1,153 @@
-import { useState } from 'react'
-import { BoxBoy } from '../components/redesign/brand'
-import { supabaseBrowser } from '../lib/supabase'
-import { importPublicKey, verifyPayload } from '../lib/crypto'
+import { useCallback, useEffect, useState } from 'react';
+import { api, type AttendanceRegister } from '../lib/api';
+import { errorToast } from '../lib/errors';
+import { ROUTES } from '../lib/routes';
+import BackButton from '../components/BackButton';
+import Drop from '../components/Drop';
+import { BoxBoy } from '../components/redesign/brand';
+import { Card, Display, Label, ListCard, ListRow, Pill } from '../components/redesign/ui';
 
-export default function ScannerRoute(){
-  const [log,setLog]=useState<string[]>([])
-  const [verifying,setVerifying]=useState(false)
+// Take attendance (lecturer): open a session for a course, show the 6-digit
+// code, watch students tick in live, close when class is settled.
+// Route kept at /attendance/scanner so existing links keep working.
+const MINUTES = [5, 10, 15, 30, 60];
 
-  const simulateScan = async ()=>{
-    setVerifying(true)
-    try{
-      const demo = { uid:'demo-user', seed:1, date:new Date().toISOString().slice(0,10) }
-      const payload = JSON.stringify(demo)
-      const sig = 'demo-sig'
-      const sb = supabaseBrowser()
-      if(!sb) throw new Error('no supabase')
-      const { data } = await sb.from('device_keys').select('device_pubkey').eq('user_id','demo-user').maybeSingle()
-      if(!data) throw new Error('no key')
-      const pub = await importPublicKey(data.device_pubkey)
-      const ok = await verifyPayload(payload, sig, pub)
-      setLog(l=>[...l, `Scanned ${demo.uid} – verified: ${ok}`])
-    }catch(e:any){
-      setLog(l=>[...l, `Scan error: ${e.message}`])
-    }finally{
-      setVerifying(false)
-    }
-  }
-
-  return (
-    <div style={{padding:24}}>
-      <div style={{display:'flex',gap:12,alignItems:'center',marginBottom:16}}>
-        <BoxBoy pose="teaching" width={64}/>
-        <h1 style={{margin:0,fontFamily:'var(--font-headline)'}}>Scan attendance</h1>
-      </div>
-      <div style={{height:300,borderRadius:24,background:'#1a1a1a',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:16}}>
-        {verifying ? 'Verifying...' : 'Camera placeholder'}
-      </div>
-      <ul style={{marginBottom:16}}>
-        {log.map((l,i)=><li key={i}>{l}</li>)}
-      </ul>
-      <button onClick={simulateScan} disabled={verifying} style={{padding:'10px 16px',background:'var(--u-amber)',borderRadius:12,border:'none',fontWeight:700}}>Simulate scan</button>
-    </div>
-  )
+function useCountdown(closesAt: string | undefined, open: boolean) {
+  const [left, setLeft] = useState(0);
+  useEffect(() => {
+    if (!closesAt || !open) { setLeft(0); return; }
+    const tick = () => setLeft(Math.max(0, Math.floor((new Date(closesAt).getTime() - Date.now()) / 1000)));
+    tick();
+    const t = setInterval(tick, 1000);
+    return () => clearInterval(t);
+  }, [closesAt, open]);
+  return left;
 }
 
+export default function ScannerRoute() {
+  const [courses, setCourses] = useState<string[]>([]);
+  const [course, setCourse] = useState('');
+  const [minutes, setMinutes] = useState(15);
+  const [reg, setReg] = useState<AttendanceRegister | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const me = await api.me();
+        const list = me.isAdmin ? (await api.courses()).map((c) => c.code) : (await api.teaching()).courses;
+        setCourses(list);
+        if (list[0]) setCourse(list[0]);
+      } catch (e) {
+        errorToast(e, 'load your courses');
+      } finally {
+        setLoaded(true);
+      }
+    })();
+  }, []);
+
+  const refresh = useCallback(async () => {
+    if (!course) return;
+    try {
+      setReg(await api.attendanceRegister(course));
+    } catch (e) {
+      errorToast(e, 'load the register');
+    }
+  }, [course]);
+
+  // Load on course change; poll while a session is open.
+  useEffect(() => { setReg(null); void refresh(); }, [refresh]);
+  const open = !!reg?.session?.open;
+  useEffect(() => {
+    if (!open) return;
+    const t = setInterval(() => void refresh(), 5000);
+    return () => clearInterval(t);
+  }, [open, refresh]);
+
+  const left = useCountdown(reg?.session?.closesAt, open);
+  useEffect(() => { if (open && left === 0 && reg?.session) void refresh(); }, [left, open, reg?.session, refresh]);
+
+  const start = async () => {
+    setBusy(true);
+    try { setReg(await api.attendanceStart(course, undefined, minutes)); }
+    catch (e) { errorToast(e, 'start attendance'); }
+    finally { setBusy(false); }
+  };
+  const end = async () => {
+    if (!reg?.session) return;
+    setBusy(true);
+    try { await api.attendanceClose(reg.session.id); await refresh(); }
+    catch (e) { errorToast(e, 'end the session'); }
+    finally { setBusy(false); }
+  };
+
+  const shell = { maxWidth: 'min(var(--shell, 480px), 720px)', margin: '0 auto', padding: '20px 16px 96px' } as const;
+  const mm = String(Math.floor(left / 60)).padStart(2, '0');
+  const ss = String(left % 60).padStart(2, '0');
+
+  if (loaded && courses.length === 0)
+    return (
+      <div style={shell}>
+        <BackButton to={ROUTES.lecturer} />
+        <Card style={{ alignItems: 'center', textAlign: 'center', marginTop: 8 }}>
+          <BoxBoy pose="peeking" width={110} />
+          <div className="t-15 w-6">No courses to take attendance for</div>
+          <div className="t-13 muted">You can take attendance for courses you teach. An admin assigns those.</div>
+        </Card>
+      </div>
+    );
+
+  return (
+    <div style={shell}>
+      <BackButton to={ROUTES.lecturer} />
+      <Label>Attendance</Label>
+      <Display size={30}>Take attendance</Display>
+
+      <div style={{ marginTop: 16 }}>
+        <Drop label="Course" value={course} onChange={setCourse} options={courses.map((c) => ({ value: c, label: c }))} />
+      </div>
+
+      {open && reg?.session ? (
+        <Card tone="dark" style={{ alignItems: 'center', textAlign: 'center', marginTop: 16 }}>
+          <div className="eyebrow" style={{ opacity: 0.7 }}>Tell your class this code</div>
+          <div style={{ fontSize: 56, fontWeight: 900, letterSpacing: 10, fontFamily: 'var(--font-body)', color: 'var(--u-green)' }} aria-label="Attendance code">
+            {reg.session.code}
+          </div>
+          <Pill tone="amber">Closes in {mm}:{ss}</Pill>
+          <div className="t-15" style={{ marginTop: 6 }}>{reg.present.length} of {reg.enrolled} present</div>
+          <button className="btn btn--white" disabled={busy} onClick={() => void end()} style={{ marginTop: 10 }}>End session</button>
+        </Card>
+      ) : (
+        <Card style={{ marginTop: 16, gap: 14 }}>
+          {reg?.session && <div className="t-13 muted">Last session: {reg.present.length} of {reg.enrolled} present.</div>}
+          <Label>Open for</Label>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {MINUTES.map((m) => (
+              <button key={m} className={`chip chip--sm${m === minutes ? ' chip--on' : ''}`} onClick={() => setMinutes(m)}>{m} min</button>
+            ))}
+          </div>
+          <button className="btn btn--amber btn--block" disabled={busy || !course} onClick={() => void start()}>
+            {busy ? 'Starting…' : 'Start attendance'}
+          </button>
+        </Card>
+      )}
+
+      {reg && reg.present.length > 0 && (
+        <section style={{ marginTop: 22 }}>
+          <Label>Present ({reg.present.length})</Label>
+          <ListCard style={{ marginTop: 8 }}>
+            {reg.present.map((p) => (
+              <ListRow
+                key={p.studentId}
+                title={p.name}
+                sub={p.matric || undefined}
+                right={<span className="t-13 muted">{new Date(p.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>}
+              />
+            ))}
+          </ListCard>
+        </section>
+      )}
+    </div>
+  );
+}

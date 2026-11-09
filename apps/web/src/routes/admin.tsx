@@ -455,7 +455,7 @@ export default function AdminRoute() {
     <div style={{ maxWidth: 960, margin: '0 auto', padding: '20px 16px 100px' }}>
       <BackButton to="/home" />
       <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, display: 'flex', gap: 8, alignItems: 'center' }}>
-        <Shield size={22} color="#059669" /> Admin
+        <Shield size={22} color="var(--u-good)" /> Admin
       </h1>
       {success && <Flash tone="success" message={success} onDismiss={() => setSuccess('')} />}
 
@@ -671,7 +671,7 @@ export default function AdminRoute() {
                 style={{
                   padding: '8px 14px',
                   borderRadius: 9999,
-                  border: `1px solid ${courseLevels.includes(l) ? '#059669' : 'var(--border)'}`,
+                  border: `1px solid ${courseLevels.includes(l) ? 'var(--u-good)' : 'var(--border)'}`,
                   background: courseLevels.includes(l) ? 'var(--u-amber)' : 'var(--surface)',
                   color: courseLevels.includes(l) ? '#fff' : 'var(--text2)',
                   fontSize: 12,
@@ -691,7 +691,7 @@ export default function AdminRoute() {
                   flex: 1,
                   padding: '8px 14px',
                   borderRadius: 9999,
-                  border: `1px solid ${courseSemester === s ? '#059669' : 'var(--border)'}`,
+                  border: `1px solid ${courseSemester === s ? 'var(--u-good)' : 'var(--border)'}`,
                   background: courseSemester === s ? 'var(--u-amber)' : 'var(--surface)',
                   color: courseSemester === s ? '#fff' : 'var(--text2)',
                   fontSize: 12,
@@ -720,7 +720,7 @@ export default function AdminRoute() {
                 flex: 1,
                 padding: '10px 14px',
                 borderRadius: 9999,
-                border: `1px solid ${currentSemester === s ? '#059669' : 'var(--border)'}`,
+                border: `1px solid ${currentSemester === s ? 'var(--u-good)' : 'var(--border)'}`,
                 background: currentSemester === s ? 'var(--u-amber)' : 'var(--surface)',
                 color: currentSemester === s ? '#fff' : 'var(--text2)',
                 fontSize: 13,
@@ -805,7 +805,7 @@ export default function AdminRoute() {
             <button
               key={t}
               onClick={() => { setReqTab(t); void loadRequests(t === 'history'); }}
-              style={{ flex: 1, padding: '8px 10px', borderRadius: 9999, border: `1px solid ${reqTab === t ? '#059669' : 'var(--border)'}`, background: reqTab === t ? 'var(--u-amber)' : 'var(--surface)', color: reqTab === t ? '#fff' : 'var(--text2)', fontSize: 12, fontWeight: 800 }}
+              style={{ flex: 1, padding: '8px 10px', borderRadius: 9999, border: `1px solid ${reqTab === t ? 'var(--u-good)' : 'var(--border)'}`, background: reqTab === t ? 'var(--u-amber)' : 'var(--surface)', color: reqTab === t ? 'var(--u-black)' : 'var(--text2)', fontSize: 12, fontWeight: 800 }}
             >
               {t === 'pending' ? 'Pending' : 'History'}
             </button>
@@ -933,7 +933,7 @@ export default function AdminRoute() {
               )}
             </div>
             {u.id === ownId ? (
-              <div style={{ marginTop: 8, fontSize: 12, color: '#059669', fontWeight: 700, background: 'var(--u-good-tint)', border: '1px solid var(--u-good)', borderRadius: 8, padding: '8px 12px' }}>
+              <div style={{ marginTop: 8, fontSize: 12, color: 'var(--u-good)', fontWeight: 700, background: 'var(--u-good-tint)', border: '1px solid var(--u-good)', borderRadius: 8, padding: '8px 12px' }}>
                 This is you — your role is locked so you can't lock yourself out.
               </div>
             ) : (
@@ -946,7 +946,7 @@ export default function AdminRoute() {
                     flex: 1,
                     padding: 8,
                     borderRadius: 9999,
-                    border: `1px solid ${u.role === r ? '#059669' : 'var(--border)'}`,
+                    border: `1px solid ${u.role === r ? 'var(--u-good)' : 'var(--border)'}`,
                     background: u.role === r ? 'var(--u-amber)' : 'var(--surface)',
                     color: u.role === r ? '#fff' : 'var(--text2)',
                     fontSize: 12,
@@ -988,7 +988,7 @@ export default function AdminRoute() {
                       return groups.length ? (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
                           {groups.map(([lv, cs]) => (
-                            <div key={lv} style={{ fontSize: 12, color: cs.length >= 2 ? '#059669' : 'var(--text2)', fontWeight: 700 }}>
+                            <div key={lv} style={{ fontSize: 12, color: cs.length >= 2 ? 'var(--u-good)' : 'var(--text2)', fontWeight: 700 }}>
                               {lv}: {cs.length}/2 {cs.length >= 2 ? '✓' : '· assign 2 per level'}
                             </div>
                           ))}
@@ -998,7 +998,7 @@ export default function AdminRoute() {
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
                       {assigned.length === 0 && <span style={{ fontSize: 12, color: 'var(--text2)' }}>None assigned — reaches nothing.</span>}
                       {assigned.map((c) => (
-                        <span key={c} style={{ display: 'inline-flex', gap: 6, alignItems: 'center', fontSize: 12, fontWeight: 800, background: 'var(--u-good-tint)', border: '1px solid var(--u-good)', color: '#059669', borderRadius: 9999, padding: '4px 6px 4px 12px' }}>
+                        <span key={c} style={{ display: 'inline-flex', gap: 6, alignItems: 'center', fontSize: 12, fontWeight: 800, background: 'var(--u-good-tint)', border: '1px solid var(--u-good)', color: 'var(--u-good)', borderRadius: 9999, padding: '4px 6px 4px 12px' }}>
                           {c}
                           <button
                             onClick={() => saveAssigned(u.id, assigned.filter((x) => x !== c))}
@@ -1048,9 +1048,9 @@ export default function AdminRoute() {
                                 void saveAssigned(u.id, [...assigned, c.code]);
                               }}
                               disabled={assignBusy || on}
-                              style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '10px 12px', borderRadius: 10, border: `1px solid ${on ? '#059669' : 'var(--border)'}`, background: on ? 'var(--u-good-tint)' : 'var(--surface)', textAlign: 'left', opacity: on ? 0.75 : 1 }}
+                              style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '10px 12px', borderRadius: 10, border: `1px solid ${on ? 'var(--u-good)' : 'var(--border)'}`, background: on ? 'var(--u-good-tint)' : 'var(--surface)', textAlign: 'left', opacity: on ? 0.75 : 1 }}
                             >
-                              <span style={{ width: 20, height: 20, borderRadius: 6, border: `1px solid ${on ? '#059669' : 'var(--border)'}`, background: on ? 'var(--u-amber)' : 'var(--surface)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, flexShrink: 0 }}>
+                              <span style={{ width: 20, height: 20, borderRadius: 6, border: `1px solid ${on ? 'var(--u-good)' : 'var(--border)'}`, background: on ? 'var(--u-amber)' : 'var(--surface)', color: 'var(--u-black)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, flexShrink: 0 }}>
                                 {on ? '✓' : ''}
                               </span>
                               <span style={{ flex: 1, minWidth: 0 }}>

@@ -25,7 +25,7 @@ export function BoxBoy({ pose, width, style }: { pose: Pose; width: number; styl
 }
 
 /** Fades the bottom of a Box Boy cut-out into the background. Never leave a hard crop line. */
-export function FadedBoxBoy({ pose, width, bg = '#50ff90', fade = 120, style }: { pose: Pose; width: number; bg?: string; fade?: number; style?: CSSProperties }) {
+export function FadedBoxBoy({ pose, width, bg = 'var(--u-green)', fade = 120, style }: { pose: Pose; width: number; bg?: string; fade?: number; style?: CSSProperties }) {
   return (
     <div style={{ position: 'relative', width, ...style }}>
       <BoxBoy pose={pose} width={width} />
@@ -70,7 +70,7 @@ export function Wordmark({ size = 16, color }: { size?: number; color?: string }
 export function AppIcon({ size = 120 }: { size?: number }) {
   return (
     <div style={{ width: size, height: size, borderRadius: size * 0.24, background: '#0a0a0a', display: 'grid', placeItems: 'center' }}>
-      <span className="display" style={{ fontSize: size * 0.47, color: '#50ff90' }}>U</span>
+      <span className="display" style={{ fontSize: size * 0.47, color: 'var(--u-green)' }}>U</span>
     </div>
   );
 }

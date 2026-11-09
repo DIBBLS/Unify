@@ -1,19 +1,148 @@
-import { useState } from 'react'
-import { BoxBoy } from '../components/redesign/brand'
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Trash2 } from 'lucide-react';
+import { api, type HocPost } from '../lib/api';
+import { errorToast } from '../lib/errors';
+import { toastSuccess } from '../lib/toast';
+import { ROUTES } from '../lib/routes';
+import BackButton from '../components/BackButton';
+import ErrorState from '../components/ErrorState';
+import { BoxBoy } from '../components/redesign/brand';
+import { Card, Display, Label, Pill } from '../components/redesign/ui';
 
-export default function HocDashboard(){
-  const [posts,setPosts]=useState([{id:1,title:'Announcement',content:'Welcome'}])
+// Class board: posts from your Head of Class for your department + level.
+// The HOC (and admins) can post and delete their own; everyone else reads.
+const TYPES: { key: HocPost['type']; label: string }[] = [
+  { key: 'announcement', label: 'Announcement' },
+  { key: 'tip', label: 'Tip' },
+  { key: 'question', label: 'Question' },
+];
+const TONE = { announcement: 'amber', tip: 'good', question: 'grey' } as const;
+
+const field: React.CSSProperties = {
+  width: '100%', padding: 12, borderRadius: 12, border: '1px solid var(--border)',
+  background: 'var(--surface)', color: 'var(--text)', fontSize: 15,
+};
+
+export default function HocDashboardRoute() {
+  const [posts, setPosts] = useState<HocPost[] | null>(null);
+  const [isHoc, setIsHoc] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [meta, setMeta] = useState('');
+  const [failed, setFailed] = useState(false);
+  const [type, setType] = useState<HocPost['type']>('announcement');
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [grantEmail, setGrantEmail] = useState('');
+
+  const load = async () => {
+    setFailed(false);
+    try {
+      const [r, me] = await Promise.all([api.hocPosts(), api.me()]);
+      setPosts(r.posts);
+      setIsHoc(r.isHoc);
+      setIsAdmin(!!me.isAdmin);
+      setMeta([r.department, r.level].filter(Boolean).join(' · '));
+    } catch (e) {
+      errorToast(e, 'load the class board');
+      setFailed(true);
+    }
+  };
+  useEffect(() => { void load(); }, []);
+
+  const post = async () => {
+    if (!content.trim()) return;
+    setBusy(true);
+    try {
+      await api.hocPost({ type, title: title.trim() || undefined, content: content.trim() });
+      setTitle(''); setContent('');
+      toastSuccess('Posted to your class.');
+      await load();
+    } catch (e) { errorToast(e, 'post that'); }
+    finally { setBusy(false); }
+  };
+  const remove = async (id: string) => {
+    try { await api.hocDelete(id); setPosts((p) => (p || []).filter((x) => x.id !== id)); }
+    catch (e) { errorToast(e, 'delete that post'); }
+  };
+  const grant = async (revoke: boolean) => {
+    try {
+      const r = await api.hocGrant(grantEmail.trim(), revoke);
+      toastSuccess(r.isHoc ? `${r.name || 'Student'} is now HOC.` : `${r.name || 'Student'} is no longer HOC.`);
+      setGrantEmail('');
+    } catch (e) { errorToast(e, 'update that HOC'); }
+  };
+
+  const shell = { maxWidth: 'min(var(--shell, 480px), 760px)', margin: '0 auto', padding: '20px 16px 96px' } as const;
+  if (failed) return <div style={shell}><ErrorState message="We couldn't load the class board." onRetry={() => void load()} /></div>;
+
   return (
-    <div style={{padding:24}}>
-      <div style={{display:'flex',gap:12,alignItems:'center',marginBottom:16}}>
-        <BoxBoy pose="teaching" width={64}/>
-        <h1 style={{margin:0,fontFamily:'var(--font-headline)'}}>Head of Class</h1>
+    <div style={shell}>
+      <BackButton to={ROUTES.timetable} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <BoxBoy pose="teaching" width={64} />
+        <div>
+          <Label>{meta || 'Your class'}</Label>
+          <Display size={28}>Class board</Display>
+        </div>
       </div>
-      <ul style={{listStyle:'none',padding:0}}>
-        {posts.map(p=><li key={p.id} style={{padding:'12px 0',borderBottom:'1px solid var(--u-border)'}}><strong>{p.title}:</strong> {p.content}</li>)}
-      </ul>
-      <button onClick={()=>setPosts(p=>[...p,{id:Date.now(),title:'New post',content:'...'}])} style={{marginTop:16,padding:'10px 16px',background:'var(--u-amber)',borderRadius:12,border:'none',fontWeight:700}}>New post</button>
-    </div>
-  )
-}
 
+      {(isHoc || isAdmin) && (
+        <Card style={{ marginTop: 16, gap: 10 }}>
+          <Label>Post to your class</Label>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {TYPES.map((t) => (
+              <button key={t.key} className={`chip chip--sm${t.key === type ? ' chip--on' : ''}`} onClick={() => setType(t.key)}>{t.label}</button>
+            ))}
+          </div>
+          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title (optional)" maxLength={120} style={field} />
+          <textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="What does your class need to know?" maxLength={1000} rows={4} style={{ ...field, resize: 'vertical' }} />
+          <button className="btn btn--amber btn--block" disabled={busy || !content.trim()} onClick={() => void post()}>{busy ? 'Posting…' : 'Post'}</button>
+        </Card>
+      )}
+
+      <section style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {posts === null ? (
+          <div className="skel" style={{ height: 110, borderRadius: 24 }} />
+        ) : posts.length === 0 ? (
+          <Card style={{ alignItems: 'center', textAlign: 'center' }}>
+            <BoxBoy pose="chairRelax" width={110} />
+            <div className="t-15 w-6">Nothing posted yet</div>
+            <div className="t-13 muted">
+              {meta ? 'Posts from your Head of Class appear here.' : 'Set your department and level in Me to see your class board.'}
+            </div>
+            {!isHoc && meta && <Link to={ROUTES.hocRequest} className="btn btn--white btn--sm">Become your class HOC</Link>}
+          </Card>
+        ) : (
+          posts.map((p) => (
+            <Card key={p.id} style={{ gap: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <Pill tone={TONE[p.type]}>{p.type}</Pill>
+                  <span className="t-13 muted">{p.author} · {new Date(p.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</span>
+                </div>
+                {(p.mine || isAdmin) && (
+                  <button aria-label="Delete post" onClick={() => void remove(p.id)} style={{ color: 'var(--text3)', display: 'flex', padding: 4 }}><Trash2 size={16} /></button>
+                )}
+              </div>
+              {p.title && <div className="t-15 w-6">{p.title}</div>}
+              <div className="t-15" style={{ whiteSpace: 'pre-wrap' }}>{p.content}</div>
+            </Card>
+          ))
+        )}
+      </section>
+
+      {isAdmin && (
+        <Card style={{ marginTop: 24, gap: 10 }}>
+          <Label>Admin · grant or remove HOC</Label>
+          <input value={grantEmail} onChange={(e) => setGrantEmail(e.target.value)} placeholder="student@email.com" type="email" style={field} />
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button className="btn btn--amber btn--sm" disabled={!grantEmail.includes('@')} onClick={() => void grant(false)}>Make HOC</button>
+            <button className="btn btn--white btn--sm" disabled={!grantEmail.includes('@')} onClick={() => void grant(true)}>Remove HOC</button>
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+}

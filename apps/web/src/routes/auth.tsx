@@ -6,6 +6,7 @@ import { BoxBoy } from '../components/redesign/brand';
 import Wordmark from '../components/Wordmark';
 import Typewriter from '../components/Typewriter';
 import Flash from '../components/Flash';
+import { hasSeenWelcome } from '../lib/welcome';
 import { BoxBoySplash } from '../components/BoxBoySplash';
 import { supabaseBrowser, saveRememberSession, restoreRememberedSession, touchActivity, isSessionExpired, expireSession } from '../lib/supabase';
 import { api, clearMeCache } from '../lib/api';
@@ -19,7 +20,9 @@ export default function AuthRoute() {
   const navigate = useNavigate();
   const sb = supabaseBrowser();
   const [showSplash, setShowSplash] = useState(true);
-  const [tab, setTab] = useState<'signin' | 'signup' | 'forgot'>('signin');
+  const [tab, setTab] = useState<'signin' | 'signup' | 'forgot'>(() =>
+    new URLSearchParams(window.location.search).get('tab') === 'signup' ? 'signup' : 'signin'
+  );
   const [error, setErrorState] = useState('');
   // Toast mirror: every failure surfaces globally AND stays readable inline.
   const setError = (m: string) => { setErrorState(m); if (m) toastError(m); };
@@ -110,7 +113,13 @@ export default function AuthRoute() {
           return;
         }
         void routeToApp();
+        return;
       }
+      // First visit on this device, plain /auth (no OAuth/recovery leg, no
+      // explicit tab): show the four welcome slides before the form.
+      const q = new URLSearchParams(window.location.search);
+      const plain = !window.location.hash && !q.get('code') && !q.get('tab') && !q.get('expired');
+      if (plain && !hasSeenWelcome()) navigate('/welcome', { replace: true });
     });
     const { data: sub } = sb.auth.onAuthStateChange((event, session) => {
       log.info('session', `event=${event} signedIn=${!!session}`);
@@ -313,7 +322,7 @@ export default function AuthRoute() {
         <BoxBoy pose="cheer" width={112} />
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28 }}>Own your journey.</h1>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', color: 'var(--text2)', fontSize: 13, fontWeight: 600 }}>
-          <Loader2 size={16} style={{ animation: 'spin 0.8s linear infinite', color: 'var(--u-green-accent)' }} />
+          <Loader2 size={16} style={{ animation: 'spin 0.8s linear infinite', color: 'var(--u-green)' }} />
           Getting your space ready…
         </div>
       </div>
@@ -349,7 +358,7 @@ export default function AuthRoute() {
     <>
       <BoxBoySplash onDone={() => setShowSplash(false)} />
       <div className="auth-page">
-      <style>{`.auth-page{min-height:100vh;background:var(--u-page)}.auth-side{display:none}.auth-card{maxWidth:480px;margin:0 auto}@media(min-width:900px){.auth-page{display:flex;flex-direction:row;background:var(--surface2)}.auth-side{display:flex;flex:1;flex-direction:column;justify-content:center;gap:18px;background:#0a0a0a;background-image:radial-gradient(circle at 85% 15%,rgba(74,222,128,.14),transparent 45%),radial-gradient(circle at 10% 90%,rgba(16,185,129,.1),transparent 40%);color:#f5f4f0;padding:64px;min-height:100vh}.auth-main{flex:1.2;display:flex;align-items:center;justify-content:center;padding:48px 32px;background:var(--u-page)}.auth-card{width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;box-shadow:0 12px 32px rgba(6,95,70,.12);margin:0}.auth-hero-mobile{border-radius:16px !important}}`}</style>
+      <style>{`.auth-page{min-height:100vh;background:var(--u-page)}.auth-side{display:none}.auth-card{maxWidth:480px;margin:0 auto}@media(min-width:900px){.auth-page{display:flex;flex-direction:row;background:var(--surface2)}.auth-side{display:flex;flex:1;flex-direction:column;justify-content:center;gap:18px;background:#0a0a0a;background-image:radial-gradient(circle at 85% 15%,color-mix(in srgb,var(--u-green) 14%,transparent),transparent 45%),radial-gradient(circle at 10% 90%,rgba(16,185,129,.1),transparent 40%);color:#f5f4f0;padding:64px;min-height:100vh}.auth-main{flex:1.2;display:flex;align-items:center;justify-content:center;padding:48px 32px;background:var(--u-page)}.auth-card{width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;box-shadow:0 12px 32px rgba(6,95,70,.12);margin:0}.auth-hero-mobile{border-radius:16px !important}}`}</style>
       <aside className="auth-side">
         <Wordmark size={30} light />
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 44, lineHeight: 1.08, margin: 0, color: '#f5f4f0' }}>
@@ -365,7 +374,7 @@ export default function AuthRoute() {
             { t: 'New notes buzz you instantly', s: 'Bell, email and push the moment authors publish' },
           ].map((f) => (
             <div key={f.t} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.09)', borderRadius: 12, padding: '12px 16px' }}>
-              <span style={{ width: 26, height: 26, borderRadius: 9999, background: 'rgba(74,222,128,.15)', color: 'var(--u-green-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
+              <span style={{ width: 26, height: 26, borderRadius: 9999, background: 'color-mix(in srgb,var(--u-green) 15%,transparent)', color: 'var(--u-green)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
                 <Check size={14} />
               </span>
               <span>
@@ -379,9 +388,9 @@ export default function AuthRoute() {
       </aside>
       <div className="auth-main">
       <div className="auth-card">
-      <div className="auth-hero-mobile" style={{ background: 'linear-gradient(135deg,var(--u-good),var(--u-good-2))', color: '#fff', padding: 28, borderRadius: '0 0 16px 16px', display: 'flex', gap: 16, alignItems: 'center' }}>
+      <div className="auth-hero-mobile" style={{ background: 'var(--u-green)', color: 'var(--u-black)', padding: 28, borderRadius: '0 0 32px 32px', display: 'flex', gap: 16, alignItems: 'center' }}>
           <div style={{ flex: 1 }}>
-          <Wordmark size={20} light />
+          <Wordmark size={20} onGreen />
           <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 32, marginTop: 12, lineHeight: 1.1 }}>
             Welcome to Unify Learn
           </h1>
@@ -398,7 +407,7 @@ export default function AuthRoute() {
               padding: 10,
               borderRadius: 9999,
               border: 'none',
-              background: tab === 'signin' ? 'var(--u-green-accent)' : 'transparent',
+              background: tab === 'signin' ? 'var(--u-green)' : 'transparent',
               color: tab === 'signin' ? '#0a0a0a' : 'var(--text2)',
               fontWeight: 700,
             }}
@@ -412,7 +421,7 @@ export default function AuthRoute() {
               padding: 10,
               borderRadius: 9999,
               border: 'none',
-              background: tab === 'signup' ? 'var(--u-green-accent)' : 'transparent',
+              background: tab === 'signup' ? 'var(--u-green)' : 'transparent',
               color: tab === 'signup' ? '#0a0a0a' : 'var(--text2)',
               fontWeight: 700,
             }}
@@ -424,7 +433,7 @@ export default function AuthRoute() {
         {error && <Flash tone="error" message={error} ttl={FLASH_TTL} onDismiss={() => setError('')} />}
         {success && <Flash tone="success" message={success} ttl={FLASH_TTL} onDismiss={() => setSuccess('')} />}
         {success && pendingEmail && (
-          <button onClick={handleResend} disabled={loading} style={{ background: 'none', border: 'none', color: '#059669', fontSize: 13, fontWeight: 700, textDecoration: 'underline', marginBottom: 12 }}>
+          <button onClick={handleResend} disabled={loading} style={{ background: 'none', border: 'none', color: 'var(--u-good)', fontSize: 13, fontWeight: 700, textDecoration: 'underline', marginBottom: 12 }}>
             Re-send verification email
           </button>
         )}
@@ -445,10 +454,10 @@ export default function AuthRoute() {
               </div>
             </label>
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: -8 }}>
-              <button type="button" onClick={() => setTab('forgot')} style={{ background: 'none', border: 'none', fontSize: 12, fontWeight: 700, color: '#059669', textDecoration: 'underline' }}>Forgot password?</button>
+              <button type="button" onClick={() => setTab('forgot')} style={{ background: 'none', border: 'none', fontSize: 12, fontWeight: 700, color: 'var(--u-good)', textDecoration: 'underline' }}>Forgot password?</button>
             </div>
             <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, color: 'var(--text2)', fontWeight: 600, cursor: 'pointer' }}>
-              <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} style={{ width: 16, height: 16, accentColor: 'var(--u-green-accent)' }} />
+              <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} style={{ width: 16, height: 16, accentColor: 'var(--u-green)' }} />
               Remember me on this device
             </label>
             <button disabled={loading} type="submit" className="btn btn--amber" style={{ fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
@@ -459,7 +468,7 @@ export default function AuthRoute() {
               <span style={{ flex: 1, height: 1, background: 'var(--border)' }} /> or <span style={{ flex: 1, height: 1, background: 'var(--border)' }} />
             </div>
             <button type="button" onClick={handleGoogle} disabled={googleLoading || loading} style={{ padding: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 700, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center', opacity: googleLoading ? 0.6 : 1 }}>
-              {googleLoading ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : <Chrome size={18} color="#059669" />}
+              {googleLoading ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : <Chrome size={18} color="var(--u-good)" />}
               {googleLoading ? 'Redirecting…' : 'Continue with Google'}
             </button>
           </form>
@@ -479,11 +488,11 @@ export default function AuthRoute() {
               Password
               <input name="new-password" type={showPw ? 'text' : 'password'} value={signupPw} onChange={(e) => setSignupPw(e.target.value)} required placeholder="Min. 8 characters" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid var(--border)', borderRadius: 12, display: 'block' }} />
               <div style={{ height: 4, background: 'var(--border)', borderRadius: 2, marginTop: 8, overflow: 'hidden' }}>
-                <div style={{ width: `${([signupPw.length >= 8, /[A-Z]/.test(signupPw), /[0-9]/.test(signupPw)].filter(Boolean).length / 3) * 100}%`, height: '100%', background: score === 1 ? '#ff4b4b' : score === 2 ? '#ff9600' : 'var(--u-green-accent)', transition: 'width .2s' }} />
+                <div style={{ width: `${([signupPw.length >= 8, /[A-Z]/.test(signupPw), /[0-9]/.test(signupPw)].filter(Boolean).length / 3) * 100}%`, height: '100%', background: score === 1 ? '#ff4b4b' : score === 2 ? '#ff9600' : 'var(--u-green)', transition: 'width .2s' }} />
               </div>
-              <div style={{ fontSize: 11, color: hasLength ? '#059669' : 'var(--text2)', marginTop: 4, display: 'flex', gap: 6, alignItems: 'center' }}>{hasLength ? <Check size={12} /> : <X size={12} />} At least 8 characters</div>
-              <div style={{ fontSize: 11, color: hasUpper ? '#059669' : 'var(--text2)', display: 'flex', gap: 6, alignItems: 'center' }}>{hasUpper ? <Check size={12} /> : <X size={12} />} One uppercase letter</div>
-              <div style={{ fontSize: 11, color: hasNumber ? '#059669' : 'var(--text2)', display: 'flex', gap: 6, alignItems: 'center' }}>{hasNumber ? <Check size={12} /> : <X size={12} />} One number</div>
+              <div style={{ fontSize: 11, color: hasLength ? 'var(--u-good)' : 'var(--text2)', marginTop: 4, display: 'flex', gap: 6, alignItems: 'center' }}>{hasLength ? <Check size={12} /> : <X size={12} />} At least 8 characters</div>
+              <div style={{ fontSize: 11, color: hasUpper ? 'var(--u-good)' : 'var(--text2)', display: 'flex', gap: 6, alignItems: 'center' }}>{hasUpper ? <Check size={12} /> : <X size={12} />} One uppercase letter</div>
+              <div style={{ fontSize: 11, color: hasNumber ? 'var(--u-good)' : 'var(--text2)', display: 'flex', gap: 6, alignItems: 'center' }}>{hasNumber ? <Check size={12} /> : <X size={12} />} One number</div>
             </label>
             <label style={{ fontSize: 12, fontWeight: 700 }}>
               Confirm Password
@@ -494,7 +503,7 @@ export default function AuthRoute() {
               {loading ? 'Creating' : 'Create Account'} <ArrowRight size={18} />
             </button>
             <button type="button" onClick={handleGoogle} disabled={googleLoading || loading} style={{ padding: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 700, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center', opacity: googleLoading ? 0.6 : 1 }}>
-              {googleLoading ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : <Chrome size={18} color="#059669" />}
+              {googleLoading ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : <Chrome size={18} color="var(--u-good)" />}
               {googleLoading ? 'Redirecting…' : 'Continue with Google'}
             </button>
           </form>
