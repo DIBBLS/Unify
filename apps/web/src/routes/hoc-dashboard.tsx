@@ -80,6 +80,9 @@ export default function HocDashboardRoute() {
         </div>
       </div>
 
+      {isHoc && (
+        <Link to={ROUTES.scanner} className="btn btn--amber btn--block" style={{ marginTop: 16 }}>Take attendance (show QR)</Link>
+      )}
       {(isHoc || isAdmin) && (
         <Card style={{ marginTop: 16, gap: 10 }}>
           <Label>Post to your class</Label>

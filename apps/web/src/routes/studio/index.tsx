@@ -9,6 +9,7 @@ import { BoxBoy } from '../../components/redesign/brand';
 import { TopicSlice } from '../../components/TopicSlice';
 import { MathPlain } from '../../components/MathText';
 import EoqQuiz from '../../components/EoqQuiz';
+import Pipeline from './Pipeline';
 import { NoteBuilder, blankNote, normalizeNote, extractJsonPayload } from './NoteBuilder';
 import { api, type Material } from '../../lib/api';
 import { localGreeting } from '../../lib/naija';
@@ -656,6 +657,7 @@ export default function StudioRoute() {
 
       {step === 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <Pipeline onPick={(c, w) => { setCourse(c); setWeek(String(w)); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <label style={{ ...label, flex: 1, minWidth: 140 }}>
               Course

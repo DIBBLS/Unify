@@ -1,4 +1,4 @@
-# Unify Learn — Web App (v2.9.0)
+# Unify Learn — Web App (v2.10.0)
 
 Student + author frontend. Vite 5 + React 18 + TypeScript 5 + React Router 6.
 Deploys to Vercel from `DIBBLS/Unify` (frontend-only mirror of the main monorepo).
