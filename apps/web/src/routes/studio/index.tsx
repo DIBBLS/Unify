@@ -11,6 +11,7 @@ import { MathPlain } from '../../components/MathText';
 import EoqQuiz from '../../components/EoqQuiz';
 import Pipeline from './Pipeline';
 import { NoteBuilder, blankNote, normalizeNote, extractJsonPayload } from './NoteBuilder';
+import { noteGaps, gapsSummary } from '../../lib/noteGaps';
 import { api, type Material } from '../../lib/api';
 import { localGreeting } from '../../lib/naija';
 import type { UnifyNote } from '../../types/note';
@@ -610,6 +611,10 @@ export default function StudioRoute() {
   } as const;
   const label = { fontSize: 12, fontWeight: 700 } as const;
 
+  // Review stays greyed out until every required field of the note is filled in.
+  const gaps = noteGaps(note, course, week);
+  const reviewReady = gaps.length === 0;
+
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 100px' }}>
       <BackButton to="/home" />
@@ -618,13 +623,14 @@ export default function StudioRoute() {
       <p style={{ margin: '6px 0 0', fontSize: 13, color: 'var(--text2)' }}>Pick the course and week, add your material, review, publish.</p>
       <div role="tablist" aria-label="Steps" style={{ display: 'flex', gap: 4, padding: 4, borderRadius: 9999, background: 'var(--surface2)', border: '1px solid var(--border)', margin: '14px 0 20px' }}>
         {['Compose', 'Review', 'Live'].map((label, i) => {
-          const canGo = i === 0 ? step === 1 : i === 1 ? step === 0 && !!note : false;
+          const canGo = i === 0 ? step === 1 : i === 1 ? step === 0 && !!note && reviewReady : false;
           return (
             <button
               key={label}
               role="tab"
               aria-selected={i === step}
               disabled={i !== step && !canGo}
+              title={i === 1 && step === 0 && note && !reviewReady ? `Review unlocks when every field is filled in. Missing: ${gapsSummary(gaps, 4)}` : undefined}
               onClick={() => { if (canGo) { if (i === 0) setTicks([false, false, false, false]); setStep(i as 0 | 1); } }}
               style={{ flex: 1, minHeight: 40, borderRadius: 9999, border: 'none', fontWeight: 800, fontSize: 13, background: i === step ? '#0a0a0a' : 'transparent', color: i === step ? '#fff' : 'var(--text2)', opacity: i !== step && !canGo ? 0.55 : 1 }}
             >
@@ -796,9 +802,14 @@ export default function StudioRoute() {
               ) : (
                 <>
                   <NoteBuilder note={note} onChange={setNote} />
-                  <button onClick={goReview} style={{ padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+                  <button onClick={goReview} disabled={!reviewReady} aria-disabled={!reviewReady} style={{ opacity: reviewReady ? 1 : 0.45, filter: reviewReady ? undefined : 'grayscale(1)', cursor: reviewReady ? 'pointer' : 'not-allowed', padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
                     Continue to review <ArrowRight size={18} />
                   </button>
+                  {!reviewReady && (
+                    <div role="status" style={{ fontSize: 12, color: 'var(--text2)', textAlign: 'center', marginTop: -4 }}>
+                      Review unlocks when every field is filled in. Still to do: {gapsSummary(gaps, 3)}.
+                    </div>
+                  )}
                 </>
               )}
             </>

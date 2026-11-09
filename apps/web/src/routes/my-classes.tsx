@@ -1,3 +1,4 @@
+import MeetLinkField from '../components/MeetLinkField';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { BookOpen, CalendarDays, ExternalLink, FileText, MapPin, Trash2, Users, Video } from 'lucide-react';
@@ -242,8 +243,8 @@ export default function MyClassesRoute() {
                     </div>
                   ) : null}
                   {linkEditId === s.id ? (
-                    <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
-                      <input value={linkValue} onChange={(e) => setLinkValue(e.target.value)} placeholder="https://meet.google.com/…" style={{ flex: 1, padding: 8, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 13 }} />
+                    <div style={{ display: 'flex', gap: 6, marginTop: 6, alignItems: 'flex-end' }}>
+                      <div style={{ flex: 1, minWidth: 0 }}><MeetLinkField value={linkValue} onChange={setLinkValue} label="Online class link" /></div>
                       <button className="btn btn--amber btn--sm" onClick={() => void saveLink(s.id)}>Save</button>
                     </div>
                   ) : s.meetLink ? (
@@ -287,10 +288,7 @@ export default function MyClassesRoute() {
               Venue
               <input value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="e.g. LT1, Engineering block" style={{ display: 'block', width: '100%', marginTop: 4, padding: 10, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }} />
             </label>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginTop: 8 }}>
-              Online class link (optional)
-              <input value={meetLink} onChange={(e) => setMeetLink(e.target.value)} placeholder="Paste your Google Meet link" inputMode="url" style={{ display: 'block', width: '100%', marginTop: 4, padding: 10, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }} />
-            </label>
+            <div style={{ marginTop: 8 }}><MeetLinkField value={meetLink} onChange={setMeetLink} label="Online class link (optional)" /></div>
             <button onClick={addSlot} disabled={adding} style={{ marginTop: 10, width: '100%', padding: 12, borderRadius: 14, border: 'none', borderBottom: '4px solid #c69a1a', background: 'var(--u-amber)', color: 'var(--u-black)', fontWeight: 800, opacity: adding ? 0.6 : 1 }}>
               {adding ? 'Adding…' : 'Add slot'}
             </button>

@@ -241,9 +241,9 @@ export function clearMeCache(): void {
 
 // ---- Head of Class + attendance ----
 export type HocPost = { id: string; type: 'announcement' | 'tip' | 'question'; title: string | null; content: string; createdAt: string; author: string; mine: boolean };
-export type AttendanceSession = { id: string; course: string; code: string; rotatesAt: string; rotateSeconds: number; week: number | null; opensAt: string; closesAt: string; open: boolean; startedBy?: { name: string; role: string; mine: boolean } };
+export type AttendanceSession = { id: string; course: string; online?: boolean; code: string; rotatesAt: string; rotateSeconds: number; week: number | null; opensAt: string; closesAt: string; open: boolean; startedBy?: { name: string; role: string; mine: boolean } };
 export type CgpaCourse = { code: string; title: string; status: 'done' | 'priority' | 'not_yet'; units: number; grade: number | null };
-export type CgpaData = { cgpaCurrent: number | null; cgpaTarget: number | null; hideCgpa: boolean; unitsDone: number | null; unitsTotal: number | null; level: string | null; courses: CgpaCourse[] };
+export type CgpaData = { cgpaCurrent: number | null; cgpaTarget: number | null; hideCgpa: boolean; unitsDone: number | null; unitsTotal: number | null; degreeYears?: number | null; level: string | null; courses: CgpaCourse[] };
 export type Material = { id: string; week: number; type: 'slides' | 'notes' | 'past-paper'; title: string; url: string; createdAt: string; mine: boolean };
 export type AttendanceRegister = { session: AttendanceSession | null; present: { studentId: string; at: string; name: string; matric: string; photo?: string | null }[]; enrolled: number };
 
@@ -543,7 +543,7 @@ export const api = {
   // CGPA planner (students)
   cgpa: () => apiFetch<CgpaData>('/v1/cgpa'),
   cgpaSave: (payload: {
-    cgpaCurrent?: number; cgpaTarget?: number; unitsDone?: number; unitsTotal?: number; hide?: boolean;
+    cgpaCurrent?: number; cgpaTarget?: number; unitsDone?: number; unitsTotal?: number; degreeYears?: number; hide?: boolean;
     courses?: { code: string; status: CgpaCourse['status']; units: number; grade?: number | null }[];
   }) => apiFetch<{ ok: boolean }>('/v1/cgpa', { method: 'PUT', body: JSON.stringify(payload) }),
   // Head of Class
@@ -558,8 +558,8 @@ export const api = {
   attendanceProfile: () => apiFetch<{ fullName: string; matric: string }>('/v1/attendance/profile'),
   attendanceSetProfile: (fullName: string, matric: string) =>
     apiFetch<{ ok: boolean }>('/v1/attendance/profile', { method: 'PUT', body: JSON.stringify({ fullName, matric }) }),
-  attendanceStart: (course: string, week?: number, minutes?: number) =>
-    apiFetch<AttendanceRegister>('/v1/attendance/sessions', { method: 'POST', body: JSON.stringify({ course, week, minutes }) }),
+  attendanceStart: (course: string, week?: number, minutes?: number, online?: { meetLink?: string }) =>
+    apiFetch<AttendanceRegister>('/v1/attendance/sessions', { method: 'POST', body: JSON.stringify({ course, week, minutes, ...(online ? { online: true, meetLink: online.meetLink || undefined } : {}) }) }),
   attendanceRegister: (course: string) =>
     apiFetch<AttendanceRegister>(`/v1/attendance/sessions?course=${encodeURIComponent(course)}`),
   attendanceClose: (id: string) => apiFetch<{ ok: boolean }>(`/v1/attendance/sessions/${id}/close`, { method: 'POST', body: '{}' }),

@@ -4,13 +4,14 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { BookOpen, ChevronRight, Trash2 } from 'lucide-react';
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type Profile, type HomeUpdate } from '../lib/api';
+import { profileGaps, gapsText } from '../lib/profileGaps';
 import { DashboardSkeleton } from '../components/Skeletons';
 import ErrorState from '../components/ErrorState';
 import { BoxBoy } from '../components/redesign/brand';
 import Typewriter from '../components/Typewriter';
 import Flash from '../components/Flash';
 import ConfirmModal from '../components/ConfirmModal';
-import { HomeHero, HomeCgpa } from '../components/redesign/HomeHero';
+import { HomeHero } from '../components/redesign/HomeHero';
 import { UpdatesSlider, type UpdateSlide } from '../components/redesign/UpdatesSlider';
 import { FACTS } from '../lib/naija';
 import Loading from '../components/Loading';
@@ -86,6 +87,8 @@ export default function HomeRoute() {
   const [streak, setStreak] = useState(0);
   const [courses, setCourses] = useState<CourseStat[]>([]);
   const [enrolled, setEnrolled] = useState<string[]>([]);
+  const [signInPhoto, setSignInPhoto] = useState('');
+  const gaps = profileGaps(profile, signInPhoto);
   const [liveUpdates, setLiveUpdates] = useState<HomeUpdate[]>([]);
   useEffect(() => {
     api.updates().then((r) => setLiveUpdates(r.updates || [])).catch(() => {});
@@ -171,6 +174,7 @@ export default function HomeRoute() {
           return;
         }
         setProfile(me.profile);
+        setSignInPhoto(me.avatar || '');
         setEnrolled(me.courses || []);
         setResume(me.resume || null);
         setIsAdmin(!!me.isAdmin);
@@ -304,11 +308,11 @@ export default function HomeRoute() {
     return (
       <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', paddingBottom: 80 }}>
         <HomeHero profile={profile!} firstName={firstName} />
-        {!profile?.avatar_url && (
+        {gaps.length > 0 && (
           <div style={{ margin: '12px 16px 0', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
-            <div style={{ flex: 1, fontSize: 13 }}><strong>Finish your profile</strong> <span style={{ color: 'var(--text2)' }}>— add a picture auditors see on your notes.</span></div>
+            <div style={{ flex: 1, fontSize: 13 }}><strong>Finish your profile</strong> <span style={{ color: 'var(--text2)' }}>— still missing {gapsText(gaps)}.</span></div>
             <Link to="/me" style={{ padding: '8px 16px', background: 'var(--u-amber)', color: 'var(--u-black)', borderBottom: '3px solid #c69a1a', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, fontSize: 12, whiteSpace: 'nowrap' }}>
-              Add photo
+              {gaps.length === 1 && gaps[0] === 'a picture' ? 'Add photo' : 'Finish up'}
             </Link>
           </div>
         )}
@@ -443,12 +447,16 @@ export default function HomeRoute() {
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', paddingBottom: 80 }}>
       <HomeHero profile={profile!} firstName={firstName} showCgpa={profile?.role === 'student'} />
-      {profile?.role === 'student' && <HomeCgpa profile={profile} />}
-      <UpdatesSlider slides={updateSlides} />
 
       <div className="rise" style={{ margin: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
         <div>
-          <div className="stat-num" style={{ fontSize: 18 }}>{profile?.cgpa_target != null ? Number(profile.cgpa_target).toFixed(2) : '—'}</div>
+          {profile?.cgpa_target != null ? (
+            <div className="stat-num" style={{ fontSize: 18 }}>{Number(profile.cgpa_target).toFixed(2)}</div>
+          ) : profile?.role === 'student' ? (
+            <Link to="/cgpa-planner" className="stat-num" style={{ fontSize: 15, color: 'var(--u-text)', textDecoration: 'underline', textUnderlineOffset: 3 }}>Set</Link>
+          ) : (
+            <div className="stat-num" style={{ fontSize: 18 }}>—</div>
+          )}
           <div style={{ fontSize: 11, color: 'var(--text2)' }}>CGPA target</div>
         </div>
         <div>
@@ -465,23 +473,25 @@ export default function HomeRoute() {
         </div>
       </div>
 
+      <UpdatesSlider slides={updateSlides} />
+
       {quizzes.taken > 0 && (
         <div style={{ margin: '0 16px 12px', fontSize: 12, color: 'var(--text2)', textAlign: 'center' }}>
           {quizzes.taken} {quizzes.taken === 1 ? 'quiz' : 'quizzes'} taken · {quizzes.avg}% average
         </div>
       )}
 
-      {!profile?.avatar_url && (
+      {gaps.length > 0 && (
         <div style={{ margin: '0 16px 12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, display: 'flex', gap: 12, alignItems: 'center' }}>
           <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--surface2)', border: '1px dashed var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: 'var(--text3)', flexShrink: 0 }}>
             {(profile?.first_name || 'U').trim().charAt(0).toUpperCase()}
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 800, fontSize: 14 }}>Finish your profile</div>
-            <div style={{ fontSize: 12, color: 'var(--text2)' }}>Add a picture so coursemates and lecturers recognize you.</div>
+            <div style={{ fontSize: 12, color: 'var(--text2)' }}>Still missing {gapsText(gaps)}.</div>
           </div>
           <Link to="/me" style={{ padding: '8px 16px', background: 'var(--u-amber)', color: 'var(--u-black)', borderBottom: '3px solid #c69a1a', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, fontSize: 12, whiteSpace: 'nowrap' }}>
-            Add photo
+            {gaps.length === 1 && gaps[0] === 'a picture' ? 'Add photo' : 'Finish up'}
           </Link>
         </div>
       )}
