@@ -2,7 +2,7 @@ import { ListSkeleton } from '../components/Skeletons';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BellRing, BookOpen, Megaphone, PartyPopper, ShieldCheck, CheckCheck } from 'lucide-react';
+import { BellRing, BookOpen, Megaphone, PartyPopper, ShieldCheck, CheckCheck, Video } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import Loading from '../components/Loading';
 import Flash from '../components/Flash';
@@ -15,6 +15,7 @@ function iconFor(type: string) {
   if (type === 'announce') return Megaphone;
   if (type === 'welcome') return PartyPopper;
   if (type === 'role') return ShieldCheck;
+  if (type === 'online_class') return Video;
   return BellRing;
 }
 

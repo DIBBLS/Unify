@@ -33,6 +33,15 @@ interface CourseStatus {
  * S15-S18: CGPA Planner
  * 4-step flow: Enter CGPA → Mark courses → Pick target → See plan
  */
+// Most courses run 4 years; engineering, architecture, pharmacy, law and similar run 5; medicine and
+// related run 6. Students can change it, this is only the starting guess from their faculty.
+export function guessDegreeYears(faculty?: string | null, department?: string | null): number {
+  const t = `${faculty || ''} ${department || ''}`.toLowerCase()
+  if (/medic|surg|dentist|veterin/.test(t)) return 6
+  if (/\beng|architect|pharm|\blaw|agric|technolog|survey|estate|building/.test(t)) return 5
+  return 4
+}
+
 export default function CGPAPlannerRoute() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -56,6 +65,12 @@ export default function CGPAPlannerRoute() {
   
   // S17: Target
   const [target, setTarget] = useState(4.0)
+  const [years, setYears] = useState(5)
+  const chooseYears = (y: number) => {
+    setYears(y)
+    // Keep the unit total in step unless the student typed their own number.
+    if (['', '120', '160', '200', '240'].includes(degreeUnits)) setDegreeUnits(String(y * 40))
+  }
   
   // Calculated
   // Completed = earlier semesters + courses marked done this semester; what is
@@ -95,7 +110,9 @@ export default function CGPAPlannerRoute() {
       }
       if (data.cgpaTarget != null) setTarget(data.cgpaTarget)
       setPriorUnits(String(data.unitsDone ?? Math.round(levelYears(data.level) * 40)))
-      setDegreeUnits(String(data.unitsTotal ?? 200))
+      const yrs = data.degreeYears ?? guessDegreeYears(me.profile.faculty, me.profile.department)
+      setYears(yrs)
+      setDegreeUnits(String(data.unitsTotal ?? yrs * 40))
       setEnrolledCourses(data.courses.map(c => c.code))
       setCourses(data.courses.map(c => ({
         code: c.code,
@@ -162,7 +179,8 @@ export default function CGPAPlannerRoute() {
       await api.cgpaSave({
         ...(cgpa != null && hasStarted ? { cgpaCurrent: cgpa } : {}),
         unitsDone: parseInt(priorUnits, 10) || 0,
-        unitsTotal: parseInt(degreeUnits, 10) || 200,
+        unitsTotal: parseInt(degreeUnits, 10) || years * 40,
+        degreeYears: years,
         courses: courseRows(),
       })
       setStep('target')
@@ -263,6 +281,8 @@ export default function CGPAPlannerRoute() {
             setPriorUnits={setPriorUnits}
             degreeUnits={degreeUnits}
             setDegreeUnits={setDegreeUnits}
+            years={years}
+            setYears={chooseYears}
             onContinue={handleEnterContinue}
           />
         )}
@@ -295,6 +315,7 @@ export default function CGPAPlannerRoute() {
             calculation={calculation}
             level={profile?.level || null}
             semester={profile?.semester || null}
+            years={years}
             onLockItIn={handleLockItIn}
             onAdjust={() => setStep('target')}
             saving={saving}
@@ -315,6 +336,8 @@ function EnterCGPA({
   setPriorUnits,
   degreeUnits,
   setDegreeUnits,
+  years,
+  setYears,
   onContinue
 }: {
   currentCGPA: string
@@ -325,6 +348,8 @@ function EnterCGPA({
   setPriorUnits: (v: string) => void
   degreeUnits: string
   setDegreeUnits: (v: string) => void
+  years: number
+  setYears: (v: number) => void
   onContinue: () => void
 }) {
   return (
@@ -339,6 +364,17 @@ function EnterCGPA({
         </p>
       </div>
       
+      <div style={{ maxWidth: 320, margin: '0 auto', width: '100%', textAlign: 'center' }}>
+        <div className="t-13 w-7" style={{ marginBottom: 8 }}>How long is your course?</div>
+        <div className="row" style={{ gap: 8, justifyContent: 'center' }} role="radiogroup" aria-label="Course length">
+          {[4, 5, 6].map((y) => (
+            <button key={y} type="button" role="radio" aria-checked={years === y} className={`chip${years === y ? ' chip--on' : ''}`} onClick={() => setYears(y)} style={{ minWidth: 84, justifyContent: 'center' }}>
+              {y} years
+            </button>
+          ))}
+        </div>
+      </div>
+
       {hasStarted ? (
         <div style={{ maxWidth: 280, margin: '0 auto', width: '100%' }}>
           <input
@@ -637,6 +673,7 @@ function ThePlan({
   calculation,
   level,
   semester,
+  years,
   onLockItIn,
   onAdjust,
   saving
@@ -648,6 +685,7 @@ function ThePlan({
   calculation: ReturnType<typeof getCGPALabel>
   level: string | null
   semester: string | null
+  years: number
   onLockItIn: () => void
   onAdjust: () => void
   saving: boolean
@@ -655,9 +693,11 @@ function ThePlan({
   // Label each remaining semester with the student's real level and semester (from their
   // profile), and say whether the target is possible from where they stand now.
   const lvl = parseInt((level || '').replace(/\D/g, ''), 10)
-  const startAbs = Number.isFinite(lvl) && lvl >= 100 && lvl <= 600 ? (lvl / 100 - 1) * 2 + (semester === 'Second Semester' ? 1 : 0) : null
-  // The degree ends at 500 Level, second semester (ten semesters in all), so the path never runs past it.
-  const semestersLeft = startAbs != null ? Math.max(1, 10 - startAbs) : Math.max(1, Math.ceil(unitsRemaining / 18))
+  const totalSems = years * 2
+  const startRaw = Number.isFinite(lvl) && lvl >= 100 && lvl <= 700 ? (lvl / 100 - 1) * 2 + (semester === 'Second Semester' ? 1 : 0) : null
+  const startAbs = startRaw == null ? null : Math.min(startRaw, totalSems - 1)
+  // The path ends with the course: 4 years is eight semesters, 5 years is ten, 6 years is twelve.
+  const semestersLeft = startAbs != null ? Math.max(1, totalSems - startAbs) : Math.max(1, Math.ceil(unitsRemaining / 18))
   const roadmap = calculateRoadmap(target, currentCGPA, unitsDone, unitsRemaining, semestersLeft)
   const labelFor = (i: number) => {
     if (startAbs == null) return `Semester ${i + 1}`
@@ -669,13 +709,13 @@ function ThePlan({
     | { kind: 'start'; title: string; note: string }
     | { kind: 'sem'; title: string; gpa: number; cgpa: number; first: boolean }
     | { kind: 'mile'; title: string; note: string; trophy?: boolean };
-  const LEVEL_NOTES: Record<number, string> = {
-    100: 'Your first steps. Build good habits now and they carry you through.',
-    200: 'Foundations are done. Courses get more focused from here.',
-    300: 'Past the halfway mark. Your results really start to count.',
-    400: 'The final stretch begins. Keep your CGPA climbing.',
-    500: 'Final year. Finish strong and graduate with pride.',
-  };
+  const finalLevel = years * 100
+  const levelNote = (l: number): string =>
+    l === finalLevel ? 'Final year. Finish strong and graduate with pride.'
+    : l === 100 ? 'Your first steps. Build good habits now and they carry you through.'
+    : l === finalLevel - 100 ? 'The final stretch begins. Keep your CGPA climbing.'
+    : l * 2 > finalLevel ? 'Past the halfway mark. Your results really start to count.'
+    : 'Foundations are done. Courses get more focused from here.';
   const path: PathNode[] = [{ kind: 'start', title: startAbs != null ? `You are here · ${labelFor(0)}` : 'You are here', note: `Your CGPA is ${currentCGPA.toFixed(2)}. Every semester from now moves it.` }];
   let prevLevel = startAbs != null ? Math.floor(startAbs / 2) + 1 : 0;
   const midIdx = roadmap.length >= 4 ? Math.floor(roadmap.length / 2) - 1 : -1;
@@ -683,7 +723,7 @@ function ThePlan({
     if (startAbs != null) {
       const levelNow = Math.floor((startAbs + i) / 2) + 1;
       if (levelNow !== prevLevel) {
-        path.push({ kind: 'mile', title: `Welcome to ${levelNow * 100} Level`, note: LEVEL_NOTES[levelNow * 100] || 'Keep going. You are close.' });
+        path.push({ kind: 'mile', title: `Welcome to ${levelNow * 100} Level`, note: levelNote(levelNow * 100) });
         prevLevel = levelNow;
       }
     }

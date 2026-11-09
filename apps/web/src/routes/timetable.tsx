@@ -1,6 +1,6 @@
 import { SectionSkeleton } from '../components/Skeletons';
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, CalendarCheck, ChevronRight, ClipboardCheck, Megaphone, MapPin, Video } from 'lucide-react';
 import { api, type ClassSlot } from '../lib/api';
 import { supabaseBrowser } from '../lib/supabase';
@@ -23,6 +23,7 @@ const toMin = (hhmm: string) => {
 };
 
 export default function TimetableRoute() {
+  const navigate = useNavigate();
   const [slots, setSlots] = useState<ClassSlot[]>([]);
   const [courses, setCourses] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -136,7 +137,17 @@ export default function TimetableRoute() {
                     <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
                       {st === 'now' ? <Pill tone="good">Now</Pill> : st === 'next' ? <Pill tone="amber">Next</Pill> : null}
                       {s.meetLink && (
-                        <a href={s.meetLink} target="_blank" rel="noreferrer" className="btn btn--amber btn--sm" style={{ gap: 6 }}>
+                        <a
+                          href={s.meetLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn btn--amber btn--sm"
+                          style={{ gap: 6 }}
+                          onClick={() => {
+                            // The meeting opens in its own tab; this tab stays on Unify, ready for the attendance code.
+                            window.setTimeout(() => navigate(`/attendance/pass?online=1&course=${encodeURIComponent(s.course)}&m=${encodeURIComponent(s.meetLink || '')}`), 300);
+                          }}
+                        >
                           <Video size={14} /> Join
                         </a>
                       )}

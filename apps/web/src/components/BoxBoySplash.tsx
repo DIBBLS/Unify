@@ -1,10 +1,16 @@
 import { useEffect, useState } from 'react';
-import { BoxBoy } from './redesign/brand';
-import LoadingQuote from './LoadingQuote';
+import { PERSONAS, POSES } from './redesign/brand';
 import Wordmark from './Wordmark';
 
-// S01 — brand-green splash: Box Boy hopping, "Unify. Learn" beneath, nothing
-// else. Auto-dismisses; never blocks sign-in.
+// S01 — brand-green splash: the whole Box Boy crew pops in one after another,
+// "Unify. Learn" arrives beneath them, everyone waits a moment, then it fades
+// into sign-in. Tap to skip. Plays once per browser session; never blocks sign-in.
+const CREW = [
+  ...PERSONAS.map((p) => p.img),
+  POSES.targetSign,
+  POSES.sittingPhone,
+  POSES.readingStanding,
+];
 const SEEN_KEY = 'unify.splash.v1';
 const seenThisSession = () => {
   try {
@@ -33,22 +39,29 @@ export function BoxBoySplash({ onDone }: { onDone?: () => void }) {
         // storage blocked: the splash may replay, never blocks
       }
       setLeaving(true);
-    }, 1500);
+    }, 3200);
     const t2 = setTimeout(() => {
       setVisible(false);
       onDone?.();
-    }, 2100);
+    }, 3800);
     return () => { clearTimeout(t); clearTimeout(t2); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   if (!visible) return null;
+  const skip = () => {
+    try { sessionStorage.setItem(SEEN_KEY, '1'); } catch { /* ignore */ }
+    setLeaving(true);
+    window.setTimeout(() => { setVisible(false); onDone?.(); }, 450);
+  };
   return (
-    <div role="status" aria-label="Loading" className={`african-band splash ${leaving ? 'splash--out' : ''}`} style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'var(--u-green)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20 }}>
-      <span className="boxboy--hop" style={{ display: 'inline-block', lineHeight: 0 }}>
-        <BoxBoy full pose="readingStanding" width={150} />
-      </span>
-      <Wordmark size={28} onGreen />
-      <LoadingQuote onGreen />
+    <div role="status" aria-label="Loading" onClick={skip} className={`african-band splash ${leaving ? 'splash--out' : ''}`} style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'var(--u-green)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 22, cursor: 'pointer' }}>
+      <div className="parade" aria-hidden="true">
+        {CREW.map((src, i) => (
+          <img key={src} src={src} alt="" decoding="async" style={{ ['--d' as string]: `${i * 140}ms` }} draggable={false} />
+        ))}
+      </div>
+      <Wordmark size={30} onGreen />
+      <div className="splash-tag">Built for the ones who build</div>
     </div>
   );
 }

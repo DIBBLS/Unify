@@ -24,7 +24,12 @@ export default function AttendancePassRoute() {
   const [ready, setReady] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const viaLink = !!params.get('c');
-  const [showCode, setShowCode] = useState(viaLink);
+  // Online class: no QR to scan. The code comes from the meeting chat, so go straight to typing it.
+  const online = params.get('online') === '1';
+  const onlineCourse = (params.get('course') || '').slice(0, 20);
+  const rawMeet = params.get('m') || '';
+  const meetHref = /^https:\/\/[^\s]+$/i.test(rawMeet) ? rawMeet : '';
+  const [showCode, setShowCode] = useState(viaLink || online);
   const [scanMsg, setScanMsg] = useState('');
   const videoRef = useRef<HTMLVideoElement>(null);
   const sending = useRef(false);
@@ -158,8 +163,15 @@ export default function AttendancePassRoute() {
         <>
           <Card style={{ alignItems: 'center', textAlign: 'center', marginTop: 8 }}>
             <BoxBoy pose="phoneOut" width={110} />
-            <Display size={28}>Enter the class code</Display>
-            <div className="t-13 muted">Type the 6-digit code under the QR on your lecturer's screen.</div>
+            <Display size={28}>{online ? 'Enter the code from the meeting' : 'Enter the class code'}</Display>
+            <div className="t-13 muted">
+              {online
+                ? `Your lecturer shares a 6-digit code in the meeting chat${onlineCourse ? ` for ${onlineCourse}` : ''}. Type it here to be marked present.`
+                : "Type the 6-digit code under the QR on your lecturer's screen."}
+            </div>
+            {online && meetHref && (
+              <a href={meetHref} target="_blank" rel="noopener noreferrer" className="btn btn--amber btn--sm" style={{ marginTop: 4 }}>Open the meeting</a>
+            )}
             {scanMsg && !viaLink && <div className="t-12" style={{ color: 'var(--u-red, #dc2626)' }}>{scanMsg}</div>}
           </Card>
           <input
@@ -176,7 +188,7 @@ export default function AttendancePassRoute() {
           <button className="btn btn--amber btn--block" disabled={busy || code.length !== 6} onClick={() => void submit()} style={{ marginTop: 18 }}>
             {busy ? 'Checking…' : 'Mark me present'}
           </button>
-          {!viaLink && <button className="btn btn--white btn--block" onClick={() => { setScanMsg(''); setShowCode(false); }} style={{ marginTop: 12 }}>Scan the QR instead</button>}
+          {!viaLink && !online && <button className="btn btn--white btn--block" onClick={() => { setScanMsg(''); setShowCode(false); }} style={{ marginTop: 12 }}>Scan the QR instead</button>}
         </>
       )}
       <Link to={ROUTES.attendanceMine} className="btn btn--white btn--block" style={{ marginTop: 12 }}>My attendance</Link>
