@@ -102,12 +102,12 @@ export function BottomActions({ children, tone = 'page', hint }: { children: Rea
 export function Sheet({ children, height }: { children: ReactNode; height?: number }) {
   return (
     <>
-      <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', zIndex: 40 }} />
+      <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', zIndex: 120 }} />
       <div
         className="stack"
         style={{
           position: 'fixed', left: '50%', bottom: 0, transform: 'translateX(-50%)', width: '100%', maxWidth: 'var(--shell)',
-          minHeight: height, background: 'var(--u-card)', borderRadius: '32px 32px 0 0', padding: '12px 16px calc(24px + env(safe-area-inset-bottom))', gap: 14, zIndex: 41,
+          minHeight: height, background: 'var(--u-card)', borderRadius: '32px 32px 0 0', padding: '12px 16px calc(24px + env(safe-area-inset-bottom))', gap: 14, zIndex: 121, maxHeight: 'calc(100dvh - 24px)', overflowY: 'auto',
         }}
       >
         <span style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, background: '#dddbd5', marginBottom: 6 }} />

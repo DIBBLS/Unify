@@ -114,7 +114,7 @@ export default function ClassRoute() {
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
       <BackButton to="/courses" />
-      <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28 }}>Find your class</h1>
+      <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28 }}>Add courses</h1>
       <p style={{ color: 'var(--text2)', marginTop: 6, fontSize: 13 }}>
         Find courses and enroll{myLevel ? ` · ${myLevel}` : ''}
       </p>
@@ -134,7 +134,7 @@ export default function ClassRoute() {
       <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {shown.length === 0 && !error && (
           <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
-            <BoxBoy pose="readingStanding" width={62} />
+            <BoxBoy pose="peeking" width={62} />
             <div style={{ marginTop: 8 }}>{results !== null ? 'No courses match that search.' : 'No courses for this level yet. Check back soon.'}</div>
           </div>
         )}

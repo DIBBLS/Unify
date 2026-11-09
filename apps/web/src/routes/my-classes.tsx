@@ -139,7 +139,7 @@ export default function MyClassesRoute() {
   // Materials for the selected course (links, shown to enrolled students).
   const loadMaterials = async (course: string) => {
     try {
-      setMaterials((await api.materials(course)).materials);
+      setMaterials((await api.materials(course)).materials || []);
     } catch {
       setMaterials([]);
     }
@@ -203,7 +203,7 @@ export default function MyClassesRoute() {
       </p>
       {courses.length === 0 ? (
         <div style={{ marginTop: 16, padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
-          <BoxBoy pose="readingStanding" width={62} />
+          <BoxBoy pose="teaching" width={62} />
           <div style={{ marginTop: 8 }}>No teaching courses assigned yet. Ask an admin to assign your courses.</div>
         </div>
       ) : (

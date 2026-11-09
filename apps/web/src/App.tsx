@@ -30,7 +30,6 @@ const TimetableRoute = lazyRoute(() => import('./routes/timetable'));
 const ScreensRoute = lazyRoute(() => import('./routes/screens'));
 const NotificationsRoute = lazyRoute(() => import('./routes/notifications'));
 const AdminRoute = lazyRoute(() => import('./routes/admin'));
-const AdminContentRoute = lazyRoute(() => import('./routes/admin/content'));
 const BrowseRoute = lazyRoute(() => import('./routes/browse'));
 const ShareRoute = lazyRoute(() => import('./routes/share'));
 const StudioRoute = lazyRoute(() => import('./routes/studio/index'));
@@ -226,8 +225,9 @@ export default function App() {
               </RequireAuth>
             }
           />
+          <Route path="/class" element={<RequireAuth><HocDashboardRoute /></RequireAuth>} />
           <Route
-            path="/class"
+            path="/courses/find"
             element={
               <RequireAuth>
                 <RequireRole allow={STUDENT_ONLY}>
@@ -291,18 +291,10 @@ export default function App() {
             }
           />
           <Route
-            path="/admin"
+            path="/admin/:section?"
             element={
               <RequireAuth>
                 <AdminRoute />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/admin/content"
-            element={
-              <RequireAuth>
-                <AdminContentRoute />
               </RequireAuth>
             }
           />

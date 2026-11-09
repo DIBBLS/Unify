@@ -18,15 +18,41 @@
 
 /* Loading / splash: a little hop with a tilt, anchored at the feet */
 @keyframes boxboy-hop {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  30% { transform: translateY(-16px) rotate(-3deg); }
-  60% { transform: translateY(0) rotate(2deg); }
-  80% { transform: translateY(-6px) rotate(0deg); }
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-5px) scale(1.04); }
 }
 .boxboy--hop {
-  animation: boxboy-hop 1.6s ease-in-out infinite;
+  animation: boxboy-hop 2.2s ease-in-out infinite;
   transform-origin: bottom center;
 }
 @media (prefers-reduced-motion: reduce) {
   .boxboy--hop, .boxboy--bob, .boxboy--wave { animation: none; }
+}
+
+/* Quiet life: a slow breath (tiny grow) and sparkles drifting around him. */
+@keyframes bb-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.035); }
+}
+.bb-breathe { transform-origin: 50% 100%; animation: bb-breathe 4.2s ease-in-out infinite; }
+
+.bb-orbit { position: absolute; inset: -10% -14% 0 -14%; pointer-events: none; }
+.bb-spark {
+  position: absolute; width: 9px; height: 9px; opacity: 0;
+  background: var(--u-amber, #fbbf24);
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  animation: bb-drift 7s ease-in-out infinite;
+}
+.bb-spark--a { left: 6%; top: 18%; }
+.bb-spark--b { right: 4%; top: 38%; width: 7px; height: 7px; background: var(--u-green, #50ff90); animation-duration: 9s; animation-delay: -3s; }
+.bb-spark--c { left: 12%; top: 62%; width: 6px; height: 6px; background: #fff; animation-duration: 11s; animation-delay: -6s; }
+@keyframes bb-drift {
+  0%   { opacity: 0;   transform: translate(0, 4px) scale(.6) rotate(0deg); }
+  25%  { opacity: .95; transform: translate(5px, -3px) scale(1) rotate(45deg); }
+  60%  { opacity: .7;  transform: translate(-3px, -9px) scale(.85) rotate(110deg); }
+  100% { opacity: 0;   transform: translate(2px, -16px) scale(.5) rotate(180deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bb-breathe, .bb-spark { animation: none; }
+  .bb-spark { display: none; }
 }

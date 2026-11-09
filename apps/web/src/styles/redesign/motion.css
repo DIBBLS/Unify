@@ -14,10 +14,10 @@
 @keyframes toast-in { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: none; } }
 
 /* A new screen eases up into place (the layout re-keys it on every route change). */
-.page-enter { animation: page-in var(--dur-3) var(--ease-out) both; }
+.page-enter { animation: page-in var(--dur-3) var(--ease-out) backwards; }
 
 /* Lists and card groups arrive one after another, not all at once. */
-.stagger > * { animation: rise-in var(--dur-3) var(--ease-out) both; }
+.stagger > * { animation: rise-in var(--dur-3) var(--ease-out) backwards; }
 .stagger > *:nth-child(2) { animation-delay: 40ms; }
 .stagger > *:nth-child(3) { animation-delay: 80ms; }
 .stagger > *:nth-child(4) { animation-delay: 120ms; }
@@ -27,9 +27,9 @@
 .stagger > *:nth-child(n+8) { animation-delay: 280ms; }
 
 /* Pop-overs grow from where they were opened. */
-.drop-panel { animation: pop-in var(--dur-2) var(--ease-out) both; transform-origin: top center; }
-.toast { animation: toast-in var(--dur-3) var(--ease-spring) both; }
-.modal-card { animation: modal-up var(--dur-3) var(--ease-out) both; }
+.drop-panel { animation: pop-in var(--dur-2) var(--ease-out) backwards; transform-origin: top center; }
+.toast { animation: toast-in var(--dur-3) var(--ease-spring) backwards; }
+.modal-card { animation: modal-up var(--dur-3) var(--ease-out) backwards; }
 
 /* Small things respond under the finger. */
 .chip { transition: background var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), transform var(--dur-1) var(--ease-out); }

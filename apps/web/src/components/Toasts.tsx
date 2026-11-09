@@ -9,7 +9,7 @@ export default function Toasts() {
   useEffect(() => subscribeToasts(setItems), []);
   if (!items.length) return null;
   return (
-    <div style={{ position: 'fixed', left: '50%', transform: 'translateX(-50%)', bottom: 'calc(76px + env(safe-area-inset-bottom))', width: 'min(440px, calc(100vw - 32px))', zIndex: 90, display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div style={{ position: 'fixed', left: '50%', transform: 'translateX(-50%)', bottom: 'calc(var(--nav-h) + env(safe-area-inset-bottom))', width: 'min(440px, calc(100vw - 32px))', zIndex: 140, display: 'flex', flexDirection: 'column', gap: 8 }}>
       {items.map((t) => (
         <div key={t.id} role="alert" className="toast" style={{ display: 'flex', gap: 10, alignItems: 'flex-start', background: '#111827', color: '#fff', borderRadius: 12, padding: '12px 14px', boxShadow: '0 8px 32px rgba(0,0,0,.35)', animation: 'rise-in .2s ease' }}>
           <span style={{ width: 8, height: 8, borderRadius: 9999, background: '#f87171', flexShrink: 0, marginTop: 5 }} />

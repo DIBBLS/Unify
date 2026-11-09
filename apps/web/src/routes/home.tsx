@@ -1,6 +1,6 @@
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { BookOpen, ChevronRight, Trash2 } from 'lucide-react';
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type Profile } from '../lib/api';
@@ -257,6 +257,8 @@ export default function HomeRoute() {
   if (loading) return <Loading />;
   if (loadError)
     return <ErrorState title="Couldn't load Home" message={loadError} />;
+  // Admins have one front page: the admin Overview.
+  if (profile?.role === 'admin') return <Navigate to="/admin" replace />;
 
   const firstName = profile?.first_name || 'Builder';
   const cleanEnrolled = enrolled.map((c) => (c || '').trim()).filter(Boolean);
@@ -373,7 +375,7 @@ export default function HomeRoute() {
         <div style={{ margin: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {notes.length === 0 ? (
             <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
-              <BoxBoy pose="readingStanding" width={77} />
+              <BoxBoy pose="chairRelax" width={77} />
               <div style={{ marginTop: 8 }}>Nothing published yet. Open Studio to author your first week.</div>
             </div>
           ) : (
@@ -506,16 +508,16 @@ export default function HomeRoute() {
 
       <div style={{ margin: '16px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800 }}>Your Courses</h2>
-        <Link to="/class" style={{ fontSize: 13, color: 'var(--u-good)', fontWeight: 700, textDecoration: 'none', display: 'flex', gap: 4, alignItems: 'center' }}>
+        <Link to="/courses/find" style={{ fontSize: 13, color: 'var(--u-good)', fontWeight: 700, textDecoration: 'none', display: 'flex', gap: 4, alignItems: 'center' }}>
           Add courses <ChevronRight size={14} />
         </Link>
       </div>
       <div style={{ margin: '12px 16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         {shown.length === 0 ? (
           <div style={{ gridColumn: '1 / -1', padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '2px solid var(--border)', borderRadius: 16 }}>
-            <BoxBoy pose="readingStanding" width={77} />
+            <BoxBoy pose="peeking" width={77} />
             <div style={{ marginTop: 8 }}>No courses yet.</div>
-            <Link to="/class" style={{ display: 'inline-block', marginTop: 12, padding: '10px 22px', background: 'var(--u-amber)', color: 'var(--u-black)', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #c69a1a' }}>
+            <Link to="/courses/find" style={{ display: 'inline-block', marginTop: 12, padding: '10px 22px', background: 'var(--u-amber)', color: 'var(--u-black)', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #c69a1a' }}>
               Explore courses to enroll
             </Link>
           </div>
@@ -577,7 +579,7 @@ export default function HomeRoute() {
       {confirmUnenroll && (
         <ConfirmModal
           title={`Remove ${confirmUnenroll}?`}
-          body="It leaves Home. Re-enroll anytime from Class — your XP and progress stay."
+          body="It leaves Home. Re-enroll anytime from Courses — your XP and progress stay."
           confirmLabel="Remove"
           busy={unenrolling}
           onConfirm={() => {

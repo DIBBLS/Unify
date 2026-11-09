@@ -43,6 +43,7 @@ export default function Drop({
 }) {
   const [open, setOpen] = useState(false);
   const [up, setUp] = useState(false);
+  const [listMax, setListMax] = useState(240);
   const [maxW, setMaxW] = useState(380);
   const wrapRef = useRef<HTMLDivElement>(null);
   const current = options.find((o) => o.value === value);
@@ -74,7 +75,12 @@ export default function Drop({
   const toggle = () => {
     if (!open && wrapRef.current) {
       const r = wrapRef.current.getBoundingClientRect();
-      setUp(window.innerHeight - r.bottom < 262);
+      // The bottom nav covers ~88px; open the way with more room and cap the list to it.
+      const below = window.innerHeight - r.bottom - 88 - 16;
+      const above = r.top - 16;
+      const openUp = below < 262 && above > below;
+      setUp(openUp);
+      setListMax(Math.max(120, Math.min(240, (openUp ? above : below) - 12)));
       // Never let a wide/long label push the panel past the viewport edge.
       setMaxW(Math.max(180, Math.min(380, window.innerWidth - r.left - 12)));
     }
@@ -129,7 +135,7 @@ export default function Drop({
             boxShadow: '0 12px 32px rgba(0,0,0,0.16)',
           } as React.CSSProperties}
         >
-          <div style={{ maxHeight: 240, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 2, padding: 4 }}>
+          <div style={{ maxHeight: listMax, overflowY: 'auto', overscrollBehavior: 'contain', display: 'flex', flexDirection: 'column', gap: 2, padding: 4 }}>
             {options.map((o) => {
               const active = o.value === value;
               return (

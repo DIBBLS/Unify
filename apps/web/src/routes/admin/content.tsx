@@ -1,18 +1,15 @@
 import { toastError } from '../../lib/toast';
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { BookOpen, ChevronDown, ChevronRight, Layers, Search, ShieldAlert } from 'lucide-react';
-import BackButton from '../../components/BackButton';
 import Loading from '../../components/Loading';
 import ErrorState from '../../components/ErrorState';
-import { supabaseBrowser } from '../../lib/supabase';
 import { api, type AdminContentCourse } from '../../lib/api';
 import { describeError } from '../../lib/errors';
 
 // Admin-only: every course → weeks → topics/versions in one tree, with
 // direct reader links. Admins are gate-exempt, so no enrollment needed.
-export default function AdminContentRoute() {
-  const navigate = useNavigate();
+export default function AdminContentPanel() {
   const [courses, setCourses] = useState<AdminContentCourse[]>([]);
   const [loading, setLoading] = useState(true);
   const [forbidden, setForbidden] = useState(false);
@@ -23,17 +20,7 @@ export default function AdminContentRoute() {
   const [open, setOpen] = useState<string | null>(null);
 
   useEffect(() => {
-    const sb = supabaseBrowser();
-    if (!sb) {
-      setLoading(false);
-      return;
-    }
     (async () => {
-      const { data: sessionData } = await sb.auth.getSession();
-      if (!sessionData.session) {
-        navigate('/auth');
-        return;
-      }
       try {
         const res = await api.adminContent();
         setCourses(res.courses);
@@ -44,7 +31,7 @@ export default function AdminContentRoute() {
         setLoading(false);
       }
     })();
-  }, [navigate]);
+  }, []);
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -59,8 +46,7 @@ export default function AdminContentRoute() {
   if (loading) return <Loading text="Loading all content…" />;
   if (forbidden)
     return (
-      <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
-        <BackButton to="/home" />
+      <div>
         <ErrorState
           title="Admin only"
           message="This page is for platform admins."
@@ -72,11 +58,10 @@ export default function AdminContentRoute() {
   const totalTopics = courses.reduce((n, c) => n + c.topicCount, 0);
 
   return (
-    <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 100px' }}>
-      <BackButton to="/home" />
-      <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, display: 'flex', gap: 8, alignItems: 'center' }}>
-        <Layers size={22} color="var(--u-good)" /> All content
-      </h1>
+    <div>
+      <h2 style={{ fontWeight: 800, fontSize: 20, display: 'flex', gap: 8, alignItems: 'center', margin: 0 }}>
+        <Layers size={20} color="var(--u-good)" /> All content
+      </h2>
       <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>
         {courses.length} courses · {totalWeeks} weeks · {totalTopics} topics with notes
       </div>

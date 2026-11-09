@@ -37,7 +37,7 @@ export default function MyAttendanceRoute() {
         <Card style={{ alignItems: 'center', textAlign: 'center', marginTop: 16 }}>
           <BoxBoy pose="peeking" width={110} />
           <div className="t-15 w-6">No courses yet</div>
-          <div className="t-13 muted">Join your courses from Class and your attendance shows up here.</div>
+          <div className="t-13 muted">Add your courses from Courses and your attendance shows up here.</div>
         </Card>
       ) : (
         <ListCard style={{ marginTop: 16 }}>

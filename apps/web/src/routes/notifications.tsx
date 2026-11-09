@@ -103,7 +103,7 @@ export default function NotificationsRoute() {
       <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {notes.length === 0 && !error && (
           <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
-            <BoxBoy pose="readingStanding" width={96} />
+            <BoxBoy pose="phoneOut" width={96} />
             <div style={{ marginTop: 8 }}>All caught up. New notes and updates land here.</div>
           </div>
         )}

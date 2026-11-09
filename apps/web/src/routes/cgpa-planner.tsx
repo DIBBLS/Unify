@@ -84,6 +84,10 @@ export default function CGPAPlannerRoute() {
       if (data.cgpaCurrent != null) {
         setCurrentCGPA(data.cgpaCurrent.toString())
         setHasStarted(true)
+      } else if (data.cgpaTarget != null) {
+        // Saved a target without a CGPA: a first-semester plan from zero.
+        setCurrentCGPA('0')
+        setHasStarted(false)
       }
       if (data.cgpaTarget != null) setTarget(data.cgpaTarget)
       setPriorUnits(String(data.unitsDone ?? Math.round(levelYears(data.level) * 40)))
@@ -99,8 +103,10 @@ export default function CGPAPlannerRoute() {
 
       // Check query param for direct step
       const stepParam = searchParams.get('step') as Step | null
+      const canPlan = data.cgpaCurrent != null || data.cgpaTarget != null
       if (stepParam && ['enter', 'courses', 'target', 'plan'].includes(stepParam)) {
-        setStep(stepParam)
+        // The target and plan screens need a CGPA (or a from-zero plan) first.
+        setStep((stepParam === 'target' || stepParam === 'plan') && !canPlan ? 'enter' : stepParam)
       } else if (data.cgpaCurrent != null) {
         // Already has CGPA, jump to courses
         setStep('courses')
@@ -115,8 +121,11 @@ export default function CGPAPlannerRoute() {
 
   const handleEnterContinue = () => {
     if (!hasStarted) {
-      // Skip to target (no courses to mark)
-      setStep('target')
+      // First semester: nothing earned yet, so plan from zero.
+      setCurrentCGPA('0')
+      setPriorUnits('0')
+      if (!(parseInt(degreeUnits, 10) > 0)) setDegreeUnits('200')
+      setStep('courses')
       return
     }
     
@@ -147,7 +156,7 @@ export default function CGPAPlannerRoute() {
     try {
       const cgpa = validateCGPA(currentCGPA)
       await api.cgpaSave({
-        ...(cgpa != null ? { cgpaCurrent: cgpa } : {}),
+        ...(cgpa != null && hasStarted ? { cgpaCurrent: cgpa } : {}),
         unitsDone: parseInt(priorUnits, 10) || 0,
         unitsTotal: parseInt(degreeUnits, 10) || 200,
         courses: courseRows(),
@@ -174,7 +183,7 @@ export default function CGPAPlannerRoute() {
         return
       }
       await api.cgpaSave({
-        cgpaCurrent: cgpa,
+        ...(hasStarted ? { cgpaCurrent: cgpa } : {}),
         cgpaTarget: target,
         unitsDone: parseInt(priorUnits, 10) || 0,
         unitsTotal: parseInt(degreeUnits, 10) || 200,
@@ -202,12 +211,13 @@ export default function CGPAPlannerRoute() {
           borderBottom: '1px solid var(--u-hairline)' 
         }}
       >
-        {step !== 'target' && (
+        {(
           <button
             type="button"
             onClick={() => {
               if (step === 'enter') navigate(-1)
               else if (step === 'courses') setStep('enter')
+              else if (step === 'target') setStep('courses')
               else if (step === 'plan') setStep('target')
             }}
             className="row"
@@ -349,7 +359,7 @@ function EnterCGPA({
         </div>
       ) : (
         <div className="stack center" style={{ gap: 12 }}>
-          <p className="t-15 muted">Haven't started yet?</p>
+          <p className="t-15 muted center" style={{ maxWidth: 300 }}>No problem. We'll plan from zero, so every course you take now counts toward your target.</p>
           <button
             type="button"
             onClick={() => setHasStarted(true)}
@@ -358,6 +368,11 @@ function EnterCGPA({
             Actually, I have a CGPA
           </button>
         </div>
+      )}
+      {hasStarted && (
+        <button type="button" onClick={() => setHasStarted(false)} className="btn btn--white btn--sm" style={{ alignSelf: 'center' }}>
+          I don't have a CGPA yet
+        </button>
       )}
       
       <div style={{ marginTop: 'auto' }}>
