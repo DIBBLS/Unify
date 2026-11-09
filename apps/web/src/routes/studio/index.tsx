@@ -1,7 +1,7 @@
 import { toastError } from '../../lib/toast';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowRight, Check, X, ChevronDown } from 'lucide-react';
+import { ArrowRight, Check, X, ChevronDown, FileText, ExternalLink, CircleCheck, Circle } from 'lucide-react';
 import BackButton from '../../components/BackButton';
 import Drop from '../../components/Drop';
 import Flash from '../../components/Flash';
@@ -10,7 +10,8 @@ import { TopicSlice } from '../../components/TopicSlice';
 import { MathPlain } from '../../components/MathText';
 import EoqQuiz from '../../components/EoqQuiz';
 import { NoteBuilder, blankNote, normalizeNote, extractJsonPayload } from './NoteBuilder';
-import { api } from '../../lib/api';
+import { api, type Material } from '../../lib/api';
+import { localGreeting } from '../../lib/naija';
 import type { UnifyNote } from '../../types/note';
 import { describeError } from '../../lib/errors';
 
@@ -39,6 +40,15 @@ export default function StudioRoute() {
   const [meta, setMeta] = useState<Meta | null>(null);
   const [validation, setValidation] = useState<{ valid: boolean; errors?: unknown } | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
+  // Materials the lecturer or class rep shared for the chosen course.
+  const [mats, setMats] = useState<Material[]>([]);
+  useEffect(() => {
+    const c = course.trim();
+    if (!c) { setMats([]); return; }
+    let cancelled = false;
+    api.materials(c).then((r) => { if (!cancelled) setMats(r.materials || []); }).catch(() => { if (!cancelled) setMats([]); });
+    return () => { cancelled = true; };
+  }, [course]);
   const [convertHint, setConvertHint] = useState('');
   const [canRetryConvert, setCanRetryConvert] = useState(false);
   const [error, setErrorState] = useState('');
@@ -600,7 +610,9 @@ export default function StudioRoute() {
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 100px' }}>
       <BackButton to="/home" />
-      <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24 }}>Author a week</h1>
+      <div className="eyebrow" style={{ marginTop: 4 }}>{localGreeting().text}</div>
+      <h1 className="display" style={{ fontSize: 30, lineHeight: 1.05, margin: '4px 0 0' }}>WRITE A WEEK.</h1>
+      <p style={{ margin: '6px 0 0', fontSize: 13, color: 'var(--text2)' }}>Pick the course and week, add your material, review, publish.</p>
       <div style={{ display: 'flex', gap: 6, margin: '12px 0 20px' }}>
         {['Compose', 'Review', 'Live'].map((s, i) => (
           <div key={s} style={{ flex: 1, textAlign: 'center' }}>
@@ -673,6 +685,21 @@ export default function StudioRoute() {
           {weeks.length > 0 && (
             <div style={{ fontSize: 12, color: 'var(--text2)' }}>
               Already live: {weeks.map((w) => `W${w.week}`).join(', ')}
+            </div>
+          )}
+          {mats.length > 0 && (
+            <div className="card" style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div className="eyebrow">From your lecturer and class rep</div>
+              {[...mats].sort((a, b) => Number(b.week === Number(week)) - Number(a.week === Number(week))).slice(0, 6).map((m) => (
+                <a key={m.id} href={m.url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', gap: 10, alignItems: 'center', textDecoration: 'none', color: 'var(--text)', minHeight: 44 }}>
+                  <FileText size={18} color="var(--u-good)" />
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{ display: 'block', fontWeight: 700, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.title}</span>
+                    <span style={{ fontSize: 12, color: 'var(--text2)' }}>Week {m.week} · {m.type === 'past-paper' ? 'past paper' : m.type}</span>
+                  </span>
+                  <ExternalLink size={14} color="var(--text3)" />
+                </a>
+              ))}
             </div>
           )}
           <div style={{ display: 'flex', gap: 6 }}>
@@ -949,6 +976,25 @@ export default function StudioRoute() {
               })()}
             </>
           )}
+          {note && (() => {
+            const checks: [string, boolean][] = [
+              ['A clear title', note.title.trim().length > 2],
+              ['At least one topic with content', note.topics.length > 0],
+              ['End-of-week quiz has questions', (note.eoq?.questions?.length || 0) > 0],
+              ['Nothing flagged for review', warnings.length === 0],
+            ];
+            return (
+              <div className="card" style={{ marginTop: 16, padding: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div className="eyebrow">Before you publish, check</div>
+                {checks.map(([label, ok]) => (
+                  <div key={label} style={{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 14, color: ok ? 'var(--text)' : 'var(--u-warn-ink)', fontWeight: 600 }}>
+                    {ok ? <CircleCheck size={18} color="var(--u-good)" /> : <Circle size={18} />}
+                    {label}
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
           <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap' }}>
             <button onClick={() => setStep(0)} style={{ flex: 1, minWidth: 120, padding: 14, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 800 }}>
               Back to compose
@@ -1001,8 +1047,8 @@ export default function StudioRoute() {
 
       {step === 2 && (
         <div style={{ textAlign: 'center', padding: '24px 0' }}>
-          <BoxBoy pose="cheer" width={120} />
-          <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 22, marginTop: 12 }}>Live for students</h2>
+          <BoxBoy pose="cheer" width={170} />
+          <h2 className="display" style={{ fontSize: 40, lineHeight: 1, marginTop: 12 }}>{`WEEK ${meta?.week ?? week ?? ''}`}<br />IS LIVE.</h2>
           <p style={{ fontSize: 13, color: 'var(--text2)', margin: '8px 0 20px' }}>Find it under your level and course, and on your Home.</p>
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={reset} style={{ flex: 1, padding: 14, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 800 }}>
