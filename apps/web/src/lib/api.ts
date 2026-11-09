@@ -160,6 +160,7 @@ export type Profile = {
   avatar_url?: string;
   notify_new_notes?: boolean;
   box_boy_persona?: string | null;
+  semester?: string | null;
   semester_start?: string | null;
   semester_weeks?: number | null;
   cgpa_target?: number | null;
