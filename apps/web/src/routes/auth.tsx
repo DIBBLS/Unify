@@ -363,7 +363,7 @@ export default function AuthRoute() {
       <style>{`.auth-page{min-height:100vh;background:var(--u-page)}.auth-side{display:none}.auth-card{maxWidth:480px;margin:0 auto}@media(min-width:900px){.auth-page{display:flex;flex-direction:row;background:var(--surface2)}.auth-side{display:flex;flex:1;flex-direction:column;justify-content:center;gap:18px;background:#0a0a0a;background-image:radial-gradient(circle at 85% 15%,color-mix(in srgb,var(--u-green) 14%,transparent),transparent 45%),radial-gradient(circle at 10% 90%,rgba(16,185,129,.1),transparent 40%);color:#f5f4f0;padding:64px;min-height:100vh}.auth-main{flex:1.2;display:flex;align-items:center;justify-content:center;padding:48px 32px;background:var(--u-page)}.auth-card{width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;box-shadow:0 12px 32px rgba(6,95,70,.12);margin:0}.auth-hero-mobile{border-radius:16px !important}}`}</style>
       <aside className="auth-side african-dark">
         <Wordmark size={30} light />
-        <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 44, lineHeight: 1.08, margin: 0, color: '#f5f4f0' }}>
+        <h1 key={tab} className="quote-fade" style={{ fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 44, lineHeight: 1.08, margin: 0, color: '#f5f4f0' }}>
           Own every week<br />of your degree.
         </h1>
         <p style={{ color: 'rgba(245,244,240,.7)', fontSize: 16, margin: 0, maxWidth: 420 }}>
@@ -394,10 +394,10 @@ export default function AuthRoute() {
           <div style={{ flex: 1 }}>
           <Wordmark size={20} onGreen />
           <div className="eyebrow" style={{ marginTop: 10, opacity: 0.75 }}>{WELCOME_LINE}</div>
-          <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 32, marginTop: 12, lineHeight: 1.1 }}>
+          <h1 key={tab} className="quote-fade" style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 32, marginTop: 12, lineHeight: 1.1 }}>
             Welcome to Unify Learn
           </h1>
-          <p style={{ marginTop: 8, opacity: 0.92, fontSize: 14, minHeight: 20 }}><Typewriter text="Built for the ones who build" /></p>
+          <p key={tab} style={{ marginTop: 8, opacity: 0.92, fontSize: 14, minHeight: 20 }}><Typewriter text="Built for the ones who build" /></p>
         </div>
         <BoxBoy pose="wavePhone" width={96} style={{ WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent)', maskImage: 'linear-gradient(to bottom, black 85%, transparent)' }} />
       </div>

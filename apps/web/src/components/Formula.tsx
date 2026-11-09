@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
-import 'katex/dist/katex.min.css';
-import katex from 'katex';
+import { getKatex, useKatexReady } from '../lib/katex';
 import { typesetMath } from '../lib/mathjax';
 
 export function escHtml(s: string): string {
@@ -42,12 +41,18 @@ function stripTex(raw: string): string {
 export default function Formula({ latex, display = false }: { latex: string; display?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const tex = useMemo(() => stripTex(latex), [latex]);
+  const ready = useKatexReady();
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     let dead = false;
     if (!tex) {
       el.textContent = '';
+      return;
+    }
+    const katex = getKatex();
+    if (!katex) {
+      el.textContent = tex; // plain source for the instant before KaTeX arrives
       return;
     }
     // Stage 1 — KaTeX.
@@ -67,7 +72,7 @@ export default function Formula({ latex, display = false }: { latex: string; dis
     return () => {
       dead = true;
     };
-  }, [tex, display]);
+  }, [tex, display, ready]);
   return (
     <div
       ref={ref}
