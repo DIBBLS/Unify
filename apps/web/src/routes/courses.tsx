@@ -12,7 +12,7 @@ type MyCourse = { code: string; title: string; weeks: number };
 
 // My Courses: only courses this student enrolled in. Browsing + joining
 // new ones lives under Class (/class).
-export default function CoursePage() {
+export default function CoursesRoute() {
   const [courses, setCourses] = useState<MyCourse[]>([]);
   const [activity, setActivity] = useState<string[]>([]);
   const [repairing, setRepairing] = useState(false);
@@ -79,7 +79,7 @@ export default function CoursePage() {
   if (loading)
     return (
       <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
-        <BackButton to="/dashboard" />
+        <BackButton to="/home" />
         <div className="skel" style={{ height: 32, width: '50%', marginTop: 4 }} />
         <div className="skel" style={{ height: 14, width: '70%', marginTop: 10 }} />
         <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -125,7 +125,7 @@ export default function CoursePage() {
 
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
-      <BackButton to="/dashboard" />
+      <BackButton to="/home" />
       <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28 }}>My Courses</h1>
       <p style={{ color: 'var(--text2)', marginTop: 6, fontSize: 13 }}>
         Your enrolled courses — open one to keep learning
@@ -135,13 +135,13 @@ export default function CoursePage() {
         <span style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--u-green-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Search size={18} color="var(--u-green)" />
         </span>
-        <span className="t-14 w-7">Explore courses to enroll</span>
+        <span className="t-14 w-7">Find your class to enroll</span>
       </Link>
       {activity.length > 0 && (
-        <div style={{ marginTop: 12, padding: 14, background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12 }}>
+        <div style={{ marginTop: 12, padding: 14, background: 'var(--u-warn-tint)', border: '1px solid #fde68a', borderRadius: 12 }}>
           <div style={{ fontWeight: 800, fontSize: 14 }}>You learned in {activity.length} course{activity.length === 1 ? '' : 's'} not on your list</div>
           <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>{activity.join(' · ')}</div>
-          <button onClick={repair} disabled={repairing} style={{ marginTop: 10, padding: '10px 18px', borderRadius: 9999, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800, fontSize: 13, opacity: repairing ? 0.6 : 1 }}>
+          <button onClick={repair} disabled={repairing} style={{ marginTop: 10, padding: '10px 18px', borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', fontWeight: 800, fontSize: 13, opacity: repairing ? 0.6 : 1 }}>
             {repairing ? 'Restoring…' : 'Restore my courses'}
           </button>
         </div>
@@ -152,7 +152,7 @@ export default function CoursePage() {
             <BoxBoy pose="readingStanding" width={72} />
             <div className="t-15" style={{ marginTop: 12 }}>No enrolled courses yet.</div>
             <Link to="/class" className="btn btn--amber" style={{ marginTop: 12, display: 'inline-block' }}>
-              Explore courses
+              Find your class
             </Link>
           </div>
         )}

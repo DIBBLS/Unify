@@ -323,8 +323,8 @@ const boxStyle = (active: boolean): React.CSSProperties => ({
   minHeight: 30,
   padding: '4px 8px',
   borderRadius: 8,
-  border: `1.5px ${active ? 'solid #059669' : 'dashed var(--border)'}`,
-  background: active ? '#ecfdf5' : 'var(--surface)',
+  border: `1.5px ${active ? 'solid var(--u-good)' : 'dashed var(--border)'}`,
+  background: active ? 'var(--u-good-tint)' : 'var(--surface)',
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -456,7 +456,7 @@ export default function VisualEquation({ initial, onBuild }: { initial: MNode[];
     cursor: 'pointer',
     textAlign: 'center',
   };
-  const structBtn: React.CSSProperties = { ...key, borderColor: '#059669', color: '#059669' };
+  const structBtn: React.CSSProperties = { ...key, borderColor: 'var(--u-good)', color: 'var(--u-good)' };
 
   return (
     <div>
@@ -476,7 +476,7 @@ export default function VisualEquation({ initial, onBuild }: { initial: MNode[];
         <button type="button" onClick={() => insertStruct('sup')} style={structBtn}>x²</button>
         <button type="button" onClick={() => insertStruct('sub')} style={structBtn}>x₂</button>
         <button type="button" onClick={() => insertStruct('sqrt')} style={structBtn}>√</button>
-        <button type="button" onClick={back} style={{ ...key, color: '#991b1b' }}>Del</button>
+        <button type="button" onClick={back} style={{ ...key, color: 'var(--u-red)' }}>Del</button>
         <button type="button" onClick={clear} style={{ ...key, color: 'var(--text2)', fontSize: 12 }}>Clear</button>
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }} role="toolbar" aria-label="Numbers and letters">
@@ -491,7 +491,7 @@ export default function VisualEquation({ initial, onBuild }: { initial: MNode[];
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }} role="toolbar" aria-label="Greek letters">
         {GLYPHS.map((g) => (
-          <button key={g.lx} type="button" onClick={() => addTok(g.g)} style={{ ...key, color: '#059669' }}>{g.g}</button>
+          <button key={g.lx} type="button" onClick={() => addTok(g.g)} style={{ ...key, color: 'var(--u-good)' }}>{g.g}</button>
         ))}
       </div>
       <div style={{ marginTop: 8 }}>
@@ -499,7 +499,7 @@ export default function VisualEquation({ initial, onBuild }: { initial: MNode[];
           type="button"
           onClick={() => setLibOpen((v) => !v)}
           aria-expanded={libOpen}
-          style={{ width: '100%', padding: '8px 12px', borderRadius: 10, background: '#ecfdf5', border: '1px solid #a7f3d0', color: '#065f46', fontWeight: 800, fontSize: 12 }}
+          style={{ width: '100%', padding: '8px 12px', borderRadius: 10, background: 'var(--u-good-tint)', border: '1px solid var(--u-good-tint)', color: 'var(--u-good)', fontWeight: 800, fontSize: 12 }}
         >
           {libOpen ? 'Hide formula library' : 'Reuse a saved formula instead of rebuilding'}
         </button>
@@ -511,7 +511,7 @@ export default function VisualEquation({ initial, onBuild }: { initial: MNode[];
                   key={c.category}
                   type="button"
                   onClick={() => setLibCat(c.category)}
-                  style={{ padding: '6px 12px', borderRadius: 9999, border: `1px solid ${libCat === c.category ? '#059669' : 'var(--border)'}`, background: libCat === c.category ? 'var(--u-amber)' : 'var(--surface)', color: libCat === c.category ? '#fff' : 'var(--text2)', fontSize: 11, fontWeight: 800 }}
+                  style={{ padding: '6px 12px', borderRadius: 9999, border: `1px solid ${libCat === c.category ? 'var(--u-good)' : 'var(--border)'}`, background: libCat === c.category ? 'var(--u-amber)' : 'var(--surface)', color: libCat === c.category ? 'var(--u-black)' : 'var(--text2)', fontSize: 11, fontWeight: 800 }}
                 >
                   {c.category}
                 </button>
@@ -532,7 +532,7 @@ export default function VisualEquation({ initial, onBuild }: { initial: MNode[];
                   style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '8px 12px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', textAlign: 'left', fontSize: 12, fontWeight: 700 }}
                 >
                   <span style={{ flex: 1 }}>{item.name}</span>
-                  <span style={{ color: '#059669', fontWeight: 800 }}>Insert +</span>
+                  <span style={{ color: 'var(--u-good)', fontWeight: 800 }}>Insert +</span>
                 </button>
               ))}
             </div>

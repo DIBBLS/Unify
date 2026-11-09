@@ -184,7 +184,7 @@ export function ProgressBar({ value, color = 'var(--u-green)', track = '#e8e6e0'
 /** Coloured info banner, e.g. "Online today", "Cancelled". */
 export function Banner({ tone = 'good', title, children, icon }: { tone?: 'good' | 'bad' | 'warn' | 'amber'; title: ReactNode; children?: ReactNode; icon?: ReactNode }) {
   const bg = { good: 'var(--u-good-tint)', bad: 'var(--u-bad-tint)', warn: 'var(--u-warn-tint)', amber: 'var(--u-amber)' }[tone];
-  const ink = { good: 'var(--u-good-ink)', bad: '#7f1d1d', warn: 'var(--u-warn-ink)', amber: 'var(--u-black)' }[tone];
+  const ink = { good: 'var(--u-good-ink)', bad: 'var(--u-red)', warn: 'var(--u-warn-ink)', amber: 'var(--u-black)' }[tone];
   const head = tone === 'bad' ? 'var(--u-red)' : 'var(--u-black)';
   return (
     <div className="stack" style={{ background: bg, borderRadius: 20, padding: 16, gap: 6 }}>

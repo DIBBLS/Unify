@@ -137,7 +137,7 @@ export default function CGPAPlannerRoute() {
     } catch (err) {
       console.error('Load profile failed:', err)
       toastError('Could not load profile')
-      navigate('/dashboard')
+      navigate('/home')
     } finally {
       setLoading(false)
     }
@@ -222,7 +222,7 @@ export default function CGPAPlannerRoute() {
       if (error) throw error
       
       toastSuccess('CGPA target set!')
-      navigate('/dashboard')
+      navigate('/home')
       
     } catch (err) {
       console.error('Save target failed:', err)

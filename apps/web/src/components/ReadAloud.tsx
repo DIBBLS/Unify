@@ -272,7 +272,7 @@ export function ReadAloud({ topic }: { topic: Topic }) {
     return (
       <div style={{ marginBottom: 12 }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 10 }}>
-          <span style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,var(--u-amber),#059669)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <span style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,var(--u-amber),var(--u-good))', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Volume2 size={16} />
           </span>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -317,7 +317,7 @@ export function ReadAloud({ topic }: { topic: Topic }) {
     <div style={{ marginBottom: 12 }}>
       {hasNarrator && (
         <div style={{ marginBottom: 6 }}>
-          <button onClick={() => setUseNarrator(true)} style={{ background: 'none', border: 'none', color: '#059669', fontSize: 11, fontWeight: 700 }}>
+          <button onClick={() => setUseNarrator(true)} style={{ background: 'none', border: 'none', color: 'var(--u-good)', fontSize: 11, fontWeight: 700 }}>
             ← Back to narrated version
           </button>
         </div>
@@ -327,7 +327,7 @@ export function ReadAloud({ topic }: { topic: Topic }) {
           onClick={playing ? stop : play}
           aria-label={playing ? 'Stop reading aloud' : 'Listen to this topic'}
           className={playing ? 'listening' : undefined}
-          style={{ display: 'flex', gap: 6, alignItems: 'center', background: playing ? '#059669' : 'var(--surface)', color: playing ? '#fff' : '#059669', border: `1px solid ${playing ? '#059669' : '#a7f3d0'}`, borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 800 }}
+          style={{ display: 'flex', gap: 6, alignItems: 'center', background: playing ? 'var(--u-good)' : 'var(--surface)', color: playing ? '#fff' : 'var(--u-good)', border: `1px solid ${playing ? 'var(--u-good)' : 'var(--u-good-tint)'}`, borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 800 }}
         >
           {playing ? <Square size={14} /> : <Volume2 size={14} />}
           {playing ? 'Stop' : 'Listen'}

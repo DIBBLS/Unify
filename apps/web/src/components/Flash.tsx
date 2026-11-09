@@ -4,9 +4,9 @@ import { useEffect, useRef } from 'react';
 // ttl (ms) auto-dismisses; ttl={0} stays until unmounted. `action` renders
 // below the message (e.g. a Retry button on persistent errors).
 const TONES = {
-  error: { background: '#fff0f0', border: '1px solid #ffcccc', color: '#cc0000' },
-  success: { background: '#f0fff4', border: '1px solid #b3f0c8', color: '#006620' },
-  info: { background: '#fff7ed', border: '1px solid #fed7aa', color: '#9a3412' },
+  error: { background: 'var(--u-bad-tint)', border: '1px solid var(--u-red)', color: 'var(--u-red)' },
+  success: { background: 'var(--u-good-tint)', border: '1px solid var(--u-good)', color: 'var(--u-good)' },
+  info: { background: '#fff7ed', border: '1px solid #fed7aa', color: 'var(--u-warn-ink)' },
 } as const;
 
 export default function Flash({

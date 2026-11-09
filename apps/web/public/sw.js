@@ -2,7 +2,7 @@
 // Versioned cache; documents network-first (never a stale app), static assets
 // cache-first, API GETs network-first with cache fallback. Writes (POST/PUT/
 // DELETE) and everything else always bypass. v10 (redesign tokens + BoxBoy offline cache).
-const CACHE = 'unify-app-v10';
+const CACHE = 'unify-app-v11';
 const CONTENT = 'unify-content-v1';
 const SHELL = ['/', '/index.html', '/manifest.json'];
 

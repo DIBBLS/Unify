@@ -80,7 +80,7 @@ export default function ShareRoute() {
           <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px' }}>
             Shared notes only live for a while — that is what makes them special. Join free and the whole library stays open.
           </p>
-          <Link to="/auth" style={{ display: 'inline-block', padding: '12px 28px', background: 'var(--u-amber)', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #059669' }}>
+          <Link to="/auth" style={{ display: 'inline-block', padding: '12px 28px', background: 'var(--u-amber)', color: 'var(--u-black)', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #c69a1a' }}>
             Join Unify free <ArrowRight size={16} style={{ verticalAlign: -3 }} />
           </Link>
         </div>
@@ -100,7 +100,7 @@ export default function ShareRoute() {
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '20px 16px 100px' }}>
-      <BackButton to={authed ? '/dashboard' : '/auth'} />
+      <BackButton to={authed ? '/home' : '/auth'} />
       <div style={{ display: 'flex', justifyContent: 'center', margin: '4px 0 12px' }}>
         <Wordmark size={18} />
       </div>
@@ -122,7 +122,7 @@ export default function ShareRoute() {
         </div>
       </div>
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
-        <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center', fontSize: 12, fontWeight: 800, color: '#b45309', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 9999, padding: '6px 14px' }}>
+        <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center', fontSize: 12, fontWeight: 800, color: 'var(--u-warn-ink)', background: 'var(--u-warn-tint)', border: '1px solid #fde68a', borderRadius: 9999, padding: '6px 14px' }}>
           <Clock size={13} /> Free for {countdown(data.share.expires_at)}
         </span>
         <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center', fontSize: 12, fontWeight: 700, color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '6px 14px' }}>
@@ -164,12 +164,12 @@ export default function ShareRoute() {
         {authed ? (
           <button
             onClick={() => navigate(`/learn/${encodeURIComponent(data.course)}/week/${data.week}`)}
-            style={{ padding: '12px 28px', borderRadius: 9999, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800, fontSize: 14 }}
+            style={{ padding: '12px 28px', borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', fontWeight: 800, fontSize: 14 }}
           >
             Open in my app
           </button>
         ) : (
-          <Link to="/auth" style={{ display: 'inline-block', padding: '12px 28px', borderRadius: 9999, background: 'var(--u-amber)', color: '#fff', textDecoration: 'none', fontWeight: 800, fontSize: 14, borderBottom: '4px solid #059669' }}>
+          <Link to="/auth" style={{ display: 'inline-block', padding: '12px 28px', borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', textDecoration: 'none', fontWeight: 800, fontSize: 14, borderBottom: '4px solid #c69a1a' }}>
             Join Unify free
           </Link>
         )}

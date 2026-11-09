@@ -78,7 +78,7 @@ export function AppIcon({ size = 120 }: { size?: number }) {
 /* ---------- Speech bubble ---------- */
 export function Bubble({ children, style }: { children: ReactNode; style?: CSSProperties }) {
   return (
-    <div style={{ position: 'absolute', background: '#fff', borderRadius: 18, padding: '10px 14px', fontWeight: 600, fontSize: 16, boxShadow: '0 2px 0 #0a0a0a', border: '2px solid #0a0a0a', ...style }}>
+    <div style={{ position: 'absolute', background: 'var(--u-card)', color: 'var(--u-text)', borderRadius: 18, padding: '10px 14px', fontWeight: 600, fontSize: 16, boxShadow: '0 2px 0 #0a0a0a', border: '2px solid #0a0a0a', ...style }}>
       {children}
     </div>
   );

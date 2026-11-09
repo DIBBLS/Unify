@@ -6,11 +6,9 @@ import './styles/redesign/index.css';
 import './styles/redesign/boxboy-motion.css';
 import { warmupApi } from './lib/api';
 import { bootTheme } from './hooks/useTheme';
-import { bootDesign } from './hooks/useDesign';
 import { log } from './lib/log';
 
 bootTheme();
-bootDesign();
 
 // Sentry (free tier): render-crash + failed-request visibility. Env-gated
 // (VITE_SENTRY_DSN) — unset means local-only console logging. Loaded from

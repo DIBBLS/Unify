@@ -30,7 +30,7 @@ export default function CourseDetailRoute() {
   const [enrolling, setEnrolling] = useState(false);
   // Preview landings (admin/author browsing) go back to their hub, never
   // to the student My Courses module.
-  const [backTo, setBackTo] = useState('/course');
+  const [backTo, setBackTo] = useState('/courses');
   const [slots, setSlots] = useState<{ day: number; start: string; end: string; venue: string; lecturer: string }[]>([]);
   const preview = searchParams.get('preview') === '1';
 
@@ -52,8 +52,8 @@ export default function CourseDetailRoute() {
                 ? '/admin/content'
                 : role === 'lecturer' || role === 'contributor'
                   ? '/browse'
-                  : '/course'
-              : '/course'
+                  : '/courses'
+              : '/courses'
           );
           if (preview) {
             setWeeks(res.weeks);
@@ -119,7 +119,7 @@ export default function CourseDetailRoute() {
     // it ever happens, send the student to their courses instead of a
     // dead-end message. Logged so a recurrence leaves a trace.
     log.warn('route', `course detail with empty code (url=${window.location.href})`);
-    return <Navigate to="/course" replace />;
+    return <Navigate to="/courses" replace />;
   }
   if (blocked)
     return (
@@ -145,7 +145,7 @@ export default function CourseDetailRoute() {
           </div>
         </div>
       )}
-        <button onClick={enrollHere} disabled={enrolling} style={{ padding: '12px 28px', borderRadius: 9999, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', fontWeight: 800, fontSize: 14, opacity: enrolling ? 0.6 : 1 }}>
+        <button onClick={enrollHere} disabled={enrolling} style={{ padding: '12px 28px', borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', fontWeight: 800, fontSize: 14, opacity: enrolling ? 0.6 : 1 }}>
           {enrolling ? 'Enrolling…' : `Enroll in ${courseCode}`}
         </button>
         <div style={{ marginTop: 12 }}>
@@ -196,7 +196,7 @@ export default function CourseDetailRoute() {
                       a.avatar ? (
                         <img key={ai} src={a.avatar} alt={a.name} title={a.name} style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--surface)', marginLeft: ai === 0 ? 0 : -6 }} />
                       ) : (
-                        <span key={ai} title={a.name} style={{ width: 20, height: 20, borderRadius: '50%', background: '#ecfdf5', color: '#059669', fontWeight: 800, fontSize: 10, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--surface)', marginLeft: ai === 0 ? 0 : -6 }}>
+                        <span key={ai} title={a.name} style={{ width: 20, height: 20, borderRadius: '50%', background: 'var(--u-good-tint)', color: '#059669', fontWeight: 800, fontSize: 10, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--surface)', marginLeft: ai === 0 ? 0 : -6 }}>
                           {a.name.trim().charAt(0).toUpperCase()}
                         </span>
                       )

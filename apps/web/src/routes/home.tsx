@@ -77,7 +77,7 @@ function OversightCard({ platform, activity, mainAdmin }: { platform: Platform; 
   );
 }
 
-export default function DashboardRoute() {
+export default function HomeRoute() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [xp, setXp] = useState(0);
@@ -206,7 +206,7 @@ export default function DashboardRoute() {
         if (stats) {
           setXp(stats.xp);
           setStreak(stats.streak);
-          setCourses(stats.courses);
+          setCourses(stats.courses || []);
           setQuizzes({ taken: stats.quizzesTaken || 0, avg: stats.quizAvg || 0 });
         }
         if (me.profile?.role === 'lecturer' || me.profile?.role === 'contributor') {
@@ -256,7 +256,7 @@ export default function DashboardRoute() {
 
   if (loading) return <DashboardSkeleton author={skelAuthor} />;
   if (loadError)
-    return <ErrorState title="Couldn't load your dashboard" message={loadError} />;
+    return <ErrorState title="Couldn't load Home" message={loadError} />;
 
   const firstName = profile?.first_name || 'Builder';
   const cleanEnrolled = enrolled.map((c) => (c || '').trim()).filter(Boolean);
@@ -299,7 +299,7 @@ export default function DashboardRoute() {
         {!profile?.avatar_url && (
           <div style={{ margin: '12px 16px 0', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
             <div style={{ flex: 1, fontSize: 13 }}><strong>Finish your profile</strong> <span style={{ color: 'var(--text2)' }}>— add a picture auditors see on your notes.</span></div>
-            <Link to="/profile" style={{ padding: '8px 16px', background: 'var(--u-amber)', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, fontSize: 12, whiteSpace: 'nowrap' }}>
+            <Link to="/me" style={{ padding: '8px 16px', background: 'var(--u-amber)', color: 'var(--u-black)', borderBottom: '3px solid #c69a1a', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, fontSize: 12, whiteSpace: 'nowrap' }}>
               Add photo
             </Link>
           </div>
@@ -334,7 +334,7 @@ export default function DashboardRoute() {
           </Link>
         </div>
         {profile?.role === 'lecturer' || teaching.length > 0 ? (
-          <Link to="/classes" style={{ margin: '12px 16px 0', padding: 14, background: 'linear-gradient(135deg,var(--u-amber),#059669)', color: '#fff', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center', textDecoration: 'none' }}>
+          <Link to="/my-classes" style={{ margin: '12px 16px 0', padding: 14, background: 'linear-gradient(135deg,var(--u-amber),#059669)', color: '#fff', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center', textDecoration: 'none' }}>
             <BookOpen size={20} />
             <span style={{ flex: 1 }}>
               <span style={{ fontWeight: 800, display: 'block' }}>My Classes</span>
@@ -398,7 +398,7 @@ export default function DashboardRoute() {
                   onClick={() => setConfirmDelete(n.id)}
                   disabled={deleting === n.id}
                   aria-label={`Delete ${n.course} week ${n.week} topic ${n.topic} version ${n.version}`}
-                  style={{ padding: 10, borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', color: '#991b1b', opacity: deleting === n.id ? 0.5 : 1 }}
+                  style={{ padding: 10, borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--u-red)', opacity: deleting === n.id ? 0.5 : 1 }}
                 >
                   <Trash2 size={16} />
                 </button>
@@ -461,14 +461,14 @@ export default function DashboardRoute() {
             <div style={{ fontWeight: 800, fontSize: 14 }}>Finish your profile</div>
             <div style={{ fontSize: 12, color: 'var(--text2)' }}>Add a picture so coursemates and lecturers recognize you.</div>
           </div>
-          <Link to="/profile" style={{ padding: '8px 16px', background: 'var(--u-amber)', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, fontSize: 12, whiteSpace: 'nowrap' }}>
+          <Link to="/me" style={{ padding: '8px 16px', background: 'var(--u-amber)', color: 'var(--u-black)', borderBottom: '3px solid #c69a1a', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, fontSize: 12, whiteSpace: 'nowrap' }}>
             Add photo
           </Link>
         </div>
       )}
 
       {pendingReq && (
-        <div style={{ margin: '0 16px 12px', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, padding: 16 }}>
+        <div style={{ margin: '0 16px 12px', background: 'var(--u-warn-tint)', border: '1px solid #fde68a', borderRadius: 12, padding: 16 }}>
           <div style={{ fontWeight: 800, fontSize: 15 }}>
             Welcome{profile?.first_name ? `, ${profile.first_name}` : ''} — your {pendingReq.role} application is with the admin
           </div>
@@ -515,7 +515,7 @@ export default function DashboardRoute() {
           <div style={{ gridColumn: '1 / -1', padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '2px solid var(--border)', borderRadius: 16 }}>
             <BoxBoy pose="readingStanding" width={77} />
             <div style={{ marginTop: 8 }}>No courses yet.</div>
-            <Link to="/class" style={{ display: 'inline-block', marginTop: 12, padding: '10px 22px', background: 'var(--u-amber)', color: '#fff', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #059669' }}>
+            <Link to="/class" style={{ display: 'inline-block', marginTop: 12, padding: '10px 22px', background: 'var(--u-amber)', color: 'var(--u-black)', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #c69a1a' }}>
               Explore courses to enroll
             </Link>
           </div>
@@ -577,7 +577,7 @@ export default function DashboardRoute() {
       {confirmUnenroll && (
         <ConfirmModal
           title={`Remove ${confirmUnenroll}?`}
-          body="It leaves your dashboard. Re-enroll anytime from Explore — your XP and progress stay."
+          body="It leaves Home. Re-enroll anytime from Class — your XP and progress stay."
           confirmLabel="Remove"
           busy={unenrolling}
           onConfirm={() => {

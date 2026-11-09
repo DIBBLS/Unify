@@ -72,7 +72,7 @@ export default function AuthRoute() {
         navigate(`/learn/${c}/week/${me.resume.week}${qs ? `?${qs}` : ''}`, { replace: true });
         return;
       }
-      navigate('/dashboard');
+      navigate('/home');
     } catch {
       log.error('session', 'profile check failed (API unreachable?)');
       setWelcomeBack(false);

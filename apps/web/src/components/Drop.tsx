@@ -109,7 +109,7 @@ export default function Drop({
         <span style={{ flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {current ? current.label : label}
         </span>
-        <ChevronDown size={14} color="#059669" style={{ transform: open ? 'rotate(180deg)' : 'none', flexShrink: 0 }} />
+        <ChevronDown size={14} color="var(--u-good)" style={{ transform: open ? 'rotate(180deg)' : 'none', flexShrink: 0 }} />
       </button>
       {open && (
         <div
@@ -148,8 +148,8 @@ export default function Drop({
                     lineHeight: 1.35,
                     borderRadius: 7,
                     border: 'none',
-                    background: active ? '#ecfdf5' : 'transparent',
-                    color: active ? '#059669' : 'var(--text)',
+                    background: active ? 'var(--u-good-tint)' : 'transparent',
+                    color: active ? 'var(--u-good)' : 'var(--text)',
                     fontSize: 13,
                     fontWeight: active ? 800 : 600,
                     cursor: 'pointer',

@@ -598,7 +598,7 @@ export default function StudioRoute() {
 
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 100px' }}>
-      <BackButton to="/dashboard" />
+      <BackButton to="/home" />
       <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24 }}>Author a week</h1>
       <div style={{ display: 'flex', gap: 6, margin: '12px 0 20px' }}>
         {['Compose', 'Review', 'Live'].map((s, i) => (
@@ -611,7 +611,7 @@ export default function StudioRoute() {
 
       {success && <Flash tone="success" message={success} onDismiss={() => setSuccess('')} />}
       {draftRestored && (
-        <div style={{ padding: 12, background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 12, fontSize: 13, color: '#065f46', display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div style={{ padding: 12, background: 'var(--u-good-tint)', border: '1px solid var(--u-good)', borderRadius: 12, fontSize: 13, color: '#065f46', display: 'flex', gap: 8, alignItems: 'center' }}>
           <span style={{ flex: 1 }}>Draft restored — right where you left it.</span>
           <button onClick={() => { discardDraft(); reset(); }} style={{ padding: '6px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: 'var(--text2)' }}>
             Discard
@@ -619,11 +619,11 @@ export default function StudioRoute() {
         </div>
       )}
       {convertHint && (
-        <div style={{ padding: 12, background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, fontSize: 13, color: '#92400e' }}>
+        <div style={{ padding: 12, background: 'var(--u-warn-tint)', border: '1px solid #fde68a', borderRadius: 12, fontSize: 13, color: 'var(--u-warn-ink)' }}>
           {convertHint}
           {canRetryConvert && !working && (
             <div style={{ marginTop: 8 }}>
-              <button onClick={convert} style={{ padding: '8px 18px', borderRadius: 9999, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '3px solid #059669', fontWeight: 800, fontSize: 13 }}>
+              <button onClick={convert} style={{ padding: '8px 18px', borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '3px solid #c69a1a', fontWeight: 800, fontSize: 13 }}>
                 Retry conversion
               </button>
             </div>
@@ -631,7 +631,7 @@ export default function StudioRoute() {
         </div>
       )}
       {warnings.length > 0 && (
-        <div style={{ padding: 12, background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, fontSize: 13, color: '#92400e' }}>
+        <div style={{ padding: 12, background: 'var(--u-warn-tint)', border: '1px solid #fde68a', borderRadius: 12, fontSize: 13, color: 'var(--u-warn-ink)' }}>
           <div style={{ fontWeight: 800, marginBottom: 4 }}>Review before publishing:</div>
           <ul style={{ paddingLeft: 18, margin: 0 }}>
             {warnings.map((w, i) => (
@@ -700,7 +700,7 @@ export default function StudioRoute() {
               <label style={label}>
                 Raw lecture notes
                 <textarea value={raw} onChange={(e) => setRaw(e.target.value.slice(0, 60000))} rows={10} placeholder="Paste messy lecture notes here…" style={{ ...input, resize: 'vertical' }} />
-                <span style={{ display: 'block', fontSize: 11, color: raw.length >= 60000 ? '#991b1b' : 'var(--text3)', marginTop: 4, fontWeight: 700 }}>
+                <span style={{ display: 'block', fontSize: 11, color: raw.length >= 60000 ? 'var(--u-red)' : 'var(--text3)', marginTop: 4, fontWeight: 700 }}>
                   {raw.length.toLocaleString()} / 60,000 chars{raw.length >= 60000 ? ' — limit reached: split into classes or generate per topic' : ` · ~${Math.min(3, Math.max(1, Math.ceil((raw.length || 1) / 20000)))} part${Math.min(3, Math.max(1, Math.ceil((raw.length || 1) / 20000))) === 1 ? '' : 's'}`}
                 </span>
               </label>
@@ -731,7 +731,7 @@ export default function StudioRoute() {
                   </label>
                 </div>
               </details>
-              <button onClick={convert} style={{ padding: 14, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+              <button onClick={convert} style={{ padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
                 Generate note <ArrowRight size={18} />
               </button>
             </>
@@ -739,17 +739,17 @@ export default function StudioRoute() {
 
           {method === 'manual' && (
             <>
-              <div style={{ fontSize: 13, color: 'var(--text2)', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 12, padding: 12 }}>
+              <div style={{ fontSize: 13, color: 'var(--text2)', background: 'var(--u-good-tint)', border: '1px solid var(--u-good)', borderRadius: 12, padding: 12 }}>
                 Compose the week yourself with guided forms — same format the AI produces, no JSON, no tokens spent.
               </div>
               {!note ? (
-                <button onClick={startManual} style={{ padding: 14, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+                <button onClick={startManual} style={{ padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
                   Start composing <ArrowRight size={18} />
                 </button>
               ) : (
                 <>
                   <NoteBuilder note={note} onChange={setNote} />
-                  <button onClick={goReview} style={{ padding: 14, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+                  <button onClick={goReview} style={{ padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
                     Continue to review <ArrowRight size={18} />
                   </button>
                 </>
@@ -759,7 +759,7 @@ export default function StudioRoute() {
 
           {method === 'external' && (
             <>
-              <div style={{ fontSize: 13, color: 'var(--text2)', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 12, padding: 12 }}>
+              <div style={{ fontSize: 13, color: 'var(--text2)', background: 'var(--u-good-tint)', border: '1px solid var(--u-good)', borderRadius: 12, padding: 12 }}>
                 Use your own AI (ChatGPT, Claude, Gemini app) and spend zero server tokens:
                 copy our format, paste it plus your raw notes into your AI, paste the JSON it returns below.
               </div>
@@ -769,17 +769,17 @@ export default function StudioRoute() {
               {formatPack && (
                 <details style={{ border: '1px solid var(--border)', borderRadius: 12, padding: '10px 14px' }}>
                   <summary style={{ fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>View format text (manual copy)</summary>
-                  <pre style={{ whiteSpace: 'pre-wrap', fontSize: 11, background: '#fafafa', padding: 10, borderRadius: 8, marginTop: 8, maxHeight: 240, overflow: 'auto' }}>{formatPack}</pre>
+                  <pre style={{ whiteSpace: 'pre-wrap', fontSize: 11, background: 'var(--surface2)', padding: 10, borderRadius: 8, marginTop: 8, maxHeight: 240, overflow: 'auto' }}>{formatPack}</pre>
                 </details>
               )}
               <label style={label}>
                 AI output (JSON)
                 <textarea value={pasted} onChange={(e) => setPasted(e.target.value.slice(0, 300000))} rows={8} spellCheck={false} placeholder="Paste the JSON your AI returned…" style={{ ...input, resize: 'vertical', fontFamily: 'monospace', fontSize: 12 }} />
-                <span style={{ display: 'block', fontSize: 11, color: pasted.length >= 300000 ? '#991b1b' : 'var(--text3)', marginTop: 4, fontWeight: 700 }}>
+                <span style={{ display: 'block', fontSize: 11, color: pasted.length >= 300000 ? 'var(--u-red)' : 'var(--text3)', marginTop: 4, fontWeight: 700 }}>
                   {pasted.length.toLocaleString()} / 300,000 chars{pasted.length >= 300000 ? ' — limit reached: paste one week at a time' : ''}
                 </span>
               </label>
-              <button onClick={importPasted} style={{ padding: 14, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+              <button onClick={importPasted} style={{ padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
                 Import into review <ArrowRight size={18} />
               </button>
             </>
@@ -796,13 +796,13 @@ export default function StudioRoute() {
             <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20, margin: '8px 0 4px' }}><MathPlain text={note.title} inline /></h2>
             <p style={{ fontSize: 13, color: 'var(--text2)' }}><MathPlain text={note.subtitle} inline /></p>
             {validation && (
-              <div style={{ marginTop: 10, fontSize: 12, fontWeight: 700, display: 'flex', gap: 6, alignItems: 'center', color: validation.valid ? '#059669' : '#991b1b' }}>
+              <div style={{ marginTop: 10, fontSize: 12, fontWeight: 700, display: 'flex', gap: 6, alignItems: 'center', color: validation.valid ? '#059669' : 'var(--u-red)' }}>
                 {validation.valid ? <Check size={14} /> : <X size={14} />}
                 {validation.valid ? 'Schema valid' : 'Schema has problems'}
               </div>
             )}
             {validation && !validation.valid && Array.isArray(validation.errors) && validation.errors.length > 0 && (
-              <ul style={{ marginTop: 8, paddingLeft: 18, fontSize: 12, color: '#991b1b', fontWeight: 500 }}>
+              <ul style={{ marginTop: 8, paddingLeft: 18, fontSize: 12, color: 'var(--u-red)', fontWeight: 500 }}>
                 {(validation.errors as unknown[]).slice(0, 8).map((e, i) => (
                   <li key={i}>{String(e)}</li>
                 ))}
@@ -838,7 +838,7 @@ export default function StudioRoute() {
                 <div style={{ marginTop: 10, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px' }}>
                   <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, marginBottom: 6 }}>BEFORE YOU PUBLISH — CHECK</div>
                   {rows.map((r, i) => (
-                    <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 12, color: r.ok ? 'var(--text)' : '#991b1b', fontWeight: r.ok ? 500 : 700, marginTop: i ? 4 : 0 }}>
+                    <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 12, color: r.ok ? 'var(--text)' : 'var(--u-red)', fontWeight: r.ok ? 500 : 700, marginTop: i ? 4 : 0 }}>
                       <span style={{ flexShrink: 0 }}>{r.ok ? <Check size={14} color="#059669" /> : <X size={14} />}</span>
                       <span>{r.text}</span>
                     </div>
@@ -952,7 +952,7 @@ export default function StudioRoute() {
             <button onClick={() => setStep(0)} style={{ flex: 1, minWidth: 120, padding: 14, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 800 }}>
               Back to compose
             </button>
-            <button onClick={() => publish()} disabled={publishing} style={{ flex: 2, minWidth: 160, padding: 14, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+            <button onClick={() => publish()} disabled={publishing} style={{ flex: 2, minWidth: 160, padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
               {publishing ? 'Publishing…' : 'Publish to students'} <ArrowRight size={18} />
             </button>
           </div>
@@ -972,7 +972,7 @@ export default function StudioRoute() {
                       else if (o.topic !== undefined) void publishTopic(o.topic, o.lecture || 1, 'replace');
                     }}
                     disabled={publishing || publishingTopic !== null}
-                    style={{ padding: 13, borderRadius: 14, background: '#dc2626', color: '#fff', border: 'none', borderBottom: '3px solid #991b1b', fontWeight: 800, fontSize: 14 }}
+                    style={{ padding: 13, borderRadius: 14, background: '#dc2626', color: '#fff', border: 'none', borderBottom: '3px solid var(--u-red)', fontWeight: 800, fontSize: 14 }}
                   >
                     Replace — remove the old, publish mine as fresh
                   </button>
@@ -1002,12 +1002,12 @@ export default function StudioRoute() {
         <div style={{ textAlign: 'center', padding: '24px 0' }}>
           <BoxBoy pose="cheer" width={120} />
           <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 22, marginTop: 12 }}>Live for students</h2>
-          <p style={{ fontSize: 13, color: 'var(--text2)', margin: '8px 0 20px' }}>Find it under your level and course, and on your dashboard.</p>
+          <p style={{ fontSize: 13, color: 'var(--text2)', margin: '8px 0 20px' }}>Find it under your level and course, and on your Home.</p>
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={reset} style={{ flex: 1, padding: 14, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 800 }}>
               Author another
             </button>
-            <button onClick={() => navigate('/dashboard')} style={{ flex: 1, padding: 14, background: 'var(--u-amber)', color: '#fff', border: 'none', borderBottom: '4px solid #059669', borderRadius: 16, fontWeight: 800 }}>
+            <button onClick={() => navigate('/home')} style={{ flex: 1, padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800 }}>
               Done
             </button>
           </div>

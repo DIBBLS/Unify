@@ -1,17 +1,19 @@
 import { Suspense, useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import Layout from './routes/_layout';
-import CourseRoute from './routes/course';
-import CourseDetailRoute from './routes/courseDetail';
+import CourseRoute from './routes/courses';
+import CourseDetailRoute from './routes/course-detail';
 import LearnWeek from './routes/learn/week';
 import AuthRoute from './routes/auth';
-import DashboardRoute from './routes/dashboard';
-import ProfileRoute from './routes/profile';
+import HomeRoute from './routes/home';
+import MeRoute from './routes/me';
+import { ROUTES, LEGACY_REDIRECTS } from './lib/routes';
 import { useParams } from 'react-router-dom';
 
 // Code-split the secondary/author routes: students' first load (auth →
 // dashboard → notes) never downloads Studio tables, admin panels or the
 // visual equation builder — each chunk fetches only when its route opens.
+const ClassRoute = lazyRoute(() => import('./routes/class'));
 const OnboardingRoute = lazyRoute(() => import('./routes/onboarding'));
 const OnboardingPersonaRoute = lazyRoute(() => import('./routes/onboarding-persona'));
 const CGPAPlannerRoute = lazyRoute(() => import('./routes/cgpa-planner'));
@@ -23,14 +25,24 @@ const HocDashboardRoute = lazyRoute(() => import('./routes/hoc-dashboard'));
 const OnlineClassRoute = lazyRoute(() => import('./routes/online-class'));
 const LecturerHomeRoute = lazyRoute(() => import('./routes/lecturer-home'));
 const BecomeHocRoute = lazyRoute(() => import('./routes/become-hoc'));
-const LecturerRedesignRoute = lazyRoute(() => import('./routes/lecturer-redesign'));
+const TimetableRoute = lazyRoute(() => import('./routes/timetable'));
+const ScreensRoute = lazyRoute(() => import('./routes/screens'));
 const NotificationsRoute = lazyRoute(() => import('./routes/notifications'));
 const AdminRoute = lazyRoute(() => import('./routes/admin'));
 const AdminContentRoute = lazyRoute(() => import('./routes/admin/content'));
 const BrowseRoute = lazyRoute(() => import('./routes/browse'));
 const ShareRoute = lazyRoute(() => import('./routes/share'));
 const StudioRoute = lazyRoute(() => import('./routes/studio/index'));
-const ClassesRoute = lazyRoute(() => import('./routes/classes'));
+const MyClassesRoute = lazyRoute(() => import('./routes/my-classes'));
+
+// Old paths (still written by the backend into notification/push links)
+// forward to the redesign routes, keeping params, query and hash.
+function LegacyRedirect({ to }: { to: string }) {
+  const params = useParams();
+  const { search, hash } = useLocation();
+  const path = to.replace(/:(\w+)/g, (_, k) => encodeURIComponent(params[k] ?? ''));
+  return <Navigate to={`${path}${search}${hash}`} replace />;
+}
 
 // /api/share/:token is served by the edge OG function for bots; if a
 // human lands here inside the SPA, forward to the real share landing.
@@ -54,10 +66,10 @@ function NotFound() {
     padding: '10px 18px',
     borderRadius: 9999,
     background: 'var(--u-amber)',
-    color: '#fff',
+    color: 'var(--u-black)',
     textDecoration: 'none',
     fontWeight: 800,
-    borderBottom: '4px solid #059669',
+    borderBottom: '4px solid #c69a1a',
   };
   return (
     <div style={{ padding: 40, textAlign: 'center', maxWidth: 'var(--shell, 480px)', margin: '0 auto' }}>
@@ -69,7 +81,7 @@ function NotFound() {
       <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
         <Link to="/course" style={link}>Learn</Link>
         <Link to="/auth" style={link}>Sign in</Link>
-        <Link to="/dashboard" style={link}>Dashboard</Link>
+        <Link to="/home" style={link}>Home</Link>
       </div>
     </div>
   );
@@ -137,7 +149,7 @@ function RequireRole({ allow, children }: { allow: string[]; children: JSX.Eleme
           searchParams.get('preview') === '1' &&
           (role === 'lecturer' || role === 'contributor' || me.isAdmin);
         if (!me.onboarded) navigate('/onboarding');
-        else if (!allow.includes(role) && !me.isAdmin && !preview) navigate('/dashboard');
+        else if (!allow.includes(role) && !me.isAdmin && !preview) navigate('/home');
         else setOk(true);
       })
       .catch((err) => {
@@ -203,7 +215,7 @@ export default function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<Navigate to="/auth" replace />} />
           <Route
-            path="/course"
+            path={ROUTES.courses}
             element={
               <RequireAuth>
                 <RequireRole allow={STUDENT_ONLY}>
@@ -217,13 +229,13 @@ export default function App() {
             element={
               <RequireAuth>
                 <RequireRole allow={STUDENT_ONLY}>
-                  <ExploreRoute />
+                  <ClassRoute />
                 </RequireRole>
               </RequireAuth>
             }
           />
           <Route
-            path="/course/:courseCode"
+            path="/courses/:courseCode"
             element={
               <RequireAuth>
                 <RequireRole allow={STUDENT_ONLY}>
@@ -243,18 +255,18 @@ export default function App() {
             }
           />
           <Route
-            path="/dashboard"
+            path={ROUTES.home}
             element={
               <RequireAuth>
-                <DashboardRoute />
+                <HomeRoute />
               </RequireAuth>
             }
           />
           <Route
-            path="/profile"
+            path={ROUTES.me}
             element={
               <RequireAuth>
-                <ProfileRoute />
+                <MeRoute />
               </RequireAuth>
             }
           />
@@ -313,11 +325,11 @@ export default function App() {
             }
           />
           <Route
-            path="/classes"
+            path={ROUTES.myClasses}
             element={
               <RequireAuth>
                 <RequireRole allow={AUTHOR_ONLY}>
-                  <ClassesRoute />
+                  <MyClassesRoute />
                 </RequireRole>
               </RequireAuth>
             }
@@ -329,7 +341,20 @@ export default function App() {
           <Route path="/hoc" element={<RequireAuth><HocDashboardRoute /></RequireAuth>} />
           <Route path="/online-class" element={<RequireAuth><OnlineClassRoute /></RequireAuth>} />
           <Route path="/lecturer" element={<RequireAuth><LecturerHomeRoute /></RequireAuth>} />
-          <Route path="/lecturer/redesign" element={<RequireAuth><LecturerRedesignRoute /></RequireAuth>} />
+          <Route path={ROUTES.screens} element={<RequireAuth><ScreensRoute /></RequireAuth>} />
+          <Route
+            path={ROUTES.timetable}
+            element={
+              <RequireAuth>
+                <RequireRole allow={STUDENT_ONLY}>
+                  <TimetableRoute />
+                </RequireRole>
+              </RequireAuth>
+            }
+          />
+          {Object.entries(LEGACY_REDIRECTS).map(([from, to]) => (
+            <Route key={from} path={from} element={<LegacyRedirect to={to} />} />
+          ))}
           <Route path="/hoc/request" element={<RequireAuth><BecomeHocRoute /></RequireAuth>} />
 
           <Route path="*" element={<NotFound />} />
