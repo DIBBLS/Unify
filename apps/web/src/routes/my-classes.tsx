@@ -184,7 +184,7 @@ export default function MyClassesRoute() {
     }
   };
 
-  if (loading) return <Loading />;
+  if (loading) return <ClassesSkeleton />;
 
   if (forbidden)
     return (

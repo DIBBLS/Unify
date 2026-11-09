@@ -1,7 +1,7 @@
 import { toastError } from '../../lib/toast';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowRight, Check, X, ChevronDown, FileText, ExternalLink, CircleCheck, Circle } from 'lucide-react';
+import { ArrowRight, Check, X, ChevronDown, FileText, ExternalLink, AlertTriangle, Sparkles, PenLine, Bot } from 'lucide-react';
 import BackButton from '../../components/BackButton';
 import Drop from '../../components/Drop';
 import Flash from '../../components/Flash';
@@ -43,6 +43,7 @@ export default function StudioRoute() {
   const [warnings, setWarnings] = useState<string[]>([]);
   // Materials the lecturer or class rep shared for the chosen course.
   const [mats, setMats] = useState<Material[]>([]);
+  const [ticks, setTicks] = useState<boolean[]>([false, false, false, false]);
   useEffect(() => {
     const c = course.trim();
     if (!c) { setMats([]); return; }
@@ -502,6 +503,7 @@ export default function StudioRoute() {
   };
 
   const reset = () => {
+    setTicks([false, false, false, false]);
     setStep(0);
     setMethod('ai');
     setNote(null);
@@ -614,13 +616,22 @@ export default function StudioRoute() {
       <div className="eyebrow" style={{ marginTop: 4 }}>{localGreeting().text}</div>
       <h1 className="display" style={{ fontSize: 30, lineHeight: 1.05, margin: '4px 0 0' }}>WRITE A WEEK.</h1>
       <p style={{ margin: '6px 0 0', fontSize: 13, color: 'var(--text2)' }}>Pick the course and week, add your material, review, publish.</p>
-      <div style={{ display: 'flex', gap: 6, margin: '12px 0 20px' }}>
-        {['Compose', 'Review', 'Live'].map((s, i) => (
-          <div key={s} style={{ flex: 1, textAlign: 'center' }}>
-            <div style={{ height: 4, borderRadius: 2, background: i <= step ? 'var(--u-amber)' : 'var(--border)' }} />
-            <div style={{ fontSize: 11, color: i <= step ? 'var(--u-good)' : 'var(--text3)', fontWeight: 700, marginTop: 4 }}>{s}</div>
-          </div>
-        ))}
+      <div role="tablist" aria-label="Steps" style={{ display: 'flex', gap: 4, padding: 4, borderRadius: 9999, background: 'var(--surface2)', border: '1px solid var(--border)', margin: '14px 0 20px' }}>
+        {['Compose', 'Review', 'Live'].map((label, i) => {
+          const canGo = i === 0 ? step === 1 : i === 1 ? step === 0 && !!note : false;
+          return (
+            <button
+              key={label}
+              role="tab"
+              aria-selected={i === step}
+              disabled={i !== step && !canGo}
+              onClick={() => { if (canGo) { if (i === 0) setTicks([false, false, false, false]); setStep(i as 0 | 1); } }}
+              style={{ flex: 1, minHeight: 40, borderRadius: 9999, border: 'none', fontWeight: 800, fontSize: 13, background: i === step ? '#0a0a0a' : 'transparent', color: i === step ? '#fff' : 'var(--text2)', opacity: i !== step && !canGo ? 0.55 : 1 }}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       {success && <Flash tone="success" message={success} onDismiss={() => setSuccess('')} />}
@@ -711,15 +722,21 @@ export default function StudioRoute() {
                 onClick={() => { setMethod(m); setError(''); }}
                 style={{
                   flex: 1,
+                  minHeight: 44,
                   padding: '10px 8px',
-                  borderRadius: 12,
-                  border: `1px solid ${method === m ? 'var(--u-good)' : 'var(--border)'}`,
-                  background: method === m ? 'var(--u-amber)' : 'var(--surface)',
-                  color: method === m ? '#fff' : 'var(--text2)',
+                  borderRadius: 14,
+                  border: `1px solid ${method === m ? '#0a0a0a' : 'var(--border)'}`,
+                  background: method === m ? '#0a0a0a' : 'var(--surface)',
+                  color: method === m ? '#fff' : 'var(--text)',
                   fontWeight: 800,
                   fontSize: 12,
+                  display: 'flex',
+                  gap: 6,
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
+                {m === 'ai' ? <Sparkles size={14} /> : m === 'manual' ? <PenLine size={14} /> : <Bot size={14} />}
                 {m === 'ai' ? 'AI Generate' : m === 'manual' ? 'Manual' : 'External AI'}
               </button>
             ))}
@@ -964,7 +981,7 @@ export default function StudioRoute() {
                     >
                       <span style={{ flex: 1 }}>
                         <span style={{ fontWeight: 800, fontSize: 14, display: 'block' }}>End-of-week quiz — {note.eoq.questions.length} questions</span>
-                        <span style={{ fontSize: 11, color: 'var(--text2)' }}>{mcq} MCQ · {fitb} fill-in · 60% to pass</span>
+                        <span style={{ fontSize: 11, color: 'var(--text2)' }}>{mcq} MCQ · {fitb} fill-in · {note.eoq.passMark ? 'pass mark ' + note.eoq.passMark : '60% to pass'}{note.eoq.timerMinutes ? ' · ' + note.eoq.timerMinutes + ' min' : ''}</span>
                       </span>
                       <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--u-good)', whiteSpace: 'nowrap', display: 'flex', gap: 2, alignItems: 'center' }}>{showQuizPreview ? 'Hide' : 'Preview'} <ChevronDown size={12} style={{ transform: showQuizPreview ? 'rotate(180deg)' : 'none' }} /></span>
                     </button>
@@ -979,29 +996,47 @@ export default function StudioRoute() {
             </>
           )}
           {note && (() => {
-            const checks: [string, boolean][] = [
-              ['A clear title', note.title.trim().length > 2],
-              ['At least one topic with content', note.topics.length > 0],
-              ['End-of-week quiz has questions', (note.eoq?.questions?.length || 0) > 0],
-              ['Nothing flagged for review', warnings.length === 0],
+            const auto: [string, boolean][] = [
+              ['Add a clear week title', note.title.trim().length > 2],
+              ['Add at least one topic with content', note.topics.length > 0],
+              ['Give the end-of-week quiz some questions', (note.eoq?.questions?.length || 0) > 0],
             ];
+            const fails = auto.filter(([, ok]) => !ok).map(([l]) => l).concat(warnings);
+            const manual = ["Outcomes match the lecturer's outline", 'Every formula checked against the slides', 'Quiz answers and model solutions are right', 'Nothing copied from a past paper'];
             return (
-              <div className="card" style={{ marginTop: 16, padding: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div className="eyebrow">Before you publish, check</div>
-                {checks.map(([label, ok]) => (
-                  <div key={label} style={{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 14, color: ok ? 'var(--text)' : 'var(--u-warn-ink)', fontWeight: 600 }}>
-                    {ok ? <CircleCheck size={18} color="var(--u-good)" /> : <Circle size={18} />}
-                    {label}
+              <>
+                {fails.length > 0 && (
+                  <div style={{ marginTop: 16, padding: 14, borderRadius: 14, background: 'var(--u-warn-tint)', color: 'var(--u-warn-ink)', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <span style={{ display: 'flex', gap: 6, alignItems: 'center', fontWeight: 800, fontSize: 14 }}><AlertTriangle size={16} />{fails.length} thing{fails.length === 1 ? '' : 's'} to look at before publishing</span>
+                    {fails.slice(0, 6).map((f, i) => <span key={i} style={{ fontSize: 13 }}>• {f}</span>)}
                   </div>
-                ))}
-              </div>
+                )}
+                <div className="card" style={{ marginTop: 16, padding: 6, display: 'flex', flexDirection: 'column' }}>
+                  <div className="eyebrow" style={{ padding: '10px 10px 4px' }}>Before you publish, check</div>
+                  {manual.map((label, i) => (
+                    <button
+                      key={label}
+                      type="button"
+                      role="checkbox"
+                      aria-checked={ticks[i]}
+                      onClick={() => setTicks(ticks.map((t, k) => (k === i ? !t : t)))}
+                      style={{ display: 'flex', gap: 12, alignItems: 'center', minHeight: 48, padding: '8px 10px', background: 'none', border: 'none', textAlign: 'left', color: 'var(--text)', fontSize: 14, fontWeight: 600 }}
+                    >
+                      <span style={{ width: 24, height: 24, borderRadius: 8, flexShrink: 0, display: 'grid', placeItems: 'center', border: `2px solid ${ticks[i] ? 'var(--u-good)' : 'var(--border)'}`, background: ticks[i] ? 'var(--u-good)' : 'transparent', color: '#fff' }}>
+                        {ticks[i] && <Check size={14} />}
+                      </span>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </>
             );
           })()}
-          <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap' }}>
-            <button onClick={() => setStep(0)} style={{ flex: 1, minWidth: 120, padding: 14, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 800 }}>
-              Back to compose
+          <div className="studio-actions" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button onClick={() => { setTicks([false, false, false, false]); setStep(0); }} style={{ flex: 1, minWidth: 120, padding: 14, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 800 }}>
+              Edit content
             </button>
-            <button onClick={() => publish()} disabled={publishing} style={{ flex: 2, minWidth: 160, padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+            <button onClick={() => publish()} disabled={publishing || !ticks.every(Boolean)} title={ticks.every(Boolean) ? undefined : 'Tick every check first'} style={{ opacity: ticks.every(Boolean) ? 1 : 0.55, flex: 2, minWidth: 160, padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
               {publishing ? 'Publishing…' : 'Publish to students'} <ArrowRight size={18} />
             </button>
           </div>

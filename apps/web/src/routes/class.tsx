@@ -89,7 +89,7 @@ export default function ClassRoute() {
     return () => window.clearTimeout(t);
   }, [q, myLevel]);
 
-  if (loading) return <Loading />;
+  if (loading) return <SearchListSkeleton />;
 
   // Strict scoping: your level + the admin's active semester, nothing else.
   // Search mode spans both semesters (badged) so no course can hide.

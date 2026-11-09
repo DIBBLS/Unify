@@ -85,3 +85,34 @@ export function dailyProverb(now = new Date()): string {
   const p = PROVERBS[dayOfYear(now) % PROVERBS.length];
   return `${p.text}${p.meaning ? ` ${p.meaning}` : ''} — ${p.from}`;
 }
+
+/** Short, checkable facts for loading screens: Nigeria, engineering, and how learning works. */
+export type Fact = { text: string; tag: string };
+export const FACTS: Fact[] = [
+  { tag: 'Nigeria', text: 'Nigeria is the most populous country in Africa.' },
+  { tag: 'Nigeria', text: 'Nigerians speak more than 500 languages. Yoruba, Igbo and Hausa are the three biggest.' },
+  { tag: 'Nigeria', text: 'The Niger and Benue rivers meet at Lokoja, in Kogi State.' },
+  { tag: 'Nigeria', text: 'The University of Ibadan was founded in 1948, Nigeria’s first university.' },
+  { tag: 'Nigeria', text: 'The naira replaced the Nigerian pound in 1973.' },
+  { tag: 'Engineering', text: 'Kainji Dam on the River Niger, finished in 1968, was Nigeria’s first major hydroelectric dam.' },
+  { tag: 'Engineering', text: 'Engineers in Nigeria are registered with COREN, the Council for the Regulation of Engineering in Nigeria.' },
+  { tag: 'Engineering', text: 'One joule is one watt for one second.' },
+  { tag: 'Engineering', text: 'Ohm’s law: voltage equals current times resistance, V = IR.' },
+  { tag: 'Engineering', text: 'Pi is irrational: its decimals never end and never repeat.' },
+  { tag: 'Study tip', text: 'Testing yourself beats re-reading. Pulling an answer out of memory is what makes it stick.' },
+  { tag: 'Study tip', text: 'Short sessions spread over several days beat one long night before the exam.' },
+  { tag: 'Study tip', text: 'Sleep after studying helps your brain lock in what you learned.' },
+  { tag: 'Study tip', text: 'If you can explain it simply to a friend, you really know it.' },
+  { tag: 'Study tip', text: 'Do the hard topic first, while your mind is fresh.' },
+];
+
+export type LoadingLine = { kind: 'proverb'; p: Proverb } | { kind: 'fact'; f: Fact };
+/** A shuffled mix of proverbs and facts; a different order every time. */
+export function loadingLines(): LoadingLine[] {
+  const all: LoadingLine[] = [...PROVERBS.map((p) => ({ kind: 'proverb' as const, p })), ...FACTS.map((f) => ({ kind: 'fact' as const, f }))];
+  for (let i = all.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [all[i], all[j]] = [all[j], all[i]];
+  }
+  return all;
+}

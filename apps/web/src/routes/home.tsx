@@ -254,7 +254,7 @@ export default function HomeRoute() {
     })();
   }, [navigate]);
 
-  if (loading) return <Loading />;
+  if (loading) return <DashboardSkeleton author={skelAuthor} />;
   if (loadError)
     return <ErrorState title="Couldn't load Home" message={loadError} />;
   // Admins have one front page: the admin Overview.

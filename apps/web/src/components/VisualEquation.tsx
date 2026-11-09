@@ -14,12 +14,7 @@ export type MNode =
 type Path = (number | string)[];
 
 export function compileNodes(nodes: MNode[]): string {
-  // Control sequences must not glue to a following letter (\pir is one
-  // bad command, not \pi + r) — separate with a space (harmless in math).
-  return nodes
-    .map(compileOne)
-    .join('')
-    .replace(/(\\[a-zA-Z]+)(?=[a-zA-Z])/g, '$1 ');
+  return compileList(nodes);
 }
 
 function compileList(nodes: MNode[]): string {
@@ -29,7 +24,11 @@ function compileList(nodes: MNode[]): string {
 function compileOne(n: MNode): string {
   switch (n.t) {
     case 'tok':
-      return n.lx;
+      // A control word must not glue to whatever follows (\pir is one bad
+      // command, not \pi + r), so each one carries its own trailing space.
+      // (A global regex for this used to backtrack into \frac{ and cut it to
+      // "\fra c{", which broke every fraction the builder made.)
+      return /^\\[a-zA-Z]+$/.test(n.lx) ? n.lx + ' ' : n.lx;
     case 'frac':
       return `\\frac{${compileList(n.n) || ' '}}{${compileList(n.d) || ' '}}`;
     case 'sup':

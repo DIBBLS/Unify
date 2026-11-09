@@ -1,3 +1,4 @@
+import { ListSkeleton } from '../components/Skeletons';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -78,7 +79,7 @@ export default function CoursesRoute() {
     })();
   }, []);
 
-  if (loading) return <Loading />;
+  if (loading) return <ListSkeleton titleWidth="45%" />;
 
   const repair = async () => {
     setRepairing(true);

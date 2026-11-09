@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { BoxBoy } from './redesign/brand';
+import LoadingQuote from './LoadingQuote';
 import Wordmark from './Wordmark';
 
 // S01 — brand-green splash: Box Boy hopping, "Unify. Learn" beneath, nothing
@@ -41,6 +42,7 @@ export function BoxBoySplash({ onDone }: { onDone?: () => void }) {
         <BoxBoy full pose="readingStanding" width={150} />
       </span>
       <Wordmark size={28} onGreen />
+      <LoadingQuote onGreen />
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { AdminSkeleton } from '../components/Skeletons';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -12,6 +13,8 @@ import BackButton from '../components/BackButton';
 import Drop from '../components/Drop';
 import { describeError } from '../lib/errors';
 import AdminContentPanel from './admin/content';
+import PerformancePanel from './admin/performance';
+import Typewriter from '../components/Typewriter';
 import { localGreeting, dailyProverb } from '../lib/naija';
 
 type Stats = { users: number; byRole: Record<string, number>; weeks: number; topics: number; courses: number; xpTotal: number };
@@ -432,7 +435,7 @@ export default function AdminRoute() {
     }
   };
 
-  if (loading) return <Loading text="Loading admin…" />;
+  if (loading) return <AdminSkeleton />;
 
   const card = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 12 } as const;
   const input = { padding: 10, border: '1px solid var(--border)', borderRadius: 10, fontSize: 14 } as const;
@@ -506,7 +509,7 @@ export default function AdminRoute() {
       <Module id="overview" openId={openModule}>
         <div className="african-dark" style={{ background: '#0a0a0a', color: '#fff', borderRadius: 18, padding: '18px 18px 24px', position: 'relative', overflow: 'hidden' }}>
           <div className="kente-edge" aria-hidden="true" />
-          <div style={{ fontSize: 12, opacity: 0.75, fontWeight: 700 }}>{localGreeting().text}</div>
+          <div style={{ fontSize: 12, opacity: 0.75, fontWeight: 700 }}><Typewriter text={localGreeting().text} speed={40} /></div>
           <div style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, marginTop: 2 }}>{adminName ? adminName + ', welcome back' : 'Welcome back'}</div>
           <div style={{ fontSize: 13, opacity: 0.8, marginTop: 8, lineHeight: 1.45 }}>{dailyProverb()}</div>
         </div>
@@ -564,6 +567,10 @@ export default function AdminRoute() {
           ))}
         </div>
       )}
+
+      <Module id="performance" openId={openModule}>
+        <PerformancePanel />
+      </Module>
 
       <Module id="content" openId={openModule}>
         <AdminContentPanel />

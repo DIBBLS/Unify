@@ -34,6 +34,10 @@ export type Topic = {
 };
 
 export type EOQ = {
+  /** Minutes allowed once the student answers the first question. Absent or 0 = untimed. */
+  timerMinutes?: number;
+  /** Correct answers needed to pass. Absent = 60% of the questions. */
+  passMark?: number;
   questions: {
     number: number;
     type: 'mcq' | 'fitb';

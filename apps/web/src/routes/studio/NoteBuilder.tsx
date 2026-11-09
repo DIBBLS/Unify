@@ -1,6 +1,6 @@
 import { toastError } from '../../lib/toast';
 import { useRef, useState } from 'react';
-import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, ChevronUp, ChevronDown, Check, X } from 'lucide-react';
 import ConfirmModal from '../../components/ConfirmModal';
 import Drop from '../../components/Drop';
 import Formula from '../../components/Formula';
@@ -266,7 +266,7 @@ export function normalizeNote(raw: unknown): UnifyNote | null {
         : undefined,
     };
   });
-  const eoqRaw = (r.eoq && typeof r.eoq === 'object' ? r.eoq : {}) as { questions?: unknown };
+  const eoqRaw = (r.eoq && typeof r.eoq === 'object' ? r.eoq : {}) as { questions?: unknown; timerMinutes?: unknown; passMark?: unknown };
   return {
     course: typeof r.course === 'string' ? r.course : '',
     week: typeof r.week === 'number' ? r.week : 1,
@@ -276,7 +276,11 @@ export function normalizeNote(raw: unknown): UnifyNote | null {
     metaChips: Array.isArray(r.metaChips) ? (r.metaChips as string[]).filter((x) => typeof x === 'string') : [],
     tags: Array.isArray(r.tags) ? (r.tags as string[]).filter((x) => typeof x === 'string') : [],
     topics,
-    eoq: { questions: Array.isArray(eoqRaw.questions) ? (eoqRaw.questions as EOQ['questions']) : [] },
+    eoq: {
+      questions: Array.isArray(eoqRaw.questions) ? (eoqRaw.questions as EOQ['questions']) : [],
+      ...(Number.isFinite(Number(eoqRaw.timerMinutes)) && Number(eoqRaw.timerMinutes) > 0 ? { timerMinutes: Math.min(180, Math.round(Number(eoqRaw.timerMinutes))) } : {}),
+      ...(Number.isFinite(Number(eoqRaw.passMark)) && Number(eoqRaw.passMark) > 0 ? { passMark: Math.round(Number(eoqRaw.passMark)) } : {}),
+    },
   };
 }
 
@@ -588,7 +592,7 @@ function BlockEditor({
   );
   if (block.type === 'paragraph') {
     return (
-      <div style={{ ...card, background: 'var(--surface2)' }}>
+      <div style={{ ...card, background: 'var(--surface2)', borderLeft: '3px solid var(--u-green)' }}>
         {head('Text')}
         <RichArea value={block.text} onChange={(v) => onChange({ ...block, text: v })} rows={3} placeholder="Paragraph text — select words and hit B / I…" ariaLabel="Paragraph text" />
         {block.text.trim() && (
@@ -602,7 +606,7 @@ function BlockEditor({
   }
   if (block.type === 'bullets') {
     return (
-      <div style={{ ...card, background: 'var(--surface2)' }}>
+      <div style={{ ...card, background: 'var(--surface2)', borderLeft: '3px solid var(--u-green)' }}>
         {head('Bullets')}
         <RichArea
           value={block.items.join('\n')}
@@ -616,7 +620,7 @@ function BlockEditor({
   }
   if (block.type === 'formula') {
     return (
-      <div style={{ ...card, background: 'var(--surface2)' }}>
+      <div style={{ ...card, background: 'var(--surface2)', borderLeft: '3px solid var(--u-green)' }}>
         {head('Formula')}
         <label style={label}>Label<input value={block.label} onChange={(e) => onChange({ ...block, label: e.target.value })} placeholder="e.g. Arithmetic mean" style={input} /></label>
         {/* NOT a <label>: a tap on a non-interactive box inside a <label>
@@ -637,7 +641,7 @@ function BlockEditor({
   if (block.type === 'symbol') {
     const glyphs = ['α', 'β', 'γ', 'δ', 'ε', 'θ', 'λ', 'μ', 'ρ', 'σ', 'φ', 'ω', 'Ω', 'π', 'Δ'];
     return (
-      <div style={{ ...card, background: 'var(--surface2)' }}>
+      <div style={{ ...card, background: 'var(--surface2)', borderLeft: '3px solid var(--u-green)' }}>
         {head('Symbol')}
         <label style={label}>Symbol<input value={block.symbol} onChange={(e) => onChange({ ...block, symbol: e.target.value })} placeholder="e.g. Ns — or tap a Greek letter below" style={input} /></label>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }} role="toolbar" aria-label="Greek letters">
@@ -660,7 +664,7 @@ function BlockEditor({
   }
   if (block.type === 'insight') {
     return (
-      <div style={{ ...card, background: 'var(--surface2)' }}>
+      <div style={{ ...card, background: 'var(--surface2)', borderLeft: '3px solid var(--u-green)' }}>
         {head('Insight')}
         <RichArea value={block.text} onChange={(v) => onChange({ ...block, text: v })} rows={2} placeholder="Key insight, common mistake…" ariaLabel="Insight text" />
       </div>
@@ -668,7 +672,7 @@ function BlockEditor({
   }
   if (block.type === 'analogy') {
     return (
-      <div style={{ ...card, background: 'var(--surface2)' }}>
+      <div style={{ ...card, background: 'var(--surface2)', borderLeft: '3px solid var(--u-green)' }}>
         {head('Analogy')}
         <RichArea value={block.text} onChange={(v) => onChange({ ...block, text: v })} rows={2} placeholder="Real-world analogy…" ariaLabel="Analogy text" />
       </div>
@@ -676,7 +680,7 @@ function BlockEditor({
   }
   if (block.type === 'diagram') {
     return (
-      <div style={{ ...card, background: 'var(--surface2)' }}>
+      <div style={{ ...card, background: 'var(--surface2)', borderLeft: '3px solid var(--u-green)' }}>
         {head('Diagram')}
         <label style={label}>Caption<input value={block.caption} onChange={(e) => onChange({ ...block, caption: e.target.value })} placeholder="Fig 2.1 — …" style={input} /></label>
         <label style={{ ...label, marginTop: 8 }}>Description<textarea value={block.description} onChange={(e) => onChange({ ...block, description: e.target.value })} rows={2} placeholder="What the figure shows…" style={area} /></label>
@@ -691,7 +695,7 @@ function BlockEditor({
   }
   // workedExample: advanced shape — preserved read-only, deletable.
   return (
-    <div style={{ ...card, background: 'var(--surface2)' }}>
+    <div style={{ ...card, background: 'var(--surface2)', borderLeft: '3px solid var(--u-green)' }}>
       <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
         <span style={{ fontSize: 12, fontWeight: 800 }}>Worked example (advanced — kept as-is)</span>
         <span style={{ flex: 1 }} />
@@ -825,6 +829,9 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
   const mcqCount = note.eoq.questions.filter((q) => q.type === 'mcq').length;
   const fitbCount = note.eoq.questions.filter((q) => q.type === 'fitb').length;
   const [confirmTopic, setConfirmTopic] = useState<number | null>(null);
+  const [active, setActive] = useState(0);
+  const at = Math.max(0, Math.min(active, note.topics.length - 1));
+  const multiLecture = new Set(note.topics.map((t) => t.lecture || 1)).size > 1;
 
   return (
     <div>
@@ -837,6 +844,7 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
             const ti = confirmTopic;
             setConfirmTopic(null);
             setTopics(renumber(note.topics.filter((_, xi) => xi !== ti)));
+            setActive(Math.max(0, Math.min(at, note.topics.length - 2)));
           }}
           onCancel={() => setConfirmTopic(null)}
         />
@@ -850,7 +858,27 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
         <label style={{ ...label, marginTop: 8 }}>Tags (comma-separated)<input value={note.tags.join(', ')} onChange={(e) => set({ tags: e.target.value.split(',').map((t) => t.trim()).filter(Boolean) })} placeholder="Turbine, Density" style={input} /></label>
       </div>
 
-      {note.topics.map((t, ti) => (
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', margin: '4px 0 12px' }} role="tablist" aria-label="Topics">
+        {note.topics.map((t, ti) => (
+          <button
+            key={ti}
+            role="tab"
+            aria-selected={ti === at}
+            className={`chip chip--sm${ti === at ? ' chip--on' : ''}`}
+            onClick={() => setActive(ti)}
+          >
+            {multiLecture ? `L${t.lecture || 1} · ` : ''}Topic {t.number}
+          </button>
+        ))}
+        <button
+          className="chip chip--sm"
+          onClick={() => { setTopics(renumber([...note.topics, blankTopic(note.topics.length + 1)])); setActive(note.topics.length); }}
+        >
+          + Topic
+        </button>
+      </div>
+
+      {note.topics.map((t, ti) => ti !== at ? null : (
         <div key={ti} style={card}>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8 }}>
             <h3 style={{ ...sectionTitle, margin: 0, flex: 1 }}>Lecture {t.lecture || 1} · Topic {t.number}</h3>
@@ -1001,7 +1029,47 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
       <div style={{ ...card, marginTop: 12 }}>
         <h3 style={sectionTitle}>End-of-week quiz</h3>
         <div style={{ fontSize: 12, fontWeight: 700, color: mcqCount === 8 && fitbCount === 2 ? 'var(--u-good)' : 'var(--u-warn-ink)', marginBottom: 8 }}>
-          {note.eoq.questions.length}/10 questions · MCQ {mcqCount}/8 · Fill-in {fitbCount}/2
+          {note.eoq.questions.length}/10 questions · Objective {mcqCount} of 8 · Fill-in {fitbCount} of 2
+        </div>
+        <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
+          <label style={{ ...card, background: 'var(--surface2)', flex: 1, margin: 0, padding: 12 }}>
+            <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, color: 'var(--text3)' }}>TIMER (MINUTES)</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={0}
+              max={180}
+              value={note.eoq.timerMinutes ?? ''}
+              placeholder="None"
+              aria-label="Quiz timer in minutes"
+              onChange={(e) => {
+                const v = Math.max(0, Math.min(180, Math.round(Number(e.target.value) || 0)));
+                const { timerMinutes: _drop, ...rest } = note.eoq;
+                set({ eoq: v > 0 ? { ...rest, timerMinutes: v } : rest });
+              }}
+              style={{ ...input, marginTop: 6, fontSize: 18, fontWeight: 800 }}
+            />
+            <span style={{ fontSize: 11, color: 'var(--text2)' }}>Starts at the first answer. Blank = untimed.</span>
+          </label>
+          <label style={{ ...card, background: 'var(--surface2)', flex: 1, margin: 0, padding: 12 }}>
+            <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, color: 'var(--text3)' }}>PASS MARK (OF {note.eoq.questions.length || 10})</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={Math.max(1, note.eoq.questions.length)}
+              value={note.eoq.passMark ?? ''}
+              placeholder={String(Math.ceil((note.eoq.questions.length || 10) * 0.6))}
+              aria-label="Quiz pass mark"
+              onChange={(e) => {
+                const v = Math.max(0, Math.min(Math.max(1, note.eoq.questions.length), Math.round(Number(e.target.value) || 0)));
+                const { passMark: _drop, ...rest } = note.eoq;
+                set({ eoq: v > 0 ? { ...rest, passMark: v } : rest });
+              }}
+              style={{ ...input, marginTop: 6, fontSize: 18, fontWeight: 800 }}
+            />
+            <span style={{ fontSize: 11, color: 'var(--text2)' }}>Correct answers needed. Blank = 60%.</span>
+          </label>
         </div>
         {note.eoq.questions.map((q, qi) => (
           <div key={qi} style={{ ...card, background: 'var(--surface2)' }}>
@@ -1015,42 +1083,82 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
                   qs[qi] = v === 'mcq'
                     ? { number: qi + 1, type: 'mcq', question: q.question, options: ['', ''], correct: 'A', feedback: q.feedback || { correct: '', wrong: '' }, topicRef: q.topicRef || '1' }
                     : { number: qi + 1, type: 'fitb', question: q.question, acceptedAnswers: [''], feedback: q.feedback || { correct: '', wrong: '' }, topicRef: q.topicRef || '1' };
-                  set({ eoq: { questions: qs } });
+                  set({ eoq: { ...note.eoq, questions: qs } });
                 }}
                 label="EOQ type"
                 style={{ width: 'auto', maxWidth: 140, flexShrink: 0 }}
               />
               <span style={{ flex: 1 }} />
-              <button onClick={() => set({ eoq: { questions: note.eoq.questions.filter((_, xi) => xi !== qi) } })} style={dangerBtn} aria-label="Delete EOQ question"><Trash2 size={14} /></button>
+              <button onClick={() => set({ eoq: { ...note.eoq, questions: note.eoq.questions.filter((_, xi) => xi !== qi) } })} style={dangerBtn} aria-label="Delete EOQ question"><Trash2 size={14} /></button>
             </div>
-            <label style={label}>Question<textarea value={q.question} onChange={(e) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, question: e.target.value }; set({ eoq: { questions: qs } }); }} rows={2} placeholder={q.type === 'fitb' ? 'Use ________ for the blank…' : 'Question text…'} style={area} /></label>
+            <label style={label}>Question<textarea value={q.question} onChange={(e) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, question: e.target.value }; set({ eoq: { ...note.eoq, questions: qs } }); }} rows={2} placeholder={q.type === 'fitb' ? 'Use ________ for the blank…' : 'Question text…'} style={area} /></label>
             {q.type === 'mcq' && q.options && (
-              <>
-                <label style={{ ...label, marginTop: 8 }}>Options (one per line)<textarea value={q.options.join('\n')} onChange={(e) => { const qs = [...note.eoq.questions]; const options = e.target.value.split('\n'); qs[qi] = { ...q, options }; set({ eoq: { questions: qs } }); }} rows={Math.max(q.options.length + 1, 2)} style={area} /></label>
-                <label style={{ ...label, marginTop: 8 }}>Correct letter
-                  <Drop
-                    value={q.correct || 'A'}
-                    options={((q.options ?? []).length ? (q.options ?? []) : ['']).map((_o, i) => ({ value: String.fromCharCode(65 + i), label: `${String.fromCharCode(65 + i)} — ${(q.options?.[i] || '').slice(0, 40) || `(option ${i + 1})`}` }))}
-                    onChange={(v) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, correct: v }; set({ eoq: { questions: qs } }); }}
-                    label="Correct letter"
-                    style={{ width: '100%', marginTop: 4 }}
-                  />
-                </label>
-              </>
+              <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, color: 'var(--text3)' }}>OPTIONS · TAP A LETTER TO MARK THE RIGHT ANSWER</div>
+                {q.options.map((opt, oi) => {
+                  const letter = String.fromCharCode(65 + oi);
+                  const right = (q.correct || 'A') === letter;
+                  const apply = (options: string[], correct: string) => {
+                    const qs = [...note.eoq.questions];
+                    qs[qi] = { ...q, options, correct };
+                    set({ eoq: { ...note.eoq, questions: qs } });
+                  };
+                  return (
+                    <div key={oi} style={{ display: 'flex', gap: 8, alignItems: 'center', padding: 6, borderRadius: 12, background: right ? 'var(--u-good-tint)' : 'var(--surface)', border: `1px solid ${right ? 'var(--u-good)' : 'var(--border)'}` }}>
+                      <button
+                        type="button"
+                        aria-label={`Mark ${letter} as the correct answer`}
+                        aria-pressed={right}
+                        onClick={() => apply(q.options as string[], letter)}
+                        style={{ width: 36, height: 36, borderRadius: 18, border: 'none', flexShrink: 0, fontWeight: 800, fontSize: 13, background: right ? 'var(--u-good)' : 'var(--surface2)', color: right ? '#fff' : 'var(--text2)' }}
+                      >
+                        {right ? <Check size={16} /> : letter}
+                      </button>
+                      <input
+                        value={opt}
+                        onChange={(e) => { const options = [...(q.options as string[])]; options[oi] = e.target.value; apply(options, q.correct || 'A'); }}
+                        placeholder={`Option ${letter}`}
+                        aria-label={`Option ${letter}`}
+                        style={{ ...input, margin: 0, flex: 1, minWidth: 0 }}
+                      />
+                      {q.options!.length > 2 && (
+                        <button
+                          type="button"
+                          aria-label={`Remove option ${letter}`}
+                          onClick={() => {
+                            const options = (q.options as string[]).filter((_, xi) => xi !== oi);
+                            const ci = (q.correct || 'A').charCodeAt(0) - 65;
+                            const next = ci === oi ? 0 : ci > oi ? ci - 1 : ci;
+                            apply(options, String.fromCharCode(65 + next));
+                          }}
+                          style={iconBtn}
+                        >
+                          <X size={14} />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+                {q.options.length < 6 && (
+                  <button type="button" className="chip chip--sm" style={{ alignSelf: 'flex-start' }} onClick={() => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, options: [...(q.options as string[]), ''] }; set({ eoq: { ...note.eoq, questions: qs } }); }}>
+                    + Option
+                  </button>
+                )}
+              </div>
             )}
             {q.type === 'fitb' && (
-              <label style={{ ...label, marginTop: 8 }}>Accepted answers (one per line)<textarea value={(q.acceptedAnswers || []).join('\n')} onChange={(e) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, acceptedAnswers: e.target.value.split('\n') }; set({ eoq: { questions: qs } }); }} rows={2} style={area} /></label>
+              <label style={{ ...label, marginTop: 8 }}>Accepted answers (one per line)<textarea value={(q.acceptedAnswers || []).join('\n')} onChange={(e) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, acceptedAnswers: e.target.value.split('\n') }; set({ eoq: { ...note.eoq, questions: qs } }); }} rows={2} style={area} /></label>
             )}
-            <label style={{ ...label, marginTop: 8 }}>Feedback when correct<input value={q.feedback?.correct || ''} onChange={(e) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, feedback: { correct: e.target.value, wrong: q.feedback?.wrong || '' } }; set({ eoq: { questions: qs } }); }} style={input} /></label>
-            <label style={{ ...label, marginTop: 8 }}>Feedback when wrong<input value={q.feedback?.wrong || ''} onChange={(e) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, feedback: { correct: q.feedback?.correct || '', wrong: e.target.value } }; set({ eoq: { questions: qs } }); }} style={input} /></label>
-            <label style={{ ...label, marginTop: 8 }}>Topic ref<input value={q.topicRef || ''} onChange={(e) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, topicRef: e.target.value }; set({ eoq: { questions: qs } }); }} placeholder="e.g. 2" style={input} /></label>
+            <label style={{ ...label, marginTop: 8 }}>Feedback when correct<input value={q.feedback?.correct || ''} onChange={(e) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, feedback: { correct: e.target.value, wrong: q.feedback?.wrong || '' } }; set({ eoq: { ...note.eoq, questions: qs } }); }} style={input} /></label>
+            <label style={{ ...label, marginTop: 8 }}>Feedback when wrong<input value={q.feedback?.wrong || ''} onChange={(e) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, feedback: { correct: q.feedback?.correct || '', wrong: e.target.value } }; set({ eoq: { ...note.eoq, questions: qs } }); }} style={input} /></label>
+            <label style={{ ...label, marginTop: 8 }}>Topic ref<input value={q.topicRef || ''} onChange={(e) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, topicRef: e.target.value }; set({ eoq: { ...note.eoq, questions: qs } }); }} placeholder="e.g. 2" style={input} /></label>
           </div>
         ))}
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 6 }}>
-          <button onClick={() => { const n = note.eoq.questions.length + 1; set({ eoq: { questions: [...note.eoq.questions, { number: n, type: 'mcq', question: '', options: ['', ''], correct: 'A', feedback: { correct: '', wrong: '' }, topicRef: '1' }] } }); }} style={addBtn}>
+          <button onClick={() => { const n = note.eoq.questions.length + 1; set({ eoq: { ...note.eoq, questions: [...note.eoq.questions, { number: n, type: 'mcq', question: '', options: ['', ''], correct: 'A', feedback: { correct: '', wrong: '' }, topicRef: '1' }] } }); }} style={addBtn}>
             <Plus size={12} /> MCQ
           </button>
-          <button onClick={() => { const n = note.eoq.questions.length + 1; set({ eoq: { questions: [...note.eoq.questions, { number: n, type: 'fitb', question: '', acceptedAnswers: [''], feedback: { correct: '', wrong: '' }, topicRef: '1' }] } }); }} style={addBtn}>
+          <button onClick={() => { const n = note.eoq.questions.length + 1; set({ eoq: { ...note.eoq, questions: [...note.eoq.questions, { number: n, type: 'fitb', question: '', acceptedAnswers: [''], feedback: { correct: '', wrong: '' }, topicRef: '1' }] } }); }} style={addBtn}>
             <Plus size={12} /> Fill-in
           </button>
         </div>

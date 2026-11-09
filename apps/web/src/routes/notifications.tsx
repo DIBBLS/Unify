@@ -1,3 +1,4 @@
+import { ListSkeleton } from '../components/Skeletons';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -87,7 +88,7 @@ export default function NotificationsRoute() {
     }
   };
 
-  if (loading) return <Loading text="Loading notifications…" />;
+  if (loading) return <ListSkeleton rows={5} titleWidth="50%" />;
 
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>

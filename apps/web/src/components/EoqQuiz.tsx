@@ -30,6 +30,10 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
   const [submitted, setSubmitted] = useState(false);
   // Score surfaces as an overlay, never buried down the quiz sheet.
   const [showResult, setShowResult] = useState(true);
+  // Optional timer: starts at the first answer, ends the quiz at zero.
+  const timerSec = Math.max(0, Math.round((eoq.timerMinutes || 0) * 60));
+  const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [now, setNow] = useState(() => Date.now());
 
   const gradeable = eoq.questions.map((q, i) =>
     q.type === 'mcq' ? mcqCorrectIndex(q) !== null : fitbAccepted(q).length > 0 ? true : false
@@ -48,10 +52,28 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
   const score = correct.filter(Boolean).length;
   const done = eoq.questions.every((_, i) => !gradeable[i] || answered[i]);
   const pct = total ? Math.round((score / total) * 100) : 0;
-  const passed = submitted && done && total > 0 && pct >= PASS_PCT;
+  // Pass mark: an exact count when the author set one, otherwise 60%.
+  const passAt = eoq.passMark && eoq.passMark > 0 ? Math.min(eoq.passMark, Math.max(total, 1)) : Math.ceil((total * PASS_PCT) / 100);
+  const passed = submitted && done && total > 0 && (eoq.passMark ? score >= passAt : pct >= PASS_PCT);
+  const timeLeft = timerSec && startedAt && !submitted ? Math.max(0, timerSec - Math.floor((now - startedAt) / 1000)) : null;
   const missed = eoq.questions
     .map((q, i) => ({ q, i }))
     .filter(({ i }) => submitted && gradeable[i] && answered[i] && !correct[i]);
+
+  // The clock starts at the first answer (never in a preview).
+  useEffect(() => {
+    if (preview || !timerSec || startedAt || submitted) return;
+    if (Object.keys(picked).length || Object.values(fitb).some((v) => v.trim())) setStartedAt(Date.now());
+  }, [picked, fitb, preview, timerSec, startedAt, submitted]);
+  useEffect(() => {
+    if (!startedAt || submitted) return;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [startedAt, submitted]);
+  // Time is up: submit what is there. Unanswered questions mean "not yet".
+  useEffect(() => {
+    if (timeLeft === 0 && !submitted) { setSubmitted(true); setShowResult(true); }
+  }, [timeLeft, submitted]);
 
   useEffect(() => {
     if (!submitted || !done || total === 0 || recorded || preview) return;
@@ -65,6 +87,7 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
     setSubmitted(false);
     setShowResult(true);
     setRecorded(false);
+    setStartedAt(null);
   };
 
   if (!eoq.questions.length) return null;
@@ -74,7 +97,12 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
       <div className="eoq-eyebrow">End-of-Week Quiz</div>
       <div className="eoq-title">Prove it.</div>
       <div className="eoq-sub">
-        {total} questions · {PASS_PCT}% to pass{preview ? ' · preview — not recorded' : ''}
+        {total} questions · pass mark {passAt} of {total}{timerSec ? ` · ${Math.round(timerSec / 60)} min` : ''}{preview ? ' · preview — not recorded' : ''}
+        {timeLeft !== null && (
+          <span role="timer" aria-live="off" style={{ marginLeft: 8, fontWeight: 800, color: timeLeft <= 60 ? '#fca5a5' : 'var(--u-green)' }}>
+            {String(Math.floor(timeLeft / 60)).padStart(2, '0')}:{String(timeLeft % 60).padStart(2, '0')}
+          </span>
+        )}
       </div>
       <div className="eoq-dots" aria-label="Quiz progress">
         {eoq.questions.map((q, i) => (
@@ -157,7 +185,7 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
           <div className="result-msg">
             {passed
               ? `You scored ${pct}%. This week is yours — the next one builds on it.`
-              : `You scored ${pct}% (need ${PASS_PCT}%). The misses below point at exactly what to re-read.`}
+              : `You scored ${pct}% (need ${passAt} of ${total}). The misses below point at exactly what to re-read.`}
           </div>
           {passed ? (
             <div className="unlock-banner">Week cleared — XP banked on every completed topic.</div>

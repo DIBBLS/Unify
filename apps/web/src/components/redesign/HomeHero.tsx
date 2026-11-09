@@ -1,3 +1,4 @@
+import Typewriter from '../Typewriter'
 import { Link } from 'react-router-dom'
 import { SemesterWeek, BoxBoy } from './brand'
 import type { Profile } from '../../lib/api'
@@ -46,7 +47,7 @@ export function HomeHero({ profile, firstName, showCgpa = false }: HomeHeroProps
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
         <div style={{ flex: 1 }}>
           <div className="eyebrow" style={{ color: 'var(--u-amber)', marginBottom: 6 }}>
-            {greet.text} <span style={{ opacity: 0.75 }}>· {greet.english}</span>
+            <Typewriter text={`${greet.text} · ${greet.english}`} speed={32} />
           </div>
           <h1 className="display" style={{ fontSize: 28, color: 'var(--u-on-dark)' }}>
             {firstName || 'Welcome'}
