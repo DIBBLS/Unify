@@ -10,7 +10,9 @@ import { BoxBoy } from '../components/redesign/brand';
 import Typewriter from '../components/Typewriter';
 import Flash from '../components/Flash';
 import ConfirmModal from '../components/ConfirmModal';
-import { HomeHero } from '../components/redesign/HomeHero';
+import { HomeHero, HomeCgpa } from '../components/redesign/HomeHero';
+import { UpdatesSlider, type UpdateSlide } from '../components/redesign/UpdatesSlider';
+import { FACTS } from '../lib/naija';
 import Loading from '../components/Loading';
 
 type CourseStat = { course: string; topics: number };
@@ -425,9 +427,20 @@ export default function HomeRoute() {
         )}
       </div>
     );
+  const updateSlides: UpdateSlide[] = [];
+  if (resume && resume.course) updateSlides.push({ id: 'resume', pose: 'readingStanding', tag: 'Pick up', title: `${resume.course} · Week ${resume.week}`, body: 'You stopped here. A few minutes keeps the streak alive.', to: `/learn/${encodeURIComponent(resume.course.trim())}/week/${resume.week}`, cta: 'Resume' });
+  if (shown.length === 0) updateSlides.push({ id: 'enroll', pose: 'peeking', tag: 'Start here', title: 'Add your courses', body: 'Find your department’s courses and the notes appear on Home.', to: '/courses/find', cta: 'Find courses' });
+  updateSlides.push({ id: 'attend', pose: 'phoneOut', tag: 'In class', title: 'Mark your attendance', body: 'When your lecturer shows the QR code, scan it right from the app.', to: '/attendance/pass', cta: 'Scan' });
+  updateSlides.push({ id: 'class', pose: 'thumbsUpPhone', tag: 'Your class', title: 'Notices from your class rep', body: 'Board posts and shared materials from your course live in Class.', to: '/class', cta: 'Open Class' });
+  {
+    const f = FACTS[new Date().getDate() % FACTS.length];
+    updateSlides.push({ id: 'fact', pose: 'chairRelax', tag: f.tag, title: 'Did you know?', body: f.text });
+  }
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', paddingBottom: 80 }}>
       <HomeHero profile={profile!} firstName={firstName} showCgpa={profile?.role === 'student'} />
+      {profile?.role === 'student' && <HomeCgpa profile={profile} />}
+      <UpdatesSlider slides={updateSlides} />
 
       <div className="rise" style={{ margin: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
         <div>

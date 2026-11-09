@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { AlertTriangle, LogOut, BellRing } from 'lucide-react';
 import { BoxBoy } from './redesign/brand';
 
@@ -15,7 +16,7 @@ export function ConfirmModal({
   onCancel,
 }: {
   title: string;
-  body: string;
+  body: ReactNode;
   confirmLabel?: string;
   tone?: 'danger' | 'go';
   busy?: boolean;

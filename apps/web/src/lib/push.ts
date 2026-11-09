@@ -45,11 +45,28 @@ export async function pushState(): Promise<PushState> {
 }
 
 // Enable: permission prompt -> subscribe -> register with backend.
-export async function enablePush(): Promise<{ ok: boolean; reason?: string }> {
-  if (!pushSupported()) return { ok: false, reason: 'This browser cannot do push notifications.' };
+export type EnableResult = { ok: boolean; reason?: string; kind?: 'blocked' | 'unsupported' | 'dismissed' | 'failed' };
+export async function enablePush(): Promise<EnableResult> {
+  if (!pushSupported()) return { ok: false, kind: 'unsupported', reason: 'This browser cannot do push notifications.' };
   try {
-    const perm = await Notification.requestPermission();
-    if (perm !== 'granted') return { ok: false, reason: 'Permission was not granted.' };
+    // Older Safari only supports the callback form; this handles both.
+    const perm: NotificationPermission = await new Promise((resolve) => {
+      let done = false;
+      const finish = (p: NotificationPermission) => {
+        if (!done) {
+          done = true;
+          resolve(p);
+        }
+      };
+      try {
+        const r = Notification.requestPermission(finish) as Promise<NotificationPermission> | undefined;
+        if (r && typeof r.then === 'function') r.then(finish, () => finish('default'));
+      } catch {
+        finish(Notification.permission);
+      }
+    });
+    if (perm === 'denied') return { ok: false, kind: 'blocked', reason: 'Notifications are blocked for this site.' };
+    if (perm !== 'granted') return { ok: false, kind: 'dismissed', reason: 'The permission box was closed.' };
     const reg = await navigator.serviceWorker.ready;
     const sub = await reg.pushManager.subscribe({
       userVisibleOnly: true,
@@ -62,7 +79,7 @@ export async function enablePush(): Promise<{ ok: boolean; reason?: string }> {
     });
     return { ok: true };
   } catch (err) {
-    return { ok: false, reason: err instanceof Error ? err.message : 'Subscribe failed.' };
+    return { ok: false, kind: 'failed', reason: err instanceof Error ? err.message : 'Subscribe failed.' };
   }
 }
 

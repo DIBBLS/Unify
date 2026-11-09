@@ -1,3 +1,5 @@
+import PushHelp from '../components/PushHelp';
+import type { GuideKind } from '../lib/pushHelp';
 import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, CalendarDays, ClipboardCheck, Search, User, PenTool, Bell, Shield, BookOpen, Users } from 'lucide-react';
@@ -30,15 +32,15 @@ const STUDENT_TABS: Tab[] = [
 ];
 
 const AUTHOR_TABS: Tab[] = [
-  { to: '/home', label: 'Home', icon: LayoutDashboard, match: ['/home'] },
-  { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio', '/browse', '/my-classes'] },
+  { to: '/home', label: 'Home', icon: LayoutDashboard, match: ['/home', '/browse', '/my-classes', '/course', '/learn'] },
+  { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio'] },
   { to: '/me', label: 'Me', icon: User, match: ['/me'] },
 ];
 
 const LECTURER_TABS: Tab[] = [
   { to: '/home', label: 'Home', icon: LayoutDashboard, match: ['/home'] },
-  { to: '/lecturer', label: 'Classroom', icon: ClipboardCheck, match: ['/lecturer', '/attendance', '/my-classes'] },
-  { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio', '/browse'] },
+  { to: '/lecturer', label: 'Classroom', icon: ClipboardCheck, match: ['/lecturer', '/attendance', '/my-classes', '/browse', '/course', '/learn'] },
+  { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio'] },
   { to: '/me', label: 'Me', icon: User, match: ['/me'] },
 ];
 
@@ -46,8 +48,8 @@ const LECTURER_TABS: Tab[] = [
 // everything through All content; learning paths are students-only.
 // /browse + /classes light the Studio tab (the working area).
 const ADMIN_TABS: Tab[] = [
-  { to: '/admin', label: 'Home', icon: LayoutDashboard, match: ['/admin', '/home'] },
-  { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio', '/browse', '/my-classes'] },
+  { to: '/admin', label: 'Home', icon: LayoutDashboard, match: ['/admin', '/home', '/browse', '/my-classes', '/course', '/learn'] },
+  { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio'] },
   { to: '/me', label: 'Me', icon: User, match: ['/me'] },
 ];
 
@@ -144,7 +146,7 @@ export default function Layout() {
   }, []);
   // Shown once when the browser reports "denied" — the fix lives in
   // browser settings, so plain retry would just fail again.
-  const [pushDenied, setPushDenied] = useState(false);
+  const [pushGuideKind, setPushGuideKind] = useState<GuideKind | null>(null);
 
   const dismissPushPrompt = () => {
     setPushPrompt(false);
@@ -173,13 +175,7 @@ export default function Layout() {
     setPushBusy(true);
     try {
       const res = await enablePush();
-      if (!res.ok) {
-        try {
-          if (Notification.permission === 'denied') setPushDenied(true);
-        } catch {
-          // ignore
-        }
-      }
+      if (!res.ok) setPushGuideKind(res.kind ?? 'failed');
     } finally {
       setPushBusy(false);
       dismissPushPrompt();
@@ -437,14 +433,14 @@ export default function Layout() {
                     ))}
                     <div className="side-group">
                       <div className="side-grouplabel">Create</div>
-                      <Link to="/studio" className={'side-pill' + (pathname.startsWith('/studio') || pathname.startsWith('/browse') ? ' is-active' : '')} aria-label="Studio">
+                      <Link to="/studio" className={'side-pill' + (pathname.startsWith('/studio') ? ' is-active' : '')} aria-label="Studio">
                         <span className="side-ico"><PenTool size={20} /></span>
                         <span className="side-label">Studio</span>
                       </Link>
                     </div>
                   </>
                 )
-                : tabs.map((t) => {
+                : tabs.filter((t) => t.to !== '/me').map((t) => {
                     const active = t.match.some((m) => pathname === m || pathname.startsWith(m + '/'));
                     const Icon = t.icon;
                     return (
@@ -462,7 +458,7 @@ export default function Layout() {
                 </span>
                 <span className="side-label">Notifications</span>
               </Link>
-              <Link to="/me" className="side-pill side-me" aria-label="Me">
+              <Link to="/me" className={'side-pill side-me' + (pathname === '/me' || pathname.startsWith('/me/') ? ' is-active' : '')} aria-current={pathname === '/me' ? 'page' : undefined} aria-label="Me">
                 <span className="side-ico side-avatar">{pic.src ? <img src={pic.src} alt="" /> : (initial || 'U')}</span>
                 <span className="side-label">Me</span>
               </Link>
@@ -509,7 +505,7 @@ export default function Layout() {
               {t.label}
             </a>
           ) : (
-            <Link key={t.to} to={t.to} style={style}>
+            <Link key={t.to} to={t.to} style={style} aria-current={active ? "page" : undefined}>
               <Icon size={20} />
               {t.label}
             </Link>
@@ -530,18 +526,7 @@ export default function Layout() {
           onCancel={dismissPushPrompt}
         />
       )}
-      {pushDenied && (
-        <ConfirmModal
-          title="Browser is blocking push"
-          body="Your browser said no, so tapping Allow can't work until you re-enable it: open the lock (or ⋮ menu) next to the address bar → Site settings → Notifications → Allow — then come back and tap Allow here. On iPhone, add Unify to the Home Screen first, then allow."
-          confirmLabel="Got it"
-          cancelLabel="Later"
-          tone="go"
-          icon="bell"
-          onConfirm={() => setPushDenied(false)}
-          onCancel={() => setPushDenied(false)}
-        />
-      )}
+      {pushGuideKind && <PushHelp kind={pushGuideKind} onClose={() => setPushGuideKind(null)} />}
     </div>
   );
 }
