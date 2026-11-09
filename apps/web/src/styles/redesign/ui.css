@@ -166,3 +166,26 @@ a { color: inherit; text-decoration: none; }
 [data-theme="dark"] .btn--white { --edge: #000; }
 [data-theme="dark"] .btn--ghost-dark { --edge: #000; }
 [data-theme="dark"] .chip--on { background: var(--u-text); color: var(--u-black); border-color: var(--u-text); }
+
+/* ---------- Button legibility ----------
+   Only the main action (amber / green / dark buttons) carries colour. Every
+   other button reads in the plain text colour (near-black in light mode,
+   near-white in dark), not pale green or grey. Destructive (red) stays red.
+   Inline-styled buttons are matched by their colour declaration. */
+button[style^="color: var(--u-good)"], button[style*="; color: var(--u-good)"],
+button[style^="color: var(--green-deep)"], button[style*="; color: var(--green-deep)"],
+button[style^="color: var(--green)"], button[style*="; color: var(--green)"],
+button[style^="color: var(--u-good-2)"], button[style*="; color: var(--u-good-2)"],
+button[style^="color: var(--text2)"], button[style*="; color: var(--text2)"],
+button[style^="color: var(--text3)"], button[style*="; color: var(--text3)"],
+button[style^="color: var(--u-text-2)"], button[style*="; color: var(--u-text-2)"],
+button[style^="color: var(--u-text-3)"], button[style*="; color: var(--u-text-3)"] {
+  color: var(--u-text) !important;
+}
+.btn--white, .btn--outline, .chip:not(.chip--on), .modal-cancel { color: var(--u-text); }
+
+/* Full-width buttons: fill a phone, but never stretch across a desktop page. */
+@media (min-width: 900px) {
+  .btn--block { display: flex; width: 100%; max-width: 380px; margin-inline: auto; }
+  .bottom-actions .btn--block { max-width: 420px; }
+}

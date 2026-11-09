@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { BookOpen, ChevronRight, Trash2 } from 'lucide-react';
 import { supabaseBrowser } from '../lib/supabase';
-import { api, type Profile } from '../lib/api';
+import { api, type Profile, type HomeUpdate } from '../lib/api';
 import { DashboardSkeleton } from '../components/Skeletons';
 import ErrorState from '../components/ErrorState';
 import { BoxBoy } from '../components/redesign/brand';
@@ -86,6 +86,10 @@ export default function HomeRoute() {
   const [streak, setStreak] = useState(0);
   const [courses, setCourses] = useState<CourseStat[]>([]);
   const [enrolled, setEnrolled] = useState<string[]>([]);
+  const [liveUpdates, setLiveUpdates] = useState<HomeUpdate[]>([]);
+  useEffect(() => {
+    api.updates().then((r) => setLiveUpdates(r.updates || [])).catch(() => {});
+  }, []);
   const [resume, setResume] = useState<{ course: string; week: number; topic: number; lecture?: number } | null>(null);
   const [quizzes, setQuizzes] = useState({ taken: 0, avg: 0 });
   const [loading, setLoading] = useState(true);
@@ -427,7 +431,7 @@ export default function HomeRoute() {
         )}
       </div>
     );
-  const updateSlides: UpdateSlide[] = [];
+  const updateSlides: UpdateSlide[] = liveUpdates.map((u) => ({ id: 'live-' + u.id, pose: u.pose, tag: 'From Unify', title: u.title, body: u.body, to: u.link && u.link.startsWith('/') ? u.link : undefined, href: u.link && u.link.startsWith('https://') ? u.link : undefined, cta: u.cta || 'Open' }));
   if (resume && resume.course) updateSlides.push({ id: 'resume', pose: 'readingStanding', tag: 'Pick up', title: `${resume.course} · Week ${resume.week}`, body: 'You stopped here. A few minutes keeps the streak alive.', to: `/learn/${encodeURIComponent(resume.course.trim())}/week/${resume.week}`, cta: 'Resume' });
   if (shown.length === 0) updateSlides.push({ id: 'enroll', pose: 'peeking', tag: 'Start here', title: 'Add your courses', body: 'Find your department’s courses and the notes appear on Home.', to: '/courses/find', cta: 'Find courses' });
   updateSlides.push({ id: 'attend', pose: 'phoneOut', tag: 'In class', title: 'Mark your attendance', body: 'When your lecturer shows the QR code, scan it right from the app.', to: '/attendance/pass', cta: 'Scan' });
@@ -444,8 +448,8 @@ export default function HomeRoute() {
 
       <div className="rise" style={{ margin: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
         <div>
-          <div className="stat-num" style={{ fontSize: 18 }}>{profile?.grad_target ?? '—'}</div>
-          <div style={{ fontSize: 11, color: 'var(--text2)' }}>Target</div>
+          <div className="stat-num" style={{ fontSize: 18 }}>{profile?.cgpa_target != null ? Number(profile.cgpa_target).toFixed(2) : '—'}</div>
+          <div style={{ fontSize: 11, color: 'var(--text2)' }}>CGPA target</div>
         </div>
         <div>
           <div className="stat-num" style={{ fontSize: 18 }}>{xp}</div>

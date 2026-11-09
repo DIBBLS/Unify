@@ -1,71 +1,76 @@
-# Unify Learn — Web App (v2.12.0)
+# Unify Learn: web app
 
-Student + author frontend. Vite 5 + React 18 + TypeScript 5 + React Router 6.
-Deploys to Vercel from `DIBBLS/Unify` (frontend-only mirror of the main monorepo).
-
-## Stack
-
-Classic/Story designs + dark mode (CSS tokens, per-device), Playfair Display +
-DM Sans + Nunito, emerald theme, 1px flat cards, lucide icons, KaTeX + MathJax math,
-SVG Box Boy mascot, Web Push, offline worker (SW v8 + offline write queue).
-Device prefs (theme, design, role hint, push prompt) in `localStorage`;
-everything else server-side. Secondary/author routes (studio, admin, browse,
-share, classes, onboarding, notifications, explore) are `React.lazy` — the
-student's first load never downloads them.
+The student and author frontend. Vite 5, React 18, TypeScript 5, React Router 6. Deploys to Vercel from `DIBBLS/Unify`, a frontend-only mirror of the main monorepo (see the root `README.md`).
 
 ## Scripts
 
 ```bash
 npm install
-npm run dev      # http://localhost:3000
-npm run build    # tsc + vite build -> dist/
-npm run preview
+npm run dev       # http://localhost:3000
+npm run build     # tsc + vite build -> dist/ (also stamps the build id, see "Self-updating")
+npm run preview   # serve dist/ locally (used by the browser tests)
 ```
 
-## Env (plain names work; `VITE_` equivalents too)
+## Environment
+
+Plain names work; `VITE_` equivalents do too. Public fallbacks are built in so local dev runs with nothing set.
 
 | Key | Purpose |
 |---|---|
 | `SUPABASE_URL` | Supabase project URL (Auth) |
-| `SUPABASE_PUBLISHABLE_KEY` | anon key (Auth; public-safe) |
-| `API_URL` | Render backend URL, no trailing slash |
-| `USE_BACKEND` | `1` (backend is the source of truth) |
-| `VITE_VAPID_PUBLIC_KEY` | Web Push public key (fallback baked into `src/lib/push.ts`) |
+| `SUPABASE_PUBLISHABLE_KEY` | Publishable (anon) key. Public by design |
+| `API_URL` | API base URL, no trailing slash |
+| `USE_BACKEND` | `1` |
+| `VITE_VAPID_PUBLIC_KEY` | Web Push public key; must match the API's pair |
 
-Built-in public fallbacks keep local dev working; env vars override.
+## Structure
+
+```
+src/
+  routes/        one file per screen (lazy-loaded except Home, Courses, Course, Learn, Auth, Me)
+    admin.tsx, admin/   admin hub; admin/performance.tsx (live metrics), admin/updates.tsx (Home slider), admin/content.tsx
+    studio/      index.tsx (flow), NoteBuilder.tsx (sectioned editing, equation overlay), Pipeline.tsx
+  components/    shared UI; redesign/ holds the design-system pieces (HomeHero, UpdatesSlider, brand, ui)
+  lib/           api (typed client), supabase (per-tab sessions), push + pushHelp (notification permission help),
+                 image (photo prep), autoUpdate (PWA updates), katex (on-demand math), offline (write queue),
+                 cgpa (strict validation + planner math), vitals (Web Vitals), qrscan, naija (greetings, proverbs, facts)
+  styles/redesign/   tokens.css, ui.css (buttons, chips), motion.css (all animation), african.css, boxboy-motion.css
+public/          sw.js (offline + cache), manifest.json, icons/, boxboy/ (mascot poses)
+```
+
+## Conventions
+
+- **One loading look.** Page-level waits use the skeletons in `components/Skeletons.tsx` (they mirror the real screen); a wait inside a page uses `SectionSkeleton`; route-level waits (auth gate, lazy chunk) use `Loading`. All end with a rotating `LoadingQuote`. Do not add ad-hoc spinners.
+- **Buttons.** Only the main action is coloured (amber, green or dark). Everything else reads in the normal text colour (`ui.css` enforces this for inline-styled buttons too). Full-width buttons cap at 380px on desktop.
+- **Motion.** Soft and quiet: fades, a slow "breathe" on mascots and the logo dot. `backwards` fill mode, never `both`, so finished animations do not trap popups under the nav. Everything collapses under `prefers-reduced-motion`.
+- **Layers.** nav 50, modal veil 120, equation overlay 125, Drop panels 130, toasts 140.
+- **Pictures.** Profile photos and attendance selfies go through `lib/image.ts` (square crop, upright, white behind transparency, under 60 to 70 KB).
+- **CGPA.** Always use `validateCGPA` and `cleanCgpaInput` from `lib/cgpa.ts`; a CGPA is 0.00 to 5.00 with at most two decimals.
+- **Selectors** use the `Drop` overlay, never a native `<select>` (the admin phone section picker is the one deliberate exception).
+- **Confirmations** use `ConfirmModal`, never `window.confirm`.
+- **Hooks** live above early returns.
+
+## Self-updating PWA
+
+`vite.config.ts` gives every build an id, stamps it into `dist/sw.js`, and writes `dist/version.json`. `lib/autoUpdate.ts` checks on launch, on return to the app, on reconnect and every 2 minutes; when a newer build exists it reloads onto it (waiting if the person is typing). The worker's cache name includes the build id, so the previous build's cache is deleted on activation. Saved weeks (offline content) are kept. Hosting must serve `/sw.js` and `/version.json` with no-cache headers (both `vercel.json` files do).
 
 ## Routes
 
 | Route | Who | What |
 |---|---|---|
-| `/auth` | public | Email + Google sign in/up, forgot-password, welcome-back splash |
-| `/onboarding` | signed in | Role-first setup (student 8 / lecturer 6 / contributor 3 steps) |
-| `/dashboard` | signed in | Students: XP/streak/resume/course cards; authors: notes/courses stats + My Classes entry; admins: oversight card |
-| `/course` | student | My Courses (bulk week counts) |
-| `/explore` | student | Enroll-only catalog (single bulk call + alias search) |
-| `/course/:code`, `/learn/:code/week/:week` | student (+preview roles) | Lecture reader (Lecture 1/2/3, `?c=`): hero, chapter tabs, recalls, read-aloud, EOQ exam, share, Save offline, XP-gated PDF. Only these routes get the floating pill: Focus + zoom-in (content column only) |
-| `/s/:token` | public | Expiring share landing with preview card + join CTA |
-| `/browse` | lecturer/contributor | Level-scoped note browser (read-only previews) |
-| `/classes` | lecturer/contributor | My Classes: weekly timetable manager + live roster per taught course |
-| `/notifications` | signed in | Bell list, auto-opens on fresh entry when unread |
-| `/profile` | signed in | Inline edit, email change + verify CTA, any-size avatar upload (on-device 256px JPEG), appearance (design/theme/push), version footer |
-| `/studio` | lecturer/contributor/admin | AI / manual / external-AI authoring, lecture pickers, versioned publish |
-| `/admin`, `/admin/content` | admin | Modules (analytics, models, unis, courses, session, announce, users), all-content tree |
-| `*` | public | Mascot 404 with nav links |
+| `/auth`, `/welcome` | public | Sign in or up, intro slides |
+| `/onboarding` | signed in | Role-first setup |
+| `/home` | signed in | Greeting, CGPA card, updates slider, courses |
+| `/courses`, `/courses/find`, `/course/:code`, `/learn/:code/week/:n` | student | Courses and the reader |
+| `/timetable`, `/class`, `/hoc` | student | Timetable, class board, class rep tools |
+| `/attendance/pass`, `/attendance/my` | student | Selfie then scan; my record |
+| `/attendance/scanner`, `/lecturer`, `/my-classes` | lecturer, class rep | Rotating QR, roster with photos, materials |
+| `/cgpa-planner` | student | Current CGPA, target, course status, roadmap |
+| `/studio`, `/browse` | author | Write, publish, browse notes |
+| `/admin`, `/admin/:section` | admin | The hub |
+| `/s/:token` | public | Expiring share link |
+| `/notifications`, `/me` | signed in | Bell, profile |
 
-## Key client rules
+## Browser tests
 
-- XP/progress/quiz recording is students-only (server-enforced); staff reads record nothing.
-- Learning paths are students-only; authors/admins use `?preview=1` (read-only, no resume/XP).
-- 30-min sliding idle TTL (persisted), Remember-me opt-in, exact resume (course/week/topic/lecture) for students.
-- Offline-first: progress/quiz/resume bank in `lib/offline` queue when offline and flush on reconnect; reader weeks save into the SW content cache (`Save offline`).
-- Reader controls: Focus + zoom live only in the floating pill on note readers (`components/ZoomBar.tsx`); zoom is desktop, zoom-IN only (100–150%), targets `#unify-content` so header/nav stay normal, and the first zoom-in enables Focus. Both Focus and zoom persist per device (localStorage) and are **retained when switching notes**. The layout hides the chrome bars only on reader routes — the rest of the app always renders normally, so neither ever leaks outside the notes section. The % reset button returns zoom to 100% and exits Focus.
-- Every selector uses the `Drop` overlay component — never a native `<select>`. The panel is a floating overlay with shared spacing; call-site `style` only styles the trigger (give triggers in tight rows a real `min-width`).
-- **Save PDF** (300 XP gate, reader toolbar) = `window.print()` of the rendered note — no separate export path. Print CSS (single block in `index.css`) hides `header`/`nav`/`button` and everything marked `.screen-only` (the floating ZoomBar pill, InstallBar), forces `#unify-content` zoom back to 100% (a zoomed reading session must not clip the page), unblurs recall answers, and keeps cards/formula boxes unbroken. Whatever is on screen prints: KaTeX/MathJax formulas — raw TeX can never reach a PDF. (v1.26.11)
-- **Math = KaTeX first, MathJax for complex, NO fallbacks (v1.26.11/v1.26.13).** One two-stage pipeline serves formula boxes (`Formula`) and paragraph math (`MathText`/`MathPlain`): KaTeX (statically bundled — instant, offline, zero network) renders everything it can; TeX KaTeX rejects is handed to **MathJax** (on-demand, service-worker cached), which accepts nearly all valid TeX. Bare LaTeX (`\frac{v^2}{2g}`, `\sum_{i=1}^{n}`, `\alpha`) renders even without `\(...\)` delimiters and `$$...$$` is supported; code spans stay literal. The equation editor's RENDERED preview runs the *same* component as the reader, so the preview is always exact. The glyph fallback (`a⁄b`, `√(x)`) was **deleted** — the renderers are the pipeline; only if both fail does source remain (logged for diagnosis). `lib/mathjax.ts` serves stage 2; jsdelivr is preconnected.
-- Zero `window.confirm` — all confirmations use the designed `ConfirmModal`.
-- Hooks live above early returns (error #310 guard — see git history).
-
-## Backend
-
-All data flows through the Render API (`src/lib/api.ts`). See root `SETUP.md`.
+The Puppeteer suites that drive these screens against a stubbed API are not yet in the repo. See `docs/PRODUCTION-READINESS.md` for the plan to move them into CI.

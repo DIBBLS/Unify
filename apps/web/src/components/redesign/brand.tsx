@@ -111,6 +111,7 @@ export function Wordmark({ size = 16, color }: { size?: number; color?: string }
   return (
     <span className="wordmark" style={{ fontSize: size, color, fontWeight: 900 }}>
       Unify<span className="dot-breathe" style={{ color: 'var(--u-green)', display: 'inline-block' }}>.</span>
+      <span style={{ fontFamily: 'var(--font-body)', fontWeight: 800 }}> Learn</span>
     </span>
   );
 }
@@ -118,7 +119,7 @@ export function Wordmark({ size = 16, color }: { size?: number; color?: string }
 export function AppIcon({ size = 120 }: { size?: number }) {
   return (
     <div style={{ width: size, height: size, borderRadius: size * 0.24, background: 'var(--u-green)', display: 'grid', placeItems: 'center' }}>
-      <span style={{ fontFamily: 'var(--font-wordmark)', fontWeight: 900, fontSize: size * 0.58, lineHeight: 1, color: '#0a0a0a' }}>U.</span>
+      <span style={{ fontFamily: 'var(--font-wordmark)', fontWeight: 900, fontSize: size * 0.58, lineHeight: 1, color: '#0a0a0a' }}>U<i style={{ fontStyle: 'normal', color: '#0a0a0a' }}>.</i></span>
     </div>
   );
 }

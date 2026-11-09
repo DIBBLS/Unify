@@ -10,7 +10,8 @@ import {
   getCGPALabel, 
   calculateRoadmap,
   calculateWhatIf,
-  validateCGPA 
+  validateCGPA,
+  cleanCgpaInput
 } from '../lib/cgpa'
 import { BoxBoy } from '../components/redesign/brand'
 import Loading from '../components/Loading'
@@ -132,7 +133,7 @@ export default function CGPAPlannerRoute() {
     
     const cgpa = validateCGPA(currentCGPA)
     if (cgpa == null) {
-      toastError('Enter a valid CGPA (0.00-5.00)')
+      toastError('Enter a CGPA from 0.00 to 5.00 (up to two decimals)')
       return
     }
     const done = parseInt(priorUnits, 10)
@@ -179,7 +180,7 @@ export default function CGPAPlannerRoute() {
     try {
       const cgpa = validateCGPA(currentCGPA)
       if (cgpa == null) {
-        toastError('Enter a valid CGPA (0.00-5.00)')
+        toastError('Enter a CGPA from 0.00 to 5.00 (up to two decimals)')
         setStep('enter')
         return
       }
@@ -314,12 +315,12 @@ function EnterCGPA({
 }) {
   return (
     <div className="stack" style={{ gap: 32, flex: 1 }}>
-      <div className="stack center" style={{ gap: 16 }}>
+      <div className="stack center" style={{ gap: 16, alignItems: 'center' }}>
         <BoxBoy pose="readingStanding" width={120} />
         <h1 className="display center" style={{ fontSize: 26 }}>
           WHAT'S YOUR<br />CURRENT CGPA?
         </h1>
-        <p className="t-14 muted center" style={{ maxWidth: 300 }}>
+        <p className="t-14 muted center" style={{ maxWidth: 300, margin: 0, textAlign: 'center' }}>
           Not per-course grades. Just your overall CGPA so far.
         </p>
       </div>
@@ -327,12 +328,13 @@ function EnterCGPA({
       {hasStarted ? (
         <div style={{ maxWidth: 280, margin: '0 auto', width: '100%' }}>
           <input
-            type="number"
-            step="0.01"
-            min="0"
-            max="5"
+            type="text"
+            inputMode="decimal"
+            autoComplete="off"
+            maxLength={4}
+            aria-invalid={currentCGPA !== '' && validateCGPA(currentCGPA) === null}
             value={currentCGPA}
-            onChange={(e) => setCurrentCGPA(e.target.value)}
+            onChange={(e) => setCurrentCGPA(cleanCgpaInput(e.target.value))}
             placeholder="0.00"
             className="input"
             style={{ 
@@ -343,8 +345,8 @@ function EnterCGPA({
             }}
             autoFocus
           />
-          <div className="t-12 faint center" style={{ marginTop: 8 }}>
-            0.00 – 5.00
+          <div className="t-12 center" style={{ marginTop: 8, color: currentCGPA !== '' && validateCGPA(currentCGPA) === null ? 'var(--u-red, #dc2626)' : 'var(--text3)' }}>
+            {currentCGPA !== '' && validateCGPA(currentCGPA) === null ? 'Use a number from 0.00 to 5.00, like 3.75' : '0.00 – 5.00, up to two decimals'}
           </div>
           <div className="stack" style={{ gap: 12, marginTop: 24, textAlign: 'left' }}>
             <label className="t-13 w-6">
@@ -420,11 +422,11 @@ function CourseStatus({
   
   return (
     <div className="stack" style={{ gap: 24, flex: 1 }}>
-      <div className="stack center" style={{ gap: 12 }}>
+      <div className="stack center" style={{ gap: 12, alignItems: 'center' }}>
         <h1 className="display center" style={{ fontSize: 24 }}>
           MARK YOUR<br />COURSES
         </h1>
-        <p className="t-14 muted center" style={{ maxWidth: 320 }}>
+        <p className="t-14 muted center" style={{ maxWidth: 320, margin: 0, textAlign: 'center' }}>
           Done ✓ / Priority (compulsory) / Not yet
         </p>
       </div>
@@ -521,11 +523,11 @@ function TargetPicker({
 }) {
   return (
     <div className="stack" style={{ gap: 32, flex: 1 }}>
-      <div className="stack center" style={{ gap: 12 }}>
+      <div className="stack center" style={{ gap: 12, alignItems: 'center' }}>
         <h1 className="display center" style={{ fontSize: 24 }}>
           PICK YOUR<br />TARGET
         </h1>
-        <p className="t-14 muted center" style={{ maxWidth: 300 }}>
+        <p className="t-14 muted center" style={{ maxWidth: 300, margin: 0, textAlign: 'center' }}>
           Honest labels. No sugar-coating.
         </p>
       </div>

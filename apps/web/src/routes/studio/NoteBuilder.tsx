@@ -804,6 +804,7 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
   // Manual mode edits one part at a time: Week, then each topic's details,
   // parts, recall cards and pulse check, then the quiz. Back/Next walk the
   // same order, so nothing is skipped and nothing is crowded onto one screen.
+  const stepsRef = useRef<HTMLDivElement>(null);
   type View = 'week' | 'topics' | 'quiz';
   const [view, setView] = useState<View>('week');
   const [secRaw, setSec] = useState('details');
@@ -825,7 +826,14 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
       setActive(st.ti);
       setSec(st.sec);
     }
-    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch { /* ignore */ }
+    // Land back on the Week / Topics / Quiz header (not the top of the whole page), and move
+    // keyboard and screen-reader focus there too, so the new section starts in view.
+    window.requestAnimationFrame(() => {
+      const bar = stepsRef.current;
+      if (!bar) return;
+      try { bar.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch { /* ignore */ }
+      try { bar.focus({ preventScroll: true }); } catch { /* ignore */ }
+    });
   };
 
   return (
@@ -844,7 +852,7 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
           onCancel={() => setConfirmTopic(null)}
         />
       )}
-      <div className="nb-steps" role="tablist" aria-label="Note sections">
+      <div className="nb-steps" ref={stepsRef} tabIndex={-1} role="tablist" aria-label="Note sections">
         {([['week', 'Week'], ['topics', 'Topics'], ['quiz', 'Quiz']] as const).map(([id, name]) => (
           <button key={id} role="tab" aria-selected={view === id} className={`chip chip--sm${view === id ? ' chip--on' : ''}`} onClick={() => goStep(steps.find((s) => s.view === id) as Step)}>{name}</button>
         ))}

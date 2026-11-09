@@ -1,4 +1,4 @@
-import LoadingQuote from '../components/LoadingQuote';
+import { SectionSkeleton } from '../components/Skeletons';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, CalendarCheck, ChevronRight, ClipboardCheck, Megaphone, MapPin, Video } from 'lucide-react';
@@ -95,7 +95,7 @@ export default function TimetableRoute() {
 
       <div style={{ marginTop: 16 }}>
         {loading ? (
-          <><div className="skel" style={{ height: 150, borderRadius: 24 }} /><LoadingQuote style={{ margin: '24px auto 0' }} /></>
+          <SectionSkeleton rows={3} />
         ) : courses.length === 0 ? (
           <Card style={{ alignItems: 'center', textAlign: 'center' }}>
             <BoxBoy pose="peeking" width={110} />

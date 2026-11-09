@@ -112,6 +112,26 @@ export function ClassesSkeleton() {
 
 const row = { padding: '14px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 } as const;
 
+/** The one loading look for a section inside a page (a list, a card group): rows
+ *  shaped like the real rows, then a rotating line. Page-level skeletons above
+ *  use the same rows, so every wait in the app has the same structure. */
+export function SectionSkeleton({ rows = 3, quote = true }: { rows?: number; quote?: boolean }) {
+  return (
+    <div role="status" aria-label="Loading" style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
+      {Array.from({ length: rows }).map((_, i) => (
+        <div key={i} style={{ ...row, display: 'flex', gap: 12, alignItems: 'center' }}>
+          <div className="skel" style={{ width: 36, height: 36, borderRadius: 10, flexShrink: 0 }} />
+          <div style={{ flex: 1 }}>
+            <div className="skel" style={{ height: 15, width: '55%' }} />
+            <div className="skel" style={{ height: 12, width: '85%', marginTop: 8 }} />
+          </div>
+        </div>
+      ))}
+      {quote && <LoadingQuote style={{ margin: '16px auto 0' }} />}
+    </div>
+  );
+}
+
 /** Title + subtitle + a stack of cards (Courses, Notifications, Add courses lists). */
 export function ListSkeleton({ rows = 4, titleWidth = '40%' }: { rows?: number; titleWidth?: string }) {
   return (

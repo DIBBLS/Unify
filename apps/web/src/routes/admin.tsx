@@ -14,6 +14,7 @@ import Drop from '../components/Drop';
 import { describeError } from '../lib/errors';
 import AdminContentPanel from './admin/content';
 import PerformancePanel from './admin/performance';
+import HomeUpdatesPanel from './admin/updates';
 import Typewriter from '../components/Typewriter';
 import { localGreeting, dailyProverb } from '../lib/naija';
 
@@ -365,6 +366,8 @@ export default function AdminRoute() {
   const [announceTitle, setAnnounceTitle] = useState('');
   const [announceBody, setAnnounceBody] = useState('');
   const [announcing, setAnnouncing] = useState(false);
+  const [alsoHome, setAlsoHome] = useState(false);
+  const [updatesKey, setUpdatesKey] = useState(0);
   const [testEmail, setTestEmail] = useState('');
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ ok: boolean; status: number; body: string; sender: string; keySet: boolean; fromSet: boolean } | null>(null);
@@ -379,6 +382,13 @@ export default function AdminRoute() {
     setError('');
     try {
       const res = await api.adminAnnounce(announceTitle.trim(), announceBody.trim());
+      if (alsoHome) {
+        // Same notice on everyone's Home slider (the slider has shorter limits).
+        const cur = await api.adminUpdates();
+        const item = { id: Math.random().toString(36).slice(2, 10), title: announceTitle.trim().slice(0, 80), body: announceBody.trim().slice(0, 240), pose: 'cheer' as const, createdAt: new Date().toISOString() };
+        await api.adminSaveUpdates([item, ...cur.updates].slice(0, 12));
+        setUpdatesKey((k) => k + 1);
+      }
       setAnnounceTitle('');
       setAnnounceBody('');
       const bell = `Announcement sent to ${res.reached} user${res.reached === 1 ? '' : 's'}`;
@@ -806,6 +816,10 @@ export default function AdminRoute() {
         <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 8 }}>Lands on every user's bell instantly, and is emailed to every confirmed inbox.</div>
         <input value={announceTitle} onChange={(e) => setAnnounceTitle(e.target.value)} placeholder="Announcement title" style={{ ...input, width: '100%', marginBottom: 8 }} />
         <textarea value={announceBody} onChange={(e) => setAnnounceBody(e.target.value)} rows={3} placeholder="What should everyone know?" style={{ ...input, width: '100%', resize: 'vertical', marginBottom: 8 }} />
+        <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, margin: '0 0 8px', color: 'var(--text)' }}>
+          <input type="checkbox" checked={alsoHome} onChange={(e) => setAlsoHome(e.target.checked)} />
+          Also show it on everyone's Home slider
+        </label>
         <button onClick={() => setConfirm({ title: 'Send to everyone?', body: 'This announcement lands on every user\u2019s bell instantly.', label: 'Send', run: () => void announce() })} disabled={announcing} style={{ ...primaryBtn, width: '100%', opacity: announcing ? 0.6 : 1 }}>
           {announcing ? 'Sending…' : 'Send to all users'}
         </button>
@@ -834,6 +848,7 @@ export default function AdminRoute() {
           )}
         </div>
       </div>
+      <HomeUpdatesPanel key={updatesKey} />
       </Module>
 
       <Module id="errors" openId={openModule}>
