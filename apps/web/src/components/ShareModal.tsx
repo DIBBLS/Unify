@@ -102,7 +102,7 @@ export function ShareModal({ course, week, title, topics, onClose }: { course: s
         </div>
         {/* Mini preview: exactly the hero + topics going out */}
         <div style={{ marginTop: 10, background: '#0a0a0a', borderRadius: 12, padding: 16, color: '#f5f4f0' }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: '#4ade80' }}>{course} · WEEK {week}</div>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--u-green)' }}>{course} · WEEK {week}</div>
           <div style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 17, marginTop: 4 }}>{title || `Week ${week}`}</div>
           <div style={{ fontSize: 12, color: 'rgba(245,244,240,.65)', marginTop: 6 }}>
             {topics.length ? topics.slice(0, 3).map((t, i) => (

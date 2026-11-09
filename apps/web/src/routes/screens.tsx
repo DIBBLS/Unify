@@ -34,19 +34,19 @@ const GROUPS: { title: string; entries: Entry[] }[] = [
   {
     title: 'Attendance & classes',
     entries: [
-      { path: ROUTES.attendanceSetup, name: 'Attendance setup', note: 'Register this device', roles: ['student'] },
-      { path: ROUTES.attendancePass, name: 'Attendance pass', note: 'Signed pass to show at class', roles: ['student'] },
+      { path: ROUTES.attendanceSetup, name: 'Attendance details', note: 'Name and matric number, once', roles: ['student'] },
+      { path: ROUTES.attendancePass, name: 'Mark attendance', note: 'Enter the 6-digit class code', roles: ['student'] },
       { path: ROUTES.attendanceMine, name: 'My attendance', note: 'Your record', roles: ['student'] },
-      { path: ROUTES.onlineClass, name: 'Online class', note: 'Check in to a live session', roles: ['any'] },
+      { path: ROUTES.onlineClass, name: 'Online class', note: 'Coming soon', roles: ['any'] },
       { path: ROUTES.hocRequest, name: 'Become HOC', note: 'Request head-of-class', roles: ['student'] },
-      { path: ROUTES.hoc, name: 'HOC dashboard', note: 'Class timetable and posts', roles: ['student'] },
-      { path: ROUTES.scanner, name: 'Scanner', note: 'Scan student passes', roles: ['lecturer'] },
+      { path: ROUTES.hoc, name: 'Class board', note: 'HOC posts for your department and level', roles: ['student'] },
+      { path: ROUTES.scanner, name: 'Take attendance', note: 'Open a session, share the code', roles: ['lecturer'] },
     ],
   },
   {
     title: 'Lecturer & contributor',
     entries: [
-      { path: ROUTES.lecturer, name: 'Lecturer home', note: 'Today, timetable, actions, attendance', roles: ['lecturer'] },
+      { path: ROUTES.lecturer, name: 'Classroom', note: 'Today’s classes and lecturer actions', roles: ['lecturer'] },
       { path: ROUTES.studio, name: 'Studio', note: 'Write and publish notes', roles: ['lecturer', 'contributor'] },
       { path: ROUTES.browse, name: 'Browse', note: 'Level-scoped content', roles: ['lecturer', 'contributor'] },
       { path: ROUTES.myClasses, name: 'My classes', note: 'Timetable slots and live roster', roles: ['lecturer', 'contributor'] },
@@ -62,6 +62,7 @@ const GROUPS: { title: string; entries: Entry[] }[] = [
   {
     title: 'Before sign-in',
     entries: [
+      { path: ROUTES.welcome, name: 'Welcome slides', note: 'Four intro slides, shown once per device', roles: ['any'] },
       { path: ROUTES.auth, name: 'Sign in / up', note: 'Box Boy splash first', roles: ['any'] },
       { path: ROUTES.onboarding, name: 'Onboarding', note: 'Full-screen Box Boy flow', roles: ['any'] },
       { path: ROUTES.persona, name: 'Persona picker', note: 'Choose your Box Boy', roles: ['any'] },

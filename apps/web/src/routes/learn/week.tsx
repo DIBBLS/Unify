@@ -261,7 +261,7 @@ export default function LearnPage() {
           {enrolling ? 'Enrolling…' : 'Enroll & continue'}
         </button>
         <div style={{ marginTop: 12 }}>
-          <button onClick={() => navigate('/class')} style={{ background: 'none', border: 'none', color: '#059669', fontWeight: 700, fontSize: 13 }}>
+          <button onClick={() => navigate('/class')} style={{ background: 'none', border: 'none', color: 'var(--u-good)', fontWeight: 700, fontSize: 13 }}>
             or explore other courses
           </button>
         </div>
@@ -403,12 +403,12 @@ export default function LearnPage() {
           }}
           disabled={savedOff || savingOff}
           title={savedOff ? 'Saved — opens without internet' : 'Save this week to read offline'}
-          style={{ display: 'flex', gap: 6, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 700, color: savedOff ? '#059669' : 'var(--text2)', opacity: savingOff ? 0.6 : 1 }}
+          style={{ display: 'flex', gap: 6, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 700, color: savedOff ? 'var(--u-good)' : 'var(--text2)', opacity: savingOff ? 0.6 : 1 }}
         >
           {savedOff ? <Check size={14} /> : <Download size={14} />} {savedOff ? 'Saved offline' : savingOff ? 'Saving…' : 'Save offline'}
         </button>
         {(!viewer || viewer.role === 'lecturer' || viewer.role === 'contributor' || viewer.role === 'admin' || viewer.isAdmin) && (
-          <button onClick={() => setSharing(true)} style={{ display: 'flex', gap: 6, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 700, color: '#059669' }}>
+          <button onClick={() => setSharing(true)} style={{ display: 'flex', gap: 6, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 700, color: 'var(--u-good)' }}>
             <Share2 size={14} /> Share
           </button>
         )}
@@ -521,7 +521,7 @@ export default function LearnPage() {
                     key={v.id}
                     disabled={loadingVersion}
                     onClick={() => viewVersion(activeMeta, v.version, v.id)}
-                    style={{ padding: '4px 12px', borderRadius: 9999, border: `1px solid ${current ? '#059669' : 'var(--border)'}`, background: current ? 'var(--u-amber)' : 'var(--surface)', color: current ? '#fff' : 'var(--text2)', fontWeight: 800, fontSize: 11 }}
+                    style={{ padding: '4px 12px', borderRadius: 9999, border: `1px solid ${current ? 'var(--u-good)' : 'var(--border)'}`, background: current ? 'var(--u-amber)' : 'var(--surface)', color: current ? 'var(--u-black)' : 'var(--text2)', fontWeight: 800, fontSize: 11 }}
                   >
                     v{v.version}
                   </button>
@@ -597,9 +597,9 @@ function TopicTab({ topic, done, onToggle, preview }: { topic: Topic; done: bool
             marginTop: 12,
             padding: '10px 18px',
             borderRadius: 9999,
-            background: done ? '#059669' : 'var(--surface)',
+            background: done ? 'var(--u-good)' : 'var(--surface)',
             color: done ? '#fff' : 'var(--text)',
-            border: `1px solid ${done ? '#059669' : 'var(--border)'}`,
+            border: `1px solid ${done ? 'var(--u-good)' : 'var(--border)'}`,
             cursor: 'pointer',
             display: 'flex',
             gap: 6,

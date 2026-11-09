@@ -130,7 +130,7 @@ export default function CourseDetailRoute() {
         <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px' }}>Enroll to unlock its weeks, topics and quizzes.</p>
       {slots.length > 0 && (
         <div style={{ marginTop: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14 }}>
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: '#059669' }}>CLASS TIMES · REPEATS WEEKLY</div>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--u-good)' }}>CLASS TIMES · REPEATS WEEKLY</div>
           <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
             {slots.map((s) => (
               <div key={`${s.day}-${s.start}`} style={{ fontSize: 13, fontWeight: 700 }}>
@@ -149,7 +149,7 @@ export default function CourseDetailRoute() {
           {enrolling ? 'Enrolling…' : `Enroll in ${courseCode}`}
         </button>
         <div style={{ marginTop: 12 }}>
-          <Link to="/class" style={{ fontSize: 13, color: '#059669', fontWeight: 700, textDecoration: 'none' }}>
+          <Link to="/class" style={{ fontSize: 13, color: 'var(--u-good)', fontWeight: 700, textDecoration: 'none' }}>
             or explore other courses
           </Link>
         </div>
@@ -196,17 +196,17 @@ export default function CourseDetailRoute() {
                       a.avatar ? (
                         <img key={ai} src={a.avatar} alt={a.name} title={a.name} style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--surface)', marginLeft: ai === 0 ? 0 : -6 }} />
                       ) : (
-                        <span key={ai} title={a.name} style={{ width: 20, height: 20, borderRadius: '50%', background: 'var(--u-good-tint)', color: '#059669', fontWeight: 800, fontSize: 10, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--surface)', marginLeft: ai === 0 ? 0 : -6 }}>
+                        <span key={ai} title={a.name} style={{ width: 20, height: 20, borderRadius: '50%', background: 'var(--u-good-tint)', color: 'var(--u-good)', fontWeight: 800, fontSize: 10, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--surface)', marginLeft: ai === 0 ? 0 : -6 }}>
                           {a.name.trim().charAt(0).toUpperCase()}
                         </span>
                       )
                     ))}
                   </span>
-                  <span style={{ fontSize: 11, color: '#059669', fontWeight: 700 }}>by {w.authors.map((a) => a.name).join(', ')}</span>
+                  <span style={{ fontSize: 11, color: 'var(--u-good)', fontWeight: 700 }}>by {w.authors.map((a) => a.name).join(', ')}</span>
                 </span>
               )}
             </span>
-            <ChevronRight size={18} color="#059669" />
+            <ChevronRight size={18} color="var(--u-good)" />
           </Link>
         ))}
       </div>

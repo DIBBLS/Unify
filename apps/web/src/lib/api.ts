@@ -234,6 +234,12 @@ export function clearMeCache(): void {
   meCache = null;
 }
 
+
+// ---- Head of Class + attendance ----
+export type HocPost = { id: string; type: 'announcement' | 'tip' | 'question'; title: string | null; content: string; createdAt: string; author: string; mine: boolean };
+export type AttendanceSession = { id: string; course: string; code: string; week: number | null; opensAt: string; closesAt: string; open: boolean };
+export type AttendanceRegister = { session: AttendanceSession | null; present: { studentId: string; at: string; name: string; matric: string }[]; enrolled: number };
+
 export const api = {
   universities: () => apiFetch<University[]>("/v1/universities"),
   settings: () => apiFetch<{ currentSemester: string }>("/v1/settings"),
@@ -498,5 +504,26 @@ export const api = {
     apiFetch<{ ok: boolean }>(`/v1/timetable/${id}`, { method: 'DELETE' }),
   roster: (course: string) =>
     apiFetch<{ students: RosterStudent[] }>(`/v1/courses/${encodeURIComponent(course)}/students`),
+  // Head of Class
+  hocPosts: () => apiFetch<{ posts: HocPost[]; isHoc: boolean; department?: string; level?: string }>('/v1/hoc/posts'),
+  hocPost: (payload: { type: HocPost['type']; title?: string; content: string }) =>
+    apiFetch<{ ok: boolean; id: string }>('/v1/hoc/posts', { method: 'POST', body: JSON.stringify(payload) }),
+  hocDelete: (id: string) => apiFetch<{ ok: boolean }>(`/v1/hoc/posts/${id}`, { method: 'DELETE' }),
+  hocRequest: () => apiFetch<{ ok: boolean }>('/v1/hoc/request', { method: 'POST', body: '{}' }),
+  hocGrant: (email: string, revoke = false) =>
+    apiFetch<{ ok: boolean; name: string | null; isHoc: boolean }>('/v1/hoc/grant', { method: 'POST', body: JSON.stringify({ email, revoke }) }),
+  // Attendance
+  attendanceProfile: () => apiFetch<{ fullName: string; matric: string }>('/v1/attendance/profile'),
+  attendanceSetProfile: (fullName: string, matric: string) =>
+    apiFetch<{ ok: boolean }>('/v1/attendance/profile', { method: 'PUT', body: JSON.stringify({ fullName, matric }) }),
+  attendanceStart: (course: string, week?: number, minutes?: number) =>
+    apiFetch<AttendanceRegister>('/v1/attendance/sessions', { method: 'POST', body: JSON.stringify({ course, week, minutes }) }),
+  attendanceRegister: (course: string) =>
+    apiFetch<AttendanceRegister>(`/v1/attendance/sessions?course=${encodeURIComponent(course)}`),
+  attendanceClose: (id: string) => apiFetch<{ ok: boolean }>(`/v1/attendance/sessions/${id}/close`, { method: 'POST', body: '{}' }),
+  attendanceCheckin: (code: string) =>
+    apiFetch<{ ok: boolean; already: boolean; course: string }>('/v1/attendance/checkin', { method: 'POST', body: JSON.stringify({ code }) }),
+  attendanceMine: () =>
+    apiFetch<{ courses: { course: string; held: number; attended: number }[]; recent: { course: string; at: string }[] }>('/v1/attendance/mine'),
 };
 

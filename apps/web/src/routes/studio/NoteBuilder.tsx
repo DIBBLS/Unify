@@ -54,7 +54,7 @@ const addBtn = {
   borderRadius: 9999,
   background: 'var(--u-good-tint)',
   border: '1px solid var(--u-good)',
-  color: '#059669',
+  color: 'var(--u-good)',
   fontWeight: 800,
   fontSize: 12,
   display: 'inline-flex',
@@ -456,7 +456,7 @@ function EquationInput({ value, onChange }: { value: string; onChange: (v: strin
           <div style={{ marginTop: 8, background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 8, padding: '10px 12px' }}>
             <Formula latex={value} display />
           </div>
-          <button type="button" onClick={() => openVisual([])} style={{ marginTop: 8, padding: '8px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: '#059669' }}>
+          <button type="button" onClick={() => openVisual([])} style={{ marginTop: 8, padding: '8px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: 'var(--u-good)' }}>
             Start over visually (replaces it)
           </button>
         </div>
@@ -642,7 +642,7 @@ function BlockEditor({
         <label style={label}>Symbol<input value={block.symbol} onChange={(e) => onChange({ ...block, symbol: e.target.value })} placeholder="e.g. Ns — or tap a Greek letter below" style={input} /></label>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }} role="toolbar" aria-label="Greek letters">
           {glyphs.map((g) => (
-            <button key={g} type="button" onClick={() => onChange({ ...block, symbol: `${block.symbol}${g}` })} style={{ minWidth: 32, padding: '5px 4px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: '#059669', fontSize: 14, fontWeight: 700, cursor: 'pointer', textAlign: 'center' }}>
+            <button key={g} type="button" onClick={() => onChange({ ...block, symbol: `${block.symbol}${g}` })} style={{ minWidth: 32, padding: '5px 4px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--u-good)', fontSize: 14, fontWeight: 700, cursor: 'pointer', textAlign: 'center' }}>
               {g}
             </button>
           ))}
@@ -721,7 +721,7 @@ function QuestionEditor({
     <div style={{ ...card, background: 'var(--surface2)' }}>
       <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8 }}>
         {lockType ? (
-          <span style={{ fontSize: 11, fontWeight: 800, color: '#059669' }}>{lockType.toUpperCase()} (fixed)</span>
+          <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--u-good)' }}>{lockType.toUpperCase()} (fixed)</span>
         ) : (
           <Drop
             value={q.type}
@@ -784,10 +784,10 @@ function TopicAudio({ course, week, audioRef, onChange }: { course: string; week
   };
   return (
     <div style={{ marginTop: 8, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: 10 }}>
-      <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 6 }}>Narrator audio {audioRef ? <span style={{ color: '#059669' }}>· attached</span> : <span style={{ color: 'var(--text3)' }}>· none (device voice reads instead)</span>}</div>
+      <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 6 }}>Narrator audio {audioRef ? <span style={{ color: 'var(--u-good)' }}>· attached</span> : <span style={{ color: 'var(--text3)' }}>· none (device voice reads instead)</span>}</div>
       {audioRef && <audio controls src={audioRef} style={{ width: '100%', marginBottom: 6 }} />}
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <label style={{ flex: 1, padding: '8px 12px', borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: '#059669', textAlign: 'center', cursor: 'pointer', opacity: busy ? 0.6 : 1 }}>
+        <label style={{ flex: 1, padding: '8px 12px', borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: 'var(--u-good)', textAlign: 'center', cursor: 'pointer', opacity: busy ? 0.6 : 1 }}>
           {busy ? 'Uploading…' : audioRef ? 'Replace MP3' : 'Upload MP3 (≤15 MB)'}
           <input type="file" accept="audio/mpeg,audio/mp4,audio/wav,audio/ogg,.mp3,.m4a,.wav,.ogg" disabled={busy} onChange={(e) => void pick(e.target.files?.[0] || null)} style={{ display: 'none' }} />
         </label>
@@ -884,7 +884,7 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
 
           {t.subtopics.map((s, si) => (
             <div key={si} style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed var(--border)' }}>
-              <div style={{ fontSize: 12, fontWeight: 800, color: '#059669', marginBottom: 8 }}>Part {s.number} · {s.title || '(untitled)'}</div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--u-good)', marginBottom: 8 }}>Part {s.number} · {s.title || '(untitled)'}</div>
               <label style={label}>Part title<input value={s.title} onChange={(e) => { const topics = [...note.topics]; const subs = [...topics[ti].subtopics]; subs[si] = { ...s, title: e.target.value }; topics[ti] = { ...t, subtopics: subs }; setTopics(topics); }} placeholder="Section title" style={input} /></label>
               <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {s.content.map((b, bi) => (
@@ -943,7 +943,7 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
             {(t.activeRecall || []).map((c, ci) => (
               <div key={ci} style={{ ...card, background: 'var(--surface2)' }}>
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8 }}>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: '#059669' }}>CARD {ci + 1}</span>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--u-good)' }}>CARD {ci + 1}</span>
                   <span style={{ flex: 1 }} />
                   <button onClick={() => { const topics = [...note.topics]; topics[ti] = { ...t, activeRecall: (topics[ti].activeRecall || []).filter((_, xi) => xi !== ci) }; setTopics(topics); }} style={dangerBtn} aria-label="Delete recall card"><Trash2 size={14} /></button>
                 </div>
@@ -994,19 +994,19 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
         </div>
       ))}
 
-      <button onClick={() => setTopics(renumber([...note.topics, blankTopic(note.topics.length + 1)]))} style={{ width: '100%', padding: 14, background: 'var(--surface)', border: '1px dashed var(--u-good)', borderRadius: 12, color: '#059669', fontWeight: 800, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
+      <button onClick={() => setTopics(renumber([...note.topics, blankTopic(note.topics.length + 1)]))} style={{ width: '100%', padding: 14, background: 'var(--surface)', border: '1px dashed var(--u-good)', borderRadius: 12, color: 'var(--u-good)', fontWeight: 800, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
         <Plus size={16} /> Add topic
       </button>
 
       <div style={{ ...card, marginTop: 12 }}>
         <h3 style={sectionTitle}>End-of-week quiz</h3>
-        <div style={{ fontSize: 12, fontWeight: 700, color: mcqCount === 8 && fitbCount === 2 ? '#059669' : 'var(--u-warn-ink)', marginBottom: 8 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: mcqCount === 8 && fitbCount === 2 ? 'var(--u-good)' : 'var(--u-warn-ink)', marginBottom: 8 }}>
           {note.eoq.questions.length}/10 questions · MCQ {mcqCount}/8 · Fill-in {fitbCount}/2
         </div>
         {note.eoq.questions.map((q, qi) => (
           <div key={qi} style={{ ...card, background: 'var(--surface2)' }}>
             <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8 }}>
-              <span style={{ fontSize: 11, fontWeight: 800, color: '#059669' }}>Q{qi + 1}</span>
+              <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--u-good)' }}>Q{qi + 1}</span>
               <Drop
                 value={q.type}
                 options={[{ value: 'mcq', label: 'MCQ' }, { value: 'fitb', label: 'Fill-in' }]}

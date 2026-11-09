@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, ChevronRight, MapPin } from 'lucide-react';
+import { BookOpen, CalendarCheck, ChevronRight, ClipboardCheck, Megaphone, MapPin } from 'lucide-react';
 import { api, type ClassSlot } from '../lib/api';
 import { supabaseBrowser } from '../lib/supabase';
 import { errorToast } from '../lib/errors';
@@ -140,6 +140,33 @@ export default function TimetableRoute() {
           </ListCard>
         )}
       </div>
+
+      <ListCard style={{ marginTop: 16 }}>
+        <Link to={ROUTES.attendancePass} className="row" style={{ gap: 12, padding: '14px 16px', textDecoration: 'none', color: 'var(--u-text)' }}>
+          <ClipboardCheck size={20} />
+          <div className="grow stack" style={{ gap: 2 }}>
+            <div className="t-15 w-6">Mark attendance</div>
+            <div className="t-13 muted">Enter the code your lecturer shows in class</div>
+          </div>
+          <ChevronRight size={18} />
+        </Link>
+        <Link to={ROUTES.attendanceMine} className="row" style={{ gap: 12, padding: '14px 16px', textDecoration: 'none', color: 'var(--u-text)' }}>
+          <CalendarCheck size={20} />
+          <div className="grow stack" style={{ gap: 2 }}>
+            <div className="t-15 w-6">My attendance</div>
+            <div className="t-13 muted">Attended vs held, per course</div>
+          </div>
+          <ChevronRight size={18} />
+        </Link>
+        <Link to={ROUTES.hoc} className="row" style={{ gap: 12, padding: '14px 16px', textDecoration: 'none', color: 'var(--u-text)' }}>
+          <Megaphone size={20} />
+          <div className="grow stack" style={{ gap: 2 }}>
+            <div className="t-15 w-6">Class board</div>
+            <div className="t-13 muted">Announcements and tips from your HOC</div>
+          </div>
+          <ChevronRight size={18} />
+        </Link>
+      </ListCard>
 
       {courses.length > 0 && (
         <Link

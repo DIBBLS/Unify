@@ -160,13 +160,13 @@ export default function ClassRoute() {
                 style={{ flex: 1, display: 'flex', gap: 12, alignItems: 'center', color: 'var(--text)', minWidth: 0 }}
               >
                 <span style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--u-good-tint)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <BookOpen size={20} color="#059669" />
+                  <BookOpen size={20} color="var(--u-good)" />
                 </span>
                 <span style={{ flex: 1, minWidth: 0 }}>
                   <span style={{ fontWeight: 700, display: 'block' }}>{c.code}</span>
                   <span style={{ fontSize: 12, color: 'var(--text2)' }}>{c.title} · {c.weeks} {c.weeks === 1 ? 'week' : 'weeks'}</span>
                   {isSearch && (
-                    <span style={{ fontSize: 11, color: '#059669', fontWeight: 700, display: 'block' }}>
+                    <span style={{ fontSize: 11, color: 'var(--u-good)', fontWeight: 700, display: 'block' }}>
                       {(c.semesters || []).map((s) => s.replace(' Semester', '')).join(' · ')}{c.matchedAlias ? ` · also “${c.matchedAlias}”` : ''}
                     </span>
                   )}
@@ -178,9 +178,9 @@ export default function ClassRoute() {
                 style={{
                   padding: '8px 14px',
                   borderRadius: 9999,
-                  border: `1px solid ${isIn ? '#059669' : 'var(--border)'}`,
+                  border: `1px solid ${isIn ? 'var(--u-good)' : 'var(--border)'}`,
                   background: isIn ? 'var(--u-amber)' : 'var(--surface)',
-                  color: isIn ? '#fff' : '#059669',
+                  color: isIn ? '#fff' : 'var(--u-good)',
                   fontWeight: 800,
                   fontSize: 12,
                   whiteSpace: 'nowrap',

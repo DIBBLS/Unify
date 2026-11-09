@@ -205,9 +205,9 @@ export default function OnboardingRoute() {
         <button
           key={c.code}
           onClick={() => toggleCourse(c.code)}
-          style={{ padding: 12, border: `1px solid ${on ? '#059669' : 'var(--border)'}`, borderRadius: 12, background: on ? 'var(--u-good-tint)' : 'var(--surface)', textAlign: 'left', display: 'flex', gap: 8, alignItems: 'center' }}
+          style={{ padding: 12, border: `1px solid ${on ? 'var(--u-good)' : 'var(--border)'}`, borderRadius: 12, background: on ? 'var(--u-good-tint)' : 'var(--surface)', textAlign: 'left', display: 'flex', gap: 8, alignItems: 'center' }}
         >
-          <span style={{ width: 20, height: 20, borderRadius: 6, border: `1px solid ${on ? '#059669' : 'var(--border)'}`, background: on ? 'var(--u-amber)' : 'var(--surface)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800 }}>
+          <span style={{ width: 20, height: 20, borderRadius: 6, border: `1px solid ${on ? 'var(--u-good)' : 'var(--border)'}`, background: on ? 'var(--u-amber)' : 'var(--surface)', color: 'var(--u-black)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800 }}>
             {on ? '✓' : ''}
           </span>
           <span>
@@ -266,15 +266,20 @@ export default function OnboardingRoute() {
   const left = { s: `Step ${shownStep + 1} of ${totalSteps}`, t: stepTitle };
 
   return (
-    <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', minHeight: '100vh', background: 'var(--surface)' }}>
-      <div style={{ background: 'linear-gradient(135deg,var(--u-amber),#059669)', color: '#fff', padding: 20 }}>
-        <div style={{ fontSize: 11, letterSpacing: 1, opacity: 0.8 }}>{left.s}</div>
-        <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28, marginTop: 6, minHeight: 76 }}>
-          <Typewriter key={step} text={left.t} speed={30} />
-        </h1>
+    <div style={{ maxWidth: 'min(var(--shell, 480px), 560px)', margin: '0 auto', minHeight: '100vh', background: 'var(--u-page)' }}>
+      <div style={{ background: 'var(--u-green)', color: 'var(--u-black)', padding: '20px 20px 24px', borderRadius: '0 0 32px 32px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="eyebrow" style={{ opacity: 0.7 }}>{left.s}</div>
+            <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28, marginTop: 6, minHeight: 76 }}>
+              <Typewriter key={step} text={left.t} speed={30} />
+            </h1>
+          </div>
+          <BoxBoy pose="peeking" width={84} />
+        </div>
         <div style={{ display: 'flex', gap: 6, marginTop: 12 }}>
           {Array.from({ length: totalSteps }).map((_, i) => (
-            <div key={i} style={{ flex: 1, height: 4, borderRadius: 2, background: i <= shownStep ? '#fff' : 'rgba(255,255,255,0.3)' }} />
+            <div key={i} style={{ flex: 1, height: 5, borderRadius: 3, background: i <= shownStep ? 'var(--u-black)' : 'rgba(10,10,10,0.2)' }} />
           ))}
         </div>
       </div>
@@ -316,7 +321,7 @@ export default function OnboardingRoute() {
                       height: 40,
                       borderRadius: 10,
                       background: active ? 'var(--u-amber)' : 'var(--u-good-tint)',
-                      color: active ? '#fff' : '#059669',
+                      color: active ? 'var(--u-black)' : 'var(--u-good)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -362,7 +367,7 @@ export default function OnboardingRoute() {
           <button key={d.name} onClick={() => { setDepartment(d.name); if (role === 'lecturer' || role === 'contributor') { void save(false, { department: d.name }); return; } setStep(5); }} style={{ padding: 14, border: '1px solid var(--border)', borderRadius: 12, background: 'var(--surface)', textAlign: 'left' }}>
             {d.name} <span style={{ color: 'var(--text2)', fontSize: 12 }}>{d.sub}</span>
             {(role === 'lecturer' || role === 'contributor') && (
-              <span style={{ display: 'block', fontSize: 12, color: '#059669', fontWeight: 700, marginTop: 4 }}>Select to send your {role} application for review</span>
+              <span style={{ display: 'block', fontSize: 12, color: 'var(--u-good)', fontWeight: 700, marginTop: 4 }}>Select to send your {role} application for review</span>
             )}
           </button>
         ))}

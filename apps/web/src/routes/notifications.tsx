@@ -94,7 +94,7 @@ export default function NotificationsRoute() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28, flex: 1 }}>Notifications</h1>
         {notes.some((n) => !n.read) && (
-          <button onClick={markAll} disabled={marking} style={{ display: 'flex', gap: 4, alignItems: 'center', padding: '8px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: '#059669', opacity: marking ? 0.6 : 1 }}>
+          <button onClick={markAll} disabled={marking} style={{ display: 'flex', gap: 4, alignItems: 'center', padding: '8px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: 'var(--u-good)', opacity: marking ? 0.6 : 1 }}>
             <CheckCheck size={14} /> {marking ? 'Marking…' : 'Mark all read'}
           </button>
         )}
@@ -114,7 +114,7 @@ export default function NotificationsRoute() {
               onClick={() => openNote(n)}
               style={{ padding: '14px 16px', background: n.read ? 'var(--surface)' : 'var(--green-bg)', border: `1px solid ${n.read ? 'var(--border)' : 'var(--u-good)'}`, borderRadius: 12, display: 'flex', gap: 12, alignItems: 'flex-start', textAlign: 'left', width: '100%', color: 'var(--text)' }}
             >
-              <span style={{ width: 36, height: 36, borderRadius: 10, background: n.read ? 'var(--surface2)' : 'var(--u-amber)', color: n.read ? 'var(--text2)' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ width: 36, height: 36, borderRadius: 10, background: n.read ? 'var(--surface2)' : 'var(--u-amber)', color: n.read ? 'var(--text2)' : 'var(--u-black)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 {n.type === 'new_note' ? <BookOpen size={18} /> : <Icon size={18} />}
               </span>
               <span style={{ flex: 1, minWidth: 0 }}>
@@ -128,7 +128,7 @@ export default function NotificationsRoute() {
         })}
       </div>
       <div style={{ marginTop: 12, textAlign: 'center' }}>
-        <Link to="/home" style={{ fontSize: 13, color: '#059669', fontWeight: 700, textDecoration: 'none' }}>
+        <Link to="/home" style={{ fontSize: 13, color: 'var(--u-good)', fontWeight: 700, textDecoration: 'none' }}>
           Back to dashboard
         </Link>
       </div>

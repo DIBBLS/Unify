@@ -74,7 +74,7 @@ export default function AdminContentRoute() {
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 100px' }}>
       <BackButton to="/home" />
       <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, display: 'flex', gap: 8, alignItems: 'center' }}>
-        <Layers size={22} color="#059669" /> All content
+        <Layers size={22} color="var(--u-good)" /> All content
       </h1>
       <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>
         {courses.length} courses · {totalWeeks} weeks · {totalTopics} topics with notes
@@ -108,7 +108,7 @@ export default function AdminContentRoute() {
                     {c.title || 'Untitled course'}{c.level ? ` · ${c.level}` : ''}{c.semester ? ` · ${c.semester.replace(' Semester', '')}` : ''}
                   </span>
                 </span>
-                <span style={{ fontSize: 11, color: '#059669', fontWeight: 800, whiteSpace: 'nowrap' }}>
+                <span style={{ fontSize: 11, color: 'var(--u-good)', fontWeight: 800, whiteSpace: 'nowrap' }}>
                   {c.weekCount}w · {c.topicCount}t
                 </span>
                 {isOpen ? <ChevronDown size={16} color="#999" /> : <ChevronRight size={16} color="#999" />}
@@ -117,7 +117,7 @@ export default function AdminContentRoute() {
                 <div style={{ borderTop: '1px solid #f0f0f0', padding: '4px 14px 12px' }}>
                   <Link
                     to={`/course/${encodeURIComponent(c.code)}?preview=1`}
-                    style={{ display: 'inline-block', fontSize: 12, color: '#059669', fontWeight: 800, textDecoration: 'none', margin: '6px 0' }}
+                    style={{ display: 'inline-block', fontSize: 12, color: 'var(--u-good)', fontWeight: 800, textDecoration: 'none', margin: '6px 0' }}
                   >
                     Open course page →
                   </Link>
@@ -140,7 +140,7 @@ export default function AdminContentRoute() {
                             <Link
                               key={`${t.lecture || 1}-${t.topic}`}
                               to={`/learn/${encodeURIComponent(c.code)}/week/${w.week}?preview=1&t=${t.topic}${t.lecture && t.lecture > 1 ? `&c=${t.lecture}` : ''}`}
-                              style={{ display: 'inline-flex', gap: 4, alignItems: 'center', fontSize: 12, fontWeight: 700, color: '#059669', background: 'var(--u-good-tint)', border: '1px solid var(--u-good)', borderRadius: 9999, padding: '4px 10px', textDecoration: 'none' }}
+                              style={{ display: 'inline-flex', gap: 4, alignItems: 'center', fontSize: 12, fontWeight: 700, color: 'var(--u-good)', background: 'var(--u-good-tint)', border: '1px solid var(--u-good)', borderRadius: 9999, padding: '4px 10px', textDecoration: 'none' }}
                               title={t.title || `Lecture ${t.lecture || 1} Topic ${t.topic}`}
                             >
                               <BookOpen size={12} /> L{t.lecture || 1}·T{t.topic} · v{t.versions}

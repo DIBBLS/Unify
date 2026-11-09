@@ -164,7 +164,7 @@ export default function MyClassesRoute() {
           </div>
           {refreshing && <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 8 }}>Refreshing…</div>}
           <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800, marginTop: 16, display: 'flex', gap: 6, alignItems: 'center' }}>
-            <CalendarDays size={16} color="#059669" /> Weekly timetable
+            <CalendarDays size={16} color="var(--u-good)" /> Weekly timetable
           </h2>
           <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
             {slots.length === 0 && (
@@ -219,7 +219,7 @@ export default function MyClassesRoute() {
             </button>
           </div>
           <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800, marginTop: 20, display: 'flex', gap: 6, alignItems: 'center' }}>
-            <Users size={16} color="#059669" /> Roster · {roster.length} student{roster.length === 1 ? '' : 's'}
+            <Users size={16} color="var(--u-good)" /> Roster · {roster.length} student{roster.length === 1 ? '' : 's'}
           </h2>
           <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
             {roster.length === 0 && (
@@ -229,7 +229,7 @@ export default function MyClassesRoute() {
             )}
             {roster.map((s) => (
               <div key={s.id} className="cv-row" style={{ padding: '12px 14px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
-                <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,var(--u-amber),#059669)', color: '#fff', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--u-green)', color: 'var(--u-black)', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   {(s.name || '?').trim().charAt(0).toUpperCase()}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>

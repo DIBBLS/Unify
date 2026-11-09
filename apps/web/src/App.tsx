@@ -25,6 +25,7 @@ const HocDashboardRoute = lazyRoute(() => import('./routes/hoc-dashboard'));
 const OnlineClassRoute = lazyRoute(() => import('./routes/online-class'));
 const LecturerHomeRoute = lazyRoute(() => import('./routes/lecturer-home'));
 const BecomeHocRoute = lazyRoute(() => import('./routes/become-hoc'));
+const WelcomeRoute = lazyRoute(() => import('./routes/welcome'));
 const TimetableRoute = lazyRoute(() => import('./routes/timetable'));
 const ScreensRoute = lazyRoute(() => import('./routes/screens'));
 const NotificationsRoute = lazyRoute(() => import('./routes/notifications'));
@@ -190,6 +191,7 @@ export default function App() {
         <Routes>
         {/* Chromeless: no top bar on sign in / onboarding */}
         <Route path="/auth" element={<AuthRoute />} />
+        <Route path={ROUTES.welcome} element={<WelcomeRoute />} />
         {/* Public share landing: no session needed until expiry */}
         <Route path="/s/:token" element={<ShareRoute />} />
         {/* Fallback: if the edge OG function ever misses (misconfigured

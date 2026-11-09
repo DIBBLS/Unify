@@ -4,6 +4,7 @@
 // "/dashboard", "/course" and "/studio" into notification links, push
 // payloads and emails, and users have old bookmarks.
 export const ROUTES = {
+  welcome: '/welcome',
   auth: '/auth',
   onboarding: '/onboarding',
   persona: '/onboarding/persona',

@@ -105,3 +105,26 @@
 .semester-week-bar[data-status="urgent"]::after {
   background: var(--u-red);
 }
+
+
+/* ---------- Desktop (>=1024px): sidebar pills, not the phone column ----------
+   The sidebar is the bottom tab bar turned vertical: same icon-over-label
+   pills, same lit green pill for the active tab. The bottom bar is hidden
+   at this size and every page's max-width (var(--shell)) opens up. */
+@media (min-width: 1024px) {
+  :root { --shell: 1040px; }
+  .side-pills {
+    position: sticky; top: 56px; align-self: flex-start;
+    width: 104px; flex-shrink: 0; height: calc(100vh - 56px);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    padding: 20px 8px; background: var(--u-card); border-right: 1px solid var(--u-border);
+  }
+  .side-pill {
+    width: 84px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 10px 0; border-radius: 9999px; text-decoration: none;
+    color: var(--u-text-2); font-size: 11px; font-weight: 500;
+    transition: background .15s ease, color .15s ease;
+  }
+  .side-pill:hover { background: var(--u-card-2); }
+  .side-pill.is-active { background: var(--green-bg); color: var(--u-text); font-weight: 800; }
+}

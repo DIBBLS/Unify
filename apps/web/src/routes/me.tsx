@@ -363,7 +363,7 @@ export default function MeRoute() {
         {(profile?.avatar_url || meAvatar) ? (
           <img src={profile?.avatar_url || meAvatar} alt="Profile picture" style={{ width: 64, height: 64, borderRadius: 9999, objectFit: 'cover', flexShrink: 0 }} />
         ) : (
-          <div style={{ width: 64, height: 64, borderRadius: 9999, background: 'linear-gradient(135deg,#34d399,#059669)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 24, flexShrink: 0 }}>
+          <div style={{ width: 64, height: 64, borderRadius: 9999, background: 'var(--u-green)', color: 'var(--u-black)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 24, flexShrink: 0 }}>
             {initial}
           </div>
         )}
@@ -373,13 +373,13 @@ export default function MeRoute() {
           {email && !emailConfirmed && (
             <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
               <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--u-warn-ink)', background: 'var(--u-warn-tint)', border: '1px solid #fde68a', borderRadius: 9999, padding: '3px 10px' }}>Email not verified</span>
-              <button onClick={() => void resendVerify()} disabled={verifBusy} style={{ fontSize: 12, fontWeight: 800, color: '#059669', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+              <button onClick={() => void resendVerify()} disabled={verifBusy} style={{ fontSize: 12, fontWeight: 800, color: 'var(--u-good)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                 {verifBusy ? 'Sending…' : 'Resend verification email'}
               </button>
             </div>
           )}
           {verifMsg && <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>{verifMsg}</div>}
-          <label style={{ display: 'inline-block', marginTop: 6, fontSize: 12, fontWeight: 800, color: '#059669', cursor: 'pointer' }}>
+          <label style={{ display: 'inline-block', marginTop: 6, fontSize: 12, fontWeight: 800, color: 'var(--u-good)', cursor: 'pointer' }}>
             {uploadingAvatar ? 'Uploading…' : profile?.avatar_url ? 'Change picture' : 'Add a picture'}
             <input
               type="file"
@@ -389,7 +389,7 @@ export default function MeRoute() {
               style={{ display: 'none' }}
             />
           </label>
-          {avatarMsg && <div style={{ fontSize: 12, color: '#059669', marginTop: 4 }}>{avatarMsg}</div>}
+          {avatarMsg && <div style={{ fontSize: 12, color: 'var(--u-good)', marginTop: 4 }}>{avatarMsg}</div>}
         </div>
         <BoxBoy pose="readingStanding" width={64} />
       </div>
@@ -411,7 +411,7 @@ export default function MeRoute() {
             Send
           </button>
         </div>
-        {emailMsg && <div style={{ fontSize: 12, color: '#059669', marginTop: 6 }}>{emailMsg}</div>}
+        {emailMsg && <div style={{ fontSize: 12, color: 'var(--u-good)', marginTop: 6 }}>{emailMsg}</div>}
       </div>
       {isAdmin && (
         <Link to="/admin" style={{ marginBottom: 8, padding: 14, background: '#111827', color: '#fff', borderRadius: 16, fontWeight: 800, textDecoration: 'none', textAlign: 'center', display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
@@ -520,7 +520,7 @@ export default function MeRoute() {
             <button
               onClick={flipPush}
               disabled={pushBusy || pushSt === 'denied'}
-              style={{ width: '100%', padding: 12, background: pushSt === 'on' ? 'var(--u-good-tint)' : 'var(--surface2)', color: pushSt === 'on' ? '#059669' : 'var(--text)', border: `1px solid ${pushSt === 'on' ? 'var(--u-good)' : 'var(--border)'}`, borderRadius: 12, fontWeight: 800, fontSize: 13, opacity: pushBusy || pushSt === 'denied' ? 0.6 : 1 }}
+              style={{ width: '100%', padding: 12, background: pushSt === 'on' ? 'var(--u-good-tint)' : 'var(--surface2)', color: pushSt === 'on' ? 'var(--u-good)' : 'var(--text)', border: `1px solid ${pushSt === 'on' ? 'var(--u-good)' : 'var(--border)'}`, borderRadius: 12, fontWeight: 800, fontSize: 13, opacity: pushBusy || pushSt === 'denied' ? 0.6 : 1 }}
             >
               {pushBusy ? 'Working…' : pushSt === 'on' ? 'Push notifications: ON' : 'Push notifications: OFF'}
             </button>
@@ -529,7 +529,7 @@ export default function MeRoute() {
                 ? 'Blocked in browser settings — allow notifications for this site, then retry.'
                 : 'Lock-screen nudges for new notes and announcements, even with the app closed.'}
             </div>
-            {pushMsg && <div style={{ fontSize: 12, color: '#059669', marginTop: 6 }}>{pushMsg}</div>}
+            {pushMsg && <div style={{ fontSize: 12, color: 'var(--u-good)', marginTop: 6 }}>{pushMsg}</div>}
           </div>
         )}
       </div>
@@ -547,7 +547,7 @@ export default function MeRoute() {
         </button>
       </div>
       {canAuthor && (
-        <Link to="/studio" style={{ marginTop: 8, padding: 14, background: 'var(--surface)', color: '#059669', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 800, textDecoration: 'none', textAlign: 'center', display: 'block' }}>
+        <Link to="/studio" style={{ marginTop: 8, padding: 14, background: 'var(--surface)', color: 'var(--u-good)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 800, textDecoration: 'none', textAlign: 'center', display: 'block' }}>
           Open Authoring Studio
         </Link>
       )}
