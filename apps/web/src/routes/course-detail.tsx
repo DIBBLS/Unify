@@ -1,12 +1,14 @@
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, ExternalLink, FileText } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import { BoxBoy } from '../components/redesign/brand';
 import Flash from '../components/Flash';
-import { api } from '../lib/api';
+import { api, type Material } from '../lib/api';
 import { log } from '../lib/log';
+import { describeError } from '../lib/errors';
+import Loading from '../components/Loading';
 
 type WeekRow = { week: number; title: string; subtitle: string; authors?: { name: string; avatar: string }[] };
 
@@ -31,6 +33,7 @@ export default function CourseDetailRoute() {
   // Preview landings (admin/author browsing) go back to their hub, never
   // to the student My Courses module.
   const [backTo, setBackTo] = useState('/courses');
+  const [materials, setMaterials] = useState<Material[]>([]);
   const [slots, setSlots] = useState<{ day: number; start: string; end: string; venue: string; lecturer: string }[]>([]);
   const preview = searchParams.get('preview') === '1';
 
@@ -56,7 +59,7 @@ export default function CourseDetailRoute() {
               : '/courses'
           );
           if (preview) {
-            setWeeks(res.weeks);
+            setWeeks(res.weeks || []);
             return;
           }
           const enrolled = (me.courses || []).map((c) => c.toUpperCase().trim()).includes(courseCode.toUpperCase());
@@ -66,12 +69,13 @@ export default function CourseDetailRoute() {
             return;
           }
         }
-        setWeeks(res.weeks);
+        setWeeks(res.weeks || []);
         // Class times ride alongside (read-only here; lecturers manage
         // them under My Classes). Failure never blocks the weeks.
         api.timetable(courseCode).then((tt) => setSlots(tt.slots || [])).catch(() => {});
+        api.materials(courseCode).then((r) => setMaterials(r.materials || [])).catch(() => {});
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Could not load weeks.');
+        setError(describeError(err, 'load weeks'));
       } finally {
         setLoading(false);
       }
@@ -86,34 +90,15 @@ export default function CourseDetailRoute() {
       await api.enroll(courseCode, true);
       setBlocked(false);
       const res = await api.courseWeeks(courseCode);
-      setWeeks(res.weeks);
+      setWeeks(res.weeks || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Enrollment failed.');
+      setError(describeError(err, 'enrollment that'));
     } finally {
       setEnrolling(false);
     }
   };
 
-  if (loading)
-    return (
-      <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
-        <BackButton to={backTo} />
-        <div className="skel" style={{ height: 32, width: '55%', marginTop: 4 }} />
-        <div className="skel" style={{ height: 14, width: '75%', marginTop: 10 }} />
-        <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} style={{ padding: '14px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, display: 'flex', gap: 12, alignItems: 'center' }}>
-              <div style={{ flex: 1 }}>
-                <div className="skel" style={{ height: 16, width: '60%' }} />
-                <div className="skel" style={{ height: 12, width: '85%', marginTop: 8 }} />
-              </div>
-              <div className="skel" style={{ height: 18, width: 18, borderRadius: 9999 }} />
-            </div>
-          ))}
-        </div>
-        <div style={{ fontSize: 12, color: 'var(--text2)', textAlign: 'center', marginTop: 12 }}>Loading weeks…</div>
-      </div>
-    );
+  if (loading) return <Loading />;
   if (!code) {
     // Unreachable via router links (course code is always present), but if
     // it ever happens, send the student to their courses instead of a
@@ -125,7 +110,7 @@ export default function CourseDetailRoute() {
     return (
       <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px', textAlign: 'center' }}>
         <BackButton to={backTo} />
-        <BoxBoy pose="readingStanding" width={72} />
+        <div style={{ display: 'flex', justifyContent: 'center' }}><BoxBoy pose="readingStanding" width={72} /></div>
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20, marginTop: 12 }}>You're not enrolled in {courseCode}</h1>
         <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px' }}>Enroll to unlock its weeks, topics and quizzes.</p>
       {slots.length > 0 && (
@@ -163,6 +148,23 @@ export default function CourseDetailRoute() {
       <p style={{ color: 'var(--text2)', marginTop: 6, fontSize: 13 }}>
         {weeks.length} {weeks.length === 1 ? 'week' : 'weeks'} · pick one to start learning
       </p>
+      {materials.length > 0 && (
+        <div style={{ marginTop: 16 }}>
+          <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', letterSpacing: 1 }}>FROM YOUR LECTURER</div>
+          <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {materials.map((m) => (
+              <a key={m.id} href={m.url} target="_blank" rel="noreferrer" style={{ padding: '12px 14px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, textDecoration: 'none', color: 'var(--text)', display: 'flex', gap: 12, alignItems: 'center' }}>
+                <FileText size={18} color="var(--u-good)" />
+                <span style={{ flex: 1 }}>
+                  <span style={{ fontWeight: 700, display: 'block' }}>{m.title}</span>
+                  <span style={{ fontSize: 12, color: 'var(--text2)' }}>Week {m.week} · {m.type === 'past-paper' ? 'past paper' : m.type}</span>
+                </span>
+                <ExternalLink size={16} color="var(--u-good)" />
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
       <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {weeks.length === 0 && !error && (
           <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>

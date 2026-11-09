@@ -2,6 +2,7 @@ import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link2, Copy, Check, Trash2, X, MessageCircle } from 'lucide-react';
 import { api } from '../lib/api';
+import { describeError } from '../lib/errors';
 
 const TTLS = [
   { hours: 8, label: '8 hours' },
@@ -50,7 +51,7 @@ export function ShareModal({ course, week, title, topics, onClose }: { course: s
       setLink({ token: res.token, expires_at: res.expires_at });
       loadMine();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not create link.');
+      setError(describeError(err, 'create link'));
     } finally {
       setCreating(false);
     }
@@ -82,7 +83,7 @@ export function ShareModal({ course, week, title, topics, onClose }: { course: s
       if (link?.token === token) setLink(null);
       loadMine();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Revoke failed.');
+      setError(describeError(err, 'revoke that'));
     }
   };
 

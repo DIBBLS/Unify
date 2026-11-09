@@ -130,7 +130,7 @@ const AUTHOR_ONLY = ['lecturer', 'contributor'];
 // Only a real 401 (dead session) bounces to /auth. Network/API failures show
 // a retry screen instead of kicking the user to sign-in and back (that loop
 // is what made sessions feel like they "refresh anyhow").
-function RequireRole({ allow, children }: { allow: string[]; children: JSX.Element }) {
+function RequireRole({ allow, children, strict = false }: { allow: string[]; children: JSX.Element; strict?: boolean }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [ok, setOk] = useState(false);
@@ -150,7 +150,7 @@ function RequireRole({ allow, children }: { allow: string[]; children: JSX.Eleme
           searchParams.get('preview') === '1' &&
           (role === 'lecturer' || role === 'contributor' || me.isAdmin);
         if (!me.onboarded) navigate('/onboarding');
-        else if (!allow.includes(role) && !me.isAdmin && !preview) navigate('/home');
+        else if (!allow.includes(role) && (strict || !me.isAdmin) && !preview) navigate('/home');
         else setOk(true);
       })
       .catch((err) => {
@@ -276,7 +276,7 @@ export default function App() {
             path="/cgpa-planner"
             element={
               <RequireAuth>
-                <RequireRole allow={STUDENT_ONLY}>
+                <RequireRole allow={STUDENT_ONLY} strict>
                   <CGPAPlannerRoute />
                 </RequireRole>
               </RequireAuth>

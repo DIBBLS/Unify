@@ -72,7 +72,12 @@ export default function LecturerHomeRoute() {
                 key={s.id}
                 title={s.course}
                 sub={`${s.start}–${s.end}${s.venue ? ` · ${s.venue}` : ''}`}
-                right={role === 'lecturer' || role === 'admin' ? <Link to={ROUTES.scanner} className="btn btn--amber btn--sm">Attendance</Link> : <Pill>Today</Pill>}
+                right={
+                  <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
+                    {s.meetLink && <a href={s.meetLink} target="_blank" rel="noreferrer" className="btn btn--white btn--sm">Open link</a>}
+                    {role === 'lecturer' || role === 'admin' ? <Link to={ROUTES.scanner} className="btn btn--amber btn--sm">Attendance</Link> : <Pill>Today</Pill>}
+                  </span>
+                }
               />
             ))}
           </ListCard>

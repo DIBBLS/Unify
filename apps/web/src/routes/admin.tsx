@@ -10,6 +10,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import { Bars, Donut, Spark } from '../components/Charts';
 import BackButton from '../components/BackButton';
 import Drop from '../components/Drop';
+import { describeError } from '../lib/errors';
 
 type Stats = { users: number; byRole: Record<string, number>; weeks: number; topics: number; courses: number; xpTotal: number };
 type Uni = { id: string; name: string; short_name?: string };
@@ -106,7 +107,7 @@ export default function AdminRoute() {
       setViolations((res.remaining || []) as { user_id: string; name: string; email: string; level: string; courses: string[] }[]);
       setSuccess(`Trimmed ${res.trimmed} excess assignment${res.trimmed === 1 ? '' : 's'} (earliest two per level kept).`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Trim failed.');
+      setError(describeError(err, 'trim that'));
     } finally {
       setTrimming(false);
     }
@@ -148,7 +149,7 @@ export default function AdminRoute() {
       // Decided rows leave the pending tab; history tab picks them up.
       if (reqTab === 'history') void loadRequests(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Decision failed.');
+      setError(describeError(err, 'decision that'));
     } finally {
       setDeciding(null);
     }
@@ -179,7 +180,7 @@ export default function AdminRoute() {
       const res = await api.adminUserCourses(id);
       setAssigned(res.courses.filter((c) => c.kind === 'teaching').map((c) => c.course));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not load courses.');
+      setError(describeError(err, 'load courses'));
     }
   };
 
@@ -191,7 +192,7 @@ export default function AdminRoute() {
       setAssigned(res.courses);
       setSuccess(`Assigned ${res.courses.length} course${res.courses.length === 1 ? '' : 's'}.`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed.');
+      setError(describeError(err, 'save that'));
     } finally {
       setAssignBusy(false);
     }
@@ -223,7 +224,7 @@ export default function AdminRoute() {
       if (t) setTrends(t);
       if (st.currentSemester) setCurrentSemester(st.currentSemester);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Load failed.');
+      setError(describeError(err, 'load that'));
     }
   };
 
@@ -268,7 +269,7 @@ export default function AdminRoute() {
       setSuccess('University added.');
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Add failed.');
+      setError(describeError(err, 'add that'));
     }
   };
 
@@ -281,7 +282,7 @@ export default function AdminRoute() {
       setSuccess('University deleted.');
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Delete failed.');
+      setError(describeError(err, 'delete that'));
     }
   };
 
@@ -302,7 +303,7 @@ export default function AdminRoute() {
       setSuccess('Course added.');
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Add failed.');
+      setError(describeError(err, 'add that'));
     }
   };
 
@@ -312,7 +313,7 @@ export default function AdminRoute() {
       setSuccess('Course deleted.');
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Delete failed.');
+      setError(describeError(err, 'delete that'));
     }
   };
 
@@ -325,7 +326,7 @@ export default function AdminRoute() {
       setSuccess(`Invite sent to ${inviteEmail.trim()}.`);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invite failed.');
+      setError(describeError(err, 'invite that'));
     }
   };
 
@@ -336,7 +337,7 @@ export default function AdminRoute() {
       setSuccess('Role updated.');
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Update failed.');
+      setError(describeError(err, 'update that'));
     }
   };
 
@@ -348,7 +349,7 @@ export default function AdminRoute() {
       setCurrentSemester(res.currentSemester);
       setSuccess(`Active semester: ${res.currentSemester}. Students now see only its courses.`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Update failed.');
+      setError(describeError(err, 'update that'));
     }
   };
 
@@ -361,7 +362,7 @@ export default function AdminRoute() {
       setSuccess(`Promoted ${res.promoted} student${res.promoted === 1 ? '' : 's'}, graduated ${res.graduated}.`);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Promotion failed.');
+      setError(describeError(err, 'promotion that'));
     } finally {
       setPromoting(false);
     }
@@ -374,7 +375,7 @@ export default function AdminRoute() {
       setSuccess('Level updated.');
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Update failed.');
+      setError(describeError(err, 'update that'));
     }
   };
 
@@ -406,7 +407,7 @@ export default function AdminRoute() {
             : `${bell}. Email queued for ${res.emailTo} confirmed inbox${res.emailTo === 1 ? '' : 'es'}.`
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Announce failed.');
+      setError(describeError(err, 'announce that'));
     } finally {
       setAnnouncing(false);
     }
@@ -423,7 +424,7 @@ export default function AdminRoute() {
     try {
       setTestResult(await api.adminEmailTest(testEmail.trim()));
     } catch (err) {
-      setTestResult({ ok: false, status: 0, body: err instanceof Error ? err.message : 'Test failed.', sender: '', keySet: false, fromSet: false });
+      setTestResult({ ok: false, status: 0, body: describeError(err, 'test that'), sender: '', keySet: false, fromSet: false });
     } finally {
       setTesting(false);
     }
@@ -436,7 +437,7 @@ export default function AdminRoute() {
       setSuccess('User removed.');
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Delete failed.');
+      setError(describeError(err, 'delete that'));
     }
   };
 
@@ -591,7 +592,7 @@ export default function AdminRoute() {
                       await api.adminModelsReset(m.model);
                       await loadAll();
                     } catch (err) {
-                      setError(err instanceof Error ? err.message : 'Reset failed.');
+                      setError(describeError(err, 'reset that'));
                     }
                   }}
                   style={{ padding: '6px 12px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12 }}
@@ -611,7 +612,7 @@ export default function AdminRoute() {
               setDefaultModel(r.default);
               setSuccess('Model list refreshed from Google.');
             } catch (err) {
-              setError(err instanceof Error ? err.message : 'Refresh failed.');
+              setError(describeError(err, 'refresh that'));
             }
           }}
           style={{ ...primaryBtn, width: '100%', marginTop: 10 }}
@@ -759,7 +760,7 @@ export default function AdminRoute() {
             </button>
           </div>
           {testResult && (
-            <div style={{ marginTop: 8, padding: '10px 12px', borderRadius: 10, border: `1px solid ${testResult.ok ? 'var(--u-good)' : '#fecaca'}`, background: testResult.ok ? 'var(--u-good-tint)' : '#fef2f2', fontSize: 12, color: testResult.ok ? '#065f46' : 'var(--u-red)' }}>
+            <div style={{ marginTop: 8, padding: '10px 12px', borderRadius: 10, border: `1px solid ${testResult.ok ? 'var(--u-good)' : '#fecaca'}`, background: testResult.ok ? 'var(--u-good-tint)' : '#fef2f2', fontSize: 12, color: testResult.ok ? 'var(--u-good)' : 'var(--u-red)' }}>
               <div style={{ fontWeight: 800, marginBottom: 4 }}>
                 {testResult.ok ? `Delivered — Brevo ${testResult.status}` : testResult.status ? `Brevo ${testResult.status}` : 'Not sent'}
                 {!testResult.keySet && ' · BREVO_API_KEY missing on the server'}

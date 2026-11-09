@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PersonaCarousel } from '../components/redesign/PersonaCarousel'
 import { type PersonaKey } from '../components/redesign/brand'
-import { supabaseBrowser } from '../lib/supabase'
+import { api } from '../lib/api'
+import { errorToast } from '../lib/errors'
+import { announcePicture } from '../lib/picture'
 import { toastError, toastSuccess } from '../lib/toast'
 import '@/styles/redesign/index.css'
 
@@ -19,47 +21,27 @@ export default function OnboardingPersonaRoute() {
   const handleContinue = async () => {
     setSaving(true)
     try {
-      const sb = supabaseBrowser()
-      if (!sb) throw new Error('Not authenticated')
-      
-      const { data: { user } } = await sb.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
-      
       // Cache persona for offline (PWA requirement)
       try {
         localStorage.setItem('unify_persona', selected)
       } catch {
         // Ignore quota errors in private browsing
       }
-      
-      // Update profile with selected persona
-      if (navigator.onLine) {
-        const { error } = await sb
-          .from('profiles')
-          .update({ box_boy_persona: selected })
-          .eq('id', user.id)
-        
-        if (error) throw error
-      } else {
-        // Offline: queue write for when online
-        const { queueWrite } = await import('../lib/offline-queue')
-        queueWrite('profiles', 'update', { box_boy_persona: selected }, { id: user.id })
-      }
-      
+      // Through the API: a browser-side profiles update is blocked by RLS.
+      await api.setPersona(selected)
+      announcePicture()
       toastSuccess('Persona selected!')
-      
-      // Continue to next onboarding step (or dashboard if editing)
+
+      // Continue to next onboarding step (or back to Me when editing)
       const isEdit = new URLSearchParams(window.location.search).get('edit') === '1'
       navigate(isEdit ? '/me' : '/onboarding?step=push')
-      
     } catch (err) {
-      console.error('Persona save failed:', err)
-      toastError('Could not save persona. Try again.')
+      errorToast(err, 'save your Box Boy')
     } finally {
       setSaving(false)
     }
   }
-  
+
   const handleSkip = () => {
     // Skip is allowed (persona is optional, photo upload in Settings)
     const isEdit = new URLSearchParams(window.location.search).get('edit') === '1'

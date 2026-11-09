@@ -8,6 +8,7 @@ import Flash from '../components/Flash';
 import { BoxBoy } from '../components/redesign/brand';
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type NotificationItem } from '../lib/api';
+import { describeError } from '../lib/errors';
 
 function iconFor(type: string) {
   if (type === 'announce') return Megaphone;
@@ -51,7 +52,7 @@ export default function NotificationsRoute() {
       const res = await api.notifications(30);
       setNotes(res.notifications);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not load notifications.');
+      setError(describeError(err, 'load notifications'));
     } finally {
       setLoading(false);
     }
@@ -80,7 +81,7 @@ export default function NotificationsRoute() {
       await api.notificationsMarkRead({ all: true });
       setNotes((prev) => prev.map((x) => ({ ...x, read: true })));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Mark-all-read failed.');
+      setError(describeError(err, 'mark everything as read'));
     } finally {
       setMarking(false);
     }

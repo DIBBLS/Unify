@@ -1,0 +1,49 @@
+/* One motion language for the whole app.
+   Easing: out-expo for things that arrive, a soft spring for things that pop.
+   Durations: 120 / 200 / 320 / 500 ms. Everything collapses under
+   prefers-reduced-motion. */
+:root {
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+  --dur-1: .12s; --dur-2: .2s; --dur-3: .32s; --dur-4: .5s;
+}
+
+@keyframes page-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes rise-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes pop-in { from { opacity: 0; transform: translateY(-4px) scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes toast-in { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: none; } }
+
+/* A new screen eases up into place (the layout re-keys it on every route change). */
+.page-enter { animation: page-in var(--dur-3) var(--ease-out) both; }
+
+/* Lists and card groups arrive one after another, not all at once. */
+.stagger > * { animation: rise-in var(--dur-3) var(--ease-out) both; }
+.stagger > *:nth-child(2) { animation-delay: 40ms; }
+.stagger > *:nth-child(3) { animation-delay: 80ms; }
+.stagger > *:nth-child(4) { animation-delay: 120ms; }
+.stagger > *:nth-child(5) { animation-delay: 160ms; }
+.stagger > *:nth-child(6) { animation-delay: 200ms; }
+.stagger > *:nth-child(7) { animation-delay: 240ms; }
+.stagger > *:nth-child(n+8) { animation-delay: 280ms; }
+
+/* Pop-overs grow from where they were opened. */
+.drop-panel { animation: pop-in var(--dur-2) var(--ease-out) both; transform-origin: top center; }
+.toast { animation: toast-in var(--dur-3) var(--ease-spring) both; }
+.modal-card { animation: modal-up var(--dur-3) var(--ease-out) both; }
+
+/* Small things respond under the finger. */
+.chip { transition: background var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), transform var(--dur-1) var(--ease-out); }
+.chip:active { transform: scale(.96); }
+.progress-fill { transition: width var(--dur-4) var(--ease-out); }
+@media (hover: hover) {
+  .btn:hover:not(:disabled) { filter: brightness(1.04); }
+  a.card, .card.is-link { transition: transform var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out); }
+  a.card:hover, .card.is-link:hover { transform: translateY(-2px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important; animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important;
+  }
+}

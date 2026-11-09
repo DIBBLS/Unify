@@ -7,6 +7,7 @@ import Loading from '../../components/Loading';
 import ErrorState from '../../components/ErrorState';
 import { supabaseBrowser } from '../../lib/supabase';
 import { api, type AdminContentCourse } from '../../lib/api';
+import { describeError } from '../../lib/errors';
 
 // Admin-only: every course → weeks → topics/versions in one tree, with
 // direct reader links. Admins are gate-exempt, so no enrollment needed.
@@ -38,7 +39,7 @@ export default function AdminContentRoute() {
         setCourses(res.courses);
       } catch (err) {
         if ((err as { status?: number })?.status === 403) setForbidden(true);
-        else setError(err instanceof Error ? err.message : 'Could not load content.');
+        else setError(describeError(err, 'load content'));
       } finally {
         setLoading(false);
       }

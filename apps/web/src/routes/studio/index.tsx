@@ -12,6 +12,7 @@ import EoqQuiz from '../../components/EoqQuiz';
 import { NoteBuilder, blankNote, normalizeNote, extractJsonPayload } from './NoteBuilder';
 import { api } from '../../lib/api';
 import type { UnifyNote } from '../../types/note';
+import { describeError } from '../../lib/errors';
 
 const MODES = [
   { id: 'whole-week-headers', label: 'Whole week, my headers (recommended)' },
@@ -200,7 +201,7 @@ export default function StudioRoute() {
         setEditing(false);
         setStep(1);
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Could not load week.');
+        if (!cancelled) setError(describeError(err, 'load week'));
       } finally {
         if (!cancelled) setWorking(false);
       }
@@ -224,7 +225,7 @@ export default function StudioRoute() {
       const max = res.weeks.reduce((m, w) => Math.max(m, w.week), 0);
       setWeek(String(max + 1));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not load weeks.');
+      setError(describeError(err, 'load weeks'));
     }
   };
 
@@ -306,7 +307,7 @@ export default function StudioRoute() {
     } catch (err) {
       const hint = (err as { hint?: string })?.hint;
       const code = (err as { code?: string })?.code;
-      setError(err instanceof Error ? err.message : 'Conversion failed.');
+      setError(describeError(err, 'conversion that'));
       if (hint) setConvertHint(hint);
       // Retryable by design: rate limits, overloads, model failures.
       // Auth/key and oversize errors need a fix first, not a retry.
@@ -324,7 +325,7 @@ export default function StudioRoute() {
       setValidation(res);
       if (!res.valid) setError('Validation found problems — fix them in Edit content (list below).');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Validation failed.');
+      setError(describeError(err, 'validation that'));
     }
   };
 
@@ -483,7 +484,7 @@ export default function StudioRoute() {
         });
         return;
       }
-      setError(err instanceof Error ? err.message : 'Publish failed.');
+      setError(describeError(err, 'publish that'));
     } finally {
       setPublishing(false);
     }
@@ -544,7 +545,7 @@ export default function StudioRoute() {
         });
         return;
       }
-      setError(err instanceof Error ? err.message : 'Topic publish failed.');
+      setError(describeError(err, 'topic publish'));
     } finally {
       setPublishingTopic(null);
     }
@@ -611,7 +612,7 @@ export default function StudioRoute() {
 
       {success && <Flash tone="success" message={success} onDismiss={() => setSuccess('')} />}
       {draftRestored && (
-        <div style={{ padding: 12, background: 'var(--u-good-tint)', border: '1px solid var(--u-good)', borderRadius: 12, fontSize: 13, color: '#065f46', display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div style={{ padding: 12, background: 'var(--u-good-tint)', border: '1px solid var(--u-good)', borderRadius: 12, fontSize: 13, color: 'var(--u-good)', display: 'flex', gap: 8, alignItems: 'center' }}>
           <span style={{ flex: 1 }}>Draft restored — right where you left it.</span>
           <button onClick={() => { discardDraft(); reset(); }} style={{ padding: '6px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: 'var(--text2)' }}>
             Discard

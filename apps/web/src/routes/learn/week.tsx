@@ -15,6 +15,7 @@ import { saveWeekOffline, isWeekSaved } from '../../lib/offline';
 import { useProgress } from '../../hooks/useProgress';
 import { BoxBoy } from '../../components/redesign/brand';
 import ErrorState from '../../components/ErrorState';
+import Loading from '../../components/Loading';
 
 export default function LearnPage() {
   const { courseCode = '', week: weekParam } = useParams();
@@ -201,32 +202,7 @@ export default function LearnPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseCode, weekNum]);
 
-  if (loading)
-    return (
-      <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 20px 100px' }}>
-        <div className="skel" style={{ height: 14, width: 90, marginBottom: 16 }} />
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 24, marginBottom: 20 }}>
-          <div className="skel" style={{ height: 12, width: '40%' }} />
-          <div className="skel" style={{ height: 26, width: '75%', marginTop: 10 }} />
-          <div className="skel" style={{ height: 14, width: '90%', marginTop: 10 }} />
-          <div className="skel" style={{ height: 14, width: '60%', marginTop: 8 }} />
-        </div>
-        <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="skel" style={{ height: 34, flex: '1 0 auto', borderRadius: 9999 }} />
-          ))}
-        </div>
-        <div style={{ marginBottom: 8 }}>
-          <div className="skel" style={{ height: 12, width: '30%', marginBottom: 6 }} />
-          <div className="skel" style={{ height: 20, width: '65%', marginBottom: 12 }} />
-          <div className="skel" style={{ height: 14, width: '100%', marginBottom: 8 }} />
-          <div className="skel" style={{ height: 14, width: '100%', marginBottom: 8 }} />
-          <div className="skel" style={{ height: 14, width: '80%', marginBottom: 8 }} />
-          <div className="skel" style={{ height: 120, width: '100%', marginTop: 12 }} />
-        </div>
-        <div style={{ fontSize: 12, color: 'var(--text2)', textAlign: 'center', marginTop: 12 }}>Loading Week {weekNum}…</div>
-      </div>
-    );
+  if (loading) return <Loading />;
   if (!courseCode) {
     // Unreachable via router links — redirect to courses instead of stranding.
     log.warn('route', `week with empty course (url=${window.location.href})`);
@@ -448,7 +424,7 @@ export default function LearnPage() {
       </div>
 
       {preview && (
-        <div style={{ background: 'var(--u-good-tint)', border: '1px solid var(--u-good)', borderRadius: 12, padding: 10, fontSize: 13, color: '#065f46', marginBottom: 12, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ background: 'var(--u-good-tint)', border: '1px solid var(--u-good)', borderRadius: 12, padding: 10, fontSize: 13, color: 'var(--u-good)', marginBottom: 12, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'space-between' }}>
           <span>Author preview — read-only, nothing is recorded.</span>
           <button onClick={() => navigate(`/studio?edit=${encodeURIComponent(courseCode || '')}&week=${weekNum}`)} style={{ padding: '8px 14px', borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '3px solid #c69a1a', fontWeight: 800, fontSize: 12, whiteSpace: 'nowrap' }}>
             Edit in Studio

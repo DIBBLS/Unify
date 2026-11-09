@@ -35,7 +35,7 @@ export default function WelcomeRoute() {
 
   return (
     <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', maxWidth: 'var(--shell, 480px)', margin: '0 auto', background: 'var(--u-page)' }}>
-      <div style={{ background: 'var(--u-green)', borderRadius: '0 0 32px 32px', padding: '18px 20px 0', minHeight: 360, display: 'flex', flexDirection: 'column' }}>
+      <div className="african-band" style={{ background: 'var(--u-green)', borderRadius: '0 0 32px 32px', padding: '18px 20px 0', minHeight: 360, display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           {i > 0 ? (
             <button onClick={() => setI(i - 1)} aria-label="Back" style={{ color: 'var(--u-black)', display: 'flex', padding: 6, marginLeft: -6 }}>
@@ -57,8 +57,10 @@ export default function WelcomeRoute() {
 
       <div style={{ padding: '24px 24px 28px', flex: 1, display: 'flex', flexDirection: 'column', gap: 14 }}>
         <ProgressDots step={i + 1} total={SLIDES.length} color="var(--u-text)" />
-        <Display size={32}>{s.title}</Display>
-        <p style={{ fontSize: 16, lineHeight: 1.5, color: 'var(--u-text-2)' }}>{s.body}</p>
+        <div key={i} className="page-enter" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <Display size={32}>{s.title}</Display>
+          <p style={{ fontSize: 16, lineHeight: 1.5, color: 'var(--u-text-2)' }}>{s.body}</p>
+        </div>
         <div style={{ flex: 1 }} />
         {last ? (
           <>

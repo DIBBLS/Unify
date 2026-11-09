@@ -1,0 +1,36 @@
+/* African design language: an Adire-inspired geometric tile (concentric rings,
+   cross ticks, corner dots) and a kente stripe, used as quiet texture on the
+   brand-green bands, the auth pages and, very faintly, the page itself.
+   The tiles are pure SVG data URIs: no network, no extra requests. */
+:root {
+  --adire-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='black' stroke-opacity='.10' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='36' cy='36' r='15'/%3E%3Ccircle cx='36' cy='36' r='8'/%3E%3Cpath d='M36 6v8M36 58v8M6 36h8M58 36h8M0 0l8 8M72 0l-8 8M0 72l8-8M72 72l-8-8'/%3E%3C/g%3E%3Cg fill='black' fill-opacity='.10'%3E%3Ccircle cx='36' cy='36' r='2.5'/%3E%3Ccircle cx='0' cy='0' r='3'/%3E%3Ccircle cx='72' cy='0' r='3'/%3E%3Ccircle cx='0' cy='72' r='3'/%3E%3Ccircle cx='72' cy='72' r='3'/%3E%3C/g%3E%3C/svg%3E");
+  --adire-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='white' stroke-opacity='.07' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='36' cy='36' r='15'/%3E%3Ccircle cx='36' cy='36' r='8'/%3E%3Cpath d='M36 6v8M36 58v8M6 36h8M58 36h8M0 0l8 8M72 0l-8 8M0 72l8-8M72 72l-8-8'/%3E%3C/g%3E%3Cg fill='white' fill-opacity='.07'%3E%3Ccircle cx='36' cy='36' r='2.5'/%3E%3Ccircle cx='0' cy='0' r='3'/%3E%3Ccircle cx='72' cy='0' r='3'/%3E%3Ccircle cx='0' cy='72' r='3'/%3E%3Ccircle cx='72' cy='72' r='3'/%3E%3C/g%3E%3C/svg%3E");
+  --adire-page: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='black' stroke-opacity='.035' stroke-width='1.6' stroke-linecap='round'%3E%3Ccircle cx='36' cy='36' r='15'/%3E%3Ccircle cx='36' cy='36' r='8'/%3E%3Cpath d='M36 6v8M36 58v8M6 36h8M58 36h8M0 0l8 8M72 0l-8 8M0 72l8-8M72 72l-8-8'/%3E%3C/g%3E%3C/svg%3E");
+  --adire-page-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='white' stroke-opacity='.03' stroke-width='1.6' stroke-linecap='round'%3E%3Ccircle cx='36' cy='36' r='15'/%3E%3Ccircle cx='36' cy='36' r='8'/%3E%3Cpath d='M36 6v8M36 58v8M6 36h8M58 36h8M0 0l8 8M72 0l-8 8M0 72l8-8M72 72l-8-8'/%3E%3C/g%3E%3C/svg%3E");
+  --kente: repeating-linear-gradient(90deg, #50ff90 0 18px, #0a0a0a 18px 24px, #fbbf24 24px 42px, #0a0a0a 42px 48px, #dc2626 48px 54px, #0a0a0a 54px 60px);
+}
+
+/* The whole app sits on a barely-there Adire texture. */
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background-image: var(--adire-page); background-size: 96px 96px;
+}
+[data-theme="dark"] body::before { background-image: var(--adire-page-dark); }
+
+/* Brand-green bands (auth hero, welcome, onboarding, splash): pattern + kente edge. */
+.african-band { position: relative; overflow: hidden; }
+.african-band::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background-image: var(--adire-dark); background-size: 72px 72px;
+}
+.african-band::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 6px; pointer-events: none;
+  background: var(--kente); background-size: 60px 6px;
+}
+/* Dark panels (desktop auth side, hero cards). */
+.african-dark { position: relative; }
+.african-dark::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+  background-image: var(--adire-light); background-size: 72px 72px;
+}
+.kente-edge { position: absolute; left: 0; right: 0; bottom: 0; height: 6px; background: var(--kente); background-size: 60px 6px; pointer-events: none; }

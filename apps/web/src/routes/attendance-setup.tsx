@@ -32,7 +32,7 @@ export default function AttendanceSetupRoute() {
     setBusy(true);
     try {
       await api.attendanceSetProfile(fullName.trim(), matric.trim());
-      navigate(params.get('next') || ROUTES.attendancePass, { replace: true });
+      navigate(params.get('next') ? decodeURIComponent(params.get('next') as string) : ROUTES.attendancePass, { replace: true });
     } catch (e) {
       errorToast(e, 'save your details');
     } finally {

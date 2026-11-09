@@ -16,7 +16,11 @@ import ErrorState from '../components/ErrorState';
 import Flash from '../components/Flash';
 import { BoxBoy } from '../components/redesign/brand';
 
-import { describeError } from '../lib/errors';
+import { describeError, errorToast } from '../lib/errors';
+import { toastSuccess } from '../lib/toast';
+import { askInstall, isStandalone } from '../lib/install';
+import { announcePicture, resolvePicture } from '../lib/picture';
+import { Avatar, PERSONAS, type PersonaKey } from '../components/redesign/brand';
 const UUID_RE = /^[0-9a-f-]{36}$/i;
 const DEPARTMENTS = [
   'Electronic & Computer Engineering',
@@ -82,6 +86,23 @@ export default function MeRoute() {
   const [verifMsg, setVerifMsg] = useState('');
   // /me's avatar (Gravatar/SSO photo) when the profile row has no upload.
   const [meAvatar, setMeAvatar] = useState('');
+
+  const [personaBusy, setPersonaBusy] = useState(false);
+  const picture = resolvePicture(profile, meAvatar);
+  const pickPersona = async (key: PersonaKey) => {
+    setPersonaBusy(true);
+    try {
+      // Choosing a Box Boy replaces an uploaded photo (the photo would win otherwise).
+      await api.setPersona(key, true);
+      setProfile((prev) => (prev ? { ...prev, box_boy_persona: key, avatar_url: '' } : prev));
+      announcePicture();
+      toastSuccess(`${PERSONAS.find((p) => p.key === key)?.name || 'Box Boy'} is your picture now.`);
+    } catch (e) {
+      errorToast(e, 'change your picture');
+    } finally {
+      setPersonaBusy(false);
+    }
+  };
 
   const uploadAvatar = async (file: File | null) => {
     if (!file || uploadingAvatar) return;
@@ -317,7 +338,7 @@ export default function MeRoute() {
       const match = unis.find((u) => u.name === dUni);
       if (match && UUID_RE.test(match.id)) payload.universityId = match.id;
       const author = profile?.role === 'lecturer' || profile?.role === 'contributor';
-      if (!author) {
+      if (!author && profile?.role === 'student') {
         if (dLevel) payload.level = dLevel;
         if (dTarget) payload.gradTarget = Number(dTarget);
       } else if (dLevel) {
@@ -343,13 +364,15 @@ export default function MeRoute() {
   const initial = (profile?.first_name || email).charAt(0).toUpperCase() || 'U';
   const roleLabel = profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : '—';
   const canAuthor = profile?.role === 'lecturer' || profile?.role === 'contributor';
+  // Level and graduation target are student concepts: staff and admins never see them.
+  const isStudent = (profile?.role || 'student') === 'student';
   const rows: [string, string][] = [
     ['Role', roleLabel],
     ['University', profile?.university || '—'],
     ['Faculty', profile?.faculty || '—'],
     ['Department', profile?.department || '—'],
   ];
-  if (!canAuthor) {
+  if (isStudent) {
     rows.push(['Level', profile?.level || '—']);
     rows.push(['Graduation target', profile?.grad_target != null ? String(profile.grad_target) : '—']);
   }
@@ -360,8 +383,8 @@ export default function MeRoute() {
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '24px 16px 80px' }}>
       <BackButton to="/home" />
       <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 20 }}>
-        {(profile?.avatar_url || meAvatar) ? (
-          <img src={profile?.avatar_url || meAvatar} alt="Profile picture" style={{ width: 64, height: 64, borderRadius: 9999, objectFit: 'cover', flexShrink: 0 }} />
+        {picture.src ? (
+          <img src={picture.src} alt="Profile picture" style={{ width: 64, height: 64, borderRadius: 9999, objectFit: 'cover', flexShrink: 0 }} />
         ) : (
           <div style={{ width: 64, height: 64, borderRadius: 9999, background: 'var(--u-green)', color: 'var(--u-black)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 24, flexShrink: 0 }}>
             {initial}
@@ -392,6 +415,32 @@ export default function MeRoute() {
           {avatarMsg && <div style={{ fontSize: 12, color: 'var(--u-good)', marginTop: 4 }}>{avatarMsg}</div>}
         </div>
         <BoxBoy pose="readingStanding" width={64} />
+      </div>
+
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 16 }}>
+        <div style={{ fontWeight: 800, fontSize: 14 }}>Or pick a Box Boy as your picture</div>
+        <div style={{ fontSize: 12, color: 'var(--text2)', margin: '2px 0 10px' }}>
+          {profile?.avatar_url ? 'Picking one replaces your uploaded photo.' : 'Tap one to use it everywhere.'}
+        </div>
+        <div role="radiogroup" aria-label="Box Boy persona" style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          {PERSONAS.map((p) => {
+            const on = profile?.box_boy_persona === p.key && !profile?.avatar_url;
+            return (
+              <button
+                key={p.key}
+                role="radio"
+                aria-checked={on}
+                aria-label={p.name}
+                disabled={personaBusy}
+                onClick={() => void pickPersona(p.key)}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: 4, borderRadius: 16, border: `2px solid ${on ? 'var(--u-green)' : 'transparent'}`, background: on ? 'var(--u-good-tint)' : 'transparent', opacity: personaBusy ? 0.6 : 1 }}
+              >
+                <Avatar persona={p.key} size={52} />
+                <span style={{ fontSize: 11, fontWeight: on ? 800 : 600 }}>{p.name}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', marginBottom: 16 }}>
@@ -466,7 +515,7 @@ export default function MeRoute() {
               ]}
             />
           </label>
-          {!canAuthor && (
+          {isStudent && (
             <>
               <label style={{ fontSize: 12, fontWeight: 700 }}>
                 Level
@@ -561,6 +610,11 @@ export default function MeRoute() {
           onConfirm={() => void doLogout()}
           onCancel={() => setConfirmLogout(false)}
         />
+      )}
+      {!isStandalone() && (
+        <button className="btn btn--amber btn--block" onClick={askInstall} style={{ marginTop: 16 }}>
+          Install Unify on this device
+        </button>
       )}
       {(isAdmin || import.meta.env.DEV) && (
         <Link to="/screens" className="btn btn--white btn--sm" style={{ marginTop: 16, display: 'flex', width: 'fit-content', marginInline: 'auto' }}>

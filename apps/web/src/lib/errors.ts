@@ -82,12 +82,15 @@ const TECHNICAL_RE =
  */
 export function describeError(e: unknown, action = 'do that'): string {
   const l = asLike(e);
-  const m = msgOf(e).trim();
+  // apiFetch throws "API 404: <server message>": show only the message.
+  const m = msgOf(e).trim().replace(/^API \d{3}:?\s*/, '');
 
   const code = typeof l.code === 'string' ? l.code : '';
   if (code && CODE_COPY[code]) return CODE_COPY[code];
 
   const status = Number(l.status ?? l.statusCode);
+  // Server faults (5xx) are never the user's to read; 4xx keep our own message when we wrote one.
+  if (status >= 500 && STATUS_COPY[status]) return STATUS_COPY[status];
   if (status && STATUS_COPY[status] && (!m || TECHNICAL_RE.test(m))) return STATUS_COPY[status];
 
   for (const [re, copy] of AUTH_COPY) if (re.test(m)) return copy;

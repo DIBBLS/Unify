@@ -87,6 +87,13 @@ export function clearRememberSession(): void {
   } catch {
     // ignore
   }
+  // Signing out also wipes the saved API copies on this device (phones are
+  // shared): the worker keys them per user, this makes sure none linger.
+  try {
+    void caches?.delete('unify-api-v1');
+  } catch {
+    // Cache Storage unavailable: nothing to clear
+  }
 }
 
 // One-shot restore for fresh entry (called from /auth mount — every launch
