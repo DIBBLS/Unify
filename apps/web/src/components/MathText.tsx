@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
-import 'katex/dist/katex.min.css';
-import katex from 'katex';
+import { getKatex, useKatexReady } from '../lib/katex';
 import { typesetMath } from '../lib/mathjax';
 import { escHtml } from './Formula';
 
@@ -19,6 +18,8 @@ const ENT: Record<string, string> = { '&lt;': '<', '&gt;': '>', '&amp;': '&' };
 const DELIM = /\\\(([\s\S]*?)\\\)|\\\[([\s\S]*?)\\\]|\$\$([\s\S]*?)\$\$/g;
 
 function renderTex(tex: string, displayMode: boolean): string | null {
+  const katex = getKatex();
+  if (!katex) return null;
   try {
     return katex.renderToString(tex, { throwOnError: true, displayMode, strict: false });
   } catch {
@@ -182,7 +183,9 @@ export function MathText({
   inline?: boolean;
 }) {
   const ref = useRef<HTMLDivElement & HTMLSpanElement>(null);
-  const stage1 = useMemo(() => kaTeXSegments(html), [html]);
+  const ready = useKatexReady();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stage1 = useMemo(() => kaTeXSegments(html), [html, ready]);
   useEffect(() => {
     const el = ref.current;
     if (!el || !stage1.leftover) return;
