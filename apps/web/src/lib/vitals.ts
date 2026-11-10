@@ -42,8 +42,16 @@ export function startVitals(): void {
     if (!Object.keys(m).length) return;
     sent = true;
     try {
-      const body = new Blob([JSON.stringify({ page: pageGroup(location.pathname), metrics: m })], { type: 'application/json' });
-      navigator.sendBeacon?.(`${base}/v1/metrics/vitals`, body);
+      // fetch + keepalive survives the page closing like sendBeacon, but unlike sendBeacon it can
+      // omit cookies, which the API's CORS rules require (sendBeacon always sends them, so Chrome
+      // blocked it with an Allow-Credentials error).
+      void fetch(`${base}/v1/metrics/vitals`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page: pageGroup(location.pathname), metrics: m }),
+        keepalive: true,
+        credentials: 'omit',
+      }).catch(() => {});
     } catch {
       // never matters to the user
     }
