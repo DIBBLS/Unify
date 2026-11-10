@@ -33,7 +33,7 @@
   ],
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!assets/|boxboy/|icons/|.*\\.[A-Za-z0-9]+$).*)",
       "destination": "/index.html"
     }
   ],
