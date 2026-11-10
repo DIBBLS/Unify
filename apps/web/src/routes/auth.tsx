@@ -321,7 +321,8 @@ export default function AuthRoute() {
 
   if (welcomeBack)
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, maxWidth: 'var(--shell, 480px)', margin: '0 auto', background: 'var(--surface)', padding: 24, textAlign: 'center' }}>
+      // Translucent on purpose: the Adire pattern and a soft green glow show through from underneath.
+      <div className="auth-page" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, maxWidth: 'var(--shell, 480px)', margin: '0 auto', backgroundColor: 'color-mix(in srgb, var(--surface) 55%, transparent)', backgroundImage: 'radial-gradient(ellipse at 50% 38%, color-mix(in srgb, var(--u-green) 38%, transparent), transparent 62%), var(--adire-page)', backdropFilter: 'blur(2px)', padding: 24, textAlign: 'center' }}>
         <BoxBoy pose="cheer" width={112} />
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28 }}>Own your journey.</h1>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', color: 'var(--text2)', fontSize: 13, fontWeight: 600 }}>

@@ -2,7 +2,7 @@ import { AdminSkeleton } from '../components/Skeletons';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Shield, Trash2, PenTool, BookOpen, ChevronDown, ChevronRight, BarChart3, UserCheck, Users, LibraryBig, Cpu, Building2, CalendarDays, Megaphone, AlertTriangle, Scale, LayoutGrid, GraduationCap } from 'lucide-react';
+import { Shield, Trash2, PenTool, BookOpen, ChevronDown, ChevronRight, BarChart3, UserCheck, Users, LibraryBig, Cpu, Building2, CalendarDays, Megaphone, AlertTriangle, Scale, LayoutGrid, GraduationCap, Menu, X } from 'lucide-react';
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type AdminUser } from '../lib/api';
 import Loading from '../components/Loading';
@@ -63,6 +63,15 @@ export default function AdminRoute() {
   const [ownId, setOwnId] = useState('');
   const { section } = useParams();
   const openModule = section && SECTION_IDS.includes(section) ? section : 'overview';
+  // Phones: the section list is a left drawer over a blurred backdrop (desktop keeps the sticky sidebar).
+  const [navOpen, setNavOpen] = useState(false);
+  useEffect(() => { setNavOpen(false); }, [openModule]);
+  useEffect(() => {
+    if (!navOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setNavOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [navOpen]);
   const setOpenModule = (id: string) => navigate(id === 'overview' ? '/admin' : `/admin/${id}`);
   const [hocEmail, setHocEmail] = useState('');
   const [adminName, setAdminName] = useState('');
@@ -465,25 +474,14 @@ export default function AdminRoute() {
       {success && <Flash tone="success" message={success} onDismiss={() => setSuccess('')} />}
 
       <div className="admin-shell" style={{ marginTop: 12 }}>
-        <label className="admin-select-wrap">
-          <span className="admin-grouplabel" style={{ padding: '0 2px 4px', display: 'block' }}>Section</span>
-          <select
-            className="admin-select"
-            value={openModule}
-            onChange={(e) => (e.target.value === '__studio' ? navigate('/studio') : setOpenModule(e.target.value))}
-          >
-            {GROUPS.map((g) => (
-              <optgroup key={g.label || 'top'} label={g.label || 'Admin'}>
-                {g.items.map((m) => {
-                  const n = m.id === 'requests' ? requests.length : m.id === 'errors' ? errors.length : m.id === 'capaudit' ? violations.length : 0;
-                  return <option key={m.id} value={m.id}>{m.title}{n > 0 ? ` (${n})` : ''}</option>;
-                })}
-              </optgroup>
-            ))}
-            <option value="__studio">Studio</option>
-          </select>
-        </label>
-        <nav className="admin-side" aria-label="Admin sections">
+        <button type="button" className="admin-menu-btn" aria-haspopup="dialog" aria-expanded={navOpen} onClick={() => setNavOpen(true)}>
+          <Menu size={18} />
+          <span style={{ flex: 1, textAlign: 'left' }}>{GROUPS.flatMap((g) => g.items).find((m) => m.id === openModule)?.title || 'Sections'}</span>
+          <ChevronRight size={16} />
+        </button>
+        <div className={`admin-scrim${navOpen ? ' open' : ''}`} onClick={() => setNavOpen(false)} aria-hidden="true" />
+        <nav className={`admin-side${navOpen ? ' open' : ''}`} aria-label="Admin sections">
+          <button type="button" className="admin-side-close" aria-label="Close sections" onClick={() => setNavOpen(false)}><X size={18} /></button>
           {GROUPS.map((g) => (
             <div key={g.label || 'top'} className="admin-group">
               {g.label && <div className="admin-grouplabel">{g.label}</div>}
