@@ -318,18 +318,23 @@ sticky icon sidebar; phones get a horizontal pill rail on top. */
 .admin-view{flex:1;min-width:0}
 .admin-group{display:flex;flex-direction:column;gap:4px}
 .admin-grouplabel{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);padding:8px 12px 2px}
-/* phones use the native picker, desktop the sidebar */
-.admin-select-wrap{display:none}
+/* phones: a button that opens the sections as a left drawer; desktop uses the sticky sidebar */
+.admin-menu-btn,.admin-scrim,.admin-side-close{display:none}
 /* the desktop rail already lists every admin section */
 [data-rail="1"] .admin-side{display:none}
 [data-rail="1"] .admin-view{width:100%}
 @media(max-width:767px){
   .admin-shell{flex-direction:column;align-items:stretch;gap:12px;width:100%}
   .admin-view{width:100%}
-  .admin-side{display:none}
-  .admin-select-wrap{display:block;width:100%}
-  .admin-select{width:100%;min-height:48px;padding:0 14px;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text);font:700 15px var(--font-body, inherit)}
+  .admin-menu-btn{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:0 14px;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text);font:700 15px var(--font-body, inherit);cursor:pointer}
+  .admin-scrim{display:block;position:fixed;inset:0;z-index:1190;background:rgba(10,10,10,.32);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .22s ease}
+  .admin-scrim.open{opacity:1;pointer-events:auto}
+  .admin-side{display:flex;position:fixed;top:0;left:0;bottom:0;z-index:1200;width:min(82vw,300px);border-radius:0 18px 18px 0;border-left:none;padding:56px 12px 20px;overflow-y:auto;overscroll-behavior:contain;transform:translateX(-102%);transition:transform .26s cubic-bezier(.2,.8,.2,1);box-shadow:none;background:color-mix(in srgb,var(--surface) 88%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+  .admin-side.open{transform:none;box-shadow:12px 0 40px rgba(0,0,0,.25)}
+  .admin-side-close{display:flex;align-items:center;justify-content:center;position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer}
 }
+@media(max-width:767px) and (prefers-reduced-motion:reduce){.admin-side,.admin-scrim{transition:none}}
+
 
 /* Back-to-top floating button (reader) */
 .to-top{position:fixed;right:16px;bottom:124px;z-index:50;width:44px;height:44px;border-radius:9999px;border:1px solid var(--border);background:var(--surface);color:var(--green-deep);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);animation:rise-in .25s ease}
