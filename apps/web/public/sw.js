@@ -188,6 +188,13 @@ self.addEventListener('push', (e) => {
       } catch {
         // postMessage unsupported — badge falls back to polling
       }
+      // Mark the home-screen icon even while the app is closed (the open
+      // app replaces this dot with the real count on its next refresh).
+      try {
+        if (self.navigator && self.navigator.setAppBadge) await self.navigator.setAppBadge();
+      } catch {
+        // badges unsupported
+      }
       await self.registration.showNotification(title, {
         body,
         icon: '/icons/v4/icon-192.png',

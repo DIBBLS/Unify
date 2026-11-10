@@ -3,20 +3,20 @@ import { Flame } from 'lucide-react';
 
 /* ---------- Box Boy ---------- */
 export const POSES = {
-  cheer: '/boxboy/cheer.png',                 // fist up, notebook (celebrations)
-  armsCrossed: '/boxboy/arms-crossed.png',    // confident
-  peeking: '/boxboy/peeking.png',             // over an edge (loading, empty)
-  wavePhone: '/boxboy/wave-phone.png',        // stop / hold on
-  thumbsUpPhone: '/boxboy/thumbs-up-phone.png',
-  thumbsUp: '/boxboy/thumbs-up.png',
-  chairRelax: '/boxboy/chair-relax.png',      // no classes, rest
-  chairSmall: '/boxboy/chair-small.png',
-  readingStanding: '/boxboy/reading-standing.png',
-  teaching: '/boxboy/teaching.png',
-  targetSign: '/boxboy/target-sign.png',      // holds the CGPA target sign (sign is drawn in code)
-  phoneOut: '/boxboy/phone-out.png',
-  keyHandover: '/boxboy/key-handover.png',
-  sittingPhone: '/boxboy/sitting-phone.png',
+  cheer: '/boxboy/cheer.webp',                 // fist up, notebook (celebrations)
+  armsCrossed: '/boxboy/arms-crossed.webp',    // confident
+  peeking: '/boxboy/peeking.webp',             // over an edge (loading, empty)
+  wavePhone: '/boxboy/wave-phone.webp',        // stop / hold on
+  thumbsUpPhone: '/boxboy/thumbs-up-phone.webp',
+  thumbsUp: '/boxboy/thumbs-up.webp',
+  chairRelax: '/boxboy/chair-relax.webp',      // no classes, rest
+  chairSmall: '/boxboy/chair-small.webp',
+  readingStanding: '/boxboy/reading-standing.webp',
+  teaching: '/boxboy/teaching.webp',
+  targetSign: '/boxboy/target-sign.webp',      // holds the CGPA target sign (sign is drawn in code)
+  phoneOut: '/boxboy/phone-out.webp',
+  keyHandover: '/boxboy/key-handover.webp',
+  sittingPhone: '/boxboy/sitting-phone.webp',
 } as const;
 export type Pose = keyof typeof POSES;
 
@@ -85,11 +85,11 @@ function hexA(hex: string, a: number) {
 
 /* ---------- Avatars: 5 round Box Boys, students pick one. No photos, no letters. ---------- */
 export const PERSONAS = [
-  { key: 'go-getter', name: 'Go-getter', title: 'The 5.0 Scholar', blurb: 'Has a target and a plan for every semester. Starts early and keeps score.', traits: ['Sets targets', 'Starts early', 'Keeps score'], img: '/boxboy/avatar-go-getter.png' },
-  { key: 'comeback', name: 'Comeback', title: 'The Comeback Kid', blurb: 'Had a rough semester. Not this one. Steady, every single week.', traits: ['Bounces back', 'Steady pace', 'No excuses'], img: '/boxboy/avatar-comeback.png' },
-  { key: 'curious', name: 'Curious', title: 'The Engineer', blurb: 'Needs to know how it actually works before it sticks. Worked examples first.', traits: ['Asks why', 'Builds things', 'Deep dives'], img: '/boxboy/avatar-curious.png' },
-  { key: 'team-player', name: 'Team player', title: 'The Study Captain', blurb: 'Learns by explaining. The one the class calls the night before the test.', traits: ['Explains well', 'Studies in groups', 'Shares notes'], img: '/boxboy/avatar-team-player.png' },
-  { key: 'on-the-move', name: 'On the move', title: 'The Hustler', blurb: 'School plus work, a business or leadership. Short sessions that fit the day.', traits: ['Busy days', 'Short sessions', 'Gets it done'], img: '/boxboy/avatar-on-the-move.png' },
+  { key: 'go-getter', name: 'Go-getter', title: 'The 5.0 Scholar', blurb: 'Has a target and a plan for every semester. Starts early and keeps score.', traits: ['Sets targets', 'Starts early', 'Keeps score'], img: '/boxboy/avatar-go-getter.webp' },
+  { key: 'comeback', name: 'Comeback', title: 'The Comeback Kid', blurb: 'Had a rough semester. Not this one. Steady, every single week.', traits: ['Bounces back', 'Steady pace', 'No excuses'], img: '/boxboy/avatar-comeback.webp' },
+  { key: 'curious', name: 'Curious', title: 'The Engineer', blurb: 'Needs to know how it actually works before it sticks. Worked examples first.', traits: ['Asks why', 'Builds things', 'Deep dives'], img: '/boxboy/avatar-curious.webp' },
+  { key: 'team-player', name: 'Team player', title: 'The Study Captain', blurb: 'Learns by explaining. The one the class calls the night before the test.', traits: ['Explains well', 'Studies in groups', 'Shares notes'], img: '/boxboy/avatar-team-player.webp' },
+  { key: 'on-the-move', name: 'On the move', title: 'The Hustler', blurb: 'School plus work, a business or leadership. Short sessions that fit the day.', traits: ['Busy days', 'Short sessions', 'Gets it done'], img: '/boxboy/avatar-on-the-move.webp' },
 ] as const;
 export type PersonaKey = (typeof PERSONAS)[number]['key'];
 

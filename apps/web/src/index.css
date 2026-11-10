@@ -338,6 +338,10 @@ sticky icon sidebar; phones get a horizontal pill rail on top. */
 /* Back-to-top floating button (reader) */
 .to-top{position:fixed;right:16px;bottom:124px;z-index:50;width:44px;height:44px;border-radius:9999px;border:1px solid var(--border);background:var(--surface);color:var(--green-deep);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);animation:rise-in .25s ease}
 .print-only{display:none}
+/* Reader zoom (desktop only, set by ZoomBar): applies to the note body alone,
+   never the loading screen; phones always read at 100%. */
+.reader-zoom{zoom:var(--reader-zoom,1)}
+@media (max-width:640px){.reader-zoom{zoom:1 !important}}
 /* Save PDF = browser print of the reader. Hide every screen chrome (the
    floating controls pill, install bar, nav, buttons), unblur recall
    answers, keep cards unbroken, and force content zoom back to 100% so a
@@ -346,7 +350,7 @@ sticky icon sidebar; phones get a horizontal pill rail on top. */
   header,nav,button,.screen-only{display:none !important}
   body{background:#fff}
   .print-only{display:block !important}
-  #unify-content{zoom:1 !important}
+  #unify-content,.reader-zoom{zoom:1 !important}
   .recall-answer.blurred{filter:none;max-height:none;overflow:visible}
   .topic-card,.mini-check,.formula-box,.insight-box,.analogy-box,.symbol-card{box-shadow:none;break-inside:avoid}
 }

@@ -10,7 +10,39 @@ export type PrepOptions = { size?: number; maxBytes?: number; square?: boolean }
 
 type Source = { draw: (ctx: CanvasRenderingContext2D, sx: number, sy: number, sw: number, sh: number, dw: number, dh: number) => void; width: number; height: number; close: () => void };
 
+// iPhone photos (HEIC/HEIF) open natively only in Safari. Elsewhere we convert
+// them to JPEG on the device first; the converter (~1 MB) downloads only when
+// such a photo is actually picked, never on normal app load.
+async function looksLikeHeic(file: Blob): Promise<boolean> {
+  const name = (file as File).name || '';
+  if (/hei[cf]/i.test(file.type) || /\.(heic|heif)$/i.test(name)) return true;
+  try {
+    const head = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+    const box = String.fromCharCode(...head.slice(4, 8));
+    const brand = String.fromCharCode(...head.slice(8, 12));
+    return box === 'ftyp' && /^(heic|heix|hevc|hevx|heim|heis|mif1|msf1)$/.test(brand);
+  } catch {
+    return false;
+  }
+}
+
+async function heicToJpeg(file: Blob): Promise<Blob> {
+  const { default: heic2any } = await import('heic2any');
+  const out = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.92 });
+  return Array.isArray(out) ? out[0] : out;
+}
+
+/** Open any picture: native decode first, then convert formats the browser can't read. */
 async function open(file: Blob): Promise<Source> {
+  try {
+    return await openNative(file);
+  } catch (e) {
+    if (!(await looksLikeHeic(file))) throw e;
+    return openNative(await heicToJpeg(file));
+  }
+}
+
+async function openNative(file: Blob): Promise<Source> {
   // Preferred: createImageBitmap honours EXIF rotation and decodes big photos off the main thread.
   if (typeof createImageBitmap === 'function') {
     try {

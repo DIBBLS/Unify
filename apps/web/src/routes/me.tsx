@@ -4,7 +4,7 @@ import { ProfileSkeleton } from '../components/Skeletons';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, Pencil, Shield, X, Sun, Moon, MessageCircle } from 'lucide-react';
+import { LogOut, Pencil, X, Sun, Moon, MessageCircle } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import ConfirmModal from '../components/ConfirmModal';
 import Drop from '../components/Drop';
@@ -105,12 +105,9 @@ export default function MeRoute() {
   const uploadAvatar = async (file: File | null) => {
     if (!file || uploadingAvatar) return;
     setAvatarMsg('');
-    // Some pickers hand back an empty MIME for perfectly good photos —
-    // never reject on that; the decode below is the real test.
-    if (file.type && !file.type.startsWith('image/')) {
-      setAvatarMsg("That's not an image — pick a JPG, PNG or WEBP photo.");
-      return;
-    }
+    // No format gate: pickers mislabel photos (empty MIME, HEIC as
+    // octet-stream). preparePhoto converts whatever it can open (HEIC
+    // included) to a small JPEG — the decode is the only real test.
     setUploadingAvatar(true);
     try {
       // Square 320px JPEG under ~60 KB, upright, no black behind transparency.
@@ -126,7 +123,7 @@ export default function MeRoute() {
       const msg = describeError(e, 'update your picture');
       setAvatarMsg(
         /^Couldn/.test(msg) || /reach the server|offline/i.test(msg)
-          ? "Couldn't read that photo — save it as JPG or PNG (some formats like HEIC need converting) and retry."
+          ? "Couldn't open that file as a picture. Try another photo."
           : msg
       );
     } finally {
@@ -376,7 +373,7 @@ export default function MeRoute() {
             {uploadingAvatar ? 'Uploading…' : profile?.avatar_url ? 'Change picture' : 'Add a picture'}
             <input
               type="file"
-              accept="image/*"
+              accept="image/*,.heic,.heif"
               disabled={uploadingAvatar}
               onChange={(e) => void uploadAvatar(e.target.files?.[0] || null)}
               style={{ display: 'none' }}
@@ -437,11 +434,6 @@ export default function MeRoute() {
         </div>
         {emailMsg && <div style={{ fontSize: 12, color: 'var(--u-good)', marginTop: 6 }}>{emailMsg}</div>}
       </div>
-      {isAdmin && (
-        <Link to="/admin" style={{ marginBottom: 8, padding: 14, background: '#111827', color: '#fff', borderRadius: 16, fontWeight: 800, textDecoration: 'none', textAlign: 'center', display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
-          <Shield size={16} /> Admin panel
-        </Link>
-      )}
       {saveMsg && <Flash tone="success" message={saveMsg} onDismiss={() => setSaveMsg('')} />}
 
       {editing && (
