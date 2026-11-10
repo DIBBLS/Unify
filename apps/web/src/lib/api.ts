@@ -127,7 +127,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, retries 
     log.info("api", `← ${res.status} ${path} (${Date.now() - started}ms)`);
     // Any successful write may change who the user is (onboarding, profile,
     // enrolment, role): never serve the memoised /v1/me after one.
-    if (method !== "GET") meCache = null;
+    if (method !== "GET") clearMeCache();
     return (await res.json()) as T;
   } catch (e) {
     // Retry transient faults (cold starts, network blips) — never 4xx:
@@ -137,7 +137,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, retries 
     if (retries > 0 && !(status && status >= 400 && status < 500)) {
       log.warn("api", `↻ retry ${path} (${e instanceof Error ? e.message : "network error"})`);
       await new Promise((r) => setTimeout(r, 1500));
-      return apiFetch<T>(path, init, retries - 1);
+      return apiFetch<T>(path, init, retries - 1, timeoutMs);
     }
     log.error("api", `✕ ${method} ${path} failed (${e instanceof Error ? e.message : "network error"})`);
     throw e;
@@ -234,8 +234,16 @@ export type MeResponse = { onboarded: boolean; profile: Profile | null; isAdmin:
 // sign-out and fresh sign-in so account switches never read another
 // user's profile.
 let meCache: { at: number; data: MeResponse } | null = null;
+// In-flight /v1/me: the layout, the role gate and the page all ask at once on
+// first load — they share one request instead of each hitting the server.
+// meGen bumps on every invalidation so a request started before a write or
+// sign-out never repopulates the cache or gets handed to a later caller.
+let meInflight: Promise<MeResponse> | null = null;
+let meGen = 0;
 export function clearMeCache(): void {
   meCache = null;
+  meInflight = null;
+  meGen++;
 }
 
 
@@ -268,10 +276,23 @@ export const api = {
   settings: () => apiFetch<{ currentSemester: string }>("/v1/settings"),
   me: () => {
     if (meCache && Date.now() - meCache.at < 15000) return Promise.resolve(meCache.data);
-    return apiFetch<MeResponse>("/v1/me").then((d) => {
-      meCache = { at: Date.now(), data: d };
-      return d;
-    });
+    if (meInflight) return meInflight;
+    const gen = meGen;
+    const p = apiFetch<MeResponse>("/v1/me").then(
+      (d) => {
+        if (gen === meGen) {
+          meCache = { at: Date.now(), data: d };
+          meInflight = null;
+        }
+        return d;
+      },
+      (e) => {
+        if (gen === meGen) meInflight = null;
+        throw e;
+      }
+    );
+    meInflight = p;
+    return p;
   },
   updateMe: (payload: Record<string, unknown>) =>
     apiFetch<{ ok: boolean; profile: Profile }>("/v1/me", {

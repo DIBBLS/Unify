@@ -42,11 +42,15 @@ export default function ZoomBar() {
     } catch {
       // private mode — zoom just won't persist
     }
+    // Older builds zoomed the whole content column (loading screen included):
+    // make sure that never lingers.
     const el = document.getElementById(CONTENT_ID);
-    if (!el) return;
-    // Notes section only: anywhere else the app renders at 100%.
-    el.style.zoom = reader && z !== 100 ? String(z / 100) : '';
-  }, [z, pathname, reader]);
+    if (el) el.style.zoom = '';
+    // Only the note body reads this (.reader-zoom in learn/week.tsx), so the
+    // loading skeleton and every other screen stay at 100%. Desktop only:
+    // phones always read at normal size, whatever zoom desktop saved.
+    document.documentElement.style.setProperty('--reader-zoom', reader && !mobile && z !== 100 ? String(z / 100) : '1');
+  }, [z, pathname, reader, mobile]);
 
   // Controls live only on note readers — never on dashboard/browse/etc.
   if (!reader) return null;

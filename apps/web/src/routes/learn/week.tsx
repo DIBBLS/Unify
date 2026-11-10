@@ -344,7 +344,7 @@ export default function LearnPage() {
 
   return (
     <>
-    <div className="screen-only" style={{ maxWidth: 640, margin: '0 auto', padding: '24px 20px 100px' }}>
+    <div className="screen-only reader-zoom" style={{ maxWidth: 640, margin: '0 auto', padding: '24px 20px 100px' }}>
       {burst && (
         <div key={burst.k} className="xp-burst" onAnimationEnd={() => setBurst(null)}>
           <div><span className="xp-burst-pill">{burst.label}</span></div>

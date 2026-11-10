@@ -3,6 +3,6 @@
 // MINOR — feature batch (new screens, flows, capabilities).
 // PATCH — bugfix/hotfix push (no new surface).
 // Bump PATCH on every fix push, MINOR when a push adds features.
-export const APP_VERSION = '2.16.0';
+export const APP_VERSION = '2.17.4';
 export const APP_NAME = 'Unify Learn';
 
