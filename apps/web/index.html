@@ -3,6 +3,57 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // Self-repair: if a bundled script or stylesheet fails to load (for example a stale copy kept
+      // by the browser from a deploy), fetch the files fresh from the server, which replaces the bad
+      // copy, then re-attach the stylesheet, or reload once for a script. Runs before the app files.
+      (function () {
+        var KEY = 'unify.heal.at', busy = false;
+        function urls() {
+          var out = [], els = document.querySelectorAll('link[href*="/assets/"],script[src*="/assets/"]');
+          for (var i = 0; i < els.length; i++) out.push(els[i].href || els[i].src);
+          return out;
+        }
+        function refetch() {
+          return Promise.all(urls().map(function (u) { return fetch(u, { cache: 'reload', credentials: 'same-origin' }).catch(function () {}); }));
+        }
+        // A stylesheet refused for its type fires no error event: it just ends up with no rules.
+        // So check each bundled stylesheet once it has settled, and re-attach any that is empty.
+        function healStyle(t) {
+          if (!t || t.getAttribute('data-healed') || t.getAttribute('data-checked')) return;
+          var ok = false;
+          try { ok = !!(t.sheet && t.sheet.cssRules && t.sheet.cssRules.length); } catch (_) { ok = !!t.sheet; }
+          if (ok) return;
+          t.setAttribute('data-checked', '1');
+          var u = t.href;
+          refetch().then(function () {
+            var n = t.cloneNode();
+            n.removeAttribute('data-checked');
+            n.setAttribute('data-healed', '1');
+            n.href = u.split('?')[0] + '?r=' + Date.now();
+            t.parentNode.insertBefore(n, t.nextSibling);
+          });
+        }
+        function checkStyles() {
+          var ls = document.querySelectorAll('link[rel="stylesheet"][href*="/assets/"]:not([data-healed])');
+          for (var i = 0; i < ls.length; i++) healStyle(ls[i]);
+        }
+        window.addEventListener('load', checkStyles);
+        window.addEventListener('error', function (e) {
+          var t = e.target;
+          if (!t || t === window || !t.tagName) return;
+          var u = (t.tagName === 'LINK' && t.href) || (t.tagName === 'SCRIPT' && t.src) || '';
+          if (u.indexOf('/assets/') < 0) return;
+          if (t.tagName === 'LINK' && t.rel === 'stylesheet') { healStyle(t); return; }
+          var last = 0;
+          try { last = +sessionStorage.getItem(KEY) || 0; } catch (_) {}
+          if (busy || Date.now() - last < 60000) return;
+          busy = true;
+          try { sessionStorage.setItem(KEY, String(Date.now())); } catch (_) {}
+          refetch().then(function () { location.reload(); });
+        }, true);
+      })();
+    </script>
     <title>Unify Learn — Own your journey</title>
     <meta name="description" content="Guided notes, a timetable, QR attendance, a CGPA path and study streaks for your whole course. Free for students, works offline." />
     <meta name="theme-color" content="#50ff90" media="(prefers-color-scheme: light)" />

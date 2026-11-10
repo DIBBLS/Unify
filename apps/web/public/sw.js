@@ -76,6 +76,8 @@ async function apiFirst(e, request, url) {
   return fresh || cached;
 }
 
+const isHtml = (res) => /text\/html/i.test((res.headers && res.headers.get('content-type')) || '');
+
 self.addEventListener('fetch', (e) => {
   const { request } = e;
   if (request.method !== 'GET') return;
@@ -124,12 +126,20 @@ self.addEventListener('fetch', (e) => {
     (async () => {
       const cached = await caches.match(request);
       const network = fetch(request)
+        .then(async (res) => {
+          // A script/style that arrives as HTML is a stale copy (the browser's own cache can hold
+          // one from a deploy). Ask the server again, skipping and overwriting that copy.
+          if (isAsset && res && isHtml(res) && !/\.html?$/.test(url.pathname)) {
+            try { res = await fetch(new Request(request, { cache: 'reload' })); } catch { /* keep res */ }
+          }
+          return res;
+        })
         .then((res) => {
           // Opaque (no-cors) CDN responses have status 0 but are perfectly
           // cacheable — the MathJax <script> arrives this way.
           // Never keep an HTML page under a script/style/image address: a deploy in flight (or a
           // missing file) can answer with index.html, and a cache-first copy would stick forever.
-          const wrong = isAsset && /text\/html/i.test((res && res.headers && res.headers.get('content-type')) || '') && !/\.html?$/.test(url.pathname);
+          const wrong = isAsset && res && isHtml(res) && !/\.html?$/.test(url.pathname);
           if (res && (res.ok || res.type === 'opaque') && !wrong) {
             const clone = res.clone();
             caches.open(CACHE).then((c) => c.put(request, clone));
@@ -139,7 +149,7 @@ self.addEventListener('fetch', (e) => {
         .catch(() => null);
       // Versioned bundles, MathJax, fonts and storage media: cache-first.
       // Content: fresh first, cached fallback.
-      const poisoned = cached && isAsset && /text\/html/i.test(cached.headers.get('content-type') || '') && !/\.html?$/.test(url.pathname);
+      const poisoned = cached && isAsset && isHtml(cached) && !/\.html?$/.test(url.pathname);
       if (poisoned) { caches.open(CACHE).then((c) => c.delete(request)); }
       if ((isAsset || isMathCdn || isFontCdn || isStorageMedia) && cached && !poisoned) return cached;
       const fresh = await network;
