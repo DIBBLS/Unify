@@ -2,7 +2,7 @@ import PushHelp from '../components/PushHelp';
 import type { GuideKind } from '../lib/pushHelp';
 import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, CalendarDays, ClipboardCheck, Search, User, PenTool, Bell, Shield, BookOpen, Users } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, ClipboardCheck, Search, User, PenTool, Bell, Shield, BookOpen, Users, Menu } from 'lucide-react';
 import { supabaseBrowser, touchActivity, isSessionExpired, expireSession } from '../lib/supabase';
 import { pushSupported, enablePush } from '../lib/push';
 import ConfirmModal from '../components/ConfirmModal';
@@ -333,6 +333,16 @@ export default function Layout() {
     <div style={{ fontFamily: 'var(--font-body)' }}>
       {!immersive && !(isDesktop && authed) && (
       <header style={{ display: 'flex', gap: 12, padding: '12px 16px', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, background: 'var(--surface)', zIndex: 10, alignItems: 'center' }}>
+        {role === 'admin' && pathname.startsWith('/admin') && (
+          <button
+            type="button"
+            aria-label="Admin sections"
+            onClick={() => window.dispatchEvent(new Event('unify:admin-menu'))}
+            style={{ width: 36, height: 36, marginRight: -4, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}
+          >
+            <Menu size={18} />
+          </button>
+        )}
         <Link to="/home" style={{ textDecoration: 'none' }} aria-label="Unify Learn home">
           <Wordmark size={20} />
         </Link>
