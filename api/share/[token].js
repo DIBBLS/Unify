@@ -51,7 +51,7 @@ module.exports = async (req, res) => {
   // always unfurl fresh.
   res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600');
   if (!token) {
-    res.status(400).send(page({ title: 'Unify Learn', desc: 'Shared note', image: APP_URL + '/og-image.jpg?v=5', body: '', appLink: APP_URL + '/auth' }));
+    res.status(400).send(page({ title: 'Unify Learn', desc: 'Shared note', image: APP_URL + '/og-image.jpg?v=6', body: '', appLink: APP_URL + '/auth' }));
     return;
   }
   let data = null;
@@ -68,7 +68,7 @@ module.exports = async (req, res) => {
     res.status(expired ? 410 : 404).send(page({
       title: expired ? 'This Unify link expired — Unify Learn' : 'Link not found — Unify Learn',
       desc: expired ? 'Shared notes live for a while. Join free and the library stays open.' : 'This share link is invalid or was revoked.',
-      image: APP_URL + '/og-image.jpg?v=5',
+      image: APP_URL + '/og-image.jpg?v=6',
       body: '<div class="card"><div class="eyebrow">Unify Learn</div><h1>' + (expired ? 'This link expired' : 'Link not found') + '</h1><div class="sub">Shared notes live for a while — that is what makes them special.</div></div>',
       appLink: APP_URL + '/auth',
     }));
@@ -93,7 +93,7 @@ module.exports = async (req, res) => {
   res.status(200).send(page({
     title,
     desc,
-    image: APP_URL + '/og-image.jpg?v=5',
+    image: APP_URL + '/og-image.jpg?v=6',
     body,
     appLink: APP_URL + '/s/' + encodeURIComponent(token),
   }));
