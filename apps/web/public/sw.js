@@ -127,7 +127,10 @@ self.addEventListener('fetch', (e) => {
         .then((res) => {
           // Opaque (no-cors) CDN responses have status 0 but are perfectly
           // cacheable — the MathJax <script> arrives this way.
-          if (res && (res.ok || res.type === 'opaque')) {
+          // Never keep an HTML page under a script/style/image address: a deploy in flight (or a
+          // missing file) can answer with index.html, and a cache-first copy would stick forever.
+          const wrong = isAsset && /text\/html/i.test((res && res.headers && res.headers.get('content-type')) || '') && !/\.html?$/.test(url.pathname);
+          if (res && (res.ok || res.type === 'opaque') && !wrong) {
             const clone = res.clone();
             caches.open(CACHE).then((c) => c.put(request, clone));
           }
@@ -136,7 +139,9 @@ self.addEventListener('fetch', (e) => {
         .catch(() => null);
       // Versioned bundles, MathJax, fonts and storage media: cache-first.
       // Content: fresh first, cached fallback.
-      if ((isAsset || isMathCdn || isFontCdn || isStorageMedia) && cached) return cached;
+      const poisoned = cached && isAsset && /text\/html/i.test(cached.headers.get('content-type') || '') && !/\.html?$/.test(url.pathname);
+      if (poisoned) { caches.open(CACHE).then((c) => c.delete(request)); }
+      if ((isAsset || isMathCdn || isFontCdn || isStorageMedia) && cached && !poisoned) return cached;
       const fresh = await network;
       if (fresh) return fresh;
       if (cached) return cached;
