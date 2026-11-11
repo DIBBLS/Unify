@@ -4,18 +4,20 @@
 // screens (auth gates, studio jobs, share landings).
 import LoadingQuote from './LoadingQuote';
 
+// The rotating fact/proverb sits at the TOP of full-page loaders: below the
+// skeleton, long layouts pushed it under the bottom tab bar where nobody saw it.
 export function PageShell({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
+    <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 96px' }}>
+      <LoadingQuote style={{ margin: '0 auto 20px' }} />
       {children}
-      <LoadingQuote style={{ margin: '28px auto 0' }} />
     </div>
   );
 }
 
 export function DashboardSkeleton({ author }: { author: boolean }) {
   return (
-    <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', paddingBottom: 80 }}>
+    <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', paddingBottom: 96 }}>
       <div style={{ padding: '20px 16px 12px', background: 'var(--surface)', display: 'flex', gap: 12, alignItems: 'center' }}>
         <div style={{ flex: 1 }}>
           <div className="skel" style={{ height: 11, width: 110 }} />
@@ -25,6 +27,7 @@ export function DashboardSkeleton({ author }: { author: boolean }) {
         </div>
         <div className="skel" style={{ width: 64, height: 64, borderRadius: 16, flexShrink: 0 }} />
       </div>
+      <LoadingQuote style={{ margin: '16px auto 4px' }} />
       <div style={{ margin: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }}>
         {[0, 1, 2, 3].map((i) => (
           <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
@@ -54,7 +57,6 @@ export function DashboardSkeleton({ author }: { author: boolean }) {
           </div>
         </>
       )}
-      <LoadingQuote style={{ margin: '24px auto 0' }} />
     </div>
   );
 }

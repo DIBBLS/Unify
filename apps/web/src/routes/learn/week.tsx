@@ -84,9 +84,11 @@ export default function LearnPage() {
       window.removeEventListener('focus', onFocus);
     };
   }, []);
-  // Return-to-top lands on the topic head (below hero + chapter bar),
-  // not the very top of the page.
+  // Next / a topic tab / return-to-top land on the notes header: the title
+  // with the Topic 1 · Topic 2 tabs right under it, so you always see which
+  // topic you're on. (It used to land below the tabs, hiding the header.)
   const topicTopRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
   const [showTop, setShowTop] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [reporting, setReporting] = useState(false);
@@ -95,13 +97,19 @@ export default function LearnPage() {
   const [savedOff, setSavedOff] = useState(false);
   const [savingOff, setSavingOff] = useState(false);
   const scrollToTopicTop = () => {
-    const el = topicTopRef.current;
-    const top = el ? el.getBoundingClientRect().top + window.scrollY - 70 : 0;
-    try {
-      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-    } catch {
-      window.scrollTo(0, Math.max(0, top));
-    }
+    // Wait for the new topic to render, then measure (measuring first used the
+    // old topic's layout).
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        const el = headerRef.current || topicTopRef.current;
+        const top = el ? el.getBoundingClientRect().top + window.scrollY - 70 : 0;
+        try {
+          window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+        } catch {
+          window.scrollTo(0, Math.max(0, top));
+        }
+      })
+    );
   };
   useEffect(() => {
     const onScroll = () => setShowTop(window.scrollY > 600);
@@ -410,7 +418,7 @@ export default function LearnPage() {
       {sharing && note && (
         <ShareModal course={note.course} week={weekNum} title={note.title} topics={topics.map((t) => t.title || `Topic ${t.number}`)} onClose={() => setSharing(false)} />
       )}
-      <div className="hero">
+      <div className="hero" ref={headerRef}>
         <div className="hero-eyebrow">{note.course} · Week {note.week}</div>
         <div className="hero-title"><MathPlain text={note.title} inline /></div>
         {note.subtitle ? <div className="hero-subtitle"><MathPlain text={note.subtitle} inline /></div> : null}
