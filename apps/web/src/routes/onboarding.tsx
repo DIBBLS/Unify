@@ -3,7 +3,7 @@ import { StepBars } from '../components/redesign/ui';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ChevronLeft, GraduationCap, Presentation, Users } from 'lucide-react';
+import { ArrowRight, ChevronLeft } from 'lucide-react';
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type University } from '../lib/api';
 import Loading from '../components/Loading';
@@ -21,21 +21,15 @@ const FALLBACK_UNIS: Uni[] = [{ id: 'lasu', name: 'Lagos State University', shor
 
 const UUID_RE = /^[0-9a-f-]{36}$/i;
 
-const ROLES = [
-  { id: 'student', label: 'Student', desc: 'Learn with guided paths', icon: GraduationCap },
-  { id: 'lecturer', label: 'Lecturer', desc: 'Teach + author notes · admin approval needed', icon: Presentation },
-  { id: 'contributor', label: 'Contributor', desc: 'Co-create notes · admin approval needed', icon: Users },
-] as const;
-
 export default function OnboardingRoute() {
   const navigate = useNavigate();
   const isEdit = new URLSearchParams(window.location.search).get('edit') === '1';
-  const [step, setStep] = useState(0);
-  const [originalRole, setOriginalRole] = useState<Role | null>(null);
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setErrorState] = useState('');
   // Toast mirror: every failure surfaces globally AND stays readable inline.
   const setError = (m: string) => { setErrorState(m); if (m) toastError(m); };
+  // Read from the profile only. Nobody picks a role: staff are granted server-side.
   const [role, setRole] = useState<Role | null>(null);
   const [universities, setUniversities] = useState<Uni[]>([]);
   const [firstName, setFirstName] = useState('');
@@ -49,8 +43,6 @@ export default function OnboardingRoute() {
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [availableCourses, setAvailableCourses] = useState<{ code: string; title: string }[]>([]);
   const [coursesLoading, setCoursesLoading] = useState(false);
-  // Staff request filed: applicant waits on admin approval as a student.
-  const [requestSent, setRequestSent] = useState(false);
 
   useEffect(() => {
     const sb = supabaseBrowser();
@@ -80,7 +72,6 @@ export default function OnboardingRoute() {
         }
         if (profile?.role === 'student' || profile?.role === 'lecturer' || profile?.role === 'contributor' || profile?.role === 'admin') {
           setRole(profile.role);
-          setOriginalRole(profile.role);
         }
         let list: Uni[] = [];
         try {
@@ -128,33 +119,21 @@ export default function OnboardingRoute() {
     setError('');
     setLoading(true);
     try {
-      const wantsStaff = !isEdit && (role === 'lecturer' || role === 'contributor');
+      // Staff level and courses are the admin's job, never self-picked.
+      const staffSetup = !isEdit && (role === 'lecturer' || role === 'contributor');
       const payload: Record<string, unknown> = {
         firstName,
         university: university?.name,
         faculty,
         department,
-        // Staff applicants onboard as students first; the staff role, level
-        // and courses are the admin's job on approval (never self-picked).
-        level: wantsStaff ? null : level,
-        role: isEdit ? (originalRole ?? role ?? 'student') : wantsStaff ? 'student' : (role ?? 'student'),
+        level: staffSetup ? null : level,
         semester: activeSemester,
-        courses: wantsStaff ? [] : selectedCourses,
+        courses: staffSetup ? [] : selectedCourses,
         ...overrides,
       };
       if (university?.id && UUID_RE.test(university.id)) payload.universityId = university.id;
       if (!skipTarget && gradTarget) payload.gradTarget = gradTarget;
       await api.onboarding(payload);
-      if (wantsStaff && role) {
-        try {
-          await api.roleRequest({ role, level: '', courses: [] });
-        } catch {
-          // profile saved; request can be re-filed from the pending screen
-        }
-        setRequestSent(true);
-        setLoading(false);
-        return;
-      }
       navigate('/home');
     } catch (err) {
       setError(describeError(err, 'finish that'));
@@ -224,30 +203,7 @@ export default function OnboardingRoute() {
 
   if (loading) return <FormSkeleton />;
 
-  if (requestSent) {
-    const staffLabel = role === 'lecturer' ? 'Lecturer' : 'Contributor';
-    return (
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: '60px 20px 80px', textAlign: 'center' }}>
-        <BoxBoy pose="cheer" width={96} />
-        <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, marginTop: 12 }}>Welcome aboard — application received</h1>
-        <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px', lineHeight: 1.6 }}>
-          Your {staffLabel} application is with an admin now — you'll be notified on your bell
-          and by email the moment it's decided. This is verification, not a verdict: while you
-          wait you keep full access to everything, and your dashboard holds your waiting room
-          with a way to withdraw anytime.
-        </p>
-        <button
-          onClick={() => navigate('/home')}
-          style={{ padding: '12px 28px', borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', fontWeight: 800, fontSize: 14 }}
-        >
-          Enter my waiting room
-        </button>
-      </div>
-    );
-  }
-
   const STEP_TITLES = [
-    "What's your role?",
     "What's your first name?",
     'Where are you studying?',
     "What's your faculty?",
@@ -256,17 +212,11 @@ export default function OnboardingRoute() {
     'Which courses are you taking?',
     "What's your graduation target?",
   ];
-  // The flow length follows the chosen role: student 8 (role, name,
-  // uni, faculty, dept, level, courses, target), staff 5 (role, name, uni,
-  // faculty, dept) — level and courses are the admin's job on approval,
-  // never the applicant's.
-  const totalSteps = role === 'student' || !role ? 8 : 5;
-  const shownStep = Math.min(step, totalSteps - 1);
-  const stepTitle =
-    step === 6 && role === 'student'
-      ? 'Which courses are you taking?'
-      : STEP_TITLES[shownStep];
-  const left = { s: `Step ${shownStep + 1} of ${totalSteps}`, t: stepTitle };
+  // Steps run from 1. Students get 7 (name, uni, faculty, dept, level,
+  // courses, target); staff stop after 4 (name, uni, faculty, dept).
+  const totalSteps = role === 'student' || !role ? 7 : 4;
+  const shownStep = Math.min(step, totalSteps);
+  const left = { s: `Step ${shownStep} of ${totalSteps}`, t: STEP_TITLES[shownStep - 1] };
 
   return (
     <div style={{ maxWidth: 'min(var(--shell, 480px), 560px)', margin: '0 auto', minHeight: '100vh', background: 'var(--u-page)' }}>
@@ -281,64 +231,10 @@ export default function OnboardingRoute() {
           <BoxBoy pose="peeking" width={84} />
         </div>
         <div style={{ marginTop: 12 }}>
-          <StepBars step={shownStep + 1} total={totalSteps} />
+          <StepBars step={shownStep} total={totalSteps} />
         </div>
       </div>
       <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {step === 0 && (
-          <>
-            <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0 4px' }}>
-              <BoxBoy pose="readingStanding" width={70} />
-            </div>
-            {isEdit && (
-              <div style={{ background: 'var(--u-good-tint)', border: '1px solid var(--u-good)', borderRadius: 12, padding: 10, fontSize: 13, color: 'var(--u-good)', textAlign: 'center' }}>
-                Role{originalRole ? ` (${originalRole})` : ''} can't be changed here.
-              </div>
-            )}
-            {(isEdit ? [] : ROLES).map((r) => {
-              const Icon = r.icon;
-              const active = role === r.id;
-              return (
-                <button
-                  key={r.id}
-                  onClick={() => {
-                    setRole(r.id);
-                    setStep(1);
-                  }}
-                  style={{
-                    padding: 14,
-                    border: `1px solid ${active ? 'var(--u-amber)' : 'var(--border)'}`,
-                    borderRadius: 12,
-                    background: 'var(--surface)',
-                    textAlign: 'left',
-                    display: 'flex',
-                    gap: 12,
-                    alignItems: 'center',
-                  }}
-                >
-                  <span
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 10,
-                      background: active ? 'var(--u-amber)' : 'var(--u-good-tint)',
-                      color: active ? 'var(--u-black)' : 'var(--u-good)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Icon size={20} />
-                  </span>
-                  <span>
-                    <span style={{ fontWeight: 700, display: 'block' }}>{r.label}</span>
-                    <span style={{ fontSize: 12, color: 'var(--text2)' }}>{r.desc}</span>
-                  </span>
-                </button>
-              );
-            })}
-          </>
-        )}
         {step === 1 && (
           <>
             <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0 4px' }}>
@@ -346,7 +242,7 @@ export default function OnboardingRoute() {
             </div>
             <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="e.g. Joshua" style={{ padding: 12, border: '1px solid var(--border)', borderRadius: 12, fontSize: 16 }} />
             {firstName && <div style={{ fontSize: 14 }}>{daypart}, <strong>{firstName}</strong></div>}
-            <button onClick={() => { if (!firstName.trim()) return; if (isEdit) { void save(false); return; } if (role === 'contributor') { setStep(2); return; } setStep(2); }} style={{ padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+            <button onClick={() => { if (!firstName.trim()) return; if (isEdit) { void save(false); return; } setStep(2); }} style={{ padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
               {isEdit ? (<>Finish setup <ArrowRight size={18} /></>) : (<>Continue <ArrowRight size={18} /></>)}
             </button>
           </>
@@ -367,9 +263,6 @@ export default function OnboardingRoute() {
         {step === 4 && departments.map((d) => (
           <button key={d.name} onClick={() => { setDepartment(d.name); if (role === 'lecturer' || role === 'contributor') { void save(false, { department: d.name }); return; } setStep(5); }} style={{ padding: 14, border: '1px solid var(--border)', borderRadius: 12, background: 'var(--surface)', textAlign: 'left' }}>
             {d.name} <span style={{ color: 'var(--text2)', fontSize: 12 }}>{d.sub}</span>
-            {(role === 'lecturer' || role === 'contributor') && (
-              <span style={{ display: 'block', fontSize: 12, color: 'var(--u-good)', fontWeight: 700, marginTop: 4 }}>Select to send your {role} application for review</span>
-            )}
           </button>
         ))}
         {step === 5 && (role === 'student' || !role) && levels.map((l) => (
@@ -405,7 +298,7 @@ export default function OnboardingRoute() {
             </button>
           </>
         )}
-        {step > 0 && (
+        {step > 1 && (
           <button onClick={() => setStep(step - 1)} style={{ background: 'none', border: 'none', color: 'var(--text2)', marginTop: 8, display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}>
             <ChevronLeft size={16} /> Back
           </button>
