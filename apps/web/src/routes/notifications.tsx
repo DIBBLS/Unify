@@ -111,7 +111,7 @@ export default function NotificationsRoute() {
     setClearing(true);
     try {
       await api.notificationsClear();
-      setNotes([]);
+      setNotes((prev) => prev.filter((x) => x.pinned));
       announceChange();
     } catch (err) {
       setError(describeError(err, 'clear your notifications'));
@@ -161,6 +161,12 @@ export default function NotificationsRoute() {
                 {n.type === 'new_note' ? <BookOpen size={18} /> : <Icon size={18} />}
               </span>
               <span style={{ flex: 1, minWidth: 0 }}>
+                {(n.type === 'announce' || n.pinned) && (
+                  <span style={{ display: 'inline-flex', gap: 6, marginBottom: 4 }}>
+                    {n.type === 'announce' && <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, padding: '2px 8px', borderRadius: 9999, background: 'var(--u-black)', color: 'var(--u-green)' }}>FROM UNIFY</span>}
+                    {n.pinned && <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, padding: '2px 8px', borderRadius: 9999, border: '1px solid var(--border)', color: 'var(--text2)' }}>PINNED</span>}
+                  </span>
+                )}
                 <span style={{ fontWeight: 800, display: 'block', fontSize: 14 }}>{n.title || 'Update'}</span>
                 <span style={{ fontSize: 13, color: '#555', display: 'block', marginTop: 2 }}>{n.body}</span>
                 <span style={{ fontSize: 11, color: 'var(--text3)', marginTop: 4, display: 'block' }}>{timeAgo(n.created_at)}</span>
@@ -187,7 +193,7 @@ export default function NotificationsRoute() {
       {confirmClear && (
         <ConfirmModal
           title="Clear all notifications?"
-          body="This removes every notification from your list. It can't be undone."
+          body={notes.some((n) => n.pinned) ? "This removes every notification except pinned messages from Unify. It can't be undone." : "This removes every notification from your list. It can't be undone."}
           confirmLabel="Clear all"
           busy={clearing}
           onConfirm={() => void clearAll()}

@@ -24,8 +24,8 @@ type Tab = {
 import { GROUPS as ADMIN_GROUPS } from '../lib/adminNav';
 
 const STUDENT_TABS: Tab[] = [
-  { to: '/home', label: 'Home', icon: LayoutDashboard, match: ['/home'] },
-  { to: '/courses', label: 'Courses', icon: BookOpen, match: ['/courses', '/learn'] },
+  // Review: the menu is Home · Timetable · Class · Me; courses open from the course cards on Home.
+  { to: '/home', label: 'Home', icon: LayoutDashboard, match: ['/home', '/courses', '/learn'] },
   { to: '/timetable', label: 'Timetable', icon: CalendarDays, match: ['/timetable'] },
   { to: '/class', label: 'Class', icon: Users, match: ['/class', '/hoc', '/attendance/my', '/attendance/pass', '/class-list'] },
   { to: '/me', label: 'Me', icon: User, match: ['/me'] },

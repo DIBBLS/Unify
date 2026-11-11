@@ -10,8 +10,17 @@ import { api, type Material } from '../lib/api';
 import { log } from '../lib/log';
 import { describeError } from '../lib/errors';
 import Loading from '../components/Loading';
+import CourseAttendance from '../components/CourseAttendance';
 
-type WeekRow = { week: number; title: string; subtitle: string; authors?: { name: string; avatar: string }[] };
+// Week of the semester from the profile's semester start (0 = not set / outside it).
+export function semesterWeek(start?: string | null, weeks?: number | null): { week: number; total: number } {
+  const total = weeks || 12;
+  if (!start) return { week: 0, total };
+  const w = Math.floor((Date.now() - new Date(start).getTime()) / (7 * 86400000)) + 1;
+  return { week: w >= 1 && w <= total ? w : 0, total };
+}
+
+type WeekRow ={ week: number; title: string; subtitle: string; authors?: { name: string; avatar: string }[] };
 
 export default function CourseDetailRoute() {
   // Param name must match the route (/course/:courseCode in App.tsx) —
@@ -37,6 +46,7 @@ export default function CourseDetailRoute() {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [slots, setSlots] = useState<{ day: number; start: string; end: string; venue: string; lecturer: string }[]>([]);
   const preview = searchParams.get('preview') === '1';
+  const [sem, setSem] = useState<{ week: number; total: number }>({ week: 0, total: 12 });
 
   useEffect(() => {
     (async () => {
@@ -50,6 +60,7 @@ export default function CourseDetailRoute() {
         ]);
         if (me) {
           const role = me.profile?.role || 'student';
+          setSem(semesterWeek(me.profile?.semester_start, me.profile?.semester_weeks));
           setBackTo(
             preview
               ? me.isAdmin
@@ -149,6 +160,7 @@ export default function CourseDetailRoute() {
       <p style={{ color: 'var(--text2)', marginTop: 6, fontSize: 13 }}>
         {weeks.length} {weeks.length === 1 ? 'week' : 'weeks'} · pick one to start learning
       </p>
+      {!preview && <CourseAttendance course={courseCode} totalWeeks={sem.total} currentWeek={sem.week} />}
       {materials.length > 0 && (
         <div style={{ marginTop: 16 }}>
           <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', letterSpacing: 1 }}>FROM YOUR LECTURER</div>

@@ -41,6 +41,7 @@ const GROUPS: { title: string; entries: Entry[] }[] = [
       { path: ROUTES.onlineClass, name: 'Online class', note: 'Coming soon', roles: ['any'] },
       { path: ROUTES.hocRequest, name: 'Become HOC', note: 'Request head-of-class', roles: ['student'] },
       { path: ROUTES.hoc, name: 'Class board', note: 'HOC posts for your department and level', roles: ['student'] },
+      { path: ROUTES.hocWelcome, name: 'Class rep setup', note: 'Four steps after approval: class list, timetable, first post', roles: ['student'] },
       { path: ROUTES.classList, name: 'Class list', note: 'Class rep uploads names and matric numbers; answers requests', roles: ['student'] },
       { path: ROUTES.scanner, name: 'Take attendance', note: 'Open a session, scan passes, see who is absent', roles: ['lecturer'] },
     ],

@@ -53,12 +53,10 @@ export function HomeHero({ profile, firstName, showCgpa = false }: HomeHeroProps
             {firstName || 'Welcome'}
           </h1>
           <div className="t-13" style={{ marginTop: 10, opacity: 0.8, lineHeight: 1.45, maxWidth: 420 }}>{dailyProverb()}</div>
-          {profile.department && (
-            <div 
-              className="pill pill--dark" 
-              style={{ marginTop: 8, display: 'inline-flex' }}
-            >
-              {profile.department}
+          {/* Who and where they are (review p.4): Week 3 of 12 · 400L · department · faculty · LASU */}
+          {whereLine(profile, currentWeek) && (
+            <div className="t-13 w-6" style={{ marginTop: 10, color: 'var(--u-on-dark)', opacity: 0.92, lineHeight: 1.45 }}>
+              {whereLine(profile, currentWeek)}
             </div>
           )}
         </div>
@@ -66,6 +64,13 @@ export function HomeHero({ profile, firstName, showCgpa = false }: HomeHeroProps
       </div>
     </div>
   )
+}
+
+const UNI_SHORT: Record<string, string> = { 'lagos state university': 'LASU' };
+function whereLine(profile: Profile, week: number): string {
+  const level = (profile.level || '').replace(/^(\d{3})\s*Level$/i, '$1L');
+  const uni = profile.university ? UNI_SHORT[profile.university.trim().toLowerCase()] || profile.university : '';
+  return [week > 0 ? `Week ${week} of ${profile.semester_weeks || 12}` : '', level, profile.department, profile.faculty, uni].filter(Boolean).join(' · ');
 }
 
 /**

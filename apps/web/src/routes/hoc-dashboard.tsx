@@ -1,5 +1,5 @@
 import { SectionSkeleton } from '../components/Skeletons';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
 import { api, type HocPost } from '../lib/api';
@@ -30,6 +30,8 @@ export default function HocDashboardRoute() {
   const [isHoc, setIsHoc] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [meta, setMeta] = useState('');
+  const [audience, setAudience] = useState<{ students: number; fromList: boolean } | null>(null);
+  const formRef = useRef<HTMLTextAreaElement>(null);
   const [failed, setFailed] = useState(false);
   const [type, setType] = useState<HocPost['type']>('announcement');
   const [title, setTitle] = useState('');
@@ -44,6 +46,7 @@ export default function HocDashboardRoute() {
       setIsHoc(r.isHoc);
       setIsAdmin(!!me.isAdmin);
       setMeta([r.department, r.level].filter(Boolean).join(' · '));
+      setAudience(r.audience || null);
     } catch (e) {
       errorToast(e, 'load the class board');
       setFailed(true);
@@ -81,19 +84,33 @@ export default function HocDashboardRoute() {
         </div>
       </div>
 
-      {(isHoc || isAdmin) && (
-        <Link to={ROUTES.classList} className="btn btn--white btn--block" style={{ marginTop: 16 }}>Class list</Link>
+      <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+        <Link to={ROUTES.attendancePass} className="btn btn--amber" style={{ flex: 1 }}>My pass</Link>
+        {(isHoc || isAdmin) && <Link to={ROUTES.classList} className="btn btn--white" style={{ flex: 1 }}>Class list</Link>}
+      </div>
+      {isHoc && audience && !audience.fromList && (
+        <Link to={ROUTES.hocWelcome} className="card" style={{ marginTop: 12, display: 'block', textDecoration: 'none', color: 'var(--text)', padding: 14 }}>
+          <div className="t-15 w-7">Finish setting up your class</div>
+          <div className="t-13 muted">Upload your class list first: classmates can't confirm their place until it's in.</div>
+        </Link>
       )}
       {(isHoc || isAdmin) && (
         <Card style={{ marginTop: 16, gap: 10 }}>
           <Label>Post to your class</Label>
+          {meta && (
+            <div className="t-13" style={{ marginTop: -4 }}>
+              Posting to <b>{meta}</b>{audience ? ` · ${audience.students} student${audience.students === 1 ? '' : 's'}` : ''}
+              {audience && !audience.fromList && <span className="muted"> on Unify (upload your class list for the full count)</span>}
+              <span className="muted">. Only your class gets it.</span>
+            </div>
+          )}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {TYPES.map((t) => (
               <button key={t.key} className={`chip chip--sm${t.key === type ? ' chip--on' : ''}`} onClick={() => setType(t.key)}>{t.label}</button>
             ))}
           </div>
           <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title (optional)" maxLength={120} style={field} />
-          <textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="What does your class need to know?" maxLength={1000} rows={4} style={{ ...field, resize: 'vertical' }} />
+          <textarea ref={formRef} value={content} onChange={(e) => setContent(e.target.value)} placeholder="What does your class need to know?" maxLength={1000} rows={4} style={{ ...field, resize: 'vertical' }} />
           <button className="btn btn--amber btn--block" disabled={busy || !content.trim()} onClick={() => void post()}>{busy ? 'Posting…' : 'Post'}</button>
         </Card>
       )}
@@ -104,10 +121,11 @@ export default function HocDashboardRoute() {
         ) : posts.length === 0 ? (
           <Card style={{ alignItems: 'center', textAlign: 'center' }}>
             <BoxBoy pose="chairRelax" width={110} />
-            <div className="t-15 w-6">Nothing posted yet</div>
+            <div className="t-15 w-6">{isHoc ? 'Post your first announcement to your class' : 'Nothing posted yet'}</div>
             <div className="t-13 muted">
-              {meta ? 'Posts from your Head of Class appear here.' : 'Set your department and level in Me to see your class board.'}
+              {isHoc ? 'Class times, test dates, where to find the notes: your class sees it straight away.' : meta ? 'Posts from your class rep appear here.' : 'Set your department and level in Me to see your class board.'}
             </div>
+            {isHoc && <button className="btn btn--amber btn--sm" onClick={() => { formRef.current?.focus(); formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}>New post</button>}
           </Card>
         ) : (
           posts.map((p) => (
