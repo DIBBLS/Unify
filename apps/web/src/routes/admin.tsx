@@ -16,6 +16,7 @@ import { describeError } from '../lib/errors';
 import AdminContentPanel from './admin/content';
 import PerformancePanel from './admin/performance';
 import HomeUpdatesPanel from './admin/updates';
+import ModulesOverview from './admin/modules-overview';
 import Typewriter from '../components/Typewriter';
 import { localGreeting, dailyProverb } from '../lib/naija';
 
@@ -580,6 +581,7 @@ export default function AdminRoute() {
           </div>
         </div>
       )}
+      {openModule === 'overview' && <ModulesOverview openModule={setOpenModule} />}
 
       </Module>
 

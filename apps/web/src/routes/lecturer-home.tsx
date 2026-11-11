@@ -28,6 +28,7 @@ export default function LecturerHomeRoute() {
   const [role, setRole] = useState('');
   const [today, setToday] = useState<ClassSlot[] | null>(null);
   const [taught, setTaught] = useState<string[]>([]);
+  const [dept, setDept] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -35,6 +36,7 @@ export default function LecturerHomeRoute() {
         const me = await api.me();
         setName(me.profile?.first_name || '');
         setRole(me.profile?.role || '');
+        setDept(me.profile?.department || '');
         const courses = (await api.teaching()).courses;
         setTaught(courses);
         const day = new Date().getDay();
@@ -59,6 +61,34 @@ export default function LecturerHomeRoute() {
           <Display size={26} color="#fff">{name ? `Hi, ${name}` : 'Welcome'}</Display>
         </div>
       </Card>
+
+      {/* L01–L06: first-time lecturer setup, until they've set a department. */}
+      {role === 'lecturer' && dept === '' && (
+        <Link to="/lecturer/welcome" className="card" style={{ marginTop: 12, display: 'block', padding: 14, textDecoration: 'none', color: 'var(--text)' }}>
+          <div className="t-15 w-7">Finish setting up</div>
+          <div className="t-13 muted">Your department, your courses and how students see your name. Two minutes.</div>
+        </Link>
+      )}
+
+      {/* L08: the class on right now (or starting within 15 minutes), one tap to take attendance. */}
+      {(() => {
+        const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+        const live = (today || []).find((s) => nowMin >= toMin(s.start) - 15 && nowMin < toMin(s.end));
+        if (!live || !(role === 'lecturer' || role === 'admin')) return null;
+        const started = nowMin >= toMin(live.start);
+        return (
+          <Card tone="dark" style={{ marginTop: 12, gap: 8 }}>
+            <div className="eyebrow" style={{ color: 'var(--u-green)' }}>{started ? 'Class time' : 'Starting soon'}</div>
+            <Display size={24} color="#fff">{live.course}</Display>
+            <div className="t-13" style={{ opacity: 0.8 }}>{live.start}–{live.end}{live.venue ? ` · ${live.venue}` : ''}</div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <Link to={`${ROUTES.scanner}?course=${encodeURIComponent(live.course)}&slot=${live.id}`} className="btn btn--amber btn--sm">Take attendance</Link>
+              {live.meetLink && <a href={live.meetLink} target="_blank" rel="noreferrer" className="btn btn--white btn--sm">Open the meeting</a>}
+              <Link to={`/lecturer/course/${encodeURIComponent(live.course)}?tab=post`} className="btn btn--white btn--sm">Post to students</Link>
+            </div>
+          </Card>
+        );
+      })()}
 
       <section style={{ marginTop: 22 }}>
         <Label>Today</Label>
@@ -88,6 +118,14 @@ export default function LecturerHomeRoute() {
         )}
       </section>
 
+      {/* S76: a lecturer with no courses yet. */}
+      {today !== null && taught.length === 0 && role === 'lecturer' && (
+        <Card style={{ marginTop: 22, alignItems: 'center', textAlign: 'center' }}>
+          <BoxBoy pose="peeking" width={90} />
+          <div className="t-15 w-6">No courses assigned yet</div>
+          <div className="t-13 muted">The Unify team assigns the courses you teach. Tell them which from Me → Help, and they'll show up here with their weeks, reports and attendance.</div>
+        </Card>
+      )}
       {taught.length > 0 && (role === 'lecturer' || role === 'admin') && (
         <section style={{ marginTop: 22 }}>
           <Label>Your courses</Label>

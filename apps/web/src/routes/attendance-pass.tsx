@@ -98,6 +98,22 @@ function MyPass({ onOnline }: { onOnline: () => void }) {
     return () => window.clearInterval(t);
   }, [pass]);
 
+  // S62: once scanned, show who marked you (checked every 10 s while the pass is open)
+  // so a student can flag someone who isn't their lecturer or class rep.
+  const [marked, setMarked] = useState<{ course: string; at: string; by: string } | null>(null);
+  const [flagged, setFlagged] = useState(false);
+  useEffect(() => {
+    let gone = false;
+    const check = () =>
+      api.attendanceMine().then((r) => {
+        const m = r.recent.find((x) => x.method !== 'code' && Date.now() - new Date(x.at).getTime() < 30 * 60 * 1000);
+        if (!gone) setMarked(m ? { course: m.course, at: m.at, by: m.by || '' } : null);
+      }).catch(() => {});
+    void check();
+    const t = window.setInterval(() => { if (document.visibilityState === 'visible') void check(); }, 10000);
+    return () => { gone = true; window.clearInterval(t); };
+  }, []);
+
   // Keep the screen awake while the pass is up (best effort; not every phone allows it).
   useEffect(() => {
     let lock: { release: () => Promise<void> } | null = null;
@@ -147,6 +163,25 @@ function MyPass({ onOnline }: { onOnline: () => void }) {
         </div>
         {(err || stale) && <button className="btn btn--amber btn--sm" onClick={() => void load()}>Try again</button>}
       </Card>
+      {marked && (
+        <Card style={{ marginTop: 12, gap: 6 }}>
+          <div className="t-15 w-7" style={{ color: 'var(--u-good)' }}>Marked present for {marked.course}</div>
+          <div className="t-13">
+            {new Date(marked.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{marked.by ? ` · by ${marked.by}` : ''}
+          </div>
+          {flagged ? (
+            <div className="t-12 muted">Thanks. The Unify team will check it.</div>
+          ) : (
+            <button
+              className="t-12"
+              style={{ alignSelf: 'flex-start', background: 'none', border: 'none', padding: 0, color: 'var(--text2)', textDecoration: 'underline' }}
+              onClick={() => { if (window.confirm(`Tell Unify that ${marked.by || 'the person who scanned you'} isn't your lecturer or class rep?`)) void api.attendanceFlag({ course: marked.course, at: marked.at, by: marked.by }).then(() => setFlagged(true)).catch((e) => errorToast(e, 'send that')); }}
+            >
+              Not your lecturer or class rep? Tell Unify
+            </button>
+          )}
+        </Card>
+      )}
       <div className="t-13 muted" style={{ textAlign: 'center', marginTop: 12 }}>
         Show this to your class rep or lecturer. They scan it to mark you present. Phone dead? They can type your matric number instead.
       </div>

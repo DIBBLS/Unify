@@ -33,6 +33,9 @@ const ContentReportsRoute = lazyRoute(() => import('./routes/content-reports'));
 const LecturerCourseRoute = lazyRoute(() => import('./routes/lecturer-course'));
 const LecturerProfileRoute = lazyRoute(() => import('./routes/lecturer-profile'));
 const SettingsRoute = lazyRoute(() => import('./routes/settings'));
+const LecturerWelcomeRoute = lazyRoute(() => import('./routes/lecturer-welcome'));
+const ClassDetailRoute = lazyRoute(() => import('./routes/class-detail'));
+const OnboardingFinishRoute = lazyRoute(() => import('./routes/onboarding-finish'));
 const NotificationSettingsRoute = lazyRoute(() => import('./routes/settings').then((m) => ({ default: m.NotificationSettingsRoute })));
 const OnlineClassRoute = lazyRoute(() => import('./routes/online-class'));
 const LecturerHomeRoute = lazyRoute(() => import('./routes/lecturer-home'));
@@ -225,6 +228,7 @@ export default function App() {
             </RequireAuth>
           }
         />
+        <Route path="/onboarding/finish" element={<RequireAuth><OnboardingFinishRoute /></RequireAuth>} />
         <Route element={<Layout />}>
           <Route path="/" element={<Navigate to="/auth" replace />} />
           <Route
@@ -356,6 +360,8 @@ export default function App() {
           <Route path="/lecturer/course/:code" element={<RequireAuth><LecturerCourseRoute /></RequireAuth>} />
           <Route path="/lecturer/profile/:id" element={<RequireAuth><LecturerProfileRoute /></RequireAuth>} />
           <Route path="/settings" element={<RequireAuth><SettingsRoute /></RequireAuth>} />
+          <Route path="/lecturer/welcome" element={<RequireAuth><LecturerWelcomeRoute /></RequireAuth>} />
+          <Route path="/timetable/class/:course/:id" element={<RequireAuth><ClassDetailRoute /></RequireAuth>} />
           <Route path="/settings/notifications" element={<RequireAuth><NotificationSettingsRoute /></RequireAuth>} />
           <Route path="/online-class" element={<RequireAuth><OnlineClassRoute /></RequireAuth>} />
           <Route path="/lecturer" element={<RequireAuth><LecturerHomeRoute /></RequireAuth>} />

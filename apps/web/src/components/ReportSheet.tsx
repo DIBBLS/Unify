@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { api } from '../lib/api';
 import { errorToast } from '../lib/errors';
 import { toastSuccess } from '../lib/toast';
+import Drop from './Drop';
 
 // S27 "Report a problem" (students) and L13 "Review this week" (the course's
 // lecturer). Same sheet look as ConfirmModal. Students stay anonymous to authors.
@@ -35,9 +36,7 @@ export default function ReportSheet({ course, week, topics, current, review, onC
         <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <span>{review ? 'Flag errors or suggest changes. The authors see your name.' : "Tell the authors what's wrong. They don't see your name."}</span>
           {topics.length > 1 && (
-            <select value={topic} onChange={(e) => setTopic(e.target.value)} aria-label="Which topic" style={field}>
-              {topics.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
+            <Drop value={topic} onChange={setTopic} label="Which topic" options={topics.map((t) => ({ value: t, label: t }))} style={{ width: '100%' }} />
           )}
           {!review && (
             <div role="radiogroup" aria-label="What kind of problem" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>

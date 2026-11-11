@@ -1044,8 +1044,8 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
       {view === 'quiz' && (
       <div className="nb-pane" style={{ ...card, marginTop: 12 }}>
         <h3 style={sectionTitle}>End-of-week quiz</h3>
-        <div style={{ fontSize: 12, fontWeight: 700, color: mcqCount === 8 && fitbCount === 2 ? 'var(--u-good)' : 'var(--u-warn-ink)', marginBottom: 8 }}>
-          {note.eoq.questions.length}/10 questions · Objective {mcqCount} of 8 · Fill-in {fitbCount} of 2
+        <div style={{ fontSize: 12, fontWeight: 700, color: note.eoq.questions.length === 10 && mcqCount >= 6 ? 'var(--u-good)' : 'var(--u-warn-ink)', marginBottom: 8 }}>
+          {note.eoq.questions.length}/10 questions · {mcqCount} multiple choice (at least 6) · {note.eoq.questions.length - mcqCount} written (fill-in, number or maths)
         </div>
         <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
           <label style={{ ...card, background: 'var(--surface2)', flex: 1, margin: 0, padding: 12 }}>
@@ -1093,12 +1093,15 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
               <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--u-good)' }}>Q{qi + 1}</span>
               <Drop
                 value={q.type}
-                options={[{ value: 'mcq', label: 'MCQ' }, { value: 'fitb', label: 'Fill-in' }]}
+                options={[{ value: 'mcq', label: 'MCQ' }, { value: 'fitb', label: 'Fill-in' }, { value: 'number', label: 'Number' }, { value: 'maths', label: 'Maths' }]}
                 onChange={(v) => {
                   const qs = [...note.eoq.questions];
+                  const base = { number: qi + 1, question: q.question, feedback: q.feedback || { correct: '', wrong: '' }, topicRef: q.topicRef || '1' };
                   qs[qi] = v === 'mcq'
-                    ? { number: qi + 1, type: 'mcq', question: q.question, options: ['', ''], correct: 'A', feedback: q.feedback || { correct: '', wrong: '' }, topicRef: q.topicRef || '1' }
-                    : { number: qi + 1, type: 'fitb', question: q.question, acceptedAnswers: [''], feedback: q.feedback || { correct: '', wrong: '' }, topicRef: q.topicRef || '1' };
+                    ? { ...base, type: 'mcq', options: ['', ''], correct: 'A' }
+                    : v === 'number'
+                      ? { ...base, type: 'number', answer: 0 }
+                      : { ...base, type: v as 'fitb' | 'maths', acceptedAnswers: [''] };
                   set({ eoq: { ...note.eoq, questions: qs } });
                 }}
                 label="EOQ type"
@@ -1162,8 +1165,18 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
                 )}
               </div>
             )}
-            {q.type === 'fitb' && (
-              <label style={{ ...label, marginTop: 8 }}>Accepted answers (one per line)<textarea value={(q.acceptedAnswers || []).join('\n')} onChange={(e) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, acceptedAnswers: e.target.value.split('\n') }; set({ eoq: { ...note.eoq, questions: qs } }); }} rows={2} style={area} /></label>
+            {(q.type === 'fitb' || q.type === 'maths') && (
+              <label style={{ ...label, marginTop: 8 }}>
+                {q.type === 'maths' ? 'Accepted expressions (one per line; any equivalent form the student types counts, e.g. 8ρV^3/27)' : 'Accepted answers (one per line)'}
+                <textarea value={(q.acceptedAnswers || []).join('\n')} onChange={(e) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, acceptedAnswers: e.target.value.split('\n') }; set({ eoq: { ...note.eoq, questions: qs } }); }} rows={2} style={area} />
+              </label>
+            )}
+            {q.type === 'number' && (
+              <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+                <label style={{ ...label, flex: '1 1 110px' }}>Answer<input type="number" step="any" value={Number.isFinite(q.answer as number) ? String(q.answer) : ''} onChange={(e) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, answer: Number(e.target.value) }; set({ eoq: { ...note.eoq, questions: qs } }); }} style={input} /></label>
+                <label style={{ ...label, flex: '1 1 110px' }}>Allow ± (blank = 1%)<input type="number" step="any" min={0} value={q.tolerance ?? ''} onChange={(e) => { const qs = [...note.eoq.questions]; const v = e.target.value; qs[qi] = { ...q, tolerance: v === '' ? undefined : Math.max(0, Number(v)) }; set({ eoq: { ...note.eoq, questions: qs } }); }} style={input} /></label>
+                <label style={{ ...label, flex: '1 1 90px' }}>Unit<input value={q.unit || ''} onChange={(e) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, unit: e.target.value || undefined }; set({ eoq: { ...note.eoq, questions: qs } }); }} placeholder="kW" style={input} /></label>
+              </div>
             )}
             <label style={{ ...label, marginTop: 8 }}>Feedback when correct<input value={q.feedback?.correct || ''} onChange={(e) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, feedback: { correct: e.target.value, wrong: q.feedback?.wrong || '' } }; set({ eoq: { ...note.eoq, questions: qs } }); }} style={input} /></label>
             <label style={{ ...label, marginTop: 8 }}>Feedback when wrong<input value={q.feedback?.wrong || ''} onChange={(e) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, feedback: { correct: q.feedback?.correct || '', wrong: e.target.value } }; set({ eoq: { ...note.eoq, questions: qs } }); }} style={input} /></label>
@@ -1176,6 +1189,12 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
           </button>
           <button onClick={() => { const n = note.eoq.questions.length + 1; set({ eoq: { ...note.eoq, questions: [...note.eoq.questions, { number: n, type: 'fitb', question: '', acceptedAnswers: [''], feedback: { correct: '', wrong: '' }, topicRef: '1' }] } }); }} style={addBtn}>
             <Plus size={12} /> Fill-in
+          </button>
+          <button onClick={() => { const n = note.eoq.questions.length + 1; set({ eoq: { ...note.eoq, questions: [...note.eoq.questions, { number: n, type: 'number', question: '', answer: 0, feedback: { correct: '', wrong: '' }, topicRef: '1' }] } }); }} style={addBtn}>
+            <Plus size={12} /> Number
+          </button>
+          <button onClick={() => { const n = note.eoq.questions.length + 1; set({ eoq: { ...note.eoq, questions: [...note.eoq.questions, { number: n, type: 'maths', question: '', acceptedAnswers: [''], feedback: { correct: '', wrong: '' }, topicRef: '1' }] } }); }} style={addBtn}>
+            <Plus size={12} /> Maths
           </button>
         </div>
       </div>

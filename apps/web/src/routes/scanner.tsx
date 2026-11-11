@@ -128,6 +128,13 @@ export default function ScannerRoute() {
     catch (e) { errorToast(e, 'start attendance'); }
     finally { setBusy(false); }
   };
+  const extend = async () => {
+    if (!reg?.session) return;
+    setBusy(true);
+    try { await api.attendanceExtend(reg.session.id, 30); toastSuccess('Added 30 minutes.'); await refresh(); }
+    catch (e) { errorToast(e, 'add time'); }
+    finally { setBusy(false); }
+  };
   const end = async () => {
     if (!reg?.session) return;
     setBusy(true);
@@ -199,7 +206,11 @@ export default function ScannerRoute() {
             </div>
             <Pill tone="amber">Closes in {mm}:{ss}</Pill>
             <div className="t-15" style={{ marginTop: 6 }}>{reg.present.length} of {expected} {ofWhat} present</div>
-            <button className="btn btn--white" disabled={busy} onClick={() => void end()} style={{ marginTop: 10 }}>End class</button>
+            <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
+              {/* L19: lectures overrun; add time without starting a new register. */}
+              <button className="btn btn--white" disabled={busy} onClick={() => void extend()}>Add 30 min</button>
+              <button className="btn btn--white" disabled={busy} onClick={() => void end()}>End class</button>
+            </div>
           </Card>
         ) : (
           <PassScanner

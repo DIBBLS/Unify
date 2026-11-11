@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { api, type CourseAttendance as Data } from '../lib/api';
 import { ROUTES } from '../lib/routes';
+import Drop from './Drop';
 
 // Attendance on the course page (review p.5-6, p.10):
 // - students: "Came to 3 of 4 classes held" and each week 1-12 at a glance;
@@ -97,14 +98,13 @@ function TakeAttendance({ data, course, totalWeeks, currentWeek }: { data: Data;
         </Link>
       ) : (
         <>
-          <label style={{ fontSize: 12, fontWeight: 700 }}>
-            Week
-            <select value={week} onChange={(e) => setWeek(Number(e.target.value))} style={{ display: 'block', width: '100%', marginTop: 4, padding: 10, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 14 }}>
-              {Array.from({ length: Math.max(totalWeeks, latest) }, (_, i) => i + 1).map((w) => (
-                <option key={w} value={w}>Week {w}{w === currentWeek ? ' (this week)' : ''}</option>
-              ))}
-            </select>
-          </label>
+          <Drop
+            value={String(week)}
+            onChange={(v) => setWeek(Number(v))}
+            label="Week"
+            options={Array.from({ length: Math.max(totalWeeks, latest) }, (_, i) => i + 1).map((w) => ({ value: String(w), label: `Week ${w}${w === currentWeek ? ' (this week)' : ''}` }))}
+            style={{ width: '100%' }}
+          />
           <div role="radiogroup" aria-label="Which class" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {data.slots.map((s) => (
               <button key={s.id} role="radio" aria-checked={which === s.id} className={`chip chip--sm${which === s.id ? ' chip--on' : ''}`} onClick={() => setWhich(s.id)}>

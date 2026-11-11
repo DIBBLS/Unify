@@ -84,9 +84,9 @@ export default function LearnPage() {
       window.removeEventListener('focus', onFocus);
     };
   }, []);
-  // Next / a topic tab / return-to-top land on the notes header: the title
-  // with the Topic 1 · Topic 2 tabs right under it, so you always see which
-  // topic you're on. (It used to land below the tabs, hiding the header.)
+  // Next / a topic tab / return-to-top land on the topic head: the Topic 1 ·
+  // Topic 2 tabs with the topic's title right under them (not the week's big
+  // hero above). With a single topic there are no tabs: the topic itself.
   const topicTopRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const [showTop, setShowTop] = useState(false);
@@ -418,7 +418,7 @@ export default function LearnPage() {
       {sharing && note && (
         <ShareModal course={note.course} week={weekNum} title={note.title} topics={topics.map((t) => t.title || `Topic ${t.number}`)} onClose={() => setSharing(false)} />
       )}
-      <div className="hero" ref={headerRef}>
+      <div className="hero">
         <div className="hero-eyebrow">{note.course} · Week {note.week}</div>
         <div className="hero-title"><MathPlain text={note.title} inline /></div>
         {note.subtitle ? <div className="hero-subtitle"><MathPlain text={note.subtitle} inline /></div> : null}
@@ -479,7 +479,7 @@ export default function LearnPage() {
         </div>
       )}
       {tabCount > 1 && (
-        <div className="segbar" role="tablist" aria-label={lectures.length > 1 ? `Lecture ${selLecture} chapters` : 'Week chapters'}>
+        <div ref={headerRef} className="segbar" role="tablist" aria-label={lectures.length > 1 ? `Lecture ${selLecture} chapters` : 'Week chapters'}>
           {classTopics.map((t) => {
             const done = isDone(weekNum, t.number, selLecture);
             const idx = classTopics.indexOf(t);

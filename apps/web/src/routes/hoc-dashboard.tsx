@@ -32,6 +32,7 @@ export default function HocDashboardRoute() {
   const [meta, setMeta] = useState('');
   const [audience, setAudience] = useState<{ students: number; fromList: boolean } | null>(null);
   const formRef = useRef<HTMLTextAreaElement>(null);
+  const [filter, setFilter] = useState<'all' | HocPost['type']>('all');
   const [failed, setFailed] = useState(false);
   const [type, setType] = useState<HocPost['type']>('announcement');
   const [title, setTitle] = useState('');
@@ -116,6 +117,17 @@ export default function HocDashboardRoute() {
       )}
 
       <section style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {/* S42: filter the feed (announcement-only design: All / Announcements / Tips / Questions). */}
+        {posts && posts.length > 0 && (
+          <div role="tablist" aria-label="Filter posts" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {([['all', 'All'], ['announcement', 'Announcements'], ['tip', 'Tips'], ['question', 'Questions']] as const).map(([k, l]) => (
+              <button key={k} role="tab" aria-selected={filter === k} className={`chip chip--sm${filter === k ? ' chip--on' : ''}`} onClick={() => setFilter(k)}>{l}</button>
+            ))}
+          </div>
+        )}
+        {posts && posts.length > 0 && filter !== 'all' && !posts.some((p) => p.type === filter) && (
+          <Card><div className="t-13 muted">No {filter === 'tip' ? 'tips' : filter === 'question' ? 'questions' : 'announcements'} yet.</div></Card>
+        )}
         {posts === null ? (
           <SectionSkeleton rows={2} />
         ) : posts.length === 0 ? (
@@ -128,7 +140,7 @@ export default function HocDashboardRoute() {
             {isHoc && <button className="btn btn--amber btn--sm" onClick={() => { formRef.current?.focus(); formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}>New post</button>}
           </Card>
         ) : (
-          posts.map((p) => (
+          posts.filter((p) => filter === 'all' || p.type === filter).map((p) => (
             <Card key={p.id} style={{ gap: 6 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>

@@ -218,7 +218,8 @@ export type NotificationItem = {
 };
 
 export type NoteAuthor = { name: string; avatar: string };
-export type ClassSlot = { id: string; course: string; day: number; start: string; end: string; venue: string; lecturer: string; meetLink?: string };
+export type SlotChange = { status: 'cancelled' | 'moved' | 'unconfirmed'; start: string; end: string; venue: string; note: string };
+export type ClassSlot = { id: string; course: string; day: number; start: string; end: string; venue: string; lecturer: string; meetLink?: string; date?: string; change?: SlotChange | null };
 export type RosterStudent = { id: string; name: string; email: string; level: string; topicsDone: number; quizzesTaken: number; lastActive: string | null };
 export type AdminContentTopic = { topic: number; lecture: number; versions: number; title: string };
 export type AdminContentWeek = { week: number; title: string; topics: AdminContentTopic[] };
@@ -640,6 +641,8 @@ export const api = {
   materialAdd: (payload: { course: string; week: number; type: Material['type']; title: string; url: string }) =>
     apiFetch<{ ok: boolean; id: string }>('/v1/materials', { method: 'POST', body: JSON.stringify(payload) }),
   materialDelete: (id: string) => apiFetch<{ ok: boolean }>(`/v1/materials/${id}`, { method: 'DELETE' }),
+  slotChange: (id: string, payload: { status: SlotChange['status'] | 'normal'; start?: string; end?: string; venue?: string; note?: string }) =>
+    apiFetch<{ ok: boolean; date: string }>(`/v1/timetable/${id}/change`, { method: 'POST', body: JSON.stringify(payload) }),
   slotDelete: (id: string) =>
     apiFetch<{ ok: boolean }>(`/v1/timetable/${id}`, { method: 'DELETE' }),
   roster: (course: string) =>
@@ -663,6 +666,14 @@ export const api = {
   hocRequests: () => apiFetch<{ requests: { id: string; name: string; email: string; department: string; level: string; note: string; status: 'pending' | 'approved' | 'rejected'; at: string; repsInClass: number }[] }>('/v1/hoc/requests'),
   hocAnswer: (id: string, approve: boolean, note?: string) =>
     apiFetch<{ ok: boolean }>(`/v1/hoc/requests/${id}`, { method: 'POST', body: JSON.stringify({ approve, note }) }),
+  adminOverview: () =>
+    apiFetch<{
+      attention: { key: string; label: string; n: number; to: string }[];
+      modules: { key: string; label: string; lines: string[]; to?: string }[];
+      setup: { label: string; to: string }[];
+      calendar: { start: string | null; weeks: number; semester: string };
+      releaseNotes: { version: string; date: string; body: string }[];
+    }>('/v1/admin/overview'),
   roleGrants: () => apiFetch<{ grants: { id: string; role: 'level_admin' | 'hod' | 'dean'; faculty: string; department: string; level: string; name: string; email: string }[] }>('/v1/admin/role-grants'),
   roleGrant: (payload: { email: string; role: 'level_admin' | 'hod' | 'dean'; faculty?: string; department?: string; level?: string }) =>
     apiFetch<{ ok: boolean; name: string }>('/v1/admin/role-grants', { method: 'POST', body: JSON.stringify(payload) }),
@@ -680,6 +691,8 @@ export const api = {
   attendanceRegister: (course: string, sessionId?: string) =>
     apiFetch<AttendanceRegister>(`/v1/attendance/sessions?course=${encodeURIComponent(course)}${sessionId ? `&session=${encodeURIComponent(sessionId)}` : ''}`),
   attendanceCourse: (course: string) => apiFetch<CourseAttendance>(`/v1/attendance/course?course=${encodeURIComponent(course)}`),
+  attendanceExtend: (id: string, minutes = 30) =>
+    apiFetch<{ ok: boolean; closesAt: string }>(`/v1/attendance/sessions/${id}/extend`, { method: 'POST', body: JSON.stringify({ minutes }) }),
   attendanceClose: (id: string) => apiFetch<{ ok: boolean }>(`/v1/attendance/sessions/${id}/close`, { method: 'POST', body: '{}' }),
   // Online classes only: the code shared in the meeting chat.
   attendanceCheckin: (code: string) =>
@@ -688,7 +701,9 @@ export const api = {
   attendanceScan: (sessionId: string, input: { token: string } | { matric: string }) =>
     apiFetch<ScanResult>(`/v1/attendance/sessions/${sessionId}/scan`, { method: 'POST', body: JSON.stringify(input) }),
   attendanceMine: () =>
-    apiFetch<{ courses: { course: string; held: number; attended: number }[]; recent: { course: string; at: string }[] }>('/v1/attendance/mine'),
+    apiFetch<{ courses: { course: string; held: number; attended: number }[]; recent: { course: string; at: string; method?: string; by?: string }[] }>('/v1/attendance/mine'),
+  attendanceFlag: (payload: { course: string; at: string; by?: string; note?: string }) =>
+    apiFetch<{ ok: boolean }>('/v1/attendance/flag', { method: 'POST', body: JSON.stringify(payload) }),
   attendanceExport: (sessionId: string, course: string) =>
     apiDownload(`/v1/attendance/sessions/${sessionId}/register.csv`, `${course.replace(/\s+/g, '')}-register.csv`),
   // Learning (S23–S36)

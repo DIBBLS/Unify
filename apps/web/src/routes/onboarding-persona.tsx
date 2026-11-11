@@ -34,7 +34,7 @@ export default function OnboardingPersonaRoute() {
 
       // Continue to next onboarding step (or back to Me when editing)
       const isEdit = new URLSearchParams(window.location.search).get('edit') === '1'
-      navigate(isEdit ? '/me' : '/onboarding?step=push')
+      navigate(isEdit ? '/me' : '/onboarding/finish')
     } catch (err) {
       errorToast(err, 'save your Box Boy')
     } finally {
@@ -45,7 +45,7 @@ export default function OnboardingPersonaRoute() {
   const handleSkip = () => {
     // Skip is allowed (persona is optional, photo upload in Settings)
     const isEdit = new URLSearchParams(window.location.search).get('edit') === '1'
-    navigate(isEdit ? '/me' : '/onboarding?step=push')
+    navigate(isEdit ? '/me' : '/onboarding/finish')
   }
   
   return (

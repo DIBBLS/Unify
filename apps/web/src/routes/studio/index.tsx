@@ -815,8 +815,13 @@ export default function StudioRoute() {
                     Continue to review <ArrowRight size={18} />
                   </button>
                   {!reviewReady && (
-                    <div role="status" style={{ fontSize: 12, color: 'var(--text2)', textAlign: 'center', marginTop: -4 }}>
-                      Review unlocks when every field is filled in. Still to do: {gapsSummary(gaps, 3)}.
+                    // C05: the full list of what's left, not just the first few.
+                    <div role="status" style={{ fontSize: 13, color: 'var(--u-warn-ink)', background: 'var(--u-warn-tint)', borderRadius: 12, padding: 12 }}>
+                      <div style={{ fontWeight: 800, marginBottom: 4 }}>{gaps.length} thing{gaps.length === 1 ? '' : 's'} to fix before review</div>
+                      <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {gaps.slice(0, 12).map((g) => <li key={g}>{g}</li>)}
+                        {gaps.length > 12 && <li>…and {gaps.length - 12} more</li>}
+                      </ul>
                     </div>
                   )}
                 </>
@@ -892,10 +897,11 @@ export default function StudioRoute() {
               ).length;
               const mcq = note.eoq.questions.filter((q) => q.type === 'mcq').length;
               const fitb = note.eoq.questions.length - mcq;
-              const quizOk = note.eoq.questions.length === 10 && mcq === 8 && fitb === 2;
+              // 10 questions, at least 6 multiple choice; the rest fill-in, number or maths.
+              const quizOk = note.eoq.questions.length === 10 && mcq >= 6;
               const rows: { ok: boolean; text: string }[] = [
                 { ok: note.topics.length > 0, text: `${note.topics.length} topic${note.topics.length === 1 ? '' : 's'} in Lecture${lectures.length === 1 ? '' : 's'} ${lectures.join(', ')}` },
-                { ok: quizOk, text: quizOk ? `Quiz complete: 10 questions (8 MCQ + 2 fill-in)` : `Quiz short: ${note.eoq.questions.length}/10 (${mcq} MCQ + ${fitb} fill-in) — regenerate or top up` },
+                { ok: quizOk, text: quizOk ? `Quiz complete: 10 questions (${mcq} multiple choice + ${fitb} written)` : `Quiz short: ${note.eoq.questions.length}/10 (${mcq} multiple choice + ${fitb} written; needs 10 with at least 6 multiple choice)` },
                 { ok: diagramsBare === 0, text: diagrams.length ? (diagramsBare ? `${diagramsBare} diagram${diagramsBare === 1 ? '' : 's'} still need${diagramsBare === 1 ? 's' : ''} uploaded images` : `All ${diagrams.length} diagrams have images`) : 'No diagrams called for' },
                 { ok: true, text: `${formulas} formula${formulas === 1 ? '' : 's'} — open each Reader preview to confirm the render` },
               ];

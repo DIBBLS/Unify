@@ -29,6 +29,43 @@ type Activity = {
 // Admin oversight: platform totals + latest signups + latest published
 // notes in one dark card. Main admin (role) gets the manage link,
 // normal admins (flag) get the view-only notes link.
+// S20: back after a week or more away. Kind, no guilt: one step to get going.
+// Shown once a day at most (dismiss hides it until tomorrow).
+function WelcomeBack({ firstName, resume }: { firstName: string; resume: { course: string; week: number; topic: number } | null }) {
+  const [away, setAway] = useState<number | null>(null);
+  const key = 'unify.welcomeBack.' + new Date().toISOString().slice(0, 10);
+  const [hidden, setHidden] = useState(() => { try { return !!localStorage.getItem(key); } catch { return false; } });
+  useEffect(() => {
+    if (hidden) return;
+    api.learnActivity(60).then((a) => {
+      const days = a.days.filter((d) => d.xp > 0).map((d) => d.date).sort();
+      if (!days.length) return; // brand new: the usual Home is the welcome
+      const last = days[days.length - 1];
+      const gap = Math.floor((Date.now() - new Date(`${last}T12:00:00`).getTime()) / 86400000);
+      if (gap >= 7) setAway(gap);
+    }).catch(() => {});
+  }, [hidden]);
+  if (hidden || away == null) return null;
+  const close = () => { setHidden(true); try { localStorage.setItem(key, '1'); } catch { /* optional */ } };
+  return (
+    <div className="rise" style={{ margin: '12px 16px 0', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, display: 'flex', gap: 12, alignItems: 'center' }}>
+      <BoxBoy pose="wavePhone" width={56} calm />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontWeight: 800, fontSize: 15 }}>Welcome back, {firstName}</div>
+        <div style={{ fontSize: 13, color: 'var(--text2)' }}>It's been {away} days. One topic today and you're moving again.</div>
+        <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+          {resume ? (
+            <Link to={`/learn/${encodeURIComponent(resume.course.trim())}/week/${resume.week}${resume.topic ? `?t=${resume.topic}` : ''}`} className="btn btn--amber btn--sm" onClick={close}>Pick up {resume.course} · Week {resume.week}</Link>
+          ) : (
+            <Link to="/revision" className="btn btn--amber btn--sm" onClick={close}>Five-minute revision</Link>
+          )}
+          <button className="btn btn--white btn--sm" onClick={close}>Not now</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function semesterWeekOf(start?: string | null, weeks?: number | null): { week: number; total: number } {
   const total = weeks || 12;
   if (!start) return { week: 0, total };
@@ -573,6 +610,8 @@ export default function HomeRoute() {
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', paddingBottom: 80 }}>
       <HomeHero profile={profile!} firstName={firstName} showCgpa={profile?.role === 'student'} />
+
+      {profile?.role === 'student' && <WelcomeBack firstName={firstName} resume={resume} />}
 
       <div className="rise" style={{ margin: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
         <div>
