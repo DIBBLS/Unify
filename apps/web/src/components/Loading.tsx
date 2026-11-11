@@ -2,7 +2,7 @@ import { BoxBoy } from './redesign/brand';
 import Wordmark from './Wordmark';
 import LoadingQuote from './LoadingQuote';
 
-// The loading screen: Box Boy, "Unify. Learn" beneath, then a proverb so a slow
+// The loading screen: Box Boy, "Unify Learn" beneath, then a proverb so a slow
 // network never means dead air. The caption is kept for screen readers only.
 export default function Loading({ text = 'Loading…' }: { text?: string }) {
   return (

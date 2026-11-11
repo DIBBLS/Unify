@@ -337,20 +337,20 @@ export default function AuthRoute() {
     <>
       <BoxBoySplash onDone={() => setShowSplash(false)} />
       <div className="auth-page">
-      <style>{`.auth-page{min-height:100vh;background-color:var(--u-page)}.auth-side{display:none}.auth-card{maxWidth:480px;margin:0 auto}@media(min-width:900px){.auth-page{display:flex;flex-direction:row;background-color:var(--surface2)}.auth-side{display:flex;flex:1;flex-direction:column;justify-content:center;gap:18px;background:#0a0a0a;background-image:radial-gradient(circle at 85% 15%,color-mix(in srgb,var(--u-green) 14%,transparent),transparent 45%),radial-gradient(circle at 10% 90%,rgba(16,185,129,.1),transparent 40%);color:#f5f4f0;padding:64px;min-height:100vh}.auth-main{flex:1.2;display:flex;align-items:center;justify-content:center;padding:48px 32px;background-color:var(--u-page)}.auth-card{width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;box-shadow:0 12px 32px rgba(6,95,70,.12);margin:0}.auth-hero-mobile{border-radius:16px !important}}`}</style>
+      <style>{`.auth-page{min-height:100vh;background-color:var(--u-page)}.auth-side{display:none}.auth-card{maxWidth:480px;margin:0 auto}@media(min-width:900px){.auth-page{display:flex;flex-direction:row;background-color:var(--surface2)}.auth-side{display:flex;flex:1;flex-direction:column;justify-content:center;gap:18px;background:#0a0a0a;background-image:radial-gradient(circle at 85% 15%,color-mix(in srgb,var(--u-green) 14%,transparent),transparent 45%),radial-gradient(circle at 10% 90%,rgba(16,185,129,.1),transparent 40%);color:#f5f4f0;padding:64px;min-height:100vh}.auth-main{flex:1.2;display:flex;align-items:center;justify-content:center;padding:48px 32px;background-color:var(--u-page)}.auth-card{width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;box-shadow:0 12px 32px rgba(6,95,70,.12);margin:0}.auth-hero-mobile{border-radius:16px !important}.auth-tagline-m{display:none}}`}</style>
       <aside className="auth-side african-dark">
         <Wordmark size={30} light />
         <h1 key={tab} className="quote-fade" style={{ fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 44, lineHeight: 1.08, margin: 0, color: '#f5f4f0' }}>
-          Own every week<br />of your degree.
+          Own your academic journey.
         </h1>
         <p style={{ color: 'rgba(245,244,240,.7)', fontSize: 16, margin: 0, maxWidth: 420 }}>
-          Guided notes, recall decks, quizzes and streaks — the whole semester, one story at a time.
+          Everything you need to keep up with your courses, plan your grades and stay ahead of class, in one place.
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 8 }}>
           {[
-            { t: '158 courses, week by week', s: 'Every level, both semesters, always current' },
-            { t: 'XP and streaks that pull you back', s: '+10 XP a topic · Day-2 return is the whole game' },
-            { t: 'New notes buzz you instantly', s: 'Bell, email and push the moment authors publish' },
+            { t: 'Everything for your course, together', s: 'No more chasing the class Drive, WhatsApp groups and seniors.' },
+            { t: 'Know where your CGPA is heading', s: 'Set a target and see what each course needs to get you there.' },
+            { t: 'Practice before the exam does it for you', s: 'Weekly quizzes and practice questions that show what you actually know.' },
           ].map((f) => (
             <div key={f.t} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.09)', borderRadius: 12, padding: '12px 16px' }}>
               <span style={{ width: 26, height: 26, borderRadius: 9999, background: 'color-mix(in srgb,var(--u-green) 15%,transparent)', color: 'var(--u-green)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
@@ -363,7 +363,6 @@ export default function AuthRoute() {
             </div>
           ))}
         </div>
-        <p style={{ margin: 0, fontSize: 13, color: 'rgba(245,244,240,.45)' }}><Typewriter text="Built for the ones who build" /></p>
       </aside>
       <div className="auth-main">
       <div className="auth-card">
@@ -372,10 +371,10 @@ export default function AuthRoute() {
           <Wordmark size={20} onGreen />
           <div className="eyebrow" style={{ marginTop: 10, opacity: 0.75 }}>{WELCOME_LINE}</div>
           <h1 key={tab} className="quote-fade" style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 32, marginTop: 12, lineHeight: 1.1 }}>
-            Welcome to Unify Learn
+            {tab === 'signin' ? 'Welcome back' : 'Welcome to Unify Learn'}
           </h1>
           {/* No key here: it would duplicate the h1's key, and React then leaves a stale headline behind on a tab switch. */}
-          <p style={{ marginTop: 8, opacity: 0.92, fontSize: 14, minHeight: 20 }}><Typewriter text="Built for the ones who build" /></p>
+          <p className="auth-tagline-m" style={{ marginTop: 8, opacity: 0.92, fontSize: 16, minHeight: 20, fontFamily: "'Playfair Display',Georgia,serif", fontWeight: 700 }}><Typewriter text="Own your academic journey" /></p>
         </div>
         <BoxBoy pose="wavePhone" width={96} style={{ flexShrink: 0, WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent)', maskImage: 'linear-gradient(to bottom, black 85%, transparent)' }} />
       </div>

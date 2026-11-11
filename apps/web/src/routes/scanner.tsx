@@ -125,6 +125,18 @@ export default function ScannerRoute() {
     finally { setBusy(false); }
   };
 
+  const [exporting, setExporting] = useState(false);
+  const exportCsv = async () => {
+    if (!reg?.session) return;
+    setExporting(true);
+    try { await api.attendanceExport(reg.session.id, reg.session.course); }
+    catch (e) { errorToast(e, 'download the register'); }
+    finally { setExporting(false); }
+  };
+  // With a class list the register counts against it; without one, against enrolled students.
+  const expected = reg?.listed ?? reg?.enrolled ?? 0;
+  const ofWhat = reg?.listed != null ? 'on the class list' : 'enrolled';
+
   const shell = { maxWidth: 'min(var(--shell, 480px), 720px)', margin: '0 auto', padding: '20px 16px 96px' } as const;
   const mm = String(Math.floor(left / 60)).padStart(2, '0');
   const ss = String(left % 60).padStart(2, '0');
@@ -175,14 +187,15 @@ export default function ScannerRoute() {
               {meetLink && <a className="btn btn--white btn--sm" href={meetLink} target="_blank" rel="noopener noreferrer"><Video size={14} /> Open the meeting</a>}
             </div>
             <Pill tone="amber">Closes in {mm}:{ss}</Pill>
-            <div className="t-15" style={{ marginTop: 6 }}>{reg.present.length} of {reg.enrolled} present</div>
+            <div className="t-15" style={{ marginTop: 6 }}>{reg.present.length} of {expected} {ofWhat} present</div>
             <button className="btn btn--white" disabled={busy} onClick={() => void end()} style={{ marginTop: 10 }}>End class</button>
           </Card>
         ) : (
           <PassScanner
             session={reg.session}
             presentCount={reg.present.length}
-            enrolled={reg.enrolled}
+            enrolled={expected}
+            ofWhat={ofWhat}
             closesIn={`${mm}:${ss}`}
             busy={busy}
             onEnd={() => void end()}
@@ -191,7 +204,10 @@ export default function ScannerRoute() {
         )
       ) : (
         <Card style={{ marginTop: 16, gap: 14 }}>
-          {reg?.session && <div className="t-13 muted">Last session: {reg.present.length} of {reg.enrolled} present.</div>}
+          {reg?.session && <div className="t-13 muted">Last session: {reg.present.length} of {expected} {ofWhat} present.</div>}
+          {reg && reg.listed == null && (
+            <div className="t-12 muted">No class list for this course yet. Once your class rep uploads one, the register shows who's absent and checks typed matric numbers against it.</div>
+          )}
           <div role="tablist" aria-label="Class type" style={{ display: 'flex', gap: 6 }}>
             {([['room', 'In class'], ['online', 'Online class']] as const).map(([id, name]) => (
               <button key={id} role="tab" aria-selected={mode === id} className={`chip chip--sm${mode === id ? ' chip--on' : ''}`} onClick={() => setMode(id)}>{name}</button>
@@ -215,23 +231,40 @@ export default function ScannerRoute() {
         </Card>
       )}
 
+      {reg?.session && (reg.present.length > 0 || reg.absent.length > 0) && (
+        <button className="btn btn--white btn--block" disabled={exporting} onClick={() => void exportCsv()} style={{ marginTop: 16 }}>
+          {exporting ? 'Preparing…' : 'Download register (CSV)'}
+        </button>
+      )}
+
       {reg && reg.present.length > 0 && (
         <section style={{ marginTop: 22 }}>
           <Label>Present ({reg.present.length})</Label>
           <ListCard style={{ marginTop: 8 }}>
-            {reg.present.map((p) => {
+            {reg.present.map((p, i) => {
               const pic = resolvePicture({ avatar_url: p.avatar, box_boy_persona: p.persona });
               const how = p.method === 'typed' ? `Typed in${p.by ? ` by ${p.by}` : ''}` : p.method === 'scan' ? `Scanned${p.by ? ` by ${p.by}` : ''}` : 'Online code';
               return (
                 <ListRow
-                  key={p.studentId}
+                  key={p.entryId || p.studentId || i}
                   title={p.name}
                   leading={pic.kind !== 'none' ? <img src={pic.src} alt="" width={40} height={40} loading="lazy" decoding="async" style={{ width: 40, height: 40, borderRadius: 9999, objectFit: 'cover', display: 'block' }} /> : undefined}
-                  sub={[p.matric, how].filter(Boolean).join(' · ')}
+                  sub={[p.matric, how, p.onList === false ? 'Not on the class list' : ''].filter(Boolean).join(' · ')}
                   right={<span className="t-13 muted">{new Date(p.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>}
                 />
               );
             })}
+          </ListCard>
+        </section>
+      )}
+
+      {reg?.session && reg.absent.length > 0 && (
+        <section style={{ marginTop: 22 }}>
+          <Label>{reg.session.open ? 'Not marked yet' : 'Absent'} ({reg.absent.length})</Label>
+          <ListCard style={{ marginTop: 8 }}>
+            {reg.absent.map((a) => (
+              <ListRow key={a.entryId} title={a.name} sub={[a.matric, a.joined ? (a.notTaking ? `Hasn't added ${reg.session?.course || 'this course'} on Unify` : '') : 'Not on Unify yet'].filter(Boolean).join(' · ')} />
+            ))}
           </ListCard>
         </section>
       )}
@@ -243,13 +276,15 @@ const STATUS = {
   marked: { text: 'Marked present', color: 'var(--u-green)' },
   already: { text: 'Already scanned', color: 'var(--u-amber)' },
   not_enrolled: { text: 'Not taking this course', color: 'var(--u-red, #dc2626)' },
+  not_on_list: { text: 'Not on this class list', color: 'var(--u-red, #dc2626)' },
 } as const;
 
 // The camera reads students' passes; each read marks them and shows who it was.
-function PassScanner({ session, presentCount, enrolled, closesIn, busy, onEnd, onMarked }: {
+function PassScanner({ session, presentCount, enrolled, ofWhat, closesIn, busy, onEnd, onMarked }: {
   session: AttendanceSession;
   presentCount: number;
   enrolled: number;
+  ofWhat: string;
   closesIn: string;
   busy: boolean;
   onEnd: () => void;
@@ -258,29 +293,39 @@ function PassScanner({ session, presentCount, enrolled, closesIn, busy, onEnd, o
   const videoRef = useRef<HTMLVideoElement>(null);
   const [camErr, setCamErr] = useState('');
   const [msg, setMsg] = useState('');
-  const [last, setLast] = useState<ScanResult | null>(null);
+  // Several passes can be in view at once: each is sent on its own, and the
+  // latest five results stack up (newest first).
+  const [results, setResults] = useState<(ScanResult & { key: number })[]>([]);
   const [matric, setMatric] = useState('');
   const [typing, setTyping] = useState(false);
-  const sending = useRef(false);
-  const seen = useRef<{ text: string; at: number }>({ text: '', at: 0 });
+  const inFlight = useRef(new Set<string>());
+  // Student id -> when we last heard back about them: the camera sees the same pass
+  // many times a second, and the pass changes every 30 s, so dedupe by student.
+  const done = useRef(new Map<string, number>());
+  const keyRef = useRef(0);
   const onMarkedRef = useRef(onMarked);
   onMarkedRef.current = onMarked;
 
   const send = useCallback(async (input: { token: string } | { matric: string }) => {
-    sending.current = true;
+    const id = 'token' in input ? input.token.split('.')[1] || input.token : `m:${input.matric}`;
+    if (inFlight.current.has(id)) return false;
+    inFlight.current.add(id);
     try {
       const r = await api.attendanceScan(session.id, input);
-      setLast(r);
+      done.current.set(id, Date.now());
+      setResults((rs) => [{ ...r, key: ++keyRef.current }, ...rs].slice(0, 5));
       setMsg('');
       try { navigator.vibrate?.(r.status === 'marked' ? 60 : [40, 60, 40]); } catch { /* optional */ }
       if (r.status === 'marked') onMarkedRef.current();
-      return true;
+      // Keep a typed number that isn't on the list in the box, so a typo is easy to fix.
+      return r.status !== 'not_on_list';
     } catch (e) {
-      setLast(null);
+      // A bad or expired pass would otherwise be retried on every frame; pause it briefly.
+      if ('token' in input) done.current.set(id, Date.now() - 15000);
       setMsg(describeError(e, 'mark that student'));
       return false;
     } finally {
-      sending.current = false;
+      inFlight.current.delete(id);
     }
   }, [session.id]);
 
@@ -291,10 +336,10 @@ function PassScanner({ session, presentCount, enrolled, closesIn, busy, onEnd, o
     void startQrScan(
       videoRef.current,
       (text) => {
-        // The camera reads the same pass several times a second: act once per pass.
-        const now = Date.now();
-        if (sending.current || (text === seen.current.text && now - seen.current.at < 4000)) return;
-        seen.current = { text, at: now };
+        // The camera reads the same pass several times a second: act once per student.
+        const id = text.split('.')[1] || text;
+        const at = done.current.get(id);
+        if (at && Date.now() - at < 20000) return;
         void send({ token: text });
       },
       (m) => setCamErr(m),
@@ -310,15 +355,12 @@ function PassScanner({ session, presentCount, enrolled, closesIn, busy, onEnd, o
     setTyping(false);
   };
 
-  const st = last ? STATUS[last.status] : null;
-  const pic = last ? resolvePicture({ avatar_url: last.student.avatar, box_boy_persona: last.student.persona }) : null;
-
   return (
     <Card tone="dark" style={{ alignItems: 'center', textAlign: 'center', marginTop: 16, gap: 10 }}>
       {session.startedBy && (
         <Pill tone="amber">{session.startedBy.mine ? 'You started this' : `Started by ${session.startedBy.name}${session.startedBy.role ? ` (${session.startedBy.role})` : ''}`} · shared live</Pill>
       )}
-      <div className="eyebrow" style={{ opacity: 0.7 }}>Scan each student's pass</div>
+      <div className="eyebrow" style={{ opacity: 0.7 }}>Scan passes: up to 5 at once</div>
       {camErr ? (
         <div className="t-13" style={{ color: 'var(--u-red, #dc2626)', maxWidth: 320 }}>{camErr}</div>
       ) : (
@@ -327,27 +369,42 @@ function PassScanner({ session, presentCount, enrolled, closesIn, busy, onEnd, o
           <div className="scan-frame" aria-hidden="true"><i /><i /><i /><i /><span className="scan-line" /></div>
         </div>
       )}
-      <div role="status" aria-live="polite" style={{ width: '100%', maxWidth: 320, minHeight: 64 }}>
-        {last && st && pic ? (
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center', textAlign: 'left', padding: 10, borderRadius: 14, border: `2px solid ${st.color}`, background: 'rgba(255,255,255,0.04)' }}>
-            {pic.kind !== 'none' ? (
-              <img src={pic.src} alt="" width={48} height={48} style={{ width: 48, height: 48, borderRadius: 9999, objectFit: 'cover', flexShrink: 0 }} />
-            ) : (
-              <BoxBoy pose="phoneOut" width={48} />
-            )}
-            <div style={{ minWidth: 0 }}>
-              <div className="t-15 w-6">{last.student.name}</div>
-              <div className="t-12" style={{ opacity: 0.75 }}>{[last.student.level, last.student.department].filter(Boolean).join(' · ')}</div>
-              <div className="t-13 w-6" style={{ color: st.color }}>
-                {last.status === 'not_enrolled' ? `Not taking ${last.course}` : st.text}{last.status === 'marked' && last.method === 'typed' ? ' (typed in)' : ''}
-              </div>
-            </div>
-          </div>
-        ) : (
+      <div role="status" aria-live="polite" style={{ width: '100%', maxWidth: 320, minHeight: 64, display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {(msg || !results.length) && (
           <div className="t-13" style={{ color: msg ? 'var(--u-red, #dc2626)' : undefined, opacity: msg ? 1 : 0.7 }}>
-            {msg || 'Students open My pass in Unify and hold it up to your camera.'}
+            {msg || 'Students open My pass in Unify and hold it up to your camera. A few can hold theirs up together.'}
           </div>
         )}
+        {results.map((r, i) => {
+          const st = STATUS[r.status];
+          const pic = resolvePicture({ avatar_url: r.student.avatar, box_boy_persona: r.student.persona });
+          const size = i === 0 ? 48 : 36;
+          return (
+            <div key={r.key} style={{ display: 'flex', gap: 10, alignItems: 'center', textAlign: 'left', padding: i === 0 ? 10 : 7, borderRadius: 14, border: `2px solid ${st.color}`, background: 'rgba(255,255,255,0.04)', opacity: i === 0 ? 1 : 0.85 }}>
+              {pic.kind !== 'none' ? (
+                <img src={pic.src} alt="" width={size} height={size} style={{ width: size, height: size, borderRadius: 9999, objectFit: 'cover', flexShrink: 0 }} />
+              ) : (
+                <BoxBoy pose="phoneOut" width={size} />
+              )}
+              <div style={{ minWidth: 0 }}>
+                <div className={i === 0 ? 't-15 w-6' : 't-13 w-6'}>{r.status === 'not_on_list' ? r.student.matric : r.student.name}</div>
+                {i === 0 && (
+                  <div className="t-12" style={{ opacity: 0.75 }}>
+                    {r.status === 'not_on_list'
+                      ? 'Check the number. If they belong here, the class rep can add them to the class list.'
+                      : [r.student.matric, r.student.level, r.student.department].filter(Boolean).join(' · ')}
+                  </div>
+                )}
+                <div className={i === 0 ? 't-13 w-6' : 't-12 w-6'} style={{ color: st.color }}>
+                  {r.status === 'not_enrolled' ? `Not taking ${r.course}` : st.text}{r.status === 'marked' && r.method === 'typed' ? ' (typed in)' : ''}
+                </div>
+                {r.status === 'marked' && r.onList === false && (
+                  <div className="t-12" style={{ color: 'var(--u-amber)' }}>Not on the class list (carryover or not added yet)</div>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
       <div style={{ display: 'flex', gap: 8, width: '100%', maxWidth: 320 }}>
         <input
@@ -364,7 +421,7 @@ function PassScanner({ session, presentCount, enrolled, closesIn, busy, onEnd, o
         </button>
       </div>
       <Pill tone="amber">Closes in {closesIn}</Pill>
-      <div className="t-15" style={{ marginTop: 2 }}>{presentCount} of {enrolled} present</div>
+      <div className="t-15" style={{ marginTop: 2 }}>{presentCount} of {enrolled} {ofWhat} present</div>
       <button className="btn btn--white" disabled={busy} onClick={onEnd} style={{ marginTop: 6 }}>End session</button>
     </Card>
   );

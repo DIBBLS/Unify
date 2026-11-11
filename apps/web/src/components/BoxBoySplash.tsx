@@ -3,7 +3,7 @@ import { PERSONAS, POSES } from './redesign/brand';
 import Wordmark from './Wordmark';
 
 // S01 — brand-green splash: the whole Box Boy crew pops in one after another,
-// "Unify. Learn" arrives beneath them, everyone waits a moment, then it fades
+// "Unify Learn" arrives beneath them, everyone waits a moment, then it fades
 // into sign-in. Tap to skip. Plays once per browser session; never blocks sign-in.
 const CREW = [
   ...PERSONAS.map((p) => p.img),
@@ -61,7 +61,7 @@ export function BoxBoySplash({ onDone }: { onDone?: () => void }) {
         ))}
       </div>
       <Wordmark size={30} onGreen />
-      <div className="splash-tag">Built for the ones who build</div>
+      <div className="splash-tag" style={{ fontFamily: "'Playfair Display',Georgia,serif" }}>Own your academic journey</div>
     </div>
   );
 }

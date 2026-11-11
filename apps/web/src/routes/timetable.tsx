@@ -102,7 +102,7 @@ export default function TimetableRoute() {
             <BoxBoy pose="peeking" width={110} />
             <div className="t-15 w-6">No courses yet</div>
             <div className="t-13 muted">Join your courses and their class times show up here.</div>
-            <Link to={ROUTES.findCourses} className="btn btn--amber">Add courses</Link>
+            <Link to={ROUTES.findCourses} className="btn btn--amber">Manage courses</Link>
           </Card>
         ) : daySlots.length === 0 ? (
           <Card style={{ alignItems: 'center', textAlign: 'center' }}>
@@ -110,7 +110,7 @@ export default function TimetableRoute() {
             <div className="t-15 w-6">No classes on {DAY_LONG[day]}</div>
             <div className="t-13 muted">
               {slots.length === 0
-                ? 'Your lecturers haven’t posted times yet. They’ll appear here once they do.'
+                ? 'Your class rep hasn’t posted times yet. They’ll appear here once they do.'
                 : 'Enjoy the free day, or pick another day above.'}
             </div>
           </Card>

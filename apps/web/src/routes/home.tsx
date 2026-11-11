@@ -525,7 +525,7 @@ export default function HomeRoute() {
       <div style={{ margin: '16px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800 }}>Your Courses</h2>
         <Link to="/courses/find" style={{ fontSize: 13, color: 'var(--u-good)', fontWeight: 700, textDecoration: 'none', display: 'flex', gap: 4, alignItems: 'center' }}>
-          Add courses <ChevronRight size={14} />
+          Manage courses <ChevronRight size={14} />
         </Link>
       </div>
       <div style={{ margin: '12px 16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>

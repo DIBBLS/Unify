@@ -23,14 +23,19 @@ export default function AttendancePassRoute() {
   const rawMeet = params.get('m') || '';
   const meetHref = /^https:\/\/[^\s]+$/i.test(rawMeet) ? rawMeet : '';
   const [ready, setReady] = useState(false);
+  const [waiting, setWaiting] = useState(false);
 
-  // First time? Collect name + matric, so a class rep can type you in if your phone dies.
+  // First time? Once the class rep has uploaded the class list, find yourself on it;
+  // before that, give your name + matric so a class rep can type you in if your phone dies.
   useEffect(() => {
-    api
-      .attendanceProfile()
-      .then((p) => {
-        if (!p.fullName || !p.matric) navigate(`${ROUTES.attendanceSetup}?next=${encodeURIComponent(ROUTES.attendancePass + window.location.search)}`, { replace: true });
-        else setReady(true);
+    const setup = () => navigate(`${ROUTES.attendanceSetup}?next=${encodeURIComponent(ROUTES.attendancePass + window.location.search)}`, { replace: true });
+    Promise.all([api.attendanceProfile(), api.classListMe().catch(() => null)])
+      .then(([p, cl]) => {
+        if (cl?.list) {
+          if (!cl.entry && !cl.request) return setup();
+          setWaiting(!cl.entry && !!cl.request);
+        } else if (!p.fullName || !p.matric) return setup();
+        setReady(true);
       })
       .catch(() => setReady(true));
   }, [navigate]);
@@ -41,6 +46,11 @@ export default function AttendancePassRoute() {
   return (
     <div style={shell}>
       <BackButton to={ROUTES.timetable} />
+      {waiting && !codeMode && (
+        <Link to={ROUTES.attendanceSetup} className="t-13" style={{ display: 'block', marginTop: 8, padding: 12, borderRadius: 12, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', textDecoration: 'none' }}>
+          Your class rep is checking your class-list request. Your pass still works meanwhile.
+        </Link>
+      )}
       {codeMode ? (
         <OnlineCode course={onlineCourse} meetHref={meetHref} initial={(params.get('c') || '').replace(/\D/g, '').slice(0, 6)} onPass={() => setCodeMode(false)} />
       ) : (

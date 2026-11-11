@@ -114,9 +114,9 @@ export default function ClassRoute() {
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
       <BackButton to="/courses" />
-      <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28 }}>Add courses</h1>
+      <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28 }}>Manage courses</h1>
       <p style={{ color: 'var(--text2)', marginTop: 6, fontSize: 13 }}>
-        Find courses and enroll{myLevel ? ` · ${myLevel}` : ''}
+        Add or remove your courses{myLevel ? ` · ${myLevel}` : ''}
       </p>
       <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 8 }}>
         {myLevel || 'Your level'} · {activeSemester}
