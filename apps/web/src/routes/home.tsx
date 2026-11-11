@@ -29,6 +29,76 @@ type Activity = {
 // Admin oversight: platform totals + latest signups + latest published
 // notes in one dark card. Main admin (role) gets the manage link,
 // normal admins (flag) get the view-only notes link.
+function semesterWeekOf(start?: string | null, weeks?: number | null): { week: number; total: number } {
+  const total = weeks || 12;
+  if (!start) return { week: 0, total };
+  const w = Math.floor((Date.now() - new Date(start).getTime()) / (7 * 86400000)) + 1;
+  return { week: w >= 1 && w <= total ? w : 0, total };
+}
+
+// Home course card (design S19 CourseCard), in the app's own look: the lecturer's
+// Box Boy avatar, code (+ PRIORITY for another level's course), title, lecturer,
+// an In progress / Not started / Done pill, a progress bar of topics done, and
+// where the semester is. The whole card opens the course.
+function CourseCard({ index, course, title, staff, priority, semWeek }: {
+  index: number; course: string; title: string; staff: { name: string; avatar: string; persona?: string }[]; priority: boolean; semWeek: { week: number; total: number };
+}) {
+  const [prog, setProg] = useState<{ done: number; topics: number } | null>(null);
+  useEffect(() => {
+    let gone = false;
+    api.myCourseProgress(course).then((r) => {
+      if (gone) return;
+      setProg({ done: r.weeks.reduce((s, w) => s + w.done, 0), topics: r.weeks.reduce((s, w) => s + w.topics, 0) });
+    }).catch(() => {});
+    return () => { gone = true; };
+  }, [course]);
+  const pct = prog && prog.topics ? Math.min(1, prog.done / prog.topics) : 0;
+  const state = !prog || prog.done === 0 ? 'Not started' : pct >= 1 ? 'Done' : 'In progress';
+  const lecturer = staff.map((s) => s.name).join(' · ');
+  return (
+    <Link
+      to={`/course/${encodeURIComponent(course)}`}
+      className="rise"
+      style={{ animationDelay: `${Math.min(index, 6) * 40}ms`, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: 8, textDecoration: 'none', color: 'var(--text)' }}
+    >
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center', minWidth: 0 }}>
+        <div style={{ display: 'flex', flexShrink: 0 }}>
+          {(staff.length ? staff : [{ name: '', avatar: '', persona: '' }]).map((s, si) => {
+            const pic = resolvePicture({ avatar_url: s.avatar, box_boy_persona: s.persona });
+            return (
+              <img
+                key={si}
+                src={pic.kind !== 'none' ? pic.src : PERSONAS[2].img}
+                alt=""
+                title={s.name || undefined}
+                width={44}
+                height={44}
+                loading="lazy"
+                style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--surface)', marginLeft: si === 0 ? 0 : -14, background: 'var(--u-good-tint)' }}
+              />
+            );
+          })}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <span style={{ fontWeight: 800, fontSize: 15 }}>{course}</span>
+            {priority && <span className="pill pill--amber" style={{ fontSize: 10 }}>PRIORITY</span>}
+          </div>
+          {title && <div style={{ fontSize: 12, color: 'var(--text2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</div>}
+          {lecturer && <div style={{ fontSize: 12, color: 'var(--text2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lecturer}</div>}
+        </div>
+        <span className={`pill ${state === 'Not started' ? 'pill--grey' : 'pill--good'}`} style={{ flexShrink: 0 }}>{state}</span>
+      </div>
+      <div style={{ height: 4, borderRadius: 9999, background: 'var(--border)', overflow: 'hidden' }} aria-label={`${Math.round(pct * 100)}% of published topics done`}>
+        <div style={{ width: `${pct * 100}%`, height: '100%', background: 'var(--u-green)' }} />
+      </div>
+      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text2)' }}>
+        {[semWeek.week ? `Week ${semWeek.week} of ${semWeek.total}` : '', prog && prog.topics ? `${prog.done} of ${prog.topics} topics` : 'No notes published yet'].filter(Boolean).join(' · ')}
+      </div>
+    </Link>
+  );
+}
+
 // C01 for authors: the next week to write in each course (with the lecturer's
 // materials for it, when they've shared some) and open student reports.
 function AuthorNextUp({ courses }: { courses: string[] }) {
@@ -163,7 +233,7 @@ export default function HomeRoute() {
   const setNoteError = (m: string) => { setNoteErrorState(m); if (m) toastError(m); };
   // BUG-012: catalog meta for course cards (title, weeks, lecturers) +
   // elective removal target. Hooks stay above every early return (#310).
-  const [catalog, setCatalog] = useState<Record<string, { title: string; weeks: number; lecturers: string[]; staff: { name: string; avatar: string; persona?: string }[] }>>({});
+  const [catalog, setCatalog] = useState<Record<string, { title: string; weeks: number; lecturers: string[]; levels?: string[]; staff: { name: string; avatar: string; persona?: string }[] }>>({});
   // Skeleton variant follows the last-known role on THIS device (same
   // hint as the nav) so the loader matches the real dashboard — students
   // and contributors each see their own shape, even on first paint.
@@ -219,7 +289,7 @@ export default function HomeRoute() {
         const [me, statsRes, catRes] = await Promise.all([
           api.me(),
           api.stats().catch(() => null),
-          api.courses().catch(() => [] as { code: string; title: string; weeks: number; lecturers: string[]; staff: { name: string; avatar: string; persona?: string }[] }[]),
+          api.courses().catch(() => [] as { code: string; title: string; weeks: number; lecturers: string[]; levels?: string[]; staff: { name: string; avatar: string; persona?: string }[] }[]),
         ]);
         if (!me.onboarded || !me.profile) {
           navigate('/onboarding');
@@ -248,8 +318,8 @@ export default function HomeRoute() {
         // BUG-012: one catalog fetch feeds every course card (title,
         // weeks, lecturers) — never one request per card.
         try {
-          const map: Record<string, { title: string; weeks: number; lecturers: string[]; staff: { name: string; avatar: string; persona?: string }[] }> = {};
-          for (const c of catRes) map[c.code.toUpperCase().trim()] = { title: c.title, weeks: c.weeks || 0, lecturers: c.lecturers || [], staff: c.staff || [] };
+          const map: Record<string, { title: string; weeks: number; lecturers: string[]; levels?: string[]; staff: { name: string; avatar: string; persona?: string }[] }> = {};
+          for (const c of catRes) map[c.code.toUpperCase().trim()] = { title: c.title, weeks: c.weeks || 0, lecturers: c.lecturers || [], levels: c.levels || [], staff: c.staff || [] };
           setCatalog(map);
         } catch {
           // cards fall back to codes
@@ -592,9 +662,9 @@ export default function HomeRoute() {
           Manage courses <ChevronRight size={14} />
         </Link>
       </div>
-      <div style={{ margin: '12px 16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+      <div style={{ margin: '12px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {shown.length === 0 ? (
-          <div style={{ gridColumn: '1 / -1', padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '2px solid var(--border)', borderRadius: 16 }}>
+          <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '2px solid var(--border)', borderRadius: 16 }}>
             <BoxBoy pose="peeking" width={77} />
             <div style={{ marginTop: 8 }}>No courses yet.</div>
             <Link to="/courses/find" style={{ display: 'inline-block', marginTop: 12, padding: '10px 22px', background: 'var(--u-amber)', color: 'var(--u-black)', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #c69a1a' }}>
@@ -605,49 +675,18 @@ export default function HomeRoute() {
           shown.map((c, i) => {
             const key = c.course.toUpperCase().trim();
             const meta = catalog[key];
-            const stat = courses.find((s) => s.course.toUpperCase().trim() === key);
-            const staff = (meta?.staff || []).slice(0, 3);
-            const staffNames = staff.map((s) => s.name).join(' · ');
+            const levels = meta?.levels || [];
             return (
-              <div key={c.course} className="rise" style={{ animationDelay: `${Math.min(i, 6) * 40}ms`, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 12, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', minWidth: 0 }}>
-                  {/* Box Boy avatars (review p.4): the lecturer's photo or persona, else a round
-                      Box Boy avatar (the full-body figure crops badly in a 34px circle). */}
-                  <div style={{ display: 'flex', flexShrink: 0 }}>
-                    {(staff.length ? staff : [{ name: '', avatar: '', persona: '' }]).map((s, si) => {
-                      const pic = resolvePicture({ avatar_url: s.avatar, box_boy_persona: s.persona });
-                      const src = pic.kind !== 'none' ? pic.src : PERSONAS[2].img;
-                      return (
-                        <img
-                          key={si}
-                          src={src}
-                          alt={s.name || ''}
-                          title={s.name || undefined}
-                          width={34}
-                          height={34}
-                          loading="lazy"
-                          style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--surface)', marginLeft: si === 0 ? 0 : -10, background: 'var(--u-good-tint)', flexShrink: 0 }}
-                        />
-                      );
-                    })}
-                  </div>
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <Link to={`/course/${encodeURIComponent(c.course.trim())}`} style={{ fontWeight: 800, fontSize: 14, color: 'var(--text)', textDecoration: 'none', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {c.course}
-                    </Link>
-                    {staffNames ? (
-                      <div style={{ fontSize: 11, color: 'var(--text2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{staffNames}</div>
-                    ) : null}
-                  </div>
-                </div>
-                <Link to={`/course/${encodeURIComponent(c.course.trim())}`} style={{ fontSize: 12, color: 'var(--text2)', textDecoration: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {meta?.title || 'Tap to open'}
-                </Link>
-                <div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 11, color: 'var(--text2)' }}>
-                  <BookOpen size={12} color="var(--u-good)" />
-                  <span>{meta?.weeks || 0} {meta?.weeks === 1 ? 'week' : 'weeks'}{stat && stat.topics > 0 ? ` · ${stat.topics} done` : ''}</span>
-                </div>
-              </div>
+              <CourseCard
+                key={c.course}
+                index={i}
+                course={c.course.trim()}
+                title={meta?.title || ''}
+                staff={(meta?.staff || []).slice(0, 3)}
+                // PRIORITY: a course from another level (carryover or elective).
+                priority={!!profile?.level && levels.length > 0 && !levels.includes(profile.level)}
+                semWeek={semesterWeekOf(profile?.semester_start, profile?.semester_weeks)}
+              />
             );
           })
         )}
