@@ -87,6 +87,8 @@ export default function MeRoute() {
 
   const [personaBusy, setPersonaBusy] = useState(false);
   const picture = resolvePicture(profile, meAvatar);
+  // An HOC's class is locked server-side, since it decides who their posts reach.
+  const isHoc = !!(profile as unknown as { is_hoc?: boolean } | null)?.is_hoc;
   const pickPersona = async (key: PersonaKey) => {
     setPersonaBusy(true);
     try {
@@ -296,20 +298,15 @@ export default function MeRoute() {
     setSaveError('');
     setSaveMsg('');
     try {
-      const payload: Record<string, unknown> = {
-        firstName: dName.trim(),
-        university: dUni || null,
-        faculty: dFaculty || null,
-        department: dDept || null,
-      };
-      const match = unis.find((u) => u.name === dUni);
-      if (match && UUID_RE.test(match.id)) payload.universityId = match.id;
-      const author = profile?.role === 'lecturer' || profile?.role === 'contributor';
-      if (!author && profile?.role === 'student') {
+      const payload: Record<string, unknown> = { firstName: dName.trim() };
+      if (!isHoc) {
+        payload.university = dUni || null;
+        payload.faculty = dFaculty || null;
+        payload.department = dDept || null;
+        const match = unis.find((u) => u.name === dUni);
+        if (match && UUID_RE.test(match.id)) payload.universityId = match.id;
+        // Students set their level; authors pick the level they contribute to (scopes Browse).
         if (dLevel) payload.level = dLevel;
-      } else if (dLevel) {
-        // Authors pick the level they contribute to (scopes Browse).
-        payload.level = dLevel;
       }
       payload.notifyNewNotes = dNotify;
       const res = await api.updateMe(payload);
@@ -443,6 +440,10 @@ export default function MeRoute() {
             First name
             <input value={dName} onChange={(e) => setDName(e.target.value)} style={{ width: '100%', padding: 10, marginTop: 4, border: '1px solid var(--border)', borderRadius: 10, fontSize: 14, display: 'block' }} />
           </label>
+          {isHoc ? (
+            <div style={{ fontSize: 11, color: 'var(--text2)' }}>Your class is locked while you're Head of Class. Contact Unify support to change it.</div>
+          ) : (
+          <>
           <label style={{ fontSize: 12, fontWeight: 700 }}>
             University
             <Drop
@@ -495,6 +496,8 @@ export default function MeRoute() {
                 />
               </label>
             </>
+          )}
+          </>
           )}
           {canAuthor && (
             <div style={{ fontSize: 11, color: 'var(--text2)' }}>Your contributing level and courses are assigned by an admin — they show on your dashboard.</div>

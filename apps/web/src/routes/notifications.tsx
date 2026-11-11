@@ -2,13 +2,12 @@ import { ListSkeleton } from '../components/Skeletons';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BellRing, BookOpen, Megaphone, PartyPopper, ShieldCheck, CheckCheck, Video } from 'lucide-react';
+import { BellRing, BookOpen, Megaphone, PartyPopper, ShieldCheck, CheckCheck, Video, Trash2 } from 'lucide-react';
 import BackButton from '../components/BackButton';
-import Loading from '../components/Loading';
-import Flash from '../components/Flash';
+import ConfirmModal from '../components/ConfirmModal';
 import { BoxBoy } from '../components/redesign/brand';
 import { supabaseBrowser } from '../lib/supabase';
-import { api, type NotificationItem } from '../lib/api';
+import { api, NOTIFS_CHANGED, type NotificationItem } from '../lib/api';
 import { describeError } from '../lib/errors';
 
 function iconFor(type: string) {
@@ -38,6 +37,11 @@ export default function NotificationsRoute() {
   // Toast mirror: every failure surfaces globally AND stays readable inline.
   const setError = (m: string) => { setErrorState(m); if (m) toastError(m); };
   const [marking, setMarking] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [clearing, setClearing] = useState(false);
+  // The bell lives in the layout: tell it the count changed.
+  const announceChange = () => window.dispatchEvent(new Event(NOTIFS_CHANGED));
 
   const load = async () => {
     const sb = supabaseBrowser();
@@ -82,10 +86,38 @@ export default function NotificationsRoute() {
     try {
       await api.notificationsMarkRead({ all: true });
       setNotes((prev) => prev.map((x) => ({ ...x, read: true })));
+      announceChange();
     } catch (err) {
       setError(describeError(err, 'mark everything as read'));
     } finally {
       setMarking(false);
+    }
+  };
+
+  const removeNote = async (id: string) => {
+    setDeleting(id);
+    try {
+      await api.notificationDelete(id);
+      setNotes((prev) => prev.filter((x) => x.id !== id));
+      announceChange();
+    } catch (err) {
+      setError(describeError(err, 'delete that notification'));
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  const clearAll = async () => {
+    setClearing(true);
+    try {
+      await api.notificationsClear();
+      setNotes([]);
+      announceChange();
+    } catch (err) {
+      setError(describeError(err, 'clear your notifications'));
+    } finally {
+      setClearing(false);
+      setConfirmClear(false);
     }
   };
 
@@ -94,8 +126,13 @@ export default function NotificationsRoute() {
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
       <BackButton to="/home" />
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28, flex: 1 }}>Notifications</h1>
+        {notes.length > 0 && (
+          <button onClick={() => setConfirmClear(true)} style={{ display: 'flex', gap: 4, alignItems: 'center', padding: '8px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: 'var(--text2)' }}>
+            <Trash2 size={14} /> Clear all
+          </button>
+        )}
         {notes.some((n) => !n.read) && (
           <button onClick={markAll} disabled={marking} style={{ display: 'flex', gap: 4, alignItems: 'center', padding: '8px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: 'var(--u-good)', opacity: marking ? 0.6 : 1 }}>
             <CheckCheck size={14} /> {marking ? 'Marking…' : 'Mark all read'}
@@ -112,10 +149,13 @@ export default function NotificationsRoute() {
         {notes.map((n) => {
           const Icon = iconFor(n.type);
           return (
-            <button
+            <div
               key={n.id}
+              style={{ background: n.read ? 'var(--surface)' : 'var(--green-bg)', border: `1px solid ${n.read ? 'var(--border)' : 'var(--u-good)'}`, borderRadius: 12, display: 'flex', alignItems: 'flex-start' }}
+            >
+            <button
               onClick={() => openNote(n)}
-              style={{ padding: '14px 16px', background: n.read ? 'var(--surface)' : 'var(--green-bg)', border: `1px solid ${n.read ? 'var(--border)' : 'var(--u-good)'}`, borderRadius: 12, display: 'flex', gap: 12, alignItems: 'flex-start', textAlign: 'left', width: '100%', color: 'var(--text)' }}
+              style={{ padding: '14px 4px 14px 16px', background: 'none', border: 'none', display: 'flex', gap: 12, alignItems: 'flex-start', textAlign: 'left', flex: 1, minWidth: 0, color: 'var(--text)' }}
             >
               <span style={{ width: 36, height: 36, borderRadius: 10, background: n.read ? 'var(--surface2)' : 'var(--u-amber)', color: n.read ? 'var(--text2)' : 'var(--u-black)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 {n.type === 'new_note' ? <BookOpen size={18} /> : <Icon size={18} />}
@@ -127,6 +167,15 @@ export default function NotificationsRoute() {
               </span>
               {!n.read && <span style={{ width: 10, height: 10, borderRadius: 9999, background: 'var(--u-amber)', flexShrink: 0, marginTop: 6 }} />}
             </button>
+            <button
+              onClick={() => void removeNote(n.id)}
+              disabled={deleting === n.id}
+              aria-label={`Delete notification: ${n.title || 'Update'}`}
+              style={{ padding: 14, background: 'none', border: 'none', color: 'var(--text3)', flexShrink: 0, display: 'flex', opacity: deleting === n.id ? 0.5 : 1 }}
+            >
+              <Trash2 size={16} />
+            </button>
+            </div>
           );
         })}
       </div>
@@ -135,6 +184,16 @@ export default function NotificationsRoute() {
           Back to dashboard
         </Link>
       </div>
+      {confirmClear && (
+        <ConfirmModal
+          title="Clear all notifications?"
+          body="This removes every notification from your list. It can't be undone."
+          confirmLabel="Clear all"
+          busy={clearing}
+          onConfirm={() => void clearAll()}
+          onCancel={() => setConfirmClear(false)}
+        />
+      )}
     </div>
   );
 }

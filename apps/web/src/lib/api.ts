@@ -198,6 +198,9 @@ export type TopicMeta = {
   versions: TopicVersionMeta[];
 };
 
+/** Window event: the notification list changed here, so the bell should recount. */
+export const NOTIFS_CHANGED = 'unify:notifs-changed';
+
 export type NotificationItem = {
   id: string;
   type: string;
@@ -424,6 +427,10 @@ export const api = {
     apiFetch<{ notifications: NotificationItem[]; unread: number }>(`/v1/notifications?limit=${limit}`),
   notificationsMarkRead: (payload: { ids?: string[]; all?: boolean }) =>
     apiFetch<{ ok: boolean }>('/v1/notifications/read', { method: 'POST', body: JSON.stringify(payload) }),
+  notificationDelete: (id: string) =>
+    apiFetch<{ ok: boolean }>(`/v1/notifications/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  notificationsClear: () =>
+    apiFetch<{ ok: boolean }>('/v1/notifications', { method: 'DELETE' }),
   pushSubscribe: (endpoint: string, keys: { p256dh: string; auth: string }) =>
     apiFetch<{ ok: boolean }>('/v1/push/subscribe', { method: 'POST', body: JSON.stringify({ endpoint, keys }) }),
   pushUnsubscribe: (endpoint?: string) =>

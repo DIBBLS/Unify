@@ -431,7 +431,14 @@ export default function HomeRoute() {
     const linkOk = canOpenLink(u.link, profile?.role, isAdmin);
     return { id: 'live-' + u.id, pose: u.pose, tag: 'From Unify', title: u.title, body: u.body, to: linkOk && u.link && u.link.startsWith('/') ? u.link : undefined, href: u.link && u.link.startsWith('https://') ? u.link : undefined, cta: u.cta || 'Open' };
   });
-  if (resume && resume.course) updateSlides.push({ id: 'resume', pose: 'readingStanding', tag: 'Pick up', title: `${resume.course} · Week ${resume.week}`, body: 'You stopped here. A few minutes keeps the streak alive.', to: `/learn/${encodeURIComponent(resume.course.trim())}/week/${resume.week}`, cta: 'Resume' });
+  // Continue-where-you-stopped leads the slideshow, opening the exact topic.
+  if (resume && resume.course) {
+    const q = new URLSearchParams();
+    if (resume.topic) q.set('t', String(resume.topic));
+    if (resume.lecture && resume.lecture > 1) q.set('c', String(resume.lecture));
+    const qs = q.toString();
+    updateSlides.unshift({ id: 'resume', pose: 'readingStanding', tag: 'Pick up', title: `${resume.course} · Week ${resume.week}`, body: 'You stopped here. A few minutes keeps the streak alive.', to: `/learn/${encodeURIComponent(resume.course.trim())}/week/${resume.week}${qs ? `?${qs}` : ''}`, cta: 'Resume' });
+  }
   if (shown.length === 0) updateSlides.push({ id: 'enroll', pose: 'peeking', tag: 'Start here', title: 'Add your courses', body: 'Find your department’s courses and the notes appear on Home.', to: '/courses/find', cta: 'Find courses' });
   updateSlides.push({ id: 'attend', pose: 'phoneOut', tag: 'In class', title: 'Mark your attendance', body: 'When your lecturer shows the QR code, scan it right from the app.', to: '/attendance/pass', cta: 'Scan' });
   updateSlides.push({ id: 'class', pose: 'thumbsUpPhone', tag: 'Your class', title: 'Notices from your class rep', body: 'Board posts and shared materials from your course live in Class.', to: '/class', cta: 'Open Class' });
@@ -511,19 +518,6 @@ export default function HomeRoute() {
         </div>
       )}
 
-      {resume && resume.course ? (
-        <div className="card" style={{ margin: '0 16px 12px', display: 'flex', gap: 12, alignItems: 'center', padding: 16 }}>
-          <BoxBoy pose="readingStanding" width={56} style={{ flexShrink: 0 }} />
-          <div style={{ flex: 1 }}>
-            <div className="t-15 w-7" style={{ marginBottom: 4 }}>Continue Learning</div>
-            <div className="t-13 muted">{resume.course} · Week {resume.week} · pick up where you stopped</div>
-          </div>
-          <Link to={`/learn/${encodeURIComponent(resume.course.trim())}/week/${resume.week}${(() => { const q = new URLSearchParams(); if (resume.topic) q.set('t', String(resume.topic)); if (resume.lecture && resume.lecture > 1) q.set('c', String(resume.lecture)); const s = q.toString(); return s ? `?${s}` : ''; })()}`} className="btn btn--amber" style={{ whiteSpace: 'nowrap' }}>
-            Resume
-          </Link>
-        </div>
-      ) : null}
-
       {isAdmin && platform && (
         <OversightCard platform={platform} activity={activity} mainAdmin={profile?.role === 'admin'} />
       )}
@@ -584,7 +578,7 @@ export default function HomeRoute() {
                 </Link>
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 11, color: 'var(--text2)' }}>
                   <BookOpen size={12} color="var(--u-good)" />
-                  <span>{meta?.weeks || 0} weeks{stat && stat.topics > 0 ? ` · ${stat.topics} done` : ''}</span>
+                  <span>{meta?.weeks || 0} {meta?.weeks === 1 ? 'week' : 'weeks'}{stat && stat.topics > 0 ? ` · ${stat.topics} done` : ''}</span>
                   <button
                     onClick={() => setConfirmUnenroll(c.course)}
                     aria-label={`Remove ${c.course} from your courses`}

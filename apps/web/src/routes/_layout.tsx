@@ -7,7 +7,7 @@ import { supabaseBrowser, touchActivity, isSessionExpired, expireSession } from 
 import { pushSupported, enablePush } from '../lib/push';
 import ConfirmModal from '../components/ConfirmModal';
 import Wordmark from '../components/Wordmark';
-import { api, type Profile } from '../lib/api';
+import { api, NOTIFS_CHANGED, type Profile } from '../lib/api';
 import { PICTURE_EVENT, resolvePicture } from '../lib/picture';
 import { recordNav } from '../lib/navHistory';
 import { useFocusMode } from '../lib/focus';
@@ -313,6 +313,7 @@ export default function Layout() {
     };
     window.addEventListener('focus', onFocus);
     window.addEventListener('online', onFocus);
+    window.addEventListener(NOTIFS_CHANGED, onFocus);
     document.addEventListener('visibilitychange', onVisible);
     try {
       if ('serviceWorker' in navigator) {
@@ -326,6 +327,7 @@ export default function Layout() {
       clearInterval(t);
       window.removeEventListener('focus', onFocus);
       window.removeEventListener('online', onFocus);
+      window.removeEventListener(NOTIFS_CHANGED, onFocus);
       document.removeEventListener('visibilitychange', onVisible);
       try {
         if ('serviceWorker' in navigator) {

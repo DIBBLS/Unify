@@ -53,32 +53,9 @@ export default function AuthRoute() {
     try {
       const me = await api.me();
       log.info('session', `profile check ok (onboarded=${me.onboarded})`);
-      if (!me.onboarded) {
-        navigate('/onboarding');
-        return;
-      }
-      // Unread first: coming back to waiting notifications opens them
-      // before anything else (dashboard/resume can wait one tap).
-      try {
-        const n = await api.notifications(1);
-        if ((n.unread || 0) > 0) {
-          navigate('/notifications');
-          return;
-        }
-      } catch {
-        // notification check flaked — fall through to resume/dashboard
-      }
-      // Exact restore is a student path: authors/admins land on dashboard.
-      if (me.resume?.course && me.profile?.role === 'student') {
-        const c = encodeURIComponent(me.resume.course.trim());
-        const q = new URLSearchParams();
-        if (me.resume.topic) q.set('t', String(me.resume.topic));
-        if (me.resume.lecture && me.resume.lecture > 1) q.set('c', String(me.resume.lecture));
-        const qs = q.toString();
-        navigate(`/learn/${c}/week/${me.resume.week}${qs ? `?${qs}` : ''}`, { replace: true });
-        return;
-      }
-      navigate('/home');
+      // Replace, never push: /auth forwards signed-in users straight back,
+      // so leaving it in history would trap the Back button.
+      navigate(me.onboarded ? '/home' : '/onboarding', { replace: true });
     } catch {
       log.error('session', 'profile check failed (API unreachable?)');
       setWelcomeBack(false);
@@ -183,7 +160,6 @@ export default function AuthRoute() {
       return;
     }
     const form = e.currentTarget;
-    const name = (form.elements.namedItem('name') as HTMLInputElement).value.trim();
     const email = (form.elements.namedItem('email') as HTMLInputElement).value.trim();
     const password = (form.elements.namedItem('new-password') as HTMLInputElement).value;
     const confirm = (form.elements.namedItem('confirm-password') as HTMLInputElement).value;
@@ -195,7 +171,6 @@ export default function AuthRoute() {
         email,
         password,
         options: {
-          data: { display_name: name },
           emailRedirectTo: `${window.location.origin}/auth?verified=1`,
         },
       });
@@ -362,7 +337,7 @@ export default function AuthRoute() {
     <>
       <BoxBoySplash onDone={() => setShowSplash(false)} />
       <div className="auth-page">
-      <style>{`.auth-page{min-height:100vh;background:var(--u-page)}.auth-side{display:none}.auth-card{maxWidth:480px;margin:0 auto}@media(min-width:900px){.auth-page{display:flex;flex-direction:row;background:var(--surface2)}.auth-side{display:flex;flex:1;flex-direction:column;justify-content:center;gap:18px;background:#0a0a0a;background-image:radial-gradient(circle at 85% 15%,color-mix(in srgb,var(--u-green) 14%,transparent),transparent 45%),radial-gradient(circle at 10% 90%,rgba(16,185,129,.1),transparent 40%);color:#f5f4f0;padding:64px;min-height:100vh}.auth-main{flex:1.2;display:flex;align-items:center;justify-content:center;padding:48px 32px;background:var(--u-page)}.auth-card{width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;box-shadow:0 12px 32px rgba(6,95,70,.12);margin:0}.auth-hero-mobile{border-radius:16px !important}}`}</style>
+      <style>{`.auth-page{min-height:100vh;background-color:var(--u-page)}.auth-side{display:none}.auth-card{maxWidth:480px;margin:0 auto}@media(min-width:900px){.auth-page{display:flex;flex-direction:row;background-color:var(--surface2)}.auth-side{display:flex;flex:1;flex-direction:column;justify-content:center;gap:18px;background:#0a0a0a;background-image:radial-gradient(circle at 85% 15%,color-mix(in srgb,var(--u-green) 14%,transparent),transparent 45%),radial-gradient(circle at 10% 90%,rgba(16,185,129,.1),transparent 40%);color:#f5f4f0;padding:64px;min-height:100vh}.auth-main{flex:1.2;display:flex;align-items:center;justify-content:center;padding:48px 32px;background-color:var(--u-page)}.auth-card{width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;box-shadow:0 12px 32px rgba(6,95,70,.12);margin:0}.auth-hero-mobile{border-radius:16px !important}}`}</style>
       <aside className="auth-side african-dark">
         <Wordmark size={30} light />
         <h1 key={tab} className="quote-fade" style={{ fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 44, lineHeight: 1.08, margin: 0, color: '#f5f4f0' }}>
@@ -393,15 +368,16 @@ export default function AuthRoute() {
       <div className="auth-main">
       <div className="auth-card">
       <div className="auth-hero-mobile african-band" style={{ background: 'var(--u-green)', color: 'var(--u-black)', padding: 28, borderRadius: '0 0 32px 32px', display: 'flex', gap: 16, alignItems: 'center' }}>
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
           <Wordmark size={20} onGreen />
           <div className="eyebrow" style={{ marginTop: 10, opacity: 0.75 }}>{WELCOME_LINE}</div>
           <h1 key={tab} className="quote-fade" style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 32, marginTop: 12, lineHeight: 1.1 }}>
             Welcome to Unify Learn
           </h1>
-          <p key={tab} style={{ marginTop: 8, opacity: 0.92, fontSize: 14, minHeight: 20 }}><Typewriter text="Built for the ones who build" /></p>
+          {/* No key here: it would duplicate the h1's key, and React then leaves a stale headline behind on a tab switch. */}
+          <p style={{ marginTop: 8, opacity: 0.92, fontSize: 14, minHeight: 20 }}><Typewriter text="Built for the ones who build" /></p>
         </div>
-        <BoxBoy pose="wavePhone" width={96} style={{ WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent)', maskImage: 'linear-gradient(to bottom, black 85%, transparent)' }} />
+        <BoxBoy pose="wavePhone" width={96} style={{ flexShrink: 0, WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent)', maskImage: 'linear-gradient(to bottom, black 85%, transparent)' }} />
       </div>
       <div style={{ padding: 20, flex: 1 }}>
         <div style={{ display: 'flex', gap: 4, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 9999, padding: 4, marginBottom: 20 }}>
@@ -481,10 +457,6 @@ export default function AuthRoute() {
 
         {tab === 'signup' && (
           <form onSubmit={handleSignUp} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <label style={{ fontSize: 12, fontWeight: 700 }}>
-              Full Name
-              <input name="name" required placeholder="Your full name" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid var(--border)', borderRadius: 12, display: 'block' }} />
-            </label>
             <label style={{ fontSize: 12, fontWeight: 700 }}>
               Email
               <input name="email" type="email" required placeholder="you@email.com" style={{ width: '100%', padding: 12, marginTop: 6, border: '1px solid var(--border)', borderRadius: 12, display: 'block' }} />
