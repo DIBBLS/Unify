@@ -81,8 +81,8 @@ export default function HocDashboardRoute() {
         </div>
       </div>
 
-      {isHoc && (
-        <Link to={ROUTES.scanner} className="btn btn--amber btn--block" style={{ marginTop: 16 }}>Take attendance (show QR)</Link>
+      {(isHoc || isAdmin) && (
+        <Link to={ROUTES.classList} className="btn btn--white btn--block" style={{ marginTop: 16 }}>Class list</Link>
       )}
       {(isHoc || isAdmin) && (
         <Card style={{ marginTop: 16, gap: 10 }}>
@@ -108,7 +108,6 @@ export default function HocDashboardRoute() {
             <div className="t-13 muted">
               {meta ? 'Posts from your Head of Class appear here.' : 'Set your department and level in Me to see your class board.'}
             </div>
-            {!isHoc && meta && <Link to={ROUTES.hocRequest} className="btn btn--white btn--sm">Become your class HOC</Link>}
           </Card>
         ) : (
           posts.map((p) => (

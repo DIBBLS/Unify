@@ -10,6 +10,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import Drop from '../components/Drop';
 import { useTheme } from '../hooks/useTheme';
 import { APP_VERSION } from '../lib/version';
+import { ROUTES } from '../lib/routes';
 import Wordmark from '../components/Wordmark';
 import { pushSupported, pushState, enablePush, disablePush, type PushState } from '../lib/push';
 import { supabaseBrowser, clearRememberSession } from '../lib/supabase';
@@ -69,8 +70,6 @@ export default function MeRoute() {
   const [error, setErrorState] = useState('');
   // Toast mirror: every failure surfaces globally AND stays readable inline.
   const setError = (m: string) => { setErrorState(m); if (m) toastError(m); };
-  const [newEmail, setNewEmail] = useState('');
-  const [emailMsg, setEmailMsg] = useState('');
   // Inline edit (no onboarding detour): role + semester stay locked.
   const [editing, setEditing] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
@@ -226,32 +225,6 @@ export default function MeRoute() {
     })();
   }, [navigate]);
 
-  const handleEmailChange = async () => {
-    setEmailMsg('');
-    const client = supabaseBrowser();
-    if (!client) {
-      setEmailMsg('Something went wrong. Please reload and try again.');
-      return;
-    }
-    const next = newEmail.trim().toLowerCase();
-    if (!next || !next.includes('@')) {
-      setEmailMsg('Enter a valid email address.');
-      return;
-    }
-    try {
-      const { error: err } = await client.auth.updateUser({ email: next });
-      if (err) {
-        setEmailMsg(describeError(err, 'change your email'));
-        return;
-      }
-      setEmailMsg(`Confirmation sent to ${next}. Tap the link there to finish.`);
-      setNewEmail('');
-      // The new address is unconfirmed until that link is tapped.
-      setEmailConfirmed(false);
-    } catch (err) {
-      setEmailMsg(describeError(err, 'change your email'));
-    }
-  };
 
   const resendVerify = async () => {
     const client = supabaseBrowser();
@@ -421,16 +394,20 @@ export default function MeRoute() {
         )}
       </div>
 
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 8 }}>
-        <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 6 }}>Change email</div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <input value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="new@email.com" style={{ flex: 1, minWidth: 0, padding: 10, border: '1px solid var(--border)', borderRadius: 10, fontSize: 14 }} />
-          <button onClick={handleEmailChange} style={{ padding: '10px 16px', borderRadius: 10, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '3px solid #c69a1a', fontWeight: 800, fontSize: 13 }}>
-            Send
-          </button>
-        </div>
-        {emailMsg && <div style={{ fontSize: 12, color: 'var(--u-good)', marginTop: 6 }}>{emailMsg}</div>}
-      </div>
+      {isStudent && (
+        <Link
+          to={isHoc ? ROUTES.classList : ROUTES.hocRequest}
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 8, color: 'var(--text)', textDecoration: 'none' }}
+        >
+          <span>
+            <span style={{ display: 'block', fontSize: 13, fontWeight: 700 }}>{isHoc ? 'Class list' : 'Are you your class rep?'}</span>
+            <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>
+              {isHoc ? 'Upload names and matric numbers, answer requests' : 'Ask to manage your class board, class list and attendance'}
+            </span>
+          </span>
+          <span aria-hidden="true" style={{ color: 'var(--text3)' }}>›</span>
+        </Link>
+      )}
       {saveMsg && <Flash tone="success" message={saveMsg} onDismiss={() => setSaveMsg('')} />}
 
       {editing && (

@@ -258,12 +258,72 @@ export type CgpaData = { cgpaCurrent: number | null; cgpaTarget: number | null; 
 export type Material = { id: string; week: number; type: 'slides' | 'notes' | 'past-paper'; title: string; url: string; createdAt: string; mine: boolean };
 export type AttendanceRegister = {
   session: AttendanceSession | null;
-  present: { studentId: string; at: string; name: string; matric: string; avatar: string; persona: string; method: 'scan' | 'typed' | 'code'; by: string }[];
+  // onList: null until the class rep uploads a class list for this course.
+  present: { studentId: string; entryId: string; at: string; name: string; matric: string; avatar: string; persona: string; method: 'scan' | 'typed' | 'code'; by: string; onList: boolean | null }[];
+  // Everyone on the class list not marked yet (empty without a class list).
+  absent: { entryId: string; name: string; matric: string; joined: boolean; notTaking: boolean }[];
+  listed: number | null;
+  lists: string[];
   enrolled: number;
 };
 export type StudentCard = { id: string; name: string; matric: string; level: string; department: string; avatar: string; persona: string };
 export type AttendancePass = { token: string; rotatesAt: string; rotateSeconds: number; student: StudentCard };
-export type ScanResult = { status: 'marked' | 'already' | 'not_enrolled'; method?: 'scan' | 'typed'; course: string; student: StudentCard };
+export type ScanResult = { status: 'marked' | 'already' | 'not_enrolled' | 'not_on_list'; method?: 'scan' | 'typed'; course: string; student: StudentCard; onList?: boolean | null };
+
+// Class lists (HOC uploads, students claim their entry).
+export type ClassListMe = {
+  list: { department: string; level: string; size: number } | null;
+  entry: { name: string; matric: string; method: string; verifiedEmail: boolean } | null;
+  request: { matric: string; reason: 'not_on_list' | 'already_claimed'; at: string } | null;
+  emailPending: { email: string } | null;
+  emailFormat: string;
+};
+export type ClaimOutcome =
+  | { status: 'claimed'; entry: { name: string; matric: string } }
+  | { status: 'sent_to_hoc'; reason: 'not_on_list' | 'already_claimed' }
+  | { status: 'not_found'; reason: 'not_on_list' | 'already_claimed' }
+  | { status: 'no_list' };
+export type ClassListEntry = { id: string; name: string; matric: string; claimed: boolean; claimedBy: string; claimMethod: string; verifiedEmail: boolean; removed: boolean };
+export type ClassListClaim = {
+  id: string; reason: 'not_on_list' | 'already_claimed'; matric: string; name: string; account: string; accountEmail: string;
+  verifiedEmail: string; note: string; at: string; entry: { id: string; name: string; claimedBy: string } | null;
+};
+export type ClassListLog = { id: string; action: string; detail: Record<string, unknown>; at: string; by: string };
+export type ClassListData = {
+  list: { id: string; department: string; level: string; institution: string; updatedAt: string } | null;
+  class: { department: string; level: string; institution: string };
+  entries: ClassListEntry[];
+  claims: ClassListClaim[];
+  log: ClassListLog[];
+};
+export type ParsedClassRow = {
+  line: number; name: string; matric: string;
+  issue?: 'duplicate' | 'no_name' | 'odd_matric';
+  existing: { name: string; removed: boolean } | null;
+};
+export type ClassListParse = { rows: ParsedClassRow[]; problems: { line: number; text: string; issue: 'no_matric' }[]; skipped: number; source: string };
+
+// Authenticated file download (CSV exports): fetch with the session token, save as a file.
+export async function apiDownload(path: string, filename: string): Promise<void> {
+  const token = await sessionToken();
+  const res = await fetch(`${API_URL}${path}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  if (!res.ok) {
+    let msg = '';
+    try { msg = ((await res.json()) as { error?: string }).error || ''; } catch { /* not JSON */ }
+    const err = new Error(`API ${res.status}${msg ? `: ${msg}` : ''}`);
+    (err as { status?: number }).status = res.status;
+    throw err;
+  }
+  const name = /filename="([^"]+)"/.exec(res.headers.get('content-disposition') || '')?.[1] || filename;
+  const url = URL.createObjectURL(await res.blob());
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
 
 export type PerfPoint = { t: number; n: number; e4: number; e5: number; p50: number; p95: number; max: number };
 export type PerfSnapshot = {
@@ -606,5 +666,29 @@ export const api = {
     apiFetch<ScanResult>(`/v1/attendance/sessions/${sessionId}/scan`, { method: 'POST', body: JSON.stringify(input) }),
   attendanceMine: () =>
     apiFetch<{ courses: { course: string; held: number; attended: number }[]; recent: { course: string; at: string }[] }>('/v1/attendance/mine'),
+  attendanceExport: (sessionId: string, course: string) =>
+    apiDownload(`/v1/attendance/sessions/${sessionId}/register.csv`, `${course.replace(/\s+/g, '')}-register.csv`),
+  // Class lists: student side
+  classListMe: () => apiFetch<ClassListMe>('/v1/class-list/me'),
+  classListClaim: (matric: string, ask?: { fullName: string; note?: string }) =>
+    apiFetch<ClaimOutcome>('/v1/class-list/claim', { method: 'POST', body: JSON.stringify({ matric, ...(ask ? { ...ask, askHoc: true } : {}) }) }),
+  classListCancelRequest: () => apiFetch<{ ok: boolean }>('/v1/class-list/request', { method: 'DELETE' }),
+  classListEmailStart: (email: string) =>
+    apiFetch<{ ok: boolean; email: string; matric: string }>('/v1/class-list/verify-email/start', { method: 'POST', body: JSON.stringify({ email }) }),
+  classListEmailConfirm: (code: string, fullName?: string) =>
+    apiFetch<ClaimOutcome & { verified: boolean; matric: string }>('/v1/class-list/verify-email/confirm', { method: 'POST', body: JSON.stringify({ code, fullName }) }),
+  // Class lists: HOC side
+  classList: () => apiFetch<ClassListData>('/v1/class-list'),
+  classListParse: (input: { text: string } | { filename: string; data: string }) =>
+    apiFetch<ClassListParse>('/v1/class-list/parse', { method: 'POST', body: JSON.stringify(input) }, 0, 60000),
+  classListSave: (rows: { name: string; matric: string }[], source?: string) =>
+    apiFetch<{ ok: boolean; added: number; restored: number; unchanged: number; nameDiffers: number; linked: number }>('/v1/class-list/entries', { method: 'POST', body: JSON.stringify({ rows, source }) }, 0, 60000),
+  classListEdit: (id: string, patch: { name?: string; matric?: string }) =>
+    apiFetch<{ ok: boolean }>(`/v1/class-list/entries/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
+  classListRemove: (id: string) => apiFetch<{ ok: boolean }>(`/v1/class-list/entries/${id}`, { method: 'DELETE' }),
+  classListRestore: (id: string) => apiFetch<{ ok: boolean }>(`/v1/class-list/entries/${id}/restore`, { method: 'POST', body: '{}' }),
+  classListUnclaim: (id: string) => apiFetch<{ ok: boolean }>(`/v1/class-list/entries/${id}/unclaim`, { method: 'POST', body: '{}' }),
+  classListAnswer: (id: string, action: 'approve' | 'reject', note?: string) =>
+    apiFetch<{ ok: boolean }>(`/v1/class-list/claims/${id}`, { method: 'POST', body: JSON.stringify({ action, note }) }),
 };
 

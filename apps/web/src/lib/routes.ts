@@ -36,6 +36,7 @@ export const ROUTES = {
   scanner: '/attendance/scanner',
   hoc: '/hoc',
   hocRequest: '/hoc/request',
+  classList: '/class-list',
   onlineClass: '/online-class',
 
   admin: '/admin',

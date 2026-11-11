@@ -16,7 +16,7 @@ const toMin = (hhmm: string) => {
 };
 
 const ACTIONS = [
-  { to: ROUTES.scanner, icon: ClipboardCheck, title: 'Take attendance', sub: 'Open a session and share the code', lecturerOnly: true },
+  { to: ROUTES.scanner, icon: ClipboardCheck, title: 'Take attendance', sub: 'Open a session and scan students’ passes', lecturerOnly: true },
   { to: ROUTES.myClasses, icon: CalendarDays, title: 'My classes', sub: 'Timetable slots and live roster' },
   { to: ROUTES.studio, icon: PenTool, title: 'Studio', sub: 'Write and publish notes' },
   { to: ROUTES.browse, icon: Search, title: 'Browse content', sub: 'Everything at your level' },

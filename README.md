@@ -37,6 +37,7 @@ Roles lock at assignment and are enforced on the server, not just hidden in the 
 ## Features worth knowing about
 
 - **Attendance:** each student shows My pass, a QR that changes every 30 seconds, and the class rep or lecturer scans it. A student with a dead phone is typed in by matric number (marked "typed in"). Online classes share a 6-digit code in the meeting chat instead. No photos are taken. One shared session per course, so a lecturer and class rep are always in step.
+- **Class lists:** the class rep uploads names and matric numbers (Excel, Word, PDF, CSV or pasted). Students claim their own entry once (by matric; LASU email verification optional). Typed matrics must be on the list, the register shows who's absent and exports as CSV, and problems go to the class rep's inbox. Only the class's reps see the list.
 - **Notes:** versioned weekly notes, lectures 1 to 3, recall cards, pulse checks, an end-of-week quiz with timer and pass mark, read-aloud, offline saving. Math renders with KaTeX first and MathJax as a fallback.
 - **Studio:** manual mode edits one section at a time (week, each topic, each part, recall, pulse check, quiz). An equation builder opens as a full overlay.
 - **CGPA planner:** current CGPA and target are strict decimals from 0.00 to 5.00 (two places at most), checked in the app and on the server.

@@ -284,7 +284,8 @@ export default function OnboardingRoute() {
               { label: 'First Class', val: 4.5 },
               { label: '2nd Class Upper', val: 3.5 },
               { label: '2nd Class Lower', val: 2.4 },
-              { label: 'Pass', val: 1.5 },
+              { label: 'Third Class', val: 1.5 },
+              { label: 'Pass', val: 1.0 },
             ].map((t) => (
               <button key={t.label} onClick={() => setGradTarget(t.val)} style={{ padding: 14, border: `1px solid ${gradTarget === t.val ? 'var(--u-amber)' : 'var(--border)'}`, borderRadius: 12, background: gradTarget === t.val ? 'var(--u-good-tint)' : 'var(--surface)' }}>
                 {t.label} — {t.val}

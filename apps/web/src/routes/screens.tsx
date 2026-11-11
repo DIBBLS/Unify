@@ -18,7 +18,7 @@ const GROUPS: { title: string; entries: Entry[] }[] = [
       { path: ROUTES.home, name: 'Home', note: 'Hero, CGPA target, resume, activity', roles: ['any'] },
       { path: ROUTES.timetable, name: 'Timetable', note: 'This week’s classes across your courses', roles: ['student'] },
       { path: ROUTES.class, name: 'Class', note: 'Your class board, attendance and Meet links', roles: ['student'] },
-      { path: ROUTES.findCourses, name: 'Add courses', note: 'Search and enroll in courses', roles: ['student'] },
+      { path: ROUTES.findCourses, name: 'Manage courses', note: 'Search, add and remove courses', roles: ['student'] },
       { path: ROUTES.me, name: 'Me', note: 'Profile, persona, theme, account', roles: ['any'] },
     ],
   },
@@ -35,13 +35,14 @@ const GROUPS: { title: string; entries: Entry[] }[] = [
   {
     title: 'Attendance & classes',
     entries: [
-      { path: ROUTES.attendanceSetup, name: 'Attendance details', note: 'Name and matric number, once', roles: ['student'] },
+      { path: ROUTES.attendanceSetup, name: 'Attendance details', note: 'Find yourself on the class list, once', roles: ['student'] },
       { path: ROUTES.attendancePass, name: 'My pass', note: 'Rotating QR the class rep or lecturer scans', roles: ['student'] },
       { path: ROUTES.attendanceMine, name: 'My attendance', note: 'Your record', roles: ['student'] },
       { path: ROUTES.onlineClass, name: 'Online class', note: 'Coming soon', roles: ['any'] },
       { path: ROUTES.hocRequest, name: 'Become HOC', note: 'Request head-of-class', roles: ['student'] },
       { path: ROUTES.hoc, name: 'Class board', note: 'HOC posts for your department and level', roles: ['student'] },
-      { path: ROUTES.scanner, name: 'Take attendance', note: 'Open a session, share the code', roles: ['lecturer'] },
+      { path: ROUTES.classList, name: 'Class list', note: 'Class rep uploads names and matric numbers; answers requests', roles: ['student'] },
+      { path: ROUTES.scanner, name: 'Take attendance', note: 'Open a session, scan passes, see who is absent', roles: ['lecturer'] },
     ],
   },
   {

@@ -119,7 +119,7 @@ export default function CoursesRoute() {
         <span style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--u-green-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Search size={18} color="var(--u-green)" />
         </span>
-        <span className="t-14 w-7">Add courses to enroll</span>
+        <span className="t-14 w-7">Manage courses</span>
       </Link>
       {activity.length > 0 && (
         <div style={{ marginTop: 12, padding: 14, background: 'var(--u-warn-tint)', border: '1px solid #fde68a', borderRadius: 12 }}>
@@ -136,7 +136,7 @@ export default function CoursesRoute() {
             <BoxBoy pose="peeking" width={72} />
             <div className="t-15" style={{ marginTop: 12 }}>No enrolled courses yet.</div>
             <Link to="/courses/find" className="btn btn--amber" style={{ marginTop: 12, display: 'inline-block' }}>
-              Add courses
+              Manage courses
             </Link>
           </div>
         )}
