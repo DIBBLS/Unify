@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Copy, Video } from 'lucide-react';
-import { QRCodeSVG } from 'qrcode.react';
-import { api, type AttendanceRegister } from '../lib/api';
-import { errorToast } from '../lib/errors';
+import { api, type AttendanceRegister, type AttendanceSession, type ScanResult } from '../lib/api';
+import { errorToast, describeError } from '../lib/errors';
+import { startQrScan } from '../lib/qrscan';
+import { resolvePicture } from '../lib/picture';
 import { toastSuccess } from '../lib/toast';
 import MeetLinkField from '../components/MeetLinkField';
 import { isHttpsLink } from '../lib/meet';
@@ -13,10 +14,10 @@ import Drop from '../components/Drop';
 import { BoxBoy } from '../components/redesign/brand';
 import { Card, Display, Label, ListCard, ListRow, Pill } from '../components/redesign/ui';
 
-// Take attendance (lecturer): open a session for a course, show the rotating
-// 6-digit code + QR (a new one every 30s, so a photo of the screen goes stale),
-// watch students tick in live, close when class is settled.
-// Route kept at /attendance/scanner so existing links keep working.
+// Take attendance (lecturer or class rep): open a session for a course, then
+// scan each student's pass (My pass in their app). A student with a dead phone
+// is typed in by matric number. Online classes share a 6-digit code in the
+// meeting chat instead. Route kept at /attendance/scanner so links keep working.
 const MINUTES = [5, 10, 15, 30, 60];
 const ONLINE_MINUTES = [60, 90, 120, 180];
 
@@ -160,12 +161,12 @@ export default function ScannerRoute() {
             <div style={{ fontSize: 44, fontWeight: 900, letterSpacing: 8, fontFamily: 'var(--font-body)', color: 'var(--u-green)' }} aria-label="Attendance code">
               {reg.session.code}
             </div>
-            <div className="t-13" style={{ opacity: 0.75 }}>Students open Unify, tap Mark attendance and type it. New code in {Math.max(1, Math.ceil(rotateIn / 60))} min.</div>
+            <div className="t-13" style={{ opacity: 0.75 }}>Students open My pass in Unify, tap "Online class? Enter the code" and type it. New code in {Math.max(1, Math.ceil(rotateIn / 60))} min.</div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center', marginTop: 6 }}>
               <button
                 className="btn btn--amber btn--sm"
                 onClick={() => {
-                  const msg = `Unify attendance code for ${reg.session?.course}: ${reg.session?.code}. Open Unify, tap Mark attendance, take the selfie and type this code. It works for the next ${Math.max(1, Math.ceil(rotateIn / 60))} minutes.`;
+                  const msg = `Unify attendance code for ${reg.session?.course}: ${reg.session?.code}. Open Unify, tap My pass, then "Online class? Enter the code" and type this code. It works for the next ${Math.max(1, Math.ceil(rotateIn / 60))} minutes.`;
                   void navigator.clipboard.writeText(msg).then(() => toastSuccess('Copied. Paste it in the meeting chat.')).catch(() => errorToast(new Error('Copying was blocked. Select the code and copy it yourself.'), 'copy the code'));
                 }}
               >
@@ -178,23 +179,15 @@ export default function ScannerRoute() {
             <button className="btn btn--white" disabled={busy} onClick={() => void end()} style={{ marginTop: 10 }}>End class</button>
           </Card>
         ) : (
-          <Card tone="dark" style={{ alignItems: 'center', textAlign: 'center', marginTop: 16 }}>
-          {reg.session.startedBy && (
-            <Pill tone="amber">{reg.session.startedBy.mine ? 'You started this' : `Started by ${reg.session.startedBy.name}${reg.session.startedBy.role ? ` (${reg.session.startedBy.role})` : ''}`} · shared live</Pill>
-          )}
-          <div className="eyebrow" style={{ opacity: 0.7 }}>Students scan this QR in the app</div>
-          <div style={{ background: '#fff', padding: 12, borderRadius: 16, lineHeight: 0 }} aria-label="Attendance QR code">
-            <QRCodeSVG value={`${window.location.origin}/attendance/pass?c=${reg.session.code}`} size={260} level="M" />
-          </div>
-          <div className="t-13" style={{ opacity: 0.7 }}>QR changes in {rotateIn}s</div>
-          <div className="t-12" style={{ opacity: 0.6, marginTop: 2 }}>No camera? Students can type this code instead</div>
-          <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: 6, fontFamily: 'var(--font-body)', color: 'var(--u-green)' }} aria-label="Attendance code">
-            {reg.session.code}
-          </div>
-          <Pill tone="amber">Closes in {mm}:{ss}</Pill>
-          <div className="t-15" style={{ marginTop: 6 }}>{reg.present.length} of {reg.enrolled} present</div>
-          <button className="btn btn--white" disabled={busy} onClick={() => void end()} style={{ marginTop: 10 }}>End session</button>
-        </Card>
+          <PassScanner
+            session={reg.session}
+            presentCount={reg.present.length}
+            enrolled={reg.enrolled}
+            closesIn={`${mm}:${ss}`}
+            busy={busy}
+            onEnd={() => void end()}
+            onMarked={() => void refresh()}
+          />
         )
       ) : (
         <Card style={{ marginTop: 16, gap: 14 }}>
@@ -226,18 +219,153 @@ export default function ScannerRoute() {
         <section style={{ marginTop: 22 }}>
           <Label>Present ({reg.present.length})</Label>
           <ListCard style={{ marginTop: 8 }}>
-            {reg.present.map((p) => (
-              <ListRow
-                key={p.studentId}
-                title={p.name}
-                leading={p.photo ? <img src={p.photo} alt="" width={40} height={40} loading="lazy" decoding="async" style={{ width: 40, height: 40, borderRadius: 9999, objectFit: 'cover', display: 'block' }} /> : undefined}
-                sub={p.matric || undefined}
-                right={<span className="t-13 muted">{new Date(p.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>}
-              />
-            ))}
+            {reg.present.map((p) => {
+              const pic = resolvePicture({ avatar_url: p.avatar, box_boy_persona: p.persona });
+              const how = p.method === 'typed' ? `Typed in${p.by ? ` by ${p.by}` : ''}` : p.method === 'scan' ? `Scanned${p.by ? ` by ${p.by}` : ''}` : 'Online code';
+              return (
+                <ListRow
+                  key={p.studentId}
+                  title={p.name}
+                  leading={pic.kind !== 'none' ? <img src={pic.src} alt="" width={40} height={40} loading="lazy" decoding="async" style={{ width: 40, height: 40, borderRadius: 9999, objectFit: 'cover', display: 'block' }} /> : undefined}
+                  sub={[p.matric, how].filter(Boolean).join(' · ')}
+                  right={<span className="t-13 muted">{new Date(p.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>}
+                />
+              );
+            })}
           </ListCard>
         </section>
       )}
     </div>
+  );
+}
+
+const STATUS = {
+  marked: { text: 'Marked present', color: 'var(--u-green)' },
+  already: { text: 'Already scanned', color: 'var(--u-amber)' },
+  not_enrolled: { text: 'Not taking this course', color: 'var(--u-red, #dc2626)' },
+} as const;
+
+// The camera reads students' passes; each read marks them and shows who it was.
+function PassScanner({ session, presentCount, enrolled, closesIn, busy, onEnd, onMarked }: {
+  session: AttendanceSession;
+  presentCount: number;
+  enrolled: number;
+  closesIn: string;
+  busy: boolean;
+  onEnd: () => void;
+  onMarked: () => void;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [camErr, setCamErr] = useState('');
+  const [msg, setMsg] = useState('');
+  const [last, setLast] = useState<ScanResult | null>(null);
+  const [matric, setMatric] = useState('');
+  const [typing, setTyping] = useState(false);
+  const sending = useRef(false);
+  const seen = useRef<{ text: string; at: number }>({ text: '', at: 0 });
+  const onMarkedRef = useRef(onMarked);
+  onMarkedRef.current = onMarked;
+
+  const send = useCallback(async (input: { token: string } | { matric: string }) => {
+    sending.current = true;
+    try {
+      const r = await api.attendanceScan(session.id, input);
+      setLast(r);
+      setMsg('');
+      try { navigator.vibrate?.(r.status === 'marked' ? 60 : [40, 60, 40]); } catch { /* optional */ }
+      if (r.status === 'marked') onMarkedRef.current();
+      return true;
+    } catch (e) {
+      setLast(null);
+      setMsg(describeError(e, 'mark that student'));
+      return false;
+    } finally {
+      sending.current = false;
+    }
+  }, [session.id]);
+
+  useEffect(() => {
+    if (!videoRef.current) return;
+    let handle: { stop: () => void } | null = null;
+    let gone = false;
+    void startQrScan(
+      videoRef.current,
+      (text) => {
+        // The camera reads the same pass several times a second: act once per pass.
+        const now = Date.now();
+        if (sending.current || (text === seen.current.text && now - seen.current.at < 4000)) return;
+        seen.current = { text, at: now };
+        void send({ token: text });
+      },
+      (m) => setCamErr(m),
+    ).then((h) => { if (gone) h.stop(); else handle = h; });
+    return () => { gone = true; handle?.stop(); };
+  }, [send]);
+
+  const typeIn = async () => {
+    const m = matric.trim();
+    if (m.length < 3) return;
+    setTyping(true);
+    if (await send({ matric: m })) setMatric('');
+    setTyping(false);
+  };
+
+  const st = last ? STATUS[last.status] : null;
+  const pic = last ? resolvePicture({ avatar_url: last.student.avatar, box_boy_persona: last.student.persona }) : null;
+
+  return (
+    <Card tone="dark" style={{ alignItems: 'center', textAlign: 'center', marginTop: 16, gap: 10 }}>
+      {session.startedBy && (
+        <Pill tone="amber">{session.startedBy.mine ? 'You started this' : `Started by ${session.startedBy.name}${session.startedBy.role ? ` (${session.startedBy.role})` : ''}`} · shared live</Pill>
+      )}
+      <div className="eyebrow" style={{ opacity: 0.7 }}>Scan each student's pass</div>
+      {camErr ? (
+        <div className="t-13" style={{ color: 'var(--u-red, #dc2626)', maxWidth: 320 }}>{camErr}</div>
+      ) : (
+        <div style={{ position: 'relative', width: '100%', maxWidth: 320, aspectRatio: '1 / 1', borderRadius: 18, overflow: 'hidden', background: '#000' }}>
+          <video ref={videoRef} muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} aria-label="Camera" />
+          <div className="scan-frame" aria-hidden="true"><i /><i /><i /><i /><span className="scan-line" /></div>
+        </div>
+      )}
+      <div role="status" aria-live="polite" style={{ width: '100%', maxWidth: 320, minHeight: 64 }}>
+        {last && st && pic ? (
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', textAlign: 'left', padding: 10, borderRadius: 14, border: `2px solid ${st.color}`, background: 'rgba(255,255,255,0.04)' }}>
+            {pic.kind !== 'none' ? (
+              <img src={pic.src} alt="" width={48} height={48} style={{ width: 48, height: 48, borderRadius: 9999, objectFit: 'cover', flexShrink: 0 }} />
+            ) : (
+              <BoxBoy pose="phoneOut" width={48} />
+            )}
+            <div style={{ minWidth: 0 }}>
+              <div className="t-15 w-6">{last.student.name}</div>
+              <div className="t-12" style={{ opacity: 0.75 }}>{[last.student.level, last.student.department].filter(Boolean).join(' · ')}</div>
+              <div className="t-13 w-6" style={{ color: st.color }}>
+                {last.status === 'not_enrolled' ? `Not taking ${last.course}` : st.text}{last.status === 'marked' && last.method === 'typed' ? ' (typed in)' : ''}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="t-13" style={{ color: msg ? 'var(--u-red, #dc2626)' : undefined, opacity: msg ? 1 : 0.7 }}>
+            {msg || 'Students open My pass in Unify and hold it up to your camera.'}
+          </div>
+        )}
+      </div>
+      <div style={{ display: 'flex', gap: 8, width: '100%', maxWidth: 320 }}>
+        <input
+          value={matric}
+          onChange={(e) => setMatric(e.target.value.toUpperCase().slice(0, 30))}
+          onKeyDown={(e) => { if (e.key === 'Enter') void typeIn(); }}
+          placeholder="Phone dead? Matric no."
+          aria-label="Matric number"
+          autoCapitalize="characters"
+          style={{ flex: 1, minWidth: 0, padding: '10px 12px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.08)', color: 'inherit', fontSize: 14 }}
+        />
+        <button className="btn btn--amber btn--sm" disabled={typing || matric.trim().length < 3} onClick={() => void typeIn()}>
+          {typing ? 'Adding…' : 'Type in'}
+        </button>
+      </div>
+      <Pill tone="amber">Closes in {closesIn}</Pill>
+      <div className="t-15" style={{ marginTop: 2 }}>{presentCount} of {enrolled} present</div>
+      <button className="btn btn--white" disabled={busy} onClick={onEnd} style={{ marginTop: 6 }}>End session</button>
+    </Card>
   );
 }

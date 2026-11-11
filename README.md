@@ -1,6 +1,6 @@
 # Unify Learn
 
-Study platform for Nigerian engineering students (starting with LASU). Guided weekly notes with recall cards and quizzes, a timetable, **QR + selfie attendance**, a class board, a CGPA planner, and an authoring Studio for lecturers and contributors. Mobile-first PWA with an offline reader, light and dark themes, and Box Boy, the mascot.
+Study platform for Nigerian engineering students (starting with LASU). Guided weekly notes with recall cards and quizzes, a timetable, **QR pass attendance**, a class board, a CGPA planner, and an authoring Studio for lecturers and contributors. Mobile-first PWA with an offline reader, light and dark themes, and Box Boy, the mascot.
 
 Current version: see `CHANGELOG.md` (the app also shows it in Me).
 
@@ -17,7 +17,7 @@ Browser (PWA) ──HTTPS──▶ Vercel (static web app) ──HTTPS──▶ 
 |---|---|---|
 | Web app | Vite 5, React 18, TypeScript, React Router 6, KaTeX (loaded on demand) | `apps/web` |
 | API | Express 4, TypeScript, zod, supabase-js (service role), Prisma migrations | `notes-engine` |
-| Data and auth | Supabase Postgres, Auth, Storage (private bucket for attendance selfies) | `supabase/` (reference), `notes-engine/prisma` (authoritative) |
+| Data and auth | Supabase Postgres, Auth, Storage (profile photos, diagrams) | `supabase/` (reference), `notes-engine/prisma` (authoritative) |
 | Hosting | Vercel (web), Render (API, `render.yaml`) | |
 | AI authoring | Gemini by default, Anthropic optional, Studio only | `notes-engine/src/lib/ai*` |
 
@@ -36,7 +36,7 @@ Roles lock at assignment and are enforced on the server, not just hidden in the 
 
 ## Features worth knowing about
 
-- **Attendance:** the lecturer (or class rep) shows a rotating QR that changes every 30 seconds. The student takes a quick selfie, then scans. The photo is stored in a private bucket and only the person running that session sees it, through a link that expires in 10 minutes. One shared session per course, so a lecturer and class rep are always in step.
+- **Attendance:** each student shows My pass, a QR that changes every 30 seconds, and the class rep or lecturer scans it. A student with a dead phone is typed in by matric number (marked "typed in"). Online classes share a 6-digit code in the meeting chat instead. No photos are taken. One shared session per course, so a lecturer and class rep are always in step.
 - **Notes:** versioned weekly notes, lectures 1 to 3, recall cards, pulse checks, an end-of-week quiz with timer and pass mark, read-aloud, offline saving. Math renders with KaTeX first and MathJax as a fallback.
 - **Studio:** manual mode edits one section at a time (week, each topic, each part, recall, pulse check, quiz). An equation builder opens as a full overlay.
 - **CGPA planner:** current CGPA and target are strict decimals from 0.00 to 5.00 (two places at most), checked in the app and on the server.

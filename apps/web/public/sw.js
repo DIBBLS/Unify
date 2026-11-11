@@ -13,7 +13,7 @@ const CONTENT = 'unify-content-v1';
 const API_CACHE = 'unify-api-v1';
 const API_WAIT_MS = 4000;
 // Never replayed from cache: live data, one-time actions, admin tooling.
-const NO_CACHE = [/^\/v1\/attendance\/(sessions|checkin)/, /^\/v1\/admin\//];
+const NO_CACHE = [/^\/v1\/attendance\/(sessions|checkin|pass)/, /^\/v1\/admin\//];
 const SHELL = ['/', '/index.html', '/manifest.json'];
 
 // Update here if the backend moves (must match VITE_API_URL origin).
