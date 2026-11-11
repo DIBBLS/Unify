@@ -194,6 +194,15 @@ export default function StudioRoute() {
 
   // Deep link from author preview: /studio?edit=COURSE&week=N loads the
   // published week straight into review for editing, then re-publish.
+  // ?course=X&week=N (from Home's "Next up") starts a NEW week with those filled in.
+  useEffect(() => {
+    if (searchParams.get('edit')) return;
+    const c = searchParams.get('course');
+    const w = searchParams.get('week');
+    if (c) setCourse(c.toUpperCase());
+    if (w && /^\d{1,2}$/.test(w)) setWeek(w);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   useEffect(() => {
     const editCourse = searchParams.get('edit');
     const editWeek = Number(searchParams.get('week'));
@@ -1095,7 +1104,23 @@ export default function StudioRoute() {
         <div style={{ textAlign: 'center', padding: '24px 0' }}>
           <BoxBoy pose="cheer" width={170} />
           <h2 className="display" style={{ fontSize: 40, lineHeight: 1, marginTop: 12 }}>{`WEEK ${meta?.week ?? week ?? ''}`}<br />IS LIVE.</h2>
-          <p style={{ fontSize: 13, color: 'var(--text2)', margin: '8px 0 20px' }}>Find it under your level and course, and on your Home.</p>
+          <p style={{ fontSize: 13, color: 'var(--text2)', margin: '8px 0 20px' }}>Students taking {meta?.course || course} can read it now. Find it under your level and course, and on your Home.</p>
+          {(() => {
+            // C06 "Next up": the next week of this course nobody has published yet.
+            const done = new Set([...weeks.map((w) => w.week), Number(meta?.week ?? week)]);
+            const next = Array.from({ length: 15 }, (_, i) => i + 1).find((n) => !done.has(n));
+            const c = meta?.course || course;
+            if (!next || !c) return null;
+            return (
+              <div style={{ textAlign: 'left', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 12 }}>
+                <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--text2)' }}>NEXT UP</div>
+                <div style={{ fontWeight: 800, fontSize: 15, marginTop: 2 }}>{c} · Week {next}</div>
+                <button onClick={() => { reset(); setCourse(c); setWeek(String(next)); }} style={{ marginTop: 8, padding: '8px 14px', borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '3px solid #c69a1a', fontWeight: 800, fontSize: 12 }}>
+                  Start Week {next}
+                </button>
+              </div>
+            );
+          })()}
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={reset} style={{ flex: 1, padding: 14, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 800 }}>
               Author another

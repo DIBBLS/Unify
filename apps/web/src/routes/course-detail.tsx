@@ -47,6 +47,11 @@ export default function CourseDetailRoute() {
   const [slots, setSlots] = useState<{ day: number; start: string; end: string; venue: string; lecturer: string }[]>([]);
   const preview = searchParams.get('preview') === '1';
   const [sem, setSem] = useState<{ week: number; total: number }>({ week: 0, total: 12 });
+  const initialTab = searchParams.get('tab');
+  const [tab, setTab] = useState<'weeks' | 'outline' | 'practice'>(initialTab === 'outline' || initialTab === 'practice' ? initialTab : 'weeks');
+  const [progress, setProgress] = useState<Awaited<ReturnType<typeof api.myCourseProgress>>['weeks'] | null>(null);
+  const [lecturers, setLecturers] = useState<{ id: string; name: string }[]>([]);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -86,8 +91,11 @@ export default function CourseDetailRoute() {
         // them under My Classes). Failure never blocks the weeks.
         api.timetable(courseCode).then((tt) => setSlots(tt.slots || [])).catch(() => {});
         api.materials(courseCode).then((r) => setMaterials(r.materials || [])).catch(() => {});
+        api.myCourseProgress(courseCode).then((r) => { setProgress(r.weeks); setLecturers(r.lecturers || []); }).catch(() => {});
       } catch (err) {
-        setError(describeError(err, 'load weeks'));
+        // S73: a course code that doesn't exist (old link, typo) gets its own state.
+        if ((err as { status?: number }).status === 404) setNotFound(true);
+        else setError(describeError(err, 'load weeks'));
       } finally {
         setLoading(false);
       }
@@ -118,6 +126,16 @@ export default function CourseDetailRoute() {
     log.warn('route', `course detail with empty code (url=${window.location.href})`);
     return <Navigate to="/courses" replace />;
   }
+  if (notFound)
+    return (
+      <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px', textAlign: 'center' }}>
+        <BackButton to={backTo} />
+        <div style={{ display: 'flex', justifyContent: 'center' }}><BoxBoy pose="peeking" width={90} /></div>
+        <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20, marginTop: 12 }}>We can't find {courseCode}</h1>
+        <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px' }}>The link may be old, or the course isn't on Unify yet.</p>
+        <Link to="/courses/find" className="btn btn--amber">Manage courses</Link>
+      </div>
+    );
   if (blocked)
     return (
       <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px', textAlign: 'center' }}>
@@ -160,8 +178,25 @@ export default function CourseDetailRoute() {
       <p style={{ color: 'var(--text2)', marginTop: 6, fontSize: 13 }}>
         {weeks.length} {weeks.length === 1 ? 'week' : 'weeks'} · pick one to start learning
       </p>
+      {lecturers.length > 0 && (
+        <p style={{ marginTop: 4, fontSize: 13 }}>
+          Taught by{' '}
+          {lecturers.map((l, i) => (
+            <span key={l.id}>{i > 0 ? ', ' : ''}<Link to={`/lecturer/profile/${l.id}`} style={{ color: 'var(--u-good)', fontWeight: 700 }}>{l.name}</Link></span>
+          ))}
+        </p>
+      )}
+      {!preview && <LecturerPosts course={courseCode} />}
       {!preview && <CourseAttendance course={courseCode} totalWeeks={sem.total} currentWeek={sem.week} />}
-      {materials.length > 0 && (
+      {/* S23–S25: Weeks · Outline · Practice */}
+      <div role="tablist" aria-label="Course sections" style={{ display: 'flex', gap: 6, marginTop: 16 }}>
+        {(['weeks', 'outline', 'practice'] as const).map((t) => (
+          <button key={t} role="tab" aria-selected={tab === t} className={`chip chip--sm${tab === t ? ' chip--on' : ''}`} onClick={() => setTab(t)} style={{ textTransform: 'capitalize' }}>{t}</button>
+        ))}
+      </div>
+      {tab === 'outline' && <Outline weeks={weeks} progress={progress} />}
+      {tab === 'practice' && <Practice course={courseCode} progress={progress} preview={preview} />}
+      {tab === 'weeks' && materials.length > 0 && (
         <div style={{ marginTop: 16 }}>
           <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', letterSpacing: 1 }}>FROM YOUR LECTURER</div>
           <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -178,7 +213,7 @@ export default function CourseDetailRoute() {
           </div>
         </div>
       )}
-      <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {tab === 'weeks' && <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {weeks.length === 0 && !error && (
           <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
             <BoxBoy pose="readingStanding" width={62} />
@@ -204,6 +239,17 @@ export default function CourseDetailRoute() {
             <span style={{ flex: 1 }}>
               <span style={{ fontWeight: 700, display: 'block' }}>Week {w.week}{w.title ? ` — ${w.title}` : ''}</span>
               {w.subtitle && <span style={{ fontSize: 12, color: 'var(--text2)' }}>{w.subtitle}</span>}
+              {(() => {
+                const p = progress?.find((x) => x.week === w.week);
+                if (!p || !p.topics) return null;
+                const all = p.done >= p.topics;
+                return (
+                  <span style={{ display: 'block', fontSize: 12, fontWeight: 700, marginTop: 2, color: all ? 'var(--u-good)' : 'var(--text2)' }}>
+                    {all ? 'Done' : p.done ? `${p.done} of ${p.topics} topics` : `${p.topics} topics`}
+                    {p.quiz ? ` · Quiz ${p.quiz.best}/${p.quiz.total}` : ''}
+                  </span>
+                );
+              })()}
               {w.authors && w.authors.length > 0 && (
                 <span style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 4 }}>
                   <span style={{ display: 'flex' }}>
@@ -223,6 +269,87 @@ export default function CourseDetailRoute() {
             </span>
             <ChevronRight size={18} color="var(--u-good)" />
           </Link>
+        ))}
+      </div>}
+    </div>
+  );
+}
+
+type Progress = Awaited<ReturnType<typeof api.myCourseProgress>>['weeks'];
+const box: React.CSSProperties = { padding: '14px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 };
+
+// S24: the course outline, week by week (topic names from the published notes).
+function Outline({ weeks, progress }: { weeks: WeekRow[]; progress: Progress | null }) {
+  if (!weeks.length) return <div style={{ ...box, marginTop: 16, color: 'var(--text2)', textAlign: 'center' }}>The outline appears as weeks are published.</div>;
+  return (
+    <div style={{ ...box, marginTop: 16 }}>
+      <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 6 }}>Course outline</div>
+      {weeks.map((w) => {
+        const p = progress?.find((x) => x.week === w.week);
+        return (
+          <div key={w.week} style={{ display: 'flex', gap: 12, padding: '8px 0', borderTop: '1px solid var(--border)' }}>
+            <span style={{ width: 58, flexShrink: 0, fontSize: 12, fontWeight: 800, color: p && p.topics && p.done >= p.topics ? 'var(--u-good)' : 'var(--text2)' }}>Week {w.week}</span>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ display: 'block', fontSize: 14, fontWeight: 700 }}>{w.title || `Week ${w.week}`}</span>
+              {p && p.topicTitles.length > 0 && <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>{p.topicTitles.join(' · ')}</span>}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// S25: practice: each week's quiz with your best score; past questions come later.
+function Practice({ course, progress, preview }: { course: string; progress: Progress | null; preview: boolean }) {
+  const quizzes = (progress || []).filter((w) => w.hasQuiz);
+  return (
+    <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ ...box, display: 'flex', gap: 12, alignItems: 'center', opacity: 0.75 }}>
+        <span style={{ flex: 1 }}>
+          <span style={{ display: 'block', fontWeight: 700 }}>Past questions</span>
+          <span style={{ fontSize: 12, color: 'var(--text2)' }}>Coming once the Faculty approves them.</span>
+        </span>
+      </div>
+      {quizzes.length === 0 && <div style={{ ...box, color: 'var(--text2)', textAlign: 'center' }}>Weekly quizzes show here as weeks are published.</div>}
+      {quizzes.map((w) => (
+        <Link
+          key={w.week}
+          to={`/learn/${encodeURIComponent(course)}/week/${w.week}?t=${w.topics}${preview ? '&preview=1' : ''}`}
+          style={{ ...box, display: 'flex', gap: 12, alignItems: 'center', textDecoration: 'none', color: 'var(--text)' }}
+        >
+          <span style={{ flex: 1 }}>
+            <span style={{ display: 'block', fontWeight: 700 }}>Week {w.week} quiz</span>
+            <span style={{ fontSize: 12, color: 'var(--text2)' }}>{w.title || 'End-of-week questions'}{w.quiz ? ` · ${w.quiz.attempts} attempt${w.quiz.attempts === 1 ? '' : 's'}` : ''}</span>
+          </span>
+          {w.quiz ? (
+            <span style={{ fontSize: 12, fontWeight: 800, padding: '4px 10px', borderRadius: 9999, background: 'var(--u-good-tint)', color: 'var(--u-good)' }}>{w.quiz.best}/{w.quiz.total}</span>
+          ) : (
+            <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--u-good)' }}>Start</span>
+          )}
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+// L15 seen by students: the latest posts from this course's lecturer.
+function LecturerPosts({ course }: { course: string }) {
+  const [posts, setPosts] = useState<Awaited<ReturnType<typeof api.coursePosts>>['posts']>([]);
+  useEffect(() => {
+    api.coursePosts(course).then((r) => setPosts(r.posts.slice(0, 3))).catch(() => {});
+  }, [course]);
+  if (!posts.length) return null;
+  return (
+    <div style={{ marginTop: 16 }}>
+      <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', letterSpacing: 1 }}>FROM YOUR LECTURER</div>
+      <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {posts.map((p) => (
+          <div key={p.id} style={box}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: 1 }}>{p.type} · {p.author} · {new Date(p.at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</div>
+            {p.title && <div style={{ fontWeight: 700, marginTop: 4 }}>{p.title}</div>}
+            <div style={{ fontSize: 14, marginTop: 2, whiteSpace: 'pre-wrap' }}>{p.content}</div>
+          </div>
         ))}
       </div>
     </div>

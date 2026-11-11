@@ -159,6 +159,8 @@ export type Profile = {
   role?: string;
   avatar_url?: string;
   notify_new_notes?: boolean;
+  quiet_start?: string | null;
+  quiet_end?: string | null;
   box_boy_persona?: string | null;
   semester?: string | null;
   semester_start?: string | null;
@@ -689,6 +691,30 @@ export const api = {
     apiFetch<{ courses: { course: string; held: number; attended: number }[]; recent: { course: string; at: string }[] }>('/v1/attendance/mine'),
   attendanceExport: (sessionId: string, course: string) =>
     apiDownload(`/v1/attendance/sessions/${sessionId}/register.csv`, `${course.replace(/\s+/g, '')}-register.csv`),
+  // Learning (S23–S36)
+  myCourseProgress: (course: string) =>
+    apiFetch<{ course: string; lecturers?: { id: string; name: string }[]; weeks: { week: number; title: string; topics: number; topicTitles: string[]; done: number; quiz: { best: number; total: number; attempts: number } | null; hasQuiz: boolean }[] }>(`/v1/courses/${encodeURIComponent(course)}/my-progress`),
+  learnActivity: (days = 35) => apiFetch<{ days: { date: string; xp: number }[]; streak: number; longest: number }>(`/v1/learn/activity?days=${days}`),
+  revision: (limit = 10, course?: string) =>
+    apiFetch<{ cards: { course: string; week: number; topic: string; question: string; answer: string; badge: string }[]; available: number }>(`/v1/learn/revision?limit=${limit}${course ? `&course=${encodeURIComponent(course)}` : ''}`),
+  // Content reports: students' "Report a problem", lecturers' "Review this week"
+  contentReport: (payload: { course: string; week: number; topic?: string; kind?: 'problem' | 'review'; reason?: string; text: string }) =>
+    apiFetch<{ ok: boolean }>('/v1/content-reports', { method: 'POST', body: JSON.stringify(payload) }),
+  contentReports: (course?: string) =>
+    apiFetch<{ reports: { id: string; course: string; week: number; topic: string; kind: 'problem' | 'review'; reason: string; text: string; status: 'open' | 'resolved'; at: string; from: string }[] }>(`/v1/content-reports${course ? `?course=${encodeURIComponent(course)}` : ''}`),
+  contentReportResolve: (id: string) => apiFetch<{ ok: boolean }>(`/v1/content-reports/${id}/resolve`, { method: 'POST', body: '{}' }),
+  // Lecturer (L11, L15, L16) and lecturer profile (S53)
+  coursePosts: (course: string) =>
+    apiFetch<{ posts: { id: string; type: 'announcement' | 'tip' | 'reminder'; title: string | null; content: string; at: string; author: string; mine: boolean }[] }>(`/v1/course-posts?course=${encodeURIComponent(course)}`),
+  coursePost: (payload: { course: string; type: 'announcement' | 'tip' | 'reminder'; title?: string; content: string }) =>
+    apiFetch<{ ok: boolean; reached: number }>('/v1/course-posts', { method: 'POST', body: JSON.stringify(payload) }),
+  coursePostDelete: (id: string) => apiFetch<{ ok: boolean }>(`/v1/course-posts/${id}`, { method: 'DELETE' }),
+  courseReport: (course: string) =>
+    apiFetch<{ course: string; students: number; weeks: { week: number; title: string; studied: number; studiedPct: number; quizTakers: number; quizAvg: number | null; attemptsPerStudent: number | null }[] }>(`/v1/lecturer/course-report?course=${encodeURIComponent(course)}`),
+  attendanceStudents: (course: string) =>
+    apiFetch<{ course: string; held: number; students: { name: string; matric: string; attended: number; pct: number | null; onUnify: boolean }[] }>(`/v1/attendance/students?course=${encodeURIComponent(course)}`),
+  lecturerProfile: (id: string) =>
+    apiFetch<{ id: string; name: string; department: string; faculty: string; avatar: string; persona: string; courses: string[] }>(`/v1/lecturer/profile/${id}`),
   deleteMyAccount: () => apiFetch<{ ok: boolean }>('/v1/me', { method: 'DELETE', body: JSON.stringify({ confirm: 'DELETE' }) }, 0),
   // Class lists: student side
   classListMe: () => apiFetch<ClassListMe>('/v1/class-list/me'),

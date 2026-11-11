@@ -1,7 +1,7 @@
 import { SectionSkeleton } from '../components/Skeletons';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CalendarDays, ClipboardCheck, PenTool, Search, ChevronRight } from 'lucide-react';
+import { CalendarDays, ClipboardCheck, PenTool, Search, ChevronRight, Flag } from 'lucide-react';
 import { api, type ClassSlot } from '../lib/api';
 import { errorToast } from '../lib/errors';
 import { ROUTES } from '../lib/routes';
@@ -20,12 +20,14 @@ const ACTIONS = [
   { to: ROUTES.myClasses, icon: CalendarDays, title: 'My classes', sub: 'Timetable slots and live roster' },
   { to: ROUTES.studio, icon: PenTool, title: 'Studio', sub: 'Write and publish notes' },
   { to: ROUTES.browse, icon: Search, title: 'Browse content', sub: 'Everything at your level' },
+  { to: '/content-reports', icon: Flag, title: 'Reports and reviews', sub: 'Problems students reported, and week reviews' },
 ];
 
 export default function LecturerHomeRoute() {
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
   const [today, setToday] = useState<ClassSlot[] | null>(null);
+  const [taught, setTaught] = useState<string[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -34,6 +36,7 @@ export default function LecturerHomeRoute() {
         setName(me.profile?.first_name || '');
         setRole(me.profile?.role || '');
         const courses = (await api.teaching()).courses;
+        setTaught(courses);
         const day = new Date().getDay();
         const settled = await Promise.allSettled(courses.map((c) => api.timetable(c)));
         const slots = settled.flatMap((r) => (r.status === 'fulfilled' ? r.value.slots || [] : []));
@@ -84,6 +87,23 @@ export default function LecturerHomeRoute() {
           </ListCard>
         )}
       </section>
+
+      {taught.length > 0 && (role === 'lecturer' || role === 'admin') && (
+        <section style={{ marginTop: 22 }}>
+          <Label>Your courses</Label>
+          <ListCard style={{ marginTop: 8 }}>
+            {taught.map((c) => (
+              <Link key={c} to={`/lecturer/course/${encodeURIComponent(c)}`} className="row" style={{ gap: 12, padding: '14px 16px', textDecoration: 'none', color: 'var(--u-text)' }}>
+                <div className="grow stack" style={{ gap: 2 }}>
+                  <div className="t-15 w-6">{c}</div>
+                  <div className="t-13 muted">Weeks · report · attendance · post to students</div>
+                </div>
+                <ChevronRight size={18} />
+              </Link>
+            ))}
+          </ListCard>
+        </section>
+      )}
 
       <section style={{ marginTop: 22 }}>
         <Label>Do</Label>
