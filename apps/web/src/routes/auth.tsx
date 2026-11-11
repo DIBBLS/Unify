@@ -388,7 +388,7 @@ export default function AuthRoute() {
           {/* No key here: it would duplicate the h1's key, and React then leaves a stale headline behind on a tab switch. */}
           <p className="auth-tagline-m" style={{ marginTop: 8, opacity: 0.92, fontSize: 16, minHeight: 20, fontFamily: "'Playfair Display',Georgia,serif", fontWeight: 700 }}><Typewriter text="Own your academic journey" /></p>
         </div>
-        <BoxBoy pose="wavePhone" width={96} style={{ flexShrink: 0, WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent)', maskImage: 'linear-gradient(to bottom, black 85%, transparent)' }} />
+        <BoxBoy pose="wavePhone" width={120} style={{ flexShrink: 0, alignSelf: 'flex-end' }} />
       </div>
       <div style={{ padding: 20, flex: 1 }}>
         <div style={{ display: 'flex', gap: 4, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 9999, padding: 4, marginBottom: 20 }}>

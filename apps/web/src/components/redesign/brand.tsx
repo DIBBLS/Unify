@@ -27,8 +27,8 @@ const RATIO: Partial<Record<Pose, number>> = {
 };
 
 /**
- * Box Boy, three-quarter body by default: head to hips, fading into the
- * ground at the bottom (a mask, so it sits on light, dark or green grounds
+ * Box Boy, most of the body by default, with only a soft edge at the very
+ * bottom (a mask, so it sits on light, dark or green grounds
  * alike, never a hard crop line). `full` keeps the whole figure (splash,
  * target sign). Seated or peeking poses are never cropped.
  *
@@ -42,11 +42,12 @@ export function BoxBoy({ pose, width, style, full = false, calm = false }: { pos
   const img = <img src={POSES[pose]} alt="" width={width} loading={full ? 'eager' : 'lazy'} decoding="async" style={{ width, height: 'auto', display: 'block' }} draggable={false} />;
   const ratio = RATIO[pose];
   const cropped = !full && !!ratio;
-  const fade = 'linear-gradient(to bottom, #000 74%, transparent 100%)';
+  // A soft edge only at the very bottom, so he keeps his full place on screen.
+  const fade = 'linear-gradient(to bottom, #000 90%, transparent 100%)';
   const figure = cropped ? (
     <span
       className="bb-breathe"
-      style={{ display: 'inline-block', lineHeight: 0, width, height: Math.round(width * (ratio as number) * 0.84), overflow: 'hidden', WebkitMaskImage: fade, maskImage: fade }}
+      style={{ display: 'inline-block', lineHeight: 0, width, height: Math.round(width * (ratio as number) * 0.94), overflow: 'hidden', WebkitMaskImage: fade, maskImage: fade }}
     >
       {img}
     </span>
