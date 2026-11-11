@@ -37,6 +37,10 @@ export const ROUTES = {
   hoc: '/hoc',
   hocRequest: '/hoc/request',
   classList: '/class-list',
+  hocWelcome: '/hoc/welcome',
+  hocRequests: '/hoc/requests',
+  reports: '/reports',
+  adminRoles: '/admin-roles',
   onlineClass: '/online-class',
 
   admin: '/admin',

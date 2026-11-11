@@ -1,10 +1,11 @@
 import { SectionSkeleton } from '../components/Skeletons';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, CalendarCheck, ChevronRight, ClipboardCheck, Megaphone, MapPin, Video } from 'lucide-react';
+import { MapPin, Video, X } from 'lucide-react';
 import { api, type ClassSlot } from '../lib/api';
 import { supabaseBrowser } from '../lib/supabase';
 import { errorToast } from '../lib/errors';
+import { toastSuccess } from '../lib/toast';
 import { ROUTES } from '../lib/routes';
 import ErrorState from '../components/ErrorState';
 import { BoxBoy } from '../components/redesign/brand';
@@ -30,6 +31,9 @@ export default function TimetableRoute() {
   const [failed, setFailed] = useState(false);
   const [day, setDay] = useState(new Date().getDay());
   const today = new Date().getDay();
+  // Class reps set the class times (review p.5-6).
+  const [isHoc, setIsHoc] = useState(false);
+  const [adding, setAdding] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -38,6 +42,7 @@ export default function TimetableRoute() {
       const sb = supabaseBrowser();
       if (!sb) throw new Error('no client');
       const me = await api.me();
+      setIsHoc(!!(me.profile as unknown as { is_hoc?: boolean } | null)?.is_hoc);
       const enrolled = (me.courses || []).map((c) => (c || '').toUpperCase().trim()).filter(Boolean);
       setCourses(enrolled);
       // One course failing must not blank the whole week.
@@ -76,7 +81,7 @@ export default function TimetableRoute() {
 
   const shell = { maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 96px' } as const;
 
-  if (failed) return <div style={shell}><ErrorState message="We couldn2019t load your timetable." onRetry={() => void load()} /></div>;
+  if (failed) return <div style={shell}><ErrorState message="We couldn’t load your timetable." onRetry={() => void load()} /></div>;
 
   return (
     <div style={shell}>
@@ -107,12 +112,15 @@ export default function TimetableRoute() {
         ) : daySlots.length === 0 ? (
           <Card style={{ alignItems: 'center', textAlign: 'center' }}>
             <BoxBoy pose="chairRelax" width={120} />
-            <div className="t-15 w-6">No classes on {DAY_LONG[day]}</div>
+            <div className="t-15 w-6">{isHoc && slots.length === 0 ? 'You haven’t added this week’s classes yet' : `No classes on ${DAY_LONG[day]}`}</div>
             <div className="t-13 muted">
-              {slots.length === 0
-                ? 'Your class rep hasn’t posted times yet. They’ll appear here once they do.'
-                : 'Enjoy the free day, or pick another day above.'}
+              {isHoc && slots.length === 0
+                ? 'Add your class times once; they repeat every week for the whole class.'
+                : slots.length === 0
+                  ? 'Your class rep hasn’t posted times yet. They’ll appear here once they do.'
+                  : 'Enjoy the free day, or pick another day above.'}
             </div>
+            {isHoc && slots.length === 0 && <button className="btn btn--amber" onClick={() => setAdding(true)}>Add class times</button>}
           </Card>
         ) : (
           <ListCard>
@@ -136,6 +144,15 @@ export default function TimetableRoute() {
                   right={
                     <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
                       {st === 'now' ? <Pill tone="good">Now</Pill> : st === 'next' ? <Pill tone="amber">Next</Pill> : null}
+                      {isHoc && (
+                        <button
+                          aria-label={`Remove ${s.course} ${DAY_SHORT[s.day]} ${s.start}`}
+                          onClick={() => { if (window.confirm(`Remove ${s.course} on ${DAY_LONG[s.day]} at ${s.start} for the whole class?`)) void api.slotDelete(s.id).then(load).catch((e) => errorToast(e, 'remove that class time')); }}
+                          style={{ display: 'flex', padding: 4, color: 'var(--text3)' }}
+                        >
+                          <X size={16} />
+                        </button>
+                      )}
                       {s.meetLink && (
                         <a
                           href={s.meetLink}
@@ -160,47 +177,65 @@ export default function TimetableRoute() {
         )}
       </div>
 
-      <ListCard style={{ marginTop: 16 }}>
-        <Link to={ROUTES.attendancePass} className="row" style={{ gap: 12, padding: '14px 16px', textDecoration: 'none', color: 'var(--u-text)' }}>
-          <ClipboardCheck size={20} />
-          <div className="grow stack" style={{ gap: 2 }}>
-            <div className="t-15 w-6">My pass</div>
-            <div className="t-13 muted">Show your QR to your class rep or lecturer</div>
-          </div>
-          <ChevronRight size={18} />
-        </Link>
-        <Link to={ROUTES.attendanceMine} className="row" style={{ gap: 12, padding: '14px 16px', textDecoration: 'none', color: 'var(--u-text)' }}>
-          <CalendarCheck size={20} />
-          <div className="grow stack" style={{ gap: 2 }}>
-            <div className="t-15 w-6">My attendance</div>
-            <div className="t-13 muted">Attended vs held, per course</div>
-          </div>
-          <ChevronRight size={18} />
-        </Link>
-        <Link to={ROUTES.hoc} className="row" style={{ gap: 12, padding: '14px 16px', textDecoration: 'none', color: 'var(--u-text)' }}>
-          <Megaphone size={20} />
-          <div className="grow stack" style={{ gap: 2 }}>
-            <div className="t-15 w-6">Class board</div>
-            <div className="t-13 muted">Announcements and tips from your HOC</div>
-          </div>
-          <ChevronRight size={18} />
-        </Link>
-      </ListCard>
-
-      {courses.length > 0 && (
-        <Link
-          to={ROUTES.courses}
-          className="card"
-          style={{ marginTop: 16, display: 'flex', gap: 12, alignItems: 'center', textDecoration: 'none', color: 'var(--u-text)' }}
-        >
-          <BookOpen size={20} />
-          <div style={{ flex: 1 }}>
-            <div className="t-15 w-6">My courses</div>
-            <div className="t-13 muted">{courses.length} enrolled · open notes and quizzes</div>
-          </div>
-          <ChevronRight size={18} />
-        </Link>
+      {isHoc && courses.length > 0 && (
+        adding ? (
+          <AddClassTime courses={courses} day={day} onDone={() => { setAdding(false); void load(); }} onCancel={() => setAdding(false)} />
+        ) : (
+          slots.length > 0 && <button className="btn btn--white btn--block" style={{ marginTop: 14 }} onClick={() => setAdding(true)}>Add a class time</button>
+        )
       )}
     </div>
+  );
+}
+
+// Class rep: add a weekly class time for one of the class's courses.
+function AddClassTime({ courses, day, onDone, onCancel }: { courses: string[]; day: number; onDone: () => void; onCancel: () => void }) {
+  const [course, setCourse] = useState(courses[0] || '');
+  const [d, setD] = useState(day);
+  const [start, setStart] = useState('08:00');
+  const [end, setEnd] = useState('10:00');
+  const [venue, setVenue] = useState('');
+  const [busy, setBusy] = useState(false);
+  const field: React.CSSProperties = { width: '100%', padding: 10, marginTop: 4, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 15 };
+  const save = async () => {
+    if (end <= start) {
+      errorToast(new Error('The class must end after it starts.'), 'add that class time');
+      return;
+    }
+    setBusy(true);
+    try {
+      await api.slotAdd({ course, day: d, start, end, venue: venue.trim() });
+      toastSuccess(`${course} added on ${DAY_LONG[d]} at ${start}. The class sees it now.`);
+      onDone();
+    } catch (e) {
+      errorToast(e, 'add that class time');
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <Card style={{ marginTop: 14, gap: 10 }}>
+      <div className="t-15 w-7">Add a class time</div>
+      <div className="t-13 muted">It repeats every week and shows on everyone's timetable.</div>
+      <label className="t-13 w-6">Course
+        <select value={course} onChange={(e) => setCourse(e.target.value)} style={field}>
+          {courses.map((c) => <option key={c} value={c}>{c}</option>)}
+        </select>
+      </label>
+      <label className="t-13 w-6">Day
+        <select value={d} onChange={(e) => setD(Number(e.target.value))} style={field}>
+          {ORDER.map((x) => <option key={x} value={x}>{DAY_LONG[x]}</option>)}
+        </select>
+      </label>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <label className="t-13 w-6" style={{ flex: 1 }}>Starts<input type="time" value={start} onChange={(e) => setStart(e.target.value)} style={field} /></label>
+        <label className="t-13 w-6" style={{ flex: 1 }}>Ends<input type="time" value={end} onChange={(e) => setEnd(e.target.value)} style={field} /></label>
+      </div>
+      <label className="t-13 w-6">Venue (optional)<input value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="e.g. LT 2" maxLength={120} style={field} /></label>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button className="btn btn--amber" disabled={busy || !course} onClick={() => void save()}>{busy ? 'Adding…' : 'Add'}</button>
+        <button className="btn btn--white" onClick={onCancel}>Cancel</button>
+      </div>
+    </Card>
   );
 }

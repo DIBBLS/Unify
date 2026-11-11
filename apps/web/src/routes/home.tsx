@@ -9,6 +9,7 @@ import { profileGaps, gapsText } from '../lib/profileGaps';
 import { DashboardSkeleton } from '../components/Skeletons';
 import ErrorState from '../components/ErrorState';
 import { BoxBoy } from '../components/redesign/brand';
+import { resolvePicture } from '../lib/picture';
 import Typewriter from '../components/Typewriter';
 import Flash from '../components/Flash';
 import ConfirmModal from '../components/ConfirmModal';
@@ -112,7 +113,7 @@ export default function HomeRoute() {
   const setNoteError = (m: string) => { setNoteErrorState(m); if (m) toastError(m); };
   // BUG-012: catalog meta for course cards (title, weeks, lecturers) +
   // elective removal target. Hooks stay above every early return (#310).
-  const [catalog, setCatalog] = useState<Record<string, { title: string; weeks: number; lecturers: string[]; staff: { name: string; avatar: string }[] }>>({});
+  const [catalog, setCatalog] = useState<Record<string, { title: string; weeks: number; lecturers: string[]; staff: { name: string; avatar: string; persona?: string }[] }>>({});
   // Skeleton variant follows the last-known role on THIS device (same
   // hint as the nav) so the loader matches the real dashboard — students
   // and contributors each see their own shape, even on first paint.
@@ -168,7 +169,7 @@ export default function HomeRoute() {
         const [me, statsRes, catRes] = await Promise.all([
           api.me(),
           api.stats().catch(() => null),
-          api.courses().catch(() => [] as { code: string; title: string; weeks: number; lecturers: string[]; staff: { name: string; avatar: string }[] }[]),
+          api.courses().catch(() => [] as { code: string; title: string; weeks: number; lecturers: string[]; staff: { name: string; avatar: string; persona?: string }[] }[]),
         ]);
         if (!me.onboarded || !me.profile) {
           navigate('/onboarding');
@@ -197,7 +198,7 @@ export default function HomeRoute() {
         // BUG-012: one catalog fetch feeds every course card (title,
         // weeks, lecturers) — never one request per card.
         try {
-          const map: Record<string, { title: string; weeks: number; lecturers: string[]; staff: { name: string; avatar: string }[] }> = {};
+          const map: Record<string, { title: string; weeks: number; lecturers: string[]; staff: { name: string; avatar: string; persona?: string }[] }> = {};
           for (const c of catRes) map[c.code.toUpperCase().trim()] = { title: c.title, weeks: c.weeks || 0, lecturers: c.lecturers || [], staff: c.staff || [] };
           setCatalog(map);
         } catch {
@@ -547,23 +548,22 @@ export default function HomeRoute() {
             return (
               <div key={c.course} className="rise" style={{ animationDelay: `${Math.min(i, 6) * 40}ms`, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 12, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', minWidth: 0 }}>
-                  {staff.length ? (
-                    <div style={{ display: 'flex', flexShrink: 0 }}>
-                      {staff.map((s, si) => (
-                        s.avatar ? (
-                          <img key={si} src={s.avatar} alt={s.name} title={s.name} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--surface)', marginLeft: si === 0 ? 0 : -10 }} />
-                        ) : (
-                          <div key={si} title={s.name} style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--u-green)', color: 'var(--u-black)', fontWeight: 800, fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid var(--surface)', marginLeft: si === 0 ? 0 : -10 }}>
-                            {s.name.trim().charAt(0).toUpperCase()}
-                          </div>
-                        )
-                      ))}
-                    </div>
-                  ) : (
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--u-green)', color: 'var(--u-black)', fontWeight: 800, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      {c.course.trim().charAt(0).toUpperCase()}
-                    </div>
-                  )}
+                  {/* Box Boy avatars (review p.4): the lecturer's photo or persona, else Box Boy teaching. */}
+                  <div style={{ display: 'flex', flexShrink: 0 }}>
+                    {(staff.length ? staff : [{ name: '', avatar: '', persona: '' }]).map((s, si) => {
+                      const pic = resolvePicture({ avatar_url: s.avatar, box_boy_persona: s.persona });
+                      const ring: React.CSSProperties = { width: 34, height: 34, borderRadius: '50%', border: '2px solid var(--surface)', marginLeft: si === 0 ? 0 : -10, overflow: 'hidden', background: 'var(--u-good-tint)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', flexShrink: 0 };
+                      return (
+                        <div key={si} title={s.name || undefined} style={ring}>
+                          {pic.kind !== 'none' ? (
+                            <img src={pic.src} alt={s.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ) : (
+                            <BoxBoy pose="teaching" width={30} />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <Link to={`/course/${encodeURIComponent(c.course.trim())}`} style={{ fontWeight: 800, fontSize: 14, color: 'var(--text)', textDecoration: 'none', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {c.course}
@@ -579,13 +579,6 @@ export default function HomeRoute() {
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 11, color: 'var(--text2)' }}>
                   <BookOpen size={12} color="var(--u-good)" />
                   <span>{meta?.weeks || 0} {meta?.weeks === 1 ? 'week' : 'weeks'}{stat && stat.topics > 0 ? ` · ${stat.topics} done` : ''}</span>
-                  <button
-                    onClick={() => setConfirmUnenroll(c.course)}
-                    aria-label={`Remove ${c.course} from your courses`}
-                    style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text3)', padding: 4 }}
-                  >
-                    <Trash2 size={14} />
-                  </button>
                 </div>
               </div>
             );

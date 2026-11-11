@@ -43,6 +43,12 @@ export default function ScannerRoute() {
   const [reg, setReg] = useState<AttendanceRegister | null>(null);
   const [busy, setBusy] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  // From the course page: which week and which class (timetable slot or extra),
+  // or one past register to look at (?session=).
+  const wantCourse = (params.get('course') || '').toUpperCase();
+  const week = Number(params.get('week')) || undefined;
+  const which = params.get('extra') === '1' ? { extra: true } : params.get('slot') ? { slotId: params.get('slot') as string } : undefined;
+  const [viewSession, setViewSession] = useState(params.get('session') || '');
 
   useEffect(() => {
     (async () => {
@@ -53,7 +59,9 @@ export default function ScannerRoute() {
         // Class reps can also run attendance for the courses they take.
         const list = [...new Set([...taught, ...(isHoc ? (me.courses || []).map((x) => String(x)) : [])])];
         setCourses(list);
-        if (list[0]) setCourse(list[0]);
+        const norm = (c: string) => c.replace(/\s/g, '').toUpperCase();
+        const pick = wantCourse ? list.find((c) => norm(c) === norm(wantCourse)) : undefined;
+        if (pick || list[0]) setCourse(pick || list[0]);
       } catch (e) {
         errorToast(e, 'load your courses');
       } finally {
@@ -65,11 +73,11 @@ export default function ScannerRoute() {
   const refresh = useCallback(async () => {
     if (!course) return;
     try {
-      setReg(await api.attendanceRegister(course));
+      setReg(await api.attendanceRegister(course, viewSession || undefined));
     } catch (e) {
       errorToast(e, 'load the register');
     }
-  }, [course]);
+  }, [course, viewSession]);
 
   // Load on course change; poll while a session is open.
   useEffect(() => { setReg(null); void refresh(); }, [refresh]);
@@ -113,7 +121,10 @@ export default function ScannerRoute() {
       return;
     }
     setBusy(true);
-    try { setReg(await api.attendanceStart(course, undefined, minutes, mode === 'online' ? { meetLink } : undefined)); }
+    try {
+      setViewSession('');
+      setReg(await api.attendanceStart(course, week, minutes, mode === 'online' ? { meetLink } : undefined, which));
+    }
     catch (e) { errorToast(e, 'start attendance'); }
     finally { setBusy(false); }
   };
@@ -160,7 +171,7 @@ export default function ScannerRoute() {
       <Display size={30}>Take attendance</Display>
 
       <div style={{ marginTop: 16 }}>
-        <Drop label="Course" value={course} onChange={setCourse} options={courses.map((c) => ({ value: c, label: c }))} />
+        <Drop label="Course" value={course} onChange={(c) => { setViewSession(''); setCourse(c); }} options={courses.map((c) => ({ value: c, label: c }))} />
       </div>
 
       {open && reg?.session ? (
@@ -204,7 +215,17 @@ export default function ScannerRoute() {
         )
       ) : (
         <Card style={{ marginTop: 16, gap: 14 }}>
-          {reg?.session && <div className="t-13 muted">Last session: {reg.present.length} of {expected} {ofWhat} present.</div>}
+          {reg?.session && (
+            <div className="t-13 muted">
+              {viewSession ? 'This register' : 'Last session'}
+              {reg.session.week ? ` (Week ${reg.session.week}${reg.session.label ? ` · ${reg.session.label}` : ''}, ${new Date(reg.session.opensAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })})` : ''}: {reg.present.length} of {expected} {ofWhat} present.
+            </div>
+          )}
+          {(week || which) && (
+            <div className="t-13 w-6">
+              New register for {week ? `Week ${week}` : 'this class'}{which && 'extra' in which ? ' · Extra class' : which ? ' · the class you picked on the course page' : ''}
+            </div>
+          )}
           {reg && reg.listed == null && (
             <div className="t-12 muted">No class list for this course yet. Once your class rep uploads one, the register shows who's absent and checks typed matric numbers against it.</div>
           )}

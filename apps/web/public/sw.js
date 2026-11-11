@@ -14,7 +14,7 @@ const API_CACHE = 'unify-api-v1';
 const API_WAIT_MS = 4000;
 // Never replayed from cache: live data, one-time actions, admin tooling, and
 // class lists (names + matric numbers stay off the device and are always current).
-const NO_CACHE = [/^\/v1\/attendance\/(sessions|checkin|pass)/, /^\/v1\/admin\//, /^\/v1\/class-list/];
+const NO_CACHE = [/^\/v1\/attendance\/(sessions|checkin|pass|course)/, /^\/v1\/admin\//, /^\/v1\/class-list/];
 const SHELL = ['/', '/index.html', '/manifest.json'];
 
 // Update here if the backend moves (must match VITE_API_URL origin).

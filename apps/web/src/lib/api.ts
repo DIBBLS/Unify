@@ -211,6 +211,7 @@ export type NotificationItem = {
   topic?: number | null;
   link?: string | null;
   read?: boolean;
+  pinned?: boolean;
   created_at?: string;
 };
 
@@ -252,7 +253,15 @@ export function clearMeCache(): void {
 
 // ---- Head of Class + attendance ----
 export type HocPost = { id: string; type: 'announcement' | 'tip' | 'question'; title: string | null; content: string; createdAt: string; author: string; mine: boolean };
-export type AttendanceSession = { id: string; course: string; online?: boolean; code: string; rotatesAt: string; rotateSeconds: number; week: number | null; opensAt: string; closesAt: string; open: boolean; startedBy?: { name: string; role: string; mine: boolean } };
+export type CourseAttendance = {
+  course: string;
+  canTake: boolean;
+  mine: { held: number; attended: number; weeks: { week: number; held: number; attended: number }[] };
+  listed?: number | null;
+  slots: { id: string; day: number; start: string; end: string; venue: string }[];
+  registers: { id: string; week: number | null; label: string; opensAt: string; open: boolean; present: number }[];
+};
+export type AttendanceSession = { id: string; course: string; online?: boolean; code: string; rotatesAt: string; rotateSeconds: number; week: number | null; label?: string; slotId?: string; opensAt: string; closesAt: string; open: boolean; startedBy?: { name: string; role: string; mine: boolean } };
 export type CgpaCourse = { code: string; title: string; status: 'done' | 'priority' | 'not_yet'; units: number; grade: number | null };
 export type CgpaData = { cgpaCurrent: number | null; cgpaTarget: number | null; hideCgpa: boolean; unitsDone: number | null; unitsTotal: number | null; degreeYears?: number | null; level: string | null; courses: CgpaCourse[] };
 export type Material = { id: string; week: number; type: 'slides' | 'notes' | 'past-paper'; title: string; url: string; createdAt: string; mine: boolean };
@@ -343,7 +352,7 @@ export type HomeUpdate = { id: string; title: string; body: string; link?: strin
 
 export const api = {
   universities: () => apiFetch<University[]>("/v1/universities"),
-  settings: () => apiFetch<{ currentSemester: string }>("/v1/settings"),
+  settings: () => apiFetch<{ currentSemester: string; semesterStart?: string | null; semesterWeeks?: number }>("/v1/settings"),
   me: () => {
     if (meCache && Date.now() - meCache.at < 15000) return Promise.resolve(meCache.data);
     if (meInflight) return meInflight;
@@ -510,8 +519,8 @@ export const api = {
     apiFetch<{ links: { token: string; course: string; week: number; expires_at: string; views: number; created_at: string }[] }>('/v1/share/mine'),
   shareDelete: (token: string) =>
     apiFetch<{ ok: boolean }>(`/v1/share/${encodeURIComponent(token)}`, { method: 'DELETE' }),
-  adminAnnounce: (title: string, body: string, link?: string) =>
-    apiFetch<{ ok: boolean; reached: number; emailTo?: number }>('/v1/admin/announce', { method: 'POST', body: JSON.stringify({ title, body, link }) }),
+  adminAnnounce: (title: string, body: string, link?: string, opts?: { pin?: boolean; email?: boolean }) =>
+    apiFetch<{ ok: boolean; reached: number; emailTo?: number }>('/v1/admin/announce', { method: 'POST', body: JSON.stringify({ title, body, link, ...(opts || {}) }) }),
   adminEmailTest: (to: string) =>
     apiFetch<{ ok: boolean; status: number; body: string; sender: string; keySet: boolean; fromSet: boolean }>('/v1/admin/email/test', { method: 'POST', body: JSON.stringify({ to }) }),
   adminContent: () =>
@@ -544,8 +553,8 @@ export const api = {
     apiFetch<{ courses: { course: string; kind: string }[] }>(`/v1/admin/users/${id}/courses`),
   adminSetUserCourses: (id: string, courses: string[]) =>
     apiFetch<{ ok: boolean; courses: string[] }>(`/v1/admin/users/${id}/courses`, { method: 'PUT', body: JSON.stringify({ courses }) }),
-  adminSetSemester: (semester: string) =>
-    apiFetch<{ ok: boolean; currentSemester: string }>('/v1/admin/settings/semester', { method: 'PUT', body: JSON.stringify({ semester }) }),
+  adminSetSemester: (semester: string, calendar?: { start?: string; weeks?: number }) =>
+    apiFetch<{ ok: boolean; currentSemester: string }>('/v1/admin/settings/semester', { method: 'PUT', body: JSON.stringify({ semester, ...(calendar || {}) }) }),
   adminPromote: () =>
     apiFetch<{ ok: boolean; promoted: number; graduated: number }>('/v1/admin/users/promote', { method: 'POST', body: JSON.stringify({}) }),
   adminDeleteUser: (id: string) => apiFetch<{ ok: boolean }>(`/v1/admin/users/${id}`, { method: 'DELETE' }),
@@ -562,7 +571,7 @@ export const api = {
     if (level) p.set('level', level);
     if (semester) p.set('semester', semester);
     const q = p.toString();
-    return apiFetch<{ code: string; title: string; levels: string[]; semesters: string[]; weeks: number; lecturers: string[]; staff: { name: string; avatar: string }[] }[]>(`/v1/courses${q ? `?${q}` : ''}`);
+    return apiFetch<{ code: string; title: string; levels: string[]; semesters: string[]; weeks: number; lecturers: string[]; staff: { name: string; avatar: string; persona?: string }[] }[]>(`/v1/courses${q ? `?${q}` : ''}`);
   },
   courseSearch: (q: string, level = '') => {
     const p = new URLSearchParams({ q });
@@ -642,21 +651,33 @@ export const api = {
     courses?: { code: string; status: CgpaCourse['status']; units: number; grade?: number | null }[];
   }) => apiFetch<{ ok: boolean }>('/v1/cgpa', { method: 'PUT', body: JSON.stringify(payload) }),
   // Head of Class
-  hocPosts: () => apiFetch<{ posts: HocPost[]; isHoc: boolean; department?: string; level?: string }>('/v1/hoc/posts'),
+  hocPosts: () => apiFetch<{ posts: HocPost[]; isHoc: boolean; department?: string; level?: string; audience?: { students: number; fromList: boolean } }>('/v1/hoc/posts'),
   hocPost: (payload: { type: HocPost['type']; title?: string; content: string }) =>
     apiFetch<{ ok: boolean; id: string }>('/v1/hoc/posts', { method: 'POST', body: JSON.stringify(payload) }),
   hocDelete: (id: string) => apiFetch<{ ok: boolean }>(`/v1/hoc/posts/${id}`, { method: 'DELETE' }),
-  hocRequest: () => apiFetch<{ ok: boolean }>('/v1/hoc/request', { method: 'POST', body: '{}' }),
+  hocRequest: (note?: string) => apiFetch<{ ok: boolean; already?: boolean }>('/v1/hoc/request', { method: 'POST', body: JSON.stringify({ note }) }),
+  // Scoped roles: level admins, heads of department, deans
+  rolesMine: () => apiFetch<{ admin: boolean; grants: { id: string; role: 'level_admin' | 'hod' | 'dean'; faculty: string; department: string; level: string }[]; canApproveHocs: boolean; canSeeReports: boolean }>('/v1/roles/mine'),
+  hocRequests: () => apiFetch<{ requests: { id: string; name: string; email: string; department: string; level: string; note: string; status: 'pending' | 'approved' | 'rejected'; at: string; repsInClass: number }[] }>('/v1/hoc/requests'),
+  hocAnswer: (id: string, approve: boolean, note?: string) =>
+    apiFetch<{ ok: boolean }>(`/v1/hoc/requests/${id}`, { method: 'POST', body: JSON.stringify({ approve, note }) }),
+  roleGrants: () => apiFetch<{ grants: { id: string; role: 'level_admin' | 'hod' | 'dean'; faculty: string; department: string; level: string; name: string; email: string }[] }>('/v1/admin/role-grants'),
+  roleGrant: (payload: { email: string; role: 'level_admin' | 'hod' | 'dean'; faculty?: string; department?: string; level?: string }) =>
+    apiFetch<{ ok: boolean; name: string }>('/v1/admin/role-grants', { method: 'POST', body: JSON.stringify(payload) }),
+  roleRevoke: (id: string) => apiFetch<{ ok: boolean }>(`/v1/admin/role-grants/${id}`, { method: 'DELETE' }),
+  attendanceReport: () =>
+    apiFetch<{ scope: string; classes: { department: string; level: string; students: number; onUnify: number; courses: { course: string; held: number; marks: number; rate: number | null }[] }[] }>('/v1/reports/attendance'),
   hocGrant: (email: string, revoke = false) =>
     apiFetch<{ ok: boolean; name: string | null; isHoc: boolean }>('/v1/hoc/grant', { method: 'POST', body: JSON.stringify({ email, revoke }) }),
   // Attendance
   attendanceProfile: () => apiFetch<{ fullName: string; matric: string }>('/v1/attendance/profile'),
   attendanceSetProfile: (fullName: string, matric: string) =>
     apiFetch<{ ok: boolean }>('/v1/attendance/profile', { method: 'PUT', body: JSON.stringify({ fullName, matric }) }),
-  attendanceStart: (course: string, week?: number, minutes?: number, online?: { meetLink?: string }) =>
-    apiFetch<AttendanceRegister>('/v1/attendance/sessions', { method: 'POST', body: JSON.stringify({ course, week, minutes, ...(online ? { online: true, meetLink: online.meetLink || undefined } : {}) }) }),
-  attendanceRegister: (course: string) =>
-    apiFetch<AttendanceRegister>(`/v1/attendance/sessions?course=${encodeURIComponent(course)}`),
+  attendanceStart: (course: string, week?: number, minutes?: number, online?: { meetLink?: string }, which?: { slotId?: string; extra?: boolean }) =>
+    apiFetch<AttendanceRegister>('/v1/attendance/sessions', { method: 'POST', body: JSON.stringify({ course, week, minutes, ...(online ? { online: true, meetLink: online.meetLink || undefined } : {}), ...(which || {}) }) }),
+  attendanceRegister: (course: string, sessionId?: string) =>
+    apiFetch<AttendanceRegister>(`/v1/attendance/sessions?course=${encodeURIComponent(course)}${sessionId ? `&session=${encodeURIComponent(sessionId)}` : ''}`),
+  attendanceCourse: (course: string) => apiFetch<CourseAttendance>(`/v1/attendance/course?course=${encodeURIComponent(course)}`),
   attendanceClose: (id: string) => apiFetch<{ ok: boolean }>(`/v1/attendance/sessions/${id}/close`, { method: 'POST', body: '{}' }),
   // Online classes only: the code shared in the meeting chat.
   attendanceCheckin: (code: string) =>
@@ -668,6 +689,7 @@ export const api = {
     apiFetch<{ courses: { course: string; held: number; attended: number }[]; recent: { course: string; at: string }[] }>('/v1/attendance/mine'),
   attendanceExport: (sessionId: string, course: string) =>
     apiDownload(`/v1/attendance/sessions/${sessionId}/register.csv`, `${course.replace(/\s+/g, '')}-register.csv`),
+  deleteMyAccount: () => apiFetch<{ ok: boolean }>('/v1/me', { method: 'DELETE', body: JSON.stringify({ confirm: 'DELETE' }) }, 0),
   // Class lists: student side
   classListMe: () => apiFetch<ClassListMe>('/v1/class-list/me'),
   classListClaim: (matric: string, ask?: { fullName: string; note?: string }) =>

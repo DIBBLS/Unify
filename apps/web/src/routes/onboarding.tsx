@@ -19,6 +19,52 @@ type Role = 'student' | 'lecturer' | 'contributor' | 'admin';
 // Fallback so onboarding never dead-ends when the backend has no universities yet.
 const FALLBACK_UNIS: Uni[] = [{ id: 'lasu', name: 'Lagos State University', shortName: 'LASU' }];
 
+// Review p.3: list popular Nigerian universities, only LASU selectable for now.
+const COMING_UNIS = [
+  { name: 'University of Lagos', short: 'UNILAG' },
+  { name: 'University of Ibadan', short: 'UI' },
+  { name: 'Obafemi Awolowo University', short: 'OAU' },
+  { name: 'University of Nigeria, Nsukka', short: 'UNN' },
+  { name: 'Ahmadu Bello University', short: 'ABU' },
+  { name: 'University of Benin', short: 'UNIBEN' },
+  { name: 'Covenant University', short: 'CU' },
+  { name: 'Federal University of Technology, Akure', short: 'FUTA' },
+  { name: 'University of Ilorin', short: 'UNILORIN' },
+  { name: 'Lagos State University of Science and Technology', short: 'LASUSTECH' },
+  { name: 'Yaba College of Technology', short: 'YABATECH' },
+  { name: 'Federal University of Technology, Minna', short: 'FUTMINNA' },
+  { name: 'Nnamdi Azikiwe University', short: 'UNIZIK' },
+  { name: 'University of Port Harcourt', short: 'UNIPORT' },
+  { name: 'Babcock University', short: 'BU' },
+];
+// Inside LASU: Engineering is open; Environmental Sciences and Agriculture are next (same campus).
+const COMING_FACULTIES = [
+  { name: 'Faculty of Environmental Sciences', soon: true },
+  { name: 'School of Agriculture', soon: true },
+  { name: 'Faculty of Arts', soon: false },
+  { name: 'Faculty of Communication and Media Studies', soon: false },
+  { name: 'Faculty of Education', soon: false },
+  { name: 'Faculty of Law', soon: false },
+  { name: 'Faculty of Management Sciences', soon: false },
+  { name: 'Faculty of Science', soon: false },
+  { name: 'Faculty of Social Sciences', soon: false },
+  { name: 'Faculty of Transport', soon: false },
+  { name: 'College of Medicine', soon: false },
+];
+
+// A greyed-out choice that can't be picked yet.
+function Soon({ name, sub, label }: { name: string; sub?: string; label: string }) {
+  return (
+    <div aria-disabled="true" style={{ padding: 14, border: '1px dashed var(--border)', borderRadius: 12, background: 'transparent', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, opacity: 0.55 }}>
+      <span>
+        <span style={{ fontWeight: 700, display: 'block' }}>{name}</span>
+        {sub && <span style={{ fontSize: 12, color: 'var(--text2)' }}>{sub}</span>}
+      </span>
+      <span style={{ fontSize: 11, fontWeight: 800, whiteSpace: 'nowrap', padding: '3px 10px', borderRadius: 9999, border: '1px solid var(--border)' }}>{label}</span>
+    </div>
+  );
+}
+
 const UUID_RE = /^[0-9a-f-]{36}$/i;
 
 export default function OnboardingRoute() {
@@ -237,9 +283,6 @@ export default function OnboardingRoute() {
       <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
         {step === 1 && (
           <>
-            <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0 4px' }}>
-              <BoxBoy pose="wavePhone" width={88} />
-            </div>
             <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="e.g. Joshua" style={{ padding: 12, border: '1px solid var(--border)', borderRadius: 12, fontSize: 16 }} />
             {firstName && <div style={{ fontSize: 14 }}>{daypart}, <strong>{firstName}</strong></div>}
             <button onClick={() => { if (!firstName.trim()) return; if (isEdit) { void save(false); return; } setStep(2); }} style={{ padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
@@ -255,11 +298,15 @@ export default function OnboardingRoute() {
                 <div style={{ fontSize: 12, color: 'var(--text2)' }}>{u.shortName}</div>
               </button>
             ))}
+            {COMING_UNIS.filter((c) => !universities.some((u) => u.name.toLowerCase() === c.name.toLowerCase())).map((c) => (
+              <Soon key={c.name} name={c.name} sub={c.short} label="Coming soon" />
+            ))}
           </>
         )}
         {step === 3 && faculties.map((f) => (
           <button key={f.name} onClick={() => { setFaculty(f.name); setStep(4); }} style={{ padding: 14, border: '1px solid var(--border)', borderRadius: 12, background: 'var(--surface)', textAlign: 'left' }}>{f.name}</button>
         ))}
+        {step === 3 && COMING_FACULTIES.map((f) => <Soon key={f.name} name={f.name} label={f.soon ? 'Coming very soon' : 'Coming soon'} />)}
         {step === 4 && departments.map((d) => (
           <button key={d.name} onClick={() => { setDepartment(d.name); if (role === 'lecturer' || role === 'contributor') { void save(false, { department: d.name }); return; } setStep(5); }} style={{ padding: 14, border: '1px solid var(--border)', borderRadius: 12, background: 'var(--surface)', textAlign: 'left' }}>
             {d.name} <span style={{ color: 'var(--text2)', fontSize: 12 }}>{d.sub}</span>

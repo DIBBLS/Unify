@@ -61,6 +61,82 @@ function SupportRow() {
   );
 }
 
+// Level admins, heads of department and deans: links to what their role unlocks.
+function ScopedRoleLinks() {
+  const [r, setR] = useState<{ canApproveHocs: boolean; canSeeReports: boolean; label: string } | null>(null);
+  useEffect(() => {
+    api.rolesMine().then((x) => {
+      const names = x.grants.map((g) => (g.role === 'level_admin' ? `Level admin · ${g.department} ${g.level}` : g.role === 'hod' ? `Head of department · ${g.department}` : `Dean · ${g.faculty}`));
+      if (x.grants.length) setR({ canApproveHocs: x.canApproveHocs, canSeeReports: x.canSeeReports, label: names.join(' · ') });
+    }).catch(() => {});
+  }, []);
+  if (!r) return null;
+  const row: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 8, color: 'var(--text)', textDecoration: 'none' };
+  return (
+    <>
+      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--text2)', margin: '4px 0 6px' }}>{r.label.toUpperCase()}</div>
+      {r.canApproveHocs && (
+        <Link to={ROUTES.hocRequests} style={row}>
+          <span style={{ fontSize: 13, fontWeight: 700 }}>Class rep requests</span><span aria-hidden="true" style={{ color: 'var(--text3)' }}>›</span>
+        </Link>
+      )}
+      {r.canSeeReports && (
+        <Link to={ROUTES.reports} style={row}>
+          <span style={{ fontSize: 13, fontWeight: 700 }}>Attendance reports (counts only)</span><span aria-hidden="true" style={{ color: 'var(--text3)' }}>›</span>
+        </Link>
+      )}
+    </>
+  );
+}
+
+// Delete my account: a quiet link that opens a sheet, and the person types DELETE.
+function DeleteAccount({ onDeleted }: { onDeleted: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [typed, setTyped] = useState('');
+  const [busy, setBusy] = useState(false);
+  const go = async () => {
+    setBusy(true);
+    try {
+      await api.deleteMyAccount();
+      toastSuccess('Your account was deleted.');
+      onDeleted();
+    } catch (e) {
+      errorToast(e, 'delete your account');
+      setBusy(false);
+    }
+  };
+  return (
+    <>
+      <button onClick={() => { setTyped(''); setOpen(true); }} style={{ display: 'block', margin: '16px auto 0', fontSize: 12, fontWeight: 700, color: 'var(--text3)', textDecoration: 'underline', background: 'transparent' }}>
+        Delete my account
+      </button>
+      {open && (
+        <ConfirmModal
+          title="Delete your account?"
+          body={
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <span>Your profile, progress, CGPA plan and notifications are deleted and you're signed out. This can't be undone.</span>
+              <span>Attendance your class rep took stays on the class register under your name from the class list.</span>
+              <input
+                value={typed}
+                onChange={(e) => setTyped(e.target.value)}
+                placeholder="Type DELETE"
+                aria-label="Type DELETE to confirm"
+                autoCapitalize="characters"
+                style={{ padding: 12, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 15, textAlign: 'center' }}
+              />
+            </div>
+          }
+          confirmLabel="Delete account"
+          busy={busy}
+          onConfirm={() => { if (typed.trim() === 'DELETE') void go(); else errorToast(new Error('Type DELETE in capitals to confirm.'), 'delete your account'); }}
+          onCancel={() => setOpen(false)}
+        />
+      )}
+    </>
+  );
+}
+
 export default function MeRoute() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -85,6 +161,7 @@ export default function MeRoute() {
   const [meAvatar, setMeAvatar] = useState('');
 
   const [personaBusy, setPersonaBusy] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
   const picture = resolvePicture(profile, meAvatar);
   // An HOC's class is locked server-side, since it decides who their posts reach.
   const isHoc = !!(profile as unknown as { is_hoc?: boolean } | null)?.is_hoc;
@@ -320,13 +397,24 @@ export default function MeRoute() {
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '24px 16px 80px' }}>
       <BackButton to="/home" />
       <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 20 }}>
-        {picture.src ? (
-          <img src={picture.src} alt="Profile picture" style={{ width: 64, height: 64, borderRadius: 9999, objectFit: 'cover', flexShrink: 0 }} />
-        ) : (
-          <div style={{ width: 64, height: 64, borderRadius: 9999, background: 'var(--u-green)', color: 'var(--u-black)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 24, flexShrink: 0 }}>
-            {initial}
-          </div>
-        )}
+        {/* Review p.6: show the avatar they picked; tap it to change (no picker up front). */}
+        <button
+          onClick={() => setShowPicker((v) => !v)}
+          aria-label="Change your picture"
+          aria-expanded={showPicker}
+          style={{ position: 'relative', padding: 0, background: 'none', border: 'none', borderRadius: 9999, flexShrink: 0 }}
+        >
+          {picture.src ? (
+            <img src={picture.src} alt="" style={{ width: 64, height: 64, borderRadius: 9999, objectFit: 'cover', display: 'block' }} />
+          ) : (
+            <div style={{ width: 64, height: 64, borderRadius: 9999, background: 'var(--u-green)', color: 'var(--u-black)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 24 }}>
+              {initial}
+            </div>
+          )}
+          <span aria-hidden="true" style={{ position: 'absolute', right: -2, bottom: -2, width: 24, height: 24, borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text2)' }}>
+            <Pencil size={12} />
+          </span>
+        </button>
         <div style={{ flex: 1 }}>
           <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 22 }}>{profile?.first_name || 'Builder'}</h1>
           <div style={{ fontSize: 13, color: 'var(--text2)' }}>{email}</div>
@@ -339,8 +427,18 @@ export default function MeRoute() {
             </div>
           )}
           {verifMsg && <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>{verifMsg}</div>}
-          <label style={{ display: 'inline-block', marginTop: 6, fontSize: 12, fontWeight: 800, color: 'var(--u-good)', cursor: 'pointer' }}>
-            {uploadingAvatar ? 'Uploading…' : profile?.avatar_url ? 'Change picture' : 'Add a picture'}
+          {avatarMsg && <div style={{ fontSize: 12, color: 'var(--u-good)', marginTop: 4 }}>{avatarMsg}</div>}
+        </div>
+        <BoxBoy pose="armsCrossed" width={64} />
+      </div>
+
+      {showPicker && (
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 16 }}>
+        <div style={{ fontWeight: 800, fontSize: 14 }}>Your picture</div>
+        <div style={{ fontSize: 12, color: 'var(--text2)', margin: '2px 0 10px' }}>
+          Pick a Box Boy{profile?.avatar_url ? ' (it replaces your uploaded photo)' : ''}, or{' '}
+          <label style={{ fontWeight: 800, color: 'var(--u-good)', cursor: 'pointer' }}>
+            {uploadingAvatar ? 'uploading…' : profile?.avatar_url ? 'upload a different photo' : 'upload a photo'}
             <input
               type="file"
               accept="image/*,.heic,.heif"
@@ -349,15 +447,7 @@ export default function MeRoute() {
               style={{ display: 'none' }}
             />
           </label>
-          {avatarMsg && <div style={{ fontSize: 12, color: 'var(--u-good)', marginTop: 4 }}>{avatarMsg}</div>}
-        </div>
-        <BoxBoy pose="armsCrossed" width={64} />
-      </div>
-
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 16 }}>
-        <div style={{ fontWeight: 800, fontSize: 14 }}>Or pick a Box Boy as your picture</div>
-        <div style={{ fontSize: 12, color: 'var(--text2)', margin: '2px 0 10px' }}>
-          {profile?.avatar_url ? 'Picking one replaces your uploaded photo.' : 'Tap one to use it everywhere.'}
+          .
         </div>
         <div role="radiogroup" aria-label="Box Boy persona" style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           {PERSONAS.map((p) => {
@@ -379,6 +469,7 @@ export default function MeRoute() {
           })}
         </div>
       </div>
+      )}
 
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', marginBottom: 16 }}>
         {rows.map(([label, value], i) => (
@@ -408,6 +499,7 @@ export default function MeRoute() {
           <span aria-hidden="true" style={{ color: 'var(--text3)' }}>›</span>
         </Link>
       )}
+      <ScopedRoleLinks />
       {saveMsg && <Flash tone="success" message={saveMsg} onDismiss={() => setSaveMsg('')} />}
 
       {editing && (
@@ -555,6 +647,7 @@ export default function MeRoute() {
           Install Unify on this device
         </button>
       )}
+      {!isAdmin && <DeleteAccount onDeleted={() => void doLogout()} />}
       {(isAdmin || import.meta.env.DEV) && (
         <Link to="/screens" className="btn btn--white btn--sm" style={{ marginTop: 16, display: 'flex', width: 'fit-content', marginInline: 'auto' }}>
           All screens

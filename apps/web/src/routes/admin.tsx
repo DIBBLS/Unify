@@ -2,6 +2,7 @@ import { AdminSkeleton } from '../components/Skeletons';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { ROUTES } from '../lib/routes';
 import { Shield, Trash2, PenTool, BookOpen, ChevronDown, ChevronRight, BarChart3, UserCheck, Users, LibraryBig, Cpu, Building2, CalendarDays, Megaphone, AlertTriangle, Scale, LayoutGrid, GraduationCap, Menu, X } from 'lucide-react';
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type AdminUser } from '../lib/api';
@@ -220,6 +221,9 @@ export default function AdminRoute() {
       setDefaultModel(m.default);
       if (t) setTrends(t);
       if (st.currentSemester) setCurrentSemester(st.currentSemester);
+      const cal = st as { semesterStart?: string | null; semesterWeeks?: number };
+      setSemStart(cal.semesterStart || '');
+      setSemWeeks(cal.semesterWeeks || 12);
     } catch (err) {
       setError(describeError(err, 'load that'));
     }
@@ -340,6 +344,19 @@ export default function AdminRoute() {
     }
   };
 
+  // Semester calendar: Week 1's start date and teaching weeks ("Week 3 of 12" on Home, attendance weeks).
+  const [semStart, setSemStart] = useState('');
+  const [semWeeks, setSemWeeks] = useState(12);
+  const saveCalendar = async () => {
+    setError('');
+    try {
+      await api.adminSetSemester(currentSemester, { start: semStart || undefined, weeks: semWeeks });
+      setSuccess(semStart ? `Semester calendar saved: Week 1 starts ${new Date(semStart).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}, ${semWeeks} weeks.` : 'Saved.');
+    } catch (err) {
+      setError(describeError(err, 'save the calendar'));
+    }
+  };
+
   // Academic session: which semester students see (global toggle).
   const setSemester = async (semester: string) => {
     setError('');
@@ -382,6 +399,8 @@ export default function AdminRoute() {
   const [announceBody, setAnnounceBody] = useState('');
   const [announcing, setAnnouncing] = useState(false);
   const [alsoHome, setAlsoHome] = useState(false);
+  const [pinIt, setPinIt] = useState(false);
+  const [emailIt, setEmailIt] = useState(false);
   const [updatesKey, setUpdatesKey] = useState(0);
   const [testEmail, setTestEmail] = useState('');
   const [testing, setTesting] = useState(false);
@@ -396,7 +415,7 @@ export default function AdminRoute() {
     setAnnouncing(true);
     setError('');
     try {
-      const res = await api.adminAnnounce(announceTitle.trim(), announceBody.trim());
+      const res = await api.adminAnnounce(announceTitle.trim(), announceBody.trim(), undefined, { pin: pinIt, email: emailIt });
       if (alsoHome) {
         // Same notice on everyone's Home slider (the slider has shorter limits).
         const cur = await api.adminUpdates();
@@ -585,6 +604,11 @@ export default function AdminRoute() {
       </Module>
 
       <Module id="hoc" openId={openModule}>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+          <Link to={ROUTES.hocRequests} className="btn btn--amber btn--sm">Class rep requests</Link>
+          <Link to={ROUTES.adminRoles} className="btn btn--white btn--sm">Level admins, HODs and deans</Link>
+          <Link to={ROUTES.reports} className="btn btn--white btn--sm">Attendance reports</Link>
+        </div>
         <div style={card}>
           <div style={{ fontWeight: 800, fontSize: 16 }}>Class reps (HOC)</div>
           <div style={{ fontSize: 12, color: 'var(--text2)', margin: '4px 0 10px' }}>A Head of Class can post to their class board. Enter the student's email.</div>
@@ -806,6 +830,18 @@ export default function AdminRoute() {
           {promoting ? 'Promoting…' : 'Promote all students one level'}
         </button>
         <div style={{ fontSize: 11, color: 'var(--text2)', marginTop: 6 }}>500 Level graduates; enrollments reset for promoted students.</div>
+        <div style={{ borderTop: '1px solid var(--border)', marginTop: 14, paddingTop: 12 }}>
+          <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 8 }}>Semester calendar: when Week 1 starts and how many teaching weeks. Students see "Week 3 of 12" on Home, and attendance is filed by week.</div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <label style={{ fontSize: 12, fontWeight: 700, flex: '1 1 160px' }}>Week 1 starts
+              <input type="date" value={semStart} onChange={(e) => setSemStart(e.target.value)} style={{ display: 'block', width: '100%', marginTop: 4, padding: 10, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }} />
+            </label>
+            <label style={{ fontSize: 12, fontWeight: 700, flex: '0 1 110px' }}>Weeks
+              <input type="number" min={6} max={26} value={semWeeks} onChange={(e) => setSemWeeks(Math.max(6, Math.min(26, Number(e.target.value) || 12)))} style={{ display: 'block', width: '100%', marginTop: 4, padding: 10, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }} />
+            </label>
+          </div>
+          <button onClick={() => void saveCalendar()} style={{ ...primaryBtn, width: '100%', marginTop: 10 }}>Save calendar</button>
+        </div>
       </div>
       </Module>
 
@@ -817,6 +853,14 @@ export default function AdminRoute() {
         <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, margin: '0 0 8px', color: 'var(--text)' }}>
           <input type="checkbox" checked={alsoHome} onChange={(e) => setAlsoHome(e.target.checked)} />
           Also show it on everyone's Home slider
+        </label>
+        <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, margin: '0 0 8px', color: 'var(--text)' }}>
+          <input type="checkbox" checked={pinIt} onChange={(e) => setPinIt(e.target.checked)} />
+          Pin it to the top of Notifications ("Clear all" keeps it)
+        </label>
+        <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, margin: '0 0 8px', color: 'var(--text)' }}>
+          <input type="checkbox" checked={emailIt} onChange={(e) => setEmailIt(e.target.checked)} />
+          Also email everyone (only for things that really matter: account, security, big news)
         </label>
         <button onClick={() => setConfirm({ title: 'Send to everyone?', body: 'This announcement lands on every user\u2019s bell instantly.', label: 'Send', run: () => void announce() })} disabled={announcing} style={{ ...primaryBtn, width: '100%', opacity: announcing ? 0.6 : 1 }}>
           {announcing ? 'Sending…' : 'Send to all users'}
