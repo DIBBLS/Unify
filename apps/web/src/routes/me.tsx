@@ -499,6 +499,16 @@ export default function MeRoute() {
           <span aria-hidden="true" style={{ color: 'var(--text3)' }}>›</span>
         </Link>
       )}
+      <Link
+        to="/settings"
+        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 8, color: 'var(--text)', textDecoration: 'none' }}
+      >
+        <span>
+          <span style={{ display: 'block', fontSize: 13, fontWeight: 700 }}>Settings</span>
+          <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>Notifications, quiet hours, theme</span>
+        </span>
+        <span aria-hidden="true" style={{ color: 'var(--text3)' }}>›</span>
+      </Link>
       <ScopedRoleLinks />
       {saveMsg && <Flash tone="success" message={saveMsg} onDismiss={() => setSaveMsg('')} />}
 

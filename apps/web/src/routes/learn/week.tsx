@@ -1,7 +1,8 @@
 import { ReaderSkeleton } from '../../components/Skeletons';
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Check, Download, ArrowUp, Share2, Lock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Download, ArrowUp, Share2, Lock, Flag } from 'lucide-react';
+import ReportSheet from '../../components/ReportSheet';
 import { api, type TopicMeta } from '../../lib/api';
 import { log } from '../../lib/log';
 import type { UnifyNote, Topic } from '../../types/note';
@@ -88,6 +89,7 @@ export default function LearnPage() {
   const topicTopRef = useRef<HTMLDivElement>(null);
   const [showTop, setShowTop] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [reporting, setReporting] = useState(false);
   // Offline-first: this week saved into Cache Storage opens with zero
   // network (bus, dead hostel wifi). Marker mirrors the cached payload.
   const [savedOff, setSavedOff] = useState(false);
@@ -389,7 +391,22 @@ export default function LearnPage() {
             <Share2 size={14} /> Share
           </button>
         )}
+        {(!previewMode || viewer?.role === 'lecturer') && (
+          <button onClick={() => setReporting(true)} style={{ display: 'flex', gap: 6, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 700, color: 'var(--text2)' }}>
+            <Flag size={14} /> {viewer?.role === 'lecturer' ? 'Review this week' : 'Report'}
+          </button>
+        )}
       </div>
+      {reporting && note && (
+        <ReportSheet
+          course={note.course}
+          week={weekNum}
+          topics={topics.map((t) => t.title || `Topic ${t.number}`)}
+          current={shownTopic?.title || ''}
+          review={viewer?.role === 'lecturer'}
+          onClose={() => setReporting(false)}
+        />
+      )}
       {sharing && note && (
         <ShareModal course={note.course} week={weekNum} title={note.title} topics={topics.map((t) => t.title || `Topic ${t.number}`)} onClose={() => setSharing(false)} />
       )}

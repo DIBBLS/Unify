@@ -108,6 +108,9 @@ function MyPass({ onOnline }: { onOnline: () => void }) {
 
   const s = pass?.student;
   const pic = s ? resolvePicture({ avatar_url: s.avatar, box_boy_persona: s.persona }) : null;
+  // S74: offline past the scanner's grace window, the old QR no longer works:
+  // say so instead of showing a code that will be refused.
+  const stale = !!pass && left === 0 && Date.now() > new Date(pass.rotatesAt).getTime() + pass.rotateSeconds * 1000;
 
   return (
     <>
@@ -127,12 +130,22 @@ function MyPass({ onOnline }: { onOnline: () => void }) {
           </div>
         )}
         <div style={{ background: '#fff', padding: 14, borderRadius: 18, lineHeight: 0, minWidth: 288, minHeight: 288, display: 'grid', placeItems: 'center' }} aria-label="Your attendance pass QR code">
-          {pass ? <QRCodeSVG value={pass.token} size={260} level="M" /> : <span className="t-13" style={{ color: '#555', lineHeight: 1.4 }}>{err ? 'No pass yet' : 'Loading your pass…'}</span>}
+          {pass && !stale ? (
+            <QRCodeSVG value={pass.token} size={260} level="M" />
+          ) : stale ? (
+            <span style={{ display: 'grid', placeItems: 'center', gap: 8, color: '#0a0a0a', lineHeight: 1.4, padding: 12 }}>
+              <BoxBoy pose="phoneOut" width={70} calm />
+              <span className="t-15 w-7">Reconnect to refresh your pass</span>
+              <span className="t-13" style={{ color: '#555' }}>Your pass changes every 30 seconds and needs the internet to get a new one. Turn on data or wifi.</span>
+            </span>
+          ) : (
+            <span className="t-13" style={{ color: '#555', lineHeight: 1.4 }}>{err ? 'No pass yet' : 'Loading your pass…'}</span>
+          )}
         </div>
         <div role="status" aria-live="polite" className="t-13" style={{ minHeight: 20, color: err ? 'var(--u-red, #dc2626)' : undefined, opacity: err ? 1 : 0.75 }}>
-          {err || (pass ? `Changes in ${left}s. A screenshot won't work.` : '')}
+          {stale ? 'No connection.' : err || (pass ? `Changes in ${left}s. A screenshot won't work.` : '')}
         </div>
-        {err && <button className="btn btn--amber btn--sm" onClick={() => void load()}>Try again</button>}
+        {(err || stale) && <button className="btn btn--amber btn--sm" onClick={() => void load()}>Try again</button>}
       </Card>
       <div className="t-13 muted" style={{ textAlign: 'center', marginTop: 12 }}>
         Show this to your class rep or lecturer. They scan it to mark you present. Phone dead? They can type your matric number instead.
@@ -146,21 +159,25 @@ function OnlineCode({ course, meetHref, initial, onPass }: { course: string; mee
   const [code, setCode] = useState(initial);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<{ course: string; already: boolean } | null>(null);
+  // S72: a wrong or expired code says why, right under the box.
+  const [wrong, setWrong] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => { inputRef.current?.focus(); }, []);
 
   const submit = async () => {
     if (!/^\d{6}$/.test(code)) {
-      errorToast(new Error('Enter the 6-digit code from the meeting chat.'), 'mark attendance');
+      setWrong('Enter the 6-digit code from the meeting chat.');
       return;
     }
     setBusy(true);
+    setWrong('');
     try {
       const r = await api.attendanceCheckin(code);
       setDone({ course: r.course, already: r.already });
     } catch (e) {
-      errorToast(e, 'mark attendance');
+      setWrong(describeError(e, 'mark attendance'));
       setCode('');
+      inputRef.current?.focus();
     } finally {
       setBusy(false);
     }
@@ -190,14 +207,21 @@ function OnlineCode({ course, meetHref, initial, onPass }: { course: string; mee
       <input
         ref={inputRef}
         value={code}
-        onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+        onChange={(e) => { setCode(e.target.value.replace(/\D/g, '').slice(0, 6)); setWrong(''); }}
         onKeyDown={(e) => { if (e.key === 'Enter') void submit(); }}
         inputMode="numeric"
         autoComplete="one-time-code"
         placeholder="000000"
         aria-label="Attendance code"
-        style={{ width: '100%', marginTop: 20, padding: 16, textAlign: 'center', fontSize: 34, letterSpacing: 10, fontWeight: 800, fontFamily: 'var(--font-body)', borderRadius: 16, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}
+        aria-invalid={!!wrong}
+        aria-describedby={wrong ? 'code-wrong' : undefined}
+        style={{ width: '100%', marginTop: 20, padding: 16, textAlign: 'center', fontSize: 34, letterSpacing: 10, fontWeight: 800, fontFamily: 'var(--font-body)', borderRadius: 16, border: `1px solid ${wrong ? 'var(--u-red, #dc2626)' : 'var(--border)'}`, background: 'var(--surface)', color: 'var(--text)' }}
       />
+      {wrong && (
+        <div id="code-wrong" role="alert" className="t-13" style={{ marginTop: 8, color: 'var(--u-red, #dc2626)', textAlign: 'center' }}>
+          {wrong} Codes change every 10 minutes: check the meeting chat for the latest one.
+        </div>
+      )}
       <button className="btn btn--amber btn--block" disabled={busy || code.length !== 6} onClick={() => void submit()} style={{ marginTop: 18 }}>
         {busy ? 'Checking…' : 'Mark me present'}
       </button>
