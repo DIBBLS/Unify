@@ -40,11 +40,16 @@ export type EOQ = {
   passMark?: number;
   questions: {
     number: number;
-    type: 'mcq' | 'fitb';
+    /** mcq, fitb (a word), number (S30: numeric answer within a tolerance), maths (S31: an expression, checked by value). */
+    type: 'mcq' | 'fitb' | 'number' | 'maths';
     question: string;
     options?: string[];
     correct?: string;
     acceptedAnswers?: string[];
+    /** number: the answer, an allowed +/- tolerance (absolute; default 1% of the answer) and a unit shown after the box. */
+    answer?: number;
+    tolerance?: number;
+    unit?: string;
     feedback?: { correct: string; wrong: string };
     topicRef?: string;
   }[];

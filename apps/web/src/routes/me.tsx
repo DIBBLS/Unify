@@ -298,6 +298,11 @@ export default function MeRoute() {
         setError("Couldn't load your profile. Check your connection and try again.");
       } finally {
         setLoading(false);
+        // S47: /me?edit=1 (Settings → Profile) opens the editor straight away.
+        if (new URLSearchParams(window.location.search).get('edit') === '1') {
+          setEditing(true);
+          window.setTimeout(() => document.getElementById('me-edit')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+        }
       }
     })();
   }, [navigate]);
@@ -513,7 +518,7 @@ export default function MeRoute() {
       {saveMsg && <Flash tone="success" message={saveMsg} onDismiss={() => setSaveMsg('')} />}
 
       {editing && (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 8, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div id="me-edit" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 8, display: 'flex', flexDirection: 'column', gap: 10, scrollMarginTop: 70 }}>
           <div style={{ fontSize: 12, fontWeight: 800 }}>Edit profile</div>
           <label style={{ fontSize: 12, fontWeight: 700 }}>
             First name

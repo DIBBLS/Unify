@@ -5,6 +5,7 @@ import { describeError, errorToast } from '../lib/errors';
 import { toastSuccess } from '../lib/toast';
 import { ROUTES } from '../lib/routes';
 import BackButton from '../components/BackButton';
+import Drop from '../components/Drop';
 import { Card, Display, Label } from '../components/redesign/ui';
 
 // Admin: give scoped roles to existing accounts. Level admins approve class reps
@@ -50,23 +51,19 @@ export default function AdminRolesRoute() {
       <Display size={28}>Level admins, HODs and deans</Display>
       <Card style={{ marginTop: 16, gap: 10 }}>
         <label className="t-13 w-6">Their account email<input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="name@email.com" style={field} /></label>
-        <label className="t-13 w-6">Role
-          <select value={role} onChange={(e) => setRole(e.target.value as Grant['role'])} style={field}>
-            <option value="level_admin">Level admin: approves class reps</option>
-            <option value="hod">Head of department: attendance counts</option>
-            <option value="dean">Dean: attendance counts for the faculty</option>
-          </select>
-        </label>
-        {role !== 'dean' && (
-          <label className="t-13 w-6">Department
-            <select value={department} onChange={(e) => setDepartment(e.target.value)} style={field}>{DEPARTMENTS.map((d) => <option key={d}>{d}</option>)}</select>
-          </label>
-        )}
-        {role === 'level_admin' && (
-          <label className="t-13 w-6">Level
-            <select value={level} onChange={(e) => setLevel(e.target.value)} style={field}>{LEVELS.map((l) => <option key={l}>{l}</option>)}</select>
-          </label>
-        )}
+        <Drop
+          value={role}
+          onChange={(v) => setRole(v as Grant['role'])}
+          label="Role"
+          options={[
+            { value: 'level_admin', label: 'Level admin: approves class reps' },
+            { value: 'hod', label: 'Head of department: attendance counts' },
+            { value: 'dean', label: 'Dean: attendance counts for the faculty' },
+          ]}
+          style={{ width: '100%' }}
+        />
+        {role !== 'dean' && <Drop value={department} onChange={setDepartment} label="Department" options={DEPARTMENTS.map((d) => ({ value: d, label: d }))} style={{ width: '100%' }} />}
+        {role === 'level_admin' && <Drop value={level} onChange={setLevel} label="Level" options={LEVELS.map((l) => ({ value: l, label: l }))} style={{ width: '100%' }} />}
         {role === 'dean' && <label className="t-13 w-6">Faculty<input value={faculty} onChange={(e) => setFaculty(e.target.value)} style={field} /></label>}
         <button className="btn btn--amber btn--block" disabled={busy || !/@/.test(email)} onClick={() => void give()}>{busy ? 'Saving…' : 'Give role'}</button>
       </Card>

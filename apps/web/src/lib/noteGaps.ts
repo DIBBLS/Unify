@@ -1,4 +1,5 @@
 import type { UnifyNote, ContentBlock, MiniCheckQuestion } from '../types/note';
+import { parses } from './mathAnswer';
 
 // What is still missing before a week can go to Review. Review stays greyed out until this
 // list is empty, so nothing half-written reaches the checker or the students. Optional fields
@@ -78,7 +79,7 @@ export function noteGaps(note: UnifyNote | null | undefined, course: string, wee
 
   const qs = note.eoq.questions;
   const mcq = qs.filter((q) => q.type === 'mcq').length;
-  if (qs.length !== 10 || mcq !== 8) gaps.push(`the quiz: 8 objective and 2 fill-in questions (now ${mcq} and ${qs.length - mcq})`);
+  if (qs.length !== 10 || mcq < 6) gaps.push(`the quiz: 10 questions with at least 6 multiple choice (now ${qs.length}, ${mcq} multiple choice)`);
   qs.forEach((q, qi) => {
     const Q = `Quiz question ${qi + 1}`;
     if (!filled(q.question)) gaps.push(`${Q}: the question text`);
@@ -86,7 +87,14 @@ export function noteGaps(note: UnifyNote | null | undefined, course: string, wee
       const opts = q.options || [];
       if (opts.length < 2 || !opts.every(filled)) gaps.push(`${Q}: every option`);
       else if (!q.correct || q.correct.charCodeAt(0) - 65 >= opts.length) gaps.push(`${Q}: the right answer`);
-    } else if (!(q.acceptedAnswers || []).some(filled)) gaps.push(`${Q}: an accepted answer`);
+    } else if (q.type === 'number') {
+      if (!(typeof q.answer === 'number' && Number.isFinite(q.answer))) gaps.push(`${Q}: the number answer`);
+    } else if (!(q.acceptedAnswers || []).some(filled)) gaps.push(`${Q}: ${q.type === 'maths' ? 'an accepted expression' : 'an accepted answer'}`);
+    // Maths answers must parse, or no student could ever match them.
+    if (q.type === 'maths') {
+      const bad = (q.acceptedAnswers || []).filter(filled).find((a) => !parses(a));
+      if (bad) gaps.push(`${Q}: "${bad}" isn't a maths expression the checker can read`);
+    }
   });
   return gaps;
 }

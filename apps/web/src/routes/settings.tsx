@@ -44,7 +44,8 @@ export default function SettingsRoute() {
 
       <div style={head}>ACCOUNT</div>
       <div style={card}>
-        <Row first to={ROUTES.me} title="Profile and picture" sub="Name, class, Box Boy or photo" />
+        <Row first to={`${ROUTES.me}?edit=1`} title="Edit profile" sub="Name, university, department, level" />
+        <Row to={ROUTES.me} title="Your picture" sub="Tap your picture on Me to change it" />
         {isStudent && <Row to={ROUTES.attendanceSetup} title="Attendance details" sub="Your entry on the class list" />}
         {isStudent && <Row to={isHoc ? ROUTES.classList : ROUTES.hocRequest} title={isHoc ? 'Class list' : 'Are you your class rep?'} />}
         {isStudent && <Row to="/cgpa-planner" title="CGPA plan" sub="Your target and what it takes" />}

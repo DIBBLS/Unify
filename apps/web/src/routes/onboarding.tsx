@@ -180,7 +180,9 @@ export default function OnboardingRoute() {
       if (university?.id && UUID_RE.test(university.id)) payload.universityId = university.id;
       if (!skipTarget && gradTarget) payload.gradTarget = gradTarget;
       await api.onboarding(payload);
-      navigate('/home');
+      // New students: pick a Box Boy (S11), then goal, rhythm, reminders and
+      // "Bag that first class" (S09, S10, S12, S13). Edits and staff go Home.
+      navigate(!isEdit && !staffSetup ? '/onboarding/persona' : '/home');
     } catch (err) {
       setError(describeError(err, 'finish that'));
       setLoading(false);

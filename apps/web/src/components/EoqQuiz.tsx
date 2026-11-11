@@ -4,6 +4,7 @@ import type { EOQ } from '../types/note';
 import { api } from '../lib/api';
 import { BoxBoy } from './redesign/brand';
 import { MathPlain } from './MathText';
+import { mathsMatches, numberMatches } from '../lib/mathAnswer';
 
 const PASS_PCT = 60;
 
@@ -14,9 +15,41 @@ function mcqCorrectIndex(q: EOQ['questions'][number]): number | null {
 }
 
 function fitbAccepted(q: EOQ['questions'][number]): string[] {
-  if (q.type !== 'fitb') return [];
+  if (q.type !== 'fitb' && q.type !== 'maths') return [];
   if (q.acceptedAnswers && q.acceptedAnswers.length) return q.acceptedAnswers;
   return q.correct ? [q.correct] : [];
+}
+
+// Written answers: a word (fitb), a number within tolerance (S30), or a maths
+// expression checked by value (S31).
+function writtenCorrect(q: EOQ['questions'][number], typed: string): boolean {
+  const v = typed.trim();
+  if (!v) return false;
+  if (q.type === 'number') return typeof q.answer === 'number' && numberMatches(v, q.answer, q.tolerance);
+  if (q.type === 'maths') return mathsMatches(v, fitbAccepted(q));
+  return fitbAccepted(q).some((a) => a.trim().toLowerCase() === v.toLowerCase());
+}
+const gradeableQ = (q: EOQ['questions'][number]) =>
+  q.type === 'mcq' ? mcqCorrectIndex(q) !== null : q.type === 'number' ? typeof q.answer === 'number' : fitbAccepted(q).length > 0;
+
+// S31 maths keypad: the symbols a phone keyboard hides. Typing still works.
+const KEYS = ['7', '8', '9', '/', '(', ')', '4', '5', '6', '*', '^', '√', '1', '2', '3', '-', 'π', 'x', '0', '.', '⌫', '+', 'ρ', 'V'];
+function MathKeypad({ onKey }: { onKey: (k: string) => void }) {
+  return (
+    <div role="group" aria-label="Maths keypad" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6, marginTop: 8 }}>
+      {KEYS.map((k) => (
+        <button
+          key={k}
+          type="button"
+          onClick={() => onKey(k)}
+          aria-label={k === '⌫' ? 'Delete' : k === '√' ? 'Square root' : k === '^' ? 'Power' : k}
+          style={{ padding: '10px 0', borderRadius: 10, border: '1px solid rgba(255,255,255,.15)', background: 'rgba(255,255,255,.06)', color: '#f5f4f0', fontWeight: 700, fontSize: 15 }}
+        >
+          {k}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 // End-of-week exam on the dark card. BUG-005: NO feedback while
@@ -35,18 +68,17 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [now, setNow] = useState(() => Date.now());
 
-  const gradeable = eoq.questions.map((q, i) =>
-    q.type === 'mcq' ? mcqCorrectIndex(q) !== null : fitbAccepted(q).length > 0 ? true : false
-  );
+  const gradeable = eoq.questions.map((q) => gradeableQ(q));
   const answered = eoq.questions.map((q, i) =>
     q.type === 'mcq' ? picked[i] !== undefined : (fitb[i] || '').trim().length > 0
   );
   const correct = eoq.questions.map((q, i) => {
     if (!gradeable[i] || !answered[i]) return false;
     if (q.type === 'mcq') return picked[i] === mcqCorrectIndex(q);
-    const v = (fitb[i] || '').trim().toLowerCase();
-    return fitbAccepted(q).some((a) => a.trim().toLowerCase() === v);
+    return writtenCorrect(q, fitb[i] || '');
   });
+  const [keypadFor, setKeypadFor] = useState<number | null>(null);
+  const [finishedAt, setFinishedAt] = useState<number | null>(null);
 
   const total = gradeable.filter(Boolean).length;
   const score = correct.filter(Boolean).length;
@@ -72,7 +104,7 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
   }, [startedAt, submitted]);
   // Time is up: submit what is there. Unanswered questions mean "not yet".
   useEffect(() => {
-    if (timeLeft === 0 && !submitted) { setSubmitted(true); setShowResult(true); }
+    if (timeLeft === 0 && !submitted) { setSubmitted(true); setShowResult(true); setFinishedAt(Date.now()); }
   }, [timeLeft, submitted]);
 
   useEffect(() => {
@@ -88,6 +120,7 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
     setShowResult(true);
     setRecorded(false);
     setStartedAt(null);
+    setFinishedAt(null);
   };
 
   if (!eoq.questions.length) return null;
@@ -138,16 +171,32 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
                 })}
               </div>
             )}
-            {q.type === 'fitb' && (
-              <div className="eoq-fitb-row">
+            {(q.type === 'fitb' || q.type === 'number' || q.type === 'maths') && (
+              <div className="eoq-fitb-row" style={{ alignItems: 'center' }}>
                 <input
                   value={fitb[i] || ''}
                   disabled={submitted}
                   onChange={(e) => setFitb((f) => ({ ...f, [i]: e.target.value }))}
-                  placeholder="Type the missing word…"
+                  onFocus={() => q.type === 'maths' && setKeypadFor(i)}
+                  placeholder={q.type === 'number' ? 'Your answer' : q.type === 'maths' ? 'e.g. (8/27)ρV^3' : 'Type the missing word…'}
+                  inputMode={q.type === 'number' ? 'decimal' : undefined}
+                  aria-label={`Answer to question ${i + 1}`}
                   className={submitted ? (correct[i] ? 'correct-input' : 'wrong-input') : undefined}
                 />
+                {q.type === 'number' && q.unit && <span style={{ marginLeft: 8, fontWeight: 700, opacity: 0.85 }}>{q.unit}</span>}
               </div>
+            )}
+            {q.type === 'maths' && !submitted && keypadFor === i && (
+              <MathKeypad onKey={(k) => setFitb((f) => ({ ...f, [i]: k === '⌫' ? (f[i] || '').slice(0, -1) : (f[i] || '') + (k === '√' ? '√(' : k) }))} />
+            )}
+            {q.type === 'maths' && !submitted && (
+              <div style={{ fontSize: 11, opacity: 0.7, marginTop: 4 }}>Any equivalent form counts: 8ρV³/27 and 0.296ρV³ are both right.</div>
+            )}
+            {submitted && !correct[i] && gradeable[i] && q.type === 'number' && typeof q.answer === 'number' && (
+              <div style={{ fontSize: 12, opacity: 0.85, marginTop: 4 }}>Answer: {q.answer}{q.unit ? ` ${q.unit}` : ''}</div>
+            )}
+            {submitted && !correct[i] && gradeable[i] && q.type === 'maths' && (
+              <div style={{ fontSize: 12, opacity: 0.85, marginTop: 4 }}>Answer: <MathPlain text={fitbAccepted(q)[0]} inline /></div>
             )}
             {submitted && answered[i] && gradeable[i] && (
               <div className={`eoq-feedback ${correct[i] ? 'correct-fb' : 'wrong-fb'}`}>
@@ -169,7 +218,7 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
         </div>
       )}
       {done && !submitted && (
-        <button onClick={() => { setSubmitted(true); setShowResult(true); }} className="eoq-submit-btn" style={{ width: '100%', marginTop: 16 }}>
+        <button onClick={() => { setSubmitted(true); setShowResult(true); setFinishedAt(Date.now()); setKeypadFor(null); }} className="eoq-submit-btn" style={{ width: '100%', marginTop: 16 }}>
           Check score
         </button>
       )}
@@ -182,6 +231,23 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
             <span className={`result-pill ${passed ? 'pill-pass' : 'pill-fail'}`}>{passed ? 'PASSED' : 'NOT YET'}</span>
           </div>
           <div className="result-score-big">{score}/{total}</div>
+          {/* S32: question by question, and how long it took. */}
+          <div style={{ display: 'flex', gap: 4, justifyContent: 'center', flexWrap: 'wrap', margin: '8px 0' }} aria-label="Question by question">
+            {eoq.questions.map((q, qi) => gradeable[qi] && (
+              <span key={qi} title={`Question ${qi + 1}: ${correct[qi] ? 'right' : answered[qi] ? 'wrong' : 'not answered'}`} style={{ width: 22, height: 22, borderRadius: 9999, display: 'inline-grid', placeItems: 'center', fontSize: 11, fontWeight: 800, background: correct[qi] ? 'var(--u-green)' : 'rgba(255,255,255,.12)', color: correct[qi] ? '#0a0a0a' : '#fca5a5' }}>
+                {qi + 1}
+              </span>
+            ))}
+          </div>
+          {startedAt && finishedAt && (
+            <div style={{ fontSize: 12, opacity: 0.75 }}>Finished in {Math.max(1, Math.round((finishedAt - startedAt) / 60000))} min</div>
+          )}
+          {/* S75: offline, the score is kept on the phone and sent when the connection is back. */}
+          {!preview && typeof navigator !== 'undefined' && !navigator.onLine && (
+            <div style={{ fontSize: 12, marginTop: 6, padding: '6px 10px', borderRadius: 10, background: 'rgba(255,255,255,.08)' }}>
+              You're offline. Your score is saved on this phone and sends itself when you're back online.
+            </div>
+          )}
           <div className="result-msg">
             {passed
               ? `You scored ${pct}%. This week is yours — the next one builds on it.`
