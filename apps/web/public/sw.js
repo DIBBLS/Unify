@@ -198,8 +198,8 @@ self.addEventListener('push', (e) => {
       }
       await self.registration.showNotification(title, {
         body,
-        icon: '/icons/v4/icon-192.png',
-        badge: '/icons/v4/favicon-32.png',
+        icon: '/icons/v5/icon-192.png',
+        badge: '/icons/v5/favicon-32.png',
         data: { url },
       });
     })()

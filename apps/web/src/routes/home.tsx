@@ -8,7 +8,7 @@ import { canOpenLink } from '../lib/updateLinks';
 import { profileGaps, gapsText } from '../lib/profileGaps';
 import { DashboardSkeleton } from '../components/Skeletons';
 import ErrorState from '../components/ErrorState';
-import { BoxBoy } from '../components/redesign/brand';
+import { BoxBoy, PERSONAS } from '../components/redesign/brand';
 import { resolvePicture } from '../lib/picture';
 import Typewriter from '../components/Typewriter';
 import Flash from '../components/Flash';
@@ -538,7 +538,7 @@ export default function HomeRoute() {
       )}
       {profile?.role === 'student' && courses.some((c) => c.topics > 0) && (
         <Link to="/revision" style={{ margin: '0 16px 12px', display: 'flex', gap: 12, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, color: 'var(--text)', textDecoration: 'none' }}>
-          <BoxBoy pose="readingStanding" width={40} calm />
+          <img src={PERSONAS[2].img} alt="" width={40} height={40} loading="lazy" style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0 }} />
           <span style={{ flex: 1 }}>
             <span style={{ display: 'block', fontWeight: 800, fontSize: 14 }}>Revise what you've learned</span>
             <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)' }}>10 quick recall cards from topics you've finished</span>
@@ -611,19 +611,23 @@ export default function HomeRoute() {
             return (
               <div key={c.course} className="rise" style={{ animationDelay: `${Math.min(i, 6) * 40}ms`, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 12, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', minWidth: 0 }}>
-                  {/* Box Boy avatars (review p.4): the lecturer's photo or persona, else Box Boy teaching. */}
+                  {/* Box Boy avatars (review p.4): the lecturer's photo or persona, else a round
+                      Box Boy avatar (the full-body figure crops badly in a 34px circle). */}
                   <div style={{ display: 'flex', flexShrink: 0 }}>
                     {(staff.length ? staff : [{ name: '', avatar: '', persona: '' }]).map((s, si) => {
                       const pic = resolvePicture({ avatar_url: s.avatar, box_boy_persona: s.persona });
-                      const ring: React.CSSProperties = { width: 34, height: 34, borderRadius: '50%', border: '2px solid var(--surface)', marginLeft: si === 0 ? 0 : -10, overflow: 'hidden', background: 'var(--u-good-tint)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', flexShrink: 0 };
+                      const src = pic.kind !== 'none' ? pic.src : PERSONAS[2].img;
                       return (
-                        <div key={si} title={s.name || undefined} style={ring}>
-                          {pic.kind !== 'none' ? (
-                            <img src={pic.src} alt={s.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          ) : (
-                            <BoxBoy pose="teaching" width={30} />
-                          )}
-                        </div>
+                        <img
+                          key={si}
+                          src={src}
+                          alt={s.name || ''}
+                          title={s.name || undefined}
+                          width={34}
+                          height={34}
+                          loading="lazy"
+                          style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--surface)', marginLeft: si === 0 ? 0 : -10, background: 'var(--u-good-tint)', flexShrink: 0 }}
+                        />
                       );
                     })}
                   </div>
