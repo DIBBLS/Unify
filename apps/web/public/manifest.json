@@ -17,6 +17,6 @@
   ],
   "shortcuts": [
     { "name": "Timetable", "short_name": "Timetable", "url": "/timetable", "icons": [{ "src": "/icons/v4/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Mark attendance", "short_name": "Attendance", "url": "/attendance/pass", "icons": [{ "src": "/icons/v4/icon-192.png", "sizes": "192x192" }] }
+    { "name": "My pass", "short_name": "My pass", "url": "/attendance/pass", "icons": [{ "src": "/icons/v4/icon-192.png", "sizes": "192x192" }] }
   ]
 }
