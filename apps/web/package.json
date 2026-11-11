@@ -1,11 +1,11 @@
 {
   "name": "@unify/web",
   "private": true,
-  "version": "2.20.0",
+  "version": "2.20.1",
   "type": "module",
   "scripts": {
-    "dev": "vite --port 3000",
-    "build": "tsc && vite build",
+    "dev": "node init && vite --port 3000",
+    "build": "node init && tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint src --ext ts,tsx"
   },
