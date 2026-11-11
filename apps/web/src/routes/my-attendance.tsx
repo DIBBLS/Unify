@@ -30,7 +30,7 @@ export default function MyAttendanceRoute() {
       <BackButton to={ROUTES.timetable} />
       <Label>Attendance</Label>
       <Display size={30}>My record</Display>
-      <Link to={ROUTES.attendancePass} className="btn btn--amber btn--block" style={{ marginTop: 16 }}>Mark attendance</Link>
+      <Link to={ROUTES.attendancePass} className="btn btn--amber btn--block" style={{ marginTop: 16 }}>My pass</Link>
 
       {!data ? (
         <SectionSkeleton rows={3} />

@@ -15,7 +15,7 @@ export async function startQrScan(
   try {
     stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
   } catch {
-    onError('Camera access was blocked. Allow the camera for this site, or use the class QR instead.');
+    onError('Camera access was blocked. Allow the camera for this site, or type matric numbers below.');
     return { stop: () => {} };
   }
   video.srcObject = stream;

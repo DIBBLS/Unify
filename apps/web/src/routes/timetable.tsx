@@ -164,8 +164,8 @@ export default function TimetableRoute() {
         <Link to={ROUTES.attendancePass} className="row" style={{ gap: 12, padding: '14px 16px', textDecoration: 'none', color: 'var(--u-text)' }}>
           <ClipboardCheck size={20} />
           <div className="grow stack" style={{ gap: 2 }}>
-            <div className="t-15 w-6">Mark attendance</div>
-            <div className="t-13 muted">Enter the code your lecturer shows in class</div>
+            <div className="t-15 w-6">My pass</div>
+            <div className="t-13 muted">Show your QR to your class rep or lecturer</div>
           </div>
           <ChevronRight size={18} />
         </Link>

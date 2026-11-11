@@ -256,7 +256,14 @@ export type AttendanceSession = { id: string; course: string; online?: boolean; 
 export type CgpaCourse = { code: string; title: string; status: 'done' | 'priority' | 'not_yet'; units: number; grade: number | null };
 export type CgpaData = { cgpaCurrent: number | null; cgpaTarget: number | null; hideCgpa: boolean; unitsDone: number | null; unitsTotal: number | null; degreeYears?: number | null; level: string | null; courses: CgpaCourse[] };
 export type Material = { id: string; week: number; type: 'slides' | 'notes' | 'past-paper'; title: string; url: string; createdAt: string; mine: boolean };
-export type AttendanceRegister = { session: AttendanceSession | null; present: { studentId: string; at: string; name: string; matric: string; photo?: string | null }[]; enrolled: number };
+export type AttendanceRegister = {
+  session: AttendanceSession | null;
+  present: { studentId: string; at: string; name: string; matric: string; avatar: string; persona: string; method: 'scan' | 'typed' | 'code'; by: string }[];
+  enrolled: number;
+};
+export type StudentCard = { id: string; name: string; matric: string; level: string; department: string; avatar: string; persona: string };
+export type AttendancePass = { token: string; rotatesAt: string; rotateSeconds: number; student: StudentCard };
+export type ScanResult = { status: 'marked' | 'already' | 'not_enrolled'; method?: 'scan' | 'typed'; course: string; student: StudentCard };
 
 export type PerfPoint = { t: number; n: number; e4: number; e5: number; p50: number; p95: number; max: number };
 export type PerfSnapshot = {
@@ -591,8 +598,12 @@ export const api = {
   attendanceRegister: (course: string) =>
     apiFetch<AttendanceRegister>(`/v1/attendance/sessions?course=${encodeURIComponent(course)}`),
   attendanceClose: (id: string) => apiFetch<{ ok: boolean }>(`/v1/attendance/sessions/${id}/close`, { method: 'POST', body: '{}' }),
-  attendanceCheckin: (code: string, selfie?: string) =>
-    apiFetch<{ ok: boolean; already: boolean; course: string }>('/v1/attendance/checkin', { method: 'POST', body: JSON.stringify({ code, selfie }) }),
+  // Online classes only: the code shared in the meeting chat.
+  attendanceCheckin: (code: string) =>
+    apiFetch<{ ok: boolean; already: boolean; course: string }>('/v1/attendance/checkin', { method: 'POST', body: JSON.stringify({ code }) }),
+  attendancePass: () => apiFetch<AttendancePass>('/v1/attendance/pass'),
+  attendanceScan: (sessionId: string, input: { token: string } | { matric: string }) =>
+    apiFetch<ScanResult>(`/v1/attendance/sessions/${sessionId}/scan`, { method: 'POST', body: JSON.stringify(input) }),
   attendanceMine: () =>
     apiFetch<{ courses: { course: string; held: number; attended: number }[]; recent: { course: string; at: string }[] }>('/v1/attendance/mine'),
 };

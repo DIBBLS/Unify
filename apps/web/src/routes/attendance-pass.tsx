@@ -1,197 +1,197 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { api } from '../lib/api';
-import { startQrScan } from '../lib/qrscan';
+import { QRCodeSVG } from 'qrcode.react';
+import { api, type AttendancePass } from '../lib/api';
 import { errorToast, describeError } from '../lib/errors';
+import { resolvePicture } from '../lib/picture';
 import { ROUTES } from '../lib/routes';
 import BackButton from '../components/BackButton';
 import { BoxBoy } from '../components/redesign/brand';
 import { Card, Display } from '../components/redesign/ui';
-import SelfieCapture from '../components/SelfieCapture';
 
-// Mark attendance: the lecturer shows a rotating QR in class and you scan it
-// with the camera here. The 6-digit code underneath is the fallback (no camera,
-// permission blocked). Scanning it with your phone's own camera also works: it
-// opens this page with ?c= and marks you straight away.
+// My pass: in class, students never scan. They show this QR and the class rep
+// (HOC) or lecturer scans it. The QR changes every 30 seconds, so a screenshot
+// sent to a friend stops working within a minute.
+// Online class (?online=1): there is no room to scan in, so the student types
+// the 6-digit code the lecturer shares in the meeting chat.
 export default function AttendancePassRoute() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  // Scanning the lecturer's QR opens this page with ?c=123456.
-  const [code, setCode] = useState(() => (params.get('c') || '').replace(/\D/g, '').slice(0, 6));
-  const autoSent = useRef(false);
-  const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState<{ course: string; already: boolean } | null>(null);
-  const [ready, setReady] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const viaLink = !!params.get('c');
-  // Online class: no QR to scan. The code comes from the meeting chat, so go straight to typing it.
-  const online = params.get('online') === '1';
+  // Old links (?c=) came from the lecturer's QR; that code now only exists for online classes.
+  const [codeMode, setCodeMode] = useState(params.get('online') === '1' || !!params.get('c'));
   const onlineCourse = (params.get('course') || '').slice(0, 20);
   const rawMeet = params.get('m') || '';
   const meetHref = /^https:\/\/[^\s]+$/i.test(rawMeet) ? rawMeet : '';
-  const [showCode, setShowCode] = useState(viaLink || online);
-  const [scanMsg, setScanMsg] = useState('');
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const sending = useRef(false);
-  // Step 1 is a quick selfie (kept in memory); step 2 is the QR. Scanning last keeps the rotating code fresh.
-  const [selfie, setSelfie] = useState<string | null>(null);
-  const selfieRef = useRef<string | null>(null);
-  selfieRef.current = selfie;
+  const [ready, setReady] = useState(false);
 
-  // First time? Collect name + matric before the code.
+  // First time? Collect name + matric, so a class rep can type you in if your phone dies.
   useEffect(() => {
     api
       .attendanceProfile()
       .then((p) => {
-        if (!p.fullName || !p.matric) navigate(`${ROUTES.attendanceSetup}?next=${encodeURIComponent(ROUTES.attendancePass + (params.get('c') ? `?c=${params.get('c')}` : ''))}`, { replace: true });
+        if (!p.fullName || !p.matric) navigate(`${ROUTES.attendanceSetup}?next=${encodeURIComponent(ROUTES.attendancePass + window.location.search)}`, { replace: true });
         else setReady(true);
       })
       .catch(() => setReady(true));
-  }, [navigate, params]);
+  }, [navigate]);
 
-  useEffect(() => {
-    if (ready && showCode) inputRef.current?.focus();
-  }, [ready, showCode]);
+  const shell = { maxWidth: 'min(var(--shell, 480px), 560px)', margin: '0 auto', padding: '20px 16px 96px' } as const;
+  if (!ready) return <div style={shell} />;
 
-  // Camera: pull the 6 digits out of the class QR (a link with ?c=) and mark me.
+  return (
+    <div style={shell}>
+      <BackButton to={ROUTES.timetable} />
+      {codeMode ? (
+        <OnlineCode course={onlineCourse} meetHref={meetHref} initial={(params.get('c') || '').replace(/\D/g, '').slice(0, 6)} onPass={() => setCodeMode(false)} />
+      ) : (
+        <MyPass onOnline={() => setCodeMode(true)} />
+      )}
+      <Link to={ROUTES.attendanceMine} className="btn btn--white btn--block" style={{ marginTop: 12 }}>My attendance</Link>
+    </div>
+  );
+}
+
+function MyPass({ onOnline }: { onOnline: () => void }) {
+  const [pass, setPass] = useState<AttendancePass | null>(null);
+  const [err, setErr] = useState('');
+  const [left, setLeft] = useState(0);
+
+  const load = useCallback(async () => {
+    try {
+      setPass(await api.attendancePass());
+      setErr('');
+    } catch (e) {
+      setErr(describeError(e, 'load your pass'));
+    }
+  }, []);
+
+  useEffect(() => { void load(); }, [load]);
+
+  // New QR the moment the old one rotates, and whenever the app comes back to the front.
   useEffect(() => {
-    if (!ready || !selfie || showCode || done || !videoRef.current) return;
-    let handle: { stop: () => void } | null = null;
-    let gone = false;
-    void startQrScan(
-      videoRef.current,
-      async (text) => {
-        if (sending.current) return;
-        let digits = '';
-        try { digits = (new URL(text).searchParams.get('c') || '').replace(/\D/g, ''); } catch { digits = text.replace(/\D/g, ''); }
-        if (!/^\d{6}$/.test(digits)) { setScanMsg("That isn't a Unify attendance QR."); return; }
-        sending.current = true;
-        try {
-          const r = await api.attendanceCheckin(digits, selfieRef.current || undefined);
-          setDone({ course: r.course, already: r.already });
-          try { navigator.vibrate?.(60); } catch { /* optional */ }
-        } catch (e) {
-          const m = describeError(e, 'mark attendance');
-          if (/photo/i.test(m)) setSelfie(null);
-          setScanMsg(m);
-          window.setTimeout(() => { sending.current = false; }, 2500); // let the next rotation be read
-          return;
-        }
-        sending.current = false;
-      },
-      (m) => { setScanMsg(m); setShowCode(true); },
-    ).then((h) => { if (gone) h.stop(); else handle = h; });
-    return () => { gone = true; handle?.stop(); };
-  }, [ready, selfie, showCode, done]);
+    if (!pass) return;
+    const ms = Math.max(500, new Date(pass.rotatesAt).getTime() - Date.now() + 300);
+    const t = window.setTimeout(() => void load(), ms);
+    return () => window.clearTimeout(t);
+  }, [pass, load]);
+  useEffect(() => {
+    const onShow = () => { if (document.visibilityState === 'visible') void load(); };
+    document.addEventListener('visibilitychange', onShow);
+    window.addEventListener('online', onShow);
+    return () => { document.removeEventListener('visibilitychange', onShow); window.removeEventListener('online', onShow); };
+  }, [load]);
+  useEffect(() => {
+    if (!pass) return;
+    const tick = () => setLeft(Math.max(0, Math.ceil((new Date(pass.rotatesAt).getTime() - Date.now()) / 1000)));
+    tick();
+    const t = window.setInterval(tick, 1000);
+    return () => window.clearInterval(t);
+  }, [pass]);
+
+  // Keep the screen awake while the pass is up (best effort; not every phone allows it).
+  useEffect(() => {
+    let lock: { release: () => Promise<void> } | null = null;
+    const wl = (navigator as unknown as { wakeLock?: { request: (t: 'screen') => Promise<{ release: () => Promise<void> }> } }).wakeLock;
+    wl?.request('screen').then((l) => { lock = l; }).catch(() => {});
+    return () => { void lock?.release().catch(() => {}); };
+  }, []);
+
+  const s = pass?.student;
+  const pic = s ? resolvePicture({ avatar_url: s.avatar, box_boy_persona: s.persona }) : null;
+
+  return (
+    <>
+      <Card tone="dark" style={{ alignItems: 'center', textAlign: 'center', marginTop: 8, gap: 10 }}>
+        <div className="eyebrow" style={{ color: 'var(--u-green)' }}>My pass</div>
+        {s && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left' }}>
+            {pic && pic.kind !== 'none' ? (
+              <img src={pic.src} alt="" width={52} height={52} style={{ width: 52, height: 52, borderRadius: 9999, objectFit: 'cover', flexShrink: 0 }} />
+            ) : (
+              <BoxBoy pose="phoneOut" width={52} />
+            )}
+            <div style={{ minWidth: 0 }}>
+              <div className="t-15 w-7">{s.name}</div>
+              <div className="t-13" style={{ opacity: 0.75 }}>{[s.matric, s.level, s.department].filter(Boolean).join(' · ')}</div>
+            </div>
+          </div>
+        )}
+        <div style={{ background: '#fff', padding: 14, borderRadius: 18, lineHeight: 0, minWidth: 288, minHeight: 288, display: 'grid', placeItems: 'center' }} aria-label="Your attendance pass QR code">
+          {pass ? <QRCodeSVG value={pass.token} size={260} level="M" /> : <span className="t-13" style={{ color: '#555', lineHeight: 1.4 }}>{err ? 'No pass yet' : 'Loading your pass…'}</span>}
+        </div>
+        <div role="status" aria-live="polite" className="t-13" style={{ minHeight: 20, color: err ? 'var(--u-red, #dc2626)' : undefined, opacity: err ? 1 : 0.75 }}>
+          {err || (pass ? `Changes in ${left}s. A screenshot won't work.` : '')}
+        </div>
+        {err && <button className="btn btn--amber btn--sm" onClick={() => void load()}>Try again</button>}
+      </Card>
+      <div className="t-13 muted" style={{ textAlign: 'center', marginTop: 12 }}>
+        Show this to your class rep or lecturer. They scan it to mark you present. Phone dead? They can type your matric number instead.
+      </div>
+      <button className="btn btn--white btn--block" onClick={onOnline} style={{ marginTop: 14 }}>Online class? Enter the code</button>
+    </>
+  );
+}
+
+function OnlineCode({ course, meetHref, initial, onPass }: { course: string; meetHref: string; initial: string; onPass: () => void }) {
+  const [code, setCode] = useState(initial);
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState<{ course: string; already: boolean } | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => { inputRef.current?.focus(); }, []);
 
   const submit = async () => {
     if (!/^\d{6}$/.test(code)) {
-      errorToast(new Error('Enter the 6-digit code from your lecturer.'), 'mark attendance');
+      errorToast(new Error('Enter the 6-digit code from the meeting chat.'), 'mark attendance');
       return;
     }
     setBusy(true);
     try {
-      const r = await api.attendanceCheckin(code, selfieRef.current || undefined);
+      const r = await api.attendanceCheckin(code);
       setDone({ course: r.course, already: r.already });
     } catch (e) {
       errorToast(e, 'mark attendance');
-      if (/photo/i.test(describeError(e, 'mark attendance'))) setSelfie(null);
-      else setCode('');
+      setCode('');
     } finally {
       setBusy(false);
     }
   };
 
-  // Opened from the QR: submit straight away, once, as soon as we know the profile is set.
-  useEffect(() => {
-    if (ready && selfie && !autoSent.current && params.get('c') && /^\d{6}$/.test(code)) {
-      autoSent.current = true;
-      void submit();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, selfie]);
-
-  const shell = { maxWidth: 'min(var(--shell, 480px), 560px)', margin: '0 auto', padding: '20px 16px 96px' } as const;
-
   if (done)
     return (
-      <div style={shell}>
-        <Card style={{ alignItems: 'center', textAlign: 'center', marginTop: 24 }}>
-          <BoxBoy pose="cheer" width={140} />
-          <Display size={28}>{done.already ? 'Already marked' : "You're in!"}</Display>
-          <div className="t-15">{done.already ? `You were already marked present for ${done.course}.` : `Marked present for ${done.course}.`}</div>
-        </Card>
-        <Link to={ROUTES.attendanceMine} className="btn btn--amber btn--block" style={{ marginTop: 20 }}>See my attendance</Link>
-        <Link to={ROUTES.timetable} className="btn btn--white btn--block" style={{ marginTop: 12 }}>Back to timetable</Link>
-      </div>
-    );
-
-  if (ready && !selfie)
-    return (
-      <div style={shell}>
-        <BackButton to={ROUTES.timetable} />
-        <Card style={{ alignItems: 'center', textAlign: 'center', marginTop: 8, gap: 10 }}>
-          <div className="eyebrow" style={{ color: 'var(--green-deep)' }}>Step 1 of 2</div>
-          <Display size={26}>Take a quick selfie</Display>
-          <div className="t-13 muted">Your lecturer sees it next to your name so they know you are in class. It is not shared with anyone else, and it is deleted as soon as attendance for this class closes.</div>
-          <SelfieCapture onUse={setSelfie} />
-        </Card>
-      </div>
+      <Card style={{ alignItems: 'center', textAlign: 'center', marginTop: 8 }}>
+        <BoxBoy pose="cheer" width={140} />
+        <Display size={28}>{done.already ? 'Already marked' : "You're in!"}</Display>
+        <div className="t-15">{done.already ? `You were already marked present for ${done.course}.` : `Marked present for ${done.course}.`}</div>
+      </Card>
     );
 
   return (
-    <div style={shell}>
-      <BackButton to={ROUTES.timetable} />
-      {!showCode ? (
-        <>
-          <Card style={{ alignItems: 'center', textAlign: 'center', marginTop: 8, gap: 10 }}>
-            <BoxBoy pose="phoneOut" width={96} />
-            <div className="eyebrow" style={{ color: 'var(--green-deep)' }}>Step 2 of 2</div>
-            <Display size={26}>Scan to mark attendance</Display>
-            <div className="t-13 muted">Point your camera at the QR code your lecturer is showing.</div>
-            <div style={{ position: 'relative', width: '100%', maxWidth: 320, aspectRatio: '1 / 1', borderRadius: 18, overflow: 'hidden', background: '#000' }}>
-              <video ref={videoRef} muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} aria-label="Camera" />
-              <div className="scan-frame" aria-hidden="true"><i /><i /><i /><i /><span className="scan-line" /></div>
-            </div>
-            <div role="status" aria-live="polite" className="t-13" style={{ minHeight: 20, color: scanMsg ? 'var(--u-red, #dc2626)' : 'var(--text2)' }}>
-              {scanMsg || 'The QR changes every 30 seconds, so scan it while you are in class.'}
-            </div>
-          </Card>
-          <button className="btn btn--white btn--block" onClick={() => setShowCode(true)} style={{ marginTop: 14 }}>Can't scan? Enter the code</button>
-        </>
-      ) : (
-        <>
-          <Card style={{ alignItems: 'center', textAlign: 'center', marginTop: 8 }}>
-            <BoxBoy pose="phoneOut" width={110} />
-            <Display size={28}>{online ? 'Enter the code from the meeting' : 'Enter the class code'}</Display>
-            <div className="t-13 muted">
-              {online
-                ? `Your lecturer shares a 6-digit code in the meeting chat${onlineCourse ? ` for ${onlineCourse}` : ''}. Type it here to be marked present.`
-                : "Type the 6-digit code under the QR on your lecturer's screen."}
-            </div>
-            {online && meetHref && (
-              <a href={meetHref} target="_blank" rel="noopener noreferrer" className="btn btn--amber btn--sm" style={{ marginTop: 4 }}>Open the meeting</a>
-            )}
-            {scanMsg && !viaLink && <div className="t-12" style={{ color: 'var(--u-red, #dc2626)' }}>{scanMsg}</div>}
-          </Card>
-          <input
-            ref={inputRef}
-            value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            onKeyDown={(e) => { if (e.key === 'Enter') void submit(); }}
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            placeholder="000000"
-            aria-label="Attendance code"
-            style={{ width: '100%', marginTop: 20, padding: 16, textAlign: 'center', fontSize: 34, letterSpacing: 10, fontWeight: 800, fontFamily: 'var(--font-body)', borderRadius: 16, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}
-          />
-          <button className="btn btn--amber btn--block" disabled={busy || code.length !== 6} onClick={() => void submit()} style={{ marginTop: 18 }}>
-            {busy ? 'Checking…' : 'Mark me present'}
-          </button>
-          {!viaLink && !online && <button className="btn btn--white btn--block" onClick={() => { setScanMsg(''); setShowCode(false); }} style={{ marginTop: 12 }}>Scan the QR instead</button>}
-        </>
-      )}
-      <Link to={ROUTES.attendanceMine} className="btn btn--white btn--block" style={{ marginTop: 12 }}>My attendance</Link>
-    </div>
+    <>
+      <Card style={{ alignItems: 'center', textAlign: 'center', marginTop: 8 }}>
+        <BoxBoy pose="phoneOut" width={110} />
+        <Display size={28}>Enter the code from the meeting</Display>
+        <div className="t-13 muted">
+          Your lecturer shares a 6-digit code in the meeting chat{course ? ` for ${course}` : ''}. Type it here to be marked present.
+        </div>
+        {meetHref && (
+          <a href={meetHref} target="_blank" rel="noopener noreferrer" className="btn btn--amber btn--sm" style={{ marginTop: 4 }}>Open the meeting</a>
+        )}
+      </Card>
+      <input
+        ref={inputRef}
+        value={code}
+        onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+        onKeyDown={(e) => { if (e.key === 'Enter') void submit(); }}
+        inputMode="numeric"
+        autoComplete="one-time-code"
+        placeholder="000000"
+        aria-label="Attendance code"
+        style={{ width: '100%', marginTop: 20, padding: 16, textAlign: 'center', fontSize: 34, letterSpacing: 10, fontWeight: 800, fontFamily: 'var(--font-body)', borderRadius: 16, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}
+      />
+      <button className="btn btn--amber btn--block" disabled={busy || code.length !== 6} onClick={() => void submit()} style={{ marginTop: 18 }}>
+        {busy ? 'Checking…' : 'Mark me present'}
+      </button>
+      <button className="btn btn--white btn--block" onClick={onPass} style={{ marginTop: 12 }}>In class? Show my pass</button>
+    </>
   );
 }

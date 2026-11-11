@@ -36,7 +36,7 @@ const GROUPS: { title: string; entries: Entry[] }[] = [
     title: 'Attendance & classes',
     entries: [
       { path: ROUTES.attendanceSetup, name: 'Attendance details', note: 'Name and matric number, once', roles: ['student'] },
-      { path: ROUTES.attendancePass, name: 'Mark attendance', note: 'Enter the 6-digit class code', roles: ['student'] },
+      { path: ROUTES.attendancePass, name: 'My pass', note: 'Rotating QR the class rep or lecturer scans', roles: ['student'] },
       { path: ROUTES.attendanceMine, name: 'My attendance', note: 'Your record', roles: ['student'] },
       { path: ROUTES.onlineClass, name: 'Online class', note: 'Coming soon', roles: ['any'] },
       { path: ROUTES.hocRequest, name: 'Become HOC', note: 'Request head-of-class', roles: ['student'] },

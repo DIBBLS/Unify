@@ -17,7 +17,7 @@ export const UPDATE_LINKS: UpdateLink[] = [
   { value: ROUTES.findCourses, label: 'Find courses', who: 'students' },
   { value: ROUTES.timetable, label: 'Timetable', who: 'students' },
   { value: ROUTES.cgpa, label: 'CGPA planner', who: 'students', strict: true },
-  { value: ROUTES.attendancePass, label: 'Mark attendance', who: 'students' },
+  { value: ROUTES.attendancePass, label: 'My pass', who: 'students' },
   { value: ROUTES.attendanceMine, label: 'My attendance', who: 'students' },
   { value: ROUTES.hocRequest, label: 'Become a class rep', who: 'students', strict: true },
   { value: ROUTES.studio, label: 'Studio', who: 'authors' },
