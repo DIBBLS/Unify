@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { useGameRoom } from '../../lib/gameRoom';
+import { InviteButton, RoomBar } from '../../components/GameRoomBar';
 import { Delete } from 'lucide-react';
 import { api } from '../../lib/api';
 import { buildCrossword, type Entry, type Puzzle } from '../../lib/crossword';
@@ -20,10 +22,14 @@ const enumeration = (display: string) => `(${display.split(/[\s-]+/).map((p) => 
 export default function CrosswordRoute() {
   const { courseCode = '', week = '1' } = useParams();
   const weekNum = Number(week) || 1;
+  const [params] = useSearchParams();
+  const roomCode = params.get('room');
+  const room = useGameRoom('crossword', courseCode, weekNum, roomCode, params.get('mode') === 'team' ? 'team' : 'race', params.get('host') === '1');
+  const skey = store(courseCode, weekNum) + (roomCode ? `:room:${roomCode}` : '');
   const [puzzle, setPuzzle] = useState<Puzzle | null | undefined>(undefined);
   const [err, setErr] = useState('');
   const [saved, setSaved] = useState<Saved>(() => {
-    try { return JSON.parse(localStorage.getItem(store(courseCode, weekNum)) || '') as Saved; } catch { return { letters: {}, reveals: 0, checks: 0, startedAt: Date.now() }; }
+    try { return JSON.parse(localStorage.getItem(skey) || '') as Saved; } catch { return { letters: {}, reveals: 0, checks: 0, startedAt: Date.now() }; }
   });
   const [sel, setSel] = useState<{ r: number; c: number; dir: 'across' | 'down' } | null>(null);
   const [wrong, setWrong] = useState<string[]>([]);
@@ -37,8 +43,18 @@ export default function CrosswordRoute() {
       .catch(() => setErr("Couldn't load this week. Check your network and try again."));
   }, [courseCode, weekNum]);
   useEffect(() => {
-    try { localStorage.setItem(store(courseCode, weekNum), JSON.stringify(saved)); } catch { /* fine */ }
-  }, [saved, courseCode, weekNum]);
+    try { localStorage.setItem(skey, JSON.stringify(saved)); } catch { /* fine */ }
+  }, [saved, skey]);
+  // A session starts both players from the same empty grid.
+  useEffect(() => {
+    if (room.startedAt) { setSaved({ letters: {}, reveals: 0, checks: 0, startedAt: room.startedAt }); setSel(null); }
+  }, [room.startedAt]);
+  // Team up: letters from the teammate land on this grid too.
+  useEffect(() => room.onEvent((e) => {
+    if (room.mode !== 'team' || e.t !== 'cell') return;
+    setSaved((s) => { const l = { ...s.letters }; if (e.v) l[e.k] = e.v; else delete l[e.k]; return { ...s, letters: l }; });
+  }), [room]);
+  const share = (k: string, v: string) => { if (room.mode === 'team' && room.startedAt && room.me) room.send({ t: 'cell', id: room.me.id, k, v }); };
 
   const entryAt = (r: number, c: number, dir: 'across' | 'down'): Entry | undefined =>
     puzzle?.entries.find((e) => e.dir === dir && (dir === 'across' ? e.row === r && c >= e.col && c < e.col + e.word.length : e.col === c && r >= e.row && r < e.row + e.word.length));
@@ -46,6 +62,14 @@ export default function CrosswordRoute() {
   const cellsOf = (e: Entry) => Array.from({ length: e.word.length }, (_, i) => (e.dir === 'across' ? { r: e.row, c: e.col + i } : { r: e.row + i, c: e.col }));
   const solved = useMemo(() => !!puzzle && puzzle.cells.every((row, r) => row.every((ch, c) => !ch || saved.letters[`${r},${c}`] === ch)), [puzzle, saved.letters]);
 
+  // In a session, tell the other player when you finish.
+  const announced = useRef(false);
+  useEffect(() => {
+    if (saved.finishedSecs == null || !room.startedAt || !room.me || !puzzle || announced.current) return;
+    announced.current = true;
+    room.send({ t: 'finish', id: room.me.id, name: room.me.name, score: Math.max(0, puzzle.entries.length * 20 + 50 - saved.reveals * 10), seconds: saved.finishedSecs });
+  }, [saved, room, puzzle]);
+  useEffect(() => { announced.current = false; }, [room.startedAt]);
   useEffect(() => {
     if (solved && saved.finishedSecs == null) setSaved((s) => ({ ...s, finishedSecs: Math.max(1, Math.round((Date.now() - s.startedAt) / 1000)) }));
   }, [solved, saved.finishedSecs]);
@@ -73,12 +97,13 @@ export default function CrosswordRoute() {
     if (!sel || solved) return;
     setWrong([]);
     setSaved((s) => ({ ...s, letters: { ...s.letters, [`${sel.r},${sel.c}`]: ch } }));
+    share(`${sel.r},${sel.c}`, ch);
     step(1);
   };
   const back = () => {
     if (!sel || solved) return;
     const k = `${sel.r},${sel.c}`;
-    if (saved.letters[k]) setSaved((s) => { const l = { ...s.letters }; delete l[k]; return { ...s, letters: l }; });
+    if (saved.letters[k]) { setSaved((s) => { const l = { ...s.letters }; delete l[k]; return { ...s, letters: l }; }); share(k, ''); }
     else step(-1);
   };
   useEffect(() => {
@@ -103,6 +128,7 @@ export default function CrosswordRoute() {
     const target = cellsOf(current).find((x) => saved.letters[`${x.r},${x.c}`] !== puzzle.cells[x.r][x.c]);
     if (!target) return;
     setSaved((s) => ({ ...s, reveals: s.reveals + 1, letters: { ...s.letters, [`${target.r},${target.c}`]: puzzle.cells[target.r][target.c] as string } }));
+    share(`${target.r},${target.c}`, puzzle.cells[target.r][target.c] as string);
   };
 
   const shell = { maxWidth: 'min(var(--shell, 480px), 640px)', margin: '0 auto', padding: '20px 16px 96px' } as const;
@@ -132,6 +158,12 @@ export default function CrosswordRoute() {
       <BackButton to={backTo} />
       <Label>Crossword · {courseCode} Week {weekNum}</Label>
       <Display size={26}>{puzzle.entries.length} key terms</Display>
+      {roomCode && (() => {
+        const all = puzzle.cells.flatMap((row, r) => row.map((ch, c) => (ch ? `${r},${c}` : ''))).filter(Boolean);
+        const right = all.filter((k) => { const [r, c] = k.split(',').map(Number); return saved.letters[k] === puzzle.cells[r][c]; }).length;
+        return <RoomBar room={room} game="crossword" course={courseCode} week={weekNum} mine={{ done: right, total: all.length, label: `${Math.round((right / Math.max(1, all.length)) * 100)}%` }} />;
+      })()}
+      {roomCode && !room.startedAt ? null : (<>
 
       <div role="grid" aria-label="Crossword grid" style={{ display: 'grid', gridTemplateColumns: `repeat(${puzzle.cols}, ${size}px)`, gap: 2, justifyContent: 'center', marginTop: 12, userSelect: 'none' }}>
         {puzzle.cells.flatMap((row, r) => row.map((ch, c) => {
@@ -209,8 +241,10 @@ export default function CrosswordRoute() {
               </div>
             ))}
           </details>
+          {!roomCode && <InviteButton game="crossword" course={courseCode} week={weekNum} />}
         </>
       )}
+      </>)}
     </div>
   );
 }

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { useGameRoom } from '../../lib/gameRoom';
+import { InviteButton, RoomBar } from '../../components/GameRoomBar';
 import { Lightbulb, Shuffle } from 'lucide-react';
 import { api } from '../../lib/api';
 import { buildLevels, type Level } from '../../lib/wordgame';
@@ -15,15 +17,28 @@ import GameFinish from '../../components/GameFinish';
 // other boxes are words the notes use that fit the same letters.
 type Saved = { level: number; found: Record<number, string[]>; hints: Record<number, number>; bonus: number; startedAt?: number; finishedSecs?: number };
 const HINTS = 3;
+// Points: each key term 50 (less 15 per hint, never under 10), each other word 10, each bonus word 5.
+function scoreOf(levels: Level[], s: Saved): number {
+  return levels.reduce((sum, l, i) => {
+    const f = s.found[i] || [];
+    const main = f.includes(l.term.word) ? Math.max(10, 50 - 15 * (s.hints[i] || 0)) : 0;
+    return sum + main + 10 * f.filter((w) => w !== l.term.word).length;
+  }, 0) + 5 * s.bonus;
+}
 const key = (c: string, w: number) => `unify:keywords:${c}:${w}`;
 
 export default function KeywordsRoute() {
   const { courseCode = '', week = '1' } = useParams();
   const weekNum = Number(week) || 1;
+  // Play with a coursemate: ?room=CODE&mode=race|team (&host=1 for the one who made it).
+  const [params] = useSearchParams();
+  const roomCode = params.get('room');
+  const room = useGameRoom('keywords', courseCode, weekNum, roomCode, params.get('mode') === 'team' ? 'team' : 'race', params.get('host') === '1');
+  const skey = key(courseCode, weekNum) + (roomCode ? `:room:${roomCode}` : '');
   const [levels, setLevels] = useState<Level[] | null>(null);
   const [err, setErr] = useState('');
   const [saved, setSaved] = useState<Saved>(() => {
-    try { return JSON.parse(localStorage.getItem(key(courseCode, weekNum)) || '') as Saved; } catch { return { level: 0, found: {}, hints: {}, bonus: 0 }; }
+    try { return JSON.parse(localStorage.getItem(skey) || '') as Saved; } catch { return { level: 0, found: {}, hints: {}, bonus: 0 }; }
   });
   const [order, setOrder] = useState<number[]>([]);
   const [path, setPath] = useState<number[]>([]);
@@ -45,8 +60,19 @@ export default function KeywordsRoute() {
   }, [courseCode, weekNum]);
 
   useEffect(() => {
-    try { localStorage.setItem(key(courseCode, weekNum), JSON.stringify(saved)); } catch { /* fine */ }
-  }, [saved, courseCode, weekNum]);
+    try { localStorage.setItem(skey, JSON.stringify(saved)); } catch { /* fine */ }
+  }, [saved, skey]);
+
+  // A session starts both players from the same blank board.
+  useEffect(() => {
+    if (room.startedAt) setSaved({ level: 0, found: {}, hints: {}, bonus: 0, startedAt: room.startedAt });
+  }, [room.startedAt]);
+  // Team up: words and level changes from the teammate land on this board too.
+  useEffect(() => room.onEvent((e) => {
+    if (room.mode !== 'team') return;
+    if (e.t === 'found') setSaved((s) => ((s.found[e.level] || []).includes(e.word) ? s : { ...s, found: { ...s.found, [e.level]: [...(s.found[e.level] || []), e.word] } }));
+    if (e.t === 'level') setSaved((s) => (e.level > s.level ? { ...s, level: e.level } : s));
+  }), [room]);
 
   const li = Math.min(saved.level, Math.max((levels?.length || 1) - 1, 0));
   const lv = levels?.[li];
@@ -62,6 +88,14 @@ export default function KeywordsRoute() {
       setSaved((s) => ({ ...s, finishedSecs: Math.max(1, Math.round((Date.now() - (s.startedAt || Date.now())) / 1000)) }));
     }
   }, [levels, li, done, saved.finishedSecs]);
+  // In a session, tell the other player when you finish.
+  const announced = useRef(false);
+  useEffect(() => {
+    if (saved.finishedSecs == null || !room.startedAt || !room.me || !levels || announced.current) return;
+    announced.current = true;
+    room.send({ t: 'finish', id: room.me.id, name: room.me.name, score: scoreOf(levels, saved), seconds: saved.finishedSecs });
+  }, [saved, room, levels]);
+  useEffect(() => { announced.current = false; }, [room.startedAt]);
 
   useEffect(() => {
     if (lv) setOrder(lv.letters.map((_, i) => i));
@@ -81,6 +115,7 @@ export default function KeywordsRoute() {
     if (found.includes(w)) return say('Already found', 'grey');
     if (lv.slots.includes(w)) {
       setSaved((s) => ({ ...s, found: { ...s.found, [li]: [...(s.found[li] || []), w] } }));
+      if (room.mode === 'team' && room.startedAt && room.me) room.send({ t: 'found', id: room.me.id, level: li, word: w });
       return say(w === lv.term.word ? `${lv.term.display}!` : 'Nice one', 'good');
     }
     if (lv.bonus.includes(w)) {
@@ -158,12 +193,8 @@ export default function KeywordsRoute() {
   }
 
   const allDone = li === levels.length - 1 && done;
-  // Points: each key term 50 (less 15 per hint, never under 10), each other word 10, each bonus word 5.
-  const score = levels.reduce((sum, l, i) => {
-    const f = saved.found[i] || [];
-    const main = f.includes(l.term.word) ? Math.max(10, 50 - 15 * (saved.hints[i] || 0)) : 0;
-    return sum + main + 10 * f.filter((w) => w !== l.term.word).length;
-  }, 0) + 5 * saved.bonus;
+  const score = scoreOf(levels, saved);
+
   const termsSolved = levels.filter((l, i) => (saved.found[i] || []).includes(l.term.word)).length;
   const hintsTotal = Object.values(saved.hints).reduce((s, n) => s + n, 0);
   const pts = path.map((i) => pos(slotOf(i), lv.letters.length));
@@ -172,6 +203,16 @@ export default function KeywordsRoute() {
     <div style={shell}>
       <BackButton to={back} />
       <Label>Keywords · {courseCode} Week {weekNum}</Label>
+      {roomCode && (
+        <RoomBar
+          room={room}
+          game="keywords"
+          course={courseCode}
+          week={weekNum}
+          mine={{ done: levels.reduce((n, _l, i) => n + (saved.found[i] || []).length, 0), total: levels.reduce((n, l) => n + l.slots.length, 0), label: `L${li + 1}/${levels.length}` }}
+        />
+      )}
+      {roomCode && !room.startedAt ? null : (<>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
         <Display size={26}>Level {li + 1} of {levels.length}</Display>
         {saved.bonus > 0 && <span className="pill pill--good" style={{ marginLeft: 'auto' }}>{saved.bonus} bonus</span>}
@@ -230,7 +271,7 @@ export default function KeywordsRoute() {
               <button className="btn btn--white btn--block" onClick={() => setSaved({ level: 0, found: {}, hints: {}, bonus: 0, startedAt: Date.now() })}>Play again</button>
             </>
           ) : (
-            <button className="btn btn--amber btn--block" onClick={() => setSaved((s) => ({ ...s, level: li + 1 }))}>Next level</button>
+            <button className="btn btn--amber btn--block" onClick={() => { setSaved((s) => ({ ...s, level: li + 1 })); if (room.mode === 'team' && room.startedAt) room.send({ t: 'level', level: li + 1 }); }}>Next level</button>
           )}
         </Card>
       ) : (
@@ -292,8 +333,10 @@ export default function KeywordsRoute() {
           <div className="t-13 muted" style={{ textAlign: 'center', marginTop: 10 }}>
             Drag across the letters to spell a word, or tap them one by one and press Go.
           </div>
+          {!roomCode && <InviteButton game="keywords" course={courseCode} week={weekNum} />}
         </>
       )}
+      </>)}
       <style>{'@keyframes kw-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}'}</style>
     </div>
   );
