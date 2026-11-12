@@ -8,7 +8,8 @@ import type { UnifyNote } from '../types/note';
 // word in the game is course vocabulary and nothing extra is downloaded.
 
 export type Term = { word: string; display: string; clue: string };
-export type Level = { term: Term; letters: string[]; slots: string[]; bonus: string[] };
+// clues: a clue from the notes for every word box (the key term's is term.clue).
+export type Level = { term: Term; letters: string[]; slots: string[]; bonus: string[]; clues: Record<string, string> };
 
 const strip = (s: string) => {
   const noTags = s.replace(/<[^>]*>/g, ' ');
@@ -191,7 +192,27 @@ function shuffle<T>(a: T[], seed: number): T[] {
   return out;
 }
 
+// A clue for one of the other words: a sentence from the notes that uses it,
+// with the word (and the level's key term) blanked out. A defining sentence
+// wins; otherwise the shortest one that still says something.
+function clueFor(word: string, keyTerm: Term, sentences: string[]): string {
+  const esc = (x: string) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const wordRe = new RegExp(`\\b${esc(word)}\\b`, 'i');
+  const keyRe = new RegExp(`\\b${esc(keyTerm.display)}\\b`, 'i');
+  const uses = sentences.filter((s) => wordRe.test(s) && s.length >= 30);
+  const free = uses.filter((s) => !keyRe.test(s));
+  const pool = free.length ? free : uses;
+  const defines = new RegExp(`\\b${esc(word)}\\b\\s+(is|are|means|refers)\\b`, 'i');
+  const best = pool.find((s) => defines.test(s)) || [...pool].sort((a, b) => a.length - b.length)[0];
+  if (!best) return `A ${word.length}-letter word from this week's notes.`;
+  let c = best.replace(new RegExp(`\\b${esc(word)}\\b`, 'gi'), '_____');
+  c = c.replace(new RegExp(`\\b${esc(keyTerm.display)}\\b`, 'gi'), '(key term)');
+  if (c.length > 220) c = c.slice(0, 217).replace(/\s+\S*$/, '') + '…';
+  return c;
+}
+
 export function buildLevels(note: UnifyNote, max = 12): Level[] {
+  const sentences = sentencesOf(note);
   const marked = extractTerms(note);
   const terms = [...marked, ...moreTerms(note, marked)];
   const dict = courseDictionary(note, terms);
@@ -208,6 +229,8 @@ export function buildLevels(note: UnifyNote, max = 12): Level[] {
     fits.sort((a, b) => b.length - a.length || a.localeCompare(b));
     const slots = [term.word, ...fits.slice(0, 5)];
     const bonus = fits.slice(5);
-    return { term, letters: shuffle(letters, term.word.length * 31 + n * 7 + 3), slots, bonus };
+    const clues: Record<string, string> = { [term.word]: term.clue };
+    for (const w of slots.slice(1)) clues[w] = clueFor(w, term, sentences);
+    return { term, letters: shuffle(letters, term.word.length * 31 + n * 7 + 3), slots, bonus, clues };
   });
 }

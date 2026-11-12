@@ -671,6 +671,8 @@ export const api = {
     courses?: { code: string; status: CgpaCourse['status']; units: number; grade?: number | null }[];
   }) => apiFetch<{ ok: boolean }>('/v1/cgpa', { method: 'PUT', body: JSON.stringify(payload) }),
   // Head of Class
+  classMembers: () =>
+    apiFetch<{ department: string | null; level: string | null; members: { id: string; name: string; avatar: string; persona: string | null; isHoc: boolean; me: boolean }[] }>('/v1/hoc/members'),
   hocPosts: () => apiFetch<{ posts: HocPost[]; isHoc: boolean; department?: string; level?: string; audience?: { students: number; fromList: boolean } }>('/v1/hoc/posts'),
   hocPost: (payload: { type: HocPost['type']; title?: string; content: string }) =>
     apiFetch<{ ok: boolean; id: string }>('/v1/hoc/posts', { method: 'POST', body: JSON.stringify(payload) }),

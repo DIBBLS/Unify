@@ -7,12 +7,14 @@ import { errorToast } from '../lib/errors';
 import { toastSuccess } from '../lib/toast';
 import { ROUTES } from '../lib/routes';
 import BackButton from '../components/BackButton';
+import ClassMembers from '../components/ClassMembers';
 import ErrorState from '../components/ErrorState';
 import { BoxBoy } from '../components/redesign/brand';
 import { Card, Display, Label, Pill } from '../components/redesign/ui';
 
 // Class board: posts from your Head of Class for your department + level.
 // The HOC (and admins) can post and delete their own; everyone else reads.
+// Everyone in the class also sees who else is in it (Class members).
 const TYPES: { key: HocPost['type']; label: string }[] = [
   { key: 'announcement', label: 'Announcement' },
   { key: 'tip', label: 'Tip' },
@@ -115,6 +117,8 @@ export default function HocDashboardRoute() {
           <button className="btn btn--amber btn--block" disabled={busy || !content.trim()} onClick={() => void post()}>{busy ? 'Posting…' : 'Post'}</button>
         </Card>
       )}
+
+      {meta && <ClassMembers />}
 
       <section style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
         {/* S42: filter the feed (announcement-only design: All / Announcements / Tips / Questions). */}

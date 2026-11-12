@@ -528,6 +528,7 @@ export default function MeRoute() {
           <span aria-hidden="true" style={{ color: 'var(--text3)' }}>›</span>
         </Link>
       )}
+      <LiveWireRow />
       <Link
         to="/settings"
         style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 8, color: 'var(--text)', textDecoration: 'none' }}
@@ -699,3 +700,23 @@ export default function MeRoute() {
   );
 }
 
+
+// Live wire, for anyone who can send one (class reps, lecturers, contributors,
+// level admins, HODs, deans, admins). Hidden for everyone else.
+function LiveWireRow() {
+  const [can, setCan] = useState(false);
+  useEffect(() => { api.liveWires().then((r) => setCan(r.targets.length > 0)).catch(() => {}); }, []);
+  if (!can) return null;
+  return (
+    <Link
+      to={ROUTES.liveWire}
+      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 8, color: 'var(--text)', textDecoration: 'none' }}
+    >
+      <span>
+        <span style={{ display: 'block', fontSize: 13, fontWeight: 700 }}>Live wire</span>
+        <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>Send an urgent message with a countdown to the students you look after</span>
+      </span>
+      <span aria-hidden="true" style={{ color: 'var(--text3)' }}>›</span>
+    </Link>
+  );
+}

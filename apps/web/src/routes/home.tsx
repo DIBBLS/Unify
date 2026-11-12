@@ -618,6 +618,10 @@ export default function HomeRoute() {
     if (guide.fresh) updateSlides.splice(resume ? 1 : 0, 0, slide);
     else updateSlides.push(slide);
   }
+  // Practice: the course games, with their leaderboards.
+  if (shown.length > 0 && (profile?.role || 'student') === 'student') {
+    updateSlides.push({ id: 'practice', pose: 'cheer', tag: 'Practice', title: 'Course games', body: 'Keywords and Crossword from your own notes, against the clock, with leaderboards for your course.', to: '/games', cta: 'Play now' });
+  }
   updateSlides.push({ id: 'attend', pose: 'phoneOut', tag: 'In class', title: 'Your attendance pass', body: 'In class, open My pass and let your class rep or lecturer scan it.', to: '/attendance/pass', cta: 'My pass' });
   updateSlides.push({ id: 'class', pose: 'thumbsUpPhone', tag: 'Your class', title: 'Notices from your class rep', body: 'Board posts and shared materials from your course live in Class.', to: '/class', cta: 'Open Class' });
   {

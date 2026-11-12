@@ -17,6 +17,7 @@ import AdminContentPanel from './admin/content';
 import PerformancePanel from './admin/performance';
 import HomeUpdatesPanel from './admin/updates';
 import ModulesOverview from './admin/modules-overview';
+import AdminLiveWire from './admin/livewire';
 import GuidePanel, { ClassContributorsPicker } from './admin/guide';
 import Typewriter from '../components/Typewriter';
 import { localGreeting, dailyProverb } from '../lib/naija';
@@ -851,6 +852,10 @@ export default function AdminRoute() {
 
       <Module id="guide" openId={openModule}>
         {openModule === 'guide' && <GuidePanel />}
+      </Module>
+
+      <Module id="livewire" openId={openModule}>
+        {openModule === 'livewire' && <AdminLiveWire />}
       </Module>
 
       <Module id="announce" openId={openModule}>
