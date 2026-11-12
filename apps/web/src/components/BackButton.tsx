@@ -1,14 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
-import { previousPath } from '../lib/navHistory';
+import { goBack, leaveTo } from '../lib/navHistory';
 
-// Back remembers the actual previous in-app screen (previousPath) and
+// Back steps back to the actual previous in-app screen (navHistory) and
 // falls back to the explicit hub for deep links with no history.
-export default function BackButton({ to, label = 'Back' }: { to: string; label?: string }) {
+// fixed: always go to `to` (games → Practice), not wherever you came from.
+export default function BackButton({ to, label = 'Back', fixed }: { to: string; label?: string; fixed?: boolean }) {
   const navigate = useNavigate();
   return (
     <button
-      onClick={() => navigate(previousPath() || to)}
+      onClick={() => (fixed ? leaveTo(navigate, to) : goBack(navigate, to))}
       style={{
         marginBottom: 16,
         display: 'flex',

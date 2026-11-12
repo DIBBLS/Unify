@@ -104,13 +104,17 @@ export default function TimetableRoute() {
         {loading ? (
           <SectionSkeleton rows={3} />
         ) : courses.length === 0 ? (
+          <>
           <Card style={{ alignItems: 'center', textAlign: 'center' }}>
             <BoxBoy pose="peeking" width={110} />
             <div className="t-15 w-6">No courses yet</div>
             <div className="t-13 muted">Join your courses and their class times show up here.</div>
             <Link to={ROUTES.findCourses} className="btn btn--amber">Manage courses</Link>
           </Card>
+          <EmptyDay label={DAY_LONG[day]} nowMin={day === today ? nowMin : null} />
+          </>
         ) : daySlots.length === 0 ? (
+          <>
           <Card style={{ alignItems: 'center', textAlign: 'center' }}>
             <BoxBoy pose="chairRelax" width={120} />
             <div className="t-15 w-6">{isHoc && slots.length === 0 ? 'You haven’t added this week’s classes yet' : `No classes on ${DAY_LONG[day]}`}</div>
@@ -123,6 +127,8 @@ export default function TimetableRoute() {
             </div>
             {isHoc && slots.length === 0 && <button className="btn btn--amber" onClick={() => setAdding(true)}>Add class times</button>}
           </Card>
+          <EmptyDay label={DAY_LONG[day]} nowMin={day === today ? nowMin : null} />
+          </>
         ) : (
           <ListCard>
             {daySlots.map((s) => {
@@ -236,5 +242,35 @@ function AddClassTime({ courses, day, onDone, onCancel }: { courses: string[]; d
         <button className="btn btn--white" onClick={onCancel}>Cancel</button>
       </div>
     </Card>
+  );
+}
+
+// A day with nothing on it still shows as a day: the hours from 8am to 6pm,
+// with a line at the current time when it's today.
+const DAY_START = 8 * 60;
+const DAY_END = 18 * 60;
+function EmptyDay({ label, nowMin }: { label: string; nowMin: number | null }) {
+  const hours = Array.from({ length: (DAY_END - DAY_START) / 60 + 1 }, (_, i) => DAY_START / 60 + i);
+  const rowH = 36;
+  const showNow = nowMin != null && nowMin >= DAY_START && nowMin <= DAY_END;
+  const fmt = (h: number) => `${h % 12 || 12}${h < 12 ? 'am' : 'pm'}`;
+  return (
+    <div aria-label={`${label}: no classes scheduled`} style={{ position: 'relative', marginTop: 12, padding: '6px 12px 6px 0', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16 }}>
+      {hours.map((h) => (
+        <div key={h} style={{ display: 'flex', alignItems: 'flex-start', height: h === hours[hours.length - 1] ? 14 : rowH }}>
+          <span style={{ width: 48, flex: 'none', textAlign: 'right', paddingRight: 8, fontSize: 11, fontWeight: 700, color: 'var(--text3)', lineHeight: '12px', transform: 'translateY(-1px)' }}>{fmt(h)}</span>
+          <span style={{ flex: 1, borderTop: '1px dashed var(--border)', marginTop: 6 }} />
+        </div>
+      ))}
+      {showNow && (
+        <div aria-hidden="true" style={{ position: 'absolute', left: 44, right: 12, top: 6 + 6 + ((nowMin! - DAY_START) / 60) * rowH, display: 'flex', alignItems: 'center' }}>
+          <span style={{ width: 8, height: 8, borderRadius: 9999, background: 'var(--u-red)' }} />
+          <span style={{ flex: 1, height: 2, background: 'var(--u-red)' }} />
+        </div>
+      )}
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+        <span style={{ padding: '6px 12px', borderRadius: 9999, background: 'var(--u-card-2)', border: '1px solid var(--border)', fontSize: 12, fontWeight: 700, color: 'var(--text2)' }}>Nothing scheduled</span>
+      </div>
+    </div>
   );
 }

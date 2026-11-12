@@ -1,8 +1,7 @@
 import { ReaderSkeleton } from '../../components/Skeletons';
 import { useEffect, useRef, useState } from 'react';
-import { Link, useParams, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Check, Download, ArrowUp, Share2, Lock, Flag, Gamepad2, Grid3x3 } from 'lucide-react';
-import { ROUTES } from '../../lib/routes';
+import { useParams, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, Check, Download, ArrowUp, Share2, Lock, Flag } from 'lucide-react';
 import ReportSheet from '../../components/ReportSheet';
 import { api, type TopicMeta } from '../../lib/api';
 import { log } from '../../lib/log';
@@ -13,7 +12,8 @@ import EoqQuiz from '../../components/EoqQuiz';
 import { ReadAloud } from '../../components/ReadAloud';
 import { ShareModal } from '../../components/ShareModal';
 import { XP_GATES, meetsXpGate } from '../../lib/xp';
-import { previousPath } from '../../lib/navHistory';
+import { goBack } from '../../lib/navHistory';
+import PracticeGames from '../../components/PracticeGames';
 import { saveWeekOffline, isWeekSaved } from '../../lib/offline';
 import { useProgress } from '../../hooks/useProgress';
 import { BoxBoy } from '../../components/redesign/brand';
@@ -371,7 +371,7 @@ export default function LearnPage() {
           <ArrowUp size={20} />
         </button>
       )}
-      <button onClick={() => navigate(previousPath() || backTo)} style={{ marginBottom: 16, display: 'flex', gap: 6, alignItems: 'center', background: 'none', border: 'none', color: 'var(--text2)', fontSize: 14 }}>
+      <button onClick={() => goBack(navigate, backTo)} style={{ marginBottom: 16, display: 'flex', gap: 6, alignItems: 'center', background: 'none', border: 'none', color: 'var(--text2)', fontSize: 14 }}>
         <ChevronLeft size={18} /> Back
       </button>
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginBottom: 8 }}>
@@ -405,12 +405,6 @@ export default function LearnPage() {
             <Flag size={14} /> {viewer?.role === 'lecturer' ? 'Review this week' : 'Report'}
           </button>
         )}
-        <Link to={ROUTES.keywords(courseCode || '', weekNum)} style={{ display: 'flex', gap: 6, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 700, color: 'var(--u-good)', textDecoration: 'none' }}>
-          <Gamepad2 size={14} /> Keywords
-        </Link>
-        <Link to={ROUTES.crossword(courseCode || '', weekNum)} style={{ display: 'flex', gap: 6, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 700, color: 'var(--u-good)', textDecoration: 'none' }}>
-          <Grid3x3 size={14} /> Crossword
-        </Link>
       </div>
       {reporting && note && (
         <ReportSheet
@@ -583,6 +577,8 @@ export default function LearnPage() {
           </div>
         );
       })()}
+      {/* At the end of the notes (the last tab): practise the week's key terms. */}
+      {tab >= tabCount - 1 && !preview && courseCode && <PracticeGames course={courseCode} week={weekNum} />}
     </div>
     <div className="print-only">
       <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 22 }}>{note.course} · Week {note.week}: <MathPlain text={note.title} inline /></h1>

@@ -15,6 +15,7 @@ export const UPDATE_LINKS: UpdateLink[] = [
   { value: ROUTES.persona, label: 'Choose your Box Boy', who: 'everyone' },
   { value: ROUTES.courses, label: 'My courses', who: 'students' },
   { value: ROUTES.findCourses, label: 'Find courses', who: 'students' },
+  { value: ROUTES.games, label: 'Practice games (Keywords, Crossword)', who: 'students' },
   { value: ROUTES.timetable, label: 'Timetable', who: 'students' },
   { value: ROUTES.cgpa, label: 'CGPA planner', who: 'students', strict: true },
   { value: ROUTES.attendancePass, label: 'My pass', who: 'students' },

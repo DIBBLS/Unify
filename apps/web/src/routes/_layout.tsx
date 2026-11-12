@@ -78,7 +78,7 @@ export default function Layout() {
   });
   const [unread, setUnread] = useState(0);
   const [isDesktop, setIsDesktop] = useState(false);
-  const { pathname } = useLocation();
+  const { pathname, key: locKey } = useLocation();
   // Focus (reading) mode: the note reader owns the whole screen — both
   // chrome bars stay out of the way (mobile included). The flag persists
   // per device, but the bars are only hidden ON note readers: the rest of
@@ -94,7 +94,7 @@ export default function Layout() {
   // don't pollute the trail).
   useEffect(() => {
     recordNav(pathname);
-  }, [pathname]);
+  }, [pathname, locKey]);
   // Push permission prompt: once per device per 7 days, only while the
   // browser permission is still undecided. Profile toggle covers the rest.
   const [pushPrompt, setPushPrompt] = useState(false);

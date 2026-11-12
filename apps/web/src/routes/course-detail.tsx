@@ -370,10 +370,10 @@ function CourseBoard({ course }: { course: string }) {
     api.gameMine(course).then((r) => setMine(r.termsMastered)).catch(() => {});
     api.gameBoard({ course }).then(setBoard).catch(() => {});
   }, [course]);
-  if (!mine && !board?.top.length) return null;
   return (
     <div style={{ ...box, display: 'flex', flexDirection: 'column', gap: 6 }}>
       <span style={{ fontWeight: 700 }}>Course leaderboard</span>
+      {board && !board.top.length && <span style={{ fontSize: 12, color: 'var(--text2)' }}>Nobody has played {course}'s games yet. Finish a week's notes and play Keywords or Crossword to get on the board.</span>}
       {mine != null && <span style={{ fontSize: 12, color: 'var(--text2)' }}>You've mastered {mine} key term{mine === 1 ? '' : 's'} in {course} so far{board?.me ? `, and you're number ${board.me.rank} of ${board.players}` : ''}.</span>}
       {(board?.top || []).slice(0, 5).map((p) => (
         <div key={p.rank} style={{ display: 'flex', gap: 8, fontSize: 13, fontWeight: p.me ? 800 : 500 }}>
@@ -383,6 +383,7 @@ function CourseBoard({ course }: { course: string }) {
           <span style={{ minWidth: 40, textAlign: 'right', fontWeight: 800 }}>{p.score}</span>
         </div>
       ))}
+      <Link to={`${ROUTES.games}?course=${encodeURIComponent(course)}`} style={{ fontSize: 13, fontWeight: 700, color: 'var(--u-good)', textDecoration: 'none', marginTop: 2 }}>Weekly leaderboards and games</Link>
     </div>
   );
 }

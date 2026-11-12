@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { leaveTo } from '../../lib/navHistory';
+import GameTimer, { TimeChoice, mmss, timeLimit, useGameClock } from '../../components/GameTimer';
 import { useGameRoom } from '../../lib/gameRoom';
 import { InviteButton, RoomBar } from '../../components/GameRoomBar';
 import { Lightbulb, Shuffle } from 'lucide-react';
@@ -10,12 +12,16 @@ import BackButton from '../../components/BackButton';
 import { BoxBoy } from '../../components/redesign/brand';
 import { Card, Display, Label } from '../../components/redesign/ui';
 import GameFinish from '../../components/GameFinish';
+import { useCheer } from '../../components/Cheer';
 
 // Keywords: spell the week's key terms from a wheel of letters. Drag across
 // the letters (or tap them one by one, then tap the centre) to make a word.
 // The main word of each level is a term from the notes, with its clue; the
 // other boxes are words the notes use that fit the same letters.
-type Saved = { level: number; found: Record<number, string[]>; hints: Record<number, number>; bonus: number; startedAt?: number; finishedSecs?: number };
+// reveal: hinted letters per word box, keyed `${level}:${word}`.
+type Saved = { level: number; found: Record<number, string[]>; hints: Record<number, number>; bonus: number; reveal?: Record<string, number>; startedAt?: number; finishedSecs?: number; played?: number; timeUp?: boolean; limit?: number };
+// Time allowed: 75 seconds a level (4 to 12 minutes in all).
+const PER_LEVEL = 75;
 const HINTS = 3;
 // Points: each key term 50 (less 15 per hint, never under 10), each other word 10, each bonus word 5.
 function scoreOf(levels: Level[], s: Saved): number {
@@ -30,6 +36,7 @@ const key = (c: string, w: number) => `unify:keywords:${c}:${w}`;
 export default function KeywordsRoute() {
   const { courseCode = '', week = '1' } = useParams();
   const weekNum = Number(week) || 1;
+  const navigate = useNavigate();
   // Play with a coursemate: ?room=CODE&mode=race|team (&host=1 for the one who made it).
   const [params] = useSearchParams();
   const roomCode = params.get('room');
@@ -55,6 +62,11 @@ export default function KeywordsRoute() {
   const [trail, setTrail] = useState<{ pts: { x: number; y: number }[]; tone: 'good' | 'bad' | 'grey'; id: number } | null>(null);
   // The word just found: its boxes flip in one letter after another.
   const [justFound, setJustFound] = useState<string | null>(null);
+  // Cheers, and words found in a row without a miss (3+ is a streak).
+  const [cheerNode, cheer] = useCheer();
+  const streak = useRef(0);
+  // The word box whose clue is showing (tap a box to pick it).
+  const [focus, setFocus] = useState<string | null>(null);
   useEffect(() => {
     if (!justFound) return;
     const t = window.setTimeout(() => setJustFound(null), 1200);
@@ -96,9 +108,22 @@ export default function KeywordsRoute() {
   }, [levels, saved.startedAt]);
   useEffect(() => {
     if (levels?.length && li === levels.length - 1 && done && saved.finishedSecs == null) {
-      setSaved((s) => ({ ...s, finishedSecs: Math.max(1, Math.round((Date.now() - (s.startedAt || Date.now())) / 1000)) }));
+      setSaved((s) => ({ ...s, finishedSecs: Math.max(1, s.played || 1) }));
     }
   }, [levels, li, done, saved.finishedSecs]);
+  // The clock: counts while the game is on screen; at the limit the run ends
+  // with whatever you've found.
+  // The student picks how long to play before the clock starts; a session
+  // with a coursemate uses the suggested time so both get the same.
+  const suggested = timeLimit(levels?.length || 8, PER_LEVEL);
+  const limit = saved.limit || (roomCode ? suggested : 0);
+  const choosing = !limit && saved.finishedSecs == null;
+  const tick = useCallback(() => setSaved((s) => {
+    if (s.finishedSecs != null || !limit) return s;
+    const played = (s.played || 0) + 1;
+    return played >= limit ? { ...s, played, timeUp: true, finishedSecs: played } : { ...s, played };
+  }), [limit]);
+  useGameClock(!!levels?.length && !!limit && saved.finishedSecs == null && !(roomCode && !room.startedAt), tick);
   // In a session, tell the other player when you finish.
   const announced = useRef(false);
   useEffect(() => {
@@ -111,7 +136,40 @@ export default function KeywordsRoute() {
   useEffect(() => {
     if (lv) setOrder(lv.letters.map((_, i) => i));
     setPath([]);
+    setFocus(null);
+    setSpin(null);
   }, [li, lv]);
+
+  // Shuffle: every letter travels clockwise round the ring to its new place
+  // (a short hop or most of a lap), easing in and out, so the wheel swirls.
+  const [spin, setSpin] = useState<{ from: number[]; delta: number[]; t: number } | null>(null);
+  const spinRaf = useRef(0);
+  useEffect(() => () => cancelAnimationFrame(spinRaf.current), []);
+  const shuffleLetters = () => {
+    if (!lv) return;
+    const n = lv.letters.length;
+    let next = [...order];
+    for (let tries = 0; tries < 6 && next.join() === order.join(); tries++) {
+      next = [...order];
+      for (let i = n - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [next[i], next[j]] = [next[j], next[i]]; }
+    }
+    const from = lv.letters.map((_, i) => order.indexOf(i));
+    const delta = lv.letters.map((_, i) => { const d = (next.indexOf(i) - from[i] + n) % n; return d || n; });
+    setPath([]);
+    tapMode.current = false;
+    setOrder(next);
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    cancelAnimationFrame(spinRaf.current);
+    setSpin({ from, delta, t: 0 });
+    const start = performance.now();
+    const dur = 720;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / dur);
+      setSpin(t < 1 ? { from, delta, t } : null);
+      if (t < 1) spinRaf.current = requestAnimationFrame(tick);
+    };
+    spinRaf.current = requestAnimationFrame(tick);
+  };
 
   const word = path.map((i) => lv?.letters[i] || '').join('');
   const say = (text: string, tone: 'good' | 'bad' | 'grey') => {
@@ -126,6 +184,7 @@ export default function KeywordsRoute() {
     return { x: 50 + R * Math.cos(a), y: 50 + R * Math.sin(a) };
   };
   const slotOf = (letterIdx: number) => order.indexOf(letterIdx);
+  const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
   const submit = (w: string) => {
     // The line you drew lingers for a moment in the colour of the result.
@@ -142,21 +201,33 @@ export default function KeywordsRoute() {
     if (lv.slots.includes(w)) {
       setSaved((s) => ({ ...s, found: { ...s.found, [li]: [...(s.found[li] || []), w] } }));
       setJustFound(w);
+      // The biggest moment wins: game done, level cleared, key term, streak, word.
+      streak.current += 1;
+      const now = [...found, w];
+      const cleared = lv.slots.every((x) => now.includes(x));
+      if (cleared && levels && li === levels.length - 1) cheer('done', { sub: 'Every key term cracked' });
+      else if (cleared) cheer('level', { sub: `Level ${li + 1} of ${levels?.length || 1}` });
+      else if (w === lv.term.word) cheer('key', { sub: lv.term.display });
+      else if (streak.current >= 3) cheer('streak', { text: `${streak.current} in a row!` });
+      else cheer('word');
       if (room.mode === 'team' && room.startedAt && room.me) room.send({ t: 'found', id: room.me.id, level: li, word: w });
       return out(w === lv.term.word ? `${lv.term.display}!` : 'Nice one', 'good');
     }
     if (lv.bonus.includes(w)) {
       setSaved((s) => ({ ...s, bonus: s.bonus + 1 }));
+      streak.current += 1;
+      cheer('bonus', { sub: '+5' });
       return out('Bonus word', 'good');
     }
     setShake((n) => n + 1);
+    streak.current = 0;
     out('Not in this week’s notes', 'bad');
   };
 
   // On a laptop: type the letters, Enter to try the word, Backspace to undo.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (!lv || done || e.ctrlKey || e.metaKey || e.altKey) return;
+      if (!lv || done || saved.timeUp || choosing || e.ctrlKey || e.metaKey || e.altKey) return;
       if ((e.target as HTMLElement | null)?.closest?.('input, textarea, [contenteditable="true"]')) return;
       if (/^[a-z]$/i.test(e.key)) {
         const ch = e.key.toUpperCase();
@@ -208,27 +279,30 @@ export default function KeywordsRoute() {
     else tapMode.current = true;
   };
 
+  // The word being worked on: the box you tapped, else the first one not found yet.
+  const target = lv ? (focus && !found.includes(focus) ? focus : lv.slots.find((s) => !found.includes(s))) : undefined;
   const hint = () => {
-    if (!lv || hintsUsed >= HINTS) return;
-    const target = lv.slots.find((s) => !found.includes(s));
-    if (!target) return;
-    setSaved((s) => ({ ...s, hints: { ...s.hints, [li]: (s.hints[li] || 0) + 1 } }));
-    say(`Starts with ${target.slice(0, hintsUsed + 1)}…`, 'grey');
+    if (!lv || hintsUsed >= HINTS || !target) return;
+    const k = `${li}:${target}`;
+    const shown = Math.min(target.length, (saved.reveal?.[k] || 0) + 1);
+    setSaved((s) => ({ ...s, hints: { ...s.hints, [li]: (s.hints[li] || 0) + 1 }, reveal: { ...s.reveal, [k]: shown } }));
+    say(`Starts with ${target.slice(0, shown)}…`, 'grey');
   };
 
-  const back = `/learn/${encodeURIComponent(courseCode)}/week/${weekNum}`;
+  // Leaving a game always lands on Practice, opened on this course.
+  const back = `/games?course=${encodeURIComponent(courseCode)}`;
 
-  if (err) return <div className="g-shell"><BackButton to={back} /><div className="t-14" style={{ color: 'var(--u-red)' }}>{err}</div></div>;
-  if (!levels) return <div className="g-shell"><BackButton to={back} /><div className="t-13 muted">Loading the week…</div></div>;
+  if (err) return <div className="g-shell"><BackButton to={back} fixed /><div className="t-14" style={{ color: 'var(--u-red)' }}>{err}</div></div>;
+  if (!levels) return <div className="g-shell"><BackButton to={back} fixed /><div className="t-13 muted">Loading the week…</div></div>;
   if (!levels.length || !lv) {
     return (
       <div className="g-shell" style={{ maxWidth: 480 }}>
-        <BackButton to={back} />
+        <BackButton to={back} fixed />
         <Card style={{ alignItems: 'center', textAlign: 'center', gap: 10 }}>
           <BoxBoy pose="peeking" width={110} />
           <Display size={24}>Not enough key terms yet</Display>
           <div className="t-14 muted">This week's notes don't have enough single-word terms to build a game. Try another week.</div>
-          <Link to={back} className="btn btn--amber btn--block">Back to the notes</Link>
+          <button className="btn btn--amber btn--block" onClick={() => leaveTo(navigate, back)}>Back to practice</button>
         </Card>
       </div>
     );
@@ -245,11 +319,12 @@ export default function KeywordsRoute() {
   const totalSlots = levels.reduce((n, l) => n + l.slots.length, 0);
   const foundSlots = levels.reduce((n, l, i) => n + (saved.found[i] || []).filter((w) => l.slots.includes(w)).length, 0);
   const longest = Math.max(...lv.slots.map((s) => s.length));
-  const hintTarget = lv.slots.find((s) => !found.includes(s));
+  const clue = target ? lv.clues?.[target] || (target === lv.term.word ? lv.term.clue : '') : lv.term.clue;
 
   return (
     <div className="g-shell">
-      <BackButton to={back} />
+      {cheerNode}
+      <BackButton to={back} fixed />
       <Label>Keywords · {courseCode} Week {weekNum}</Label>
       {roomCode && (
         <RoomBar
@@ -268,12 +343,16 @@ export default function KeywordsRoute() {
         </div>
         {saved.bonus > 0 && <span className="g-count">+{saved.bonus} bonus</span>}
       </div>
+      {saved.finishedSecs == null && !choosing && <GameTimer played={saved.played || 0} limit={limit} />}
+      {choosing ? (
+        <div style={{ marginTop: 16 }}><TimeChoice suggested={suggested} what={`${levels.length} level${levels.length === 1 ? '' : 's'} of this week's key terms.`} onPick={(secs) => setSaved((s) => ({ ...s, limit: secs, played: 0 }))} /></div>
+      ) : (
 
       <div className="g-layout">
         <div className="g-main">
-          <div className="g-clue g-in" key={`clue${li}`}>
-            <div className="g-clue-tag">Clue for the key term</div>
-            <div className="g-clue-text">{lv.term.clue}</div>
+          <div className="g-clue g-in" key={`clue${li}:${target || ''}`}>
+            <div className="g-clue-tag">{!target || target === lv.term.word ? 'Clue for the key term' : `Clue for a ${target.length}-letter word`}</div>
+            <div className="g-clue-text">{clue || `A ${target?.length}-letter word from this week's notes.`}</div>
           </div>
 
           {/* Word boxes: the key term first, on its own row, then the others. */}
@@ -282,9 +361,18 @@ export default function KeywordsRoute() {
               const got = found.includes(s) || done;
               const main = si === 0;
               const fresh = justFound === s;
-              const shown = got ? s.length : s === hintTarget ? Math.min(hintsUsed, s.length) : 0;
+              const shown = got ? s.length : saved.reveal?.[`${li}:${s}`] || 0;
+              const on = !done && s === target;
               return (
-                <div key={s} className={`g-slot${main ? ' g-slot--main' : ''}`} aria-label={got ? s : `${s.length} letters${main ? ', key term' : ''}`}>
+                <div
+                  key={s}
+                  className={`g-slot${main ? ' g-slot--main' : ''}${on ? ' g-slot--on' : ''}${got ? '' : ' g-slot--pick'}`}
+                  aria-label={got ? s : `${s.length} letters${main ? ', key term' : ''}${on ? ', clue showing' : ''}`}
+                  role={got ? undefined : 'button'}
+                  tabIndex={got ? undefined : 0}
+                  onClick={got ? undefined : () => setFocus(s)}
+                  onKeyDown={got ? undefined : (e) => { if (e.key === ' ') { e.preventDefault(); setFocus(s); } }}
+                >
                   {s.split('').map((c, ci) => (
                     <span
                       key={ci}
@@ -301,7 +389,16 @@ export default function KeywordsRoute() {
         </div>
 
         <div className="g-side">
-          {done ? (
+          {saved.timeUp ? (
+            <Card className="g-win" style={{ alignItems: 'center', textAlign: 'center', gap: 8 }}>
+              <BoxBoy pose="thumbsUp" width={96} />
+              <Display size={22}>Time's up</Display>
+              <div className="t-14 muted">You played {mmss(saved.finishedSecs || limit)} and cracked {termsSolved} of {levels.length} key terms. Take a break, or go again to beat your score.</div>
+              {saved.finishedSecs != null && <GameFinish game="keywords" course={courseCode} week={weekNum} score={score} terms={termsSolved} hints={hintsTotal} seconds={saved.finishedSecs} />}
+              <button className="btn btn--amber btn--block" onClick={() => leaveTo(navigate, back)}>Back to practice</button>
+              <button className="btn btn--white btn--block" onClick={() => setSaved({ level: 0, found: {}, hints: {}, bonus: 0, startedAt: Date.now() })}>Play again</button>
+            </Card>
+          ) : done ? (
             <Card className="g-win" style={{ alignItems: 'center', textAlign: 'center', gap: 8 }}>
               <BoxBoy pose={allDone ? 'cheer' : 'thumbsUp'} width={96} />
               <Display size={22}>{lv.term.display}</Display>
@@ -310,7 +407,7 @@ export default function KeywordsRoute() {
                 <>
                   <div className="t-15 w-7">You've cracked every key term this week.</div>
                   {saved.finishedSecs != null && <GameFinish game="keywords" course={courseCode} week={weekNum} score={score} terms={termsSolved} hints={hintsTotal} seconds={saved.finishedSecs} />}
-                  <Link to={back} className="btn btn--amber btn--block">Back to the notes</Link>
+                  <button className="btn btn--amber btn--block" onClick={() => leaveTo(navigate, back)}>Back to practice</button>
                   <button className="btn btn--white btn--block" onClick={() => setSaved({ level: 0, found: {}, hints: {}, bonus: 0, startedAt: Date.now() })}>Play again</button>
                 </>
               ) : (
@@ -347,8 +444,12 @@ export default function KeywordsRoute() {
                   {isDragging && last && ptr && <line className="kw-band" x1={last.x} y1={last.y} x2={ptr.x} y2={ptr.y} />}
                 </svg>
                 {lv.letters.map((c, i) => {
-                  const p = pos(slotOf(i), lv.letters.length);
+                  const n = lv.letters.length;
+                  const st = spin ? spin.from[i] + spin.delta[i] * ease(spin.t) : slotOf(i);
+                  const p = pos(st, n);
                   const on = path.includes(i);
+                  // Letters dip a little mid-swirl and settle back.
+                  const dip = spin ? 1 - 0.14 * Math.sin(Math.PI * spin.t) : undefined;
                   return (
                     <button
                       key={i}
@@ -357,7 +458,7 @@ export default function KeywordsRoute() {
                       aria-label={`Letter ${c}`}
                       aria-pressed={on}
                       className={`kw-letter${on ? ' on' : ''}`}
-                      style={{ left: `${p.x}%`, top: `${p.y}%` }}
+                      style={{ left: `${p.x}%`, top: `${p.y}%`, ...(dip ? { transform: `scale(${dip})`, transition: 'none' } : null) }}
                     >
                       {c}
                     </button>
@@ -371,7 +472,7 @@ export default function KeywordsRoute() {
                 )}
               </div>
               <div className="g-tools" style={{ marginTop: 6 }}>
-                <button className="btn btn--white btn--sm" onClick={() => { setOrder((o) => [...o].sort(() => Math.random() - 0.5)); setPath([]); tapMode.current = false; }}>
+                <button className="btn btn--white btn--sm" onClick={shuffleLetters} disabled={!!spin}>
                   <Shuffle size={15} /> Shuffle
                 </button>
                 <button className="btn btn--white btn--sm" disabled={hintsUsed >= HINTS} onClick={hint}>
@@ -384,6 +485,7 @@ export default function KeywordsRoute() {
           )}
         </div>
       </div>
+      )}
       </>)}
     </div>
   );

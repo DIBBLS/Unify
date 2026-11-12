@@ -52,6 +52,11 @@
 
 .g-slots { container-type: inline-size; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 20px; }
 .g-slot { display: flex; gap: 5px; --t: min(36px, calc((100cqw - (var(--n) - 1) * 5px) / var(--n))); }
+.g-slot--pick { cursor: pointer; border-radius: 12px; -webkit-tap-highlight-color: transparent; }
+.g-slot--pick:focus-visible { outline: 2px solid var(--u-amber); outline-offset: 4px; }
+.g-slot--on .g-tile { border-color: var(--u-amber); box-shadow: 0 3px 0 var(--g-amber-edge); }
+.g-slot--on .g-tile:not(.g-tile--got) { background: var(--u-warn-tint); }
+.g-slot--on { animation: g-nudge .35s var(--g-spring); }
 .g-slot--main { flex-basis: 100%; justify-content: center; --t: min(44px, calc((100cqw - (var(--n) - 1) * 5px) / var(--n))); }
 
 /* Toast + current word */
@@ -78,7 +83,7 @@
   margin: calc(var(--w) * -.11) 0 0 calc(var(--w) * -.11); padding: 0; border: none; border-radius: 50%;
   background: #f5f4f0; color: #0a0a0a; box-shadow: 0 4px 0 #bdb9ae;
   font-family: var(--fd); font-weight: 900; font-size: calc(var(--w) * .1); touch-action: none; cursor: pointer;
-  transition: left .5s var(--g-spring), top .5s var(--g-spring), background .15s, box-shadow .15s, transform .18s var(--g-spring);
+  transition: background .15s, box-shadow .15s, transform .18s var(--g-spring);
   -webkit-tap-highlight-color: transparent;
 }
 .kw-letter.on { background: var(--u-green); box-shadow: 0 4px 0 var(--g-green-edge); transform: scale(1.12); }
@@ -150,11 +155,73 @@
 @keyframes g-shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-7px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(3px); } }
 @keyframes g-slide { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes g-rise { from { opacity: 0; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes g-nudge { 0% { transform: scale(.94); } 100% { transform: none; } }
 @keyframes kw-draw { to { stroke-dashoffset: 0; } }
 @keyframes kw-trail { 0% { opacity: 1; stroke-width: 8; } 100% { opacity: 0; stroke-width: 2; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .g-tile--flip, .g-toast, .kw-chip, .g-shake, .kw-go, .cw-cell.bad, .cw-cell.won, .cw-ch, .g-in, .g-win, .kw-trail { animation: none; }
+  .g-tile--flip, .g-slot--on, .g-toast, .kw-chip, .g-shake, .kw-go, .cw-cell.bad, .cw-cell.won, .cw-ch, .g-in, .g-win, .kw-trail { animation: none; }
   .kw-seg { animation: none; stroke-dashoffset: 0; }
-  .kw-letter, .cw-cell, .g-bar > i { transition: none; }
+  .cw-cell, .g-bar > i { transition: none; }
 }
+
+/* Game clock: time played, then a draining countdown bar. */
+.g-timer { display: flex; align-items: center; gap: 10px; margin-top: 10px; font-weight: 800; font-size: 13px; font-variant-numeric: tabular-nums; }
+.g-timer-played { display: inline-flex; align-items: center; gap: 4px; color: var(--u-text-2); }
+.g-timer-track { flex: 1; height: 10px; border-radius: 999px; background: var(--u-card-2); border: 1px solid var(--u-border); overflow: hidden; }
+.g-timer-track > i { display: block; height: 100%; border-radius: inherit; background: var(--u-text-3); transition: width 1s linear, background .3s; }
+.g-timer-left { min-width: 62px; text-align: right; color: var(--u-text-2); }
+.g-timer--warn .g-timer-track > i { background: var(--u-amber); }
+.g-timer--warn .g-timer-left { color: var(--u-warn-ink); }
+.g-timer--bad .g-timer-track > i { background: #f87171; }
+.g-timer--bad .g-timer-left { color: var(--u-red); animation: g-blink 1s steps(2) infinite; }
+@keyframes g-blink { 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .g-timer-track > i { transition: none; } .g-timer--bad .g-timer-left { animation: none; } }
+
+/* Time choice before a run */
+.g-time-opts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; width: 100%; max-width: 420px; }
+.g-time-opt {
+  display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 12px 4px 10px; border-radius: 14px;
+  border: 2px solid var(--u-border); background: var(--u-card); color: var(--u-text); box-shadow: 0 4px 0 var(--g-edge);
+  font-size: 12px; font-weight: 700; transition: transform .08s, box-shadow .08s; -webkit-tap-highlight-color: transparent;
+}
+.g-time-opt b { font-family: var(--fd); font-size: 24px; font-weight: 900; line-height: 1; }
+.g-time-opt span { font-size: 10px; font-weight: 900; letter-spacing: .5px; text-transform: uppercase; color: var(--u-good); }
+.g-time-opt.on { border-color: var(--g-green-edge); background: var(--g-soft); box-shadow: 0 4px 0 var(--g-green-edge); }
+.g-time-opt:active { transform: translateY(4px); box-shadow: none; }
+
+/* Cheers: a big springy word over the game, confetti for big moments. */
+.cheer-layer { position: fixed; inset: 0; z-index: 80; pointer-events: none; display: flex; justify-content: center; }
+.cheer { position: absolute; top: 18%; display: flex; flex-direction: column; align-items: center; gap: 4px; animation: cheer-in 1.3s var(--g-spring) both; }
+.cheer--done { animation-duration: 2.2s; }
+.cheer-text {
+  font-family: var(--fd); font-weight: 900; font-size: clamp(34px, 9vw, 56px); line-height: 1; letter-spacing: -.5px;
+  color: var(--u-green); -webkit-text-stroke: 2px #0a0a0a; paint-order: stroke fill;
+  text-shadow: 0 5px 0 #0a0a0a, 0 10px 24px rgba(0, 0, 0, .25);
+}
+.cheer--key .cheer-text, .cheer--level .cheer-text { color: var(--u-amber); }
+.cheer--done .cheer-text { color: #fff; text-shadow: 0 5px 0 #0a0a0a, 0 0 30px rgba(80, 255, 144, .7); }
+.cheer--streak .cheer-text { color: #fb923c; }
+.cheer--bonus .cheer-text, .cheer--half .cheer-text { color: #38bdf8; }
+.cheer-sub { padding: 5px 12px; border-radius: 999px; background: #0a0a0a; color: #f5f4f0; font-weight: 800; font-size: 14px; }
+.cheer-confetti { position: absolute; left: 50%; top: 22%; }
+.cheer-confetti i {
+  position: absolute; width: 9px; height: 14px; border-radius: 2px; opacity: 0;
+  animation: cheer-confetti 1.6s cubic-bezier(.2, .7, .3, 1) var(--d) forwards;
+}
+@keyframes cheer-in {
+  0% { opacity: 0; transform: scale(.3) rotate(-8deg); }
+  18% { opacity: 1; transform: scale(1.15) rotate(3deg); }
+  30% { transform: scale(1) rotate(0); }
+  80% { opacity: 1; transform: translateY(-6px); }
+  100% { opacity: 0; transform: translateY(-34px) scale(.95); }
+}
+@keyframes cheer-confetti {
+  0% { opacity: 1; transform: translate(0, 0) rotate(0); }
+  100% { opacity: 0; transform: translate(var(--x), var(--y)) rotate(var(--r)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cheer { animation: cheer-fade 1.3s linear both; }
+  .cheer-confetti { display: none; }
+}
+@keyframes cheer-fade { 0%, 85% { opacity: 1; } 100% { opacity: 0; } }

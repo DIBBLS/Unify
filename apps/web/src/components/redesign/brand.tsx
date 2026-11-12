@@ -135,22 +135,57 @@ export function Bubble({ children, style }: { children: ReactNode; style?: CSSPr
 
 /* ---------- Semester week tracker (Home hero) ----------
    12 bars. Weeks 1–7 calm, 8–10 amber "exams in N weeks", 11–12 red. */
+// Semester tracker: each week's bar takes its colour from how far into the
+// semester it is, green → yellow → orange → red, so the strip itself warms
+// up as exams get closer. The current week is outlined and the label says
+// how long is left once it matters.
+const WEEK_STOPS: [number, [number, number, number]][] = [[0, [80, 255, 144]], [0.5, [250, 204, 21]], [0.75, [251, 146, 60]], [1, [220, 38, 38]]];
+export function weekColor(f: number): string {
+  const x = Math.min(1, Math.max(0, f));
+  for (let i = 1; i < WEEK_STOPS.length; i++) {
+    const [b, cb] = WEEK_STOPS[i];
+    const [a, ca] = WEEK_STOPS[i - 1];
+    if (x <= b) {
+      const t = (x - a) / (b - a || 1);
+      const c = ca.map((v, k) => Math.round(v + (cb[k] - v) * t));
+      return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
+    }
+  }
+  return 'rgb(220, 38, 38)';
+}
+
 export function SemesterWeek({ week, total = 12 }: { week: number; total?: number }) {
   const left = total - week + 1;
-  const stage = week >= total - 1 ? 'final' : week >= 8 ? 'close' : 'calm';
-  const nowColor = { calm: '#50ff90', close: '#fbbf24', final: '#dc2626' }[stage];
+  const at = (n: number) => (total > 1 ? (n - 1) / (total - 1) : 1);
+  const f = at(week);
+  const stage = f >= 0.85 || left <= 2 ? 'final' : f >= 0.7 ? 'near' : f >= 0.5 ? 'mid' : 'calm';
+  const nowColor = weekColor(f);
   const label =
     stage === 'calm' ? `Week ${week} of ${total}` :
-    stage === 'close' ? `Week ${week} · exams in ${left} weeks` :
-    week === total ? `Week ${week} · exams next week` : `Week ${week} · exams in ${left} weeks`;
+    week === total ? `Week ${week} · final week` :
+    `Week ${week} · ${left - 1} week${left - 1 === 1 ? '' : 's'} to go`;
+  // The label pill picks up the current colour as a soft tint once it matters.
+  const tint = stage === 'calm' ? 'var(--u-surface)' : nowColor.replace('rgb(', 'rgba(').replace(')', ', 0.16)');
   return (
-    <div className="row" style={{ gap: 10, padding: '7px 12px', borderRadius: 14, background: 'var(--u-surface)', alignSelf: 'flex-start' }} aria-label={label}>
+    <div className="row" style={{ gap: 10, padding: '7px 12px', borderRadius: 14, background: tint, alignSelf: 'flex-start', transition: 'background .4s' }} aria-label={label}>
+      {stage !== 'calm' && <span aria-hidden="true" style={{ width: 8, height: 8, borderRadius: 9999, background: nowColor, boxShadow: `0 0 0 3px ${nowColor.replace('rgb(', 'rgba(').replace(')', ', 0.25)')}` }} />}
       <span className="t-12 w-7">{label}</span>
       <span className="row" style={{ gap: 3 }}>
         {Array.from({ length: total }, (_, i) => {
           const n = i + 1;
+          const c = weekColor(at(n));
           return (
-            <span key={n} style={{ width: 7, height: 12, borderRadius: 2, background: n < week ? '#0a0a0a' : n === week ? nowColor : 'var(--u-border)', outline: n === week ? '1.5px solid #0a0a0a' : undefined }} />
+            <span
+              key={n}
+              title={`Week ${n}`}
+              style={{
+                width: 7, height: n === week ? 14 : 12, borderRadius: 2,
+                background: n <= week ? c : 'var(--u-border)',
+                opacity: n < week ? 0.55 : 1,
+                outline: n === week ? '1.5px solid var(--u-text)' : undefined,
+                outlineOffset: 1,
+              }}
+            />
           );
         })}
       </span>
