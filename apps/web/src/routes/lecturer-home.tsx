@@ -1,4 +1,5 @@
 import { SectionSkeleton } from '../components/Skeletons';
+import LiveWire from '../components/LiveWire';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CalendarDays, ClipboardCheck, PenTool, Search, ChevronRight, Flag } from 'lucide-react';
@@ -61,6 +62,7 @@ export default function LecturerHomeRoute() {
           <Display size={26} color="#fff">{name ? `Hi, ${name}` : 'Welcome'}</Display>
         </div>
       </Card>
+      <LiveWire style={{ margin: '12px 0 0' }} />
 
       {/* L01–L06: first-time lecturer setup, until they've set a department. */}
       {role === 'lecturer' && dept === '' && (

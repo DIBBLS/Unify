@@ -44,8 +44,10 @@ export function PersonaCarousel({ selected, onSelect }: PersonaCarouselProps) {
             position: 'absolute', 
             left: '50%',
             top: 0,
-            transform: `translateX(calc(-50% - ${selectedIndex * 140}px))`,
-            transition: direction ? 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
+            // Put the chosen persona's centre on the screen's centre:
+            // each slot is 120px wide plus a 20px gap, so slot i's centre is i*140 + 60.
+            transform: `translateX(-${selectedIndex * 140 + 60}px)`,
+            transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             gap: 20,
             paddingTop: 20
           }}
@@ -108,7 +110,7 @@ export function PersonaCarousel({ selected, onSelect }: PersonaCarouselProps) {
       </div>
       
       {/* Selected persona details */}
-      <div className="stack center" style={{ gap: 12, maxWidth: 320 }}>
+      <div className="stack center" style={{ gap: 12, maxWidth: 320, width: '100%', margin: '0 auto', alignItems: 'center' }}>
         <h2 className="display" style={{ fontSize: 24, fontFamily: 'var(--font-headline, var(--font-display))' }}>
           {selectedPersona.title.toUpperCase()}
         </h2>

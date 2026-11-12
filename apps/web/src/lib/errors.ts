@@ -49,15 +49,15 @@ const STATUS_COPY: Record<number, string> = {
   401: 'Your session expired. Please sign in again.',
   403: 'You don’t have permission to do that.',
   404: 'We couldn’t find that.',
-  408: 'The request timed out. Try again.',
+  408: 'That took too long, likely the network. Try again.',
   409: 'That conflicts with something that already exists.',
   413: 'That file is too large.',
   422: 'Some of the details aren’t valid.',
-  429: 'Too many tries. Wait a moment and retry.',
-  500: 'Something broke on our side. Try again shortly.',
+  429: 'Too many tries. Give it a minute, then try again.',
+  500: 'Something went wrong on our side, not yours. Try again in a moment.',
   502: 'We’re waking up the server. Try again in a few seconds.',
   503: 'We’re waking up the server. Try again in a few seconds.',
-  504: 'The server took too long. Try again.',
+  504: 'That took too long, likely the network. Try again.',
 };
 
 // Supabase Auth messages worth translating (matched on text).
@@ -65,7 +65,7 @@ const AUTH_COPY: [RegExp, string][] = [
   [/invalid login credentials/i, 'Wrong email or password.'],
   [/email not confirmed/i, 'Confirm your email first — check your inbox and spam.'],
   [/user already registered|already been registered/i, 'That email already has an account. Try signing in.'],
-  [/rate limit|too many requests|over_email_send_rate_limit/i, 'Too many tries. Wait a minute and retry.'],
+  [/rate limit|too many requests|over_email_send_rate_limit/i, 'Too many tries. Give it a minute, then try again.'],
   [/password should be at least|weak password/i, 'Pick a stronger password (at least 6 characters).'],
   [/jwt|refresh token|session (missing|expired)|not authenticated/i, 'Your session expired. Please sign in again.'],
   [/same as the old|same password/i, 'Choose something different from your current one.'],
@@ -97,8 +97,8 @@ export function describeError(e: unknown, action = 'do that'): string {
 
   if (NETWORK_RE.test(m)) {
     return typeof navigator !== 'undefined' && navigator.onLine === false
-      ? 'You’re offline. We’ll retry when you’re back online.'
-      : 'Can’t reach the server. Check your connection and try again.';
+      ? 'No network right now. We’ll try again as soon as you’re back.'
+      : 'The network is poor right now. Check your data or Wi-Fi and try again.';
   }
 
   // App-authored copy: short, sentence-like, nothing technical.

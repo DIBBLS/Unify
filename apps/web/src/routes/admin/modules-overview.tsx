@@ -85,6 +85,29 @@ export default function ModulesOverview({ openModule }: { openModule: (id: strin
         </button>
       </div>
 
+      {(data.liveWires || []).length > 0 && (
+        <div style={{ ...card, marginTop: 12, padding: 0, overflow: 'hidden' }}>
+          <div style={{ padding: '12px 12px 4px', fontSize: 12, fontWeight: 800 }}>Live wires running now</div>
+          {data.liveWires.map((w) => (
+            <div key={w.id} style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '10px 12px', borderTop: '1px solid var(--border)' }}>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ display: 'block', fontSize: 13, fontWeight: 700 }}>{w.message}</span>
+                <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)' }}>{w.by} → {w.to} · ends {new Date(w.endsAt).toLocaleString(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit' })}</span>
+              </span>
+              <button
+                className="btn btn--white btn--sm"
+                onClick={() => {
+                  if (!window.confirm('End this live wire for everyone?')) return;
+                  void api.liveWireEnd(w.id).then(() => setData((d) => (d ? { ...d, liveWires: d.liveWires.filter((x) => x.id !== w.id) } : d))).catch(() => {});
+                }}
+              >
+                End
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       {data.releaseNotes.length > 0 && (
         <div style={{ ...card, marginTop: 12 }}>
           <div style={{ fontSize: 12, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>

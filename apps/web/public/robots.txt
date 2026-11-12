@@ -1,0 +1,8 @@
+# Unify Learn. Public pages are the welcome and sign-in screens; everything
+# behind sign-in also carries a noindex tag, so students' pages never appear in search.
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+Sitemap: https://unify-virid.vercel.app/sitemap.xml

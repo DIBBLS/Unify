@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { ChevronRight, ExternalLink, FileText } from 'lucide-react';
 import BackButton from '../components/BackButton';
+import { ROUTES } from '../lib/routes';
 import { BoxBoy } from '../components/redesign/brand';
 import Flash from '../components/Flash';
 import { api, type Material } from '../lib/api';
@@ -42,7 +43,8 @@ export default function CourseDetailRoute() {
   const [enrolling, setEnrolling] = useState(false);
   // Preview landings (admin/author browsing) go back to their hub, never
   // to the student My Courses module.
-  const [backTo, setBackTo] = useState('/courses');
+  // Students with no in-app trail (reopened, refreshed, from a notification) go Home.
+  const [backTo, setBackTo] = useState('/home');
   const [materials, setMaterials] = useState<Material[]>([]);
   const [slots, setSlots] = useState<{ day: number; start: string; end: string; venue: string; lecturer: string }[]>([]);
   const preview = searchParams.get('preview') === '1';
@@ -73,7 +75,7 @@ export default function CourseDetailRoute() {
                 : role === 'lecturer' || role === 'contributor'
                   ? '/browse'
                   : '/courses'
-              : '/courses'
+              : '/home'
           );
           if (preview) {
             setWeeks(res.weeks || []);
@@ -112,7 +114,7 @@ export default function CourseDetailRoute() {
       const res = await api.courseWeeks(courseCode);
       setWeeks(res.weeks || []);
     } catch (err) {
-      setError(describeError(err, 'enrollment that'));
+      setError(describeError(err, 'add that course'));
     } finally {
       setEnrolling(false);
     }
@@ -141,8 +143,8 @@ export default function CourseDetailRoute() {
       <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px', textAlign: 'center' }}>
         <BackButton to={backTo} />
         <div style={{ display: 'flex', justifyContent: 'center' }}><BoxBoy pose="readingStanding" width={72} /></div>
-        <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20, marginTop: 12 }}>You're not enrolled in {courseCode}</h1>
-        <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px' }}>Enroll to unlock its weeks, topics and quizzes.</p>
+        <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20, marginTop: 12 }}>{courseCode} isn't on your list yet</h1>
+        <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px' }}>Add it to open its weeks, topics and quizzes. It takes a second.</p>
       {slots.length > 0 && (
         <div style={{ marginTop: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14 }}>
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--u-good)' }}>CLASS TIMES · REPEATS WEEKLY</div>
@@ -161,7 +163,7 @@ export default function CourseDetailRoute() {
         </div>
       )}
         <button onClick={enrollHere} disabled={enrolling} style={{ padding: '12px 28px', borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', fontWeight: 800, fontSize: 14, opacity: enrolling ? 0.6 : 1 }}>
-          {enrolling ? 'Enrolling…' : `Enroll in ${courseCode}`}
+          {enrolling ? 'Adding…' : `Add ${courseCode}`}
         </button>
         <div style={{ marginTop: 12 }}>
           <Link to="/courses/find" style={{ fontSize: 13, color: 'var(--u-good)', fontWeight: 700, textDecoration: 'none' }}>
@@ -312,6 +314,33 @@ function Practice({ course, progress, preview }: { course: string; progress: Pro
         </span>
       </div>
       {quizzes.length === 0 && <div style={{ ...box, color: 'var(--text2)', textAlign: 'center' }}>Weekly quizzes show here as weeks are published.</div>}
+      {(progress || []).length > 0 && (
+        <div style={{ ...box, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span>
+            <span style={{ display: 'block', fontWeight: 700 }}>Keywords</span>
+            <span style={{ fontSize: 12, color: 'var(--text2)' }}>Spell each week's key terms from a wheel of letters, with clues from the notes.</span>
+          </span>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {(progress || []).map((w) => (
+              <Link key={w.week} to={ROUTES.keywords(course, w.week)} className="chip chip--sm" style={{ textDecoration: 'none' }}>Week {w.week}</Link>
+            ))}
+          </div>
+        </div>
+      )}
+      {(progress || []).length > 0 && (
+        <div style={{ ...box, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span>
+            <span style={{ display: 'block', fontWeight: 700 }}>Crossword</span>
+            <span style={{ fontSize: 12, color: 'var(--text2)' }}>The week's key terms crossing each other, with clues from the notes.</span>
+          </span>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {(progress || []).map((w) => (
+              <Link key={w.week} to={ROUTES.crossword(course, w.week)} className="chip chip--sm" style={{ textDecoration: 'none' }}>Week {w.week}</Link>
+            ))}
+          </div>
+        </div>
+      )}
+      {(progress || []).length > 0 && <CourseBoard course={course} />}
       {quizzes.map((w) => (
         <Link
           key={w.week}
@@ -328,6 +357,31 @@ function Practice({ course, progress, preview }: { course: string; progress: Pro
             <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--u-good)' }}>Start</span>
           )}
         </Link>
+      ))}
+    </div>
+  );
+}
+
+// Games across the whole course: key terms mastered, and the course leaderboard.
+function CourseBoard({ course }: { course: string }) {
+  const [mine, setMine] = useState<number | null>(null);
+  const [board, setBoard] = useState<Awaited<ReturnType<typeof api.gameBoard>> | null>(null);
+  useEffect(() => {
+    api.gameMine(course).then((r) => setMine(r.termsMastered)).catch(() => {});
+    api.gameBoard({ course }).then(setBoard).catch(() => {});
+  }, [course]);
+  if (!mine && !board?.top.length) return null;
+  return (
+    <div style={{ ...box, display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <span style={{ fontWeight: 700 }}>Course leaderboard</span>
+      {mine != null && <span style={{ fontSize: 12, color: 'var(--text2)' }}>You've mastered {mine} key term{mine === 1 ? '' : 's'} in {course} so far{board?.me ? `, and you're number ${board.me.rank} of ${board.players}` : ''}.</span>}
+      {(board?.top || []).slice(0, 5).map((p) => (
+        <div key={p.rank} style={{ display: 'flex', gap: 8, fontSize: 13, fontWeight: p.me ? 800 : 500 }}>
+          <span style={{ width: 18, color: 'var(--text2)' }}>{p.rank}</span>
+          <span style={{ flex: 1 }}>{p.me ? 'You' : p.name}</span>
+          <span style={{ color: 'var(--text2)' }}>{p.terms} terms</span>
+          <span style={{ minWidth: 40, textAlign: 'right', fontWeight: 800 }}>{p.score}</span>
+        </div>
       ))}
     </div>
   );
