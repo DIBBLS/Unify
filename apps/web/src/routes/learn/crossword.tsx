@@ -33,6 +33,8 @@ export default function CrosswordRoute() {
   });
   const [sel, setSel] = useState<{ r: number; c: number; dir: 'across' | 'down' } | null>(null);
   const [wrong, setWrong] = useState<string[]>([]);
+  // On a laptop the clue list sits open beside the grid.
+  const [wide] = useState(() => typeof window !== 'undefined' && !!window.matchMedia?.('(min-width: 1024px)').matches);
 
   useEffect(() => {
     api.week(courseCode, weekNum)
@@ -111,6 +113,20 @@ export default function CrosswordRoute() {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       if (/^[a-z]$/i.test(e.key)) { type(e.key.toUpperCase()); e.preventDefault(); }
       else if (e.key === 'Backspace') { back(); e.preventDefault(); }
+      else if (e.key === ' ' && sel) { pick(sel.r, sel.c); e.preventDefault(); }
+      else if (e.key.startsWith('Arrow') && puzzle) {
+        // Move to the next letter square that way, and follow that direction.
+        const [dr, dc] = ({ ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] } as Record<string, number[]>)[e.key] || [0, 0];
+        const dir = dr ? 'down' : 'across';
+        let r = sel ? sel.r : 0;
+        let c = sel ? sel.c : -1;
+        for (;;) {
+          r += dr; c += dc;
+          if (r < 0 || c < 0 || r >= puzzle.rows || c >= puzzle.cols) break;
+          if (puzzle.cells[r][c]) { setWrong([]); setSel({ r, c, dir: entryAt(r, c, dir) ? dir : dir === 'across' ? 'down' : 'across' }); break; }
+        }
+        e.preventDefault();
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -131,13 +147,12 @@ export default function CrosswordRoute() {
     share(`${target.r},${target.c}`, puzzle.cells[target.r][target.c] as string);
   };
 
-  const shell = { maxWidth: 'min(var(--shell, 480px), 640px)', margin: '0 auto', padding: '20px 16px 96px' } as const;
   const backTo = `/learn/${encodeURIComponent(courseCode)}/week/${weekNum}`;
-  if (err) return <div style={shell}><BackButton to={backTo} /><div className="t-14" style={{ color: 'var(--u-red)' }}>{err}</div></div>;
-  if (puzzle === undefined) return <div style={shell}><BackButton to={backTo} /><div className="t-13 muted">Building the crossword…</div></div>;
+  if (err) return <div className="g-shell"><BackButton to={backTo} /><div className="t-14" style={{ color: 'var(--u-red)' }}>{err}</div></div>;
+  if (puzzle === undefined) return <div className="g-shell"><BackButton to={backTo} /><div className="t-13 muted">Building the crossword…</div></div>;
   if (!puzzle) {
     return (
-      <div style={shell}>
+      <div className="g-shell" style={{ maxWidth: 480 }}>
         <BackButton to={backTo} />
         <Card style={{ alignItems: 'center', textAlign: 'center', gap: 10 }}>
           <BoxBoy pose="peeking" width={110} />
@@ -149,101 +164,111 @@ export default function CrosswordRoute() {
     );
   }
 
-  const size = Math.max(22, Math.min(36, Math.floor(Math.min(window.innerWidth - 32, 600) / puzzle.cols)));
   const active = new Set(current ? cellsOf(current).map((x) => `${x.r},${x.c}`) : []);
   const score = Math.max(0, puzzle.entries.length * 20 + 50 - saved.reveals * 10);
+  const all = puzzle.cells.flatMap((row, r) => row.map((ch, c) => (ch ? `${r},${c}` : ''))).filter(Boolean);
+  const right = all.filter((k) => { const [r, c] = k.split(',').map(Number); return saved.letters[k] === puzzle.cells[r][c]; }).length;
+  const filled = all.filter((k) => saved.letters[k]).length;
+  const entryDone = (e: Entry) => cellsOf(e).every((x) => saved.letters[`${x.r},${x.c}`] === puzzle.cells[x.r][x.c]);
 
   return (
-    <div style={shell}>
+    <div className="g-shell">
       <BackButton to={backTo} />
       <Label>Crossword · {courseCode} Week {weekNum}</Label>
-      <Display size={26}>{puzzle.entries.length} key terms</Display>
-      {roomCode && (() => {
-        const all = puzzle.cells.flatMap((row, r) => row.map((ch, c) => (ch ? `${r},${c}` : ''))).filter(Boolean);
-        const right = all.filter((k) => { const [r, c] = k.split(',').map(Number); return saved.letters[k] === puzzle.cells[r][c]; }).length;
-        return <RoomBar room={room} game="crossword" course={courseCode} week={weekNum} mine={{ done: right, total: all.length, label: `${Math.round((right / Math.max(1, all.length)) * 100)}%` }} />;
-      })()}
+      {roomCode && <RoomBar room={room} game="crossword" course={courseCode} week={weekNum} mine={{ done: right, total: all.length, label: `${Math.round((right / Math.max(1, all.length)) * 100)}%` }} />}
       {roomCode && !room.startedAt ? null : (<>
-
-      <div role="grid" aria-label="Crossword grid" style={{ display: 'grid', gridTemplateColumns: `repeat(${puzzle.cols}, ${size}px)`, gap: 2, justifyContent: 'center', marginTop: 12, userSelect: 'none' }}>
-        {puzzle.cells.flatMap((row, r) => row.map((ch, c) => {
-          const k = `${r},${c}`;
-          if (!ch) return <span key={k} style={{ width: size, height: size }} />;
-          const isSel = sel?.r === r && sel?.c === c;
-          const v = saved.letters[k] || '';
-          return (
-            <button
-              key={k}
-              role="gridcell"
-              aria-label={`Row ${r + 1}, column ${c + 1}${v ? `, ${v}` : ', empty'}`}
-              onClick={() => pick(r, c)}
-              style={{
-                position: 'relative', width: size, height: size, padding: 0, borderRadius: 4,
-                border: `1.5px solid ${isSel ? '#0a0a0a' : 'var(--border)'}`,
-                background: wrong.includes(k) ? 'var(--u-bad-tint, #fee2e2)' : solved ? 'var(--u-good-tint)' : isSel ? '#fbbf24' : active.has(k) ? 'rgba(74,222,128,0.25)' : 'var(--surface)',
-                fontFamily: 'var(--fd)', fontWeight: 900, fontSize: Math.round(size * 0.55), color: 'var(--text)',
-              }}
-            >
-              {puzzle.nums[r][c] && <span style={{ position: 'absolute', top: 1, left: 2, fontSize: Math.max(8, Math.round(size * 0.28)), fontFamily: 'inherit', fontWeight: 700, lineHeight: 1 }}>{puzzle.nums[r][c]}</span>}
-              {v}
-            </button>
-          );
-        }))}
+      <div className="g-head">
+        <span className="g-head-title">{puzzle.entries.length} key terms</span>
+        <div className="g-bar" role="progressbar" aria-valuemin={0} aria-valuemax={all.length} aria-valuenow={filled} aria-label="Squares filled">
+          <i style={{ width: `${(filled / Math.max(1, all.length)) * 100}%` }} />
+        </div>
       </div>
 
-      {solved ? (
-        <Card style={{ alignItems: 'center', textAlign: 'center', gap: 8, marginTop: 14 }}>
-          <BoxBoy pose="cheer" width={96} />
-          <Display size={22}>Crossword done</Display>
-          {saved.finishedSecs != null && <GameFinish game="crossword" course={courseCode} week={weekNum} score={score} terms={puzzle.entries.length} hints={saved.reveals} seconds={saved.finishedSecs} />}
-          <Link to={backTo} className="btn btn--amber btn--block">Back to the notes</Link>
-          <button className="btn btn--white btn--block" onClick={() => { setSaved({ letters: {}, reveals: 0, checks: 0, startedAt: Date.now() }); setSel(null); }}>Play again</button>
-        </Card>
-      ) : (
-        <>
-          <div style={{ minHeight: 64, marginTop: 12, background: '#0a0a0a', color: '#f5f4f0', borderRadius: 12, padding: '10px 12px' }}>
-            {current ? (
-              <>
-                <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: '#4ade80' }}>{current.num} {current.dir.toUpperCase()} {enumeration(current.display)}</div>
-                <div style={{ fontSize: 14, marginTop: 2 }}>{current.clue}</div>
-              </>
-            ) : (
-              <div style={{ fontSize: 14, color: '#aaa' }}>Tap a square to start. Tap it again to switch between across and down.</div>
-            )}
+      <div className="g-layout">
+        <div className="g-main">
+          <div className="cw-wrap">
+            <div role="grid" aria-label="Crossword grid" className="cw-grid" style={{ '--cols': puzzle.cols, '--rows': puzzle.rows } as React.CSSProperties}>
+              {puzzle.cells.flatMap((row, r) => row.map((ch, c) => {
+                const k = `${r},${c}`;
+                if (!ch) return <span key={k} className="cw-gap" />;
+                const isSel = sel?.r === r && sel?.c === c;
+                const v = saved.letters[k] || '';
+                const cls = solved ? 'won' : wrong.includes(k) ? 'bad' : isSel ? 'sel' : active.has(k) ? 'act' : '';
+                return (
+                  <button
+                    key={k}
+                    role="gridcell"
+                    aria-label={`Row ${r + 1}, column ${c + 1}${v ? `, ${v}` : ', empty'}`}
+                    onClick={() => pick(r, c)}
+                    className={`cw-cell ${cls}`}
+                    style={{ '--d': r + c } as React.CSSProperties}
+                  >
+                    {puzzle.nums[r][c] && <span className="cw-num">{puzzle.nums[r][c]}</span>}
+                    {v && <span key={v} className="cw-ch">{v}</span>}
+                  </button>
+                );
+              }))}
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 10 }}>
-            <button className="btn btn--white btn--sm" onClick={check}>Check</button>
-            <button className="btn btn--white btn--sm" disabled={!current} onClick={reveal}>Reveal a letter</button>
-          </div>
-          {wrong.length > 0 && <div className="t-13" style={{ textAlign: 'center', marginTop: 6, color: 'var(--u-red)' }}>{wrong.length} letter{wrong.length === 1 ? '' : 's'} not right yet</div>}
-          <div aria-label="Keyboard" style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 12 }}>
-            {KEYS.map((row, i) => (
-              <div key={row} style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
-                {row.split('').map((k) => (
-                  <button key={k} onClick={() => type(k)} style={{ flex: '1 1 0', maxWidth: 40, height: 44, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontWeight: 800, fontSize: 15 }}>{k}</button>
-                ))}
-                {i === 2 && (
-                  <button onClick={back} aria-label="Delete" style={{ flex: '1.5 1 0', maxWidth: 60, height: 44, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Delete size={18} /></button>
+        </div>
+
+        <div className="g-side">
+          {solved ? (
+            <Card className="g-win" style={{ alignItems: 'center', textAlign: 'center', gap: 8 }}>
+              <BoxBoy pose="cheer" width={96} />
+              <Display size={22}>Crossword done</Display>
+              {saved.finishedSecs != null && <GameFinish game="crossword" course={courseCode} week={weekNum} score={score} terms={puzzle.entries.length} hints={saved.reveals} seconds={saved.finishedSecs} />}
+              <Link to={backTo} className="btn btn--amber btn--block">Back to the notes</Link>
+              <button className="btn btn--white btn--block" onClick={() => { setSaved({ letters: {}, reveals: 0, checks: 0, startedAt: Date.now() }); setSel(null); }}>Play again</button>
+            </Card>
+          ) : (
+            <>
+              <div className="g-clue g-clue--dark">
+                {current ? (
+                  <div className="g-in" key={`${current.num}${current.dir}`}>
+                    <div className="g-clue-tag">{current.num} {current.dir} {enumeration(current.display)}</div>
+                    <div className="g-clue-text">{current.clue}</div>
+                  </div>
+                ) : (
+                  <div className="g-clue-text" style={{ color: '#aaa', marginTop: 0 }}>Tap a square to start. Tap it again to switch between across and down.</div>
                 )}
               </div>
-            ))}
-          </div>
-          <details style={{ marginTop: 14 }}>
-            <summary className="t-13 w-7" style={{ cursor: 'pointer' }}>All clues</summary>
-            {(['across', 'down'] as const).map((d) => (
-              <div key={d} style={{ marginTop: 8 }}>
-                <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--text2)' }}>{d.toUpperCase()}</div>
-                {puzzle.entries.filter((e) => e.dir === d).map((e) => (
-                  <button key={`${d}${e.num}`} onClick={() => setSel({ r: e.row, c: e.col, dir: d })} style={{ display: 'block', textAlign: 'left', background: 'none', border: 'none', padding: '4px 0', fontSize: 13, color: 'var(--text)' }}>
-                    <b>{e.num}.</b> {e.clue} {enumeration(e.display)}
-                  </button>
+              <div className="g-tools">
+                <button className="btn btn--white btn--sm" onClick={check}>Check</button>
+                <button className="btn btn--white btn--sm" disabled={!current} onClick={reveal}>Reveal a letter</button>
+              </div>
+              {wrong.length > 0 && <div className="t-13 g-in" style={{ textAlign: 'center', color: 'var(--u-red)', fontWeight: 700 }}>{wrong.length} letter{wrong.length === 1 ? '' : 's'} not right yet</div>}
+              <div className="g-kbd" aria-label="Keyboard">
+                {KEYS.map((row, i) => (
+                  <div key={row} className="g-kbd-row">
+                    {row.split('').map((k) => <button key={k} className="g-key" onClick={() => type(k)}>{k}</button>)}
+                    {i === 2 && <button className="g-key g-key--wide" onClick={back} aria-label="Delete"><Delete size={18} /></button>}
+                  </div>
                 ))}
               </div>
-            ))}
-          </details>
-          {!roomCode && <InviteButton game="crossword" course={courseCode} week={weekNum} />}
-        </>
-      )}
+              <div className="g-tip g-kbd-tip">Type on your keyboard. Arrow keys move, Backspace deletes, Space switches across and down.</div>
+              <details className="cw-clues" open={wide}>
+                <summary>All clues</summary>
+                {(['across', 'down'] as const).map((d) => (
+                  <div key={d} style={{ marginTop: 8 }}>
+                    <div className="g-clue-tag" style={{ color: 'var(--u-text-3)', marginBottom: 2 }}>{d}</div>
+                    {puzzle.entries.filter((e) => e.dir === d).map((e) => (
+                      <button
+                        key={`${d}${e.num}`}
+                        className={`cw-cl${current === e ? ' on' : ''}${entryDone(e) ? ' done' : ''}`}
+                        onClick={() => setSel({ r: e.row, c: e.col, dir: d })}
+                      >
+                        <b>{e.num}.</b><span>{e.clue} {enumeration(e.display)}</span>
+                      </button>
+                    ))}
+                  </div>
+                ))}
+              </details>
+              {!roomCode && <InviteButton game="crossword" course={courseCode} week={weekNum} />}
+            </>
+          )}
+        </div>
+      </div>
       </>)}
     </div>
   );
