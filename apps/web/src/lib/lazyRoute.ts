@@ -36,3 +36,27 @@ export function lazyRoute<T extends ComponentType<any>>(fn: () => Promise<{ defa
   });
 }
 
+
+// Warm the code for the screens people open next (other tabs, games,
+// Revision) once the app is idle, so the first tap is instant instead of a
+// fetch. Skipped on Data Saver and 2G, and on browsers without idle callbacks
+// it waits a few seconds instead. Each import resolves to the same module the
+// lazy route asks for later, so nothing downloads twice.
+export function preloadWhenIdle(loaders: (() => Promise<unknown>)[]): void {
+  if (typeof window === 'undefined') return;
+  const conn = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+  if (conn?.saveData || /(^|-)2g$/.test(conn?.effectiveType || '')) return;
+  const run = () => {
+    let i = 0;
+    const next = () => {
+      const load = loaders[i++];
+      if (!load) return;
+      load().catch(() => {}).finally(() => schedule(next));
+    };
+    next();
+  };
+  const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number };
+  const schedule = (cb: () => void) => (w.requestIdleCallback ? w.requestIdleCallback(cb, { timeout: 4000 }) : window.setTimeout(cb, 300));
+  if (w.requestIdleCallback) w.requestIdleCallback(run, { timeout: 6000 });
+  else window.setTimeout(run, 3500);
+}

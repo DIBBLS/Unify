@@ -14,7 +14,11 @@ const stampBuild = (): Plugin => ({
   closeBundle() {
     const dist = resolve(__dirname, 'dist');
     const sw = resolve(dist, 'sw.js');
-    if (existsSync(sw)) writeFileSync(sw, readFileSync(sw, 'utf8').replace('__BUILD_ID__', BUILD_ID));
+    // The worker must know the API origin to cache its answers; take it from the
+    // same env the app uses so a backend move needs no code change.
+    let apiOrigin = '';
+    try { apiOrigin = new URL(process.env.VITE_API_URL || process.env.API_URL || '').origin; } catch { /* keep fallback */ }
+    if (existsSync(sw)) writeFileSync(sw, readFileSync(sw, 'utf8').replace('__BUILD_ID__', BUILD_ID).split('__API_ORIGIN__').join(apiOrigin));
     writeFileSync(resolve(dist, 'version.json'), JSON.stringify({ build: BUILD_ID }));
   },
 });
