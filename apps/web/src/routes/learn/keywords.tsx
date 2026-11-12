@@ -49,6 +49,17 @@ export default function KeywordsRoute() {
   // Tap mode: after a single tap, further taps add letters until Go.
   const tapMode = useRef(false);
   const wheelRef = useRef<HTMLDivElement | null>(null);
+  // Where the finger is (wheel %), so the line stretches after it while dragging.
+  const [ptr, setPtr] = useState<{ x: number; y: number } | null>(null);
+  // The last drawn line, fading out in the colour of the result.
+  const [trail, setTrail] = useState<{ pts: { x: number; y: number }[]; tone: 'good' | 'bad' | 'grey'; id: number } | null>(null);
+  // The word just found: its boxes flip in one letter after another.
+  const [justFound, setJustFound] = useState<string | null>(null);
+  useEffect(() => {
+    if (!justFound) return;
+    const t = window.setTimeout(() => setJustFound(null), 1200);
+    return () => window.clearTimeout(t);
+  }, [justFound]);
 
   useEffect(() => {
     api.week(courseCode, weekNum)
@@ -108,33 +119,62 @@ export default function KeywordsRoute() {
     window.setTimeout(() => setFlash((f) => (f?.text === text ? null : f)), 1600);
   };
 
-  const submit = (w: string) => {
-    setPath([]);
-    tapMode.current = false;
-    if (!lv || w.length < 3) return;
-    if (found.includes(w)) return say('Already found', 'grey');
-    if (lv.slots.includes(w)) {
-      setSaved((s) => ({ ...s, found: { ...s.found, [li]: [...(s.found[li] || []), w] } }));
-      if (room.mode === 'team' && room.startedAt && room.me) room.send({ t: 'found', id: room.me.id, level: li, word: w });
-      return say(w === lv.term.word ? `${lv.term.display}!` : 'Nice one', 'good');
-    }
-    if (lv.bonus.includes(w)) {
-      setSaved((s) => ({ ...s, bonus: s.bonus + 1 }));
-      return say('Bonus word', 'good');
-    }
-    setShake((n) => n + 1);
-    say('Not in this week’s notes', 'bad');
-  };
-
-  // The wheel: letters on a circle; positions follow the shuffled order.
-  const size = 236;
-  const r = 84;
+  // The wheel, in percent of its own size so it scales with the screen.
+  const R = 35.6;
   const pos = (slot: number, n: number) => {
     const a = (slot / n) * Math.PI * 2 - Math.PI / 2;
-    return { x: size / 2 + r * Math.cos(a), y: size / 2 + r * Math.sin(a) };
+    return { x: 50 + R * Math.cos(a), y: 50 + R * Math.sin(a) };
   };
   const slotOf = (letterIdx: number) => order.indexOf(letterIdx);
 
+  const submit = (w: string) => {
+    // The line you drew lingers for a moment in the colour of the result.
+    const drawn = lv ? path.map((i) => pos(slotOf(i), lv.letters.length)) : [];
+    const out = (text: string, tone: 'good' | 'bad' | 'grey') => {
+      if (drawn.length > 1) { const id = Date.now(); setTrail({ pts: drawn, tone, id }); window.setTimeout(() => setTrail((t) => (t?.id === id ? null : t)), 560); }
+      say(text, tone);
+    };
+    setPath([]);
+    setPtr(null);
+    tapMode.current = false;
+    if (!lv || w.length < 3) return;
+    if (found.includes(w)) return out('Already found', 'grey');
+    if (lv.slots.includes(w)) {
+      setSaved((s) => ({ ...s, found: { ...s.found, [li]: [...(s.found[li] || []), w] } }));
+      setJustFound(w);
+      if (room.mode === 'team' && room.startedAt && room.me) room.send({ t: 'found', id: room.me.id, level: li, word: w });
+      return out(w === lv.term.word ? `${lv.term.display}!` : 'Nice one', 'good');
+    }
+    if (lv.bonus.includes(w)) {
+      setSaved((s) => ({ ...s, bonus: s.bonus + 1 }));
+      return out('Bonus word', 'good');
+    }
+    setShake((n) => n + 1);
+    out('Not in this week’s notes', 'bad');
+  };
+
+  // On a laptop: type the letters, Enter to try the word, Backspace to undo.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!lv || done || e.ctrlKey || e.metaKey || e.altKey) return;
+      if ((e.target as HTMLElement | null)?.closest?.('input, textarea, [contenteditable="true"]')) return;
+      if (/^[a-z]$/i.test(e.key)) {
+        const ch = e.key.toUpperCase();
+        const i = lv.letters.findIndex((c, idx) => c === ch && !path.includes(idx));
+        if (i >= 0) { tapMode.current = true; setPath([...path, i]); }
+        e.preventDefault();
+      } else if (e.key === 'Backspace') { setPath(path.slice(0, -1)); e.preventDefault(); }
+      else if (e.key === 'Enter') { if (path.length >= 3) submit(word); e.preventDefault(); }
+      else if (e.key === 'Escape') { setPath([]); tapMode.current = false; }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
+
+  const toWheel = (x: number, y: number) => {
+    const b = wheelRef.current?.getBoundingClientRect();
+    return b ? { x: ((x - b.left) / b.width) * 100, y: ((y - b.top) / b.height) * 100 } : null;
+  };
   const letterAt = (x: number, y: number): number | null => {
     const el = document.elementFromPoint(x, y) as HTMLElement | null;
     const v = el?.closest('[data-letter]')?.getAttribute('data-letter');
@@ -144,11 +184,13 @@ export default function KeywordsRoute() {
     e.preventDefault();
     dragging.current = true;
     setIsDragging(true);
+    setPtr(toWheel(e.clientX, e.clientY));
     // Tap mode keeps building the word; otherwise a press starts a new one.
     setPath((p) => (tapMode.current && p.length ? (p.includes(i) ? p : [...p, i]) : [i]));
   };
   const onMove = (e: React.PointerEvent) => {
     if (!dragging.current) return;
+    setPtr(toWheel(e.clientX, e.clientY));
     const i = letterAt(e.clientX, e.clientY);
     if (i == null) return;
     setPath((p) => {
@@ -160,6 +202,7 @@ export default function KeywordsRoute() {
     if (!dragging.current) return;
     dragging.current = false;
     setIsDragging(false);
+    setPtr(null);
     // A drag across 3+ letters submits; a tap (1 letter) switches to tap mode.
     if (path.length >= 3 && !tapMode.current) submit(word);
     else tapMode.current = true;
@@ -173,14 +216,13 @@ export default function KeywordsRoute() {
     say(`Starts with ${target.slice(0, hintsUsed + 1)}…`, 'grey');
   };
 
-  const shell = { maxWidth: 'min(var(--shell, 480px), 560px)', margin: '0 auto', padding: '20px 16px 96px' } as const;
   const back = `/learn/${encodeURIComponent(courseCode)}/week/${weekNum}`;
 
-  if (err) return <div style={shell}><BackButton to={back} /><div className="t-14" style={{ color: 'var(--u-red)' }}>{err}</div></div>;
-  if (!levels) return <div style={shell}><BackButton to={back} /><div className="t-13 muted">Loading the week…</div></div>;
+  if (err) return <div className="g-shell"><BackButton to={back} /><div className="t-14" style={{ color: 'var(--u-red)' }}>{err}</div></div>;
+  if (!levels) return <div className="g-shell"><BackButton to={back} /><div className="t-13 muted">Loading the week…</div></div>;
   if (!levels.length || !lv) {
     return (
-      <div style={shell}>
+      <div className="g-shell" style={{ maxWidth: 480 }}>
         <BackButton to={back} />
         <Card style={{ alignItems: 'center', textAlign: 'center', gap: 10 }}>
           <BoxBoy pose="peeking" width={110} />
@@ -198,9 +240,15 @@ export default function KeywordsRoute() {
   const termsSolved = levels.filter((l, i) => (saved.found[i] || []).includes(l.term.word)).length;
   const hintsTotal = Object.values(saved.hints).reduce((s, n) => s + n, 0);
   const pts = path.map((i) => pos(slotOf(i), lv.letters.length));
+  const last = pts[pts.length - 1];
+  // Overall progress: every word box across every level.
+  const totalSlots = levels.reduce((n, l) => n + l.slots.length, 0);
+  const foundSlots = levels.reduce((n, l, i) => n + (saved.found[i] || []).filter((w) => l.slots.includes(w)).length, 0);
+  const longest = Math.max(...lv.slots.map((s) => s.length));
+  const hintTarget = lv.slots.find((s) => !found.includes(s));
 
   return (
-    <div style={shell}>
+    <div className="g-shell">
       <BackButton to={back} />
       <Label>Keywords · {courseCode} Week {weekNum}</Label>
       {roomCode && (
@@ -209,135 +257,134 @@ export default function KeywordsRoute() {
           game="keywords"
           course={courseCode}
           week={weekNum}
-          mine={{ done: levels.reduce((n, _l, i) => n + (saved.found[i] || []).length, 0), total: levels.reduce((n, l) => n + l.slots.length, 0), label: `L${li + 1}/${levels.length}` }}
+          mine={{ done: levels.reduce((n, _l, i) => n + (saved.found[i] || []).length, 0), total: totalSlots, label: `L${li + 1}/${levels.length}` }}
         />
       )}
       {roomCode && !room.startedAt ? null : (<>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-        <Display size={26}>Level {li + 1} of {levels.length}</Display>
-        {saved.bonus > 0 && <span className="pill pill--good" style={{ marginLeft: 'auto' }}>{saved.bonus} bonus</span>}
+      <div className="g-head">
+        <span className="g-head-title">Level {li + 1}<span style={{ color: 'var(--u-text-3)' }}>/{levels.length}</span></span>
+        <div className="g-bar" role="progressbar" aria-valuemin={0} aria-valuemax={totalSlots} aria-valuenow={foundSlots} aria-label="Words found">
+          <i style={{ width: `${(foundSlots / Math.max(1, totalSlots)) * 100}%` }} />
+        </div>
+        {saved.bonus > 0 && <span className="g-count">+{saved.bonus} bonus</span>}
       </div>
 
-      <Card pad={14} style={{ marginTop: 12, gap: 4 }}>
-        <div className="t-13 w-7" style={{ color: 'var(--u-good)' }}>Clue for the key term</div>
-        <div className="t-15">{lv.term.clue}</div>
-      </Card>
+      <div className="g-layout">
+        <div className="g-main">
+          <div className="g-clue g-in" key={`clue${li}`}>
+            <div className="g-clue-tag">Clue for the key term</div>
+            <div className="g-clue-text">{lv.term.clue}</div>
+          </div>
 
-      {/* Word boxes: the key term first and highlighted, then the others. */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center', marginTop: 14 }}>
-        {lv.slots.map((s, si) => {
-          const got = found.includes(s) || done;
-          const main = si === 0;
-          return (
-            <div key={s} aria-label={got ? s : `${s.length} letters${main ? ', key term' : ''}`} style={{ display: 'flex', gap: 4 }}>
-              {s.split('').map((c, ci) => (
-                <span
-                  key={ci}
-                  style={{
-                    width: main ? 30 : 26, height: main ? 34 : 30, borderRadius: 6, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                    fontFamily: 'var(--fd)', fontWeight: 900, fontSize: main ? 18 : 15,
-                    background: got ? (main ? 'var(--u-green)' : 'var(--u-good-tint)') : 'var(--surface)',
-                    border: `1.5px solid ${main ? 'var(--u-good)' : 'var(--border)'}`,
-                    color: got ? 'var(--u-black)' : 'transparent',
-                    transition: 'background .2s',
-                  }}
-                >
-                  {c}
-                </span>
-              ))}
-            </div>
-          );
-        })}
-      </div>
-
-      <div style={{ height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 8 }}>
-        {flash ? (
-          <span className={`pill pill--${flash.tone}`}>{flash.text}</span>
-        ) : (
-          <span style={{ fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 22, letterSpacing: 3 }}>{word}</span>
-        )}
-      </div>
-
-      {done ? (
-        <Card style={{ alignItems: 'center', textAlign: 'center', gap: 8, marginTop: 8 }}>
-          <BoxBoy pose={allDone ? 'cheer' : 'thumbsUp'} width={96} />
-          <Display size={22}>{lv.term.display}</Display>
-          <div className="t-14 muted">{lv.term.clue.replace(/_____/g, lv.term.display)}</div>
-          {allDone ? (
-            <>
-              <div className="t-15 w-7">You've cracked every key term this week.</div>
-              {saved.finishedSecs != null && <GameFinish game="keywords" course={courseCode} week={weekNum} score={score} terms={termsSolved} hints={hintsTotal} seconds={saved.finishedSecs} />}
-              <Link to={back} className="btn btn--amber btn--block">Back to the notes</Link>
-              <button className="btn btn--white btn--block" onClick={() => setSaved({ level: 0, found: {}, hints: {}, bonus: 0, startedAt: Date.now() })}>Play again</button>
-            </>
-          ) : (
-            <button className="btn btn--amber btn--block" onClick={() => { setSaved((s) => ({ ...s, level: li + 1 })); if (room.mode === 'team' && room.startedAt) room.send({ t: 'level', level: li + 1 }); }}>Next level</button>
-          )}
-        </Card>
-      ) : (
-        <>
-          <div
-            ref={wheelRef}
-            onPointerMove={onMove}
-            onPointerUp={onUp}
-            onPointerLeave={onUp}
-            className="no-select"
-            style={{
-              position: 'relative', width: size, height: size, margin: '6px auto 0', borderRadius: '50%',
-              background: '#0a0a0a', boxShadow: '0 0 0 6px rgba(74,222,128,0.25)', touchAction: 'none',
-              animation: shake ? 'kw-shake .35s' : undefined,
-            }}
-            key={shake}
-          >
-            <svg width={size} height={size} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} aria-hidden="true">
-              {pts.length > 1 && <polyline points={pts.map((p) => `${p.x},${p.y}`).join(' ')} fill="none" stroke="#4ade80" strokeWidth={10} strokeLinecap="round" strokeLinejoin="round" opacity={0.85} />}
-            </svg>
-            {lv.letters.map((c, i) => {
-              const p = pos(slotOf(i), lv.letters.length);
-              const on = path.includes(i);
+          {/* Word boxes: the key term first, on its own row, then the others. */}
+          <div className="g-slots" style={{ '--n': longest } as React.CSSProperties}>
+            {lv.slots.map((s, si) => {
+              const got = found.includes(s) || done;
+              const main = si === 0;
+              const fresh = justFound === s;
+              const shown = got ? s.length : s === hintTarget ? Math.min(hintsUsed, s.length) : 0;
               return (
-                <button
-                  key={i}
-                  data-letter={i}
-                  onPointerDown={(e) => onDown(e, i)}
-                  aria-label={`Letter ${c}`}
-                  aria-pressed={on}
-                  style={{
-                    position: 'absolute', left: p.x - 26, top: p.y - 26, width: 52, height: 52, borderRadius: '50%',
-                    background: on ? '#4ade80' : '#f5f4f0', color: '#0a0a0a', border: 'none',
-                    fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 24, touchAction: 'none',
-                  }}
-                >
-                  {c}
-                </button>
+                <div key={s} className={`g-slot${main ? ' g-slot--main' : ''}`} aria-label={got ? s : `${s.length} letters${main ? ', key term' : ''}`}>
+                  {s.split('').map((c, ci) => (
+                    <span
+                      key={ci}
+                      className={`g-tile${main ? ' g-tile--main' : ''}${got ? ' g-tile--got' : ci < shown ? ' g-tile--hint' : ''}${fresh ? ' g-tile--flip' : ''}`}
+                      style={{ '--i': ci } as React.CSSProperties}
+                    >
+                      {c}
+                    </span>
+                  ))}
+                </div>
               );
             })}
-            {/* Centre: submit a tapped word, or clear it. */}
-            {path.length > 0 && !isDragging && tapMode.current && (
-              <button
-                onClick={() => (path.length >= 3 ? submit(word) : (setPath([]), (tapMode.current = false)))}
-                style={{ position: 'absolute', left: size / 2 - 30, top: size / 2 - 30, width: 60, height: 60, borderRadius: '50%', background: '#4ade80', color: '#0a0a0a', border: 'none', fontWeight: 800, fontSize: 13 }}
+          </div>
+        </div>
+
+        <div className="g-side">
+          {done ? (
+            <Card className="g-win" style={{ alignItems: 'center', textAlign: 'center', gap: 8 }}>
+              <BoxBoy pose={allDone ? 'cheer' : 'thumbsUp'} width={96} />
+              <Display size={22}>{lv.term.display}</Display>
+              <div className="t-14 muted">{lv.term.clue.replace(/_____/g, lv.term.display)}</div>
+              {allDone ? (
+                <>
+                  <div className="t-15 w-7">You've cracked every key term this week.</div>
+                  {saved.finishedSecs != null && <GameFinish game="keywords" course={courseCode} week={weekNum} score={score} terms={termsSolved} hints={hintsTotal} seconds={saved.finishedSecs} />}
+                  <Link to={back} className="btn btn--amber btn--block">Back to the notes</Link>
+                  <button className="btn btn--white btn--block" onClick={() => setSaved({ level: 0, found: {}, hints: {}, bonus: 0, startedAt: Date.now() })}>Play again</button>
+                </>
+              ) : (
+                <button className="btn btn--amber btn--block" onClick={() => { setSaved((s) => ({ ...s, level: li + 1 })); if (room.mode === 'team' && room.startedAt) room.send({ t: 'level', level: li + 1 }); }}>Next level</button>
+              )}
+            </Card>
+          ) : (
+            <>
+              {/* What you're spelling, or how the last try went. */}
+              <div className="g-status" aria-live="polite">
+                {flash ? (
+                  <span key={flash.text + flash.tone} className={`g-toast g-toast--${flash.tone}`}>{flash.text}</span>
+                ) : (
+                  <span key={shake} className={`g-slot${shake ? ' g-shake' : ''}`} style={{ gap: 4 }}>
+                    {word.split('').map((c, i) => <span key={i} className="g-tile kw-chip">{c}</span>)}
+                  </span>
+                )}
+              </div>
+
+              <div
+                ref={wheelRef}
+                onPointerMove={onMove}
+                onPointerUp={onUp}
+                onPointerLeave={onUp}
+                onPointerCancel={onUp}
+                className={`kw-wheel no-select${shake ? ' g-shake' : ''}`}
+                key={shake}
               >
-                {path.length >= 3 ? 'Go' : 'Clear'}
-              </button>
-            )}
-          </div>
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 14 }}>
-            <button className="btn btn--white btn--sm" onClick={() => { setOrder((o) => [...o].sort(() => Math.random() - 0.5)); setPath([]); }} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-              <Shuffle size={15} /> Shuffle
-            </button>
-            <button className="btn btn--white btn--sm" disabled={hintsUsed >= HINTS} onClick={hint} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-              <Lightbulb size={15} /> Hint ({HINTS - hintsUsed} left)
-            </button>
-          </div>
-          <div className="t-13 muted" style={{ textAlign: 'center', marginTop: 10 }}>
-            Drag across the letters to spell a word, or tap them one by one and press Go.
-          </div>
-          {!roomCode && <InviteButton game="keywords" course={courseCode} week={weekNum} />}
-        </>
-      )}
+                <svg viewBox="0 0 100 100" aria-hidden="true">
+                  {trail && <polyline className={`kw-trail kw-trail--${trail.tone}`} points={trail.pts.map((p) => `${p.x},${p.y}`).join(' ')} />}
+                  {pts.slice(1).map((p, i) => (
+                    <line key={`${path[i]}-${path[i + 1]}`} className="kw-seg" pathLength={1} x1={pts[i].x} y1={pts[i].y} x2={p.x} y2={p.y} />
+                  ))}
+                  {isDragging && last && ptr && <line className="kw-band" x1={last.x} y1={last.y} x2={ptr.x} y2={ptr.y} />}
+                </svg>
+                {lv.letters.map((c, i) => {
+                  const p = pos(slotOf(i), lv.letters.length);
+                  const on = path.includes(i);
+                  return (
+                    <button
+                      key={i}
+                      data-letter={i}
+                      onPointerDown={(e) => onDown(e, i)}
+                      aria-label={`Letter ${c}`}
+                      aria-pressed={on}
+                      className={`kw-letter${on ? ' on' : ''}`}
+                      style={{ left: `${p.x}%`, top: `${p.y}%` }}
+                    >
+                      {c}
+                    </button>
+                  );
+                })}
+                {/* Centre: submit a tapped word, or clear it. */}
+                {path.length > 0 && !isDragging && tapMode.current && (
+                  <button className="kw-go" onClick={() => (path.length >= 3 ? submit(word) : (setPath([]), (tapMode.current = false)))}>
+                    {path.length >= 3 ? 'Go' : 'Clear'}
+                  </button>
+                )}
+              </div>
+              <div className="g-tools" style={{ marginTop: 6 }}>
+                <button className="btn btn--white btn--sm" onClick={() => { setOrder((o) => [...o].sort(() => Math.random() - 0.5)); setPath([]); tapMode.current = false; }}>
+                  <Shuffle size={15} /> Shuffle
+                </button>
+                <button className="btn btn--white btn--sm" disabled={hintsUsed >= HINTS} onClick={hint}>
+                  <Lightbulb size={15} /> Hint ({HINTS - hintsUsed} left)
+                </button>
+              </div>
+              <div className="g-tip">Drag across the letters to spell a word, or tap them one by one and press Go. On a keyboard, type the word and press Enter.</div>
+              {!roomCode && <InviteButton game="keywords" course={courseCode} week={weekNum} />}
+            </>
+          )}
+        </div>
+      </div>
       </>)}
-      <style>{'@keyframes kw-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}'}</style>
     </div>
   );
 }
