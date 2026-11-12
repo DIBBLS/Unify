@@ -81,7 +81,9 @@ import ErrorState from './components/ErrorState';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { supabaseBrowser, ensureSession, setCachedSession, getCachedSession } from './lib/supabase';
 import { api } from './lib/api';
-import { lazyRoute } from './lib/lazyRoute';
+import { lazyRoute, preloadWhenIdle } from './lib/lazyRoute';
+// Set once the next screens' code has been queued for idle download.
+let preloaded = false;
 
 function NotFound() {
   const link: React.CSSProperties = {
@@ -200,6 +202,20 @@ function RequireRole({ allow, children, strict = false }: { allow: string[]; chi
 function RouteMeta() {
   const { pathname } = useLocation();
   useEffect(() => { applyRouteMeta(pathname); }, [pathname]);
+  // Once signed in and idle, fetch the code for the screens opened next.
+  useEffect(() => {
+    if (preloaded || !/^\/(home|courses|course|learn|me|class|timetable)/.test(pathname)) return;
+    preloaded = true;
+    preloadWhenIdle([
+      () => import('./routes/timetable'),
+      () => import('./routes/hoc-dashboard'),
+      () => import('./routes/notifications'),
+      () => import('./routes/revision'),
+      () => import('./routes/games'),
+      () => import('./routes/learn/keywords'),
+      () => import('./routes/learn/crossword'),
+    ]);
+  }, [pathname]);
   return null;
 }
 

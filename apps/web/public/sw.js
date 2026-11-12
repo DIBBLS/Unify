@@ -18,8 +18,9 @@ const API_WAIT_MS = 4000;
 const NO_CACHE = [/^\/v1\/attendance\/(sessions|checkin|pass|course)/, /^\/v1\/admin\//, /^\/v1\/class-list/, /^\/v1\/learn\/revision/, /^\/v1\/progress/];
 const SHELL = ['/', '/index.html', '/manifest.json'];
 
-// Update here if the backend moves (must match VITE_API_URL origin).
-const API_ORIGIN = 'https://unify-api-z4zm.onrender.com';
+// The API origin is stamped in at build time from VITE_API_URL (vite.config.ts),
+// so moving the backend is a Vercel env change. The fallback is today's host.
+const API_ORIGIN = '__API_ORIGIN__'.startsWith('http') ? '__API_ORIGIN__' : 'https://unify-api-z4zm.onrender.com';
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
