@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Volume2, Square } from 'lucide-react';
 import Drop from './Drop';
 import type { ContentBlock, Topic } from '../types/note';
+import { PAUSE, phrases, speakPhrases, voiceScore, type Seg } from '../lib/speech';
 
 function stripHtml(s: string): string {
   try {
@@ -13,58 +14,67 @@ function stripHtml(s: string): string {
   }
 }
 
-function blockText(b: ContentBlock): string {
+// A heading is said on its own, then a longer breath.
+const heading = (s: string): Seg[] => phrases(stripHtml(s), PAUSE.heading);
+const said = (s: string, end: number = PAUSE.block): Seg[] => phrases(stripHtml(s), end);
+
+function blockSegs(b: ContentBlock): Seg[] {
   switch (b.type) {
     case 'paragraph':
+      return said(b.text);
     case 'insight':
+      return [...said('Key point.', PAUSE.colon), ...said(b.text)];
     case 'analogy':
-      return stripHtml(b.text);
+      return [...said('Think of it like this.', PAUSE.colon), ...said(b.text)];
     case 'bullets':
-      return b.items.map(stripHtml).join('. ');
+      // Each bullet is its own thought, with a breath after it.
+      return b.items.flatMap((it, i) => said(it, i === b.items.length - 1 ? PAUSE.block : PAUSE.bullet));
     case 'formula':
-      // Equations read as gibberish — voice the label + note instead.
-      return stripHtml(`${b.label}. ${b.note || ''}`);
+      // The equation itself is for the eyes; say what it is and what it means.
+      return [...said(`${b.label}.`, PAUSE.colon), ...(b.note ? said(b.note) : [])];
     case 'symbol':
-      return stripHtml(`${b.symbol}, ${b.name}. ${b.desc}`);
+      return said(`${b.symbol} is ${b.name}. ${b.desc}`);
     case 'workedExample':
-      return stripHtml(
-        [
-          `${b.eyebrow}. ${b.title}`,
-          `Given: ${b.given.join(', ')}`,
-          ...b.steps.map((s) => `${s.label}. ${s.title}. ${s.body}`),
-          `Result: ${b.result}`,
-        ].join('. ')
-      );
+      return [
+        ...said(`Worked example: ${b.title}.`, PAUSE.heading),
+        ...(b.given.length ? said(`We are given: ${b.given.join('; ')}.`) : []),
+        ...b.steps.flatMap((s) => [...said(`${s.label}: ${s.title}.`, PAUSE.colon), ...said(s.body)]),
+        ...said(`So, ${b.result}`),
+      ];
     case 'diagram':
-      return stripHtml(`${b.caption}. ${b.description}`);
+      return said(`The diagram shows ${b.caption}. ${b.description}`);
     default:
-      return '';
+      return [];
   }
 }
 
-type Part = { title: string; text: string };
+type Part = { title: string; segs: Seg[] };
 
-// Flatten a topic into speakable parts (one utterance each so the UI can
-// track progress and stop cleanly between parts).
+// Flatten a topic into parts (one per subtopic, for the progress line), each
+// a run of short phrases with natural pauses between them.
 function speakable(topic: Topic): Part[] {
-  const parts: Part[] = [{ title: topic.title, text: topic.title }];
+  const parts: Part[] = [{ title: topic.title, segs: heading(topic.title) }];
   for (const sub of topic.subtopics) {
-    const body = sub.content.map(blockText).filter(Boolean).join('. ');
-    const checks = sub.miniCheck.questions.map((q) => stripHtml(q.question)).join('. ');
-    const text = [sub.title, body, checks ? `Quick check: ${checks}` : ''].filter(Boolean).join('. ');
-    if (text) parts.push({ title: sub.title, text });
+    const segs = [
+      ...heading(sub.title),
+      ...sub.content.flatMap(blockSegs),
+      ...(sub.miniCheck.questions.length
+        ? [...said('Quick check. Try these in your head.', PAUSE.colon), ...sub.miniCheck.questions.flatMap((q) => said(q.question, PAUSE.between))]
+        : []),
+    ];
+    if (segs.length) parts.push({ title: sub.title, segs });
   }
   if (topic.activeRecall?.length) {
     parts.push({
       title: 'Active recall',
-      text:
-        'Active recall. ' +
-        topic.activeRecall
-          .map((c) => `${stripHtml(c.question)}. ${stripHtml(c.answer)}`)
-          .join('. '),
+      segs: [
+        ...heading('Active recall'),
+        // A real pause after each question, so there's time to think before the answer.
+        ...topic.activeRecall.flatMap((c) => [...said(c.question, PAUSE.between * 2), ...said(c.answer)]),
+      ],
     });
   }
-  return parts.filter((p) => p.text);
+  return parts.filter((p) => p.segs.length);
 }
 
 function supported(): boolean {
@@ -90,15 +100,7 @@ function voiceGender(v: SpeechSynthesisVoice): '' | 'male' | 'female' {
 }
 function rankVoices(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice[] {
   const en = voices.filter((v) => v.lang.toLowerCase().startsWith('en'));
-  const score = (v: SpeechSynthesisVoice): number => {
-    const lang = v.lang.toLowerCase();
-    const name = v.name.toLowerCase();
-    if (lang === 'en-ng' || lang.startsWith('en-ng') || name.includes('nigeria')) return 0;
-    if (name.includes('google') && lang.startsWith('en')) return 1;
-    if (lang.startsWith('en')) return 2;
-    return 3;
-  };
-  return [...en].sort((a, b) => score(a) - score(b));
+  return [...en].sort((a, b) => voiceScore(a) - voiceScore(b));
 }
 
 function loadVoices(): Promise<SpeechSynthesisVoice[]> {
@@ -148,6 +150,7 @@ export function ReadAloud({ topic }: { topic: Topic }) {
     }
   });
   const cancelled = useRef(false);
+  const stopRef = useRef<(() => void) | null>(null);
   // Live ref: the speaking loop outlives renders, so speed changes apply
   // to the very next part, mid-read.
   const rateRef = useRef(rate);
@@ -191,6 +194,7 @@ export function ReadAloud({ topic }: { topic: Topic }) {
     return () => {
       live = false;
       cancelled.current = true;
+      stopRef.current?.();
       try {
         window.speechSynthesis?.cancel();
       } catch {
@@ -223,11 +227,8 @@ export function ReadAloud({ topic }: { topic: Topic }) {
 
   const stop = () => {
     cancelled.current = true;
-    try {
-      window.speechSynthesis.cancel();
-    } catch {
-      // ignore
-    }
+    stopRef.current?.();
+    stopRef.current = null;
     setPartIdx(-1);
   };
 
@@ -235,33 +236,21 @@ export function ReadAloud({ topic }: { topic: Topic }) {
     const parts = speakable(topic);
     if (!parts.length) return;
     cancelled.current = false;
-    try {
-      window.speechSynthesis.cancel();
-    } catch {
-      // ignore
-    }
-    let i = 0;
-    const next = () => {
-      if (cancelled.current || i >= parts.length) {
-        setPartIdx(-1);
-        return;
-      }
-      setPartIdx(i);
-      const u = new SpeechSynthesisUtterance(parts[i].text);
-      u.rate = rateRef.current;
-      if (activeVoice) {
-        u.voice = activeVoice;
-        u.lang = activeVoice.lang;
-      }
-      u.onend = () => {
-        i += 1;
-        // Small beat between parts so sections don't blur together.
-        window.setTimeout(next, 250);
-      };
-      u.onerror = () => setPartIdx(-1);
-      window.speechSynthesis.speak(u);
-    };
-    next();
+    // One flat run of phrases; remember which part each phrase belongs to
+    // so the progress line follows along.
+    const segs: Seg[] = [];
+    const partOf: number[] = [];
+    parts.forEach((p, pi) => p.segs.forEach((s, si) => {
+      segs.push(si === p.segs.length - 1 ? { ...s, pause: Math.max(s.pause, PAUSE.between) } : s);
+      partOf.push(pi);
+    }));
+    stopRef.current = speakPhrases(segs, {
+      voice: activeVoice,
+      rate: () => rateRef.current,
+      onPhrase: (i) => { if (!cancelled.current) setPartIdx(partOf[i]); },
+      onDone: () => setPartIdx(-1),
+      onError: () => setPartIdx(-1),
+    });
   };
 
   const playing = partIdx >= 0;
@@ -365,7 +354,7 @@ export function ReadAloud({ topic }: { topic: Topic }) {
         <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 6 }}>
           {hasNaija
             ? `Voice: ${ranked[0].name} — ${naijaVoices.length} Nigerian voice${naijaVoices.length === 1 ? '' : 's'} on this device${naijaGenders.length ? ` (${naijaGenders.join(' + ')})` : ''}. Pick another above any time.`
-            : 'No Nigerian voice on this device yet — Android: download “English (Nigeria)” under Settings → Language → Text-to-speech.'}
+            : 'No Nigerian voice on this device yet. On Android, download “English (Nigeria)” under Settings → Language → Text-to-speech. On a laptop, Microsoft Edge has natural Nigerian voices (Abeo and Ezinne).'}
         </div>
       )}
     </div>

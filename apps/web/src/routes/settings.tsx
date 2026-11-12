@@ -9,6 +9,7 @@ import { ROUTES } from '../lib/routes';
 import { APP_VERSION } from '../lib/version';
 import { useTheme } from '../hooks/useTheme';
 import BackButton from '../components/BackButton';
+import { setSpokenWelcome, speakWelcome, spokenWelcomeOn, spokenWelcomeSupported } from '../lib/welcomeVoice';
 
 // S48 Settings and S49 Notification settings, in the Me page's plain list style.
 const card: React.CSSProperties = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', marginBottom: 16 };
@@ -27,12 +28,32 @@ function Row({ to, title, sub, first }: { to: string; title: string; sub?: strin
   );
 }
 
+// Spoken welcome: off by default; "Hear it" plays it now (a tap lets the page speak).
+function SpokenWelcomeRow({ name }: { name: string }) {
+  const [on, setOn] = useState(spokenWelcomeOn);
+  if (!spokenWelcomeSupported()) return null;
+  return (
+    <div style={rowStyle}>
+      <span style={{ flex: 1 }}>
+        <span style={{ display: 'block', fontSize: 14, fontWeight: 700 }}>Spoken welcome</span>
+        <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>
+          Once a day, when you first tap the app, a voice welcomes you and says what's new. Never during quiet hours.{' '}
+          <button onClick={() => void speakWelcome(name)} style={{ background: 'none', border: 'none', padding: 0, color: 'var(--u-good)', fontWeight: 700, fontSize: 12 }}>Hear it</button>
+        </span>
+      </span>
+      <input type="checkbox" aria-label="Spoken welcome" checked={on} onChange={(e) => { setOn(e.target.checked); setSpokenWelcome(e.target.checked); toastSuccess(e.target.checked ? 'Spoken welcome on.' : 'Spoken welcome off.'); }} />
+    </div>
+  );
+}
+
 export default function SettingsRoute() {
   const { theme, toggle } = useTheme();
   const [isHoc, setIsHoc] = useState(false);
   const [isStudent, setIsStudent] = useState(true);
+  const [name, setName] = useState('');
   useEffect(() => {
     api.me().then((m) => {
+      setName((m.profile?.first_name || '').split(' ')[0]);
       setIsHoc(!!(m.profile as unknown as { is_hoc?: boolean } | null)?.is_hoc);
       setIsStudent((m.profile?.role || 'student') === 'student');
     }).catch(() => {});
@@ -58,6 +79,7 @@ export default function SettingsRoute() {
           <span style={{ fontSize: 14, fontWeight: 700 }}>Theme</span>
           <span style={{ fontSize: 13, color: 'var(--text2)' }}>{theme === 'dark' ? 'Dark' : 'Light'}</span>
         </button>
+        <SpokenWelcomeRow name={name} />
       </div>
 
       <div style={head}>ABOUT</div>

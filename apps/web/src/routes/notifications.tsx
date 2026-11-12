@@ -143,7 +143,7 @@ export default function NotificationsRoute() {
         {notes.length === 0 && !error && (
           <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
             <BoxBoy pose="phoneOut" width={96} />
-            <div style={{ marginTop: 8 }}>All caught up. New notes and updates land here.</div>
+            <div style={{ marginTop: 8 }}>You're all caught up. New notes, class changes and messages from your class rep will land here.</div>
           </div>
         )}
         {notes.map((n) => {

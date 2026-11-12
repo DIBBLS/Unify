@@ -105,7 +105,7 @@ export default function ClassRoute() {
       const res = await api.enroll(code, !isIn);
       setEnrolledSet(new Set((res.enrolled || []).map((c) => c.toUpperCase())));
     } catch (err) {
-      setError(describeError(err, 'enrollment that'));
+      setError(describeError(err, 'add that course'));
     } finally {
       setBusy(null);
     }
@@ -189,7 +189,7 @@ export default function ClassRoute() {
                   opacity: busy === c.code ? 0.6 : 1,
                 }}
               >
-                {busy === c.code ? '…' : isIn ? 'Enrolled ✓' : 'Enroll'}
+                {busy === c.code ? '…' : isIn ? 'Added ✓' : 'Add'}
               </button>
             </div>
           );

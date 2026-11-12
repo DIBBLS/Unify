@@ -1,4 +1,5 @@
 import { toastError } from '../lib/toast';
+import { forgetLastName, lastSignedInName } from '../lib/lastName';
 import { ProgressBar } from '../components/redesign/ui';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -35,6 +36,8 @@ export default function AuthRoute() {
   const navigate = useNavigate();
   const sb = supabaseBrowser();
   const [showSplash, setShowSplash] = useState(true);
+  // "Welcome back, Tunde": the first name of the last person who signed in on this device.
+  const [lastName, setLastName] = useState(lastSignedInName);
   const [tab, setTab] = useState<'signin' | 'signup' | 'forgot'>(() =>
     new URLSearchParams(window.location.search).get('tab') === 'signup' ? 'signup' : 'signin'
   );
@@ -383,8 +386,13 @@ export default function AuthRoute() {
           <Wordmark size={20} onGreen />
           <div className="eyebrow" style={{ marginTop: 10, opacity: 0.75 }}>{WELCOME_LINE}</div>
           <h1 key={tab} className="quote-fade" style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 32, marginTop: 12, lineHeight: 1.1 }}>
-            {tab === 'signin' ? 'Welcome back' : 'Welcome to Unify Learn'}
+            {tab === 'signin' ? (lastName ? `Welcome back, ${lastName}` : 'Welcome back') : 'Welcome to Unify Learn'}
           </h1>
+          {tab === 'signin' && lastName && (
+            <button onClick={() => { forgetLastName(); setLastName(''); }} style={{ background: 'none', border: 'none', padding: 0, marginTop: 4, fontSize: 12, fontWeight: 700, color: 'var(--u-black)', opacity: 0.7, textDecoration: 'underline' }}>
+              Not {lastName}?
+            </button>
+          )}
           {/* No key here: it would duplicate the h1's key, and React then leaves a stale headline behind on a tab switch. */}
           <p className="auth-tagline-m" style={{ marginTop: 8, opacity: 0.92, fontSize: 16, minHeight: 20, fontFamily: "'Playfair Display',Georgia,serif", fontWeight: 700 }}><Typewriter text="Own your academic journey" /></p>
         </div>

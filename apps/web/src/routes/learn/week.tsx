@@ -1,7 +1,8 @@
 import { ReaderSkeleton } from '../../components/Skeletons';
 import { useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Check, Download, ArrowUp, Share2, Lock, Flag } from 'lucide-react';
+import { Link, useParams, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, Check, Download, ArrowUp, Share2, Lock, Flag, Gamepad2, Grid3x3 } from 'lucide-react';
+import { ROUTES } from '../../lib/routes';
 import ReportSheet from '../../components/ReportSheet';
 import { api, type TopicMeta } from '../../lib/api';
 import { log } from '../../lib/log';
@@ -230,8 +231,8 @@ export default function LearnPage() {
     return (
       <div style={{ padding: 40, textAlign: 'center', color: 'var(--text2)', maxWidth: 'var(--shell, 480px)', margin: '0 auto' }}>
         <BoxBoy pose="readingStanding" width={72} />
-        <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20, color: 'var(--text)', marginTop: 12 }}>You're not enrolled in {courseCode}</h1>
-        <p style={{ fontSize: 14, margin: '8px 0 20px' }}>Enroll to unlock its weeks, topics and quizzes.</p>
+        <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20, color: 'var(--text)', marginTop: 12 }}>{courseCode} isn't on your list yet</h1>
+        <p style={{ fontSize: 14, margin: '8px 0 20px' }}>Add it to open its weeks, topics and quizzes. It takes a second.</p>
         <button
           onClick={async () => {
             setEnrolling(true);
@@ -245,11 +246,11 @@ export default function LearnPage() {
           disabled={enrolling}
           style={{ padding: '12px 28px', borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', fontWeight: 800, fontSize: 14, opacity: enrolling ? 0.6 : 1 }}
         >
-          {enrolling ? 'Enrolling…' : 'Enroll & continue'}
+          {enrolling ? 'Adding…' : 'Add course and continue'}
         </button>
         <div style={{ marginTop: 12 }}>
           <button onClick={() => navigate('/courses/find')} style={{ background: 'none', border: 'none', color: 'var(--u-good)', fontWeight: 700, fontSize: 13 }}>
-            or explore other courses
+            or find other courses
           </button>
         </div>
       </div>
@@ -272,7 +273,7 @@ export default function LearnPage() {
         : viewer.role === 'lecturer' || viewer.role === 'contributor'
           ? '/browse'
           : `/course/${encodeURIComponent(courseCode || '')}`
-      : `/course/${encodeURIComponent(courseCode || '')}`;
+      : '/home'; // no in-app trail (app reopened, refreshed, opened from a notification): Home
   const goTab = (t: number, lec: number = selLecture) => {
     const list = lec === selLecture ? classTopics : topics.filter((x) => (x.lecture || 1) === lec);
     const count = list.length + (hasQuiz && lec === lastLecture ? 1 : 0);
@@ -404,6 +405,12 @@ export default function LearnPage() {
             <Flag size={14} /> {viewer?.role === 'lecturer' ? 'Review this week' : 'Report'}
           </button>
         )}
+        <Link to={ROUTES.keywords(courseCode || '', weekNum)} style={{ display: 'flex', gap: 6, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 700, color: 'var(--u-good)', textDecoration: 'none' }}>
+          <Gamepad2 size={14} /> Keywords
+        </Link>
+        <Link to={ROUTES.crossword(courseCode || '', weekNum)} style={{ display: 'flex', gap: 6, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 700, color: 'var(--u-good)', textDecoration: 'none' }}>
+          <Grid3x3 size={14} /> Crossword
+        </Link>
       </div>
       {reporting && note && (
         <ReportSheet

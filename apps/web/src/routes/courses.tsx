@@ -98,7 +98,7 @@ export default function CoursesRoute() {
       setSuccess(
         res.restored > 0
           ? `Restored ${res.restored} course${res.restored === 1 ? '' : 's'} from your learning activity.`
-          : 'Nothing to restore — your enrollments already match your activity.'
+          : 'Nothing to restore. Your courses already match what you’ve been reading.'
       );
     } catch (err) {
       setError(describeError(err, 'restore that'));
@@ -134,7 +134,7 @@ export default function CoursesRoute() {
         {courses.length === 0 && !error && (
           <div className="card" style={{ padding: 24, textAlign: 'center' }}>
             <BoxBoy pose="peeking" width={72} />
-            <div className="t-15" style={{ marginTop: 12 }}>No enrolled courses yet.</div>
+            <div className="t-15" style={{ marginTop: 12 }}>No courses yet. Add the ones you're taking this semester and their notes show up here.</div>
             <Link to="/courses/find" className="btn btn--amber" style={{ marginTop: 12, display: 'inline-block' }}>
               Manage courses
             </Link>

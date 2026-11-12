@@ -20,6 +20,8 @@ export const ROUTES = {
   courses: '/courses',
   course: (code: string) => `/courses/${encodeURIComponent(code)}`,
   week: (code: string, week: number | string) => `/learn/${encodeURIComponent(code)}/week/${week}`,
+  keywords: (code: string, week: number | string) => `/learn/${encodeURIComponent(code)}/week/${week}/keywords`,
+  crossword: (code: string, week: number | string) => `/learn/${encodeURIComponent(code)}/week/${week}/crossword`,
   cgpa: '/cgpa-planner',
   notifications: '/notifications',
 
@@ -42,6 +44,8 @@ export const ROUTES = {
   reports: '/reports',
   adminRoles: '/admin-roles',
   onlineClass: '/online-class',
+  guide: '/guide',
+  contributors: '/class/contributors',
 
   admin: '/admin',
   adminContent: '/admin/content',

@@ -17,6 +17,7 @@ import AdminContentPanel from './admin/content';
 import PerformancePanel from './admin/performance';
 import HomeUpdatesPanel from './admin/updates';
 import ModulesOverview from './admin/modules-overview';
+import GuidePanel, { ClassContributorsPicker } from './admin/guide';
 import Typewriter from '../components/Typewriter';
 import { localGreeting, dailyProverb } from '../lib/naija';
 
@@ -620,6 +621,7 @@ export default function AdminRoute() {
             <button className="btn btn--white btn--sm" disabled={!hocEmail.includes('@')} onClick={() => void grantHoc(true)}>Remove HOC</button>
           </div>
         </div>
+        <ClassContributorsPicker />
       </Module>
 
       <Module id="analytics" openId={openModule}>
@@ -845,6 +847,10 @@ export default function AdminRoute() {
           <button onClick={() => void saveCalendar()} style={{ ...primaryBtn, width: '100%', marginTop: 10 }}>Save calendar</button>
         </div>
       </div>
+      </Module>
+
+      <Module id="guide" openId={openModule}>
+        {openModule === 'guide' && <GuidePanel />}
       </Module>
 
       <Module id="announce" openId={openModule}>

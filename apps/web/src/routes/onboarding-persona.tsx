@@ -51,11 +51,11 @@ export default function OnboardingPersonaRoute() {
   return (
     <div className="screen">
       <div className="pad stack" style={{ flex: 1, justifyContent: 'center', gap: 40, paddingTop: 60, paddingBottom: 40 }}>
-        <div className="stack center" style={{ gap: 12 }}>
-          <h1 className="display" style={{ fontSize: 28, fontFamily: 'var(--font-headline, var(--font-display))' }}>
+        <div className="stack center" style={{ gap: 12, alignItems: 'center', textAlign: 'center' }}>
+          <h1 className="display" style={{ fontSize: 28, fontFamily: 'var(--font-headline, var(--font-display))', textAlign: 'center', width: '100%' }}>
             PICK YOUR<br />PERSONA
           </h1>
-          <p className="t-15 muted" style={{ maxWidth: 320 }}>
+          <p className="t-15 muted" style={{ maxWidth: 320, margin: '0 auto', textAlign: 'center' }}>
             This is who you are. Your notes, tips and stats will match.
           </p>
         </div>

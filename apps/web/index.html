@@ -81,6 +81,37 @@
     <meta name="twitter:description" content="Guided notes, a timetable, QR attendance, a CGPA path and study streaks for your whole course. Free for students, works offline." />
     <meta name="twitter:image" content="https://unify-virid.vercel.app/og-image.jpg?v=7" />
     <meta name="twitter:image:alt" content="Unify Learn: own your academic journey." />
+    <!-- Search: the app sets the per-page title, robots and canonical on every route (src/lib/seo.ts). -->
+    <link rel="canonical" href="https://unify-virid.vercel.app/welcome" />
+    <meta name="robots" content="index, follow" />
+    <meta name="application-name" content="Unify Learn" />
+    <meta name="geo.region" content="NG-LA" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebApplication",
+            "name": "Unify Learn",
+            "url": "https://unify-virid.vercel.app/",
+            "applicationCategory": "EducationalApplication",
+            "operatingSystem": "Android, iOS, Windows, macOS (in the browser)",
+            "inLanguage": "en-NG",
+            "description": "Weekly course notes, a CGPA planner, your timetable and QR attendance for Nigerian university students, starting with LASU Faculty of Engineering. Free, and works offline.",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "NGN" },
+            "audience": { "@type": "EducationalAudience", "educationalRole": "student", "geographicArea": { "@type": "Country", "name": "Nigeria" } },
+            "image": "https://unify-virid.vercel.app/og-image.jpg?v=7"
+          },
+          {
+            "@type": "Organization",
+            "name": "Unify",
+            "url": "https://unify-virid.vercel.app/",
+            "logo": "https://unify-virid.vercel.app/icons/v5/apple-touch-icon.png",
+            "slogan": "Own your academic journey"
+          }
+        ]
+      }
+    </script>
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/v5/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/v5/favicon-16.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -93,6 +124,21 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- For crawlers and anyone without JavaScript: what Unify Learn is, in plain words. -->
+    <noscript>
+      <main style="max-width:560px;margin:40px auto;padding:0 16px;font-family:sans-serif;line-height:1.5">
+        <h1>Unify Learn: own your academic journey</h1>
+        <p>Unify Learn is a free study app for Nigerian university students, starting with LASU Faculty of Engineering.</p>
+        <ul>
+          <li>Weekly notes for every course, written to be understood, with quick checks and a quiz each week.</li>
+          <li>A CGPA planner that shows what it takes to reach your target class of degree.</li>
+          <li>Your timetable, class board and messages from your class rep in one place.</li>
+          <li>QR attendance: your class rep or lecturer scans your pass in class.</li>
+          <li>Save weeks to read offline when data is low.</li>
+        </ul>
+        <p>Turn on JavaScript to use the app, or <a href="/auth">sign in</a>.</p>
+      </main>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

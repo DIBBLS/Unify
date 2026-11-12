@@ -1,4 +1,4 @@
-import { Users, UserCheck, GraduationCap, LibraryBig, BookOpen, Building2, CalendarDays, Megaphone, Cpu, BarChart3, AlertTriangle, Scale, LayoutGrid, Activity } from 'lucide-react';
+import { Users, UserCheck, GraduationCap, LibraryBig, BookOpen, Building2, CalendarDays, Megaphone, Cpu, BarChart3, AlertTriangle, Scale, LayoutGrid, Activity, Map as MapIcon } from 'lucide-react';
 
 // One admin hub. Each section has its own URL (/admin/users …) so links,
 // refresh and the back button behave; /admin is the Overview. Grouped by job.
@@ -14,6 +14,7 @@ export const GROUPS = [
     { id: 'content', title: 'All content', icon: BookOpen },
     { id: 'unis', title: 'Universities', icon: Building2 },
     { id: 'session', title: 'Academic session', icon: CalendarDays },
+    { id: 'guide', title: 'Student guide', icon: MapIcon },
   ] },
   { label: 'Platform', items: [
     { id: 'announce', title: 'Announce', icon: Megaphone },

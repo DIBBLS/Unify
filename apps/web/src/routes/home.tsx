@@ -16,6 +16,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import { HomeHero } from '../components/redesign/HomeHero';
 import { UpdatesSlider, type UpdateSlide } from '../components/redesign/UpdatesSlider';
 import { FACTS } from '../lib/naija';
+import LiveWire from '../components/LiveWire';
 import Loading from '../components/Loading';
 
 type CourseStat = { course: string; topics: number };
@@ -251,6 +252,17 @@ export default function HomeRoute() {
   const [liveUpdates, setLiveUpdates] = useState<HomeUpdate[]>([]);
   useEffect(() => {
     api.updates().then((r) => setLiveUpdates(r.updates || [])).catch(() => {});
+  }, []);
+  // S44: the school's guide sits in the carousel; it leads when the admin has
+  // updated it since this student last opened it.
+  const [guide, setGuide] = useState<{ title: string; steps: number; updated: string; fresh: boolean } | null>(null);
+  useEffect(() => {
+    api.guide().then((r) => {
+      if (!r.guide) return;
+      let seen = '';
+      try { seen = localStorage.getItem('unify:guide-seen') || ''; } catch { /* fine */ }
+      setGuide({ title: r.guide.title, steps: r.guide.steps.length, updated: r.guide.updated_at, fresh: seen !== r.guide.updated_at });
+    }).catch(() => {});
   }, []);
   const [resume, setResume] = useState<{ course: string; week: number; topic: number; lecture?: number } | null>(null);
   const [quizzes, setQuizzes] = useState({ taken: 0, avg: 0 });
@@ -601,6 +613,11 @@ export default function HomeRoute() {
     updateSlides.unshift({ id: 'resume', pose: 'readingStanding', tag: 'Pick up', title: `${resume.course} · Week ${resume.week}`, body: 'You stopped here. A few minutes keeps the streak alive.', to: `/learn/${encodeURIComponent(resume.course.trim())}/week/${resume.week}${qs ? `?${qs}` : ''}`, cta: 'Resume' });
   }
   if (shown.length === 0) updateSlides.push({ id: 'enroll', pose: 'peeking', tag: 'Start here', title: 'Add your courses', body: 'Find your department’s courses and the notes appear on Home.', to: '/courses/find', cta: 'Find courses' });
+  if (guide) {
+    const slide: UpdateSlide = { id: 'guide', pose: 'targetSign', tag: guide.fresh ? 'Updated by your school' : 'Guide', title: guide.title, body: `${guide.steps} steps, in order, with where to go for each one.`, to: '/guide', cta: 'Open the guide' };
+    if (guide.fresh) updateSlides.splice(resume ? 1 : 0, 0, slide);
+    else updateSlides.push(slide);
+  }
   updateSlides.push({ id: 'attend', pose: 'phoneOut', tag: 'In class', title: 'Your attendance pass', body: 'In class, open My pass and let your class rep or lecturer scan it.', to: '/attendance/pass', cta: 'My pass' });
   updateSlides.push({ id: 'class', pose: 'thumbsUpPhone', tag: 'Your class', title: 'Notices from your class rep', body: 'Board posts and shared materials from your course live in Class.', to: '/class', cta: 'Open Class' });
   {
@@ -637,6 +654,9 @@ export default function HomeRoute() {
           <div style={{ fontSize: 11, color: 'var(--text2)' }}>Courses</div>
         </div>
       </div>
+
+      {/* Live wire: urgent messages with a countdown, between the stats and the carousel. */}
+      <LiveWire />
 
       <UpdatesSlider slides={updateSlides} />
 
@@ -705,7 +725,7 @@ export default function HomeRoute() {
         {shown.length === 0 ? (
           <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '2px solid var(--border)', borderRadius: 16 }}>
             <BoxBoy pose="peeking" width={77} />
-            <div style={{ marginTop: 8 }}>No courses yet.</div>
+            <div style={{ marginTop: 8 }}>No courses yet. Add the ones you're taking this semester.</div>
             <Link to="/courses/find" style={{ display: 'inline-block', marginTop: 12, padding: '10px 22px', background: 'var(--u-amber)', color: 'var(--u-black)', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, borderBottom: '4px solid #c69a1a' }}>
               Explore courses to enroll
             </Link>
@@ -733,7 +753,7 @@ export default function HomeRoute() {
       {confirmUnenroll && (
         <ConfirmModal
           title={`Remove ${confirmUnenroll}?`}
-          body="It leaves Home. Re-enroll anytime from Courses — your XP and progress stay."
+          body="It leaves Home. You can add it back any time from Courses, and your XP and progress stay."
           confirmLabel="Remove"
           busy={unenrolling}
           onConfirm={() => {

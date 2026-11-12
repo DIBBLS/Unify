@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useState } from 'react';
+import { applyRouteMeta } from './lib/seo';
 import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import Layout from './routes/_layout';
 import CourseRoute from './routes/courses';
@@ -23,6 +24,10 @@ const MyAttendanceRoute = lazyRoute(() => import('./routes/my-attendance'));
 const ScannerRoute = lazyRoute(() => import('./routes/scanner'));
 const HocDashboardRoute = lazyRoute(() => import('./routes/hoc-dashboard'));
 const ClassListRoute = lazyRoute(() => import('./routes/class-list'));
+const GuideRoute = lazyRoute(() => import('./routes/guide'));
+const KeywordsRoute = lazyRoute(() => import('./routes/learn/keywords'));
+const CrosswordRoute = lazyRoute(() => import('./routes/learn/crossword'));
+const ClassContributorsRoute = lazyRoute(() => import('./routes/class-contributors'));
 const HocWelcomeRoute = lazyRoute(() => import('./routes/hoc-welcome'));
 const HocRequestsRoute = lazyRoute(() => import('./routes/hoc-requests'));
 const ReportsRoute = lazyRoute(() => import('./routes/reports'));
@@ -92,9 +97,9 @@ function NotFound() {
         <BoxBoy pose="wavePhone" width={120} />
       </div>
       <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24 }}>Page not found</h1>
-      <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px' }}>This link doesn't exist. Try one of these:</p>
+      <p style={{ color: 'var(--text2)', fontSize: 14, margin: '8px 0 20px' }}>This link doesn't go anywhere. It may be old or mistyped. Try one of these:</p>
       <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-        <Link to="/course" style={link}>Learn</Link>
+        <Link to="/courses" style={link}>My courses</Link>
         <Link to="/auth" style={link}>Sign in</Link>
         <Link to="/home" style={link}>Home</Link>
       </div>
@@ -189,6 +194,13 @@ function RequireRole({ allow, children, strict = false }: { allow: string[]; chi
   return children;
 }
 
+// Page title, description, canonical and robots tag for every route (SEO).
+function RouteMeta() {
+  const { pathname } = useLocation();
+  useEffect(() => { applyRouteMeta(pathname); }, [pathname]);
+  return null;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -197,6 +209,7 @@ export default function App() {
         surface on EVERY screen including chromeless ones (/auth,
         /onboarding, /s/:token) that never mount the layout. */}
         <Toasts />
+        <RouteMeta />
         <ZoomBar />
         <InstallBar />
         {/* Lazy routes (Studio, admin, browse…) suspend on first open —
@@ -350,6 +363,10 @@ export default function App() {
           <Route path="/attendance/scanner" element={<RequireAuth><ScannerRoute /></RequireAuth>} />
           <Route path="/hoc" element={<RequireAuth><HocDashboardRoute /></RequireAuth>} />
           <Route path="/class-list" element={<RequireAuth><ClassListRoute /></RequireAuth>} />
+          <Route path="/guide" element={<RequireAuth><GuideRoute /></RequireAuth>} />
+          <Route path="/learn/:courseCode/week/:week/keywords" element={<RequireAuth><KeywordsRoute /></RequireAuth>} />
+          <Route path="/learn/:courseCode/week/:week/crossword" element={<RequireAuth><CrosswordRoute /></RequireAuth>} />
+          <Route path="/class/contributors" element={<RequireAuth><ClassContributorsRoute /></RequireAuth>} />
           <Route path="/hoc/welcome" element={<RequireAuth><HocWelcomeRoute /></RequireAuth>} />
           <Route path="/hoc/requests" element={<RequireAuth><HocRequestsRoute /></RequireAuth>} />
           <Route path="/reports" element={<RequireAuth><ReportsRoute /></RequireAuth>} />

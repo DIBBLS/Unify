@@ -170,6 +170,21 @@ export type Profile = {
   hide_cgpa?: boolean;
 };
 
+export type LiveWire = {
+  id: string; message: string; author: string; role: string; scope: string; course: string; level: string; department: string;
+  label: 'starts' | 'deadline' | 'ends'; endsAt: string; createdAt: string; mine: boolean; canEnd: boolean;
+};
+export type LiveWireTarget = { scope: 'all' | 'faculty' | 'department' | 'class' | 'course'; faculty?: string; department?: string; level?: string; course?: string; label: string };
+
+export type SchoolGuide = {
+  institution: string;
+  title: string;
+  intro: string;
+  steps: { title: string; body: string; where: string }[];
+  published: boolean;
+  updated_at: string;
+};
+
 export type AdminUser = {
   id: string;
   first_name?: string;
@@ -666,6 +681,28 @@ export const api = {
   hocRequests: () => apiFetch<{ requests: { id: string; name: string; email: string; department: string; level: string; note: string; status: 'pending' | 'approved' | 'rejected'; at: string; repsInClass: number }[] }>('/v1/hoc/requests'),
   hocAnswer: (id: string, approve: boolean, note?: string) =>
     apiFetch<{ ok: boolean }>(`/v1/hoc/requests/${id}`, { method: 'POST', body: JSON.stringify({ approve, note }) }),
+  gameScore: (payload: { game: 'keywords' | 'crossword'; course: string; week: number; score: number; terms: number; hints: number; seconds: number }) =>
+    apiFetch<{ ok: boolean; best: number; newBest: boolean; xp: number }>('/v1/games/score', { method: 'POST', body: JSON.stringify(payload) }),
+  gameBoard: (q: { course: string; week?: number; game?: 'keywords' | 'crossword' }) =>
+    apiFetch<{ players: number; top: { rank: number; name: string; persona: string | null; score: number; terms: number; me: boolean }[]; me: { rank: number; score: number; terms: number } | null }>(
+      `/v1/games/leaderboard?course=${encodeURIComponent(q.course)}${q.week ? `&week=${q.week}` : ''}${q.game ? `&game=${q.game}` : ''}`
+    ),
+  gameMine: (course?: string) =>
+    apiFetch<{ termsMastered: number; weeks: { game: string; course: string; week: number; best: number; terms: number; plays: number }[] }>(`/v1/games/mine${course ? `?course=${encodeURIComponent(course)}` : ''}`),
+  liveWires: () =>
+    apiFetch<{ wires: LiveWire[]; targets: LiveWireTarget[] }>('/v1/livewire'),
+  liveWireSend: (payload: Omit<LiveWireTarget, 'label'> & { message: string; minutes: number; label: LiveWire['label'] }) =>
+    apiFetch<{ ok: boolean; id: string; endsAt: string }>('/v1/livewire', { method: 'POST', body: JSON.stringify(payload) }),
+  liveWireEnd: (id: string) => apiFetch<{ ok: boolean }>(`/v1/livewire/${id}`, { method: 'DELETE' }),
+  guide: (institution?: string) =>
+    apiFetch<{ guide: SchoolGuide | null; canEdit: boolean }>(`/v1/guide${institution ? `?institution=${encodeURIComponent(institution)}` : ''}`),
+  guideSave: (payload: { institution?: string; title: string; intro: string; steps: SchoolGuide['steps']; published: boolean }) =>
+    apiFetch<{ ok: boolean; updated_at: string }>('/v1/admin/guide', { method: 'PUT', body: JSON.stringify(payload) }),
+  classContributors: (q?: { department: string; level: string }) =>
+    apiFetch<{
+      department: string; level: string; week: number | null; contributors: number; onTrack: number; behind: number;
+      courses: { course: string; students: number; weeksPublished: number; latestWeek: number; lastPublished: string | null; status: 'on_track' | 'behind' | 'unknown'; people: { id: string; name: string; role: 'contributor' | 'lecturer'; lastPublished: string | null }[] }[];
+    }>(`/v1/hoc/contributors${q ? `?department=${encodeURIComponent(q.department)}&level=${encodeURIComponent(q.level)}` : ''}`),
   adminOverview: () =>
     apiFetch<{
       attention: { key: string; label: string; n: number; to: string }[];
@@ -673,6 +710,7 @@ export const api = {
       setup: { label: string; to: string }[];
       calendar: { start: string | null; weeks: number; semester: string };
       releaseNotes: { version: string; date: string; body: string }[];
+      liveWires: { id: string; message: string; by: string; to: string; endsAt: string }[];
     }>('/v1/admin/overview'),
   roleGrants: () => apiFetch<{ grants: { id: string; role: 'level_admin' | 'hod' | 'dean'; faculty: string; department: string; level: string; name: string; email: string }[] }>('/v1/admin/role-grants'),
   roleGrant: (payload: { email: string; role: 'level_admin' | 'hod' | 'dean'; faculty?: string; department?: string; level?: string }) =>
