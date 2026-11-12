@@ -4,59 +4,89 @@
 // screens (auth gates, studio jobs, share landings).
 import LoadingQuote from './LoadingQuote';
 
-// The rotating fact/proverb sits at the TOP of full-page loaders: below the
-// skeleton, long layouts pushed it under the bottom tab bar where nobody saw it.
+// The rotating fact/proverb sits AFTER the skeleton: at the top it pushed the
+// placeholders down, so the real page jumped up when it arrived. Skeletons are
+// kept short enough that it still shows above the tab bar.
 export function PageShell({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 96px' }}>
-      <LoadingQuote style={{ margin: '0 auto 20px' }} />
+    <div role="status" aria-label="Loading" style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 96px' }}>
       {children}
+      <LoadingQuote style={{ margin: '24px auto 0' }} />
     </div>
   );
 }
 
+// Home. Students: the dark greeting card (week tracker, greeting, name, proverb,
+// Box Boy), the four stats, the updates slider, then the course cards in one
+// column. Authors keep their header + panel stack.
 export function DashboardSkeleton({ author }: { author: boolean }) {
-  return (
-    <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', paddingBottom: 96 }}>
-      <div style={{ padding: '20px 16px 12px', background: 'var(--surface)', display: 'flex', gap: 12, alignItems: 'center' }}>
-        <div style={{ flex: 1 }}>
-          <div className="skel" style={{ height: 11, width: 110 }} />
-          <div className="skel" style={{ height: 28, width: '70%', marginTop: 8 }} />
-          <div className="skel" style={{ height: 13, width: '55%', marginTop: 8 }} />
-          <div className="skel" style={{ height: 13, width: '40%', marginTop: 6 }} />
+  const stats = (
+    <div style={{ margin: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }}>
+      {[0, 1, 2, 3].map((i) => (
+        <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+          <div className="skel" style={{ height: 18, width: 36 }} />
+          <div className="skel" style={{ height: 11, width: 44 }} />
         </div>
-        <div className="skel" style={{ width: 64, height: 64, borderRadius: 16, flexShrink: 0 }} />
+      ))}
+    </div>
+  );
+  if (author) {
+    return (
+      <div role="status" aria-label="Loading" style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', paddingBottom: 96 }}>
+        <div style={{ padding: '20px 16px 12px', background: 'var(--surface)', display: 'flex', gap: 12, alignItems: 'center' }}>
+          <div style={{ flex: 1 }}>
+            <div className="skel" style={{ height: 11, width: 110 }} />
+            <div className="skel" style={{ height: 28, width: '70%', marginTop: 8 }} />
+            <div className="skel" style={{ height: 13, width: '55%', marginTop: 8 }} />
+          </div>
+          <div className="skel" style={{ width: 64, height: 64, borderRadius: 16, flexShrink: 0 }} />
+        </div>
+        {stats}
+        <div style={{ margin: '12px 16px 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="skel" style={{ height: 66, borderRadius: 12 }} />
+          {[0, 1, 2].map((i) => <div key={i} className="skel" style={{ height: 64, borderRadius: 12 }} />)}
+        </div>
+        <LoadingQuote style={{ margin: '20px auto 0' }} />
       </div>
-      <LoadingQuote style={{ margin: '16px auto 4px' }} />
-      <div style={{ margin: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }}>
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-            <div className="skel" style={{ height: 18, width: 36 }} />
-            <div className="skel" style={{ height: 11, width: 44 }} />
+    );
+  }
+  return (
+    <div role="status" aria-label="Loading" style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', paddingBottom: 80 }}>
+      <div className="card card--dark" style={{ margin: 16, padding: '24px 20px 30px' }}>
+        <div className="skel skel--dark" style={{ height: 26, width: 220, borderRadius: 14, marginBottom: 20 }} />
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+          <div style={{ flex: 1 }}>
+            <div className="skel skel--dark" style={{ height: 11, width: 150 }} />
+            <div className="skel skel--dark" style={{ height: 28, width: '55%', marginTop: 10 }} />
+            <div className="skel skel--dark" style={{ height: 13, width: '92%', marginTop: 12 }} />
+            <div className="skel skel--dark" style={{ height: 13, width: '70%', marginTop: 6 }} />
+            <div className="skel skel--dark" style={{ height: 13, width: '80%', marginTop: 12 }} />
+          </div>
+          <div className="skel skel--dark" style={{ width: 72, height: 96, borderRadius: 16, flexShrink: 0 }} />
+        </div>
+      </div>
+      {stats}
+      <div className="skel" style={{ height: 150, borderRadius: 16, margin: '0 16px 12px' }} />
+      <div style={{ margin: '16px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="skel" style={{ height: 20, width: 130 }} />
+        <div className="skel" style={{ height: 14, width: 110 }} />
+      </div>
+      <div style={{ margin: '12px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {[0, 1, 2].map((i) => (
+          <div key={i} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              <div className="skel" style={{ width: 44, height: 44, borderRadius: 9999, flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <div className="skel" style={{ height: 15, width: '35%' }} />
+                <div className="skel" style={{ height: 12, width: '75%', marginTop: 6 }} />
+              </div>
+            </div>
+            <div className="skel" style={{ height: 4, borderRadius: 9999 }} />
+            <div className="skel" style={{ height: 12, width: '45%' }} />
           </div>
         ))}
       </div>
-      {author ? (
-        <div style={{ margin: '12px 16px 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div className="skel" style={{ height: 66, borderRadius: 12 }} />
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="skel" style={{ height: 64, borderRadius: 12 }} />
-          ))}
-        </div>
-      ) : (
-        <>
-          <div className="skel" style={{ height: 76, borderRadius: 12, margin: '0 16px' }} />
-          <div style={{ margin: '16px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div className="skel" style={{ height: 20, width: 130 }} />
-            <div className="skel" style={{ height: 14, width: 90 }} />
-          </div>
-          <div style={{ margin: '12px 16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="skel" style={{ height: 118, borderRadius: 14 }} />
-            ))}
-          </div>
-        </>
-      )}
+      <LoadingQuote style={{ margin: '8px auto 0' }} />
     </div>
   );
 }
@@ -155,59 +185,149 @@ export function ListSkeleton({ rows = 4, titleWidth = '40%' }: { rows?: number; 
   );
 }
 
-/** Back, big title, a hero card, then week rows (course detail). */
+/** Course page: Back, course code, "N weeks", taught by, the attendance
+ *  card, the Weeks / Outline / Practice chips, then week rows. */
 export function DetailSkeleton() {
   return (
     <PageShell>
-      <div className="skel" style={{ height: 18, width: 60 }} />
-      <div className="skel" style={{ height: 30, width: '60%', marginTop: 14 }} />
-      <div className="skel" style={{ height: 14, width: '40%', marginTop: 10 }} />
-      <div className="skel" style={{ height: 96, borderRadius: 18, marginTop: 16 }} />
+      <div className="skel" style={{ height: 18, width: 64, marginBottom: 16 }} />
+      <div className="skel" style={{ height: 30, width: '45%' }} />
+      <div className="skel" style={{ height: 13, width: '60%', marginTop: 10 }} />
+      <div className="skel" style={{ height: 13, width: '45%', marginTop: 6 }} />
+      <div className="skel" style={{ height: 96, borderRadius: 12, marginTop: 16 }} />
+      <div style={{ display: 'flex', gap: 6, marginTop: 16 }}>
+        {[72, 76, 80].map((w, i) => <div key={i} className="skel" style={{ height: 32, width: w, borderRadius: 9999 }} />)}
+      </div>
       <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {[0, 1, 2, 3, 4].map((i) => <div key={i} className="skel" style={{ height: 58, borderRadius: 12 }} />)}
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} style={{ ...row, display: 'flex', gap: 12, alignItems: 'center' }}>
+            <div style={{ flex: 1 }}>
+              <div className="skel" style={{ height: 15, width: '30%' }} />
+              <div className="skel" style={{ height: 12, width: '75%', marginTop: 8 }} />
+            </div>
+            <div className="skel" style={{ height: 24, width: 52, borderRadius: 9999 }} />
+          </div>
+        ))}
       </div>
     </PageShell>
   );
 }
 
-/** Title, byline and paragraphs (the note reader, shared notes). */
+/** The note reader, shape for shape: Back, the action pills, the dark week
+ *  header (eyebrow, title, subtitle, chips), topic tabs, the narration bar,
+ *  then the topic heading and subtopic cards. Same width and padding as the
+ *  reader, so nothing jumps when the notes arrive. */
 export function ReaderSkeleton() {
   return (
-    <PageShell>
-      <div className="skel" style={{ height: 14, width: 120 }} />
-      <div className="skel" style={{ height: 30, width: '75%', marginTop: 12 }} />
-      <div className="skel" style={{ height: 14, width: '50%', marginTop: 10 }} />
-      {[0, 1, 2].map((b) => (
-        <div key={b} style={{ marginTop: 22 }}>
-          <div className="skel" style={{ height: 20, width: '45%' }} />
-          {[100, 96, 90, 70].map((w, i) => <div key={i} className="skel" style={{ height: 13, width: `${w}%`, marginTop: 10 }} />)}
+    <div role="status" aria-label="Loading the notes" style={{ maxWidth: 640, margin: '0 auto', padding: '24px 20px 100px' }}>
+      <div className="skel" style={{ height: 18, width: 64, marginBottom: 16 }} />
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginBottom: 8 }}>
+        {[118, 84, 84].map((w, i) => <div key={i} className="skel" style={{ height: 34, width: w, borderRadius: 9999 }} />)}
+      </div>
+      <div className="hero" style={{ minHeight: 150 }}>
+        <div className="skel skel--dark" style={{ height: 10, width: 120, marginBottom: 14 }} />
+        <div className="skel skel--dark" style={{ height: 24, width: '82%' }} />
+        <div className="skel skel--dark" style={{ height: 24, width: '55%', marginTop: 8 }} />
+        <div className="skel skel--dark" style={{ height: 13, width: '70%', marginTop: 12 }} />
+        <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+          {[70, 90, 110].map((w, i) => <div key={i} className="skel skel--dark" style={{ height: 24, width: w, borderRadius: 20 }} />)}
+        </div>
+      </div>
+      <div className="segbar">
+        {[0, 1, 2, 3].map((i) => <div key={i} className="skel" style={{ flex: 1, height: 34, borderRadius: 9999 }} />)}
+      </div>
+      <div className="skel" style={{ height: 58, borderRadius: 14, marginBottom: 12 }} />
+      <div className="skel" style={{ height: 10, width: 64, marginTop: 8 }} />
+      <div className="skel" style={{ height: 24, width: '68%', marginTop: 10 }} />
+      {[0, 1].map((b) => (
+        <div key={b}>
+          <div className="subtopic-heading">
+            <div className="skel" style={{ height: 22, width: 44, borderRadius: 9999 }} />
+            <div className="skel" style={{ height: 16, width: '48%' }} />
+          </div>
+          <div className="topic-card">
+            {[100, 97, 92, 64].map((w, i) => <div key={i} className="skel" style={{ height: 13, width: `${w}%`, marginTop: i ? 10 : 0 }} />)}
+          </div>
         </div>
       ))}
-    </PageShell>
+      <LoadingQuote style={{ margin: '8px auto 0' }} />
+    </div>
   );
 }
 
-/** Avatar row, detail rows, buttons (Me). */
+/** Me: Back, the avatar row (picture, name, email, Box Boy), the details
+ *  card, then the link rows (class list, guide, settings…). */
 export function ProfileSkeleton() {
   return (
-    <PageShell>
+    <div role="status" aria-label="Loading" style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '24px 16px 80px' }}>
+      <div className="skel" style={{ height: 18, width: 64, marginBottom: 16 }} />
       <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 20 }}>
         <div className="skel" style={{ width: 64, height: 64, borderRadius: 9999, flexShrink: 0 }} />
         <div style={{ flex: 1 }}>
-          <div className="skel" style={{ height: 20, width: '50%' }} />
-          <div className="skel" style={{ height: 13, width: '70%', marginTop: 8 }} />
+          <div className="skel" style={{ height: 22, width: '50%' }} />
+          <div className="skel" style={{ height: 13, width: '75%', marginTop: 8 }} />
         </div>
+        <div className="skel" style={{ width: 52, height: 64, borderRadius: 14, flexShrink: 0 }} />
       </div>
-      <div style={{ ...row, padding: 0, overflow: 'hidden' }}>
-        {[0, 1, 2, 3, 4].map((i) => (
+      <div style={{ ...row, padding: 0, overflow: 'hidden', marginBottom: 16 }}>
+        {[0, 1, 2, 3, 4, 5].map((i) => (
           <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 16px', borderTop: i ? '1px solid var(--border)' : 'none' }}>
             <div className="skel" style={{ height: 13, width: 90 }} />
             <div className="skel" style={{ height: 13, width: 120 }} />
           </div>
         ))}
       </div>
-      <div className="skel" style={{ height: 48, borderRadius: 14, marginTop: 16 }} />
-    </PageShell>
+      {[0, 1, 2].map((i) => (
+        <div key={i} style={{ ...row, padding: 14, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ flex: 1 }}>
+            <div className="skel" style={{ height: 13, width: '35%' }} />
+            <div className="skel" style={{ height: 12, width: '70%', marginTop: 6 }} />
+          </div>
+          <div className="skel" style={{ height: 12, width: 8 }} />
+        </div>
+      ))}
+      <LoadingQuote style={{ margin: '20px auto 0' }} />
+    </div>
+  );
+}
+
+/** A course game (Keywords, Crossword): Back, label, the level title and
+ *  progress bar, the clue card, then the board (word boxes or grid). */
+export function GameSkeleton({ grid = false }: { grid?: boolean }) {
+  return (
+    <div role="status" aria-label="Loading the game" className="g-shell">
+      <div className="skel" style={{ height: 18, width: 64, marginBottom: 16 }} />
+      <div className="skel" style={{ height: 11, width: 160 }} />
+      <div className="g-head">
+        <div className="skel" style={{ height: 24, width: 96 }} />
+        <div className="skel" style={{ flex: 1, height: 16, borderRadius: 9999 }} />
+      </div>
+      <div className="g-layout">
+        <div className="g-main">
+          <div className="skel" style={{ height: 76, borderRadius: 18 }} />
+          {grid ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 4, maxWidth: 360, width: '100%', margin: '0 auto' }}>
+              {Array.from({ length: 40 }, (_, i) => <div key={i} className="skel" style={{ aspectRatio: '1', borderRadius: 8, opacity: (i * 7) % 5 === 0 ? 0 : 1 }} />)}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+              {[7, 5, 4, 4].map((n, r) => (
+                <div key={r} style={{ display: 'flex', gap: 5 }}>
+                  {Array.from({ length: n }, (_, i) => <div key={i} className="skel" style={{ width: r ? 32 : 40, height: r ? 36 : 44, borderRadius: 10 }} />)}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="g-side">
+          {grid ? (
+            <div className="skel" style={{ height: 160, borderRadius: 14 }} />
+          ) : (
+            <div className="skel" style={{ width: 'clamp(220px, min(84vw, 40svh), 340px)', aspectRatio: '1', borderRadius: '50%', margin: '46px auto 0' }} />
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 

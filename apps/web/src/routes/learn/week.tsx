@@ -1,6 +1,6 @@
 import { ReaderSkeleton } from '../../components/Skeletons';
 import { useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
+import { Link, useParams, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Check, Download, ArrowUp, Share2, Lock, Flag } from 'lucide-react';
 import ReportSheet from '../../components/ReportSheet';
 import { api, type TopicMeta } from '../../lib/api';
@@ -614,6 +614,12 @@ function TopicTab({ topic, done, onToggle, preview }: { topic: Topic; done: bool
         >
           <Check size={16} /> {done ? 'Completed' : 'Mark Topic Complete'}
         </button>
+      )}
+      {/* Finishing a topic adds its recall cards to Revision: say so, with the way there. */}
+      {!preview && done && (
+        <Link to="/revision" className="g-in" style={{ display: 'inline-flex', gap: 6, alignItems: 'center', marginTop: 10, fontSize: 13, fontWeight: 700, color: 'var(--u-good)', textDecoration: 'none' }}>
+          This topic's recall cards are in Revision ›
+        </Link>
       )}
     </div>
   );

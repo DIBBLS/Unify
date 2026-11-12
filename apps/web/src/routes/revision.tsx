@@ -22,6 +22,9 @@ export default function RevisionRoute() {
   const [knew, setKnew] = useState(0);
   const [missed, setMissed] = useState<CardT[]>([]);
   const [round, setRound] = useState(1);
+  // Only student accounts record finished topics, so staff see why it's empty.
+  const [staff, setStaff] = useState(false);
+  useEffect(() => { api.me().then((m) => setStaff(!!m.isAdmin || ((m.profile?.role || 'student') !== 'student'))).catch(() => {}); }, []);
 
   const load = () => {
     setDeck(null); setI(0); setShown(false); setKnew(0); setMissed([]); setRound(1);
@@ -40,7 +43,11 @@ export default function RevisionRoute() {
         <Card style={{ alignItems: 'center', textAlign: 'center', marginTop: 8 }}>
           <BoxBoy pose="peeking" width={110} />
           <div className="t-15 w-6">Nothing to revise yet</div>
-          <div className="t-13 muted">Finish a topic in any course and its recall cards show up here.</div>
+          <div className="t-13 muted">
+            {staff
+              ? "Revision is built from the topics a student marks done. Your account isn't a student account, so finished topics aren't recorded for you. Sign in as a student to try it."
+              : 'Finish a topic in any course (tap "Mark Topic Complete" at the end of it) and its recall cards show up here.'}
+          </div>
           <Link to={ROUTES.home} className="btn btn--amber">Back to my courses</Link>
         </Card>
       </div>
