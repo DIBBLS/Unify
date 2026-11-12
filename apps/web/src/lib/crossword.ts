@@ -1,5 +1,5 @@
 import type { UnifyNote } from '../types/note';
-import { extractTerms, type Term } from './wordgame';
+import { extractTerms, moreTerms, type Term } from './wordgame';
 
 // Crossword from one week's notes: the key terms cross each other where they
 // share a letter, numbered the usual way, with clues from the notes.
@@ -77,7 +77,8 @@ function seeded(seed: number) {
 }
 
 export function buildCrossword(note: UnifyNote, max = 12): Puzzle | null {
-  const terms = extractTerms(note, 12).slice(0, 24);
+  const marked = extractTerms(note, 12);
+  const terms = [...marked, ...moreTerms(note, marked, 12, 20)].slice(0, 24);
   if (terms.length < 3) return null;
   let best: Placed[] = [];
   let bestArea = Infinity;
