@@ -8,6 +8,7 @@ import { toastSuccess } from '../lib/toast';
 import { ROUTES } from '../lib/routes';
 import BackButton from '../components/BackButton';
 import ClassMembers from '../components/ClassMembers';
+import LecturerChecks from '../components/LecturerChecks';
 import ErrorState from '../components/ErrorState';
 import { BoxBoy } from '../components/redesign/brand';
 import { Card, Display, Label, Pill } from '../components/redesign/ui';
@@ -120,6 +121,8 @@ export default function HocDashboardRoute() {
         </Card>
       )}
 
+      {/* Class rep: confirm lecturers who added one of the class's courses (S62). */}
+      {isHoc && <LecturerChecks />}
       {meta && <ClassMembers />}
 
       <section style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>

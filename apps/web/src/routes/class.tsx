@@ -98,7 +98,7 @@ export default function ClassRoute() {
     return () => window.clearTimeout(t);
   }, [q, myLevel]);
 
-  if (loading) return <SearchListSkeleton />;
+  if (loading) return <SearchListSkeleton withAction={false} />;
 
   // Levels as the catalog spells them ("400 Level"); "400L" profiles match too.
   const norm = (l: string) => (l || '').replace(/^(\d{3})\s*L(evel)?$/i, '$1 Level').trim();

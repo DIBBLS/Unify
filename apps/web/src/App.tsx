@@ -411,7 +411,8 @@ export default function App() {
             path={ROUTES.timetable}
             element={
               <RequireAuth>
-                <RequireRole allow={STUDENT_ONLY}>
+                {/* Students, and lecturers (every class they teach, read-only). */}
+                <RequireRole allow={['student', 'lecturer']}>
                   <TimetableRoute />
                 </RequireRole>
               </RequireAuth>

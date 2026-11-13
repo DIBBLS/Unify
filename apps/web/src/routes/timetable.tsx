@@ -1,4 +1,4 @@
-import { SectionSkeleton } from '../components/Skeletons';
+import { TimetableSkeleton } from '../components/Skeletons';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api, type ClassSlot } from '../lib/api';
@@ -147,7 +147,7 @@ export default function TimetableRoute() {
 
       <div style={{ marginTop: 16 }}>
         {loading ? (
-          <SectionSkeleton rows={3} />
+          <TimetableSkeleton />
         ) : courses.length === 0 ? (
           <>
           <Card style={{ alignItems: 'center', textAlign: 'center' }}>

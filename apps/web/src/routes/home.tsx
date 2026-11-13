@@ -6,7 +6,7 @@ import { supabaseBrowser } from '../lib/supabase';
 import { api, type Profile, type HomeUpdate } from '../lib/api';
 import { canOpenLink } from '../lib/updateLinks';
 import { profileGaps, gapsText } from '../lib/profileGaps';
-import { DashboardSkeleton } from '../components/Skeletons';
+import { DashboardSkeleton, LecturerHomeSkeleton } from '../components/Skeletons';
 import ErrorState from '../components/ErrorState';
 import { BoxBoy, PERSONAS } from '../components/redesign/brand';
 import { resolvePicture } from '../lib/picture';
@@ -292,14 +292,10 @@ export default function HomeRoute() {
   // Skeleton variant follows the last-known role on THIS device (same
   // hint as the nav) so the loader matches the real dashboard — students
   // and contributors each see their own shape, even on first paint.
-  const [skelAuthor] = useState(() => {
-    try {
-      const r = localStorage.getItem('unify.role.v1');
-      return r === 'lecturer' || r === 'contributor' || r === 'admin';
-    } catch {
-      return false;
-    }
+  const [skelRole] = useState(() => {
+    try { return localStorage.getItem('unify.role.v1') || 'student'; } catch { return 'student'; }
   });
+  const skelAuthor = skelRole === 'lecturer' || skelRole === 'contributor' || skelRole === 'admin';
   // Teaching courses: lecturers always get My Classes; contributors with
   // assigned teaching courses do too (backend gates the page either way).
   const [teaching, setTeaching] = useState<string[]>([]);
@@ -435,7 +431,7 @@ export default function HomeRoute() {
     })();
   }, [navigate]);
 
-  if (loading) return <DashboardSkeleton author={skelAuthor} />;
+  if (loading) return skelRole === 'lecturer' ? <LecturerHomeSkeleton /> : <DashboardSkeleton author={skelAuthor} />;
   if (loadError)
     return <ErrorState title="Couldn't load Home" message={loadError} />;
   // Admins have one front page: the admin Overview.

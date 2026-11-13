@@ -27,8 +27,16 @@ export default function LecturerProfileRoute() {
         ) : (
           <BoxBoy pose="teaching" width={100} />
         )}
-        <Display size={26}>{p.name}</Display>
+        <Display size={26}>{[p.title, p.name].filter(Boolean).join(' ')}</Display>
         <div className="t-13 muted">{[p.department, p.faculty].filter(Boolean).join(' · ') || 'Lecturer'}</div>
+        {/* "Let students know you" (L05): bio and how to reach them, when they've added them. */}
+        {p.bio && <div className="t-14" style={{ marginTop: 6, whiteSpace: 'pre-wrap' }}>{p.bio}</div>}
+        {(p.contactEmail || p.links) && (
+          <div className="t-13" style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {p.contactEmail && <a href={`mailto:${p.contactEmail}`} style={{ color: 'var(--u-good)', fontWeight: 700 }}>{p.contactEmail}</a>}
+            {p.links && <span className="muted" style={{ wordBreak: 'break-word' }}>{p.links}</span>}
+          </div>
+        )}
       </Card>
       {p.courses.length > 0 && (
         <section style={{ marginTop: 18 }}>

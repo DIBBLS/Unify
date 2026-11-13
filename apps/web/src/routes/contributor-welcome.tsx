@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { ROUTES } from '../lib/routes';
 import BackButton from '../components/BackButton';
+import { StepsSkeleton } from '../components/Skeletons';
 import { BoxBoy } from '../components/redesign/brand';
 import { Card, Display, Label } from '../components/redesign/ui';
 
@@ -52,7 +53,7 @@ export default function ContributorWelcomeRoute() {
   };
 
   const shell = { maxWidth: 'min(var(--shell, 480px), 560px)', margin: '0 auto', padding: '20px 16px 96px' } as const;
-  if (isContributor === null) return <div style={shell} />;
+  if (isContributor === null) return <StepsSkeleton />;
   if (!isContributor) {
     return (
       <div style={shell}>

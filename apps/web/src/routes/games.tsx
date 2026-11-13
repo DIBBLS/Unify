@@ -4,6 +4,7 @@ import { Gamepad2, Grid3x3 } from 'lucide-react';
 import { api } from '../lib/api';
 import { ROUTES } from '../lib/routes';
 import BackButton from '../components/BackButton';
+import { SectionSkeleton } from '../components/Skeletons';
 import { BoxBoy } from '../components/redesign/brand';
 import { Card, Chip, Chips, Display, Label } from '../components/redesign/ui';
 import GameLeaderboard from '../components/GameLeaderboard';
@@ -59,7 +60,7 @@ export default function GamesRoute() {
       <div className="t-14 muted" style={{ marginTop: 4 }}>Spell the week's key terms in Keywords, or cross them in a Crossword. Every word comes from your notes.</div>
 
       {err && <div className="t-14" style={{ color: 'var(--u-red)', marginTop: 12 }}>{err}</div>}
-      {!err && !courses && <div className="t-13 muted" style={{ marginTop: 12 }}>Loading your courses…</div>}
+      {!err && !courses && <div style={{ marginTop: 14 }}><SectionSkeleton rows={3} quote={false} /></div>}
       {courses && courses.length === 0 && (
         <Card style={{ alignItems: 'center', textAlign: 'center', gap: 10, marginTop: 14 }}>
           <BoxBoy pose="peeking" width={110} />
@@ -93,7 +94,7 @@ export default function GamesRoute() {
       {course && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 18 }}>
           <div className="t-13 w-7" style={{ color: 'var(--text2)', letterSpacing: 1 }}>PLAY A WEEK</div>
-          {!sorted && <div className="t-13 muted">Loading weeks…</div>}
+          {!sorted && <SectionSkeleton rows={3} quote={false} />}
           {sorted && sorted.length === 0 && <div className="t-14 muted">No weeks published for {course} yet.</div>}
           {sorted?.map((w) => (
             <Card key={w.week} pad={14} gap={10} className="g-in">

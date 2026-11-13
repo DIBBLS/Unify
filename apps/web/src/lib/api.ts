@@ -672,6 +672,12 @@ export const api = {
     courses?: { code: string; status: CgpaCourse['status']; units: number; grade?: number | null }[];
   }) => apiFetch<{ ok: boolean }>('/v1/cgpa', { method: 'PUT', body: JSON.stringify(payload) }),
   // Head of Class
+  // Lecturer course claims (L04) and the class rep's "Is this your lecturer?" (S62).
+  lecturerClaims: () => apiFetch<{ courses: { course: string; claimed: boolean; confirmed: number; declined: number; waiting: boolean }[] }>('/v1/lecturer/claims'),
+  lecturerClaimAdd: (courses: string[]) => apiFetch<{ ok: boolean; added: string[]; already: string[] }>('/v1/lecturer/claims', { method: 'POST', body: JSON.stringify({ courses }) }, 0),
+  lecturerClaimRemove: (course: string) => apiFetch<{ ok: boolean }>(`/v1/lecturer/claims/${encodeURIComponent(course)}`, { method: 'DELETE' }, 0),
+  hocLecturerChecks: () => apiFetch<{ class?: string; checks: { id: string; course: string; courseTitle: string; at: string; lecturer: { id: string; name: string; department: string; avatar: string } }[] }>('/v1/hoc/lecturer-checks'),
+  hocLecturerAnswer: (id: string, answer: 'yes' | 'no') => apiFetch<{ ok: boolean; status: string }>(`/v1/hoc/lecturer-checks/${id}`, { method: 'POST', body: JSON.stringify({ answer }) }, 0),
   // Send a PDF (lecturer): a signed upload link, then send = materials + post + bell/push.
   lecturerPdfUploadUrl: (body: { course: string; filename: string; size: number }) =>
     apiFetch<{ path: string; token: string; signedUrl: string; bucket: string }>('/v1/lecturer/pdf/upload-url', { method: 'POST', body: JSON.stringify(body) }, 0),
@@ -788,7 +794,7 @@ export const api = {
   attendanceStudents: (course: string) =>
     apiFetch<{ course: string; held: number; students: { name: string; matric: string; attended: number; pct: number | null; onUnify: boolean }[] }>(`/v1/attendance/students?course=${encodeURIComponent(course)}`),
   lecturerProfile: (id: string) =>
-    apiFetch<{ id: string; name: string; department: string; faculty: string; avatar: string; persona: string; courses: string[] }>(`/v1/lecturer/profile/${id}`),
+    apiFetch<{ id: string; name: string; department: string; faculty: string; avatar: string; persona: string; courses: string[]; title?: string; bio?: string; contactEmail?: string; links?: string }>(`/v1/lecturer/profile/${id}`),
   deleteMyAccount: () => apiFetch<{ ok: boolean }>('/v1/me', { method: 'DELETE', body: JSON.stringify({ confirm: 'DELETE' }) }, 0),
   // Class lists: student side
   classListMe: () => apiFetch<ClassListMe>('/v1/class-list/me'),
