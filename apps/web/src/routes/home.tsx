@@ -95,7 +95,7 @@ function CourseCard({ index, course, title, staff, priority, semWeek }: {
   const lecturer = staff.map((s) => s.name).join(' · ');
   return (
     <Link
-      to={`/course/${encodeURIComponent(course)}`}
+      to={`/courses/${encodeURIComponent(course)}`}
       className="rise"
       style={{ animationDelay: `${Math.min(index, 6) * 40}ms`, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: 8, textDecoration: 'none', color: 'var(--text)' }}
     >

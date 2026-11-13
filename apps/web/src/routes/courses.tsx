@@ -143,7 +143,7 @@ export default function CoursesRoute() {
         {courses.map((c, i) => (
           <Link
             key={c.code}
-            to={`/course/${encodeURIComponent(c.code.trim())}`}
+            to={`/courses/${encodeURIComponent(c.code.trim())}`}
             className="card rise"
             style={{
               animationDelay: `${Math.min(i, 6) * 40}ms`,

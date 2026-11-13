@@ -35,7 +35,7 @@ export default function LecturerProfileRoute() {
           <Label>Teaches</Label>
           <ListCard style={{ marginTop: 8 }}>
             {p.courses.map((c) => (
-              <Link key={c} to={`/course/${encodeURIComponent(c)}`} className="row" style={{ padding: '13px 16px', textDecoration: 'none', color: 'var(--u-text)' }}>
+              <Link key={c} to={`/courses/${encodeURIComponent(c)}`} className="row" style={{ padding: '13px 16px', textDecoration: 'none', color: 'var(--u-text)' }}>
                 <span className="t-15 w-6">{c}</span>
               </Link>
             ))}

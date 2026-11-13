@@ -103,7 +103,7 @@ export default function AdminContentPanel() {
               {isOpen && (
                 <div style={{ borderTop: '1px solid #f0f0f0', padding: '4px 14px 12px' }}>
                   <Link
-                    to={`/course/${encodeURIComponent(c.code)}?preview=1`}
+                    to={`/courses/${encodeURIComponent(c.code)}?preview=1`}
                     style={{ display: 'inline-block', fontSize: 12, color: 'var(--u-good)', fontWeight: 800, textDecoration: 'none', margin: '6px 0' }}
                   >
                     Open course page →

@@ -32,6 +32,13 @@ export function recordNav(pathname: string): void {
     trail[trail.length - 1].idx = idx;
     return;
   }
+  // Same history slot as the top stop: this screen replaced the last one
+  // (a redirect such as /course/X → /courses/X). Swap it rather than adding a
+  // stop, or Back would land on the redirect and bounce straight back here.
+  if (top && idx != null && top.idx === idx) {
+    trail[trail.length - 1] = { path: pathname, idx };
+    return;
+  }
   trail.push({ path: pathname, idx });
   if (trail.length > MAX_TRAIL) trail.shift();
 }
