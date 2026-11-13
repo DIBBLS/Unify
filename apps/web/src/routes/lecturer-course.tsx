@@ -3,6 +3,7 @@ import SendPdf from '../components/SendPdf';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { Check, Send, Trash2 } from 'lucide-react';
 import CourseChat from '../components/CourseChat';
+import { PracticeEditor } from '../components/PracticeQuestions';
 import { useSchool } from '../lib/school';
 import type { PostKind } from '../lib/api';
 import { api } from '../lib/api';
@@ -142,6 +143,10 @@ function Report({ course }: { course: string }) {
   useEffect(() => { api.courseReport(course).then(setData).catch((e) => setErr(describeError(e, 'load the report'))); }, [course]);
   const [pickWeek, setPickWeek] = useState<number | null>(null);
   const classLabel = useClassLabel();
+  const [missed, setMissed] = useState<Awaited<ReturnType<typeof api.lecturerMissed>> | null>(null);
+  const [adding, setAdding] = useState(false);
+  const shownWeek = pickWeek ?? ((data && ([...data.weeks].reverse().find((w) => w.studied > 0) || data.weeks[data.weeks.length - 1])?.week) || null);
+  useEffect(() => { if (shownWeek) api.lecturerMissed(course, shownWeek).then(setMissed).catch(() => setMissed(null)); }, [course, shownWeek]);
   if (err) return <Card><div className="t-13 muted">{err}</div></Card>;
   if (!data) return <SectionSkeleton rows={3} />;
   const latest = [...data.weeks].reverse().find((w) => w.studied > 0) || data.weeks[data.weeks.length - 1];
@@ -172,6 +177,23 @@ function Report({ course }: { course: string }) {
                 );
               })}
             </Card>
+          )}
+          {/* L11: the questions most students got wrong this week. */}
+          <Label>Most missed in Week {pick.week}</Label>
+          {missed && missed.questions.length > 0 ? (
+            <ListCard style={{ marginTop: 6, marginBottom: 12 }}>
+              {missed.questions.map((q) => (
+                <div key={q.index} className="row" style={{ gap: 10, padding: '12px 16px' }}>
+                  <div className="grow t-14"><b>Q{q.index + 1}</b> · {q.question}</div>
+                  <span className={`pill ${q.wrongPct >= 50 ? 'pill--bad' : 'pill--warn'}`} style={{ whiteSpace: 'nowrap' }}>{q.wrongPct}% wrong</span>
+                </div>
+              ))}
+            </ListCard>
+          ) : (
+            <div className="t-13 muted" style={{ margin: '6px 0 12px' }}>{missed && missed.attempts ? 'No question stands out yet.' : "Shows once students take this week's quiz (attempts from today on)."}</div>
+          )}
+          {adding ? <PracticeEditor course={course} onClose={() => setAdding(false)} /> : (
+            <button className="btn btn--outline btn--block" style={{ marginBottom: 14 }} onClick={() => setAdding(true)}>+ Add practice questions</button>
           )}
           <Label>Every week</Label>
         </>

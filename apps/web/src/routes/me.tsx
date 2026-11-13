@@ -801,6 +801,10 @@ function LecturerRows() {
           <span className="pill pill--amber">{n.waiting.length}</span>
         </Link>
       )}
+      <Link to="/timetable?mine=1" style={row}>
+        <span><span style={{ display: 'block', fontSize: 13, fontWeight: 700 }}>My own timetable</span><span style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>Only you see it · office hours, other duties</span></span>
+        <span aria-hidden="true" style={{ color: 'var(--text3)' }}>›</span>
+      </Link>
       <Link to="/messages" style={row}>
         <span><span style={{ display: 'block', fontSize: 13, fontWeight: 700 }}>Messages</span><span style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>With the contributors writing your courses</span></span>
         {n.unread > 0 ? <span className="pill pill--amber">{n.unread}</span> : <span aria-hidden="true" style={{ color: 'var(--text3)' }}>›</span>}

@@ -1,7 +1,7 @@
 import { TimetableSkeleton } from '../components/Skeletons';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { api, type ClassSlot } from '../lib/api';
+import { api, type ClassSlot, type OwnSlot } from '../lib/api';
 import { supabaseBrowser } from '../lib/supabase';
 import { errorToast } from '../lib/errors';
 import { toastSuccess } from '../lib/toast';
@@ -39,6 +39,8 @@ export default function TimetableRoute() {
   const [isLecturer, setIsLecturer] = useState(false);
   const [adding, setAdding] = useState(false);
   // Day: the time grid for one day. Week: every day side by side (remembered).
+  // Lecturers: the class timetables (set by class reps) or their own entries (L09).
+  const [mine, setMine] = useState(() => new URLSearchParams(window.location.search).get('mine') === '1');
   const [view, setView] = useState<'day' | 'week'>(() => { try { return localStorage.getItem(VIEW_KEY) === 'week' ? 'week' : 'day'; } catch { return 'day'; } });
   const pickView = (v: 'day' | 'week') => { setView(v); try { localStorage.setItem(VIEW_KEY, v); } catch { /* fine */ } };
 
@@ -119,6 +121,13 @@ export default function TimetableRoute() {
         <div style={{ flex: 1 }}>
           <Label>{isLecturer ? 'Every class you teach' : 'This week'}</Label>
           <Display size={30}>Timetable</Display>
+          {isLecturer && (
+            <div role="tablist" aria-label="Whose timetable" style={{ display: 'flex', gap: 6, marginTop: 10 }}>
+              {([[false, 'Class timetables'], [true, 'My own']] as const).map(([v, l]) => (
+                <button key={l} role="tab" aria-selected={mine === v} className={`chip chip--sm${mine === v ? ' chip--on' : ''}`} onClick={() => setMine(v)}>{l}</button>
+              ))}
+            </div>
+          )}
           <div role="tablist" aria-label="Timetable view" style={{ display: 'flex', gap: 6, marginTop: 10 }}>
             {(['day', 'week'] as const).map((v) => (
               <button key={v} role="tab" aria-selected={view === v} className={`chip chip--sm${view === v ? ' chip--on' : ''}`} onClick={() => pickView(v)}>
@@ -130,6 +139,8 @@ export default function TimetableRoute() {
         <BoxBoy pose={spotlight ? 'teaching' : 'readingStanding'} width={72} style={{ flexShrink: 0 }} />
       </div>
 
+      {mine && <OwnTimetable day={day} setDay={setDay} view={view} today={today} nowMin={nowMin} />}
+      {!mine && <>
       {!loading && spotlight && <TodayCard slot={spotlight} state={state(spotlight)} nowMin={nowMin} onOpen={() => open(spotlight)} onJoin={() => join(spotlight)} />}
 
       {view === 'day' && (
@@ -196,7 +207,77 @@ export default function TimetableRoute() {
           slots.length > 0 && <button className="btn btn--white btn--block" style={{ marginTop: 14 }} onClick={() => setAdding(true)}>Add a class time</button>
         )
       )}
+      </>}
     </div>
+  );
+}
+
+// My own timetable (design L09/L17): a lecturer's own entries, office hours and
+// other duties. Only they see them. Same day and week grids as the classes.
+function OwnTimetable({ day, setDay, view, today, nowMin }: { day: number; setDay: (d: number) => void; view: 'day' | 'week'; today: number; nowMin: number }) {
+  const [own, setOwn] = useState<OwnSlot[] | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [title, setTitle] = useState('');
+  const [d, setD] = useState(day);
+  const [start, setStart] = useState('14:00');
+  const [end, setEnd] = useState('16:00');
+  const [venue, setVenue] = useState('');
+  const [busy, setBusy] = useState(false);
+  const load = () => api.ownSlots().then((r) => setOwn(r.slots)).catch(() => setOwn([]));
+  useEffect(() => { void load(); }, []);
+  // The grids take class slots: an entry's title stands in for the course.
+  const asSlots: ClassSlot[] = (own || []).map((o) => ({ id: o.id, course: o.title, day: o.day, start: o.start, end: o.end, venue: o.venue, lecturer: 'Only you see this' }));
+  const daySlots = asSlots.filter((x) => x.day === day);
+  const field: React.CSSProperties = { width: '100%', padding: 10, marginTop: 4, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 15 };
+  const add = async () => {
+    if (!title.trim() || end <= start) { errorToast(new Error('Give it a name, and an end after the start.'), 'add that'); return; }
+    setBusy(true);
+    try {
+      await api.ownSlotAdd({ day: d, start, end, title: title.trim(), venue: venue.trim() || undefined });
+      toastSuccess(`${title.trim()} added on ${DAY_LONG[d]}. Only you see it.`);
+      setAdding(false); setTitle(''); setVenue('');
+      await load();
+    } catch (e) { errorToast(e, 'add that'); }
+    finally { setBusy(false); }
+  };
+  const removeOwn = (x: ClassSlot) => { if (window.confirm(`Remove ${x.course} on ${DAY_LONG[x.day]}?`)) void api.ownSlotDelete(x.id).then(load).catch((e) => errorToast(e, 'remove that')); };
+  const count: Record<number, number> = {};
+  for (const x of asSlots) count[x.day] = (count[x.day] || 0) + 1;
+  return (
+    <>
+      <div className="t-13 muted" style={{ marginTop: 12 }}>Office hours and other duties. Only you see these.</div>
+      {view === 'day' && (
+        <div style={{ margin: '12px -16px 0', padding: '0 16px', overflowX: 'auto' }}>
+          <Chips>
+            {ORDER.map((x) => <Chip key={x} on={x === day} onClick={() => setDay(x)}>{DAY_SHORT[x]}{count[x] ? ` · ${count[x]}` : ''}</Chip>)}
+          </Chips>
+        </div>
+      )}
+      <div style={{ marginTop: 12 }}>
+        {own === null ? <TimetableSkeleton />
+          : view === 'week' && asSlots.length ? <WeekGrid slots={asSlots} days={ORDER.filter((x) => (x >= 1 && x <= 5) || count[x])} today={today} nowMin={nowMin} labels={DAY_SHORT} onPickDay={setDay} />
+          : daySlots.length ? <DayGrid slots={daySlots} stateOf={() => 'later'} nowMin={day === today ? nowMin : null} isHoc onOpen={() => {}} onRemove={removeOwn} onJoin={() => {}} />
+          : <EmptyDay label={DAY_LONG[day]} nowMin={day === today ? nowMin : null} />}
+      </div>
+      {adding ? (
+        <Card style={{ marginTop: 14, gap: 10 }}>
+          <div className="t-15 w-7">Add to your own timetable</div>
+          <label className="t-13 w-6">What<input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Office hours" maxLength={80} style={field} /></label>
+          <Drop value={String(d)} onChange={(v) => setD(Number(v))} label="Day" options={ORDER.map((x) => ({ value: String(x), label: DAY_LONG[x] }))} style={{ width: '100%' }} />
+          <div style={{ display: 'flex', gap: 8 }}>
+            <label className="t-13 w-6" style={{ flex: 1 }}>Starts<input type="time" value={start} onChange={(e) => setStart(e.target.value)} style={field} /></label>
+            <label className="t-13 w-6" style={{ flex: 1 }}>Ends<input type="time" value={end} onChange={(e) => setEnd(e.target.value)} style={field} /></label>
+          </div>
+          <label className="t-13 w-6">Where (optional)<input value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="e.g. MEE block, room 7" maxLength={120} style={field} /></label>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn btn--amber" disabled={busy || !title.trim()} onClick={() => void add()}>{busy ? 'Adding…' : 'Add'}</button>
+            <button className="btn btn--white" onClick={() => setAdding(false)}>Cancel</button>
+          </div>
+        </Card>
+      ) : (
+        <button className="btn btn--white btn--block" style={{ marginTop: 14 }} onClick={() => { setD(day); setAdding(true); }}>Add to my own timetable</button>
+      )}
+    </>
   );
 }
 

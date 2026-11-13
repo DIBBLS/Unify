@@ -45,7 +45,7 @@ const AUTHOR_TABS: Tab[] = [
 const LECTURER_TABS: Tab[] = [
   { to: '/home', label: 'Home', icon: LayoutDashboard, match: ['/home', '/course', '/learn'] },
   { to: '/timetable', label: 'Timetable', icon: CalendarDays, match: ['/timetable', '/my-classes'] },
-  { to: '/lecturer', label: 'Classroom', icon: ClipboardCheck, match: ['/lecturer', '/attendance', '/browse', '/content-reports', '/messages'] },
+  { to: '/lecturer', label: 'Classroom', icon: ClipboardCheck, match: ['/lecturer', '/attendance', '/browse', '/content-reports', '/messages', '/studio'] },
   { to: '/me', label: 'Me', icon: User, match: ['/me'] },
 ];
 

@@ -12,6 +12,7 @@ import { log } from '../lib/log';
 import { describeError } from '../lib/errors';
 import Loading from '../components/Loading';
 import CourseAttendance from '../components/CourseAttendance';
+import { PracticeRunner } from '../components/PracticeQuestions';
 import { CourseActions, LecturerCards, WeekCard, attendanceByWeek } from '../components/CoursePageParts';
 import type { CourseAttendance as AttendanceData } from '../lib/api';
 
@@ -314,6 +315,7 @@ function Practice({ course, progress, preview }: { course: string; progress: Pro
           <span style={{ fontSize: 12, color: 'var(--text2)' }}>Coming once the Faculty approves them.</span>
         </span>
       </div>
+      {!preview && <PracticeRunner course={course} />}
       {quizzes.length === 0 && <div style={{ ...box, color: 'var(--text2)', textAlign: 'center' }}>Weekly quizzes show here as weeks are published.</div>}
       {(progress || []).length > 0 && (
         <div style={{ ...box, display: 'flex', flexDirection: 'column', gap: 8 }}>

@@ -110,7 +110,10 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
   useEffect(() => {
     if (!submitted || !done || total === 0 || recorded || preview) return;
     setRecorded(true);
-    api.quizAttempt(course, week, score, total).catch(() => {});
+    // Which gradeable questions were asked and missed, for the lecturer's most-missed report.
+    const asked = eoq.questions.map((_, i) => i).filter((i) => gradeable[i]);
+    const wrong = asked.filter((i) => !correct[i]);
+    api.quizAttempt(course, week, score, total, { asked, wrong }).catch(() => {});
   }, [submitted, done, total, recorded, course, week, score, preview]);
 
   const reset = () => {

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import SpotCheck from '../components/SpotCheck';
 import { useSearchParams } from 'react-router-dom';
 import { Copy, Video } from 'lucide-react';
 import { api, type AttendanceRegister, type AttendanceSession, type ScanResult } from '../lib/api';
@@ -269,6 +270,10 @@ export default function ScannerRoute() {
         </button>
       )}
 
+      {/* Spot check (L16): call out random names; anyone not here comes off the list. */}
+      {reg?.session && reg.present.length > 0 && (
+        <SpotCheck sessionId={reg.session.id} present={reg.present} onChanged={() => void api.attendanceRegister(course, reg.session?.id).then(setReg).catch(() => {})} />
+      )}
       {reg && reg.present.length > 0 && (
         <section style={{ marginTop: 22 }}>
           <Label>Present ({reg.present.length})</Label>
