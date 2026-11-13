@@ -11,7 +11,7 @@ import Flash from '../components/Flash';
 import { hasSeenWelcome } from '../lib/welcome';
 import { WELCOME_LINE } from '../lib/naija';
 import { BoxBoySplash } from '../components/BoxBoySplash';
-import { supabaseBrowser, saveRememberSession, restoreRememberedSession, touchActivity, isSessionExpired, expireSession } from '../lib/supabase';
+import { supabaseBrowser, saveRememberSession, restoreRememberedSession, touchActivity, isSessionExpired, expireSession, setRememberIntent } from '../lib/supabase';
 import { api, clearMeCache } from '../lib/api';
 import { log } from '../lib/log';
 import { describeError } from '../lib/errors';
@@ -296,6 +296,8 @@ export default function AuthRoute() {
     setError('');
     setSuccess('');
     setGoogleLoading(true);
+    // Remember me survives the trip to Google (saved when the session lands back).
+    setRememberIntent(remember);
     try {
       const { error: err } = await sb.auth.signInWithOAuth({
         provider: 'google',

@@ -77,7 +77,7 @@ export default function LecturerDashboard({ profile, firstName, catalog, hasPhot
     .sort((a, b) => toMin(timesOf(a).start) - toMin(timesOf(b).start));
   const live = today.find((s) => s.change?.status !== 'cancelled' && nowMin >= toMin(timesOf(s).start) - 15 && nowMin < toMin(timesOf(s).end));
   const next = live || today.find((s) => nowMin < toMin(timesOf(s).start));
-  const later = today.filter((s) => s !== next && nowMin < toMin(timesOf(s).end));
+  const later = today.filter((s) => s !== next && s.change?.status !== 'cancelled' && nowMin < toMin(timesOf(s).end));
 
   const plus = (hhmm: string, mins: number) => {
     const m = Math.min(23 * 60 + 59, toMin(hhmm) + mins);
