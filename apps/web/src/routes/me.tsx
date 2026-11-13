@@ -549,6 +549,7 @@ export default function MeRoute() {
           <span aria-hidden="true" style={{ color: 'var(--text3)' }}>›</span>
         </Link>
       )}
+      {profile?.role === 'lecturer' && <LecturerRows />}
       <LiveWireRow />
       <Link
         to="/settings"
@@ -774,5 +775,36 @@ function LiveWireRow() {
       </span>
       <span aria-hidden="true" style={{ color: 'var(--text3)' }}>›</span>
     </Link>
+  );
+}
+
+// Lecturer (design L17): my courses, any waiting for a class rep, and messages.
+function LecturerRows() {
+  const [n, setN] = useState<{ courses: number; waiting: string[]; unread: number } | null>(null);
+  useEffect(() => {
+    void Promise.all([
+      api.lecturerClaims().catch(() => ({ courses: [] as { course: string; waiting: boolean }[] })),
+      api.courseChatThreads().catch(() => ({ threads: [] as { unread: number }[] })),
+    ]).then(([c, t]) => setN({ courses: c.courses.length, waiting: c.courses.filter((x) => x.waiting).map((x) => x.course), unread: t.threads.reduce((s, x) => s + x.unread, 0) }));
+  }, []);
+  if (!n) return null;
+  const row: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 8, color: 'var(--text)', textDecoration: 'none' };
+  return (
+    <>
+      <Link to="/home" style={row}>
+        <span><span style={{ display: 'block', fontSize: 13, fontWeight: 700 }}>My courses</span><span style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>{n.courses} course{n.courses === 1 ? '' : 's'} · add more from Home</span></span>
+        <span aria-hidden="true" style={{ color: 'var(--text3)' }}>›</span>
+      </Link>
+      {n.waiting.length > 0 && (
+        <Link to="/home" style={row}>
+          <span><span style={{ display: 'block', fontSize: 13, fontWeight: 700 }}>Waiting for Head of Class</span><span style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>{n.waiting.join(', ')} · not confirmed yet</span></span>
+          <span className="pill pill--amber">{n.waiting.length}</span>
+        </Link>
+      )}
+      <Link to="/messages" style={row}>
+        <span><span style={{ display: 'block', fontSize: 13, fontWeight: 700 }}>Messages</span><span style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>With the contributors writing your courses</span></span>
+        {n.unread > 0 ? <span className="pill pill--amber">{n.unread}</span> : <span aria-hidden="true" style={{ color: 'var(--text3)' }}>›</span>}
+      </Link>
+    </>
   );
 }
