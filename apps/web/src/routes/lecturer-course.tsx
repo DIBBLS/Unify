@@ -41,7 +41,8 @@ export default function LecturerCourseRoute() {
   const t = params.get('tab') as Tab | null;
   const [tab, setTab] = useState<Tab>(t && TABS.includes(t) ? t : 'weeks');
   const [status, setStatus] = useState<Status | null>(null);
-  const loadStatus = () => api.lecturerWeekStatus(course).then(setStatus).catch(() => setStatus(null));
+  const [statusErr, setStatusErr] = useState('');
+  const loadStatus = () => { setStatusErr(''); return api.lecturerWeekStatus(course).then(setStatus).catch((e) => setStatusErr(describeError(e, 'load the weeks'))); };
   useEffect(() => { void loadStatus(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [course]);
   const shell = { maxWidth: 'min(var(--shell, 480px), 760px)', margin: '0 auto', padding: '20px 16px 96px' } as const;
   const sub = [status?.levels[0]?.toUpperCase(), course, status?.contributors.length ? `with ${status.contributors.join(', ')} (contributor${status.contributors.length === 1 ? '' : 's'})` : ''].filter(Boolean).join(' · ');
@@ -57,7 +58,9 @@ export default function LecturerCourseRoute() {
         ))}
       </div>
       <div style={{ marginTop: 14 }}>
-        {tab === 'weeks' && <Weeks course={course} status={status} reload={loadStatus} onPost={() => setTab('post')} />}
+        {tab === 'weeks' && (statusErr && !status
+          ? <Card style={{ gap: 8 }}><div className="t-13 muted">{statusErr}</div><button className="btn btn--white btn--sm" style={{ alignSelf: 'flex-start' }} onClick={() => void loadStatus()}>Try again</button></Card>
+          : <Weeks course={course} status={status} reload={() => void loadStatus()} onPost={() => setTab('post')} />)}
         {tab === 'report' && <Report course={course} />}
         {tab === 'attendance' && <Attendance course={course} />}
         {tab === 'post' && <Post course={course} />}
@@ -146,7 +149,7 @@ function Report({ course }: { course: string }) {
   const [missed, setMissed] = useState<Awaited<ReturnType<typeof api.lecturerMissed>> | null>(null);
   const [adding, setAdding] = useState(false);
   const shownWeek = pickWeek ?? ((data && ([...data.weeks].reverse().find((w) => w.studied > 0) || data.weeks[data.weeks.length - 1])?.week) || null);
-  useEffect(() => { if (shownWeek) api.lecturerMissed(course, shownWeek).then(setMissed).catch(() => setMissed(null)); }, [course, shownWeek]);
+  useEffect(() => { setMissed(null); if (shownWeek) api.lecturerMissed(course, shownWeek).then(setMissed).catch(() => setMissed(null)); }, [course, shownWeek]);
   if (err) return <Card><div className="t-13 muted">{err}</div></Card>;
   if (!data) return <SectionSkeleton rows={3} />;
   const latest = [...data.weeks].reverse().find((w) => w.studied > 0) || data.weeks[data.weeks.length - 1];
@@ -192,12 +195,15 @@ function Report({ course }: { course: string }) {
           ) : (
             <div className="t-13 muted" style={{ margin: '6px 0 12px' }}>{missed && missed.attempts ? 'No question stands out yet.' : "Shows once students take this week's quiz (attempts from today on)."}</div>
           )}
-          {adding ? <PracticeEditor course={course} onClose={() => setAdding(false)} /> : (
-            <button className="btn btn--outline btn--block" style={{ marginBottom: 14 }} onClick={() => setAdding(true)}>+ Add practice questions</button>
-          )}
           <Label>Every week</Label>
         </>
       )}
+      {/* Practice questions can be added before any week is published too. */}
+      <div style={{ margin: '4px 0 14px' }}>
+        {adding ? <PracticeEditor course={course} onClose={() => setAdding(false)} /> : (
+          <button className="btn btn--outline btn--block" onClick={() => setAdding(true)}>+ Add practice questions</button>
+        )}
+      </div>
       <div className="t-13 muted" style={{ marginBottom: 8, marginTop: 6 }}>{data.students} student{data.students === 1 ? '' : 's'} taking {course}. Counts only, never names.</div>
       {data.weeks.length === 0 ? (
         <Card><div className="t-13 muted">Nothing to report until weeks are published.</div></Card>

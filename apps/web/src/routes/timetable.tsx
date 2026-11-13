@@ -139,7 +139,7 @@ export default function TimetableRoute() {
         <BoxBoy pose={spotlight ? 'teaching' : 'readingStanding'} width={72} style={{ flexShrink: 0 }} />
       </div>
 
-      {mine && <OwnTimetable day={day} setDay={setDay} view={view} today={today} nowMin={nowMin} />}
+      {mine && <OwnTimetable day={day} setDay={setDay} view={view} today={today} nowMin={nowMin} openDay={(d) => { setDay(d); pickView('day'); }} />}
       {!mine && <>
       {!loading && spotlight && <TodayCard slot={spotlight} state={state(spotlight)} nowMin={nowMin} onOpen={() => open(spotlight)} onJoin={() => join(spotlight)} />}
 
@@ -214,7 +214,7 @@ export default function TimetableRoute() {
 
 // My own timetable (design L09/L17): a lecturer's own entries, office hours and
 // other duties. Only they see them. Same day and week grids as the classes.
-function OwnTimetable({ day, setDay, view, today, nowMin }: { day: number; setDay: (d: number) => void; view: 'day' | 'week'; today: number; nowMin: number }) {
+function OwnTimetable({ day, setDay, view, today, nowMin, openDay }: { day: number; setDay: (d: number) => void; view: 'day' | 'week'; today: number; nowMin: number; openDay: (d: number) => void }) {
   const [own, setOwn] = useState<OwnSlot[] | null>(null);
   const [adding, setAdding] = useState(false);
   const [title, setTitle] = useState('');
@@ -255,7 +255,7 @@ function OwnTimetable({ day, setDay, view, today, nowMin }: { day: number; setDa
       )}
       <div style={{ marginTop: 12 }}>
         {own === null ? <TimetableSkeleton />
-          : view === 'week' && asSlots.length ? <WeekGrid slots={asSlots} days={ORDER.filter((x) => (x >= 1 && x <= 5) || count[x])} today={today} nowMin={nowMin} labels={DAY_SHORT} onPickDay={setDay} />
+          : view === 'week' && asSlots.length ? <WeekGrid slots={asSlots} days={ORDER.filter((x) => (x >= 1 && x <= 5) || count[x])} today={today} nowMin={nowMin} labels={DAY_SHORT} onPickDay={openDay} />
           : daySlots.length ? <DayGrid slots={daySlots} stateOf={() => 'later'} nowMin={day === today ? nowMin : null} isHoc onOpen={() => {}} onRemove={removeOwn} onJoin={() => {}} />
           : <EmptyDay label={DAY_LONG[day]} nowMin={day === today ? nowMin : null} />}
       </div>

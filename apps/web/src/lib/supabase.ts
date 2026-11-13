@@ -43,6 +43,15 @@ export function supabaseBrowser(): SupabaseClient | null {
     cached = createClient(url, key, {
       auth: { storage: window.sessionStorage, storageKey: `unify.tab.${tabId}` },
     });
+    // Remember me stays valid: Supabase swaps the refresh token roughly every
+    // hour and retires the old one, so the remembered copy is re-saved on every
+    // refresh (same person only). A Google sign-in that asked to be remembered
+    // is saved when it lands back here.
+    cached.auth.onAuthStateChange((event, session) => {
+      if (!session) return;
+      if (event === 'SIGNED_IN' && takeRememberIntent()) { saveRememberSession(session); return; }
+      if ((event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') && rememberedUserId() === session.user.id) saveRememberSession(session);
+    });
   }
   return cached;
 }
@@ -60,10 +69,35 @@ export function saveRememberSession(session: Session): void {
   try {
     localStorage.setItem(
       REMEMBER_KEY,
-      JSON.stringify({ access_token: session.access_token, refresh_token: session.refresh_token })
+      JSON.stringify({ access_token: session.access_token, refresh_token: session.refresh_token, user_id: session.user?.id || '' })
     );
   } catch {
     // ignore (e.g. private mode) — session still works for this tab
+  }
+}
+
+// Who the remembered sign-in belongs to ('' when none or an older copy).
+function rememberedUserId(): string {
+  try {
+    const p = JSON.parse(localStorage.getItem(REMEMBER_KEY) || 'null') as { user_id?: unknown } | null;
+    return typeof p?.user_id === 'string' ? p.user_id : '';
+  } catch {
+    return '';
+  }
+}
+
+// "Remember me" ticked before a Google sign-in: survives the redirect.
+const REMEMBER_INTENT = 'unify.remember.intent';
+export function setRememberIntent(on: boolean): void {
+  try { if (on) localStorage.setItem(REMEMBER_INTENT, String(Date.now())); else localStorage.removeItem(REMEMBER_INTENT); } catch { /* fine */ }
+}
+function takeRememberIntent(): boolean {
+  try {
+    const at = Number(localStorage.getItem(REMEMBER_INTENT) || 0);
+    localStorage.removeItem(REMEMBER_INTENT);
+    return at > 0 && Date.now() - at < 15 * 60 * 1000; // a fresh Google round trip only
+  } catch {
+    return false;
   }
 }
 
