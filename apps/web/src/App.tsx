@@ -29,6 +29,7 @@ const KeywordsRoute = lazyRoute(() => import('./routes/learn/keywords'));
 const CrosswordRoute = lazyRoute(() => import('./routes/learn/crossword'));
 const GamesRoute = lazyRoute(() => import('./routes/games'));
 const LiveWireRoute = lazyRoute(() => import('./routes/livewire'));
+const ReportBugRoute = lazyRoute(() => import('./routes/report-bug'));
 const ClassContributorsRoute = lazyRoute(() => import('./routes/class-contributors'));
 const HocWelcomeRoute = lazyRoute(() => import('./routes/hoc-welcome'));
 const HocRequestsRoute = lazyRoute(() => import('./routes/hoc-requests'));
@@ -386,6 +387,7 @@ export default function App() {
           <Route path="/learn/:courseCode/week/:week/crossword" element={<RequireAuth><CrosswordRoute /></RequireAuth>} />
           <Route path={ROUTES.games} element={<RequireAuth><GamesRoute /></RequireAuth>} />
           <Route path={ROUTES.liveWire} element={<RequireAuth><LiveWireRoute /></RequireAuth>} />
+          <Route path={ROUTES.reportBug} element={<RequireAuth><ReportBugRoute /></RequireAuth>} />
           <Route path="/class/contributors" element={<RequireAuth><ClassContributorsRoute /></RequireAuth>} />
           <Route path="/hoc/welcome" element={<RequireAuth><HocWelcomeRoute /></RequireAuth>} />
           <Route path="/hoc/requests" element={<RequireAuth><HocRequestsRoute /></RequireAuth>} />

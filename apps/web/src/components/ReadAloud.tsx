@@ -316,7 +316,7 @@ export function ReadAloud({ topic }: { topic: Topic }) {
           onClick={playing ? stop : play}
           aria-label={playing ? 'Stop reading aloud' : 'Listen to this topic'}
           className={playing ? 'listening' : undefined}
-          style={{ display: 'flex', gap: 6, alignItems: 'center', background: playing ? 'var(--u-good)' : 'var(--surface)', color: playing ? '#fff' : 'var(--u-good)', border: `1px solid ${playing ? 'var(--u-good)' : 'var(--u-good-tint)'}`, borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 800 }}
+          style={{ display: 'flex', gap: 6, alignItems: 'center', background: playing ? 'var(--u-good)' : 'var(--surface)', color: playing ? 'var(--u-on-good)' : 'var(--u-good)', border: `1px solid ${playing ? 'var(--u-good)' : 'var(--u-good-tint)'}`, borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 800 }}
         >
           {playing ? <Square size={14} /> : <Volume2 size={14} />}
           {playing ? 'Stop' : 'Listen'}

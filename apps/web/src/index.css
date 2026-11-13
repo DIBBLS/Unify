@@ -52,7 +52,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-si
 /* SEGMENTED CHAPTER BAR — shared by both designs */
 .segbar{display:flex;gap:6px;margin:0 0 16px}
 .segbar button{flex:1;height:34px;border-radius:9999px;border:1px solid var(--border);background:var(--surface);color:var(--text3);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:4px;min-width:0;padding:0 6px;overflow:hidden;white-space:nowrap}
-.segbar button.done{background:var(--green-deep);border-color:var(--green-deep);color:#fff}
+.segbar button.done{background:var(--green-deep);border-color:var(--green-deep);color:var(--u-on-good)}
 .segbar button.current{background:var(--text);border-color:var(--text);color:var(--bg)}
 .segbar button .xp{opacity:.75;font-weight:700}
 
@@ -120,7 +120,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-si
 .mini-check-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green-deep)}
 .mini-check-sub{font-size:11px;color:var(--text3);margin-left:auto}
 .mc-q{font-size:13px;font-weight:500;color:var(--text);margin-bottom:8px;max-width:66ch;line-height:1.6}
-.mc-reveal-btn{font-size:12px;font-weight:800;padding:10px 22px;border-radius:12px;border:none;border-bottom:3px solid #14532d;background:var(--green-deep);color:#fff;cursor:pointer}
+.mc-reveal-btn{font-size:12px;font-weight:800;padding:10px 22px;border-radius:12px;border:none;border-bottom:3px solid #14532d;background:var(--green-deep);color:var(--u-on-good);cursor:pointer}
 .mc-reveal-btn:active{transform:translateY(2px);border-bottom-width:0}
 .mc-answer{display:none;margin-top:8px;padding:10px 14px;background:var(--surface);border-left:2px solid var(--green);border-radius:0 6px 6px 0;font-size:12px;color:var(--text2);line-height:1.7;max-width:66ch}
 .mc-answer.show{display:block}
@@ -136,7 +136,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-si
 .mc-fitb-input:focus{border-color:var(--green-deep);box-shadow:0 0 0 3px rgba(16,185,129,.18)}
 [data-design="story"] .mc-fitb-input:focus{box-shadow:0 0 0 3px rgba(74,222,128,.18)}
 .mc-fitb-input:disabled{opacity:.75}
-.mc-fitb-btn{font-size:12px;font-weight:700;padding:10px 20px;border-radius:10px;border:none;border-bottom:3px solid #14532d;background:var(--green-deep);color:#fff;cursor:pointer}
+.mc-fitb-btn{font-size:12px;font-weight:700;padding:10px 20px;border-radius:10px;border:none;border-bottom:3px solid #14532d;background:var(--green-deep);color:var(--u-on-good);cursor:pointer}
 .mc-fitb-btn:active{transform:translateY(2px);border-bottom-width:0}
 
 /* RECALL DECK — shared */
@@ -315,7 +315,7 @@ sticky icon sidebar; phones get a horizontal pill rail on top. */
 .admin-side{width:210px;flex-shrink:0;position:sticky;top:70px;display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:10px}
 .admin-navitem{display:flex;gap:10px;align-items:center;width:100%;padding:10px 12px;border-radius:10px;border:1px solid transparent;background:none;color:var(--text2);font-weight:700;font-size:13px;text-decoration:none;cursor:pointer;white-space:nowrap}
 .admin-navitem.active{background:var(--green-bg);border-color:var(--border);color:var(--text)}
-.admin-badge{font-size:11px;font-weight:800;background:#10b981;color:#fff;border-radius:9999px;padding:2px 10px}
+.admin-badge{font-size:11px;font-weight:800;background:#10b981;color:#052e1c;border-radius:9999px;padding:2px 10px}
 .admin-view{flex:1;min-width:0}
 .admin-group{display:flex;flex-direction:column;gap:4px}
 .admin-grouplabel{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);padding:8px 12px 2px}

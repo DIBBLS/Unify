@@ -4,9 +4,11 @@ import { ChevronRight } from 'lucide-react';
 import { api, type CourseAttendance as Data } from '../lib/api';
 import { ROUTES } from '../lib/routes';
 import Drop from './Drop';
+import { useClassListReady } from '../lib/classListReady';
 
 // Attendance on the course page (review p.5-6, p.10):
-// - students: "Came to 3 of 4 classes held" and each week 1-12 at a glance;
+// - students: "Came to 3 of 4 classes held", each week 1-12 at a glance, and
+//   My pass to show in class (once their class list is up);
 // - the class rep / lecturer: Take attendance for this week's class on the
 //   timetable (or an Extra class), and every register so far.
 const DAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -33,6 +35,7 @@ const box: React.CSSProperties = { marginTop: 8, background: 'var(--surface)', b
 
 function Mine({ data, totalWeeks, currentWeek, canTake }: { data: Data; totalWeeks: number; currentWeek: number; canTake: boolean }) {
   const byWeek = new Map(data.mine.weeks.map((w) => [w.week, w]));
+  const listReady = useClassListReady();
   // A class rep who hasn't been marked anywhere doesn't need their own row.
   if (canTake && data.mine.held > 0 && data.mine.attended === 0) return null;
   const other = byWeek.get(0);
@@ -68,6 +71,10 @@ function Mine({ data, totalWeeks, currentWeek, canTake }: { data: Data; totalWee
       </div>
       {other && other.held > 0 && (
         <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 8 }}>Plus {other.attended} of {other.held} classes not tied to a week.</div>
+      )}
+      {/* The pass to show in class: only once your class list is up (a scan checks you against it). */}
+      {listReady && (
+        <Link to={ROUTES.attendancePass} className="btn btn--amber btn--block" style={{ marginTop: 12 }}>My pass</Link>
       )}
     </div>
   );

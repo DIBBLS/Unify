@@ -1129,7 +1129,7 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
                         aria-label={`Mark ${letter} as the correct answer`}
                         aria-pressed={right}
                         onClick={() => apply(q.options as string[], letter)}
-                        style={{ width: 36, height: 36, borderRadius: 18, border: 'none', flexShrink: 0, fontWeight: 800, fontSize: 13, background: right ? 'var(--u-good)' : 'var(--surface2)', color: right ? '#fff' : 'var(--text2)' }}
+                        style={{ width: 36, height: 36, borderRadius: 18, border: 'none', flexShrink: 0, fontWeight: 800, fontSize: 13, background: right ? 'var(--u-good)' : 'var(--surface2)', color: right ? 'var(--u-on-good)' : 'var(--text2)' }}
                       >
                         {right ? <Check size={16} /> : letter}
                       </button>

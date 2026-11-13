@@ -67,6 +67,15 @@ export default function ErrorState({
         </button>
         {action}
       </div>
+      {/* Not a connection problem? Let them tell us, with this screen and the error filled in. */}
+      {!showOffline && (
+        <a
+          href={`/report-bug?from=${encodeURIComponent(window.location.pathname)}&what=${encodeURIComponent(`${title}: ${message}`)}`}
+          style={{ display: 'inline-block', marginTop: 16, fontSize: 13, fontWeight: 700, color: 'var(--u-good)' }}
+        >
+          Keeps happening? Report this problem
+        </a>
+      )}
     </div>
   );
 }

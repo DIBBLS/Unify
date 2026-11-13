@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { errorToast } from '../lib/errors';
 import { ROUTES } from '../lib/routes';
+import { useClassListReady } from '../lib/classListReady';
 import BackButton from '../components/BackButton';
 import ErrorState from '../components/ErrorState';
 import { BoxBoy } from '../components/redesign/brand';
@@ -13,6 +14,7 @@ type Data = Awaited<ReturnType<typeof api.attendanceMine>>;
 
 // My attendance: attended / sessions held for each enrolled course.
 export default function MyAttendanceRoute() {
+  const listReady = useClassListReady();
   const [data, setData] = useState<Data | null>(null);
   const [failed, setFailed] = useState(false);
 
@@ -30,7 +32,11 @@ export default function MyAttendanceRoute() {
       <BackButton to={ROUTES.timetable} />
       <Label>Attendance</Label>
       <Display size={30}>My record</Display>
-      <Link to={ROUTES.attendancePass} className="btn btn--amber btn--block" style={{ marginTop: 16 }}>My pass</Link>
+      {listReady ? (
+        <Link to={ROUTES.attendancePass} className="btn btn--amber btn--block" style={{ marginTop: 16 }}>My pass</Link>
+      ) : (
+        <div className="t-13 muted" style={{ marginTop: 12 }}>Your pass appears here once your class rep uploads the class list.</div>
+      )}
 
       {!data ? (
         <SectionSkeleton rows={3} />

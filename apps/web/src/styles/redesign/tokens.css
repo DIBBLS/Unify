@@ -41,6 +41,7 @@
   --u-good: #15803d;           /* green text on light */
   --u-good-2: #16a34a;
   --u-good-tint: #d3f9e1;      /* success / online banners */
+  --u-on-good: #ffffff;        /* text on --u-good (dark green here) */
   --u-good-ink: #1f3a2b;       /* body text on good tint */
   --u-warn-tint: #fef3c7;
   --u-warn-ink: #b45309;
