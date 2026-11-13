@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ChevronLeft } from 'lucide-react';
 import { supabaseBrowser } from '../lib/supabase';
+import { useSchool } from '../lib/school';
 import { api, type University } from '../lib/api';
 import Loading from '../components/Loading';
 import { BoxBoy } from '../components/redesign/brand';
@@ -37,20 +38,7 @@ const COMING_UNIS = [
   { name: 'University of Port Harcourt', short: 'UNIPORT' },
   { name: 'Babcock University', short: 'BU' },
 ];
-// Inside LASU: Engineering is open; Environmental Sciences and Agriculture are next (same campus).
-const COMING_FACULTIES = [
-  { name: 'Faculty of Environmental Sciences', soon: true },
-  { name: 'School of Agriculture', soon: true },
-  { name: 'Faculty of Arts', soon: false },
-  { name: 'Faculty of Communication and Media Studies', soon: false },
-  { name: 'Faculty of Education', soon: false },
-  { name: 'Faculty of Law', soon: false },
-  { name: 'Faculty of Management Sciences', soon: false },
-  { name: 'Faculty of Science', soon: false },
-  { name: 'Faculty of Social Sciences', soon: false },
-  { name: 'Faculty of Transport', soon: false },
-  { name: 'College of Medicine', soon: false },
-];
+// Faculties and departments come from Admin › Faculties & departments (lib/school).
 
 // A greyed-out choice that can't be picked yet.
 function Soon({ name, sub, label }: { name: string; sub?: string; label: string }) {
@@ -81,6 +69,7 @@ export default function OnboardingRoute() {
   const [firstName, setFirstName] = useState('');
   const [university, setUniversity] = useState<Uni | null>(null);
   const [faculty, setFaculty] = useState<string | null>(null);
+  const school = useSchool();
   const [department, setDepartment] = useState<string | null>(null);
   const [level, setLevel] = useState<string | null>(null);
   const [gradTarget, setGradTarget] = useState<number | null>(null);
@@ -150,15 +139,11 @@ export default function OnboardingRoute() {
     })();
   }, [navigate]);
 
-  const faculties = [{ name: 'Faculty of Engineering', sub: '6 departments' }];
-  const departments = [
-    { name: 'Electronic & Computer Engineering', sub: 'ECE' },
-    { name: 'Mechanical Engineering', sub: 'MEE' },
-    { name: 'Industrial & Petroleum Engineering', sub: 'IPE' },
-    { name: 'Chemical & Polymer Engineering', sub: 'CPE' },
-    { name: 'Civil Engineering', sub: 'CVE' },
-    { name: 'Aerospace Engineering', sub: 'ASE' },
-  ];
+  // Open faculties can be picked; 'soon' and 'later' ones show greyed out.
+  const faculties = school.openFaculties.map((f) => ({ name: f.name, sub: `${f.departments.length} department${f.departments.length === 1 ? '' : 's'}` }));
+  const departments = (school.openFaculties.find((f) => f.name === faculty) || school.openFaculties[0])?.departments.map((d) => ({ name: d.name, sub: d.code })) || [];
+  const COMING_FACULTIES = school.faculties.filter((f) => f.status !== 'open').map((f) => ({ name: f.name, soon: f.status === 'soon' }));
+
   const levels = ['100 Level', '200 Level', '300 Level', '400 Level', '500 Level'];
 
   const save = async (skipTarget = false, overrides: Record<string, unknown> = {}) => {

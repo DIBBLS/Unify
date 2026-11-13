@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSchool } from '../../lib/school';
 import { ArrowDown, ArrowUp, Plus, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api, type SchoolGuide } from '../../lib/api';
@@ -14,10 +15,11 @@ const field: React.CSSProperties = { display: 'block', width: '100%', marginTop:
 const blank: Step = { title: '', body: '', where: '' };
 
 // Admin → Class reps: open any class's Contributors view (S56).
-const DEPARTMENTS = ['Electronic & Computer Engineering', 'Mechanical Engineering', 'Industrial & Petroleum Engineering', 'Chemical & Polymer Engineering', 'Civil Engineering', 'Aerospace Engineering'];
 const LEVELS = ['100 Level', '200 Level', '300 Level', '400 Level', '500 Level'];
 export function ClassContributorsPicker() {
-  const [department, setDepartment] = useState(DEPARTMENTS[0]);
+  const school = useSchool();
+  const DEPARTMENTS = school.departments.map((d) => d.name);
+  const [department, setDepartment] = useState('Electronic & Computer Engineering');
   const [level, setLevel] = useState(LEVELS[1]);
   return (
     <div style={{ ...card, marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>

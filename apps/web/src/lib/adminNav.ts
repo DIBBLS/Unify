@@ -13,6 +13,7 @@ export const GROUPS = [
     { id: 'courses', title: 'Courses per level', icon: LibraryBig },
     { id: 'content', title: 'All content', icon: BookOpen },
     { id: 'unis', title: 'Universities', icon: Building2 },
+    { id: 'structure', title: 'Faculties & departments', icon: Building2 },
     { id: 'session', title: 'Academic session', icon: CalendarDays },
     { id: 'guide', title: 'Student guide', icon: MapIcon },
   ] },
