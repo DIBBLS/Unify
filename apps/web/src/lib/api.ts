@@ -270,6 +270,8 @@ export function clearMeCache(): void {
 
 
 // ---- Head of Class + attendance ----
+export type OwnSlot = { id: string; day: number; start: string; end: string; title: string; venue: string };
+export type PracticeQuestion = { id: string; week: number | null; question: string; options: string[]; correctIndex: number; explanation: string; mine: boolean };
 export type PostKind = 'announcement' | 'tip' | 'reminder' | 'test' | 'assignment' | 'exam' | 'notice';
 export type BugReport = { id: string; what: string; doing: string; page: string; appVersion: string; device: string; status: 'open' | 'resolved'; resolvedAt: string | null; createdAt: string; by: { name: string; role: string; email: string } };
 export type HocPost = { id: string; type: 'announcement' | 'tip' | 'question'; title: string | null; content: string; createdAt: string; author: string; mine: boolean };
@@ -453,8 +455,9 @@ export const api = {
       `/v1/courses/${encodeURIComponent(course.trim())}/weeks`
     );
   },
-  quizAttempt: (course: string, week: number, score: number, total: number) => {
-    const body = JSON.stringify({ course, week, score, total });
+  // asked / wrong: positions in the week's quiz, for the lecturer's most-missed report.
+  quizAttempt: (course: string, week: number, score: number, total: number, answers?: { asked: number[]; wrong: number[] }) => {
+    const body = JSON.stringify({ course, week, score, total, ...(answers || {}) });
     // Quiz results bank locally offline and flush on reconnect.
     if (queueWrite('/v1/quiz/attempt', body)) return Promise.resolve({ ok: true });
     return apiFetch<{ ok: boolean }>('/v1/quiz/attempt', {
@@ -673,6 +676,15 @@ export const api = {
     courses?: { code: string; status: CgpaCourse['status']; units: number; grade?: number | null }[];
   }) => apiFetch<{ ok: boolean }>('/v1/cgpa', { method: 'PUT', body: JSON.stringify(payload) }),
   // Head of Class
+  // Design extras: most missed (L11), spot check (L16), my own timetable (L09/L17), practice questions (L11).
+  lecturerMissed: (course: string, week: number) => apiFetch<{ week: number; attempts: number; questions: { index: number; question: string; asked: number; wrongPct: number }[] }>(`/v1/lecturer/missed?course=${encodeURIComponent(course)}&week=${week}`),
+  attendanceRemove: (sessionId: string, studentId: string) => apiFetch<{ ok: boolean }>(`/v1/attendance/sessions/${sessionId}/records/${studentId}`, { method: 'DELETE' }, 0),
+  ownSlots: () => apiFetch<{ slots: OwnSlot[] }>('/v1/lecturer/own-slots'),
+  ownSlotAdd: (body: { day: number; start: string; end: string; title: string; venue?: string }) => apiFetch<{ ok: boolean }>('/v1/lecturer/own-slots', { method: 'POST', body: JSON.stringify(body) }, 0),
+  ownSlotDelete: (id: string) => apiFetch<{ ok: boolean }>(`/v1/lecturer/own-slots/${id}`, { method: 'DELETE' }, 0),
+  practice: (course: string) => apiFetch<{ questions: PracticeQuestion[] }>(`/v1/practice?course=${encodeURIComponent(course)}`),
+  practiceAdd: (body: { course: string; week?: number; question: string; options: string[]; correctIndex: number; explanation?: string }) => apiFetch<{ ok: boolean }>('/v1/practice', { method: 'POST', body: JSON.stringify(body) }, 0),
+  practiceDelete: (id: string) => apiFetch<{ ok: boolean }>(`/v1/practice/${id}`, { method: 'DELETE' }, 0),
   // Lecturer <-> contributor messages per course.
   courseChatThreads: () => apiFetch<{ threads: { course: string; last: { body: string; at: string; mine: boolean } | null; unread: number }[] }>('/v1/course-chat/threads'),
   courseChat: (course: string) => apiFetch<{ course: string; team: { id: string; name: string; role: string; avatar: string }[]; messages: { id: string; body: string; at: string; mine: boolean; author: string; role: string }[] }>(`/v1/course-chat?course=${encodeURIComponent(course)}`),
