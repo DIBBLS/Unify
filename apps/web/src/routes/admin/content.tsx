@@ -19,6 +19,8 @@ export default function AdminContentPanel() {
   const setError = (m: string) => { setErrorState(m); if (m) toastError(m); };
   const [q, setQ] = useState('');
   const [open, setOpen] = useState<string | null>(null);
+  // Grouped like Courses per level: one level at a time, then by semester.
+  const [levelTab, setLevelTab] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -55,33 +57,19 @@ export default function AdminContentPanel() {
       </div>
     );
 
-  const totalWeeks = courses.reduce((n, c) => n + c.weekCount, 0);
-  const totalTopics = courses.reduce((n, c) => n + c.topicCount, 0);
-
-  return (
-    <div>
-      <h2 style={{ fontWeight: 800, fontSize: 20, display: 'flex', gap: 8, alignItems: 'center', margin: 0 }}>
-        <Layers size={20} color="var(--u-good)" /> All content
-      </h2>
-      <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>
-        {courses.length} courses · {totalWeeks} weeks · {totalTopics} topics with notes
-      </div>
-      {error && (
-        <div style={{ marginTop: 12, padding: 12, background: 'var(--u-bad-tint)', border: '1px solid #fecaca', borderRadius: 12, fontSize: 13, color: 'var(--u-red)' }}>
-          {error}
-        </div>
-      )}
-      <div style={{ position: 'relative', marginTop: 12 }}>
-        <Search size={16} color="#999" style={{ position: 'absolute', left: 12, top: 12 }} />
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search code or title…"
-          style={{ width: '100%', padding: '10px 12px 10px 36px', border: '1px solid var(--border)', borderRadius: 12, fontSize: 14 }}
-        />
-      </div>
-      <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {filtered.map((c) => {
+  const LEVELS = ['100 Level', '200 Level', '300 Level', '400 Level', '500 Level'];
+  const levelKey = (c: AdminContentCourse) => {
+    const l = (c.level || '').trim().replace(/^(\d{3})\s*L(evel)?$/i, '$1 Level');
+    return LEVELS.includes(l) ? l : '';
+  };
+  const levelTabs = [...LEVELS, ''].filter((l) => l || courses.some((c) => !levelKey(c)));
+  const shownLevel = levelTab ?? (levelTabs.find((l) => courses.some((c) => levelKey(c) === l)) ?? LEVELS[0]);
+  const bySemester = (list: AdminContentCourse[]) => [
+    ['First Semester', list.filter((c) => c.semester === 'First Semester')],
+    ['Second Semester', list.filter((c) => c.semester === 'Second Semester')],
+    ['No semester set', list.filter((c) => c.semester !== 'First Semester' && c.semester !== 'Second Semester')],
+  ] as const;
+  const renderCourse = (c: AdminContentCourse) => {
           const isOpen = open === c.code;
           return (
             <div key={c.code} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
@@ -141,7 +129,58 @@ export default function AdminContentPanel() {
               )}
             </div>
           );
-        })}
+  };
+  const totalWeeks = courses.reduce((n, c) => n + c.weekCount, 0);
+  const totalTopics = courses.reduce((n, c) => n + c.topicCount, 0);
+
+  return (
+    <div>
+      <h2 style={{ fontWeight: 800, fontSize: 20, display: 'flex', gap: 8, alignItems: 'center', margin: 0 }}>
+        <Layers size={20} color="var(--u-good)" /> All content
+      </h2>
+      <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>
+        {courses.length} courses · {totalWeeks} weeks · {totalTopics} topics with notes
+      </div>
+      {error && (
+        <div style={{ marginTop: 12, padding: 12, background: 'var(--u-bad-tint)', border: '1px solid #fecaca', borderRadius: 12, fontSize: 13, color: 'var(--u-red)' }}>
+          {error}
+        </div>
+      )}
+      <div style={{ position: 'relative', marginTop: 12 }}>
+        <Search size={16} color="#999" style={{ position: 'absolute', left: 12, top: 12 }} />
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search every level: code or title…"
+          style={{ width: '100%', padding: '10px 12px 10px 36px', border: '1px solid var(--border)', borderRadius: 12, fontSize: 14 }}
+        />
+      </div>
+      {!q.trim() && (
+        <div role="tablist" aria-label="Levels" style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 12 }}>
+          {levelTabs.map((l) => {
+            const list = courses.filter((c) => levelKey(c) === l);
+            return (
+              <button key={l || 'none'} role="tab" aria-selected={shownLevel === l} className={`chip chip--sm${shownLevel === l ? ' chip--on' : ''}`} onClick={() => { setLevelTab(l); setOpen(null); }}>
+                {l ? l.replace(' Level', 'L') : 'No level'} · {list.length}
+              </button>
+            );
+          })}
+        </div>
+      )}
+      <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {q.trim()
+          ? filtered.map(renderCourse)
+          : bySemester(courses.filter((c) => levelKey(c) === shownLevel)).map(([sem, list]) => (list.length ? (
+            <div key={sem} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', letterSpacing: 1, marginTop: 4 }}>
+                {sem.toUpperCase()} · {list.length} course{list.length === 1 ? '' : 's'} · {list.reduce((n, c) => n + c.weekCount, 0)} weeks
+              </div>
+              {list.map(renderCourse)}
+            </div>
+          ) : null))}
+        {!q.trim() && courses.length > 0 && !courses.some((c) => levelKey(c) === shownLevel) && (
+          <div style={{ padding: 16, textAlign: 'center', color: 'var(--text2)', fontSize: 13 }}>No {shownLevel || 'unlevelled'} courses yet.</div>
+        )}
         {filtered.length === 0 && !error && (
           <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
             {q ? 'No courses match that search.' : 'No courses yet.'}

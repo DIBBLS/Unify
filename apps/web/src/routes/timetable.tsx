@@ -35,6 +35,8 @@ export default function TimetableRoute() {
   const today = new Date().getDay();
   // Class reps set the class times (review p.5-6).
   const [isHoc, setIsHoc] = useState(false);
+  // Lecturers see every class they teach (read-only: class reps set the times).
+  const [isLecturer, setIsLecturer] = useState(false);
   const [adding, setAdding] = useState(false);
   // Day: the time grid for one day. Week: every day side by side (remembered).
   const [view, setView] = useState<'day' | 'week'>(() => { try { return localStorage.getItem(VIEW_KEY) === 'week' ? 'week' : 'day'; } catch { return 'day'; } });
@@ -48,6 +50,7 @@ export default function TimetableRoute() {
       if (!sb) throw new Error('no client');
       const me = await api.me();
       setIsHoc(!!(me.profile as unknown as { is_hoc?: boolean } | null)?.is_hoc);
+      setIsLecturer(me.profile?.role === 'lecturer');
       const enrolled = (me.courses || []).map((c) => (c || '').toUpperCase().trim()).filter(Boolean);
       setCourses(enrolled);
       // One course failing must not blank the whole week.
@@ -114,7 +117,7 @@ export default function TimetableRoute() {
       {/* Box Boy stays on the timetable whether or not there are classes. */}
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12 }}>
         <div style={{ flex: 1 }}>
-          <Label>This week</Label>
+          <Label>{isLecturer ? 'Every class you teach' : 'This week'}</Label>
           <Display size={30}>Timetable</Display>
           <div role="tablist" aria-label="Timetable view" style={{ display: 'flex', gap: 6, marginTop: 10 }}>
             {(['day', 'week'] as const).map((v) => (
@@ -150,8 +153,8 @@ export default function TimetableRoute() {
           <Card style={{ alignItems: 'center', textAlign: 'center' }}>
             <BoxBoy pose="peeking" width={110} />
             <div className="t-15 w-6">No courses yet</div>
-            <div className="t-13 muted">Join your courses and their class times show up here.</div>
-            <Link to={ROUTES.findCourses} className="btn btn--amber">Manage courses</Link>
+            <div className="t-13 muted">{isLecturer ? 'The courses you teach show here with their class times once the Unify team adds them.' : 'Join your courses and their class times show up here.'}</div>
+            {!isLecturer && <Link to={ROUTES.findCourses} className="btn btn--amber">Manage courses</Link>}
           </Card>
           <EmptyDay label={DAY_LONG[day]} nowMin={day === today ? nowMin : null} />
           </>
@@ -166,7 +169,7 @@ export default function TimetableRoute() {
               {isHoc && slots.length === 0
                 ? 'Add your class times once; they repeat every week for the whole class.'
                 : slots.length === 0
-                  ? 'Your class rep hasn’t posted times yet. They’ll appear here once they do.'
+                  ? isLecturer ? 'The class reps of the classes you teach haven’t set their times yet. They’ll appear here once they do.' : 'Your class rep hasn’t posted times yet. They’ll appear here once they do.'
                   : 'Enjoy the free day, or pick another day above.'}
             </div>
             {isHoc && slots.length === 0 && <button className="btn btn--amber" onClick={() => setAdding(true)}>Add class times</button>}

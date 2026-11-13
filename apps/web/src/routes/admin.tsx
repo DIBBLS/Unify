@@ -88,6 +88,8 @@ export default function AdminRoute() {
   const [adminName, setAdminName] = useState('');
   const [activity, setActivity] = useState<{ recentUsers: { first_name: string; role: string }[]; recentNotes: { course: string; week: number; topic: number }[] } | null>(null);
   const [courseQ, setCourseQ] = useState('');
+  // Courses per level: one level open at a time ('' = courses with no level).
+  const [courseTab, setCourseTab] = useState(LEVELS[0]);
   // App errors (client log + Sentry backup). Sentry presence is a build-time
   // env flag, read here so the module says which window is live.
   const [errors, setErrors] = useState<{ kind: string; message: string; stack: string; url: string; app_version: string; created_at: string }[]>([]);
@@ -493,6 +495,14 @@ export default function AdminRoute() {
     if (!needle) return true;
     return c.code.toLowerCase().includes(needle) || (c.title || '').toLowerCase().includes(needle);
   });
+  // Grouped per level, then semester. A course offered at two levels shows under both.
+  const inCourseTab = (c: (typeof courses)[number]) => (courseTab ? (c.levels || []).includes(courseTab) : !(c.levels || []).length);
+  const levelCount = (l: string) => courses.filter((c) => (l ? (c.levels || []).includes(l) : !(c.levels || []).length)).length;
+  const bySemester = (list: typeof courses) => [
+    ['First Semester', list.filter((c) => (c.semesters || []).includes('First Semester'))],
+    ['Second Semester', list.filter((c) => (c.semesters || []).includes('Second Semester'))],
+    ['No semester set', list.filter((c) => !(c.semesters || []).length)],
+  ] as const;
 
   return (
     <div style={{ maxWidth: 960, margin: '0 auto', padding: '20px 16px 100px' }}>
@@ -745,20 +755,51 @@ export default function AdminRoute() {
 
       <Module id="courses" openId={openModule}>
       <div style={{ ...card, display: 'flex', gap: 8, marginBottom: 8 }}>
-        <input value={courseQ} onChange={(e) => setCourseQ(e.target.value)} placeholder="Search code or title…" style={{ ...input, flex: 1 }} />
+        <input value={courseQ} onChange={(e) => setCourseQ(e.target.value)} placeholder="Search every level: code or title…" style={{ ...input, flex: 1 }} />
       </div>
+      {/* One level at a time (with counts), its courses split by semester. Search spans every level. */}
+      {!courseQ.trim() && (
+        <div role="tablist" aria-label="Levels" style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+          {[...LEVELS, ''].map((l) => {
+            const n = levelCount(l);
+            if (!l && !n) return null;
+            return (
+              <button key={l || 'none'} role="tab" aria-selected={courseTab === l} className={`chip chip--sm${courseTab === l ? ' chip--on' : ''}`} onClick={() => { setCourseTab(l); if (l) setCourseLevels([l]); }}>
+                {l ? l.replace(' Level', 'L') : 'No level'} · {n}
+              </button>
+            );
+          })}
+        </div>
+      )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {shownCourses.map((c) => (
+        {courseQ.trim() ? shownCourses.map((c) => (
           <div key={c.code} style={{ ...card, display: 'flex', gap: 8, alignItems: 'center' }}>
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 700, fontSize: 14 }}>{c.code} — {c.title}</div>
-              <div style={{ fontSize: 12, color: 'var(--text2)' }}>{(c.levels || []).join(', ') || 'No levels'}{(c.semesters || []).length ? ` · ${(c.semesters || []).join(', ')}` : ''}</div>
+              <div style={{ fontSize: 12, color: 'var(--text2)' }}>{(c.levels || []).map((l) => l.replace(' Level', 'L')).join(', ') || 'No level'}{(c.semesters || []).length ? ` · ${(c.semesters || []).map((x) => x.replace(' Semester', '')).join(', ')}` : ''}</div>
+            </div>
+            <button onClick={() => setConfirm({ title: `Delete ${c.code}?`, body: 'ALL its weeks go with it. Students lose that content.', label: 'Delete course', run: () => void delCourse(c.code) })} aria-label={`Delete ${c.code}`} style={{ background: 'none', border: '1px solid #fecaca', borderRadius: 8, color: 'var(--u-red)', padding: 8, display: 'flex' }}>
+              <Trash2 size={16} />
+            </button>
+          </div>
+        )) : bySemester(courses.filter(inCourseTab)).map(([sem, list]) => (list.length ? (
+          <div key={sem} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', letterSpacing: 1, marginTop: 4 }}>{sem.toUpperCase()} · {list.length}</div>
+            {list.map((c) => (
+          <div key={c.code} style={{ ...card, display: 'flex', gap: 8, alignItems: 'center' }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 700, fontSize: 14 }}>{c.code} — {c.title}</div>
+              <div style={{ fontSize: 12, color: 'var(--text2)' }}>{(c.levels || []).map((l) => l.replace(' Level', 'L')).join(', ') || 'No level'}{(c.semesters || []).length ? ` · ${(c.semesters || []).map((x) => x.replace(' Semester', '')).join(', ')}` : ''}</div>
             </div>
             <button onClick={() => setConfirm({ title: `Delete ${c.code}?`, body: 'ALL its weeks go with it. Students lose that content.', label: 'Delete course', run: () => void delCourse(c.code) })} aria-label={`Delete ${c.code}`} style={{ background: 'none', border: '1px solid #fecaca', borderRadius: 8, color: 'var(--u-red)', padding: 8, display: 'flex' }}>
               <Trash2 size={16} />
             </button>
           </div>
         ))}
+          </div>
+        ) : null))}
+        {!courseQ.trim() && courses.filter(inCourseTab).length === 0 && <div style={{ color: 'var(--text2)', fontSize: 13, textAlign: 'center', padding: 16 }}>No {courseTab || 'unlevelled'} courses yet. Add one below.</div>}
+        <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', letterSpacing: 1, marginTop: 6 }}>ADD A COURSE</div>
         <div style={card}>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <input value={courseCode} onChange={(e) => setCourseCode(e.target.value)} placeholder="e.g. ECE 201" style={{ ...input, flex: 1, minWidth: 100 }} />
@@ -811,7 +852,7 @@ export default function AdminRoute() {
 
       <Module id="session" openId={openModule}>
       <div style={card}>
-        <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 8 }}>Active semester — students only see this semester's courses.</div>
+        <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 8 }}>Active semester. Students add this semester's courses (and earlier ones); the next semester opens once this one's teaching weeks are over, and higher levels open when you promote.</div>
         <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
           {['First Semester', 'Second Semester'].map((s) => (
             <button
