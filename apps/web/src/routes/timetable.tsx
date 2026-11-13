@@ -1,7 +1,6 @@
 import { SectionSkeleton } from '../components/Skeletons';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MapPin, Video, X } from 'lucide-react';
 import { api, type ClassSlot } from '../lib/api';
 import { supabaseBrowser } from '../lib/supabase';
 import { errorToast } from '../lib/errors';
@@ -10,7 +9,8 @@ import { ROUTES } from '../lib/routes';
 import ErrorState from '../components/ErrorState';
 import Drop from '../components/Drop';
 import { BoxBoy } from '../components/redesign/brand';
-import { Card, Chip, Chips, Label, ListCard, ListRow, Pill, Display } from '../components/redesign/ui';
+import { Card, Chip, Chips, Label, Display } from '../components/redesign/ui';
+import { DayGrid, TodayCard, WeekGrid, timesOf, type SlotState } from '../components/TimetableGrid';
 
 // Timetable tab (student): this week's classes across every enrolled
 // course, one day at a time. Lecturers set slots under My classes; the
@@ -23,6 +23,7 @@ const toMin = (hhmm: string) => {
   const [h, m] = (hhmm || '0:0').split(':').map(Number);
   return (h || 0) * 60 + (m || 0);
 };
+const VIEW_KEY = 'unify:timetable-view';
 
 export default function TimetableRoute() {
   const navigate = useNavigate();
@@ -35,6 +36,9 @@ export default function TimetableRoute() {
   // Class reps set the class times (review p.5-6).
   const [isHoc, setIsHoc] = useState(false);
   const [adding, setAdding] = useState(false);
+  // Day: the time grid for one day. Week: every day side by side (remembered).
+  const [view, setView] = useState<'day' | 'week'>(() => { try { return localStorage.getItem(VIEW_KEY) === 'week' ? 'week' : 'day'; } catch { return 'day'; } });
+  const pickView = (v: 'day' | 'week') => { setView(v); try { localStorage.setItem(VIEW_KEY, v); } catch { /* fine */ } };
 
   const load = async () => {
     setLoading(true);
@@ -68,17 +72,38 @@ export default function TimetableRoute() {
   }, [slots]);
 
   const daySlots = useMemo(
-    () => slots.filter((s) => s.day === day).sort((a, b) => toMin(a.start) - toMin(b.start)),
+    () => slots.filter((s) => s.day === day).sort((a, b) => toMin(timesOf(a).start) - toMin(timesOf(b).start)),
     [slots, day]
   );
 
   const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
-  const state = (s: ClassSlot): 'now' | 'next' | 'done' | 'later' => {
-    if (day !== today) return 'later';
-    if (nowMin >= toMin(s.end)) return 'done';
-    if (nowMin >= toMin(s.start)) return 'now';
-    return daySlots.find((x) => nowMin < toMin(x.start))?.id === s.id ? 'next' : 'later';
+  // Now / next / done for today's classes (a moved class counts at its new time;
+  // a cancelled one is never "next").
+  const state = (s: ClassSlot): SlotState => {
+    if (s.day !== today) return 'later';
+    const t = timesOf(s);
+    if (nowMin >= toMin(t.end)) return 'done';
+    if (nowMin >= toMin(t.start)) return 'now';
+    const upcoming = slots
+      .filter((x) => x.day === today && x.change?.status !== 'cancelled' && nowMin < toMin(timesOf(x).start))
+      .sort((a, b) => toMin(timesOf(a).start) - toMin(timesOf(b).start));
+    return upcoming[0]?.id === s.id ? 'next' : 'later';
   };
+  // Today's call to action: the class on now, else the next one.
+  const todayLive = slots.filter((s) => s.day === today && s.change?.status !== 'cancelled');
+  const spotlight = todayLive.find((s) => state(s) === 'now') || todayLive.find((s) => state(s) === 'next');
+  const open = (s: ClassSlot) => navigate(`/timetable/class/${encodeURIComponent(s.course)}/${s.id}`);
+  const join = (s: ClassSlot) => {
+    if (!s.meetLink) return;
+    window.open(s.meetLink, '_blank', 'noopener');
+    // The meeting opens in its own tab; this tab goes to the pass, ready for the attendance code.
+    window.setTimeout(() => navigate(`/attendance/pass?online=1&course=${encodeURIComponent(s.course)}&m=${encodeURIComponent(s.meetLink || '')}`), 300);
+  };
+  const remove = (s: ClassSlot) => {
+    if (window.confirm(`Remove ${s.course} on ${DAY_LONG[s.day]} at ${s.start} for the whole class?`)) void api.slotDelete(s.id).then(load).catch((e) => errorToast(e, 'remove that class time'));
+  };
+  // Week view columns: Monday to Friday, plus a weekend day that has classes.
+  const weekDays = ORDER.filter((d) => (d >= 1 && d <= 5) || countByDay[d]);
 
   const shell = { maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 96px' } as const;
 
@@ -86,19 +111,36 @@ export default function TimetableRoute() {
 
   return (
     <div style={shell}>
-      <Label>This week</Label>
-      <Display size={30}>Timetable</Display>
-
-      <div style={{ margin: '16px -16px 0', padding: '0 16px', overflowX: 'auto' }}>
-        <Chips>
-          {ORDER.map((d) => (
-            <Chip key={d} on={d === day} onClick={() => setDay(d)}>
-              {DAY_SHORT[d]}
-              {countByDay[d] ? ` · ${countByDay[d]}` : ''}
-            </Chip>
-          ))}
-        </Chips>
+      {/* Box Boy stays on the timetable whether or not there are classes. */}
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12 }}>
+        <div style={{ flex: 1 }}>
+          <Label>This week</Label>
+          <Display size={30}>Timetable</Display>
+          <div role="tablist" aria-label="Timetable view" style={{ display: 'flex', gap: 6, marginTop: 10 }}>
+            {(['day', 'week'] as const).map((v) => (
+              <button key={v} role="tab" aria-selected={view === v} className={`chip chip--sm${view === v ? ' chip--on' : ''}`} onClick={() => pickView(v)}>
+                {v === 'day' ? 'Day' : 'Week'}
+              </button>
+            ))}
+          </div>
+        </div>
+        <BoxBoy pose={spotlight ? 'teaching' : 'readingStanding'} width={72} style={{ flexShrink: 0 }} />
       </div>
+
+      {!loading && spotlight && <TodayCard slot={spotlight} state={state(spotlight)} nowMin={nowMin} onOpen={() => open(spotlight)} onJoin={() => join(spotlight)} />}
+
+      {view === 'day' && (
+        <div style={{ margin: '16px -16px 0', padding: '0 16px', overflowX: 'auto' }}>
+          <Chips>
+            {ORDER.map((d) => (
+              <Chip key={d} on={d === day} onClick={() => setDay(d)}>
+                {DAY_SHORT[d]}
+                {countByDay[d] ? ` · ${countByDay[d]}` : ''}
+              </Chip>
+            ))}
+          </Chips>
+        </div>
+      )}
 
       <div style={{ marginTop: 16 }}>
         {loading ? (
@@ -113,6 +155,8 @@ export default function TimetableRoute() {
           </Card>
           <EmptyDay label={DAY_LONG[day]} nowMin={day === today ? nowMin : null} />
           </>
+        ) : view === 'week' && slots.length > 0 ? (
+          <WeekGrid slots={slots} days={weekDays} today={today} nowMin={nowMin} labels={DAY_SHORT} onPickDay={(d) => { setDay(d); pickView('day'); }} />
         ) : daySlots.length === 0 ? (
           <>
           <Card style={{ alignItems: 'center', textAlign: 'center' }}>
@@ -130,63 +174,15 @@ export default function TimetableRoute() {
           <EmptyDay label={DAY_LONG[day]} nowMin={day === today ? nowMin : null} />
           </>
         ) : (
-          <ListCard>
-            {daySlots.map((s) => {
-              const st = state(s);
-              const ch = s.change;
-              // Colour only means status (design S37): red cancelled, amber dashed not confirmed, black moved.
-              const bar = ch?.status === 'cancelled' ? '4px solid var(--u-red, #dc2626)' : ch?.status === 'unconfirmed' ? '4px dashed var(--u-amber)' : ch?.status === 'moved' ? '4px solid var(--text)' : '4px solid transparent';
-              return (
-                <div key={s.id} style={{ borderLeft: bar }}>
-                <ListRow
-                  onClick={() => navigate(`/timetable/class/${encodeURIComponent(s.course)}/${s.id}`)}
-                  title={<span style={{ opacity: st === 'done' || ch?.status === 'cancelled' ? 0.5 : 1 }}>{s.course}</span>}
-                  sub={
-                    <span style={{ display: 'inline-flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-                      <span style={{ textDecoration: ch?.status === 'cancelled' || (ch?.status === 'moved' && ch.start) ? 'line-through' : undefined }}>{s.start}–{s.end}</span>
-                      {ch?.status === 'moved' && ch.start && <span style={{ fontWeight: 700 }}>{ch.start}{ch.end ? `–${ch.end}` : ''}</span>}
-                      {(ch?.status === 'moved' && ch.venue ? ch.venue : s.venue) && (
-                        <span style={{ display: 'inline-flex', gap: 3, alignItems: 'center', fontWeight: ch?.status === 'moved' && ch.venue ? 700 : undefined }}>
-                          <MapPin size={12} /> {ch?.status === 'moved' && ch.venue ? ch.venue : s.venue}
-                        </span>
-                      )}
-                      {s.lecturer && <span>{s.lecturer}</span>}
-                    </span>
-                  }
-                  right={
-                    <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
-                      {ch?.status === 'cancelled' ? <Pill tone="bad">Cancelled</Pill> : ch?.status === 'moved' ? <Pill tone="dark">Moved</Pill> : ch?.status === 'unconfirmed' ? <Pill tone="amber">Not confirmed</Pill> : st === 'now' ? <Pill tone="good">Now</Pill> : st === 'next' ? <Pill tone="amber">Next</Pill> : null}
-                      {isHoc && (
-                        <button
-                          aria-label={`Remove ${s.course} ${DAY_SHORT[s.day]} ${s.start}`}
-                          onClick={() => { if (window.confirm(`Remove ${s.course} on ${DAY_LONG[s.day]} at ${s.start} for the whole class?`)) void api.slotDelete(s.id).then(load).catch((e) => errorToast(e, 'remove that class time')); }}
-                          style={{ display: 'flex', padding: 4, color: 'var(--text3)' }}
-                        >
-                          <X size={16} />
-                        </button>
-                      )}
-                      {s.meetLink && (
-                        <a
-                          href={s.meetLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="btn btn--amber btn--sm"
-                          style={{ gap: 6 }}
-                          onClick={() => {
-                            // The meeting opens in its own tab; this tab stays on Unify, ready for the attendance code.
-                            window.setTimeout(() => navigate(`/attendance/pass?online=1&course=${encodeURIComponent(s.course)}&m=${encodeURIComponent(s.meetLink || '')}`), 300);
-                          }}
-                        >
-                          <Video size={14} /> Join
-                        </a>
-                      )}
-                    </span>
-                  }
-                />
-                </div>
-              );
-            })}
-          </ListCard>
+          <DayGrid
+            slots={daySlots}
+            stateOf={state}
+            nowMin={day === today ? nowMin : null}
+            isHoc={isHoc}
+            onOpen={open}
+            onRemove={remove}
+            onJoin={join}
+          />
         )}
       </div>
 

@@ -138,14 +138,10 @@ export default function KeywordsRoute() {
     if (lv) setOrder(lv.letters.map((_, i) => i));
     setPath([]);
     setFocus(null);
-    setSpin(null);
   }, [li, lv]);
 
-  // Shuffle: every letter travels clockwise round the ring to its new place
-  // (a short hop or most of a lap), easing in and out, so the wheel swirls.
-  const [spin, setSpin] = useState<{ from: number[]; delta: number[]; t: number } | null>(null);
-  const spinRaf = useRef(0);
-  useEffect(() => () => cancelAnimationFrame(spinRaf.current), []);
+  // Shuffle: the letters glide straight to their new places (CSS transition
+  // on left/top). The new order always differs from the old one.
   const shuffleLetters = () => {
     if (!lv) return;
     const n = lv.letters.length;
@@ -154,22 +150,9 @@ export default function KeywordsRoute() {
       next = [...order];
       for (let i = n - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [next[i], next[j]] = [next[j], next[i]]; }
     }
-    const from = lv.letters.map((_, i) => order.indexOf(i));
-    const delta = lv.letters.map((_, i) => { const d = (next.indexOf(i) - from[i] + n) % n; return d || n; });
     setPath([]);
     tapMode.current = false;
     setOrder(next);
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
-    cancelAnimationFrame(spinRaf.current);
-    setSpin({ from, delta, t: 0 });
-    const start = performance.now();
-    const dur = 720;
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / dur);
-      setSpin(t < 1 ? { from, delta, t } : null);
-      if (t < 1) spinRaf.current = requestAnimationFrame(tick);
-    };
-    spinRaf.current = requestAnimationFrame(tick);
   };
 
   const word = path.map((i) => lv?.letters[i] || '').join('');
@@ -185,7 +168,6 @@ export default function KeywordsRoute() {
     return { x: 50 + R * Math.cos(a), y: 50 + R * Math.sin(a) };
   };
   const slotOf = (letterIdx: number) => order.indexOf(letterIdx);
-  const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
   const submit = (w: string) => {
     // The line you drew lingers for a moment in the colour of the result.
@@ -445,12 +427,8 @@ export default function KeywordsRoute() {
                   {isDragging && last && ptr && <line className="kw-band" x1={last.x} y1={last.y} x2={ptr.x} y2={ptr.y} />}
                 </svg>
                 {lv.letters.map((c, i) => {
-                  const n = lv.letters.length;
-                  const st = spin ? spin.from[i] + spin.delta[i] * ease(spin.t) : slotOf(i);
-                  const p = pos(st, n);
+                  const p = pos(slotOf(i), lv.letters.length);
                   const on = path.includes(i);
-                  // Letters dip a little mid-swirl and settle back.
-                  const dip = spin ? 1 - 0.14 * Math.sin(Math.PI * spin.t) : undefined;
                   return (
                     <button
                       key={i}
@@ -459,7 +437,7 @@ export default function KeywordsRoute() {
                       aria-label={`Letter ${c}`}
                       aria-pressed={on}
                       className={`kw-letter${on ? ' on' : ''}`}
-                      style={{ left: `${p.x}%`, top: `${p.y}%`, ...(dip ? { transform: `scale(${dip})`, transition: 'none' } : null) }}
+                      style={{ left: `${p.x}%`, top: `${p.y}%` }}
                     >
                       {c}
                     </button>
@@ -473,7 +451,7 @@ export default function KeywordsRoute() {
                 )}
               </div>
               <div className="g-tools" style={{ marginTop: 6 }}>
-                <button className="btn btn--white btn--sm" onClick={shuffleLetters} disabled={!!spin}>
+                <button className="btn btn--white btn--sm" onClick={shuffleLetters}>
                   <Shuffle size={15} /> Shuffle
                 </button>
                 <button className="btn btn--white btn--sm" disabled={hintsUsed >= HINTS} onClick={hint}>
