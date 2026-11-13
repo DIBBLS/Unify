@@ -12,6 +12,8 @@ import { log } from '../lib/log';
 import { describeError } from '../lib/errors';
 import Loading from '../components/Loading';
 import CourseAttendance from '../components/CourseAttendance';
+import { CourseActions, LecturerCards, WeekCard, attendanceByWeek } from '../components/CoursePageParts';
+import type { CourseAttendance as AttendanceData } from '../lib/api';
 
 // Week of the semester from the profile's semester start (0 = not set / outside it).
 export function semesterWeek(start?: string | null, weeks?: number | null): { week: number; total: number } {
@@ -54,6 +56,11 @@ export default function CourseDetailRoute() {
   const [progress, setProgress] = useState<Awaited<ReturnType<typeof api.myCourseProgress>>['weeks'] | null>(null);
   const [lecturers, setLecturers] = useState<{ id: string; name: string }[]>([]);
   const [notFound, setNotFound] = useState(false);
+  // Design S23: the course's full title and semester, attendance per week, and
+  // which week card is open (the current week, or the first not finished).
+  const [courseInfo, setCourseInfo] = useState<{ title: string; semesters: string[] } | null>(null);
+  const [attendance, setAttendance] = useState<AttendanceData | null>(null);
+  const [openWeek, setOpenWeek] = useState<number | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -94,6 +101,11 @@ export default function CourseDetailRoute() {
         api.timetable(courseCode).then((tt) => setSlots(tt.slots || [])).catch(() => {});
         api.materials(courseCode).then((r) => setMaterials(r.materials || [])).catch(() => {});
         api.myCourseProgress(courseCode).then((r) => { setProgress(r.weeks); setLecturers(r.lecturers || []); }).catch(() => {});
+        api.courses().then((list) => {
+          const c = list.find((x) => x.code.toUpperCase().trim() === courseCode.toUpperCase());
+          if (c) setCourseInfo({ title: c.title, semesters: c.semesters || [] });
+        }).catch(() => {});
+        if (!preview) api.attendanceCourse(courseCode).then(setAttendance).catch(() => {});
       } catch (err) {
         // S73: a course code that doesn't exist (old link, typo) gets its own state.
         if ((err as { status?: number }).status === 404) setNotFound(true);
@@ -176,20 +188,22 @@ export default function CourseDetailRoute() {
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
       <BackButton to={backTo} />
-      <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28 }}>{courseCode}</h1>
+      <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28, lineHeight: 1.15 }}>{courseInfo?.title || courseCode}</h1>
       <p style={{ color: 'var(--text2)', marginTop: 6, fontSize: 13 }}>
-        {weeks.length} {weeks.length === 1 ? 'week' : 'weeks'} · pick one to start learning
+        {[courseInfo?.title ? courseCode : '', (courseInfo?.semesters || []).map((x) => x.replace(' Semester', ' semester')).join(' & '), `${weeks.length} ${weeks.length === 1 ? 'week' : 'weeks'} published`].filter(Boolean).join(' · ')}
       </p>
-      {lecturers.length > 0 && (
-        <p style={{ marginTop: 4, fontSize: 13 }}>
-          Taught by{' '}
-          {lecturers.map((l, i) => (
-            <span key={l.id}>{i > 0 ? ', ' : ''}<Link to={`/lecturer/profile/${l.id}`} style={{ color: 'var(--u-good)', fontWeight: 700 }}>{l.name}</Link></span>
-          ))}
-        </p>
+      {/* Design S23: who teaches it, with their photo and bio. */}
+      <LecturerCards lecturers={lecturers} />
+      <CourseActions course={courseCode} weeks={progress || []} preview={preview} />
+      {sem.week > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 14 }}>
+          <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--text2)', whiteSpace: 'nowrap' }}>WEEK {sem.week} OF {sem.total}</span>
+          <div style={{ flex: 1, height: 6, borderRadius: 9999, background: 'var(--border)', overflow: 'hidden' }}>
+            <div style={{ width: `${(sem.week / sem.total) * 100}%`, height: '100%', background: 'var(--u-green)' }} />
+          </div>
+        </div>
       )}
       {!preview && <LecturerPosts course={courseCode} />}
-      {!preview && <CourseAttendance course={courseCode} totalWeeks={sem.total} currentWeek={sem.week} />}
       {/* S23–S25: Weeks · Outline · Practice */}
       <div role="tablist" aria-label="Course sections" style={{ display: 'flex', gap: 6, marginTop: 16 }}>
         {(['weeks', 'outline', 'practice'] as const).map((t) => (
@@ -215,64 +229,51 @@ export default function CourseDetailRoute() {
           </div>
         </div>
       )}
-      {tab === 'weeks' && <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {weeks.length === 0 && !error && (
-          <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
-            <BoxBoy pose="readingStanding" width={62} />
-            <div style={{ marginTop: 8 }}>No weeks published yet.</div>
-          </div>
-        )}
-        {weeks.map((w) => (
-          <Link
-            key={w.week}
-            to={`/learn/${encodeURIComponent(courseCode)}/week/${w.week}${preview ? '?preview=1' : ''}`}
-            style={{
-              padding: '14px 16px',
-              background: 'var(--surface)',
-              border: '1px solid var(--border)',
-              borderRadius: 12,
-              textDecoration: 'none',
-              color: 'var(--text)',
-              display: 'flex',
-              gap: 12,
-              alignItems: 'center',
-            }}
-          >
-            <span style={{ flex: 1 }}>
-              <span style={{ fontWeight: 700, display: 'block' }}>Week {w.week}{w.title ? ` — ${w.title}` : ''}</span>
-              {w.subtitle && <span style={{ fontSize: 12, color: 'var(--text2)' }}>{w.subtitle}</span>}
-              {(() => {
-                const p = progress?.find((x) => x.week === w.week);
-                if (!p || !p.topics) return null;
-                const all = p.done >= p.topics;
-                return (
-                  <span style={{ display: 'block', fontSize: 12, fontWeight: 700, marginTop: 2, color: all ? 'var(--u-good)' : 'var(--text2)' }}>
-                    {all ? 'Done' : p.done ? `${p.done} of ${p.topics} topics` : `${p.topics} topics`}
-                    {p.quiz ? ` · Quiz ${p.quiz.best}/${p.quiz.total}` : ''}
-                  </span>
-                );
-              })()}
-              {w.authors && w.authors.length > 0 && (
-                <span style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 4 }}>
-                  <span style={{ display: 'flex' }}>
-                    {w.authors.slice(0, 3).map((a, ai) => (
-                      a.avatar ? (
-                        <img key={ai} src={a.avatar} alt={a.name} title={a.name} style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--surface)', marginLeft: ai === 0 ? 0 : -6 }} />
-                      ) : (
-                        <span key={ai} title={a.name} style={{ width: 20, height: 20, borderRadius: '50%', background: 'var(--u-good-tint)', color: 'var(--u-good)', fontWeight: 800, fontSize: 10, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--surface)', marginLeft: ai === 0 ? 0 : -6 }}>
-                          {a.name.trim().charAt(0).toUpperCase()}
-                        </span>
-                      )
-                    ))}
-                  </span>
-                  <span style={{ fontSize: 11, color: 'var(--u-good)', fontWeight: 700 }}>by {w.authors.map((a) => a.name).join(', ')}</span>
+      {tab === 'weeks' && (() => {
+        const byWeek = attendanceByWeek(attendance);
+        const lastPublished = weeks.reduce((m, w) => Math.max(m, w.week), 0);
+        // The week to open first: this semester week if published, else the first not finished.
+        const firstOpen = weeks.find((w) => w.week === sem.week)?.week
+          ?? weeks.find((w) => { const p = progress?.find((x) => x.week === w.week); return !p || p.done < p.topics; })?.week
+          ?? null;
+        const shown = openWeek ?? firstOpen;
+        return (
+          <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {weeks.length === 0 && !error && (
+              <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
+                <BoxBoy pose="readingStanding" width={62} />
+                <div style={{ marginTop: 8 }}>No weeks published yet.</div>
+              </div>
+            )}
+            {weeks.map((w) => (
+              <WeekCard
+                key={w.week}
+                course={courseCode}
+                week={w.week}
+                title={w.title}
+                subtitle={w.subtitle}
+                progress={progress?.find((x) => x.week === w.week)}
+                attendance={byWeek[w.week]}
+                open={shown === w.week}
+                onToggle={() => setOpenWeek(shown === w.week ? -1 : w.week)}
+                preview={preview}
+                isNext={w.week === firstOpen}
+              />
+            ))}
+            {/* Weeks the semester has reached whose notes aren't out yet. */}
+            {sem.week > lastPublished && lastPublished > 0 && Array.from({ length: Math.min(2, sem.week - lastPublished) }, (_, i) => lastPublished + i + 1).map((n) => (
+              <div key={n} style={{ display: 'flex', gap: 12, alignItems: 'center', padding: 14, borderRadius: 18, border: '1px dashed var(--border)', color: 'var(--text2)' }}>
+                <span style={{ width: 46, height: 46, borderRadius: 14, background: 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 17 }}>{String(n).padStart(2, '0')}</span>
+                <span>
+                  <span style={{ display: 'block', fontWeight: 800, color: 'var(--text)' }}>Week {n}</span>
+                  <span style={{ fontSize: 12 }}>Notes land soon. You'll get a bell when they do.</span>
                 </span>
-              )}
-            </span>
-            <ChevronRight size={18} color="var(--u-good)" />
-          </Link>
-        ))}
-      </div>}
+              </div>
+            ))}
+            {!preview && <CourseAttendance course={courseCode} totalWeeks={sem.total} currentWeek={sem.week} />}
+          </div>
+        );
+      })()}
     </div>
   );
 }

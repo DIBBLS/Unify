@@ -97,15 +97,17 @@ function CourseCard({ index, course, title, staff, priority, semWeek }: {
   const pct = prog && prog.topics ? Math.min(1, prog.done / prog.topics) : 0;
   const state = !prog || prog.done === 0 ? 'Not started' : pct >= 1 ? 'Done' : 'In progress';
   const lecturer = staff.map((s) => s.name).join(' · ');
+  // Square card (Review Round 2: "square, as in Figma"): lecturer photos and
+  // status on top, the course in the middle, progress at the bottom.
   return (
     <Link
       to={`/courses/${encodeURIComponent(course)}`}
       className="rise"
-      style={{ animationDelay: `${Math.min(index, 6) * 40}ms`, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: 8, textDecoration: 'none', color: 'var(--text)' }}
+      style={{ animationDelay: `${Math.min(index, 6) * 40}ms`, aspectRatio: '1 / 1', minWidth: 0, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 18, padding: 12, display: 'flex', flexDirection: 'column', gap: 6, textDecoration: 'none', color: 'var(--text)', overflow: 'hidden' }}
     >
-      <div style={{ display: 'flex', gap: 12, alignItems: 'center', minWidth: 0 }}>
-        <div style={{ display: 'flex', flexShrink: 0 }}>
-          {(staff.length ? staff : [{ name: '', avatar: '', persona: '' }]).map((s, si) => {
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+        <div style={{ display: 'flex', flex: 1, minWidth: 0 }}>
+          {(staff.length ? staff : [{ name: '', avatar: '', persona: '' }]).slice(0, 3).map((s, si) => {
             const pic = resolvePicture({ avatar_url: s.avatar, box_boy_persona: s.persona });
             return (
               <img
@@ -113,29 +115,28 @@ function CourseCard({ index, course, title, staff, priority, semWeek }: {
                 src={pic.kind !== 'none' ? pic.src : PERSONAS[2].img}
                 alt=""
                 title={s.name || undefined}
-                width={44}
-                height={44}
+                width={34}
+                height={34}
                 loading="lazy"
-                style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--surface)', marginLeft: si === 0 ? 0 : -14, background: 'var(--u-good-tint)' }}
+                style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--surface)', marginLeft: si === 0 ? 0 : -12, background: 'var(--u-good-tint)' }}
               />
             );
           })}
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            <span style={{ fontWeight: 800, fontSize: 15 }}>{course}</span>
-            {priority && <span className="pill pill--amber" style={{ fontSize: 10 }}>PRIORITY</span>}
-          </div>
-          {title && <div style={{ fontSize: 12, color: 'var(--text2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</div>}
-          {lecturer && <div style={{ fontSize: 12, color: 'var(--text2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lecturer}</div>}
-        </div>
-        <span className={`pill ${state === 'Not started' ? 'pill--grey' : 'pill--good'}`} style={{ flexShrink: 0 }}>{state}</span>
+        {priority
+          ? <span className="pill pill--amber" style={{ fontSize: 9, padding: '2px 7px' }}>PRIORITY</span>
+          : <span className={`pill ${state === 'Not started' ? 'pill--grey' : 'pill--good'}`} style={{ fontSize: 10, padding: '2px 8px' }}>{state}</span>}
       </div>
-      <div style={{ height: 4, borderRadius: 9999, background: 'var(--border)', overflow: 'hidden' }} aria-label={`${Math.round(pct * 100)}% of published topics done`}>
+      <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div style={{ fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 19, lineHeight: 1.1 }}>{course}</div>
+        {title && <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 3, lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{title}</div>}
+        {lecturer && <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lecturer}</div>}
+      </div>
+      <div style={{ height: 4, borderRadius: 9999, background: 'var(--border)', overflow: 'hidden', flexShrink: 0 }} aria-label={`${Math.round(pct * 100)}% of published topics done`}>
         <div style={{ width: `${pct * 100}%`, height: '100%', background: 'var(--u-green)' }} />
       </div>
-      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text2)' }}>
-        {[semWeek.week ? `Week ${semWeek.week} of ${semWeek.total}` : '', prog && prog.topics ? `${prog.done} of ${prog.topics} topics` : 'No notes published yet'].filter(Boolean).join(' · ')}
+      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flexShrink: 0 }}>
+        {prog && prog.topics ? `${prog.done} of ${prog.topics} topics` : 'No notes yet'}{semWeek.week ? ` · Wk ${semWeek.week}` : ''}
       </div>
     </Link>
   );
@@ -747,7 +748,7 @@ export default function HomeRoute() {
           Manage courses <ChevronRight size={14} />
         </Link>
       </div>
-      <div style={{ margin: '12px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ margin: '12px 16px', display: 'grid', gridTemplateColumns: shown.length ? 'repeat(auto-fill, minmax(150px, 1fr))' : '1fr', gap: 10 }}>
         {shown.length === 0 ? (
           <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '2px solid var(--border)', borderRadius: 16 }}>
             <BoxBoy pose="peeking" width={77} />

@@ -71,18 +71,19 @@ export function DashboardSkeleton({ author }: { author: boolean }) {
         <div className="skel" style={{ height: 20, width: 130 }} />
         <div className="skel" style={{ height: 14, width: 110 }} />
       </div>
-      <div style={{ margin: '12px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {[0, 1, 2].map((i) => (
-          <div key={i} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-              <div className="skel" style={{ width: 44, height: 44, borderRadius: 9999, flexShrink: 0 }} />
-              <div style={{ flex: 1 }}>
-                <div className="skel" style={{ height: 15, width: '35%' }} />
-                <div className="skel" style={{ height: 12, width: '75%', marginTop: 6 }} />
-              </div>
+      <div style={{ margin: '12px 16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 10 }}>
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} style={{ aspectRatio: '1 / 1', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 18, padding: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div className="skel" style={{ width: 34, height: 34, borderRadius: 9999 }} />
+              <div className="skel" style={{ width: 56, height: 16, borderRadius: 9999 }} />
+            </div>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 6 }}>
+              <div className="skel" style={{ height: 18, width: '60%' }} />
+              <div className="skel" style={{ height: 11, width: '90%' }} />
             </div>
             <div className="skel" style={{ height: 4, borderRadius: 9999 }} />
-            <div className="skel" style={{ height: 12, width: '45%' }} />
+            <div className="skel" style={{ height: 10, width: '55%' }} />
           </div>
         ))}
       </div>
@@ -185,27 +186,39 @@ export function ListSkeleton({ rows = 4, titleWidth = '40%' }: { rows?: number; 
   );
 }
 
-/** Course page: Back, course code, "N weeks", taught by, the attendance
- *  card, the Weeks / Outline / Practice chips, then week rows. */
+/** Course page (design S23): Back, title and code line, the lecturer card,
+ *  Save for offline / Report, the week bar, the three tabs, then week cards. */
 export function DetailSkeleton() {
   return (
     <PageShell>
       <div className="skel" style={{ height: 18, width: 64, marginBottom: 16 }} />
-      <div className="skel" style={{ height: 30, width: '45%' }} />
-      <div className="skel" style={{ height: 13, width: '60%', marginTop: 10 }} />
-      <div className="skel" style={{ height: 13, width: '45%', marginTop: 6 }} />
-      <div className="skel" style={{ height: 96, borderRadius: 12, marginTop: 16 }} />
+      <div className="skel" style={{ height: 28, width: '70%' }} />
+      <div className="skel" style={{ height: 13, width: '55%', marginTop: 10 }} />
+      <div style={{ ...row, marginTop: 12, display: 'flex', gap: 12, alignItems: 'center', borderRadius: 16 }}>
+        <div className="skel" style={{ width: 48, height: 48, borderRadius: 9999, flexShrink: 0 }} />
+        <div style={{ flex: 1 }}>
+          <div className="skel" style={{ height: 15, width: '50%' }} />
+          <div className="skel" style={{ height: 12, width: '40%', marginTop: 6 }} />
+          <div className="skel" style={{ height: 12, width: '85%', marginTop: 6 }} />
+        </div>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12 }}>
+        <div className="skel" style={{ height: 32, width: 140, borderRadius: 9999 }} />
+        <div className="skel" style={{ height: 14, width: 110, marginTop: 9 }} />
+      </div>
+      <div className="skel" style={{ height: 6, borderRadius: 9999, marginTop: 16 }} />
       <div style={{ display: 'flex', gap: 6, marginTop: 16 }}>
         {[72, 76, 80].map((w, i) => <div key={i} className="skel" style={{ height: 32, width: w, borderRadius: 9999 }} />)}
       </div>
-      <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} style={{ ...row, display: 'flex', gap: 12, alignItems: 'center' }}>
+      <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {[0, 1, 2].map((i) => (
+          <div key={i} style={{ ...row, display: 'flex', gap: 12, alignItems: 'center', borderRadius: 18 }}>
+            <div className="skel" style={{ width: 46, height: 46, borderRadius: 14, flexShrink: 0 }} />
             <div style={{ flex: 1 }}>
               <div className="skel" style={{ height: 15, width: '30%' }} />
-              <div className="skel" style={{ height: 12, width: '75%', marginTop: 8 }} />
+              <div className="skel" style={{ height: 12, width: '70%', marginTop: 6 }} />
+              <div className="skel" style={{ height: 11, width: '45%', marginTop: 6 }} />
             </div>
-            <div className="skel" style={{ height: 24, width: 52, borderRadius: 9999 }} />
           </div>
         ))}
       </div>
