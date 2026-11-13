@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import SendPdf from '../components/SendPdf';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
 import { api } from '../lib/api';
@@ -150,6 +151,7 @@ function Attendance({ course }: { course: string }) {
 }
 
 function Post({ course }: { course: string }) {
+  const [sending, setSending] = useState(false);
   const [type, setType] = useState<'announcement' | 'tip' | 'reminder'>('announcement');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -183,7 +185,9 @@ function Post({ course }: { course: string }) {
         <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title (optional)" maxLength={120} style={field} />
         <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={4} maxLength={2000} placeholder="e.g. Test on Friday in LT2. Bring calculators." style={{ ...field, resize: 'vertical' }} />
         <button className="btn btn--amber btn--block" disabled={busy || !content.trim()} onClick={() => void send()}>{busy ? 'Posting…' : 'Post to students'}</button>
+        <button className="btn btn--white btn--block" onClick={() => setSending(true)}>Send a PDF instead</button>
       </Card>
+      {sending && <SendPdf course={course} onClose={() => { setSending(false); void load(); }} />}
       {posts.length > 0 && (
         <section style={{ marginTop: 18 }}>
           <Label>Posted</Label>

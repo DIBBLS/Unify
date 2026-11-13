@@ -39,12 +39,13 @@ const AUTHOR_TABS: Tab[] = [
   { to: '/me', label: 'Me', icon: User, match: ['/me'] },
 ];
 
-// Lecturers (design L07–L17): Home · Timetable · Class · Me. They teach, share
-// materials and post to classes; no Studio (they don't publish notes).
+// Lecturers: Home · Timetable · Classroom · Me (decided 13 Nov). Home is the
+// design L07 view, Classroom the former Classroom page plus Send a PDF. No
+// Studio: lecturers don't publish notes.
 const LECTURER_TABS: Tab[] = [
   { to: '/home', label: 'Home', icon: LayoutDashboard, match: ['/home', '/course', '/learn'] },
   { to: '/timetable', label: 'Timetable', icon: CalendarDays, match: ['/timetable', '/my-classes'] },
-  { to: '/lecturer', label: 'Class', icon: ClipboardCheck, match: ['/lecturer', '/attendance', '/browse', '/content-reports'] },
+  { to: '/lecturer', label: 'Classroom', icon: ClipboardCheck, match: ['/lecturer', '/attendance', '/browse', '/content-reports'] },
   { to: '/me', label: 'Me', icon: User, match: ['/me'] },
 ];
 

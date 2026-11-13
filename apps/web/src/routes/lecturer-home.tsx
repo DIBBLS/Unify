@@ -2,7 +2,8 @@ import { SectionSkeleton } from '../components/Skeletons';
 import LiveWire from '../components/LiveWire';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CalendarDays, ClipboardCheck, Search, ChevronRight, Flag } from 'lucide-react';
+import { CalendarDays, ClipboardCheck, Search, ChevronRight, Flag, FileUp } from 'lucide-react';
+import SendPdf from '../components/SendPdf';
 import { api, type ClassSlot } from '../lib/api';
 import { errorToast } from '../lib/errors';
 import { ROUTES } from '../lib/routes';
@@ -28,6 +29,7 @@ export default function LecturerHomeRoute() {
   const [role, setRole] = useState('');
   const [today, setToday] = useState<ClassSlot[] | null>(null);
   const [taught, setTaught] = useState<string[]>([]);
+  const [sending, setSending] = useState(false);
   const [dept, setDept] = useState<string | null>(null);
 
   useEffect(() => {
@@ -57,11 +59,18 @@ export default function LecturerHomeRoute() {
       <Card tone="dark" style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
         <BoxBoy pose="teaching" width={84} />
         <div>
-          <div className="eyebrow" style={{ color: 'var(--u-amber)' }}>Class</div>
+          <div className="eyebrow" style={{ color: 'var(--u-amber)' }}>Classroom</div>
           <Display size={26} color="#fff">{name ? `Hi, ${name}` : 'Welcome'}</Display>
         </div>
       </Card>
       <LiveWire style={{ margin: '12px 0 0' }} />
+      {/* Send a PDF: shrunk on the phone, posted to every class taking the course, saved for the contributor. */}
+      {(role === 'lecturer' || role === 'admin') && taught.length > 0 && (
+        <button className="btn btn--amber btn--block" style={{ marginTop: 12 }} onClick={() => setSending(true)}>
+          <FileUp size={16} /> Send a PDF to students
+        </button>
+      )}
+      {sending && <SendPdf courses={taught} onClose={() => setSending(false)} />}
 
       {/* L01–L06: first-time lecturer setup, until they've set a department. */}
       {role === 'lecturer' && dept === '' && (

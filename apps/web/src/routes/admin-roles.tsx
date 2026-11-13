@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSchool } from '../lib/school';
 import { X } from 'lucide-react';
 import { api } from '../lib/api';
 import { describeError, errorToast } from '../lib/errors';
@@ -13,16 +14,17 @@ import { Card, Display, Label } from '../components/redesign/ui';
 // counts for their department / faculty.
 type Grant = Awaited<ReturnType<typeof api.roleGrants>>['grants'][number];
 const ROLE_NAME = { level_admin: 'Level admin', hod: 'Head of department', dean: 'Dean' } as const;
-const DEPARTMENTS = ['Electronic & Computer Engineering', 'Mechanical Engineering', 'Industrial & Petroleum Engineering', 'Chemical & Polymer Engineering', 'Civil Engineering', 'Aerospace Engineering'];
 const LEVELS = ['100 Level', '200 Level', '300 Level', '400 Level', '500 Level'];
 const field: React.CSSProperties = { display: 'block', width: '100%', marginTop: 4, padding: 10, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 14 };
 
 export default function AdminRolesRoute() {
+  const school = useSchool();
+  const DEPARTMENTS = school.departments.map((d) => d.name);
   const [grants, setGrants] = useState<Grant[] | null>(null);
   const [err, setErr] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<Grant['role']>('level_admin');
-  const [department, setDepartment] = useState(DEPARTMENTS[0]);
+  const [department, setDepartment] = useState('Electronic & Computer Engineering');
   const [level, setLevel] = useState(LEVELS[1]);
   const [faculty, setFaculty] = useState('Faculty of Engineering');
   const [busy, setBusy] = useState(false);
@@ -64,7 +66,7 @@ export default function AdminRolesRoute() {
         />
         {role !== 'dean' && <Drop value={department} onChange={setDepartment} label="Department" options={DEPARTMENTS.map((d) => ({ value: d, label: d }))} style={{ width: '100%' }} />}
         {role === 'level_admin' && <Drop value={level} onChange={setLevel} label="Level" options={LEVELS.map((l) => ({ value: l, label: l }))} style={{ width: '100%' }} />}
-        {role === 'dean' && <label className="t-13 w-6">Faculty<input value={faculty} onChange={(e) => setFaculty(e.target.value)} style={field} /></label>}
+        {role === 'dean' && <Drop value={faculty} onChange={setFaculty} label="Faculty" options={school.faculties.map((f) => ({ value: f.name, label: f.name }))} style={{ width: '100%' }} />}
         <button className="btn btn--amber btn--block" disabled={busy || !/@/.test(email)} onClick={() => void give()}>{busy ? 'Saving…' : 'Give role'}</button>
       </Card>
       {err && <div className="t-13" style={{ color: 'var(--u-red)', marginTop: 12 }}>{err}</div>}

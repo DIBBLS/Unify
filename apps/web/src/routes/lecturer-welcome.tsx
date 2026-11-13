@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSchool } from '../lib/school';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { errorToast } from '../lib/errors';
@@ -11,10 +12,11 @@ import { Card, Display, Label } from '../components/redesign/ui';
 // L01–L06: a short first-time setup for lecturers, in the app's usual look.
 // Welcome → department → courses → how students see your name → all set.
 // (The lecturer role itself is given by Unify; nobody picks it.)
-const DEPARTMENTS = ['Electronic & Computer Engineering', 'Mechanical Engineering', 'Industrial & Petroleum Engineering', 'Chemical & Polymer Engineering', 'Civil Engineering', 'Aerospace Engineering'];
 const field: React.CSSProperties = { width: '100%', padding: 12, borderRadius: 12, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 16, marginTop: 6 };
 
 export default function LecturerWelcomeRoute() {
+  const school = useSchool();
+  const DEPARTMENTS = school.departments.map((d) => d.name);
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [dept, setDept] = useState('');
@@ -64,7 +66,7 @@ export default function LecturerWelcomeRoute() {
         <Card style={{ marginTop: 16, gap: 10 }}>
           <Display size={24}>Your department</Display>
           <Drop value={dept} onChange={setDept} label="Pick your department" options={DEPARTMENTS.map((d) => ({ value: d, label: d }))} style={{ width: '100%' }} />
-          <button className="btn btn--amber btn--block" disabled={busy || !dept} onClick={() => void save({ department: dept, faculty: 'Faculty of Engineering', university: 'Lagos State University' }, 2)}>{busy ? 'Saving…' : 'Next'}</button>
+          <button className="btn btn--amber btn--block" disabled={busy || !dept} onClick={() => void save({ department: dept, faculty: school.facultyOf(dept) || 'Faculty of Engineering', university: 'Lagos State University' }, 2)}>{busy ? 'Saving…' : 'Next'}</button>
         </Card>
       )}
 

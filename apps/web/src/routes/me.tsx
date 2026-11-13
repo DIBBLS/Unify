@@ -1,4 +1,5 @@
 import PushHelp, { GuideSteps } from '../components/PushHelp';
+import { useSchool } from '../lib/school';
 import type { GuideKind } from '../lib/pushHelp';
 import { ProfileSkeleton } from '../components/Skeletons';
 import { toastError } from '../lib/toast';
@@ -28,14 +29,6 @@ import { announcePicture, resolvePicture } from '../lib/picture';
 import { preparePhoto } from '../lib/image';
 import { Avatar, PERSONAS, type PersonaKey } from '../components/redesign/brand';
 const UUID_RE = /^[0-9a-f-]{36}$/i;
-const DEPARTMENTS = [
-  'Electronic & Computer Engineering',
-  'Mechanical Engineering',
-  'Industrial & Petroleum Engineering',
-  'Chemical & Polymer Engineering',
-  'Civil Engineering',
-  'Aerospace Engineering',
-];
 const LEVELS = ['100 Level', '200 Level', '300 Level', '400 Level', '500 Level'];
 
 // Support channel (WhatsApp): renders only when the backend has a support
@@ -139,6 +132,8 @@ function DeleteAccount({ onDeleted }: { onDeleted: () => void }) {
 }
 
 export default function MeRoute() {
+  const school = useSchool();
+  const DEPARTMENTS = school.departments.map((d) => d.name);
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [email, setEmail] = useState('');
@@ -578,8 +573,8 @@ export default function MeRoute() {
               label="Select…"
               style={{ width: '100%', marginTop: 4 }}
               options={[
-                ...(dFaculty && !['Faculty of Engineering'].includes(dFaculty) ? [{ value: dFaculty, label: dFaculty }] : []),
-                { value: 'Faculty of Engineering', label: 'Faculty of Engineering' },
+                ...(dFaculty && !school.openFaculties.some((f) => f.name === dFaculty) ? [{ value: dFaculty, label: dFaculty }] : []),
+                ...school.openFaculties.map((f) => ({ value: f.name, label: f.name })),
               ]}
             />
           </label>
@@ -592,7 +587,7 @@ export default function MeRoute() {
               style={{ width: '100%', marginTop: 4 }}
               options={[
                 ...(dDept && !DEPARTMENTS.includes(dDept) ? [{ value: dDept, label: dDept }] : []),
-                ...DEPARTMENTS.map((d) => ({ value: d, label: d })),
+                ...(school.openFaculties.find((f) => f.name === dFaculty)?.departments.map((d) => d.name) || DEPARTMENTS).map((d) => ({ value: d, label: d })),
               ]}
             />
           </label>

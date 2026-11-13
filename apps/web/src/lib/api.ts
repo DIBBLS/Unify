@@ -672,6 +672,17 @@ export const api = {
     courses?: { code: string; status: CgpaCourse['status']; units: number; grade?: number | null }[];
   }) => apiFetch<{ ok: boolean }>('/v1/cgpa', { method: 'PUT', body: JSON.stringify(payload) }),
   // Head of Class
+  // Send a PDF (lecturer): a signed upload link, then send = materials + post + bell/push.
+  lecturerPdfUploadUrl: (body: { course: string; filename: string; size: number }) =>
+    apiFetch<{ path: string; token: string; signedUrl: string; bucket: string }>('/v1/lecturer/pdf/upload-url', { method: 'POST', body: JSON.stringify(body) }, 0),
+  lecturerPdfSend: (body: { course: string; path: string; title: string; message?: string; week: number; type: 'slides' | 'notes' | 'past-paper'; sizeKb?: number }) =>
+    apiFetch<{ ok: boolean; reached: number; url: string }>('/v1/lecturer/pdf', { method: 'POST', body: JSON.stringify(body) }, 0),
+  // Faculties and departments (Admin › Faculties & departments).
+  adminStructure: () => apiFetch<{ faculties: import('./school').SchoolFaculty[]; people: Record<string, number> }>('/v1/admin/structure'),
+  adminFacultyAdd: (body: { name: string; status: 'open' | 'soon' | 'later' }) => apiFetch<{ ok: boolean }>('/v1/admin/faculties', { method: 'POST', body: JSON.stringify(body) }, 0),
+  adminFacultyEdit: (id: string, body: { name?: string; status?: 'open' | 'soon' | 'later'; sort?: number }) => apiFetch<{ ok: boolean }>(`/v1/admin/faculties/${id}`, { method: 'PATCH', body: JSON.stringify(body) }, 0),
+  adminDeptAdd: (body: { facultyId: string; name: string; code: string }) => apiFetch<{ ok: boolean }>('/v1/admin/departments', { method: 'POST', body: JSON.stringify(body) }, 0),
+  adminDeptEdit: (id: string, body: { name?: string; code?: string; active?: boolean; facultyId?: string; sort?: number }) => apiFetch<{ ok: boolean }>(`/v1/admin/departments/${id}`, { method: 'PATCH', body: JSON.stringify(body) }, 0),
   // In-app bug reports (Me › Report a bug) and the admin list.
   bugReport: (payload: { what: string; doing?: string; page?: string; appVersion?: string; device?: string }) =>
     apiFetch<{ ok: boolean; id: string }>('/v1/bug-reports', { method: 'POST', body: JSON.stringify(payload) }, 0),
