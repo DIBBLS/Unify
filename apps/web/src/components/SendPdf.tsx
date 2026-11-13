@@ -12,12 +12,12 @@ import Drop from './Drop';
 type Stage = 'pick' | 'compressing' | 'uploading' | 'sending' | 'done';
 const field: React.CSSProperties = { width: '100%', padding: 10, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 15, marginTop: 4 };
 
-export default function SendPdf({ courses, course: fixed, onClose }: { courses?: string[]; course?: string; onClose: () => void }) {
+export default function SendPdf({ courses, course: fixed, week: presetWeek, onClose }: { courses?: string[]; course?: string; week?: number; onClose: () => void }) {
   const [course, setCourse] = useState(fixed || courses?.[0] || '');
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
-  const [week, setWeek] = useState(1);
+  const [week, setWeek] = useState(presetWeek || 1);
   const [type, setType] = useState<'slides' | 'notes' | 'past-paper'>('slides');
   const [stage, setStage] = useState<Stage>('pick');
   const [progress, setProgress] = useState('');
@@ -27,6 +27,7 @@ export default function SendPdf({ courses, course: fixed, onClose }: { courses?:
 
   // Default the week to this week of the semester.
   useEffect(() => {
+    if (presetWeek) return;
     api.settings().then((s) => {
       if (!s.semesterStart) return;
       const w = Math.floor((Date.now() - new Date(`${s.semesterStart}T00:00:00+01:00`).getTime()) / (7 * 86400000)) + 1;

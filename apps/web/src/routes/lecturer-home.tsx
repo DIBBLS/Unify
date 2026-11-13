@@ -2,7 +2,7 @@ import { SectionSkeleton } from '../components/Skeletons';
 import LiveWire from '../components/LiveWire';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CalendarDays, ClipboardCheck, Search, ChevronRight, Flag, FileUp } from 'lucide-react';
+import { CalendarDays, ClipboardCheck, Search, ChevronRight, Flag, FileUp, MessageCircle } from 'lucide-react';
 import SendPdf from '../components/SendPdf';
 import { api, type ClassSlot } from '../lib/api';
 import { errorToast } from '../lib/errors';
@@ -20,6 +20,7 @@ const toMin = (hhmm: string) => {
 const ACTIONS = [
   { to: ROUTES.scanner, icon: ClipboardCheck, title: 'Take attendance', sub: 'Open a session and scan students’ passes', lecturerOnly: true },
   { to: ROUTES.timetable, icon: CalendarDays, title: 'Timetable', sub: 'Every class you teach, set by each class rep' },
+  { to: '/messages', icon: MessageCircle, title: 'Messages', sub: 'Talk to the contributors writing your courses' },
   { to: ROUTES.browse, icon: Search, title: 'Browse content', sub: 'Everything at your level' },
   { to: '/content-reports', icon: Flag, title: 'Reports and reviews', sub: 'Problems students reported, and week reviews' },
 ];

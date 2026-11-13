@@ -1,7 +1,7 @@
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { BookOpen, ChevronRight, Trash2 } from 'lucide-react';
+import { BookOpen, ChevronRight, Trash2, MessageCircle } from 'lucide-react';
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type Profile, type HomeUpdate } from '../lib/api';
 import { canOpenLink } from '../lib/updateLinks';
@@ -300,6 +300,8 @@ export default function HomeRoute() {
   // Teaching courses: lecturers always get My Classes; contributors with
   // assigned teaching courses do too (backend gates the page either way).
   const [teaching, setTeaching] = useState<string[]>([]);
+  // Unread lecturer/contributor messages (contributor dashboard).
+  const [unreadMsgs, setUnreadMsgs] = useState(0);
   const [myContribs, setMyContribs] = useState<{ course: string; level: string; semester: string; assigned: boolean; topics: number; versions: number; totalTopics: number }[]>([]);
   const [confirmUnenroll, setConfirmUnenroll] = useState<string | null>(null);
   const [unenrolling, setUnenrolling] = useState(false);
@@ -411,6 +413,7 @@ export default function HomeRoute() {
               if (me.profile?.role === 'contributor' && contributorNeedsWelcome(me.profile.id, assigned)) navigate(ROUTES.contributorWelcome);
             }).catch(() => {}),
             api.authorStats().then(setAstats).catch(() => {}),
+            api.courseChatThreads().then((r) => setUnreadMsgs(r.threads.reduce((n, t) => n + t.unread, 0))).catch(() => {}),
           );
         }
         // Oversight loads for every effective admin, both dashboard views.
@@ -542,6 +545,7 @@ export default function HomeRoute() {
           <div style={{ margin: '16px 16px 0' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
               <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800, flex: 1 }}>My courses</h2>
+              <Link to="/messages" style={{ fontSize: 12, fontWeight: 700, color: 'var(--u-good)', textDecoration: 'none' }}>Messages{unreadMsgs ? ` · ${unreadMsgs}` : ''}</Link>
               {profile?.role === 'contributor' && <Link to={ROUTES.contributorWelcome} style={{ fontSize: 12, fontWeight: 700, color: 'var(--u-good)', textDecoration: 'none' }}>How it works</Link>}
             </div>
             <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 2, lineHeight: 1.5 }}>
@@ -555,6 +559,7 @@ export default function HomeRoute() {
               )}
               {myContribs.map((c) => (
                 <div key={c.course} style={{ padding: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
+                  {c.assigned && <Link to={`/messages/${encodeURIComponent(c.course)}`} aria-label={`Messages for ${c.course}`} style={{ display: 'flex', padding: 6, borderRadius: 10, background: 'var(--u-good-tint)', color: 'var(--u-good)' }}><MessageCircle size={16} /></Link>}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 800, fontSize: 14 }}>{c.course}</div>
                     <div style={{ fontSize: 11, color: 'var(--text2)' }}>{[c.level, (c.semester || '').replace(' Semester', '')].filter(Boolean).join(' · ') || 'Unscoped'}</div>
