@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CalendarDays, ClipboardCheck, Search, ChevronRight, Flag, FileUp, MessageCircle, PenTool } from 'lucide-react';
 import SendPdf from '../components/SendPdf';
+import { timesOf } from '../components/TimetableGrid';
 import { api, type ClassSlot } from '../lib/api';
 import { errorToast } from '../lib/errors';
 import { ROUTES } from '../lib/routes';
@@ -46,7 +47,7 @@ export default function LecturerHomeRoute() {
         const day = new Date().getDay();
         const settled = await Promise.allSettled(courses.map((c) => api.timetable(c)));
         const slots = settled.flatMap((r) => (r.status === 'fulfilled' ? r.value.slots || [] : []));
-        setToday(slots.filter((s) => s.day === day).sort((a, b) => toMin(a.start) - toMin(b.start)));
+        setToday(slots.filter((s) => s.day === day).sort((a, b) => toMin(timesOf(a).start) - toMin(timesOf(b).start)));
       } catch (e) {
         errorToast(e, 'load your classes');
         setToday([]);
@@ -113,19 +114,26 @@ export default function LecturerHomeRoute() {
           </Card>
         ) : (
           <ListCard style={{ marginTop: 8 }}>
-            {today.map((s) => (
-              <ListRow
-                key={s.id}
-                title={s.course}
-                sub={`${s.start}–${s.end}${s.venue ? ` · ${s.venue}` : ''}`}
-                right={
-                  <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
-                    {s.meetLink && <a href={s.meetLink} target="_blank" rel="noreferrer" className="btn btn--white btn--sm">Open link</a>}
-                    {role === 'lecturer' || role === 'admin' ? <Link to={ROUTES.scanner} className="btn btn--amber btn--sm">Attendance</Link> : <Pill>Today</Pill>}
-                  </span>
-                }
-              />
-            ))}
+            {today.map((s) => {
+              const t = timesOf(s);
+              const ch = s.change?.status;
+              return (
+                <ListRow
+                  key={s.id}
+                  title={<span style={{ textDecoration: ch === 'cancelled' ? 'line-through' : undefined }}>{s.course}</span>}
+                  sub={`${t.start}–${t.end}${t.venue ? ` · ${t.venue}` : ''}`}
+                  right={
+                    <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
+                      {ch === 'cancelled' ? <Pill tone="bad">Cancelled</Pill> : ch === 'late' ? <Pill tone="amber">Running late</Pill> : ch === 'confirmed' ? <Pill tone="good">Confirmed</Pill> : null}
+                      {ch !== 'cancelled' && s.meetLink && <a href={s.meetLink} target="_blank" rel="noreferrer" className="btn btn--white btn--sm">Open link</a>}
+                      {ch !== 'cancelled' && (role === 'lecturer' || role === 'admin'
+                        ? <Link to={`${ROUTES.scanner}?course=${encodeURIComponent(s.course)}&slot=${s.id}`} className="btn btn--amber btn--sm">Attendance</Link>
+                        : !ch && <Pill>Today</Pill>)}
+                    </span>
+                  }
+                />
+              );
+            })}
           </ListCard>
         )}
       </section>
@@ -134,8 +142,9 @@ export default function LecturerHomeRoute() {
       {today !== null && taught.length === 0 && role === 'lecturer' && (
         <Card style={{ marginTop: 22, alignItems: 'center', textAlign: 'center' }}>
           <BoxBoy pose="peeking" width={90} />
-          <div className="t-15 w-6">No courses assigned yet</div>
-          <div className="t-13 muted">The Unify team assigns the courses you teach. Tell them which from Me → Help, and they'll show up here with their weeks, reports and attendance.</div>
+          <div className="t-15 w-6">No courses yet</div>
+          <div className="t-13 muted">Add the courses you teach, from any department and level. They show up here with their weeks, reports and attendance.</div>
+          <Link to="/lecturer/welcome?step=courses" className="btn btn--amber btn--block">Add your courses</Link>
         </Card>
       )}
       {taught.length > 0 && (role === 'lecturer' || role === 'admin') && (
