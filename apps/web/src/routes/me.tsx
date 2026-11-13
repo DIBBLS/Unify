@@ -14,6 +14,7 @@ import { ROUTES } from '../lib/routes';
 import Wordmark from '../components/Wordmark';
 import { pushSupported, pushState, enablePush, disablePush, type PushState } from '../lib/push';
 import { supabaseBrowser, clearRememberSession } from '../lib/supabase';
+import { forgetLastName } from '../lib/lastName';
 import { api, clearMeCache, type Profile, type University } from '../lib/api';
 import Loading from '../components/Loading';
 import ErrorState from '../components/ErrorState';
@@ -335,6 +336,9 @@ export default function MeRoute() {
     if (sb) await sb.auth.signOut({ scope: 'local' }).catch(() => {});
     clearRememberSession();
     clearMeCache();
+    // Logging out on purpose forgets the name too, so the next person on this
+    // device gets a plain sign-in instead of "Welcome back, <someone else>".
+    forgetLastName();
     navigate('/auth');
   };
 

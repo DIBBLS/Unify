@@ -85,7 +85,7 @@ export default function ClassDetailRoute() {
         {slot.lecturer && <div className="t-14 muted">{slot.lecturer}</div>}
         {ch?.note && <div className="t-14">"{ch.note}"</div>}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
-          <Link to={`/course/${encodeURIComponent(slot.course)}`} className="btn btn--white btn--sm">Open the course</Link>
+          <Link to={`/courses/${encodeURIComponent(slot.course)}`} className="btn btn--white btn--sm">Open the course</Link>
           {slot.meetLink && <a href={slot.meetLink} target="_blank" rel="noopener noreferrer" className="btn btn--amber btn--sm"><Video size={14} /> Join online</a>}
         </div>
       </Card>

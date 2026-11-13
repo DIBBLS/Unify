@@ -272,7 +272,7 @@ export default function LearnPage() {
         ? '/admin/content'
         : viewer.role === 'lecturer' || viewer.role === 'contributor'
           ? '/browse'
-          : `/course/${encodeURIComponent(courseCode || '')}`
+          : `/courses/${encodeURIComponent(courseCode || '')}`
       : '/home'; // no in-app trail (app reopened, refreshed, opened from a notification): Home
   const goTab = (t: number, lec: number = selLecture) => {
     const list = lec === selLecture ? classTopics : topics.filter((x) => (x.lecture || 1) === lec);

@@ -386,7 +386,7 @@ export default function AuthRoute() {
           <Wordmark size={20} onGreen />
           <div className="eyebrow" style={{ marginTop: 10, opacity: 0.75 }}>{WELCOME_LINE}</div>
           <h1 key={tab} className="quote-fade" style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 32, marginTop: 12, lineHeight: 1.1 }}>
-            {tab === 'signin' ? (lastName ? `Welcome back, ${lastName}` : 'Welcome back') : 'Welcome to Unify Learn'}
+            {tab === 'signin' ? (lastName ? `Welcome back, ${lastName}` : 'Sign in') : 'Welcome to Unify Learn'}
           </h1>
           {tab === 'signin' && lastName && (
             <button onClick={() => { forgetLastName(); setLastName(''); }} style={{ background: 'none', border: 'none', padding: 0, marginTop: 4, fontSize: 12, fontWeight: 700, color: 'var(--u-black)', opacity: 0.7, textDecoration: 'underline' }}>

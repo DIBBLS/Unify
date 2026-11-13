@@ -120,7 +120,7 @@ export default function OnboardingFinishRoute() {
             <div style={{ display: 'flex', justifyContent: 'center' }}><BoxBoy pose="cheer" width={150} /></div>
             <div style={{ fontSize: 15, textAlign: 'center' }}>Welcome{name ? `, ${name}` : ''}. Your courses are set. Pick one and open this week's note.</div>
             {firstCourse ? (
-              <Link to={`/course/${encodeURIComponent(firstCourse)}`} style={{ ...amberBtn, textDecoration: 'none' }}>Open {firstCourse} <ArrowRight size={18} /></Link>
+              <Link to={`/courses/${encodeURIComponent(firstCourse)}`} style={{ ...amberBtn, textDecoration: 'none' }}>Open {firstCourse} <ArrowRight size={18} /></Link>
             ) : null}
             <button onClick={() => navigate('/home')} style={firstCourse ? { background: 'none', border: 'none', color: 'var(--text2)', fontWeight: 700, padding: 10 } : amberBtn}>
               {firstCourse ? 'Go to Home' : <>Open my courses <ArrowRight size={18} /></>}
