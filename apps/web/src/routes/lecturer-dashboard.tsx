@@ -4,7 +4,7 @@ import { Camera, ChevronRight, ScanLine, Send } from 'lucide-react';
 import { api, type ClassSlot, type Profile } from '../lib/api';
 import { ROUTES } from '../lib/routes';
 import LiveWire from '../components/LiveWire';
-import { SectionSkeleton } from '../components/Skeletons';
+import { CourseCardSkeletons } from '../components/Skeletons';
 import { BoxBoy } from '../components/redesign/brand';
 import { Card, Display } from '../components/redesign/ui';
 import { timesOf, toMin } from '../components/TimetableGrid';
@@ -28,6 +28,8 @@ export default function LecturerDashboard({ profile, firstName, catalog, hasPhot
   const [slots, setSlots] = useState<ClassSlot[]>([]);
   const [students, setStudents] = useState<Record<string, number>>({});
   const [tab, setTab] = useState<string | null>(null);
+  // Courses the lecturer added themselves wait for each class's rep to confirm.
+  const [claims, setClaims] = useState<Record<string, { waiting: boolean; confirmed: number }>>({});
 
   useEffect(() => {
     let gone = false;
@@ -35,11 +37,13 @@ export default function LecturerDashboard({ profile, firstName, catalog, hasPhot
       const taught = (await api.teaching().catch(() => ({ courses: [] as string[] }))).courses;
       if (gone) return;
       setCourses(taught);
-      const [tt, rosters] = await Promise.all([
+      const [tt, rosters, cl] = await Promise.all([
         Promise.allSettled(taught.map((c) => api.timetable(c))),
         Promise.allSettled(taught.map((c) => api.roster(c))),
+        api.lecturerClaims().catch(() => ({ courses: [] as { course: string; claimed: boolean; waiting: boolean; confirmed: number }[] })),
       ]);
       if (gone) return;
+      setClaims(Object.fromEntries(cl.courses.filter((c) => c.claimed).map((c) => [c.course, { waiting: c.waiting, confirmed: c.confirmed }])));
       setSlots(tt.flatMap((r) => (r.status === 'fulfilled' ? r.value.slots || [] : [])));
       const n: Record<string, number> = {};
       rosters.forEach((r, i) => { if (r.status === 'fulfilled') n[taught[i]] = r.value.students.length; });
@@ -101,6 +105,13 @@ export default function LecturerDashboard({ profile, firstName, catalog, hasPhot
         </div>
       )}
 
+      {!profile.department && (
+        <Link to="/lecturer/welcome" style={{ margin: '0 16px 12px', display: 'block', background: 'var(--u-warn-tint)', border: '1px solid var(--u-amber)', borderRadius: 12, padding: 14, color: 'var(--text)', textDecoration: 'none' }}>
+          <span style={{ display: 'block', fontWeight: 800, fontSize: 14 }}>Finish setting up</span>
+          <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)' }}>Your title, department and the courses you teach. Two minutes.</span>
+        </Link>
+      )}
+
       {!hasPhoto && (
         <Link to={ROUTES.me} style={{ margin: '0 16px 12px', display: 'flex', gap: 12, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, color: 'var(--text)', textDecoration: 'none' }}>
           <Camera size={18} color="var(--u-good)" />
@@ -114,7 +125,7 @@ export default function LecturerDashboard({ profile, firstName, catalog, hasPhot
 
       <div style={{ margin: '16px 16px 0', display: 'flex', alignItems: 'baseline', gap: 8 }}>
         <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800, flex: 1 }}>Your courses</h2>
-        {levels.length > 0 && <span className="t-12 muted">{levels.length} level{levels.length === 1 ? '' : 's'}</span>}
+        <Link to="/lecturer/welcome?step=courses" style={{ fontSize: 13, fontWeight: 700, color: 'var(--u-good)', textDecoration: 'none' }}>+ Add a course</Link>
       </div>
       {/* One level at a time: tap a level to see its course cards. */}
       {levels.length > 1 && (
@@ -127,26 +138,30 @@ export default function LecturerDashboard({ profile, firstName, catalog, hasPhot
         </div>
       )}
       <div style={{ margin: '12px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {courses === null && <SectionSkeleton rows={2} quote={false} />}
+        {courses === null && <div style={{ margin: '-12px -16px' }}><CourseCardSkeletons rows={3} /></div>}
         {courses && courses.length === 0 && (
           <Card style={{ alignItems: 'center', textAlign: 'center' }}>
             <BoxBoy pose="peeking" width={90} />
             <div className="t-15 w-6">No courses yet</div>
-            <div className="t-13 muted">The Unify team adds the courses you teach. Tell them which from Me → Help, and they'll show up here.</div>
+            <div className="t-13 muted">Add the courses you teach, from any department and level.</div>
+            <Link to="/lecturer/welcome?step=courses" className="btn btn--amber btn--block">Add your courses</Link>
           </Card>
         )}
         {open && (byLevel[open] || []).map((code) => {
           const [dept, num] = code.includes(' ') ? [code.split(' ')[0], code.split(' ').slice(1).join(' ')] : [code.replace(/\d.*$/, ''), code.replace(/^\D+/, '')];
           const n = students[code];
+          const waiting = !!claims[code]?.waiting;
           return (
-            <Link key={code} to={`/lecturer/course/${encodeURIComponent(code)}`} className="card rise" style={{ display: 'flex', gap: 14, alignItems: 'center', padding: 14, textDecoration: 'none', color: 'var(--text)' }}>
-              <span style={{ width: 52, height: 52, borderRadius: 14, background: 'var(--u-black)', color: 'var(--u-green)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Link key={code} to={`/lecturer/course/${encodeURIComponent(code)}`} className="card rise" style={{ display: 'flex', gap: 14, alignItems: 'center', padding: 14, textDecoration: 'none', color: 'var(--text)', border: waiting ? '1.5px dashed var(--u-amber)' : undefined }}>
+              <span style={{ width: 52, height: 52, borderRadius: 14, background: waiting ? 'var(--surface2)' : 'var(--u-black)', color: waiting ? 'var(--text3)' : 'var(--u-green)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <span style={{ fontSize: 10, fontWeight: 800 }}>{dept}</span>
                 <span style={{ fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 17, lineHeight: 1 }}>{num}</span>
               </span>
               <span style={{ flex: 1, minWidth: 0 }}>
                 <span style={{ display: 'block', fontWeight: 800, fontSize: 15 }}>{info(code)?.title || code}</span>
-                <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)' }}>{n != null ? `${n} student${n === 1 ? '' : 's'}` : code}</span>
+                <span style={{ display: 'block', fontSize: 12, color: waiting ? 'var(--u-warn-ink)' : 'var(--text2)', fontWeight: waiting ? 700 : 400 }}>
+                  {waiting ? 'Waiting for Head of Class' : [n != null ? `${n} student${n === 1 ? '' : 's'}` : code, claims[code]?.confirmed ? `confirmed by ${claims[code].confirmed} class${claims[code].confirmed === 1 ? '' : 'es'}` : ''].filter(Boolean).join(' · ')}
+                </span>
               </span>
               <ChevronRight size={18} color="var(--text3)" />
             </Link>

@@ -359,3 +359,86 @@ export function AdminSkeleton() {
     </PageShell>
   );
 }
+
+/** Lecturer Home (design L07): dark header, today's class card, the photo
+ *  nudge, then Your courses with level tabs and course cards. */
+export function LecturerHomeSkeleton() {
+  return (
+    <div role="status" aria-label="Loading" style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', paddingBottom: 80 }}>
+      <div className="card card--dark" style={{ margin: 16, padding: '22px 20px 26px', display: 'flex', gap: 14, alignItems: 'center' }}>
+        <div style={{ flex: 1 }}>
+          <div className="skel skel--dark" style={{ height: 11, width: 70 }} />
+          <div className="skel skel--dark" style={{ height: 26, width: '60%', marginTop: 10 }} />
+          <div className="skel skel--dark" style={{ height: 13, width: '75%', marginTop: 10 }} />
+        </div>
+        <div className="skel skel--dark" style={{ width: 64, height: 84, borderRadius: 14, flexShrink: 0 }} />
+      </div>
+      <div className="card card--dark" style={{ margin: '0 16px 12px', padding: 18 }}>
+        <div className="skel skel--dark" style={{ height: 11, width: 110 }} />
+        <div className="skel skel--dark" style={{ height: 22, width: '70%', marginTop: 10 }} />
+        <div className="skel skel--dark" style={{ height: 13, width: '45%', marginTop: 8 }} />
+        <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
+          {[150, 120].map((w, i) => <div key={i} className="skel skel--dark" style={{ height: 36, width: w, borderRadius: 18 }} />)}
+        </div>
+      </div>
+      <div className="skel" style={{ height: 64, borderRadius: 12, margin: '0 16px 12px' }} />
+      <div style={{ margin: '16px 16px 0' }}><div className="skel" style={{ height: 20, width: 130 }} /></div>
+      <div style={{ display: 'flex', gap: 6, margin: '10px 16px 0' }}>
+        {[0, 1, 2].map((i) => <div key={i} className="skel" style={{ height: 32, width: 72, borderRadius: 9999 }} />)}
+      </div>
+      <CourseCardSkeletons />
+      <LoadingQuote style={{ margin: '8px auto 0' }} />
+    </div>
+  );
+}
+
+/** The lecturer's course cards (department/number tile, title, count). */
+export function CourseCardSkeletons({ rows = 3 }: { rows?: number }) {
+  return (
+    <div style={{ margin: '12px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {Array.from({ length: rows }).map((_, i) => (
+        <div key={i} className="card" style={{ display: 'flex', gap: 14, alignItems: 'center', padding: 14 }}>
+          <div className="skel" style={{ width: 52, height: 52, borderRadius: 14, flexShrink: 0 }} />
+          <div style={{ flex: 1 }}>
+            <div className="skel" style={{ height: 15, width: '60%' }} />
+            <div className="skel" style={{ height: 12, width: '35%', marginTop: 8 }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Timetable (day view): hours down the side with a couple of class blocks. */
+export function TimetableSkeleton() {
+  const hours = [0, 1, 2, 3, 4, 5, 6];
+  return (
+    <div role="status" aria-label="Loading the timetable" style={{ position: 'relative', marginTop: 12, padding: '10px 10px 10px 0', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, height: 6 * 60 + 22 }}>
+      {hours.map((h) => (
+        <div key={h} style={{ position: 'absolute', left: 0, right: 10, top: 10 + h * 60, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div className="skel" style={{ width: 30, height: 10, marginLeft: 12 }} />
+          <span style={{ flex: 1, borderTop: '1px dashed var(--border)' }} />
+        </div>
+      ))}
+      <div className="skel" style={{ position: 'absolute', left: 64, right: 12, top: 14, height: 112, borderRadius: 12 }} />
+      <div className="skel" style={{ position: 'absolute', left: 64, right: 12, top: 254, height: 52, borderRadius: 12 }} />
+    </div>
+  );
+}
+
+/** A short step-by-step onboarding (progress bar, one card, a button). */
+export function StepsSkeleton() {
+  return (
+    <div role="status" aria-label="Loading" style={{ maxWidth: 'min(var(--shell, 480px), 560px)', margin: '0 auto', padding: '20px 16px 96px' }}>
+      <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>{[0, 1, 2, 3].map((i) => <div key={i} className="skel" style={{ flex: 1, height: 6, borderRadius: 9999 }} />)}</div>
+      <div className="card" style={{ marginTop: 16, padding: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+        <div className="skel" style={{ width: 110, height: 130, borderRadius: 16 }} />
+        <div className="skel" style={{ height: 11, width: 80 }} />
+        <div className="skel" style={{ height: 26, width: '65%' }} />
+        <div className="skel" style={{ height: 13, width: '90%' }} />
+        <div className="skel" style={{ height: 13, width: '80%' }} />
+      </div>
+      <div className="skel" style={{ height: 55, borderRadius: 28, marginTop: 16 }} />
+    </div>
+  );
+}

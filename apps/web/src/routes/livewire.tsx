@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { ROUTES } from '../lib/routes';
 import BackButton from '../components/BackButton';
+import { SectionSkeleton } from '../components/Skeletons';
 import LiveWire from '../components/LiveWire';
 import { BoxBoy } from '../components/redesign/brand';
 import { Card, Display, Label } from '../components/redesign/ui';
@@ -24,7 +25,7 @@ export default function LiveWireRoute() {
       <div className="t-14 muted" style={{ marginTop: 4, marginBottom: 14 }}>
         A message with a countdown (a test starting, a deadline, a venue change). It sits at the top of Home for the students you pick until the time runs out, and rings their bell with a push.
       </div>
-      {canSend === null && <div className="t-13 muted">Loading…</div>}
+      {canSend === null && <SectionSkeleton rows={2} quote={false} />}
       {canSend === false && (
         <Card style={{ alignItems: 'center', textAlign: 'center', gap: 10 }}>
           <BoxBoy pose="peeking" width={100} />
