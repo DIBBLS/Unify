@@ -270,6 +270,7 @@ export function clearMeCache(): void {
 
 
 // ---- Head of Class + attendance ----
+export type BugReport = { id: string; what: string; doing: string; page: string; appVersion: string; device: string; status: 'open' | 'resolved'; resolvedAt: string | null; createdAt: string; by: { name: string; role: string; email: string } };
 export type HocPost = { id: string; type: 'announcement' | 'tip' | 'question'; title: string | null; content: string; createdAt: string; author: string; mine: boolean };
 export type CourseAttendance = {
   course: string;
@@ -671,6 +672,13 @@ export const api = {
     courses?: { code: string; status: CgpaCourse['status']; units: number; grade?: number | null }[];
   }) => apiFetch<{ ok: boolean }>('/v1/cgpa', { method: 'PUT', body: JSON.stringify(payload) }),
   // Head of Class
+  // In-app bug reports (Me › Report a bug) and the admin list.
+  bugReport: (payload: { what: string; doing?: string; page?: string; appVersion?: string; device?: string }) =>
+    apiFetch<{ ok: boolean; id: string }>('/v1/bug-reports', { method: 'POST', body: JSON.stringify(payload) }, 0),
+  adminBugReports: (status: 'open' | 'resolved' | 'all' = 'open') =>
+    apiFetch<{ open: number; reports: BugReport[] }>(`/v1/admin/bug-reports?status=${status}`),
+  adminBugReportSet: (id: string, action: 'resolve' | 'reopen') =>
+    apiFetch<{ ok: boolean }>(`/v1/admin/bug-reports/${encodeURIComponent(id)}/${action}`, { method: 'POST' }, 0),
   classMembers: () =>
     apiFetch<{ department: string | null; level: string | null; members: { id: string; name: string; avatar: string; persona: string | null; isHoc: boolean; me: boolean }[] }>('/v1/hoc/members'),
   hocPosts: () => apiFetch<{ posts: HocPost[]; isHoc: boolean; department?: string; level?: string; audience?: { students: number; fromList: boolean } }>('/v1/hoc/posts'),

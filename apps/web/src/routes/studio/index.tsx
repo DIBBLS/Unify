@@ -1046,7 +1046,7 @@ export default function StudioRoute() {
                       onClick={() => setTicks(ticks.map((t, k) => (k === i ? !t : t)))}
                       style={{ display: 'flex', gap: 12, alignItems: 'center', minHeight: 48, padding: '8px 10px', background: 'none', border: 'none', textAlign: 'left', color: 'var(--text)', fontSize: 14, fontWeight: 600 }}
                     >
-                      <span style={{ width: 24, height: 24, borderRadius: 8, flexShrink: 0, display: 'grid', placeItems: 'center', border: `2px solid ${ticks[i] ? 'var(--u-good)' : 'var(--border)'}`, background: ticks[i] ? 'var(--u-good)' : 'transparent', color: '#fff' }}>
+                      <span style={{ width: 24, height: 24, borderRadius: 8, flexShrink: 0, display: 'grid', placeItems: 'center', border: `2px solid ${ticks[i] ? 'var(--u-good)' : 'var(--border)'}`, background: ticks[i] ? 'var(--u-good)' : 'transparent', color: 'var(--u-on-good)' }}>
                         {ticks[i] && <Check size={14} />}
                       </span>
                       {label}
@@ -1092,7 +1092,7 @@ export default function StudioRoute() {
                       else if (o.topic !== undefined) void publishTopic(o.topic, o.lecture || 1, 'add');
                     }}
                     disabled={publishing || publishingTopic !== null}
-                    style={{ padding: 13, borderRadius: 14, background: 'var(--u-good)', color: '#fff', border: 'none', borderBottom: '3px solid #14532d', fontWeight: 800, fontSize: 14 }}
+                    style={{ padding: 13, borderRadius: 14, background: 'var(--u-good)', color: 'var(--u-on-good)', border: 'none', borderBottom: '3px solid #14532d', fontWeight: 800, fontSize: 14 }}
                   >
                     Add as new version — keep everything
                   </button>

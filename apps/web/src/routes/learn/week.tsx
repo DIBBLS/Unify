@@ -603,7 +603,7 @@ function TopicTab({ topic, done, onToggle, preview }: { topic: Topic; done: bool
             padding: '10px 18px',
             borderRadius: 9999,
             background: done ? 'var(--u-good)' : 'var(--surface)',
-            color: done ? '#fff' : 'var(--text)',
+            color: done ? 'var(--u-on-good)' : 'var(--text)',
             border: `1px solid ${done ? 'var(--u-good)' : 'var(--border)'}`,
             cursor: 'pointer',
             display: 'flex',

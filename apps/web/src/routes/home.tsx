@@ -14,6 +14,7 @@ import Typewriter from '../components/Typewriter';
 import Flash from '../components/Flash';
 import ConfirmModal from '../components/ConfirmModal';
 import { HomeHero } from '../components/redesign/HomeHero';
+import { useClassListReady } from '../lib/classListReady';
 import { UpdatesSlider, type UpdateSlide } from '../components/redesign/UpdatesSlider';
 import { FACTS } from '../lib/naija';
 import LiveWire from '../components/LiveWire';
@@ -250,6 +251,8 @@ export default function HomeRoute() {
   const [signInPhoto, setSignInPhoto] = useState('');
   const gaps = profileGaps(profile, signInPhoto);
   const [liveUpdates, setLiveUpdates] = useState<HomeUpdate[]>([]);
+  // My pass is only offered once the student's class list is up.
+  const passReady = useClassListReady();
   useEffect(() => {
     api.updates().then((r) => setLiveUpdates(r.updates || [])).catch(() => {});
   }, []);
@@ -622,7 +625,7 @@ export default function HomeRoute() {
   if (shown.length > 0 && (profile?.role || 'student') === 'student') {
     updateSlides.push({ id: 'practice', pose: 'cheer', tag: 'Practice', title: 'Course games', body: 'Keywords and Crossword from your own notes, against the clock, with leaderboards for your course.', to: '/games', cta: 'Play now' });
   }
-  updateSlides.push({ id: 'attend', pose: 'phoneOut', tag: 'In class', title: 'Your attendance pass', body: 'In class, open My pass and let your class rep or lecturer scan it.', to: '/attendance/pass', cta: 'My pass' });
+  if (passReady) updateSlides.push({ id: 'attend', pose: 'phoneOut', tag: 'In class', title: 'Your attendance pass', body: 'In class, open My pass and let your class rep or lecturer scan it.', to: '/attendance/pass', cta: 'My pass' });
   updateSlides.push({ id: 'class', pose: 'thumbsUpPhone', tag: 'Your class', title: 'Notices from your class rep', body: 'Board posts and shared materials from your course live in Class.', to: '/class', cta: 'Open Class' });
   {
     const f = FACTS[new Date().getDate() % FACTS.length];

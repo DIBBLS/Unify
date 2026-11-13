@@ -61,7 +61,7 @@ export default function GuideRoute() {
                     onClick={() => toggle(i)}
                     aria-label={on ? `Mark step ${i + 1} not done` : `Mark step ${i + 1} done`}
                     aria-pressed={on}
-                    style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, border: `2px solid ${on ? 'var(--u-good)' : 'var(--border)'}`, background: on ? 'var(--u-good)' : 'transparent', color: on ? '#fff' : 'var(--text2)', fontWeight: 800, fontSize: 13 }}
+                    style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, border: `2px solid ${on ? 'var(--u-good)' : 'var(--border)'}`, background: on ? 'var(--u-good)' : 'transparent', color: on ? 'var(--u-on-good)' : 'var(--text2)', fontWeight: 800, fontSize: 13 }}
                   >
                     {on ? '✓' : i + 1}
                   </button>

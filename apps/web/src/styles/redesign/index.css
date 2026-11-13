@@ -36,6 +36,7 @@
   --u-good: #4ade80;
   --u-good-2: #4ade80;
   --u-good-ink: #bbf7d0;
+  --u-on-good: #0a0a0a;   /* --u-good is light green in dark mode: dark text on it */
   --u-warn-ink: #fbbf24;
   --u-red: #f87171;
   

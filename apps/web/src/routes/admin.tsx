@@ -18,6 +18,7 @@ import PerformancePanel from './admin/performance';
 import HomeUpdatesPanel from './admin/updates';
 import ModulesOverview from './admin/modules-overview';
 import AdminLiveWire from './admin/livewire';
+import AdminBugs from './admin/bugs';
 import GuidePanel, { ClassContributorsPicker } from './admin/guide';
 import Typewriter from '../components/Typewriter';
 import { localGreeting, dailyProverb } from '../lib/naija';
@@ -486,7 +487,7 @@ export default function AdminRoute() {
 
   const card = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 12 } as const;
   const input = { padding: 10, border: '1px solid var(--border)', borderRadius: 10, fontSize: 14 } as const;
-  const primaryBtn = { padding: '10px 18px', borderRadius: 12, background: 'var(--u-green)', color: 'var(--u-on-dark)', border: 'none', fontWeight: 800 } as const;
+  const primaryBtn = { padding: '10px 18px', borderRadius: 12, background: 'var(--u-green)', color: 'var(--u-black)', border: 'none', fontWeight: 800 } as const;
   const shownCourses = courses.filter((c) => {
     const needle = courseQ.trim().toLowerCase();
     if (!needle) return true;
@@ -773,7 +774,7 @@ export default function AdminRoute() {
                   borderRadius: 9999,
                   border: `1px solid ${courseLevels.includes(l) ? 'var(--u-good)' : 'var(--border)'}`,
                   background: courseLevels.includes(l) ? 'var(--u-amber)' : 'var(--surface)',
-                  color: courseLevels.includes(l) ? '#fff' : 'var(--text2)',
+                  color: courseLevels.includes(l) ? 'var(--u-black)' : 'var(--text2)',
                   fontSize: 12,
                   fontWeight: 700,
                 }}
@@ -793,7 +794,7 @@ export default function AdminRoute() {
                   borderRadius: 9999,
                   border: `1px solid ${courseSemester === s ? 'var(--u-good)' : 'var(--border)'}`,
                   background: courseSemester === s ? 'var(--u-amber)' : 'var(--surface)',
-                  color: courseSemester === s ? '#fff' : 'var(--text2)',
+                  color: courseSemester === s ? 'var(--u-black)' : 'var(--text2)',
                   fontSize: 12,
                   fontWeight: 700,
                 }}
@@ -822,7 +823,7 @@ export default function AdminRoute() {
                 borderRadius: 9999,
                 border: `1px solid ${currentSemester === s ? 'var(--u-good)' : 'var(--border)'}`,
                 background: currentSemester === s ? 'var(--u-amber)' : 'var(--surface)',
-                color: currentSemester === s ? '#fff' : 'var(--text2)',
+                color: currentSemester === s ? 'var(--u-black)' : 'var(--text2)',
                 fontSize: 13,
                 fontWeight: 800,
               }}
@@ -852,6 +853,10 @@ export default function AdminRoute() {
 
       <Module id="guide" openId={openModule}>
         {openModule === 'guide' && <GuidePanel />}
+      </Module>
+
+      <Module id="bugs" openId={openModule}>
+        {openModule === 'bugs' && <AdminBugs />}
       </Module>
 
       <Module id="livewire" openId={openModule}>
@@ -1081,7 +1086,7 @@ export default function AdminRoute() {
                     borderRadius: 9999,
                     border: `1px solid ${u.role === r ? 'var(--u-good)' : 'var(--border)'}`,
                     background: u.role === r ? 'var(--u-amber)' : 'var(--surface)',
-                    color: u.role === r ? '#fff' : 'var(--text2)',
+                    color: u.role === r ? 'var(--u-black)' : 'var(--text2)',
                     fontSize: 12,
                     fontWeight: 700,
                   }}

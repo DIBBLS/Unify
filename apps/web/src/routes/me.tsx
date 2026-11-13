@@ -4,7 +4,7 @@ import { ProfileSkeleton } from '../components/Skeletons';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, Pencil, X, Sun, Moon, MessageCircle } from 'lucide-react';
+import { LogOut, Pencil, X, Sun, Moon, MessageCircle, Bug } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import ConfirmModal from '../components/ConfirmModal';
 import Drop from '../components/Drop';
@@ -675,6 +675,19 @@ export default function MeRoute() {
           Open Authoring Studio
         </Link>
       )}
+      <Link
+        to={ROUTES.reportBug}
+        style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, color: 'var(--text)', textDecoration: 'none' }}
+      >
+        <span style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <Bug size={18} color="var(--u-good)" />
+          <span>
+            <span style={{ display: 'block', fontSize: 13, fontWeight: 700 }}>Report a bug</span>
+            <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>Something broken or looking wrong? Tell the Unify team</span>
+          </span>
+        </span>
+        <span aria-hidden="true" style={{ color: 'var(--text3)' }}>›</span>
+      </Link>
       <SupportRow />
       {confirmLogout && (
         <ConfirmModal

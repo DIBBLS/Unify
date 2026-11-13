@@ -60,6 +60,15 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { error: E
           >
             Reload
           </button>
+          {/* A full page load (not a router link): the crashed tree can't be trusted to navigate. */}
+          <div style={{ marginTop: 16 }}>
+            <a
+              href={`/report-bug?from=${encodeURIComponent(window.location.pathname)}&what=${encodeURIComponent(`The screen crashed: ${this.state.error.message || 'unknown error'}`)}`}
+              style={{ fontSize: 13, fontWeight: 700, color: 'var(--u-good)' }}
+            >
+              Keeps happening? Report this problem
+            </a>
+          </div>
         </div>
       );
     }

@@ -24,6 +24,7 @@ export const ROUTES = {
   crossword: (code: string, week: number | string) => `/learn/${encodeURIComponent(code)}/week/${week}/crossword`,
   games: '/games',
   liveWire: '/livewire',
+  reportBug: '/report-bug',
   cgpa: '/cgpa-planner',
   notifications: '/notifications',
 
