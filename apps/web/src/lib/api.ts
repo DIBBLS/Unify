@@ -371,7 +371,7 @@ export type HomeUpdate = { id: string; title: string; body: string; link?: strin
 
 export const api = {
   universities: () => apiFetch<University[]>("/v1/universities"),
-  settings: () => apiFetch<{ currentSemester: string; semesterStart?: string | null; semesterWeeks?: number }>("/v1/settings"),
+  settings: () => apiFetch<{ currentSemester: string; semesterStart?: string | null; semesterWeeks?: number; semesterEnded?: boolean }>("/v1/settings"),
   me: () => {
     if (meCache && Date.now() - meCache.at < 15000) return Promise.resolve(meCache.data);
     if (meInflight) return meInflight;

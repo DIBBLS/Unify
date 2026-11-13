@@ -32,6 +32,7 @@ const LiveWireRoute = lazyRoute(() => import('./routes/livewire'));
 const ReportBugRoute = lazyRoute(() => import('./routes/report-bug'));
 const ClassContributorsRoute = lazyRoute(() => import('./routes/class-contributors'));
 const HocWelcomeRoute = lazyRoute(() => import('./routes/hoc-welcome'));
+const ContributorWelcomeRoute = lazyRoute(() => import('./routes/contributor-welcome'));
 const HocRequestsRoute = lazyRoute(() => import('./routes/hoc-requests'));
 const ReportsRoute = lazyRoute(() => import('./routes/reports'));
 const AdminRolesRoute = lazyRoute(() => import('./routes/admin-roles'));
@@ -388,6 +389,7 @@ export default function App() {
           <Route path={ROUTES.games} element={<RequireAuth><GamesRoute /></RequireAuth>} />
           <Route path={ROUTES.liveWire} element={<RequireAuth><LiveWireRoute /></RequireAuth>} />
           <Route path={ROUTES.reportBug} element={<RequireAuth><ReportBugRoute /></RequireAuth>} />
+          <Route path={ROUTES.contributorWelcome} element={<RequireAuth><ContributorWelcomeRoute /></RequireAuth>} />
           <Route path="/class/contributors" element={<RequireAuth><ClassContributorsRoute /></RequireAuth>} />
           <Route path="/hoc/welcome" element={<RequireAuth><HocWelcomeRoute /></RequireAuth>} />
           <Route path="/hoc/requests" element={<RequireAuth><HocRequestsRoute /></RequireAuth>} />
