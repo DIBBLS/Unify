@@ -16,6 +16,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import { HomeHero } from '../components/redesign/HomeHero';
 import { useClassListReady } from '../lib/classListReady';
 import { contributorNeedsWelcome } from './contributor-welcome';
+import LecturerDashboard from './lecturer-dashboard';
 import { ROUTES } from '../lib/routes';
 import { UpdatesSlider, type UpdateSlide } from '../components/redesign/UpdatesSlider';
 import { FACTS } from '../lib/naija';
@@ -474,6 +475,17 @@ export default function HomeRoute() {
       setDeleting(null);
     }
   };
+  // Lecturers get their own Home (design L07): today's class, their courses by
+  // level. No notes publishing, contributions or timetable editing (Review Round 2).
+  if (profile?.role === 'lecturer' && !isAdmin)
+    return (
+      <LecturerDashboard
+        profile={profile}
+        firstName={firstName}
+        hasPhoto={!!(signInPhoto || (profile as unknown as { avatar_url?: string }).avatar_url)}
+        catalog={Object.entries(catalog).map(([code, c]) => ({ code, title: c.title, levels: c.levels }))}
+      />
+    );
   if (isAuthor)
     return (
       <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', paddingBottom: 80 }}>

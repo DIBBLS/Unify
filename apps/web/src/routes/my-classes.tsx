@@ -22,6 +22,9 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 // Students read the same slots on their course pages.
 export default function MyClassesRoute() {
   const [courses, setCourses] = useState<string[]>([]);
+  // Class reps set class times (Review Round 2): only admins add or remove them here.
+  const [canEditTimes, setCanEditTimes] = useState(false);
+  useEffect(() => { api.me().then((m) => setCanEditTimes(!!m.isAdmin)).catch(() => {}); }, []);
   const [selected, setSelected] = useState('');
   const [slots, setSlots] = useState<ClassSlot[]>([]);
   const [roster, setRoster] = useState<RosterStudent[]>([]);
@@ -200,7 +203,7 @@ export default function MyClassesRoute() {
       <BackButton to="/home" />
       <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28 }}>My Classes</h1>
       <p style={{ color: 'var(--text2)', marginTop: 6, fontSize: 13 }}>
-        Weekly timetable + live roster for every course you teach
+        Class times (set by each class rep) and the live roster for every course you teach
       </p>
       {courses.length === 0 ? (
         <div style={{ marginTop: 16, padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
@@ -230,7 +233,7 @@ export default function MyClassesRoute() {
           <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
             {slots.length === 0 && (
               <div style={{ fontSize: 13, color: 'var(--text2)', background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 12, padding: 14 }}>
-                No class times set. Add the first slot below — students see it on the course page.
+                No class times yet. Each class's rep sets them; they show here once they do.
               </div>
             )}
             {slots.map((s) => (
@@ -256,13 +259,13 @@ export default function MyClassesRoute() {
                     <button onClick={() => { setLinkEditId(s.id); setLinkValue(''); }} style={{ marginTop: 4, fontSize: 12, fontWeight: 700, color: 'var(--text2)', display: 'inline-flex', gap: 4, alignItems: 'center' }}><Video size={12} /> Add online class link</button>
                   )}
                 </div>
-                <button onClick={() => setConfirmSlot(s.id)} aria-label={`Remove ${DAYS[s.day]} ${s.start} slot`} style={{ padding: 8, borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--u-red)' }}>
+                {canEditTimes && <button onClick={() => setConfirmSlot(s.id)} aria-label={`Remove ${DAYS[s.day]} ${s.start} slot`} style={{ padding: 8, borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--u-red)' }}>
                   <Trash2 size={14} />
-                </button>
+                </button>}
               </div>
             ))}
           </div>
-          <div style={{ marginTop: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14 }}>
+          {canEditTimes && <div style={{ marginTop: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14 }}>
             <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', marginBottom: 8 }}>ADD WEEKLY SLOT · {selected}</div>
             <div style={{ display: 'flex', gap: 8 }}>
               <label style={{ flex: 1, fontSize: 12, fontWeight: 700 }}>
@@ -292,7 +295,7 @@ export default function MyClassesRoute() {
             <button onClick={addSlot} disabled={adding} style={{ marginTop: 10, width: '100%', padding: 12, borderRadius: 14, border: 'none', borderBottom: '4px solid #c69a1a', background: 'var(--u-amber)', color: 'var(--u-black)', fontWeight: 800, opacity: adding ? 0.6 : 1 }}>
               {adding ? 'Adding…' : 'Add slot'}
             </button>
-          </div>
+          </div>}
           <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800, marginTop: 20, display: 'flex', gap: 6, alignItems: 'center' }}>
             <FileText size={16} color="var(--u-good)" /> Materials · {selected}
           </h2>

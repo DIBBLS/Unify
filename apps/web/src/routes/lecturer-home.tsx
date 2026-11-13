@@ -2,7 +2,7 @@ import { SectionSkeleton } from '../components/Skeletons';
 import LiveWire from '../components/LiveWire';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CalendarDays, ClipboardCheck, PenTool, Search, ChevronRight, Flag } from 'lucide-react';
+import { CalendarDays, ClipboardCheck, Search, ChevronRight, Flag } from 'lucide-react';
 import { api, type ClassSlot } from '../lib/api';
 import { errorToast } from '../lib/errors';
 import { ROUTES } from '../lib/routes';
@@ -18,8 +18,7 @@ const toMin = (hhmm: string) => {
 
 const ACTIONS = [
   { to: ROUTES.scanner, icon: ClipboardCheck, title: 'Take attendance', sub: 'Open a session and scan students’ passes', lecturerOnly: true },
-  { to: ROUTES.myClasses, icon: CalendarDays, title: 'My classes', sub: 'Timetable slots and live roster' },
-  { to: ROUTES.studio, icon: PenTool, title: 'Studio', sub: 'Write and publish notes' },
+  { to: ROUTES.timetable, icon: CalendarDays, title: 'Timetable', sub: 'Every class you teach, set by each class rep' },
   { to: ROUTES.browse, icon: Search, title: 'Browse content', sub: 'Everything at your level' },
   { to: '/content-reports', icon: Flag, title: 'Reports and reviews', sub: 'Problems students reported, and week reviews' },
 ];
@@ -58,7 +57,7 @@ export default function LecturerHomeRoute() {
       <Card tone="dark" style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
         <BoxBoy pose="teaching" width={84} />
         <div>
-          <div className="eyebrow" style={{ color: 'var(--u-amber)' }}>Classroom</div>
+          <div className="eyebrow" style={{ color: 'var(--u-amber)' }}>Class</div>
           <Display size={26} color="#fff">{name ? `Hi, ${name}` : 'Welcome'}</Display>
         </div>
       </Card>
@@ -99,7 +98,7 @@ export default function LecturerHomeRoute() {
         ) : today.length === 0 ? (
           <Card style={{ marginTop: 8 }}>
             <div className="t-15 w-6">No classes today</div>
-            <div className="t-13 muted">Add weekly slots under My classes and they show up here.</div>
+            <div className="t-13 muted">Each class's rep sets its class times; they show up here once they do.</div>
           </Card>
         ) : (
           <ListCard style={{ marginTop: 8 }}>
