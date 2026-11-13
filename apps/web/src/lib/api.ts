@@ -233,7 +233,7 @@ export type NotificationItem = {
 };
 
 export type NoteAuthor = { name: string; avatar: string };
-export type SlotChange = { status: 'cancelled' | 'moved' | 'unconfirmed'; start: string; end: string; venue: string; note: string };
+export type SlotChange = { status: 'cancelled' | 'moved' | 'unconfirmed' | 'confirmed' | 'late'; start: string; end: string; venue: string; note: string };
 export type ClassSlot = { id: string; course: string; day: number; start: string; end: string; venue: string; lecturer: string; meetLink?: string; date?: string; change?: SlotChange | null };
 export type RosterStudent = { id: string; name: string; email: string; level: string; topicsDone: number; quizzesTaken: number; lastActive: string | null };
 export type AdminContentTopic = { topic: number; lecture: number; versions: number; title: string };

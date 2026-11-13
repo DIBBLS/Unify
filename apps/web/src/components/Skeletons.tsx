@@ -360,8 +360,9 @@ export function AdminSkeleton() {
   );
 }
 
-/** Lecturer Home (design L07): dark header, today's class card, the photo
- *  nudge, then Your courses with level tabs and course cards. */
+/** Lecturer Home (design L07): the dark header, the photo nudge, then Your
+ *  courses with level tabs and course cards. (Today's class card only shows
+ *  when there is a class, so it gets no placeholder: no second hero.) */
 export function LecturerHomeSkeleton() {
   return (
     <div role="status" aria-label="Loading" style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', paddingBottom: 80 }}>
@@ -372,14 +373,6 @@ export function LecturerHomeSkeleton() {
           <div className="skel skel--dark" style={{ height: 13, width: '75%', marginTop: 10 }} />
         </div>
         <div className="skel skel--dark" style={{ width: 64, height: 84, borderRadius: 14, flexShrink: 0 }} />
-      </div>
-      <div className="card card--dark" style={{ margin: '0 16px 12px', padding: 18 }}>
-        <div className="skel skel--dark" style={{ height: 11, width: 110 }} />
-        <div className="skel skel--dark" style={{ height: 22, width: '70%', marginTop: 10 }} />
-        <div className="skel skel--dark" style={{ height: 13, width: '45%', marginTop: 8 }} />
-        <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
-          {[150, 120].map((w, i) => <div key={i} className="skel skel--dark" style={{ height: 36, width: w, borderRadius: 18 }} />)}
-        </div>
       </div>
       <div className="skel" style={{ height: 64, borderRadius: 12, margin: '0 16px 12px' }} />
       <div style={{ margin: '16px 16px 0' }}><div className="skel" style={{ height: 20, width: 130 }} /></div>

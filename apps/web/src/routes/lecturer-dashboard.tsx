@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Camera, ChevronRight, ScanLine, Send } from 'lucide-react';
+import { Camera, Check, ChevronRight, ScanLine, Send } from 'lucide-react';
+import { errorToast } from '../lib/errors';
+import { toastSuccess } from '../lib/toast';
 import { api, type ClassSlot, type Profile } from '../lib/api';
 import { ROUTES } from '../lib/routes';
 import LiveWire from '../components/LiveWire';
@@ -28,6 +30,11 @@ export default function LecturerDashboard({ profile, firstName, catalog, hasPhot
   const [slots, setSlots] = useState<ClassSlot[]>([]);
   const [students, setStudents] = useState<Record<string, number>>({});
   const [tab, setTab] = useState<string | null>(null);
+  // Today's class: confirm it, or say it's running late / cancelled (design L07, L18).
+  const [changing, setChanging] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [lateAt, setLateAt] = useState('');
+  const [cancelNote, setCancelNote] = useState('');
   // Courses the lecturer added themselves wait for each class's rep to confirm.
   const [claims, setClaims] = useState<Record<string, { waiting: boolean; confirmed: number }>>({});
 
@@ -66,11 +73,33 @@ export default function LecturerDashboard({ profile, firstName, catalog, hasPhot
   // Today's class: on now (or starting within 15 minutes), else the next one.
   const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
   const today = slots
-    .filter((s) => s.day === new Date().getDay() && s.change?.status !== 'cancelled')
+    .filter((s) => s.day === new Date().getDay())
     .sort((a, b) => toMin(timesOf(a).start) - toMin(timesOf(b).start));
-  const live = today.find((s) => nowMin >= toMin(timesOf(s).start) - 15 && nowMin < toMin(timesOf(s).end));
+  const live = today.find((s) => s.change?.status !== 'cancelled' && nowMin >= toMin(timesOf(s).start) - 15 && nowMin < toMin(timesOf(s).end));
   const next = live || today.find((s) => nowMin < toMin(timesOf(s).start));
   const later = today.filter((s) => s !== next && nowMin < toMin(timesOf(s).end));
+
+  const plus = (hhmm: string, mins: number) => {
+    const m = Math.min(23 * 60 + 59, toMin(hhmm) + mins);
+    return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+  };
+  // One change for today's class; students taking the course get a bell + push.
+  const change = async (slot: ClassSlot, payload: Parameters<typeof api.slotChange>[1], done: string) => {
+    setBusy(true);
+    try {
+      await api.slotChange(slot.id, payload);
+      const ch = payload.status === 'normal' ? null : { status: payload.status, start: payload.start || '', end: payload.end || '', venue: payload.venue || '', note: payload.note || '' };
+      setSlots((all) => all.map((x) => (x.id === slot.id ? { ...x, change: ch } : x)));
+      setChanging(false);
+      setLateAt('');
+      setCancelNote('');
+      toastSuccess(done);
+    } catch (e) {
+      errorToast(e, 'update today\'s class');
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', paddingBottom: 80 }}>
@@ -88,11 +117,51 @@ export default function LecturerDashboard({ profile, firstName, catalog, hasPhot
       {next && (
         <div style={{ margin: '0 16px 12px' }}>
           <Card tone="dark" pad={18} gap={8}>
-            <span className="eyebrow" style={{ color: live ? 'var(--u-green)' : 'var(--u-amber)' }}>
-              {live ? `Now · ${fmt(timesOf(next).start)}` : `Today · ${fmt(timesOf(next).start)}`}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between' }}>
+              <span className="eyebrow" style={{ color: live ? 'var(--u-green)' : 'var(--u-amber)' }}>
+                {live ? `Now · ${fmt(timesOf(next).start)}` : `Today · ${fmt(timesOf(next).start)}`}
+              </span>
+              {next.change?.status === 'cancelled' ? <span className="pill pill--bad">Cancelled</span>
+                : next.change?.status === 'late' ? <span className="pill pill--amber">Running late · {fmt(timesOf(next).start)}</span>
+                : next.change?.status === 'confirmed' ? <span className="pill pill--good">✓ Confirmed</span>
+                : <span className="pill pill--amber">Not confirmed</span>}
+            </div>
             <Display size={22} color="#fff">{next.course}{info(next.course)?.title ? ` · ${info(next.course)!.title}` : ''}</Display>
             <span className="t-13" style={{ color: '#aaa' }}>{[timesOf(next).venue, students[next.course] != null ? `${students[next.course]} students` : ''].filter(Boolean).join(' · ')}</span>
+            {/* Before class: confirm it; or say it's running late / cancelled. */}
+            {next.change?.status !== 'cancelled' && !live && next.change?.status !== 'confirmed' && (
+              <button className="btn btn--green btn--sm" disabled={busy} onClick={() => void change(next, { status: 'confirmed' }, `${next.course} confirmed. Your students have been told.`)}>
+                <Check size={15} /> Confirm class
+              </button>
+            )}
+            {next.change?.status === 'cancelled' || next.change?.status === 'late' || next.change?.status === 'confirmed' ? (
+              <button className="t-13 w-6" style={{ background: 'none', border: 'none', color: '#aaa', textAlign: 'left', padding: 0 }} disabled={busy} onClick={() => void change(next, { status: 'normal' }, 'Back to the usual time. Your students have been told.')}>
+                Undo: back to the usual {fmt(next.start)}
+              </button>
+            ) : (
+              <button className="t-13 w-6" style={{ background: 'none', border: 'none', color: '#aaa', textAlign: 'left', padding: 0 }} onClick={() => setChanging((v) => !v)}>
+                Running late or cancelling?
+              </button>
+            )}
+            {changing && next.change?.status !== 'cancelled' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 12, borderRadius: 12, background: 'rgba(255,255,255,.06)' }}>
+                <span className="t-13 w-7" style={{ color: '#f5f4f0' }}>Running late: it now starts at</span>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {[10, 15, 30, 45].map((m) => (
+                    <button key={m} className="btn btn--ghost-dark btn--sm" disabled={busy} onClick={() => void change(next, { status: 'late', start: plus(next.start, m), note: `About ${m} minutes late.` }, `Students told: ${next.course} now starts at ${fmt(plus(next.start, m))}.`)}>
+                      +{m} min · {fmt(plus(next.start, m))}
+                    </button>
+                  ))}
+                  <input type="time" value={lateAt} onChange={(e) => setLateAt(e.target.value)} aria-label="Or pick the new start time" style={{ padding: '6px 8px', borderRadius: 10, border: '1px solid #444', background: '#1a1a1a', color: '#f5f4f0' }} />
+                  {lateAt && <button className="btn btn--amber btn--sm" disabled={busy} onClick={() => void change(next, { status: 'late', start: lateAt }, `Students told: ${next.course} now starts at ${fmt(lateAt)}.`)}>Set {fmt(lateAt)}</button>}
+                </div>
+                <span className="t-13 w-7" style={{ color: '#f5f4f0', marginTop: 4 }}>Or cancel today's class</span>
+                <input value={cancelNote} onChange={(e) => setCancelNote(e.target.value)} maxLength={200} placeholder="Note to students (optional), e.g. we'll catch up on Thursday" style={{ padding: 10, borderRadius: 10, border: '1px solid #444', background: '#1a1a1a', color: '#f5f4f0', fontSize: 14 }} />
+                <button className="btn btn--danger btn--sm" disabled={busy} onClick={() => { if (window.confirm(`Cancel today's ${next.course} for every class taking it?`)) void change(next, { status: 'cancelled', note: cancelNote.trim() || undefined }, `${next.course} cancelled for today. Your students have been told.`); }}>
+                  Cancel today's class
+                </button>
+              </div>
+            )}
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
               {live && <Link to={`${ROUTES.scanner}?course=${encodeURIComponent(next.course)}&slot=${next.id}`} className="btn btn--green btn--sm"><ScanLine size={15} /> Open attendance scan</Link>}
               {next.meetLink && <a href={next.meetLink} target="_blank" rel="noreferrer" className="btn btn--white btn--sm">Open the meeting</a>}
