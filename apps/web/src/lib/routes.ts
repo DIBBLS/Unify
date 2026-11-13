@@ -43,6 +43,7 @@ export const ROUTES = {
   hocRequest: '/hoc/request',
   classList: '/class-list',
   hocWelcome: '/hoc/welcome',
+  contributorWelcome: '/contributor/welcome',
   hocRequests: '/hoc/requests',
   reports: '/reports',
   adminRoles: '/admin-roles',

@@ -63,6 +63,19 @@ export default function ModulesOverview({ openModule }: { openModule: (id: strin
       )}
 
       <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', letterSpacing: 1, marginTop: 18 }}>ACROSS THE MODULES</div>
+      {/* Session over: the Second Semester's teaching weeks have ended. Students move
+          up only when an admin promotes them; this is the nudge (decided 13 Nov). */}
+      {data.calendar.semester === 'Second Semester' && data.calendar.start && Date.now() >= new Date(`${data.calendar.start}T00:00:00+01:00`).getTime() + data.calendar.weeks * 7 * 86400000 && (
+        <button onClick={() => openModule('session')} style={{ ...card, marginTop: 8, width: '100%', textAlign: 'left', cursor: 'pointer', background: 'var(--u-warn-tint)', border: '1px solid var(--u-amber)', color: 'var(--text)' }}>
+          <div style={{ fontSize: 14, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ flex: 1 }}>Session finished: promote students</span>
+            <ChevronRight size={14} color="var(--u-warn-ink)" />
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4, lineHeight: 1.5 }}>
+            The Second Semester's {data.calendar.weeks} teaching weeks are over. Promote everyone one level (their next level's courses unlock), then set the new session's First Semester and its start date.
+          </div>
+        </button>
+      )}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 8, marginTop: 8 }}>
         {data.modules.map((m) => go(m.key, m.to, (
           <>

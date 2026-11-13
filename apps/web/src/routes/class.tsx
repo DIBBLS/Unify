@@ -1,6 +1,6 @@
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
-import { BookOpen, ChevronRight, Search } from 'lucide-react';
+import { BookOpen, ChevronRight, Lock, Search } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import { SearchListSkeleton } from '../components/Skeletons';
 import { BoxBoy } from '../components/redesign/brand';
@@ -20,6 +20,8 @@ export default function ClassRoute() {
   const [courses, setCourses] = useState<CatalogCourse[]>([]);
   const [myLevel, setMyLevel] = useState('');
   const [activeSemester, setActiveSemester] = useState('First Semester');
+  // The running semester's teaching weeks are over: the next one opens.
+  const [semEnded, setSemEnded] = useState(false);
   const [enrolledSet, setEnrolledSet] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,11 +53,12 @@ export default function ClassRoute() {
       try {
         const [me, settings] = await Promise.all([
           api.me(),
-          api.settings().catch(() => ({ currentSemester: 'First Semester' })),
+          api.settings().catch(() => ({ currentSemester: 'First Semester', semesterEnded: false })),
         ]);
         if (me.profile?.level) setMyLevel(me.profile.level);
         setEnrolledSet(new Set((me.courses || []).map((c) => c.toUpperCase())));
         if (settings.currentSemester) setActiveSemester(settings.currentSemester);
+        setSemEnded(!!(settings as { semesterEnded?: boolean }).semesterEnded);
         const list = (await api.courses()).filter((c) => c.code && c.code.trim());
         // Week counts ride on the catalog response — no per-course fan-out
         // (one Explore visit used to fire ~160 week requests).
@@ -110,6 +113,33 @@ export default function ClassRoute() {
   const shown = results !== null ? results : pickLevel && pickSem ? inSem(pickLevel, pickSem) : [];
   const short = (l: string) => l.replace(/ Level$/, 'L');
   const addedIn = (list: CatalogCourse[]) => list.filter((c) => enrolledSet.has(c.code.toUpperCase())).length;
+  // Locks (same rule as the server, lib/courseLock): lower levels open for
+  // carryovers; higher levels wait for promotion; in your own level the next
+  // semester opens when the running one's weeks are over.
+  const mineIdx = LEVELS.indexOf(mine);
+  const slotLock = (level: string, sem: string): string | null => {
+    const lvl = LEVELS.indexOf(norm(level));
+    if (mineIdx < 0 || lvl < 0 || lvl < mineIdx) return null;
+    if (lvl > mineIdx) return `Opens when you move to ${LEVELS[lvl]}`;
+    const order = ['First Semester', 'Second Semester'];
+    const s2 = order.indexOf(sem);
+    const cur = order.indexOf(activeSemester);
+    if (s2 < 0 || cur < 0 || s2 <= cur || semEnded) return null;
+    return `Opens when ${sem} starts`;
+  };
+  const lockOf = (c: CatalogCourse): string | null => {
+    const lv = c.levels.length ? c.levels : [''];
+    const sm = c.semesters.length ? c.semesters : [''];
+    let why: string | null = null;
+    for (const l of lv) for (const x of sm) {
+      const r = slotLock(l, x);
+      if (!r) return null;
+      why = why || r;
+    }
+    return why;
+  };
+  const levelLock = (l: string) => slotLock(l, activeSemester);
+
 
   const toggleEnroll = async (code: string) => {
     const isIn = enrolledSet.has(code.toUpperCase());
@@ -159,9 +189,12 @@ export default function ClassRoute() {
                 <span style={{ width: 44, height: 44, borderRadius: 12, background: l === mine ? 'var(--u-good-tint)' : 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 14, flexShrink: 0 }}>{short(l)}</span>
                 <span style={{ flex: 1, minWidth: 0 }}>
                   <span style={{ display: 'block', fontWeight: 800 }}>{l}{l === mine ? ' · your level' : ''}</span>
-                  <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)' }}>{list.length} course{list.length === 1 ? '' : 's'}{added ? ` · ${added} added` : ''}</span>
+                  <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)' }}>
+                    {list.length} course{list.length === 1 ? '' : 's'}{added ? ` · ${added} added` : ''}
+                    {levelLock(l) && LEVELS.indexOf(l) > mineIdx ? ` · ${levelLock(l)}` : ''}
+                  </span>
                 </span>
-                <ChevronRight size={18} color="var(--text3)" />
+                {levelLock(l) && LEVELS.indexOf(l) > mineIdx ? <Lock size={16} color="var(--text3)" aria-label="Locked" /> : <ChevronRight size={18} color="var(--text3)" />}
               </button>
             );
           })}
@@ -177,9 +210,12 @@ export default function ClassRoute() {
                 style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: 'var(--surface)', border: `1px solid ${sem === activeSemester ? 'var(--u-good)' : 'var(--border)'}`, borderRadius: 12, textAlign: 'left', color: 'var(--text)', opacity: list.length ? 1 : 0.5 }}>
                 <span style={{ flex: 1 }}>
                   <span style={{ display: 'block', fontWeight: 800 }}>{sem}{sem === activeSemester ? ' · this semester' : ''}</span>
-                  <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)' }}>{list.length} course{list.length === 1 ? '' : 's'}{added ? ` · ${added} added` : ''}</span>
+                  <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)' }}>
+                    {list.length} course{list.length === 1 ? '' : 's'}{added ? ` · ${added} added` : ''}
+                    {slotLock(pickLevel, sem) ? ` · ${slotLock(pickLevel, sem)}` : ''}
+                  </span>
                 </span>
-                <ChevronRight size={18} color="var(--text3)" />
+                {slotLock(pickLevel, sem) ? <Lock size={16} color="var(--text3)" aria-label="Locked" /> : <ChevronRight size={18} color="var(--text3)" />}
               </button>
             );
           })}
@@ -196,6 +232,8 @@ export default function ClassRoute() {
         {shown.map((c, i) => {
           const isIn = enrolledSet.has(c.code.toUpperCase());
           const isSearch = results !== null;
+          // Locked courses can be looked at, not added (one already added can still be removed).
+          const locked = !isIn ? lockOf(c) : null;
           return (
             <div
               key={c.code}
@@ -227,8 +265,14 @@ export default function ClassRoute() {
                       {[...(c.levels || []).map((l) => norm(l).replace(/ Level$/, 'L')), ...(c.semesters || []).map((x) => x.replace(' Semester', ''))].join(' · ')}{c.matchedAlias ? ` · also “${c.matchedAlias}”` : ''}
                     </span>
                   )}
+                  {locked && <span style={{ fontSize: 11, color: 'var(--text3)', fontWeight: 700, display: 'block' }}>{locked}</span>}
                 </span>
               </div>
+              {locked ? (
+                <span aria-label={`Locked: ${locked}`} style={{ display: 'inline-flex', gap: 4, alignItems: 'center', padding: '8px 12px', borderRadius: 9999, border: '1px solid var(--border)', color: 'var(--text3)', fontWeight: 800, fontSize: 12, whiteSpace: 'nowrap' }}>
+                  <Lock size={12} /> Locked
+                </span>
+              ) : (
               <button
                 onClick={() => toggleEnroll(c.code)}
                 disabled={busy === c.code}
@@ -246,6 +290,7 @@ export default function ClassRoute() {
               >
                 {busy === c.code ? '…' : isIn ? 'Added ✓' : 'Add'}
               </button>
+              )}
             </div>
           );
         })}

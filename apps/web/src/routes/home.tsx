@@ -15,6 +15,8 @@ import Flash from '../components/Flash';
 import ConfirmModal from '../components/ConfirmModal';
 import { HomeHero } from '../components/redesign/HomeHero';
 import { useClassListReady } from '../lib/classListReady';
+import { contributorNeedsWelcome } from './contributor-welcome';
+import { ROUTES } from '../lib/routes';
 import { UpdatesSlider, type UpdateSlide } from '../components/redesign/UpdatesSlider';
 import { FACTS } from '../lib/naija';
 import LiveWire from '../components/LiveWire';
@@ -404,7 +406,12 @@ export default function HomeRoute() {
           panels.push(
             api.authored().then((a) => setNotes(a.notes)).catch(() => {}),
             api.teaching().then((t) => setTeaching(t.courses || [])).catch(() => {}),
-            api.contributions().then((c) => setMyContribs(c.courses || [])).catch(() => {}),
+            api.contributions().then((c) => {
+              setMyContribs(c.courses || []);
+              // Newly assigned (or new courses): the short contributor onboarding first.
+              const assigned = (c.courses || []).filter((x) => x.assigned).map((x) => x.course);
+              if (me.profile?.role === 'contributor' && contributorNeedsWelcome(me.profile.id, assigned)) navigate(ROUTES.contributorWelcome);
+            }).catch(() => {}),
             api.authorStats().then(setAstats).catch(() => {}),
           );
         }
@@ -508,7 +515,8 @@ export default function HomeRoute() {
             Browse {profile?.level ? `${profile.level} ` : ''}notes <ChevronRight size={14} />
           </Link>
         </div>
-        {profile?.role === 'lecturer' || teaching.length > 0 ? (
+        {/* Lecturers only: contributors don't set timetables (Review Round 2). */}
+        {profile?.role === 'lecturer' ? (
           <Link to="/my-classes" style={{ margin: '12px 16px 0', padding: 14, background: 'var(--u-green)', color: 'var(--u-black)', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center', textDecoration: 'none' }}>
             <BookOpen size={20} />
             <span style={{ flex: 1 }}>
@@ -523,14 +531,17 @@ export default function HomeRoute() {
         )}
         {(profile?.role === 'contributor' || profile?.role === 'lecturer') && (
           <div style={{ margin: '16px 16px 0' }}>
-            <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800 }}>My contributions</h2>
-            <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>
-              {myContribs.filter((c) => c.assigned).length} course{myContribs.filter((c) => c.assigned).length === 1 ? '' : 's'} assigned{profile?.role === 'contributor' ? ' · 2-course cap per level' : ''} · totals cover every author on shared courses.
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+              <h2 style={{ fontFamily: 'var(--fd)', fontWeight: 800, flex: 1 }}>My courses</h2>
+              {profile?.role === 'contributor' && <Link to={ROUTES.contributorWelcome} style={{ fontSize: 12, fontWeight: 700, color: 'var(--u-good)', textDecoration: 'none' }}>How it works</Link>}
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 2, lineHeight: 1.5 }}>
+              The courses an admin assigned you to write notes for ({myContribs.filter((c) => c.assigned).length} of {profile?.role === 'contributor' ? '2' : myContribs.filter((c) => c.assigned).length}). Each shows how many notes are live for students and how many of them you wrote.
             </div>
             <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
               {myContribs.length === 0 && (
                 <div style={{ padding: 20, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 12, fontSize: 13 }}>
-                  No courses assigned yet — ask an admin to assign your courses.
+                  No courses assigned yet. An admin assigns your courses; they show here once they do.
                 </div>
               )}
               {myContribs.map((c) => (
@@ -540,8 +551,8 @@ export default function HomeRoute() {
                     <div style={{ fontSize: 11, color: 'var(--text2)' }}>{[c.level, (c.semester || '').replace(' Semester', '')].filter(Boolean).join(' · ') || 'Unscoped'}</div>
                   </div>
                   <div style={{ textAlign: 'right', fontSize: 11, color: 'var(--text2)' }}>
-                    <div><strong style={{ color: 'var(--text)', fontSize: 14 }}>{c.totalTopics}</strong> notes in course</div>
-                    <div>{c.topics} yours · {c.versions} versions</div>
+                    <div><strong style={{ color: 'var(--text)', fontSize: 14 }}>{c.totalTopics}</strong> note{c.totalTopics === 1 ? '' : 's'} live</div>
+                    <div>{c.topics} written by you{c.versions > c.topics ? ` · ${c.versions - c.topics} update${c.versions - c.topics === 1 ? '' : 's'}` : ''}</div>
                   </div>
                 </div>
               ))}
