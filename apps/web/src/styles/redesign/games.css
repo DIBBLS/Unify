@@ -83,7 +83,7 @@
   margin: calc(var(--w) * -.11) 0 0 calc(var(--w) * -.11); padding: 0; border: none; border-radius: 50%;
   background: #f5f4f0; color: #0a0a0a; box-shadow: 0 4px 0 #bdb9ae;
   font-family: var(--fd); font-weight: 900; font-size: calc(var(--w) * .1); touch-action: none; cursor: pointer;
-  transition: background .15s, box-shadow .15s, transform .18s var(--g-spring);
+  transition: left .5s var(--g-spring), top .5s var(--g-spring), background .15s, box-shadow .15s, transform .18s var(--g-spring);
   -webkit-tap-highlight-color: transparent;
 }
 .kw-letter.on { background: var(--u-green); box-shadow: 0 4px 0 var(--g-green-edge); transform: scale(1.12); }
@@ -162,7 +162,7 @@
 @media (prefers-reduced-motion: reduce) {
   .g-tile--flip, .g-slot--on, .g-toast, .kw-chip, .g-shake, .kw-go, .cw-cell.bad, .cw-cell.won, .cw-ch, .g-in, .g-win, .kw-trail { animation: none; }
   .kw-seg { animation: none; stroke-dashoffset: 0; }
-  .cw-cell, .g-bar > i { transition: none; }
+  .kw-letter, .cw-cell, .g-bar > i { transition: none; }
 }
 
 /* Game clock: time played, then a draining countdown bar. */
