@@ -22,7 +22,8 @@ const hourLabel = (h: number) => `${h % 12 || 12}${h < 12 ? 'am' : 'pm'}`;
 
 // Where a class actually sits today (a moved class sits at its new time).
 export const timesOf = (s: ClassSlot) => {
-  const moved = s.change?.status === 'moved' && s.change.start;
+  // Moved or running late: the class sits at its new start time.
+  const moved = (s.change?.status === 'moved' || s.change?.status === 'late') && s.change.start;
   return { start: moved ? (s.change!.start as string) : s.start, end: moved ? (s.change!.end || s.end) : s.end, venue: s.change?.status === 'moved' && s.change.venue ? s.change.venue : s.venue };
 };
 
@@ -144,6 +145,8 @@ export function DayGrid({ slots, stateOf, nowMin, isHoc, onOpen, onRemove, onJoi
                   {ch === 'cancelled' && <span style={{ fontWeight: 800 }}>Cancelled</span>}
                   {ch === 'unconfirmed' && <span style={{ fontWeight: 800, color: 'var(--u-warn-ink)' }}>Not confirmed</span>}
                   {ch === 'moved' && <span style={{ fontWeight: 800 }}>Moved</span>}
+                  {ch === 'late' && <span style={{ fontWeight: 800, color: now ? 'var(--u-amber)' : 'var(--u-warn-ink)' }}>Running late</span>}
+                  {ch === 'confirmed' && <span style={{ fontWeight: 800, color: now ? 'var(--u-green)' : 'var(--u-good)' }}>✓ Confirmed</span>}
                 </div>
                 {!compact && s.lecturer && <div style={{ fontSize: 11, opacity: 0.7, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.lecturer}</div>}
               </div>

@@ -248,6 +248,11 @@ export default function MeRoute() {
   const [dDept, setDDept] = useState('');
   const [dLevel, setDLevel] = useState('');
   const [dNotify, setDNotify] = useState(true);
+  // Lecturers: how students see and reach them (also set in onboarding, L05).
+  const [dTitle, setDTitle] = useState('');
+  const [dBio, setDBio] = useState('');
+  const [dContact, setDContact] = useState('');
+  const [dLinks, setDLinks] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
   const [saveError, setSaveErrorState] = useState('');
@@ -285,6 +290,11 @@ export default function MeRoute() {
         setDDept(p.department || '');
         setDLevel(p.level || '');
         setDNotify(p.notify_new_notes !== false);
+        const lp = p as unknown as { title?: string | null; bio?: string | null; contact_email?: string | null; links?: string | null };
+        setDTitle(lp.title || '');
+        setDBio(lp.bio || '');
+        setDContact(lp.contact_email || '');
+        setDLinks(lp.links || '');
         try {
           setUnis(await api.universities());
         } catch {
@@ -363,6 +373,12 @@ export default function MeRoute() {
         if (dLevel) payload.level = dLevel;
       }
       payload.notifyNewNotes = dNotify;
+      if (profile?.role === 'lecturer') {
+        payload.title = dTitle;
+        payload.bio = dBio.trim();
+        payload.contactEmail = dContact.trim();
+        payload.links = dLinks.trim();
+      }
       const res = await api.updateMe(payload);
       setProfile(res.profile);
       setEditing(false);
@@ -389,6 +405,12 @@ export default function MeRoute() {
     ['Faculty', profile?.faculty || '—'],
     ['Department', profile?.department || '—'],
   ];
+  if (profile?.role === 'lecturer') {
+    const lp = profile as unknown as { title?: string | null; bio?: string | null; contact_email?: string | null };
+    if (lp.title) rows.unshift(['Title', lp.title]);
+    rows.push(['Bio', lp.bio ? (lp.bio.length > 60 ? `${lp.bio.slice(0, 60)}…` : lp.bio) : 'Not added']);
+    rows.push(['Contact email', lp.contact_email || 'Not added']);
+  }
   if (isStudent) {
     rows.push(['Level', profile?.level || '—']);
     const ct = (profile as unknown as { cgpa_target?: number | null } | null)?.cgpa_target;
@@ -607,7 +629,29 @@ export default function MeRoute() {
           )}
           </>
           )}
-          {canAuthor && (
+          {/* Lecturers: what students see on your profile and course pages. */}
+          {profile?.role === 'lecturer' && (
+            <>
+              <label style={{ fontSize: 12, fontWeight: 700 }}>
+                Title
+                <Drop value={dTitle} onChange={setDTitle} label="None" style={{ width: '100%', marginTop: 4 }} options={[{ value: '', label: 'None' }, ...['Dr.', 'Prof.', 'Engr.', 'Mr.', 'Mrs.', 'Ms.'].map((t) => ({ value: t, label: t }))]} />
+              </label>
+              <label style={{ fontSize: 12, fontWeight: 700 }}>
+                Short bio
+                <textarea value={dBio} onChange={(e) => setDBio(e.target.value)} rows={3} maxLength={400} placeholder="What you teach, office hours, where to find you" style={{ display: 'block', width: '100%', marginTop: 4, padding: 10, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 14, resize: 'vertical' }} />
+              </label>
+              <label style={{ fontSize: 12, fontWeight: 700 }}>
+                Email students can use
+                <input type="email" value={dContact} onChange={(e) => setDContact(e.target.value)} maxLength={120} placeholder="e.g. o.adeyemi@gmail.com" style={{ display: 'block', width: '100%', marginTop: 4, padding: 10, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 14 }} />
+              </label>
+              <label style={{ fontSize: 12, fontWeight: 700 }}>
+                Handles (LinkedIn, X, website)
+                <input value={dLinks} onChange={(e) => setDLinks(e.target.value)} maxLength={300} placeholder="e.g. linkedin.com/in/oadeyemi" style={{ display: 'block', width: '100%', marginTop: 4, padding: 10, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 14 }} />
+              </label>
+              {profile?.id && <Link to={`/lecturer/profile/${profile.id}`} style={{ fontSize: 12, fontWeight: 700, color: 'var(--u-good)' }}>See your profile as students see it</Link>}
+            </>
+          )}
+          {canAuthor && profile?.role !== 'lecturer' && (
             <div style={{ fontSize: 11, color: 'var(--text2)' }}>Your contributing level and courses are assigned by an admin — they show on your dashboard.</div>
           )}
           <div style={{ fontSize: 11, color: 'var(--text2)' }}>Role and semester are locked — only admin can change those.</div>
