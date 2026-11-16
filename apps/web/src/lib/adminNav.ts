@@ -1,4 +1,4 @@
-import { Users, UserCheck, GraduationCap, LibraryBig, BookOpen, Building2, CalendarDays, Megaphone, Cpu, BarChart3, AlertTriangle, Scale, LayoutGrid, Activity, Map as MapIcon, Radio, Bug } from 'lucide-react';
+import { Users, UserCheck, GraduationCap, LibraryBig, BookOpen, Building2, CalendarDays, Megaphone, Cpu, BarChart3, AlertTriangle, Scale, LayoutGrid, Activity, Map as MapIcon, Radio, Bug } from '@/components/icons';
 
 // One admin hub. Each section has its own URL (/admin/users …) so links,
 // refresh and the back button behave; /admin is the Overview. Grouped by job.

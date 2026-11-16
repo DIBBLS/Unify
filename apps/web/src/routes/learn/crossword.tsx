@@ -4,7 +4,7 @@ import { leaveTo } from '../../lib/navHistory';
 import GameTimer, { TimeChoice, mmss, timeLimit, useGameClock } from '../../components/GameTimer';
 import { useGameRoom } from '../../lib/gameRoom';
 import { InviteButton, RoomBar } from '../../components/GameRoomBar';
-import { Delete } from 'lucide-react';
+import { Delete } from '@/components/icons';
 import { api } from '../../lib/api';
 import { buildCrossword, type Entry, type Puzzle } from '../../lib/crossword';
 import type { UnifyNote } from '../../types/note';

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Check, ChevronDown, ChevronRight, Download, Flag } from 'lucide-react';
+import { ArrowRight, Check, ChevronDown, ChevronRight, Download, Flag } from '@/components/icons';
 import { api, type CourseAttendance } from '../lib/api';
 import { isWeekSaved, saveWeekOffline } from '../lib/offline';
 import { errorToast } from '../lib/errors';

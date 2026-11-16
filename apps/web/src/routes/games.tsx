@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Gamepad2, Grid3x3 } from 'lucide-react';
+import { Gamepad2, Grid3x3 } from '@/components/icons';
 import { api } from '../lib/api';
 import { ROUTES } from '../lib/routes';
 import BackButton from '../components/BackButton';

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Camera, Check, ChevronRight, ScanLine, Send } from 'lucide-react';
+import { Camera, Check, ChevronRight, ScanLine, Send } from '@/components/icons';
 import { errorToast } from '../lib/errors';
 import { toastSuccess } from '../lib/toast';
 import { api, type ClassSlot, type Profile } from '../lib/api';

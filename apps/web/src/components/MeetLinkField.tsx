@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Video, ClipboardPaste, ExternalLink } from 'lucide-react';
+import { Video, ClipboardPaste, ExternalLink } from '@/components/icons';
 import { MEET_NEW_URL, cleanMeetLink, isMeetLink, isHttpsLink } from '../lib/meet';
 
 // One place to get a Google Meet link: open Google's "new meeting" in another tab (the app stays

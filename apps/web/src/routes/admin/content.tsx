@@ -2,7 +2,7 @@ import { ListSkeleton } from '../../components/Skeletons';
 import { toastError } from '../../lib/toast';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, ChevronDown, ChevronRight, Layers, Search, ShieldAlert } from 'lucide-react';
+import { BookOpen, ChevronDown, ChevronRight, Layers, Search, ShieldAlert } from '@/components/icons';
 import Loading from '../../components/Loading';
 import ErrorState from '../../components/ErrorState';
 import { api, type AdminContentCourse } from '../../lib/api';

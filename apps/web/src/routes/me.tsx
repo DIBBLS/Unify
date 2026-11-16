@@ -5,7 +5,7 @@ import { ProfileSkeleton } from '../components/Skeletons';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, Pencil, X, Sun, Moon, MessageCircle, Bug } from 'lucide-react';
+import { LogOut, Pencil, X, Sun, Moon, MessageCircle, Bug } from '@/components/icons';
 import BackButton from '../components/BackButton';
 import ConfirmModal from '../components/ConfirmModal';
 import Drop from '../components/Drop';

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from '@/components/icons';
 import Wordmark from '../components/Wordmark';
 import { BoxBoy, type Pose } from '../components/redesign/brand';
 import { Display, ProgressDots } from '../components/redesign/ui';

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSchool } from '../lib/school';
-import { X } from 'lucide-react';
+import { X } from '@/components/icons';
 import { api } from '../lib/api';
 import { describeError, errorToast } from '../lib/errors';
 import { toastSuccess } from '../lib/toast';

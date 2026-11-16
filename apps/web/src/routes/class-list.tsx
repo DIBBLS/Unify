@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { X } from 'lucide-react';
+import { X } from '@/components/icons';
 import { api, type ClassListClaim, type ClassListData, type ClassListEntry, type ClassListLog, type ClassListParse } from '../lib/api';
 import { errorToast, describeError } from '../lib/errors';
 import { toastSuccess } from '../lib/toast';

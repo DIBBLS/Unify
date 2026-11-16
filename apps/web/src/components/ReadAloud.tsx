@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Volume2, Square } from 'lucide-react';
+import { Volume2, Square } from '@/components/icons';
 import Drop from './Drop';
 import type { ContentBlock, Topic } from '../types/note';
 import { PAUSE, phrases, speakPhrases, voiceScore, type Seg } from '../lib/speech';

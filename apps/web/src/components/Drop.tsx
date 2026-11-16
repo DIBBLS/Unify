@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown } from '@/components/icons';
 
 // Brand dropdown that opens as a FLOATING OVERLAY above the page —
 // the panel never pushes content around or expands the frame it lives in.

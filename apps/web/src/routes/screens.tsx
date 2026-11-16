@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight } from '@/components/icons';
 import { ROUTES } from '../lib/routes';
 import { Card, Display, Label, ListCard, Pill } from '../components/redesign/ui';
 

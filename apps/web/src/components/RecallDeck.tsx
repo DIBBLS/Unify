@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Eye, RotateCcw } from 'lucide-react';
+import { Eye, RotateCcw } from '@/components/icons';
 import { MathText, MathPlain } from './MathText';
 
 export type RecallItem = { badge: string; question: string; answer: string };

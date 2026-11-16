@@ -2,7 +2,7 @@ import { ListSkeleton } from '../components/Skeletons';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, ChevronRight, Search } from 'lucide-react';
+import { BookOpen, ChevronRight, Search } from '@/components/icons';
 import BackButton from '../components/BackButton';
 import { BoxBoy } from '../components/redesign/brand';
 import Flash from '../components/Flash';

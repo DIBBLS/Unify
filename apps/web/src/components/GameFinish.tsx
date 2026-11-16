@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Share2, Trophy } from 'lucide-react';
+import { Share2, Trophy } from '@/components/icons';
 import { api } from '../lib/api';
 import { Avatar, type PersonaKey } from './redesign/brand';
 

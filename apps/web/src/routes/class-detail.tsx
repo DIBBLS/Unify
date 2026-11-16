@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { MapPin, Video } from 'lucide-react';
+import { MapPin, Video } from '@/components/icons';
 import { api, type ClassSlot } from '../lib/api';
 import { describeError, errorToast } from '../lib/errors';
 import { toastSuccess } from '../lib/toast';

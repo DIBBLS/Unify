@@ -2,7 +2,7 @@ import { ListSkeleton } from '../components/Skeletons';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BellRing, BookOpen, Megaphone, PartyPopper, ShieldCheck, CheckCheck, Video, Trash2 } from 'lucide-react';
+import { BellRing, BookOpen, Megaphone, PartyPopper, ShieldCheck, CheckCheck, Video, Trash2 } from '@/components/icons';
 import BackButton from '../components/BackButton';
 import ConfirmModal from '../components/ConfirmModal';
 import { BoxBoy } from '../components/redesign/brand';

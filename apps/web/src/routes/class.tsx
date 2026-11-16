@@ -1,6 +1,6 @@
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
-import { BookOpen, ChevronRight, Lock, Search } from 'lucide-react';
+import { BookOpen, ChevronRight, Lock, Search } from '@/components/icons';
 import BackButton from '../components/BackButton';
 import { SearchListSkeleton } from '../components/Skeletons';
 import { BoxBoy } from '../components/redesign/brand';

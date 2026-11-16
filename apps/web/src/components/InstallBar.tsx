@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowDownToLine, RefreshCw, X } from 'lucide-react';
+import { ArrowDownToLine, RefreshCw, X } from '@/components/icons';
 import { INSTALL_EVENT, isIOS as detectIOS, isStandalone } from '../lib/install';
 import { toastSuccess } from '../lib/toast';
 

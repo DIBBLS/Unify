@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, Users } from 'lucide-react';
+import { Search, Users } from '@/components/icons';
 import { api } from '../lib/api';
 import { Avatar, type PersonaKey } from './redesign/brand';
 import { Card, Label, Pill } from './redesign/ui';

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { FileText, Send, X } from 'lucide-react';
+import { FileText, Send, X } from '@/components/icons';
 import { api } from '../lib/api';
 import { supabaseBrowser } from '../lib/supabase';
 import { describeError } from '../lib/errors';

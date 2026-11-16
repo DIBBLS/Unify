@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Gamepad2, Grid3x3, Trophy } from 'lucide-react';
+import { Gamepad2, Grid3x3, Trophy } from '@/components/icons';
 import { ROUTES } from '../lib/routes';
 import GameLeaderboard from './GameLeaderboard';
 

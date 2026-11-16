@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Plus, Maximize2, Minimize2 } from 'lucide-react';
+import { Plus, Maximize2, Minimize2 } from '@/components/icons';
 import { useFocusMode, setFocusMode } from '../lib/focus';
 
 // Floating reader controls, bottom-right — NOTE READERS ONLY (nowhere else).

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Activity, RefreshCw, Mail } from 'lucide-react';
+import { Activity, RefreshCw, Mail } from '@/components/icons';
 import { api, type PerfSnapshot, type PerfPoint } from '../../lib/api';
 import { Bars, Spark } from '../../components/Charts';
 import { SectionSkeleton } from '../../components/Skeletons';

@@ -2,7 +2,7 @@ import { DetailSkeleton } from '../components/Skeletons';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
-import { ChevronRight, ExternalLink, FileText } from 'lucide-react';
+import { ChevronRight, ExternalLink, FileText } from '@/components/icons';
 import BackButton from '../components/BackButton';
 import { ROUTES } from '../lib/routes';
 import { BoxBoy } from '../components/redesign/brand';

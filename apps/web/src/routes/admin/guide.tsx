@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSchool } from '../../lib/school';
-import { ArrowDown, ArrowUp, Plus, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, Plus, X } from '@/components/icons';
 import { Link } from 'react-router-dom';
 import { api, type SchoolGuide } from '../../lib/api';
 import { errorToast } from '../../lib/errors';

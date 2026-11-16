@@ -3,7 +3,7 @@ import { StepBars } from '../components/redesign/ui';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ChevronLeft } from 'lucide-react';
+import { ArrowRight, ChevronLeft } from '@/components/icons';
 import { supabaseBrowser } from '../lib/supabase';
 import { useSchool } from '../lib/school';
 import { api, type University } from '../lib/api';

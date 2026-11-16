@@ -4,7 +4,7 @@ import { leaveTo } from '../../lib/navHistory';
 import GameTimer, { TimeChoice, mmss, timeLimit, useGameClock } from '../../components/GameTimer';
 import { useGameRoom } from '../../lib/gameRoom';
 import { InviteButton, RoomBar } from '../../components/GameRoomBar';
-import { Lightbulb, Shuffle } from 'lucide-react';
+import { Lightbulb, Shuffle } from '@/components/icons';
 import { api } from '../../lib/api';
 import { buildLevels, type Level } from '../../lib/wordgame';
 import type { UnifyNote } from '../../types/note';

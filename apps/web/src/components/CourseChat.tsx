@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Send } from 'lucide-react';
+import { Send } from '@/components/icons';
 import { api } from '../lib/api';
 import { describeError } from '../lib/errors';
 import { SectionSkeleton } from './Skeletons';

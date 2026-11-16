@@ -1,7 +1,7 @@
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { BookOpen, ChevronRight, Trash2, MessageCircle } from 'lucide-react';
+import { BookOpen, ChevronRight, Trash2, MessageCircle } from '@/components/icons';
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type Profile, type HomeUpdate } from '../lib/api';
 import { canOpenLink } from '../lib/updateLinks';

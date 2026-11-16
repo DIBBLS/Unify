@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Check, X, RotateCcw } from 'lucide-react';
+import { Check, X, RotateCcw } from '@/components/icons';
 import type { EOQ } from '../types/note';
 import { api } from '../lib/api';
 import { BoxBoy } from './redesign/brand';

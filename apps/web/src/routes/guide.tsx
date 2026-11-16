@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { MapPin } from 'lucide-react';
+import { MapPin } from '@/components/icons';
 import { api, type SchoolGuide } from '../lib/api';
 import { describeError } from '../lib/errors';
 import { ROUTES } from '../lib/routes';

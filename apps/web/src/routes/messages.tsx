@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ChevronRight, MessageCircle } from 'lucide-react';
+import { ChevronRight, MessageCircle } from '@/components/icons';
 import { api } from '../lib/api';
 import BackButton from '../components/BackButton';
 import CourseChat from '../components/CourseChat';
