@@ -121,13 +121,13 @@
     background: var(--u-card); border-right: 1px solid var(--u-border); overflow: hidden;
     transition: width var(--dur-3) var(--ease-out), box-shadow var(--dur-3) var(--ease-out);
   }
-  .side-pills:hover .side-rail, .side-pills:focus-within .side-rail {
+  .side-pills:hover .side-rail, .side-pills:focus-within .side-rail, .side-pills.is-pinned .side-rail {
     width: var(--rail-open); box-shadow: 0 0 0 1px var(--u-border), 12px 0 32px rgba(0,0,0,.14);
   }
   .side-spacer { flex: 1; }
   .side-group { display: flex; flex-direction: column; gap: 2px; }
   .side-grouplabel { height: 18px; margin: 8px 0 0 14px; font-size: 10px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: var(--u-text-3); opacity: 0; transition: opacity var(--dur-2) var(--ease-out); white-space: nowrap; }
-  .side-pills:hover .side-grouplabel, .side-pills:focus-within .side-grouplabel { opacity: 1; }
+  .side-pills:hover .side-grouplabel, .side-pills:focus-within .side-grouplabel, .side-pills.is-pinned .side-grouplabel { opacity: 1; }
   .side-rail { overflow-y: auto; scrollbar-width: none; }
   .side-rail::-webkit-scrollbar { display: none; }
   .side-logo { display: flex; align-items: center; gap: 12px; height: 48px; margin: 0 0 12px 2px; text-decoration: none; color: var(--u-text); }
@@ -145,7 +145,18 @@
   .side-pill.is-active { background: var(--green-bg); color: var(--u-text); font-weight: 800; }
   .side-ico { position: relative; flex: none; width: 44px; height: 44px; display: grid; place-items: center; }
   .side-label { opacity: 0; transform: translateX(-6px); transition: opacity var(--dur-2) var(--ease-out), transform var(--dur-3) var(--ease-out); }
-  .side-pills:hover .side-label, .side-pills:focus-within .side-label { opacity: 1; transform: none; transition-delay: 60ms; }
+  .side-pills:hover .side-label, .side-pills:focus-within .side-label, .side-pills.is-pinned .side-label { opacity: 1; transform: none; transition-delay: 60ms; }
+  /* Pin toggle: full-width subtle row under the brand. Not a menu button,
+     so the highlight surface glides past it. */
+  .side-trigger {
+    display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 0 0 4px; border-radius: 9999px;
+    background: transparent; border: 0; color: var(--u-text-3); font-size: 14px; font-weight: 600;
+    cursor: pointer; white-space: nowrap; width: 100%; text-align: left; font-family: inherit;
+    transition: background var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out);
+  }
+  .side-trigger:hover { background: var(--u-card-2); color: var(--u-text); }
+  /* The highlight surface glides inside each pill; clip it at the rounded ends. */
+  .side-pill { overflow: hidden; }
   .side-badge {
     position: absolute; top: 2px; right: 2px; min-width: 18px; height: 18px; padding: 0 4px;
     border-radius: 9999px; background: var(--u-red); color: #fff; font-size: 10px; font-weight: 800;

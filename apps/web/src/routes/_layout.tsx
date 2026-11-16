@@ -2,7 +2,7 @@ import PushHelp from '../components/PushHelp';
 import type { GuideKind } from '../lib/pushHelp';
 import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, CalendarDays, ClipboardCheck, Search, User, PenTool, Bell, Shield, BookOpen, Users, Menu } from '@/components/icons';
+import { Bell, Menu } from '@/components/icons';
 import { supabaseBrowser, touchActivity, isSessionExpired, expireSession } from '../lib/supabase';
 import { pushSupported, enablePush } from '../lib/push';
 import ConfirmModal from '../components/ConfirmModal';
@@ -15,48 +15,7 @@ import { rememberLastName } from '../lib/lastName';
 import { useFocusMode } from '../lib/focus';
 import OfflineBanner from '../components/OfflineBanner';
 
-type Tab = {
-  to: string;
-  label: string;
-  icon: typeof LayoutDashboard;
-  match: string[];
-  external?: boolean;
-};
-
-import { GROUPS as ADMIN_GROUPS } from '../lib/adminNav';
-
-const STUDENT_TABS: Tab[] = [
-  // Review: the menu is Home · Timetable · Class · Me; courses open from the course cards on Home.
-  { to: '/home', label: 'Home', icon: LayoutDashboard, match: ['/home', '/courses', '/learn', '/course', '/streak', '/revision'] },
-  { to: '/timetable', label: 'Timetable', icon: CalendarDays, match: ['/timetable'] },
-  { to: '/class', label: 'Class', icon: Users, match: ['/class', '/hoc', '/attendance/my', '/attendance/pass', '/class-list'] },
-  { to: '/me', label: 'Me', icon: User, match: ['/me'] },
-];
-
-const AUTHOR_TABS: Tab[] = [
-  { to: '/home', label: 'Home', icon: LayoutDashboard, match: ['/home', '/browse', '/my-classes', '/course', '/learn'] },
-  { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio'] },
-  { to: '/me', label: 'Me', icon: User, match: ['/me'] },
-];
-
-// Lecturers: Home · Timetable · Classroom · Me (decided 13 Nov). Home is the
-// design L07 view, Classroom the former Classroom page plus Send a PDF. No
-// Studio: lecturers don't publish notes.
-const LECTURER_TABS: Tab[] = [
-  { to: '/home', label: 'Home', icon: LayoutDashboard, match: ['/home', '/course', '/learn'] },
-  { to: '/timetable', label: 'Timetable', icon: CalendarDays, match: ['/timetable', '/my-classes'] },
-  { to: '/lecturer', label: 'Classroom', icon: ClipboardCheck, match: ['/lecturer', '/attendance', '/browse', '/content-reports', '/messages', '/studio'] },
-  { to: '/me', label: 'Me', icon: User, match: ['/me'] },
-];
-
-// Admin role: manage, never learn. No Learn tab — the admin reads
-// everything through All content; learning paths are students-only.
-// /browse + /classes light the Studio tab (the working area).
-const ADMIN_TABS: Tab[] = [
-  { to: '/admin', label: 'Home', icon: LayoutDashboard, match: ['/admin', '/home', '/browse', '/my-classes', '/course', '/learn'] },
-  { to: '/studio', label: 'Studio', icon: PenTool, match: ['/studio'] },
-  { to: '/me', label: 'Me', icon: User, match: ['/me'] },
-];
+import { ADMIN_TABS, AUTHOR_TABS, LECTURER_TABS, STUDENT_TABS, AppSidebar, type Tab } from '../components/app-sidebar';
 
 export default function Layout() {
   // Tri-state: null = session not yet resolved. The header auth slot and
@@ -439,69 +398,15 @@ export default function Layout() {
           the note body (.reader-zoom in learn/week.tsx), desktop only. */}
       <div style={{ display: isDesktop ? 'flex' : 'block', alignItems: 'flex-start', minHeight: isDesktop ? 'calc(100vh - 56px)' : 'auto' }}>
         {isDesktop && authed && !immersive && (
-          <aside className="side-pills" aria-label="Main">
-            {/* Collapsed icon rail; opens on hover or keyboard focus, closes when left. */}
-            <div className="side-rail">
-              <Link to="/home" className="side-logo" aria-label="Unify Learn home">
-                <span className="side-mark">U</span>
-                <span className="side-label side-brand"><Wordmark size={18} /></span>
-              </Link>
-              {showSkeletonNav
-                ? Array.from({ length: skelCount }).map((_, i) => (
-                    <div key={i} className="side-pill"><div className="skel" style={{ width: 24, height: 24, borderRadius: 6 }} /></div>
-                  ))
-                : role === 'admin'
-                ? (
-                  <>
-                    {ADMIN_GROUPS.map((g) => (
-                      <div key={g.label || 'top'} className="side-group">
-                        {g.label && <div className="side-grouplabel">{g.label}</div>}
-                        {g.items.map((it) => {
-                          const to = it.id === 'overview' ? '/admin' : '/admin/' + it.id;
-                          const active = it.id === 'overview' ? (pathname === '/admin' || pathname === '/home') : pathname === to;
-                          const Icon = it.icon;
-                          return (
-                            <Link key={it.id} to={to} className={'side-pill' + (active ? ' is-active' : '')} aria-current={active ? 'page' : undefined} aria-label={it.title}>
-                              <span className="side-ico"><Icon size={20} /></span>
-                              <span className="side-label">{it.id === 'overview' ? 'Home' : it.title}</span>
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    ))}
-                    <div className="side-group">
-                      <div className="side-grouplabel">Create</div>
-                      <Link to="/studio" className={'side-pill' + (pathname.startsWith('/studio') ? ' is-active' : '')} aria-label="Studio">
-                        <span className="side-ico"><PenTool size={20} /></span>
-                        <span className="side-label">Studio</span>
-                      </Link>
-                    </div>
-                  </>
-                )
-                : tabs.filter((t) => t.to !== '/me').map((t) => {
-                    const active = t.match.some((m) => pathname === m || pathname.startsWith(m + '/'));
-                    const Icon = t.icon;
-                    return (
-                      <Link key={t.to} to={t.to} className={`side-pill${active ? ' is-active' : ''}`} aria-current={active ? 'page' : undefined} aria-label={t.label}>
-                        <span className="side-ico"><Icon size={22} /></span>
-                        <span className="side-label">{t.label}</span>
-                      </Link>
-                    );
-                  })}
-              <span className="side-spacer" />
-              <Link to="/notifications" className="side-pill" aria-label="Notifications">
-                <span className="side-ico">
-                  <Bell size={20} />
-                  {unread > 0 && <span className="side-badge">{unread > 9 ? '9+' : unread}</span>}
-                </span>
-                <span className="side-label">Notifications</span>
-              </Link>
-              <Link to="/me" className={'side-pill side-me' + (pathname === '/me' || pathname.startsWith('/me/') ? ' is-active' : '')} aria-current={pathname === '/me' ? 'page' : undefined} aria-label="Me">
-                <span className="side-ico side-avatar">{pic.src ? <img src={pic.src} alt="" /> : (initial || 'U')}</span>
-                <span className="side-label">Me</span>
-              </Link>
-            </div>
-          </aside>
+          <AppSidebar
+            role={role}
+            pathname={pathname}
+            unread={unread}
+            picSrc={pic.src}
+            initial={initial}
+            showSkeleton={showSkeletonNav}
+            skelCount={skelCount}
+          />
         )}
         <main id="unify-content" style={{ flex: 1, minWidth: 0 }}>
           <div key={pathname} className="page-enter">
