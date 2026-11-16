@@ -21,8 +21,8 @@ import {
   Calendar01Icon,
   Camera01Icon,
   Cancel01Icon,
-  ClipboardCheckIcon,
-  ClipboardPasteIcon,
+  ChampionIcon,
+  ClipboardIcon,
   Clock01Icon,
   Copy01Icon,
   CpuIcon,
@@ -31,6 +31,7 @@ import {
   Download01Icon,
   Download02Icon,
   File01Icon,
+  FilePasteIcon,
   FileUploadIcon,
   Fire02Icon,
   Flag01Icon,
@@ -40,6 +41,7 @@ import {
   GridIcon,
   Home01Icon,
   InformationCircleIcon,
+  JusticeScale01Icon,
   Layers01Icon,
   LibraryIcon,
   Link01Icon,
@@ -62,10 +64,9 @@ import {
   PencilEdit01Icon,
   PenTool01Icon,
   PlusSignIcon,
+  QrCodeIcon,
   RadioIcon,
   RefreshIcon,
-  ScaleIcon,
-  ScanLineIcon,
   Search01Icon,
   SentIcon,
   Share01Icon,
@@ -76,12 +77,12 @@ import {
   SquareArrowUpRightIcon,
   SquareIcon,
   Sun01Icon,
-  SwordsIcon,
+  Sword01Icon,
   Target01Icon,
+  TaskDone01Icon,
   Tick02Icon,
   TickDouble01Icon,
   Timer01Icon,
-  TrophyIcon,
   UserCheck01Icon,
   UserGroupIcon,
   UserIcon,
@@ -123,8 +124,8 @@ export const ChevronDown = make(ArrowDown01Icon);
 export const ChevronLeft = make(ArrowLeft01Icon);
 export const ChevronRight = make(ArrowRight01Icon);
 export const ChevronUp = make(ArrowUp01Icon);
-export const ClipboardCheck = make(ClipboardCheckIcon);
-export const ClipboardPaste = make(ClipboardPasteIcon);
+export const ClipboardCheck = make(TaskDone01Icon);
+export const ClipboardPaste = make(FilePasteIcon);
 export const Clock = make(Clock01Icon);
 export const Copy = make(Copy01Icon);
 export const Cpu = make(CpuIcon);
@@ -170,8 +171,8 @@ export const Plus = make(PlusSignIcon);
 export const Radio = make(RadioIcon);
 export const RefreshCw = make(RefreshIcon);
 export const RotateCcw = make(ArrowReloadHorizontalIcon);
-export const Scale = make(ScaleIcon);
-export const ScanLine = make(ScanLineIcon);
+export const Scale = make(JusticeScale01Icon);
+export const ScanLine = make(QrCodeIcon);
 export const Search = make(Search01Icon);
 export const Send = make(SentIcon);
 export const Share2 = make(Share01Icon);
@@ -182,11 +183,11 @@ export const Shuffle = make(ShuffleIcon);
 export const Sparkles = make(SparklesIcon);
 export const Square = make(SquareIcon);
 export const Sun = make(Sun01Icon);
-export const Swords = make(SwordsIcon);
+export const Swords = make(Sword01Icon);
 export const Target = make(Target01Icon);
 export const Timer = make(Timer01Icon);
 export const Trash2 = make(Delete02Icon);
-export const Trophy = make(TrophyIcon);
+export const Trophy = make(ChampionIcon);
 export const User = make(UserIcon);
 export const UserCheck = make(UserCheck01Icon);
 export const Users = make(UserGroupIcon);
