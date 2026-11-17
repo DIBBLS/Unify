@@ -6,7 +6,7 @@ import { toastSuccess } from '../lib/toast';
 import PushHelp from './PushHelp';
 import type { GuideKind } from '../lib/pushHelp';
 
-// First things first (17 Nov): until Unify is installed on the phone and
+// First things first (17 Nov): until Unify Learn is installed on the phone and
 // notifications are allowed, every app open starts with this sheet. Reminders,
 // class changes and new notes only reach people who have done both.
 // "Later" hides it for this visit only; it comes back on the next open.
@@ -97,15 +97,15 @@ export default function GetSetUp() {
   );
 
   const installSub = isIOS()
-    ? <>In Safari tap <strong>Share</strong> ▲, then <strong>Add to Home Screen</strong>. Then open Unify from your home screen.</>
+    ? <>In Safari tap <strong>Share</strong> ▲, then <strong>Add to Home Screen</strong>. Then open Unify Learn from your home screen.</>
     : canPrompt
     ? 'Opens full-screen like any app, and keeps your weeks readable offline.'
     : <>Open your browser menu <strong>⋮</strong> and choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</>;
 
   const pushSub = iosNeedsInstall
-    ? 'On iPhone this works once Unify is on your home screen. Open it from there and allow.'
+    ? 'On iPhone this works once Unify Learn is on your home screen. Open it from there and allow.'
     : push === 'denied'
-    ? 'Notifications are blocked for Unify. Tap below to see how to turn them back on.'
+    ? 'Notifications are blocked for Unify Learn. Tap below to see how to turn them back on.'
     : 'Study reminders, class changes, new notes and messages from your class rep.';
 
   return (
@@ -114,7 +114,7 @@ export default function GetSetUp() {
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 6 }}>
           <img src="/icons/v5/icon-192.png" alt="" width={44} height={44} style={{ borderRadius: 12 }} />
           <div>
-            <div id="getsetup-title" style={{ fontSize: 18, fontWeight: 800 }}>Get Unify ready on this phone</div>
+            <div id="getsetup-title" style={{ fontSize: 18, fontWeight: 800 }}>Get Unify Learn ready on this phone</div>
             <div style={{ fontSize: 13, color: 'var(--text2)' }}>Two quick steps so nothing passes you by.</div>
           </div>
         </div>

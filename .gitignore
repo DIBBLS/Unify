@@ -29,3 +29,6 @@ __full*.txt
 dist/
 apps/web/dist/
 notes-engine/dist/
+
+# Combined documentation book: internal, kept out of git (17 Nov)
+docs/Unify-Learn-Documentation.pdf

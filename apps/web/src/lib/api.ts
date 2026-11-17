@@ -811,7 +811,7 @@ export const api = {
     apiDownload(`/v1/attendance/sessions/${sessionId}/register.csv`, `${course.replace(/\s+/g, '')}-register.csv`),
   // Learning (S23–S36)
   myCourseProgress: (course: string) =>
-    apiFetch<{ course: string; lecturers?: { id: string; name: string }[]; weeks: { week: number; title: string; topics: number; topicTitles: string[]; done: number; quiz: { best: number; total: number; attempts: number } | null; hasQuiz: boolean }[] }>(`/v1/courses/${encodeURIComponent(course)}/my-progress`),
+    apiFetch<{ course: string; lecturers?: { id: string; name: string }[]; namedLecturers?: string[]; weeks: { week: number; title: string; topics: number; topicTitles: string[]; done: number; quiz: { best: number; total: number; attempts: number } | null; hasQuiz: boolean }[] }>(`/v1/courses/${encodeURIComponent(course)}/my-progress`),
   learnActivity: (days = 35) => apiFetch<{ days: { date: string; xp: number }[]; streak: number; longest: number }>(`/v1/learn/activity?days=${days}`),
   revision: (limit = 10, course?: string) =>
     apiFetch<{ cards: { course: string; week: number; topic: string; question: string; answer: string; badge: string }[]; available: number }>(`/v1/learn/revision?limit=${limit}${course ? `&course=${encodeURIComponent(course)}` : ''}`),

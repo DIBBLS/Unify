@@ -13,7 +13,7 @@ import ReportSheet from './ReportSheet';
 type Progress = Awaited<ReturnType<typeof api.myCourseProgress>>['weeks'];
 type Week = Progress[number];
 
-export function LecturerCards({ lecturers }: { lecturers: { id: string; name: string }[] }) {
+export function LecturerCards({ lecturers, named = [] }: { lecturers: { id: string; name: string }[]; named?: string[] }) {
   const [profiles, setProfiles] = useState<Record<string, Awaited<ReturnType<typeof api.lecturerProfile>>>>({});
   useEffect(() => {
     let gone = false;
@@ -25,6 +25,24 @@ export function LecturerCards({ lecturers }: { lecturers: { id: string; name: st
     });
     return () => { gone = true; };
   }, [lecturers]);
+  // No lecturer on Unify Learn yet: the names from the faculty's course list.
+  if (!lecturers.length && named.length) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
+        {named.map((n) => (
+          <div key={n} style={{ display: 'flex', gap: 12, alignItems: 'center', padding: 14, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, color: 'var(--text)' }}>
+            <span style={{ width: 48, height: 48, borderRadius: 9999, background: 'var(--surface2, #f8f7f3)', border: '1px solid var(--border)', color: 'var(--text2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, flexShrink: 0 }}>
+              {n.replace(/^(Dr|Prof|Engr|Mr|Mrs|Ms)\.?\s*/i, '').split(/[\s.]+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 2).toUpperCase()}
+            </span>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ display: 'block', fontWeight: 800, fontSize: 15 }}>{n}</span>
+              <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)' }}>Lecturer · not on Unify Learn yet</span>
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  }
   if (!lecturers.length) return null;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>

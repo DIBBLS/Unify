@@ -56,6 +56,7 @@ export default function CourseDetailRoute() {
   const [tab, setTab] = useState<'weeks' | 'outline' | 'practice'>(initialTab === 'outline' || initialTab === 'practice' ? initialTab : 'weeks');
   const [progress, setProgress] = useState<Awaited<ReturnType<typeof api.myCourseProgress>>['weeks'] | null>(null);
   const [lecturers, setLecturers] = useState<{ id: string; name: string }[]>([]);
+  const [namedLecturers, setNamedLecturers] = useState<string[]>([]);
   const [notFound, setNotFound] = useState(false);
   // Design S23: the course's full title and semester, attendance per week, and
   // which week card is open (the current week, or the first not finished).
@@ -101,7 +102,7 @@ export default function CourseDetailRoute() {
         // them under My Classes). Failure never blocks the weeks.
         api.timetable(courseCode).then((tt) => setSlots(tt.slots || [])).catch(() => {});
         api.materials(courseCode).then((r) => setMaterials(r.materials || [])).catch(() => {});
-        api.myCourseProgress(courseCode).then((r) => { setProgress(r.weeks); setLecturers(r.lecturers || []); }).catch(() => {});
+        api.myCourseProgress(courseCode).then((r) => { setProgress(r.weeks); setLecturers(r.lecturers || []); setNamedLecturers(r.namedLecturers || []); }).catch(() => {});
         api.courses().then((list) => {
           const c = list.find((x) => x.code.toUpperCase().trim() === courseCode.toUpperCase());
           if (c) setCourseInfo({ title: c.title, semesters: c.semesters || [] });
@@ -194,7 +195,7 @@ export default function CourseDetailRoute() {
         {[courseInfo?.title ? courseCode : '', (courseInfo?.semesters || []).map((x) => x.replace(' Semester', ' semester')).join(' & '), `${weeks.length} ${weeks.length === 1 ? 'week' : 'weeks'} published`].filter(Boolean).join(' · ')}
       </p>
       {/* Design S23: who teaches it, with their photo and bio. */}
-      <LecturerCards lecturers={lecturers} />
+      <LecturerCards lecturers={lecturers} named={namedLecturers} />
       <CourseActions course={courseCode} weeks={progress || []} preview={preview} />
       {sem.week > 0 && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 14 }}>
