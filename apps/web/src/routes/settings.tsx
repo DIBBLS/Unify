@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight } from '@/components/icons';
+import { ChevronRight } from 'lucide-react';
 import { api } from '../lib/api';
 import { errorToast } from '../lib/errors';
 import { toastSuccess } from '../lib/toast';
@@ -94,6 +94,74 @@ export default function SettingsRoute() {
   );
 }
 
+// Study reminders (migration 0050): push at the person's own times, Lagos
+// time. Untouched, they follow the study time picked at sign-up.
+function RemindersCard({ pushOn }: { pushOn: boolean }) {
+  const [on, setOn] = useState(true);
+  const [times, setTimes] = useState<string[]>([]);
+  const [custom, setCustom] = useState(false);
+  const [adding, setAdding] = useState('12:00');
+  const [busy, setBusy] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    api.myReminders().then((r) => { setOn(r.on); setTimes(r.times); setCustom(r.custom); }).catch(() => {}).finally(() => setLoaded(true));
+  }, []);
+  const save = async (patch: { on?: boolean; times?: string[] | null }, done: string) => {
+    setBusy(true);
+    try {
+      await api.saveMyReminders(patch);
+      if (patch.times !== undefined) {
+        const r = await api.myReminders();
+        setTimes(r.times); setCustom(r.custom);
+      }
+      toastSuccess(done);
+    } catch (e) { errorToast(e, 'save your reminders'); }
+    finally { setBusy(false); }
+  };
+  const fmt = (t: string) => { const [h, m] = t.split(':').map(Number); return new Date(2000, 0, 1, h, m).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }); };
+  const field: React.CSSProperties = { padding: 8, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 14 };
+  return (
+    <div style={card}>
+      <div style={{ ...rowStyle, borderTop: 'none' }}>
+        <span>
+          <span style={{ display: 'block', fontSize: 14, fontWeight: 700 }}>Study reminders</span>
+          <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>
+            {pushOn ? 'A short nudge at these times. Skipped on days you have already studied.' : 'Turn on push above so reminders can reach this phone.'}
+          </span>
+        </span>
+        <input type="checkbox" aria-label="Study reminders" checked={on} disabled={busy || !loaded} onChange={(e) => { setOn(e.target.checked); void save({ on: e.target.checked }, e.target.checked ? 'Reminders on.' : 'Reminders off.'); }} />
+      </div>
+      {on && loaded && (
+        <>
+          <div style={{ ...rowStyle, justifyContent: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
+            {times.map((t) => (
+              <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 6px 6px 12px', borderRadius: 9999, background: 'var(--u-good-tint)', color: 'var(--u-good)', fontSize: 13, fontWeight: 800 }}>
+                {fmt(t)}
+                <button aria-label={`Remove ${fmt(t)}`} disabled={busy || times.length <= 1} onClick={() => void save({ times: times.filter((x) => x !== t) }, 'Reminder removed.')} style={{ border: 'none', background: 'none', color: 'inherit', cursor: 'pointer', padding: '0 4px', fontWeight: 800, opacity: times.length <= 1 ? 0.4 : 1 }}>×</button>
+              </span>
+            ))}
+            {!custom && <span style={{ fontSize: 12, color: 'var(--text2)' }}>From your study time</span>}
+          </div>
+          <div style={{ ...rowStyle, justifyContent: 'flex-start', flexWrap: 'wrap' }}>
+            {times.length < 4 && (
+              <>
+                <input type="time" aria-label="New reminder time" value={adding} onChange={(e) => setAdding(e.target.value)} style={field} />
+                <button className="btn btn--amber btn--sm" disabled={busy || !adding || times.includes(adding)} onClick={() => void save({ times: [...times, adding] }, `Reminder at ${fmt(adding)} added.`)}>Add time</button>
+              </>
+            )}
+            {custom && <button className="btn btn--white btn--sm" disabled={busy} onClick={() => void save({ times: null }, 'Back to your study time.')}>Reset</button>}
+            {pushOn && (
+              <button className="btn btn--white btn--sm" disabled={busy} onClick={() => { setBusy(true); api.testMyReminder().then(() => toastSuccess('Sent. It should land in a few seconds.')).catch((e) => errorToast(e, 'send a test')).finally(() => setBusy(false)); }}>
+                Send me one now
+              </button>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export function NotificationSettingsRoute() {
   const [pushSt, setPushSt] = useState<PushState>('off');
   const [busy, setBusy] = useState(false);
@@ -154,6 +222,8 @@ export function NotificationSettingsRoute() {
           <input type="checkbox" aria-label="Email me when new notes land" checked={emails} disabled={busy || !loaded} onChange={(e) => { setEmails(e.target.checked); void save({ notifyNewNotes: e.target.checked }, e.target.checked ? 'New-note emails on.' : 'New-note emails off.'); }} />
         </div>
       </div>
+
+      <RemindersCard pushOn={pushSt === 'on'} />
 
       <div style={card}>
         <div style={{ ...rowStyle, borderTop: 'none' }}>

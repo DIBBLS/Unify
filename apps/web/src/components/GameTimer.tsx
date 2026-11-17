@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Timer } from '@/components/icons';
+import { Timer } from 'lucide-react';
 
 // Game clock: time played (only while the game is on screen) and a countdown
 // so a run has an end. `played` lives in the game's saved state; this ticks

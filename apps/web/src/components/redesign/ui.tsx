@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { Check } from '@/components/icons';
+import { Check } from 'lucide-react';
 
 type Div = { children?: ReactNode; className?: string; style?: CSSProperties; onClick?: () => void };
 

@@ -1,7 +1,7 @@
 import { toastError } from '../lib/toast';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, ChevronDown, ChevronRight, LibraryBig, Info } from '@/components/icons';
+import { BookOpen, ChevronDown, ChevronRight, LibraryBig, Info } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import { SearchListSkeleton } from '../components/Skeletons';
 import ErrorState from '../components/ErrorState';

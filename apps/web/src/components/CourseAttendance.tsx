@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronRight } from '@/components/icons';
+import { ChevronRight } from 'lucide-react';
 import { api, type CourseAttendance as Data } from '../lib/api';
 import { ROUTES } from '../lib/routes';
 import Drop from './Drop';

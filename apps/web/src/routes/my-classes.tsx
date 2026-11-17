@@ -1,7 +1,7 @@
 import MeetLinkField from '../components/MeetLinkField';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
-import { BookOpen, CalendarDays, ExternalLink, FileText, MapPin, Trash2, Users, Video } from '@/components/icons';
+import { BookOpen, CalendarDays, ExternalLink, FileText, MapPin, Trash2, Users, Video } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import Drop from '../components/Drop';
 import { ClassesSkeleton } from '../components/Skeletons';

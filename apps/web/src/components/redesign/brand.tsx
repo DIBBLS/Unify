@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { Flame } from '@/components/icons';
+import { Flame } from 'lucide-react';
 
 /* ---------- Box Boy ---------- */
 export const POSES = {

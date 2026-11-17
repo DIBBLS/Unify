@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ArrowDownToLine, RefreshCw, X } from '@/components/icons';
-import { INSTALL_EVENT, isIOS as detectIOS, isStandalone } from '../lib/install';
+import { ArrowDownToLine, RefreshCw, X } from 'lucide-react';
+import { INSTALL_EVENT, isIOS as detectIOS, isStandalone, markInstallable } from '../lib/install';
 import { toastSuccess } from '../lib/toast';
 
 // PWA install + update notifier, bottom-left (ZoomBar owns bottom-right).
@@ -56,11 +56,13 @@ export default function InstallBar() {
     const onBip = (e: Event) => {
       e.preventDefault();
       setPie(e as BIPEvent);
+      markInstallable(true);
       if (ls(HIDE) === null) setStage(ls(SEEN) ? 'pill' : 'bar');
     };
     const onInstalled = () => {
       setStage('hidden');
       setPie(null);
+      markInstallable(false);
       setLs(HIDE, '1');
     };
     window.addEventListener('beforeinstallprompt', onBip);
@@ -127,6 +129,7 @@ export default function InstallBar() {
     await pie.prompt();
     const choice = await pie.userChoice.catch(() => null);
     setPie(null);
+    markInstallable(false);
     if (choice?.outcome === 'accepted') setStage('hidden');
     else setLs(SEEN, '1'), setStage('pill'); // dismissed → pill, not gone
   };

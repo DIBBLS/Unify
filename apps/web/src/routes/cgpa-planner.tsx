@@ -3,7 +3,7 @@ import { StepBars, ProgressBar } from '../components/redesign/ui'
 import Slider from '../components/Slider';
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { ChevronLeft, MapPin, Flag, Trophy } from '@/components/icons'
+import { ChevronLeft, MapPin, Flag, Trophy } from 'lucide-react'
 import { toastError, toastSuccess } from '../lib/toast'
 import { errorToast } from '../lib/errors'
 import { api, type Profile } from '../lib/api'

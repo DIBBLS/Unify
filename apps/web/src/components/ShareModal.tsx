@@ -1,6 +1,6 @@
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
-import { Link2, Copy, Check, Trash2, X, MessageCircle } from '@/components/icons';
+import { Link2, Copy, Check, Trash2, X, MessageCircle } from 'lucide-react';
 import { api } from '../lib/api';
 import { describeError } from '../lib/errors';
 

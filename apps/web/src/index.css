@@ -270,7 +270,7 @@ Playfair 900 in Story) — stats must read as the app, not as an import. */
 .skel::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);animation:skel-sweep 1.3s ease-in-out infinite}
 [data-theme="dark"] .skel::after{background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent)}
 @keyframes skel-sweep{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
-@media(prefers-reduced-motion:reduce){.flash{animation:none}button:active:not(:disabled){transform:none}.rise,.beat{animation:none;transition:none}.beat{opacity:1;transform:none}.skel::after{animation:none}.xp-burst{animation:none}.listening{animation:none}.modal-card{animation:none}.recall-answer.open{transition:none}.side-rail,.side-pill,.side-label,.side-grouplabel,.side-trigger{transition:none}}
+@media(prefers-reduced-motion:reduce){.flash{animation:none}button:active:not(:disabled){transform:none}.rise,.beat{animation:none;transition:none}.beat{opacity:1;transform:none}.skel::after{animation:none}.xp-burst{animation:none}.listening{animation:none}.modal-card{animation:none}.recall-answer.open{transition:none}}
 
 /* Mobile: tighter cards so headings never spill off-page */
 @media(max-width:480px){

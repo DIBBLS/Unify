@@ -3,7 +3,7 @@ import { forgetLastName, lastSignedInName } from '../lib/lastName';
 import { ProgressBar } from '../components/redesign/ui';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Eye, EyeOff, ArrowRight, Check, X, Loader2 } from '@/components/icons';
+import { Eye, EyeOff, ArrowRight, Check, X, Loader2 } from 'lucide-react';
 import { BoxBoy } from '../components/redesign/brand';
 import Wordmark from '../components/Wordmark';
 import Typewriter from '../components/Typewriter';

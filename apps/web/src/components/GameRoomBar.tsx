@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Share2, Swords, Users, X } from '@/components/icons';
+import { Share2, Swords, Users, X } from 'lucide-react';
 import { newRoomCode, roomLink, type RoomEvent, type RoomMode, type useGameRoom } from '../lib/gameRoom';
 import { Avatar, type PersonaKey } from './redesign/brand';
 

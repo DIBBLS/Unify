@@ -2,7 +2,7 @@ import { SectionSkeleton } from '../components/Skeletons';
 import LiveWire from '../components/LiveWire';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CalendarDays, ClipboardCheck, Search, ChevronRight, Flag, FileUp, MessageCircle, PenTool } from '@/components/icons';
+import { CalendarDays, ClipboardCheck, Search, ChevronRight, Flag, FileUp, MessageCircle, PenTool } from 'lucide-react';
 import SendPdf from '../components/SendPdf';
 import { timesOf } from '../components/TimetableGrid';
 import { api, type ClassSlot } from '../lib/api';

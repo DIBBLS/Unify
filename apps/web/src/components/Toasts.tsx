@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X } from '@/components/icons';
+import { X } from 'lucide-react';
 import { subscribeToasts } from '../lib/toast';
 
 // Fixed bottom-center error stack, above the nav. One host in the layout;

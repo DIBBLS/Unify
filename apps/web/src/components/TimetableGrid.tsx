@@ -1,4 +1,4 @@
-import { MapPin, Video, X } from '@/components/icons';
+import { MapPin, Video, X } from 'lucide-react';
 import type { ClassSlot } from '../lib/api';
 import { BoxBoy } from './redesign/brand';
 

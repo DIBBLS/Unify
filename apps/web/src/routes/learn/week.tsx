@@ -1,7 +1,7 @@
 import { ReaderSkeleton } from '../../components/Skeletons';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Check, Download, ArrowUp, Share2, Lock, Flag } from '@/components/icons';
+import { ChevronLeft, ChevronRight, Check, Download, ArrowUp, Share2, Lock, Flag } from 'lucide-react';
 import ReportSheet from '../../components/ReportSheet';
 import { api, type TopicMeta } from '../../lib/api';
 import { log } from '../../lib/log';

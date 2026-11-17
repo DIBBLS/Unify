@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft } from '@/components/icons';
+import { ChevronLeft } from 'lucide-react';
 import { goBack, leaveTo } from '../lib/navHistory';
 
 // Back steps back to the actual previous in-app screen (navHistory) and

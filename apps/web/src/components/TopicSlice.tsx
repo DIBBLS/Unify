@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Target } from '@/components/icons';
+import { Target } from 'lucide-react';
 import type { Topic } from '../types/note';
 import { ContentBlockView } from './ContentBlock';
 import { MiniCheck } from './MiniCheck';

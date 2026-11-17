@@ -1,7 +1,7 @@
 import { SectionSkeleton } from '../components/Skeletons';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Trash2 } from '@/components/icons';
+import { Trash2 } from 'lucide-react';
 import { api, type HocPost } from '../lib/api';
 import { errorToast } from '../lib/errors';
 import { toastSuccess } from '../lib/toast';

@@ -3,7 +3,7 @@ import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ROUTES } from '../lib/routes';
-import { Shield, Trash2, PenTool, BookOpen, ChevronDown, ChevronRight, BarChart3, UserCheck, Users, LibraryBig, Cpu, Building2, CalendarDays, Megaphone, AlertTriangle, Scale, LayoutGrid, GraduationCap, Menu, X } from '@/components/icons';
+import { Shield, Trash2, PenTool, BookOpen, ChevronDown, ChevronRight, BarChart3, UserCheck, Users, LibraryBig, Cpu, Building2, CalendarDays, Megaphone, AlertTriangle, Scale, LayoutGrid, GraduationCap, Menu, X } from 'lucide-react';
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type AdminUser } from '../lib/api';
 import Loading from '../components/Loading';
@@ -18,6 +18,7 @@ import PerformancePanel from './admin/performance';
 import HomeUpdatesPanel from './admin/updates';
 import ModulesOverview from './admin/modules-overview';
 import AdminLiveWire from './admin/livewire';
+import AdminReminders from './admin/reminders';
 import AdminBugs from './admin/bugs';
 import AdminStructure from './admin/structure';
 import GuidePanel, { ClassContributorsPicker } from './admin/guide';
@@ -907,6 +908,10 @@ export default function AdminRoute() {
 
       <Module id="livewire" openId={openModule}>
         {openModule === 'livewire' && <AdminLiveWire />}
+      </Module>
+
+      <Module id="reminders" openId={openModule}>
+        {openModule === 'reminders' && <AdminReminders />}
       </Module>
 
       <Module id="announce" openId={openModule}>

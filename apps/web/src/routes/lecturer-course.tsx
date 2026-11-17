@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import SendPdf from '../components/SendPdf';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { Check, Send, Trash2 } from '@/components/icons';
+import { Check, Send, Trash2 } from 'lucide-react';
 import CourseChat from '../components/CourseChat';
 import { PracticeEditor } from '../components/PracticeQuestions';
 import { useSchool } from '../lib/school';

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight } from '@/components/icons';
+import { ChevronRight } from 'lucide-react';
 import { api } from '../../lib/api';
 
 // Admin Overview: every module at a glance so nothing new is missed. What

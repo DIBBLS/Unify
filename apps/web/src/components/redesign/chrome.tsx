@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { ChevronLeft, Home, CalendarDays, MessageSquare, User, PenTool } from '@/components/icons';
+import { ChevronLeft, Home, CalendarDays, MessageSquare, User, PenTool } from 'lucide-react';
 import { useBack, useGo } from './nav';
 
 /* ---------- Screen shell ---------- */

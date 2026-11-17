@@ -1,7 +1,7 @@
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { BookOpen, Clock, Eye, ArrowRight, Zap } from '@/components/icons';
+import { BookOpen, Clock, Eye, ArrowRight, Zap } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import Wordmark from '../components/Wordmark';
 import Loading from '../components/Loading';

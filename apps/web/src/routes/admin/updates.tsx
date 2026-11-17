@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { SectionSkeleton } from '../../components/Skeletons';
-import { Trash2, Plus } from '@/components/icons';
+import { Trash2, Plus } from 'lucide-react';
 import { api, type HomeUpdate } from '../../lib/api';
 import { POSES, type Pose } from '../../components/redesign/brand';
 import { describeError } from '../../lib/errors';

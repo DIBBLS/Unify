@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Zap, Check, X } from '@/components/icons';
+import { Zap, Check, X } from 'lucide-react';
 import type { MiniCheckQuestion } from '../types/note';
 import { MathText, MathPlain } from './MathText';
 

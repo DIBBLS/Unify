@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { AlertTriangle, LogOut, BellRing } from '@/components/icons';
+import { AlertTriangle, LogOut, BellRing } from 'lucide-react';
 import { BoxBoy } from './redesign/brand';
 
 // Designed confirm sheet (bottom sheet on mobile) — the app-wide

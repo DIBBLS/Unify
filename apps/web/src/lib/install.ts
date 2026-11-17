@@ -16,3 +16,19 @@ export function isIOS(): boolean {
 export function askInstall(): void {
   window.dispatchEvent(new Event(INSTALL_EVENT));
 }
+
+// Whether the browser handed us an install prompt (Android/desktop Chrome).
+// InstallBar owns the event; the setup sheet only needs to know it exists.
+export const INSTALLABLE_EVENT = 'unify:installable';
+let installable = false;
+export function markInstallable(v: boolean): void {
+  installable = v;
+  try {
+    window.dispatchEvent(new Event(INSTALLABLE_EVENT));
+  } catch {
+    // ignore
+  }
+}
+export function canPromptInstall(): boolean {
+  return installable;
+}

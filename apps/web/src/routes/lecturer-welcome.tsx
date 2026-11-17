@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Camera, Check, Search } from '@/components/icons';
+import { Camera, Check, Search } from 'lucide-react';
 import { api } from '../lib/api';
 import { errorToast } from '../lib/errors';
 import { preparePhoto } from '../lib/image';

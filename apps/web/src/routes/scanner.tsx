@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import SpotCheck from '../components/SpotCheck';
 import { useSearchParams } from 'react-router-dom';
-import { Copy, Video } from '@/components/icons';
+import { Copy, Video } from 'lucide-react';
 import { api, type AttendanceRegister, type AttendanceSession, type ScanResult } from '../lib/api';
 import { errorToast, describeError } from '../lib/errors';
 import { startQrScan } from '../lib/qrscan';

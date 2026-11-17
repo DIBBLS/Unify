@@ -1,7 +1,7 @@
 import { toastError } from '../../lib/toast';
 import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, Trash2, ChevronUp, ChevronDown, Check, X } from '@/components/icons';
+import { Plus, Trash2, ChevronUp, ChevronDown, Check, X } from 'lucide-react';
 import ConfirmModal from '../../components/ConfirmModal';
 import Drop from '../../components/Drop';
 import Formula from '../../components/Formula';

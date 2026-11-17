@@ -372,6 +372,12 @@ export type PerfSnapshot = {
 
 export type HomeUpdate = { id: string; title: string; body: string; link?: string; cta?: string; pose: import('../components/redesign/brand').Pose; endsAt?: string; createdAt?: string };
 
+export type ScheduledReminder = {
+  id: string; title: string; body: string; link: string;
+  audience: 'all' | 'students' | 'lecturers' | 'staff';
+  sendAt: string; days: number[]; active: boolean; lastSentOn: string | null;
+};
+
 export const api = {
   universities: () => apiFetch<University[]>("/v1/universities"),
   settings: () => apiFetch<{ currentSemester: string; semesterStart?: string | null; semesterWeeks?: number; semesterEnded?: boolean }>("/v1/settings"),
@@ -544,6 +550,18 @@ export const api = {
     apiFetch<{ ok: boolean }>(`/v1/share/${encodeURIComponent(token)}`, { method: 'DELETE' }),
   adminAnnounce: (title: string, body: string, link?: string, opts?: { pin?: boolean; email?: boolean }) =>
     apiFetch<{ ok: boolean; reached: number; emailTo?: number }>('/v1/admin/announce', { method: 'POST', body: JSON.stringify({ title, body, link, ...(opts || {}) }) }),
+  // Scheduled reminders (migration 0050).
+  myReminders: () => apiFetch<{ on: boolean; times: string[]; custom: boolean }>('/v1/me/reminders'),
+  saveMyReminders: (patch: { on?: boolean; times?: string[] | null }) =>
+    apiFetch<{ ok: boolean }>('/v1/me/reminders', { method: 'PUT', body: JSON.stringify(patch) }),
+  testMyReminder: () => apiFetch<{ ok: boolean }>('/v1/me/reminders/test', { method: 'POST', body: '{}' }),
+  adminReminders: () => apiFetch<{ reminders: ScheduledReminder[] }>('/v1/admin/reminders'),
+  adminReminderCreate: (r: Omit<ScheduledReminder, 'id' | 'lastSentOn'>) =>
+    apiFetch<{ reminder: ScheduledReminder }>('/v1/admin/reminders', { method: 'POST', body: JSON.stringify(r) }),
+  adminReminderUpdate: (id: string, patch: Partial<Omit<ScheduledReminder, 'id' | 'lastSentOn'>>) =>
+    apiFetch<{ reminder: ScheduledReminder }>(`/v1/admin/reminders/${id}`, { method: 'PUT', body: JSON.stringify(patch) }),
+  adminReminderDelete: (id: string) => apiFetch<{ ok: boolean }>(`/v1/admin/reminders/${id}`, { method: 'DELETE' }),
+  adminReminderTest: (id: string) => apiFetch<{ ok: boolean }>(`/v1/admin/reminders/${id}/test`, { method: 'POST', body: '{}' }),
   adminEmailTest: (to: string) =>
     apiFetch<{ ok: boolean; status: number; body: string; sender: string; keySet: boolean; fromSet: boolean }>('/v1/admin/email/test', { method: 'POST', body: JSON.stringify({ to }) }),
   adminContent: () =>

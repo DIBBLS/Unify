@@ -201,7 +201,10 @@ self.addEventListener('push', (e) => {
       await self.registration.showNotification(title, {
         body,
         icon: '/icons/v5/icon-192.png',
-        badge: '/icons/v5/favicon-32.png',
+        // Status-bar icon (Android draws only its outline, like WhatsApp's chat
+        // bubble): a white U on transparent. A full-colour square here shows up
+        // as a plain white block.
+        badge: '/icons/v5/badge-96.png',
         data: { url },
       });
     })()

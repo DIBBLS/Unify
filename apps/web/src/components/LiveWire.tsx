@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Radio, X } from '@/components/icons';
+import { Radio, X } from 'lucide-react';
 import { api, type LiveWire as Wire, type LiveWireTarget } from '../lib/api';
 import { errorToast } from '../lib/errors';
 import { toastSuccess } from '../lib/toast';

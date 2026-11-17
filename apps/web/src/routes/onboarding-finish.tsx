@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Check } from '@/components/icons';
+import { ArrowRight, Check } from 'lucide-react';
 import { api } from '../lib/api';
 import { errorToast } from '../lib/errors';
 import { pushSupported, enablePush } from '../lib/push';

@@ -1,7 +1,7 @@
 import { toastError } from '../../lib/toast';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowRight, Check, X, ChevronDown, FileText, ExternalLink, AlertTriangle, Sparkles, PenLine, Bot } from '@/components/icons';
+import { ArrowRight, Check, X, ChevronDown, FileText, ExternalLink, AlertTriangle, Sparkles, PenLine, Bot } from 'lucide-react';
 import BackButton from '../../components/BackButton';
 import Drop from '../../components/Drop';
 import Flash from '../../components/Flash';
