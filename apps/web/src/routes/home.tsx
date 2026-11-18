@@ -99,12 +99,14 @@ function CourseCard({ index, course, title, staff, priority, semWeek }: {
   const state = !prog || prog.done === 0 ? 'Not started' : pct >= 1 ? 'Done' : 'In progress';
   const lecturer = staff.map((s) => s.name).join(' · ');
   // Square card (Review Round 2: "square, as in Figma"): lecturer photos and
-  // status on top, the course in the middle, progress at the bottom.
+  // status on top, the course in the middle, progress at the bottom. Square is
+  // the minimum: a long title or several lecturers make the card taller instead
+  // of the lecturer line spilling over the topics line (no overflow clip).
   return (
     <Link
       to={`/courses/${encodeURIComponent(course)}`}
       className="rise"
-      style={{ animationDelay: `${Math.min(index, 6) * 40}ms`, aspectRatio: '1 / 1', minWidth: 0, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 18, padding: 12, display: 'flex', flexDirection: 'column', gap: 6, textDecoration: 'none', color: 'var(--text)', overflow: 'hidden' }}
+      style={{ animationDelay: `${Math.min(index, 6) * 40}ms`, aspectRatio: '1 / 1', minWidth: 0, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 18, padding: 12, display: 'flex', flexDirection: 'column', gap: 6, textDecoration: 'none', color: 'var(--text)' }}
     >
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
         <div style={{ display: 'flex', flex: 1, minWidth: 0 }}>
@@ -128,8 +130,8 @@ function CourseCard({ index, course, title, staff, priority, semWeek }: {
           ? <span className="pill pill--amber" style={{ fontSize: 9, padding: '2px 7px' }}>PRIORITY</span>
           : <span className={`pill ${state === 'Not started' ? 'pill--grey' : 'pill--good'}`} style={{ fontSize: 10, padding: '2px 8px' }}>{state}</span>}
       </div>
-      <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        <div style={{ fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 19, lineHeight: 1.1 }}>{course}</div>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div style={{ fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 19, lineHeight: 1.1, overflowWrap: 'anywhere' }}>{course}</div>
         {title && <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 3, lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{title}</div>}
         {lecturer && <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lecturer}</div>}
       </div>
