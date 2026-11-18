@@ -10,8 +10,10 @@ import { BoxBoy } from '../components/redesign/brand';
 import { Card, Display } from '../components/redesign/ui';
 
 // My pass: in class, students never scan. They show this QR and the class rep
-// (HOC) or lecturer scans it. The QR changes every 30 seconds, so a screenshot
-// sent to a friend stops working within a minute.
+// (HOC) or lecturer scans it. The QR changes every 30 seconds (we don't say
+// so on screen: Review 3, C2, mentioning screenshots invites people to try).
+// Opened from a week on the course page (?course&week&class&title), it says
+// which class it's for and goes back to the course.
 // Online class (?online=1): there is no room to scan in, so the student types
 // the 6-digit code the lecturer shares in the meeting chat.
 export default function AttendancePassRoute() {
@@ -23,6 +25,10 @@ export default function AttendancePassRoute() {
   const rawMeet = params.get('m') || '';
   const meetHref = /^https:\/\/[^\s]+$/i.test(rawMeet) ? rawMeet : '';
   const [ready, setReady] = useState(false);
+  const week = Number(params.get('week')) || 0;
+  const forClass = week > 0 && onlineCourse ? {
+    course: onlineCourse, week, n: Number(params.get('class')) || 0, title: (params.get('title') || '').slice(0, 80),
+  } : null;
   const [waiting, setWaiting] = useState(false);
 
   // First time? Once the class rep has uploaded the class list, find yourself on it;
@@ -45,7 +51,13 @@ export default function AttendancePassRoute() {
 
   return (
     <div style={shell}>
-      <BackButton to={ROUTES.timetable} />
+      <BackButton to={forClass ? ROUTES.course(forClass.course) : ROUTES.timetable} label={forClass ? `Week ${forClass.week}${forClass.n ? ` · Class ${forClass.n}` : ''}` : undefined} />
+      {forClass && !codeMode && (
+        <div className="t-13 w-7" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 12, background: 'var(--u-black)', color: '#fff' }}>
+          <span style={{ width: 8, height: 8, borderRadius: 9999, background: 'var(--u-green)', flexShrink: 0 }} />
+          <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{[forClass.course, forClass.title].filter(Boolean).join(' · ')}</span>
+        </div>
+      )}
       {waiting && !codeMode && (
         <Link to={ROUTES.attendanceSetup} className="t-13" style={{ display: 'block', marginTop: 8, padding: 12, borderRadius: 12, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', textDecoration: 'none' }}>
           Your class rep is checking your class-list request. Your pass still works meanwhile.
@@ -54,14 +66,14 @@ export default function AttendancePassRoute() {
       {codeMode ? (
         <OnlineCode course={onlineCourse} meetHref={meetHref} initial={(params.get('c') || '').replace(/\D/g, '').slice(0, 6)} onPass={() => setCodeMode(false)} />
       ) : (
-        <MyPass onOnline={() => setCodeMode(true)} />
+        <MyPass onOnline={() => setCodeMode(true)} week={forClass?.week || 0} />
       )}
       <Link to={ROUTES.attendanceMine} className="btn btn--white btn--block" style={{ marginTop: 12 }}>My attendance</Link>
     </div>
   );
 }
 
-function MyPass({ onOnline }: { onOnline: () => void }) {
+function MyPass({ onOnline, week }: { onOnline: () => void; week: number }) {
   const [pass, setPass] = useState<AttendancePass | null>(null);
   const [err, setErr] = useState('');
   const [left, setLeft] = useState(0);
@@ -159,7 +171,7 @@ function MyPass({ onOnline }: { onOnline: () => void }) {
           )}
         </div>
         <div role="status" aria-live="polite" className="t-13" style={{ minHeight: 20, color: err ? 'var(--u-red, #dc2626)' : undefined, opacity: err ? 1 : 0.75 }}>
-          {stale ? 'No connection.' : err || (pass ? `Changes in ${left}s. A screenshot won't work.` : '')}
+          {stale ? 'No connection.' : err || (pass ? `New code in 0:${String(left).padStart(2, '0')}` : '')}
         </div>
         {(err || stale) && <button className="btn btn--amber btn--sm" onClick={() => void load()}>Try again</button>}
       </Card>
@@ -170,20 +182,22 @@ function MyPass({ onOnline }: { onOnline: () => void }) {
             {new Date(marked.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{marked.by ? ` · by ${marked.by}` : ''}
           </div>
           {flagged ? (
-            <div className="t-12 muted">Thanks. The Unify team will check it.</div>
+            <div className="t-12 muted">Thanks. The Unify Learn team will check it.</div>
           ) : (
             <button
               className="t-12"
               style={{ alignSelf: 'flex-start', background: 'none', border: 'none', padding: 0, color: 'var(--text2)', textDecoration: 'underline' }}
-              onClick={() => { if (window.confirm(`Tell Unify that ${marked.by || 'the person who scanned you'} isn't your lecturer or class rep?`)) void api.attendanceFlag({ course: marked.course, at: marked.at, by: marked.by }).then(() => setFlagged(true)).catch((e) => errorToast(e, 'send that')); }}
+              onClick={() => { if (window.confirm(`Tell Unify Learn that ${marked.by || 'the person who scanned you'} isn't your lecturer or class rep?`)) void api.attendanceFlag({ course: marked.course, at: marked.at, by: marked.by }).then(() => setFlagged(true)).catch((e) => errorToast(e, 'send that')); }}
             >
-              Not your lecturer or class rep? Tell Unify
+              Not your lecturer or class rep? Tell Unify Learn
             </button>
           )}
         </Card>
       )}
       <div className="t-13 muted" style={{ textAlign: 'center', marginTop: 12 }}>
-        Show this to your class rep or lecturer. They scan it to mark you present. Phone dead? They can type your matric number instead.
+        {week > 0
+          ? `Hold this up to your class rep or lecturer at the door. Once you're scanned, Week ${week} shows a tick.`
+          : 'Show this to your class rep or lecturer. They scan it to mark you present.'}{' '}Phone dead? They can type your matric number instead.
       </div>
       <button className="btn btn--white btn--block" onClick={onOnline} style={{ marginTop: 14 }}>Online class? Enter the code</button>
     </>

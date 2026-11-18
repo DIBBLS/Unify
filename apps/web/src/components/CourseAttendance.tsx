@@ -13,7 +13,8 @@ import { useClassListReady } from '../lib/classListReady';
 //   timetable (or an Extra class), and every register so far.
 const DAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-export default function CourseAttendance({ course, totalWeeks = 12, currentWeek = 0 }: { course: string; totalWeeks?: number; currentWeek?: number }) {
+// hideMine: the course page shows the student's own attendance on each week row (Review 3, C1).
+export default function CourseAttendance({ course, totalWeeks = 12, currentWeek = 0, hideMine = false }: { course: string; totalWeeks?: number; currentWeek?: number; hideMine?: boolean }) {
   const [data, setData] = useState<Data | null>(null);
   useEffect(() => {
     let gone = false;
@@ -21,11 +22,12 @@ export default function CourseAttendance({ course, totalWeeks = 12, currentWeek 
     return () => { gone = true; };
   }, [course]);
   if (!data) return null;
+  if (hideMine && !data.canTake) return null;
   return (
     <section style={{ marginTop: 16 }}>
       <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', letterSpacing: 1 }}>ATTENDANCE</div>
       {data.canTake && <TakeAttendance data={data} course={course} totalWeeks={totalWeeks} currentWeek={currentWeek} />}
-      <Mine data={data} totalWeeks={totalWeeks} currentWeek={currentWeek} canTake={data.canTake} />
+      {!hideMine && <Mine data={data} totalWeeks={totalWeeks} currentWeek={currentWeek} canTake={data.canTake} />}
       {data.canTake && data.registers.length > 0 && <Registers data={data} course={course} />}
     </section>
   );

@@ -293,11 +293,19 @@ export type HocPost = { id: string; type: 'announcement' | 'tip' | 'question'; t
 export type CourseAttendance = {
   course: string;
   canTake: boolean;
-  mine: { held: number; attended: number; weeks: { week: number; held: number; attended: number }[] };
+  mine: { held: number; attended: number; weeks: { week: number; held: number; attended: number; classes?: { at: string; came: boolean }[] }[] };
   listed?: number | null;
   slots: { id: string; day: number; start: string; end: string; venue: string }[];
   registers: { id: string; week: number | null; label: string; opensAt: string; open: boolean; present: number }[];
 };
+// Course page lecturers with their weeks (Review 3, C1/C10).
+export type CourseLecturer = {
+  name: string;
+  weekFrom: number | null;
+  weekTo: number | null;
+  lecturer: { id: string; name: string; title: string; department: string; avatar: string; persona: string } | null;
+};
+export type CourseLecturers = { course: string; intro: string; set: boolean; canEdit: boolean; lecturers: CourseLecturer[]; onApp: { id: string; name: string }[] };
 export type AttendanceSession = { id: string; course: string; online?: boolean; code: string; rotatesAt: string; rotateSeconds: number; week: number | null; label?: string; slotId?: string; opensAt: string; closesAt: string; open: boolean; startedBy?: { name: string; role: string; mine: boolean } };
 export type CgpaCourse = { code: string; title: string; status: 'done' | 'priority' | 'not_yet'; units: number; grade: number | null };
 export type CgpaData = { cgpaCurrent: number | null; cgpaTarget: number | null; hideCgpa: boolean; unitsDone: number | null; unitsTotal: number | null; degreeYears?: number | null; level: string | null; courses: CgpaCourse[] };
@@ -808,6 +816,9 @@ export const api = {
     apiFetch<AttendanceRegister>('/v1/attendance/sessions', { method: 'POST', body: JSON.stringify({ course, week, minutes, ...(online ? { online: true, meetLink: online.meetLink || undefined } : {}), ...(which || {}) }) }),
   attendanceRegister: (course: string, sessionId?: string) =>
     apiFetch<AttendanceRegister>(`/v1/attendance/sessions?course=${encodeURIComponent(course)}${sessionId ? `&session=${encodeURIComponent(sessionId)}` : ''}`),
+  courseLecturers: (course: string) => apiFetch<CourseLecturers>(`/v1/courses/${encodeURIComponent(course)}/lecturers`),
+  saveCourseLecturers: (course: string, body: { intro?: string; lecturers: { name: string; weekFrom: number; weekTo: number }[] }) =>
+    apiFetch<{ ok: boolean; intro: string; set: boolean; lecturers: CourseLecturer[] }>(`/v1/courses/${encodeURIComponent(course)}/lecturers`, { method: 'PUT', body: JSON.stringify(body) }),
   attendanceCourse: (course: string) => apiFetch<CourseAttendance>(`/v1/attendance/course?course=${encodeURIComponent(course)}`),
   attendanceExtend: (id: string, minutes = 30) =>
     apiFetch<{ ok: boolean; closesAt: string }>(`/v1/attendance/sessions/${id}/extend`, { method: 'POST', body: JSON.stringify({ minutes }) }),

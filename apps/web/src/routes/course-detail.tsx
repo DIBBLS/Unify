@@ -13,8 +13,8 @@ import { describeError } from '../lib/errors';
 import Loading from '../components/Loading';
 import CourseAttendance from '../components/CourseAttendance';
 import { PracticeRunner } from '../components/PracticeQuestions';
-import { CourseActions, LecturerCards, WeekCard, attendanceByWeek } from '../components/CoursePageParts';
-import type { CourseAttendance as AttendanceData } from '../lib/api';
+import { CourseActions, LecturersCard, MatricPrompt, MarksLegend, WeekCard, attendanceByWeek, weekClasses, type ClassMark } from '../components/CoursePageParts';
+import type { CourseAttendance as AttendanceData, CourseLecturers } from '../lib/api';
 
 // Week of the semester from the profile's semester start (0 = not set / outside it).
 export function semesterWeek(start?: string | null, weeks?: number | null): { week: number; total: number } {
@@ -55,8 +55,9 @@ export default function CourseDetailRoute() {
   const initialTab = searchParams.get('tab');
   const [tab, setTab] = useState<'weeks' | 'outline' | 'practice'>(initialTab === 'outline' || initialTab === 'practice' ? initialTab : 'weeks');
   const [progress, setProgress] = useState<Awaited<ReturnType<typeof api.myCourseProgress>>['weeks'] | null>(null);
-  const [lecturers, setLecturers] = useState<{ id: string; name: string }[]>([]);
-  const [namedLecturers, setNamedLecturers] = useState<string[]>([]);
+  // Review 3 (C1/C10): lecturers with their weeks, and the course intro.
+  const [lect, setLect] = useState<CourseLecturers | null>(null);
+  const [semStart, setSemStart] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
   // Design S23: the course's full title and semester, attendance per week, and
   // which week card is open (the current week, or the first not finished).
@@ -77,6 +78,7 @@ export default function CourseDetailRoute() {
         if (me) {
           const role = me.profile?.role || 'student';
           setSem(semesterWeek(me.profile?.semester_start, me.profile?.semester_weeks));
+          setSemStart(me.profile?.semester_start || null);
           setBackTo(
             preview
               ? me.isAdmin
@@ -102,7 +104,8 @@ export default function CourseDetailRoute() {
         // them under My Classes). Failure never blocks the weeks.
         api.timetable(courseCode).then((tt) => setSlots(tt.slots || [])).catch(() => {});
         api.materials(courseCode).then((r) => setMaterials(r.materials || [])).catch(() => {});
-        api.myCourseProgress(courseCode).then((r) => { setProgress(r.weeks); setLecturers(r.lecturers || []); setNamedLecturers(r.namedLecturers || []); }).catch(() => {});
+        api.myCourseProgress(courseCode).then((r) => setProgress(r.weeks)).catch(() => {});
+        api.courseLecturers(courseCode).then(setLect).catch(() => {});
         api.courses().then((list) => {
           const c = list.find((x) => x.code.toUpperCase().trim() === courseCode.toUpperCase());
           if (c) setCourseInfo({ title: c.title, semesters: c.semesters || [] });
@@ -187,15 +190,30 @@ export default function CourseDetailRoute() {
       </div>
     );
 
+  // Review 3 (C1): title, a short introduction, the lecturers, the matric
+  // prompt, then every week of the semester with attendance on each.
+  const byWeek = attendanceByWeek(attendance);
+  const perWeek = slots.length;
+  const lastPublished = weeks.reduce((m, w) => Math.max(m, w.week), 0);
+  const totalWeeks = Math.max(sem.total, lastPublished);
+  const firstOpen = (sem.week > 0 ? sem.week : null)
+    ?? weeks.find((w) => { const p = progress?.find((x) => x.week === w.week); return !p || p.done < p.topics; })?.week
+    ?? null;
+  const shown = openWeek ?? firstOpen;
+  const lecturerFor = (w: number) => lect?.lecturers.find((l) => l.weekFrom != null && l.weekTo != null && w >= l.weekFrom && w <= l.weekTo)?.name
+    || (lect?.lecturers.length === 1 ? lect.lecturers[0].name : '');
+  const surnameOf = (n: string) => n.split(/\s+/).filter(Boolean).slice(-1)[0] || n;
+  const shortName = (n: string) => { const t = n.match(/^(Prof|Dr|Engr|Mr|Mrs|Ms)\.?\s/i)?.[1]; return t ? `${t}. ${surnameOf(n)}` : n; };
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '20px 16px 80px' }}>
-      <BackButton to={backTo} />
-      <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28, lineHeight: 1.15 }}>{courseInfo?.title || courseCode}</h1>
+      <BackButton to={backTo} label={courseCode} />
+      <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 30, lineHeight: 1.1, letterSpacing: '-0.01em' }}>{courseInfo?.title || courseCode}</h1>
       <p style={{ color: 'var(--text2)', marginTop: 6, fontSize: 13 }}>
         {[courseInfo?.title ? courseCode : '', (courseInfo?.semesters || []).map((x) => x.replace(' Semester', ' semester')).join(' & '), `${weeks.length} ${weeks.length === 1 ? 'week' : 'weeks'} published`].filter(Boolean).join(' · ')}
       </p>
-      {/* Design S23: who teaches it, with their photo and bio. */}
-      <LecturerCards lecturers={lecturers} named={namedLecturers} />
+      {lect?.intro && <p style={{ marginTop: 10, fontSize: 15, lineHeight: 1.55, color: 'var(--text)' }}>{lect.intro}</p>}
+      {lect && <LecturersCard course={courseCode} lecturers={lect.lecturers} week={sem.week} canEdit={lect.canEdit && !preview} />}
+      {!preview && <MatricPrompt course={courseCode} />}
       <CourseActions course={courseCode} weeks={progress || []} preview={preview} />
       {sem.week > 0 && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 14 }}>
@@ -203,6 +221,9 @@ export default function CourseDetailRoute() {
           <div style={{ flex: 1, height: 6, borderRadius: 9999, background: 'var(--border)', overflow: 'hidden' }}>
             <div style={{ width: `${(sem.week / sem.total) * 100}%`, height: '100%', background: 'var(--u-green)' }} />
           </div>
+          {attendance && attendance.mine.held > 0 && (
+            <span style={{ padding: '3px 10px', borderRadius: 9999, background: 'var(--u-good-tint)', color: 'var(--u-good)', fontSize: 11, fontWeight: 800, whiteSpace: 'nowrap' }}>Attendance {attendance.mine.attended} of {attendance.mine.held}</span>
+          )}
         </div>
       )}
       {!preview && <LecturerPosts course={courseCode} />}
@@ -214,71 +235,73 @@ export default function CourseDetailRoute() {
       </div>
       {tab === 'outline' && <Outline weeks={weeks} progress={progress} />}
       {tab === 'practice' && <Practice course={courseCode} progress={progress} preview={preview} />}
-      {tab === 'weeks' && materials.length > 0 && (
-        <div style={{ marginTop: 16 }}>
-          <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', letterSpacing: 1 }}>FROM YOUR LECTURER</div>
-          <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {materials.map((m) => (
-              <a key={m.id} href={m.url} target="_blank" rel="noreferrer" style={{ padding: '12px 14px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, textDecoration: 'none', color: 'var(--text)', display: 'flex', gap: 12, alignItems: 'center' }}>
-                <FileText size={18} color="var(--u-good)" />
-                <span style={{ flex: 1 }}>
-                  <span style={{ fontWeight: 700, display: 'block' }}>{m.title}</span>
-                  <span style={{ fontSize: 12, color: 'var(--text2)' }}>Week {m.week} · {m.type === 'past-paper' ? 'past paper' : m.type}</span>
-                </span>
-                <ExternalLink size={16} color="var(--u-good)" />
-              </a>
-            ))}
-          </div>
+      {tab === 'weeks' && (
+        <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {weeks.length === 0 && !error && sem.week === 0 && (
+            <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
+              <BoxBoy pose="readingStanding" width={62} />
+              <div style={{ marginTop: 8 }}>No weeks published yet.</div>
+            </div>
+          )}
+          {(weeks.length > 0 || sem.week > 0) && Array.from({ length: totalWeeks }, (_, i) => i + 1).map((n) => {
+            const w = weeks.find((x) => x.week === n);
+            const p = progress?.find((x) => x.week === n);
+            const a = byWeek[n];
+            const held = a?.classes || [];
+            const count = Math.max(perWeek, a?.held || 0);
+            const marks: ClassMark[] = Array.from({ length: count }, (_, i) => (i < held.length ? (held[i].came ? 'came' : 'missed') : 'open'));
+            const current = n === sem.week;
+            const classes = current && !preview ? weekClasses({ week: n, semesterStart: semStart, slots, held, titles: p?.topicTitles || [] }) : null;
+            const who = lecturerFor(n);
+            const sub = current
+              ? ['This week', who && shortName(who), count ? `${count} class${count === 1 ? '' : 'es'}` : ''].filter(Boolean).join(' · ')
+              : w
+                ? [who && shortName(who), p?.quiz ? `Quiz ${p.quiz.best}/${p.quiz.total}` : p && p.topics ? `${p.done} of ${p.topics} read` : ''].filter(Boolean).join(' · ') || 'Notes ready'
+                : [who && shortName(who), sem.week > 0 && n < sem.week ? 'notes coming' : ''].filter(Boolean).join(' · ') || 'Notes land when the week is taught';
+            return (
+              <WeekCard
+                key={n}
+                course={courseCode}
+                week={n}
+                title={w?.title || ''}
+                sub={sub}
+                published={!!w}
+                current={current}
+                past={sem.week > 0 && n < sem.week}
+                progress={p}
+                marks={marks}
+                classes={classes}
+                open={shown === n}
+                onToggle={() => setOpenWeek(shown === n ? -1 : n)}
+                preview={preview}
+              />
+            );
+          })}
+          {!preview && (perWeek > 0 || (attendance?.mine.held || 0) > 0) && <MarksLegend />}
+          {materials.length > 0 && (
+            <div style={{ marginTop: 12 }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', letterSpacing: 1 }}>FROM YOUR LECTURER</div>
+              <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {materials.map((m) => (
+                  <a key={m.id} href={m.url} target="_blank" rel="noreferrer" style={{ padding: '12px 14px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, textDecoration: 'none', color: 'var(--text)', display: 'flex', gap: 12, alignItems: 'center' }}>
+                    <FileText size={18} color="var(--u-good)" />
+                    <span style={{ flex: 1 }}>
+                      <span style={{ fontWeight: 700, display: 'block' }}>{m.title}</span>
+                      <span style={{ fontSize: 12, color: 'var(--text2)' }}>Week {m.week} · {m.type === 'past-paper' ? 'past paper' : m.type}</span>
+                    </span>
+                    <ExternalLink size={16} color="var(--u-good)" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+          {!preview && <CourseAttendance course={courseCode} totalWeeks={sem.total} currentWeek={sem.week} hideMine />}
         </div>
       )}
-      {tab === 'weeks' && (() => {
-        const byWeek = attendanceByWeek(attendance);
-        const lastPublished = weeks.reduce((m, w) => Math.max(m, w.week), 0);
-        // The week to open first: this semester week if published, else the first not finished.
-        const firstOpen = weeks.find((w) => w.week === sem.week)?.week
-          ?? weeks.find((w) => { const p = progress?.find((x) => x.week === w.week); return !p || p.done < p.topics; })?.week
-          ?? null;
-        const shown = openWeek ?? firstOpen;
-        return (
-          <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {weeks.length === 0 && !error && (
-              <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
-                <BoxBoy pose="readingStanding" width={62} />
-                <div style={{ marginTop: 8 }}>No weeks published yet.</div>
-              </div>
-            )}
-            {weeks.map((w) => (
-              <WeekCard
-                key={w.week}
-                course={courseCode}
-                week={w.week}
-                title={w.title}
-                subtitle={w.subtitle}
-                progress={progress?.find((x) => x.week === w.week)}
-                attendance={byWeek[w.week]}
-                open={shown === w.week}
-                onToggle={() => setOpenWeek(shown === w.week ? -1 : w.week)}
-                preview={preview}
-                isNext={w.week === firstOpen}
-              />
-            ))}
-            {/* Weeks the semester has reached whose notes aren't out yet. */}
-            {sem.week > lastPublished && lastPublished > 0 && Array.from({ length: Math.min(2, sem.week - lastPublished) }, (_, i) => lastPublished + i + 1).map((n) => (
-              <div key={n} style={{ display: 'flex', gap: 12, alignItems: 'center', padding: 14, borderRadius: 18, border: '1px dashed var(--border)', color: 'var(--text2)' }}>
-                <span style={{ width: 46, height: 46, borderRadius: 14, background: 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 17 }}>{String(n).padStart(2, '0')}</span>
-                <span>
-                  <span style={{ display: 'block', fontWeight: 800, color: 'var(--text)' }}>Week {n}</span>
-                  <span style={{ fontSize: 12 }}>Notes land soon. You'll get a bell when they do.</span>
-                </span>
-              </div>
-            ))}
-            {!preview && <CourseAttendance course={courseCode} totalWeeks={sem.total} currentWeek={sem.week} />}
-          </div>
-        );
-      })()}
     </div>
   );
 }
+
 
 type Progress = Awaited<ReturnType<typeof api.myCourseProgress>>['weeks'];
 const box: React.CSSProperties = { padding: '14px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 };

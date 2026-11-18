@@ -19,6 +19,7 @@ const OnboardingRoute = lazyRoute(() => import('./routes/onboarding'));
 const OnboardingPersonaRoute = lazyRoute(() => import('./routes/onboarding-persona'));
 const CGPAPlannerRoute = lazyRoute(() => import('./routes/cgpa-planner'));
 const AttendanceSetupRoute = lazyRoute(() => import('./routes/attendance-setup'));
+const CourseLecturersRoute = lazyRoute(() => import('./routes/course-lecturers'));
 const AttendancePassRoute = lazyRoute(() => import('./routes/attendance-pass'));
 const MyAttendanceRoute = lazyRoute(() => import('./routes/my-attendance'));
 const ScannerRoute = lazyRoute(() => import('./routes/scanner'));
@@ -286,6 +287,8 @@ export default function App() {
               </RequireAuth>
             }
           />
+          {/* Review 3 (C10): the class rep sets a course's lecturers and their weeks. */}
+          <Route path="/courses/:courseCode/lecturers" element={<RequireAuth><CourseLecturersRoute /></RequireAuth>} />
           <Route
             path="/courses/:courseCode"
             element={
