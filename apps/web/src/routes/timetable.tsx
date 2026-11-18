@@ -121,13 +121,11 @@ export default function TimetableRoute() {
         <div style={{ flex: 1 }}>
           <Label>{isLecturer ? 'Every class you teach' : 'This week'}</Label>
           <Display size={30}>Timetable</Display>
-          {isLecturer && (
-            <div role="tablist" aria-label="Whose timetable" style={{ display: 'flex', gap: 6, marginTop: 10 }}>
-              {([[false, 'Class timetables'], [true, 'My own']] as const).map(([v, l]) => (
+          <div role="tablist" aria-label="Whose timetable" style={{ display: 'flex', gap: 6, marginTop: 10 }}>
+              {([[false, isLecturer ? 'Class timetables' : 'Class times'], [true, 'My own']] as const).map(([v, l]) => (
                 <button key={l} role="tab" aria-selected={mine === v} className={`chip chip--sm${mine === v ? ' chip--on' : ''}`} onClick={() => setMine(v)}>{l}</button>
               ))}
             </div>
-          )}
           <div role="tablist" aria-label="Timetable view" style={{ display: 'flex', gap: 6, marginTop: 10 }}>
             {(['day', 'week'] as const).map((v) => (
               <button key={v} role="tab" aria-selected={view === v} className={`chip chip--sm${view === v ? ' chip--on' : ''}`} onClick={() => pickView(v)}>
@@ -139,7 +137,7 @@ export default function TimetableRoute() {
         <BoxBoy pose={spotlight ? 'teaching' : 'readingStanding'} width={72} style={{ flexShrink: 0 }} />
       </div>
 
-      {mine && <OwnTimetable day={day} setDay={setDay} view={view} today={today} nowMin={nowMin} openDay={(d) => { setDay(d); pickView('day'); }} />}
+      {mine && <OwnTimetable courses={isLecturer ? [] : courses} isLecturer={isLecturer} day={day} setDay={setDay} view={view} today={today} nowMin={nowMin} openDay={(d) => { setDay(d); pickView('day'); }} />}
       {!mine && <>
       {!loading && spotlight && <TodayCard slot={spotlight} state={state(spotlight)} nowMin={nowMin} onOpen={() => open(spotlight)} onJoin={() => join(spotlight)} />}
 
@@ -184,6 +182,7 @@ export default function TimetableRoute() {
                   : 'Enjoy the free day, or pick another day above.'}
             </div>
             {isHoc && slots.length === 0 && <button className="btn btn--amber" onClick={() => setAdding(true)}>Add class times</button>}
+            {!isHoc && !isLecturer && slots.length === 0 && <button className="btn btn--white" onClick={() => setMine(true)}>Set up my own timetable</button>}
           </Card>
           <EmptyDay label={DAY_LONG[day]} nowMin={day === today ? nowMin : null} />
           </>
@@ -212,9 +211,11 @@ export default function TimetableRoute() {
   );
 }
 
-// My own timetable (design L09/L17): a lecturer's own entries, office hours and
-// other duties. Only they see them. Same day and week grids as the classes.
-function OwnTimetable({ day, setDay, view, today, nowMin, openDay }: { day: number; setDay: (d: number) => void; view: 'day' | 'week'; today: number; nowMin: number; openDay: (d: number) => void }) {
+// My own timetable (design L09/L17): a user's own entries. Lecturers: office
+// hours and other duties. Students: study time, labs, or a class their rep
+// hasn't added (their courses are one tap away). Only they see them. Same day
+// and week grids as the classes.
+function OwnTimetable({ courses, isLecturer, day, setDay, view, today, nowMin, openDay }: { courses: string[]; isLecturer: boolean; day: number; setDay: (d: number) => void; view: 'day' | 'week'; today: number; nowMin: number; openDay: (d: number) => void }) {
   const [own, setOwn] = useState<OwnSlot[] | null>(null);
   const [adding, setAdding] = useState(false);
   const [title, setTitle] = useState('');
@@ -245,7 +246,7 @@ function OwnTimetable({ day, setDay, view, today, nowMin, openDay }: { day: numb
   for (const x of asSlots) count[x.day] = (count[x.day] || 0) + 1;
   return (
     <>
-      <div className="t-13 muted" style={{ marginTop: 12 }}>Office hours and other duties. Only you see these.</div>
+      <div className="t-13 muted" style={{ marginTop: 12 }}>{isLecturer ? 'Office hours and other duties.' : 'Study time, labs, or a class your rep hasn’t added yet.'} Only you see these.</div>
       {view === 'day' && (
         <div style={{ margin: '12px -16px 0', padding: '0 16px', overflowX: 'auto' }}>
           <Chips>
@@ -262,7 +263,12 @@ function OwnTimetable({ day, setDay, view, today, nowMin, openDay }: { day: numb
       {adding ? (
         <Card style={{ marginTop: 14, gap: 10 }}>
           <div className="t-15 w-7">Add to your own timetable</div>
-          <label className="t-13 w-6">What<input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Office hours" maxLength={80} style={field} /></label>
+          <label className="t-13 w-6">What<input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={isLecturer ? 'e.g. Office hours' : 'e.g. Study MTH 201'} maxLength={80} style={field} /></label>
+          {courses.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }} aria-label="Your courses">
+              {courses.map((c) => <button key={c} type="button" className={`chip chip--sm${title === c ? ' chip--on' : ''}`} onClick={() => setTitle(c)}>{c}</button>)}
+            </div>
+          )}
           <Drop value={String(d)} onChange={(v) => setD(Number(v))} label="Day" options={ORDER.map((x) => ({ value: String(x), label: DAY_LONG[x] }))} style={{ width: '100%' }} />
           <div style={{ display: 'flex', gap: 8 }}>
             <label className="t-13 w-6" style={{ flex: 1 }}>Starts<input type="time" value={start} onChange={(e) => setStart(e.target.value)} style={field} /></label>
