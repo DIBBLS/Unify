@@ -225,3 +225,8 @@ input[type="range"] { accent-color: var(--u-amber); }
 .u-range:active::-webkit-slider-thumb { transform: translateY(3px); box-shadow: 0 1px 0 #c69a1a; }
 .u-range:focus-visible::-webkit-slider-thumb { outline: 3px solid var(--u-black); outline-offset: 2px; }
 .u-range:focus-visible::-moz-range-thumb { outline: 3px solid var(--u-black); outline-offset: 2px; }
+
+/* Term of the Day: a wrong-length guess shakes the grid. */
+@keyframes u-shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+.shake { animation: u-shake .35s ease; }
+@media (prefers-reduced-motion: reduce) { .shake { animation: none; } }

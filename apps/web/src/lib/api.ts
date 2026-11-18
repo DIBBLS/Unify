@@ -780,6 +780,10 @@ export const api = {
   hocRequests: () => apiFetch<{ requests: { id: string; name: string; email: string; department: string; level: string; note: string; status: 'pending' | 'approved' | 'rejected'; at: string; repsInClass: number }[] }>('/v1/hoc/requests'),
   hocAnswer: (id: string, approve: boolean, note?: string) =>
     apiFetch<{ ok: boolean }>(`/v1/hoc/requests/${id}`, { method: 'POST', body: JSON.stringify({ approve, note }) }),
+  dailyWord: (course: string, day: string) =>
+    apiFetch<{ played: number; solved: number; mine: { guesses: number; solved: boolean } | null }>(`/v1/games/daily?course=${encodeURIComponent(course)}&day=${day}`),
+  dailyWordSave: (payload: { course: string; day: string; word: string; guesses: number; solved: boolean }) =>
+    apiFetch<{ ok: boolean; first: boolean; xp: number; solved: number }>('/v1/games/daily', { method: 'POST', body: JSON.stringify(payload) }, 0),
   gameScore: (payload: { game: 'keywords' | 'crossword'; course: string; week: number; score: number; terms: number; hints: number; seconds: number }) =>
     apiFetch<{ ok: boolean; best: number; newBest: boolean; xp: number }>('/v1/games/score', { method: 'POST', body: JSON.stringify(payload) }),
   gameBoard: (q: { course: string; week?: number; game?: 'keywords' | 'crossword' }) =>

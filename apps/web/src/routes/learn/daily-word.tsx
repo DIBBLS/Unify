@@ -1,0 +1,265 @@
+import { useCallback, useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Delete, Share2 } from 'lucide-react';
+import { api } from '../../lib/api';
+import { errorToast } from '../../lib/errors';
+import { ROUTES } from '../../lib/routes';
+import { CLUE_AFTER, MAX_GUESSES, courseOfTheDay, dailyFor, readStats, recordResult, score, shareText, today, type Daily, type DailyStats, type Mark } from '../../lib/dailyword';
+import BackButton from '../../components/BackButton';
+import { GameSkeleton } from '../../components/Skeletons';
+import { BoxBoy } from '../../components/redesign/brand';
+import { Card, Display, Label } from '../../components/redesign/ui';
+import { useCheer } from '../../components/Cheer';
+
+// Term of the Day: guess one key term from your course in six tries. Same
+// word for everyone in the course today; the clue from the notes shows after
+// the third guess. Solving it counts as today's study (streak + XP).
+const ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
+const COLORS: Record<Mark, { bg: string; fg: string; border: string }> = {
+  hit: { bg: 'var(--u-green)', fg: 'var(--u-black)', border: 'var(--u-green)' },
+  near: { bg: 'var(--u-amber)', fg: 'var(--u-black)', border: 'var(--u-amber)' },
+  miss: { bg: '#8a8a8a', fg: '#fff', border: '#8a8a8a' },
+};
+type Saved = { guesses: string[]; done: boolean; sent?: boolean };
+const keyOf = (course: string, day: string) => `unify:daily:${course}:${day}`;
+
+function untilMidnight(): string {
+  const now = new Date();
+  const mid = new Date(now);
+  mid.setHours(24, 0, 0, 0);
+  const m = Math.max(0, Math.round((mid.getTime() - now.getTime()) / 60000));
+  return `${Math.floor(m / 60)}h ${m % 60}m`;
+}
+
+export default function DailyWordRoute() {
+  const [params, setParams] = useSearchParams();
+  const day = today();
+  const [courses, setCourses] = useState<string[]>([]);
+  const [daily, setDaily] = useState<Daily | null>(null);
+  const [state, setState] = useState<'loading' | 'ready' | 'none'>('loading');
+  const [saved, setSaved] = useState<Saved>({ guesses: [], done: false });
+  const [typing, setTyping] = useState('');
+  const [shake, setShake] = useState(0);
+  const [note, setNote] = useState('');
+  const [board, setBoard] = useState<{ played: number; solved: number } | null>(null);
+  const [stats, setStats] = useState<DailyStats>(readStats);
+  const [cheerNode, cheer] = useCheer();
+
+  // Pick the course: ?course=, else today's course in the rotation that has a playable word.
+  useEffect(() => {
+    let gone = false;
+    (async () => {
+      try {
+        const me = await api.me();
+        const mine = (me.courses || []).map((c) => c.trim()).filter(Boolean);
+        if (gone) return;
+        setCourses(mine);
+        const wanted = params.get('course');
+        const order = wanted ? [wanted, ...courseOfTheDay(mine, day).filter((c) => c !== wanted)] : courseOfTheDay(mine, day);
+        for (const c of order) {
+          const d = await dailyFor(c, day).catch(() => null);
+          if (gone) return;
+          if (d) {
+            setDaily(d);
+            try { setSaved(JSON.parse(localStorage.getItem(keyOf(c, day)) || '') as Saved); } catch { setSaved({ guesses: [], done: false }); }
+            setState('ready');
+            api.dailyWord(c, day).then((b) => { if (!gone) setBoard({ played: b.played, solved: b.solved }); }).catch(() => {});
+            return;
+          }
+          if (wanted) break;
+        }
+        setState('none');
+      } catch (e) {
+        errorToast(e, 'load today’s word');
+        if (!gone) setState('none');
+      }
+    })();
+    return () => { gone = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.get('course')]);
+
+  const answer = daily?.term.word || '';
+  const rows = saved.guesses.map((g) => score(g, answer));
+  const solved = saved.guesses.includes(answer);
+  const finished = solved || saved.guesses.length >= MAX_GUESSES;
+  const showClue = saved.guesses.length >= CLUE_AFTER || finished;
+
+  const persist = (s: Saved) => {
+    setSaved(s);
+    if (daily) try { localStorage.setItem(keyOf(daily.course, day), JSON.stringify(s)); } catch { /* fine */ }
+  };
+
+  const submit = useCallback(() => {
+    if (!daily || finished) return;
+    if (typing.length !== answer.length) { setNote(`The word has ${answer.length} letters.`); setShake((n) => n + 1); return; }
+    const guesses = [...saved.guesses, typing];
+    const win = typing === answer;
+    const over = win || guesses.length >= MAX_GUESSES;
+    setTyping('');
+    setNote('');
+    if (win) cheer(guesses.length <= 2 ? 'done' : 'level', { text: guesses.length === 1 ? 'First try!' : guesses.length <= 3 ? 'Brilliant!' : 'Got it!' });
+    else if (!over) {
+      // Near miss: one letter off.
+      const hits = score(typing, answer).filter((m) => m === 'hit').length;
+      if (hits === answer.length - 1) setNote('One letter away!');
+      if (guesses.length === CLUE_AFTER) setNote((n) => (n ? `${n} The clue is open now.` : 'The clue is open now.'));
+    }
+    const next: Saved = { guesses, done: over };
+    persist(next);
+    if (over) {
+      setStats(recordResult(day, win, guesses.length));
+      api.dailyWordSave({ course: daily.course, day, word: answer, guesses: guesses.length, solved: win })
+        .then((r) => { setBoard((b) => ({ played: (b?.played || 0) + (r.first ? 1 : 0), solved: r.solved })); persist({ ...next, sent: true }); })
+        .catch(() => {});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [daily, finished, typing, answer, saved, day]);
+
+  const press = useCallback((k: string) => {
+    if (finished || !answer) return;
+    if (k === 'ENTER') return submit();
+    if (k === 'BACK') return setTyping((t) => t.slice(0, -1));
+    if (/^[A-Z]$/.test(k)) setTyping((t) => (t.length < answer.length ? t + k : t));
+  }, [finished, answer, submit]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.key === 'Enter') press('ENTER');
+      else if (e.key === 'Backspace') press('BACK');
+      else if (/^[a-zA-Z]$/.test(e.key)) press(e.key.toUpperCase());
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [press]);
+
+  const shell = { maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '16px 16px 32px' } as const;
+  if (state === 'loading') return <div style={shell}><GameSkeleton /></div>;
+  if (state === 'none' || !daily) {
+    return (
+      <div style={shell}>
+        <BackButton to={ROUTES.games} />
+        <Card style={{ alignItems: 'center', textAlign: 'center', marginTop: 8 }}>
+          <BoxBoy pose="peeking" width={110} />
+          <div className="t-15 w-7">No Term of the Day yet</div>
+          <div className="t-13 muted">{courses.length ? 'It comes from your courses’ notes. Once a week’s notes are out, the word appears here.' : 'Add your courses and the word comes from their notes.'}</div>
+          {!courses.length && <Link to={ROUTES.findCourses} className="btn btn--amber btn--sm">Find courses</Link>}
+        </Card>
+      </div>
+    );
+  }
+
+  // Letter states for the keyboard: best result so far for each letter.
+  const keyState: Record<string, Mark> = {};
+  saved.guesses.forEach((g, r) => g.split('').forEach((ch, i) => {
+    const m = rows[r][i];
+    if (m === 'hit' || (m === 'near' && keyState[ch] !== 'hit') || (m === 'miss' && !keyState[ch])) keyState[ch] = m;
+  }));
+  const size = Math.min(52, Math.floor((Math.min(window.innerWidth, 480) - 32 - (answer.length - 1) * 6) / answer.length));
+  const share = async () => {
+    const url = `${window.location.origin}${ROUTES.games}`;
+    const text = shareText(daily.course, day, rows, solved, url);
+    try { if (navigator.share) { await navigator.share({ text }); return; } } catch { return; }
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+  };
+
+  return (
+    <div style={shell}>
+      {cheerNode}
+      <BackButton to={ROUTES.games} />
+      <Label>{daily.course} · {new Date(`${day}T12:00:00`).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' })}</Label>
+      <Display size={28}>Term of the Day</Display>
+      {courses.length > 1 && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
+          {courses.map((c) => (
+            <button key={c} className={`chip chip--sm${c === daily.course ? ' chip--on' : ''}`} onClick={() => setParams({ course: c })}>{c}</button>
+          ))}
+        </div>
+      )}
+
+      {/* The grid: six rows, one box per letter. */}
+      <div key={shake} className={shake ? 'shake' : undefined} style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center', marginTop: 16 }} aria-label="Your guesses">
+        {Array.from({ length: MAX_GUESSES }, (_, r) => {
+          const word = r < saved.guesses.length ? saved.guesses[r] : r === saved.guesses.length ? typing : '';
+          const marks = r < rows.length ? rows[r] : null;
+          return (
+            <div key={r} style={{ display: 'flex', gap: 6 }} aria-label={marks ? `${word}: ${marks.join(', ')}` : undefined}>
+              {Array.from({ length: answer.length }, (_, i) => {
+                const ch = word[i] || '';
+                const c = marks ? COLORS[marks[i]] : null;
+                return (
+                  <span key={i} style={{
+                    width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8,
+                    fontWeight: 900, fontSize: size * 0.5, fontFamily: 'var(--fd)',
+                    background: c ? c.bg : 'var(--surface)', color: c ? c.fg : 'var(--text)',
+                    border: `2px solid ${c ? c.border : ch ? 'var(--text)' : 'var(--border)'}`,
+                    transition: `background .25s ${i * 80}ms, border-color .25s ${i * 80}ms`,
+                  }}>{ch}</span>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+
+      <div style={{ minHeight: 22, textAlign: 'center', marginTop: 8, fontSize: 13, fontWeight: 700, color: 'var(--u-good)' }} aria-live="polite">{note}</div>
+
+      {showClue ? (
+        <Card pad={12} style={{ marginTop: 4, gap: 4 }}>
+          <div className="t-12 w-7 muted">CLUE · WEEK {daily.week}</div>
+          <div className="t-14">{daily.term.clue}</div>
+        </Card>
+      ) : (
+        <div className="t-12 muted" style={{ textAlign: 'center' }}>The clue opens after guess {CLUE_AFTER}. {answer.length} letters, from your {daily.course} notes.</div>
+      )}
+
+      {finished ? (
+        <Card style={{ marginTop: 14, alignItems: 'center', textAlign: 'center', gap: 8 }}>
+          <BoxBoy pose={solved ? 'cheer' : 'readingStanding'} width={90} />
+          <div className="t-15 w-7">{solved ? `Solved in ${saved.guesses.length} of ${MAX_GUESSES}` : `Today's word was ${daily.term.display.toUpperCase()}`}</div>
+          {solved ? <div className="t-13 muted">That counts as today's study. +10 XP.</div> : <div className="t-13 muted">Read it again in Week {daily.week} and it'll stick.</div>}
+          {board && board.played > 0 && <div className="t-13 w-7">{board.solved} of {board.played} in {daily.course} solved it today</div>}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, width: '100%', marginTop: 4 }}>
+            {[['Played', stats.played], ['Solve streak', stats.streak], ['Best streak', stats.best]].map(([k, v]) => (
+              <div key={k as string}><div style={{ fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 22 }}>{v}</div><div className="t-12 muted">{k}</div></div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 8, width: '100%' }}>
+            <button className="btn btn--amber" style={{ flex: 1, display: 'flex', gap: 6, justifyContent: 'center', alignItems: 'center' }} onClick={() => void share()}><Share2 size={16} /> Share</button>
+            <Link to={`/learn/${encodeURIComponent(daily.course)}/week/${daily.week}`} className="btn btn--white" style={{ flex: 1 }}>Open Week {daily.week}</Link>
+          </div>
+          <div className="t-12 muted">New word in {untilMidnight()}</div>
+        </Card>
+      ) : (
+        // On-screen keyboard (a physical keyboard works too).
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 14 }} aria-label="Keyboard">
+          {ROWS.map((row, ri) => (
+            <div key={row} style={{ display: 'flex', gap: 5, justifyContent: 'center' }}>
+              {ri === 2 && <KeyBtn label="Enter" wide onPress={() => press('ENTER')} />}
+              {row.split('').map((k) => <KeyBtn key={k} label={k} mark={keyState[k]} onPress={() => press(k)} />)}
+              {ri === 2 && <KeyBtn label={<Delete size={18} />} aria="Delete letter" wide onPress={() => press('BACK')} />}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function KeyBtn({ label, mark, wide, aria, onPress }: { label: React.ReactNode; mark?: Mark; wide?: boolean; aria?: string; onPress: () => void }) {
+  const c = mark ? COLORS[mark] : null;
+  return (
+    <button
+      type="button"
+      aria-label={aria || (typeof label === 'string' ? label : undefined)}
+      onClick={onPress}
+      style={{
+        flex: wide ? 1.5 : 1, maxWidth: wide ? 64 : 42, height: 52, borderRadius: 8, border: 'none', fontWeight: 800, fontSize: wide ? 12 : 16,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: c ? c.bg : 'var(--surface2)', color: c ? c.fg : 'var(--text)', boxShadow: 'inset 0 -2px 0 rgba(0,0,0,.08)',
+      }}
+    >
+      {label}
+    </button>
+  );
+}

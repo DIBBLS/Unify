@@ -23,6 +23,7 @@ export const ROUTES = {
   keywords: (code: string, week: number | string) => `/learn/${encodeURIComponent(code)}/week/${week}/keywords`,
   crossword: (code: string, week: number | string) => `/learn/${encodeURIComponent(code)}/week/${week}/crossword`,
   games: '/games',
+  dailyWord: '/games/daily',
   liveWire: '/livewire',
   reportBug: '/report-bug',
   cgpa: '/cgpa-planner',

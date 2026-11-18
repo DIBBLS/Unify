@@ -708,14 +708,17 @@ export default function HomeRoute() {
       )}
       {/* Review 3: the course games get their own clear spot on Home. */}
       {profile?.role === 'student' && shown.length > 0 && (
-        <Link to="/games" style={{ margin: '0 16px 12px', display: 'flex', gap: 12, alignItems: 'center', background: 'var(--u-black)', borderRadius: 12, padding: 14, color: '#fff', textDecoration: 'none' }}>
+        <div style={{ margin: '0 16px 12px', display: 'flex', gap: 12, alignItems: 'center', background: 'var(--u-black)', borderRadius: 12, padding: 14, color: '#fff' }}>
           <span style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--u-green)', color: 'var(--u-black)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Gamepad2 size={22} /></span>
-          <span style={{ flex: 1 }}>
-            <span style={{ display: 'block', fontWeight: 800, fontSize: 14 }}>Course games</span>
-            <span style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,.7)' }}>Keywords and Crossword from your own course notes</span>
+          <Link to={ROUTES.dailyWord} style={{ flex: 1, color: 'inherit', textDecoration: 'none' }}>
+            <span style={{ display: 'block', fontWeight: 800, fontSize: 14 }}>Term of the Day</span>
+            <span style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,.7)' }}>Guess today's key term from your notes in 6 tries</span>
+          </Link>
+          <span style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'stretch' }}>
+            <Link to={ROUTES.dailyWord} style={{ padding: '6px 12px', borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', fontWeight: 800, fontSize: 12, textDecoration: 'none', textAlign: 'center' }}>Play</Link>
+            <Link to={ROUTES.games} style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.75)', textDecoration: 'none', textAlign: 'center' }}>All games</Link>
           </span>
-          <span style={{ padding: '6px 12px', borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', fontWeight: 800, fontSize: 12 }}>Play</span>
-        </Link>
+        </div>
       )}
       {profile?.role === 'student' && courses.some((c) => c.topics > 0) && (
         <Link to="/revision" style={{ margin: '0 16px 12px', display: 'flex', gap: 12, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, color: 'var(--text)', textDecoration: 'none' }}>

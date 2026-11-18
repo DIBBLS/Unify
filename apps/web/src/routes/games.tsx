@@ -60,6 +60,18 @@ export default function GamesRoute() {
       <Display size={28}>Course games</Display>
       <div className="t-14 muted" style={{ marginTop: 4 }}>Spell the week's key terms in Keywords, or cross them in a Crossword. Every word comes from your notes.</div>
 
+      {/* Term of the Day: one word a day, the same for your whole course. */}
+      <Link to={ROUTES.dailyWord} style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, background: 'var(--u-black)', color: '#fff', textDecoration: 'none' }}>
+        <span style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 12px)', gap: 3, flexShrink: 0 }} aria-hidden="true">
+          {['var(--u-green)', 'var(--u-amber)', '#8a8a8a', '#8a8a8a', 'var(--u-green)', 'var(--u-amber)', 'var(--u-green)', 'var(--u-green)', 'var(--u-green)'].map((c, i) => <span key={i} style={{ width: 12, height: 12, borderRadius: 3, background: c }} />)}
+        </span>
+        <span style={{ flex: 1 }}>
+          <span style={{ display: 'block', fontWeight: 800, fontSize: 15 }}>Term of the Day</span>
+          <span style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,.7)' }}>Guess today's key term in 6 tries. Same word for your whole course.</span>
+        </span>
+        <span style={{ padding: '6px 12px', borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', fontWeight: 800, fontSize: 12 }}>Play</span>
+      </Link>
+
       {err && <div className="t-14" style={{ color: 'var(--u-red)', marginTop: 12 }}>{err}</div>}
       {!err && !courses && <div style={{ marginTop: 14 }}><SectionSkeleton rows={3} quote={false} /></div>}
       {courses && courses.length === 0 && (

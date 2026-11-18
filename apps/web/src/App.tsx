@@ -31,6 +31,7 @@ const GuideRoute = lazyRoute(() => import('./routes/guide'));
 const KeywordsRoute = lazyRoute(() => import('./routes/learn/keywords'));
 const CrosswordRoute = lazyRoute(() => import('./routes/learn/crossword'));
 const GamesRoute = lazyRoute(() => import('./routes/games'));
+const DailyWordRoute = lazyRoute(() => import('./routes/learn/daily-word'));
 const LiveWireRoute = lazyRoute(() => import('./routes/livewire'));
 const ReportBugRoute = lazyRoute(() => import('./routes/report-bug'));
 const MessagesRoute = lazyRoute(() => import('./routes/messages'));
@@ -395,6 +396,7 @@ export default function App() {
           <Route path="/learn/:courseCode/week/:week/keywords" element={<RequireAuth><KeywordsRoute /></RequireAuth>} />
           <Route path="/learn/:courseCode/week/:week/crossword" element={<RequireAuth><CrosswordRoute /></RequireAuth>} />
           <Route path={ROUTES.games} element={<RequireAuth><GamesRoute /></RequireAuth>} />
+          <Route path={ROUTES.dailyWord} element={<RequireAuth><DailyWordRoute /></RequireAuth>} />
           <Route path={ROUTES.liveWire} element={<RequireAuth><LiveWireRoute /></RequireAuth>} />
           <Route path={ROUTES.reportBug} element={<RequireAuth><ReportBugRoute /></RequireAuth>} />
           <Route path="/messages" element={<RequireAuth><RequireRole allow={['lecturer', 'contributor']}><MessagesRoute /></RequireRole></RequireAuth>} />
