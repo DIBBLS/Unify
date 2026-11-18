@@ -1,4 +1,5 @@
 import { toastError } from '../lib/toast';
+import { prefetchDaily } from '../lib/dailyword';
 import { CGPA_TARGET } from '../lib/features';
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
@@ -364,6 +365,8 @@ export default function HomeRoute() {
         setEnrolled(me.courses || []);
         setResume(me.resume || null);
         setIsAdmin(!!me.isAdmin);
+        // Term of the Day: get today's word ready while Home is idle, so Play opens instantly.
+        if ((me.profile?.role || 'student') === 'student') prefetchDaily(me.courses || []);
         // Streak heartbeat: showing up counts (server records one/day).
         // The day's first open shows the streak screen (Review 3: C5, C13, C14).
         if ((me.profile?.role || 'student') === 'student') {

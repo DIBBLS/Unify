@@ -34,26 +34,83 @@ function hash(s: string): number {
 // One word, 4 to 8 letters: the size that's fun to guess.
 const playable = (t: Term) => /^[A-Za-z]+$/.test(t.display) && t.word.length >= 4 && t.word.length <= 8;
 
-// The day's term for a course, or null when its notes have nothing playable.
-export async function dailyFor(course: string, day = today()): Promise<Daily | null> {
-  const { weeks } = await api.courseWeeks(course);
-  const nums = [...new Set(weeks.map((w) => w.week))].sort((a, b) => a - b);
+// Today's pick is kept on this phone, so opening the game again is instant.
+const PICK = 'unify:daily:pick:';
+const norm = (c: string) => c.toUpperCase().replace(/\s/g, '');
+function cached(course: string, day: string): Daily | null {
+  try { const d = JSON.parse(localStorage.getItem(`${PICK}${norm(course)}:${day}`) || 'null') as Daily | null; return d && d.term ? d : null; } catch { return null; }
+}
+function remember(d: Daily): void {
+  try {
+    // Drop picks from other days so storage never grows.
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(PICK) && !k.endsWith(`:${d.day}`)) localStorage.removeItem(k);
+    }
+    localStorage.setItem(`${PICK}${norm(d.course)}:${d.day}`, JSON.stringify(d));
+  } catch { /* fine: it's only a speed-up */ }
+}
+
+const termsOf = (note: UnifyNote): Term[] => {
+  const base = extractTerms(note, 8);
+  return [...base, ...moreTerms(note, base, 8, 20)].filter(playable);
+};
+
+// Weeks in a seeded order; up to 3 notes load at once. The pick is the first
+// week (in that order) with a playable term, so it's the same on every phone
+// however fast each week loads.
+async function pickFromWeeks(course: string, weekNums: number[], day: string): Promise<Daily | null> {
+  const nums = [...new Set(weekNums)].sort((a, b) => a - b);
   if (!nums.length) return null;
-  const seed = hash(`${course.toUpperCase().replace(/\s/g, '')}|${day}`);
-  // Try weeks in a seeded order until one has a playable term.
-  for (let k = 0; k < nums.length; k++) {
-    const week = nums[(seed + k) % nums.length];
-    try {
-      const d = await api.week(course, week);
-      const note = d.note_json as UnifyNote;
-      const base = extractTerms(note, 8);
-      const terms = [...base, ...moreTerms(note, base, 8, 20)].filter(playable);
-      if (terms.length) return { course, day, week, term: terms[(seed >>> 3) % terms.length] };
-    } catch {
-      // a week that won't load: try the next
+  const seed = hash(`${norm(course)}|${day}`);
+  const order = nums.map((_, k) => nums[(seed + k) % nums.length]);
+  for (let i = 0; i < order.length; i += 3) {
+    const batch = order.slice(i, i + 3);
+    const notes = await Promise.all(batch.map((w) => api.week(course, w).then((d) => d.note_json as UnifyNote).catch(() => null)));
+    for (let j = 0; j < batch.length; j++) {
+      const terms = notes[j] ? termsOf(notes[j]!) : [];
+      if (terms.length) {
+        const d: Daily = { course, day, week: batch[j], term: terms[(seed >>> 3) % terms.length] };
+        remember(d);
+        return d;
+      }
     }
   }
   return null;
+}
+
+// The day's term for one course, or null when its notes have nothing playable.
+export async function dailyFor(course: string, day = today()): Promise<Daily | null> {
+  const hit = cached(course, day);
+  if (hit) return hit;
+  const { weeks } = await api.courseWeeks(course);
+  return pickFromWeeks(course, weeks.map((w) => w.week), day);
+}
+
+// Today's word across the student's courses: today's course in the rotation,
+// or the next one that has notes. Every course's week list loads at once.
+export async function dailyForAny(courses: string[], day = today()): Promise<Daily | null> {
+  const order = courseOfTheDay(courses, day);
+  for (const c of order) {
+    const hit = cached(c, day);
+    if (hit) return hit;
+  }
+  const lists = await Promise.all(order.map((c) => api.courseWeeks(c).then((r) => r.weeks.map((w) => w.week)).catch(() => [] as number[])));
+  for (let i = 0; i < order.length; i++) {
+    if (!lists[i].length) continue;
+    const d = await pickFromWeeks(order[i], lists[i], day);
+    if (d) return d;
+  }
+  return null;
+}
+
+// Home warms today's word while the phone is idle, so Play opens instantly.
+let warming: Promise<unknown> | null = null;
+export function prefetchDaily(courses: string[]): void {
+  if (warming || !courses.length) return;
+  const run = () => { warming = dailyForAny(courses).catch(() => null); };
+  const ric = (window as unknown as { requestIdleCallback?: (cb: () => void) => void }).requestIdleCallback;
+  if (ric) ric(run); else window.setTimeout(run, 2000);
 }
 
 // Which course today: rotate through the student's courses by day, so

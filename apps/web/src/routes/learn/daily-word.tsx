@@ -4,7 +4,7 @@ import { Delete, Share2 } from 'lucide-react';
 import { api } from '../../lib/api';
 import { errorToast } from '../../lib/errors';
 import { ROUTES } from '../../lib/routes';
-import { CLUE_AFTER, MAX_GUESSES, courseOfTheDay, dailyFor, readStats, recordResult, score, shareText, today, type Daily, type DailyStats, type Mark } from '../../lib/dailyword';
+import { CLUE_AFTER, MAX_GUESSES, dailyFor, dailyForAny, readStats, recordResult, score, shareText, today, type Daily, type DailyStats, type Mark } from '../../lib/dailyword';
 import BackButton from '../../components/BackButton';
 import { GameSkeleton } from '../../components/Skeletons';
 import { BoxBoy } from '../../components/redesign/brand';
@@ -55,20 +55,13 @@ export default function DailyWordRoute() {
         if (gone) return;
         setCourses(mine);
         const wanted = params.get('course');
-        const order = wanted ? [wanted, ...courseOfTheDay(mine, day).filter((c) => c !== wanted)] : courseOfTheDay(mine, day);
-        for (const c of order) {
-          const d = await dailyFor(c, day).catch(() => null);
-          if (gone) return;
-          if (d) {
-            setDaily(d);
-            try { setSaved(JSON.parse(localStorage.getItem(keyOf(c, day)) || '') as Saved); } catch { setSaved({ guesses: [], done: false }); }
-            setState('ready');
-            api.dailyWord(c, day).then((b) => { if (!gone) setBoard({ played: b.played, solved: b.solved }); }).catch(() => {});
-            return;
-          }
-          if (wanted) break;
-        }
-        setState('none');
+        const d = wanted ? await dailyFor(wanted, day).catch(() => null) : await dailyForAny(mine, day);
+        if (gone) return;
+        if (!d) { setState('none'); return; }
+        setDaily(d);
+        try { setSaved(JSON.parse(localStorage.getItem(keyOf(d.course, day)) || '') as Saved); } catch { setSaved({ guesses: [], done: false }); }
+        setState('ready');
+        api.dailyWord(d.course, day).then((b) => { if (!gone) setBoard({ played: b.played, solved: b.solved }); }).catch(() => {});
       } catch (e) {
         errorToast(e, 'load today’s word');
         if (!gone) setState('none');
