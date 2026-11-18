@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Radio, X } from 'lucide-react';
+import { askConfirm } from '../lib/dialog';
+import { Radio, X, Zap } from 'lucide-react';
 import { api, type LiveWire as Wire, type LiveWireTarget } from '../lib/api';
 import { errorToast } from '../lib/errors';
 import { toastSuccess } from '../lib/toast';
@@ -52,7 +53,7 @@ export default function LiveWire({ allowSend = true, countdown = true, style }: 
     try { localStorage.setItem(SEEN, JSON.stringify(next)); } catch { /* fine */ }
   };
   const end = async (id: string) => {
-    if (!window.confirm('End this live wire now? It disappears for everyone.')) return;
+    if (!(await askConfirm({ title: 'End this live wire now?', body: 'It disappears for everyone.', confirmLabel: 'End it' }))) return;
     try { await api.liveWireEnd(id); setWires((w) => w.filter((x) => x.id !== id)); toastSuccess('Live wire ended.'); }
     catch (e) { errorToast(e, 'end that live wire'); }
   };
@@ -77,7 +78,7 @@ export default function LiveWire({ allowSend = true, countdown = true, style }: 
           <section key={w.id} role="alert" aria-label="Live wire" style={{ background: '#0a0a0a', color: '#f5f4f0', borderRadius: 14, borderLeft: '4px solid #fbbf24', padding: '12px 14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span className="lw-dot" aria-hidden="true" />
-              <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, color: '#4ade80' }}>LIVE WIRE</span>
+              <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 2, color: '#4ade80' }}>LIVE WIRE · EMERGENCY</span>
               <span style={{ fontSize: 11, color: '#aaa', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>· {w.role}{w.author ? ` ${w.author}` : ''} · {scopeText(w)}</span>
               {w.canEnd ? (
                 <button onClick={() => void end(w.id)} style={{ background: 'none', border: '1px solid #444', color: '#f5f4f0', borderRadius: 9999, padding: '2px 10px', fontSize: 11, fontWeight: 700 }}>End now</button>
@@ -141,7 +142,11 @@ function Compose({ targets, onClose, onSent }: { targets: LiveWireTarget[]; onCl
         <span style={{ fontWeight: 800, fontSize: 14, flex: 1 }}>Send a live wire</span>
         <button onClick={onClose} aria-label="Close" style={{ display: 'flex', background: 'none', border: 'none', color: 'var(--text3)' }}><X size={16} /></button>
       </div>
-      <div style={{ fontSize: 12, color: 'var(--text2)' }}>For urgent things only: a venue change, a test moved, a deadline today. It sits at the top of their Home with a countdown and pings their phones.</div>
+      {/* Review 3 (C4): the emergency-only warning. */}
+      <div style={{ display: 'flex', gap: 10, padding: 12, borderRadius: 12, background: 'var(--u-warn-tint)', border: '1px solid var(--u-amber)', color: 'var(--u-warn-ink)' }}>
+        <Zap size={18} style={{ flexShrink: 0, marginTop: 1 }} />
+        <span style={{ fontSize: 12, lineHeight: 1.45 }}><strong style={{ display: 'block', fontSize: 13, color: 'var(--text)' }}>Live wire is for emergencies only</strong>It buzzes every phone at once, even in quiet hours. Use it for a class cancelled, moved or happening now. Everything else is an announcement.</span>
+      </div>
       {targets.length > 1 ? (
         <Drop value={to} onChange={setTo} label="Who gets it" options={targets.map((t) => ({ value: key(t), label: t.label }))} style={{ width: '100%' }} />
       ) : (

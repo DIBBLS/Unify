@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { askConfirm } from '../../lib/dialog';
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { api } from '../../lib/api';
@@ -109,8 +110,8 @@ export default function ModulesOverview({ openModule }: { openModule: (id: strin
               </span>
               <button
                 className="btn btn--white btn--sm"
-                onClick={() => {
-                  if (!window.confirm('End this live wire for everyone?')) return;
+                onClick={async () => {
+                  if (!(await askConfirm({ title: 'End this live wire for everyone?', confirmLabel: 'End it' }))) return;
                   void api.liveWireEnd(w.id).then(() => setData((d) => (d ? { ...d, liveWires: d.liveWires.filter((x) => x.id !== w.id) } : d))).catch(() => {});
                 }}
               >

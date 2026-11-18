@@ -1,4 +1,5 @@
 import { TimetableSkeleton } from '../components/Skeletons';
+import { askConfirm } from '../lib/dialog';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api, type ClassSlot, type OwnSlot } from '../lib/api';
@@ -105,7 +106,7 @@ export default function TimetableRoute() {
     window.setTimeout(() => navigate(`/attendance/pass?online=1&course=${encodeURIComponent(s.course)}&m=${encodeURIComponent(s.meetLink || '')}`), 300);
   };
   const remove = (s: ClassSlot) => {
-    if (window.confirm(`Remove ${s.course} on ${DAY_LONG[s.day]} at ${s.start} for the whole class?`)) void api.slotDelete(s.id).then(load).catch((e) => errorToast(e, 'remove that class time'));
+    void askConfirm({ title: `Remove ${s.course} on ${DAY_LONG[s.day]} at ${s.start}?`, body: "It goes from the whole class's timetable.", confirmLabel: 'Remove' }).then((ok) => { if (ok) void api.slotDelete(s.id).then(load).catch((e) => errorToast(e, 'remove that class time')); });
   };
   // Week view columns: Monday to Friday, plus a weekend day that has classes.
   const weekDays = ORDER.filter((d) => (d >= 1 && d <= 5) || countByDay[d]);
@@ -145,7 +146,7 @@ export default function TimetableRoute() {
         <div style={{ margin: '16px -16px 0', padding: '0 16px', overflowX: 'auto' }}>
           <Chips>
             {ORDER.map((d) => (
-              <Chip key={d} on={d === day} onClick={() => setDay(d)}>
+              <Chip key={d} amber on={d === day} onClick={() => setDay(d)}>
                 {DAY_SHORT[d]}
                 {countByDay[d] ? ` · ${countByDay[d]}` : ''}
               </Chip>
@@ -241,7 +242,7 @@ function OwnTimetable({ courses, isLecturer, day, setDay, view, today, nowMin, o
     } catch (e) { errorToast(e, 'add that'); }
     finally { setBusy(false); }
   };
-  const removeOwn = (x: ClassSlot) => { if (window.confirm(`Remove ${x.course} on ${DAY_LONG[x.day]}?`)) void api.ownSlotDelete(x.id).then(load).catch((e) => errorToast(e, 'remove that')); };
+  const removeOwn = (x: ClassSlot) => { void askConfirm({ title: `Remove ${x.course} on ${DAY_LONG[x.day]}?`, confirmLabel: 'Remove' }).then((ok) => { if (ok) void api.ownSlotDelete(x.id).then(load).catch((e) => errorToast(e, 'remove that')); }); };
   const count: Record<number, number> = {};
   for (const x of asSlots) count[x.day] = (count[x.day] || 0) + 1;
   return (
@@ -250,7 +251,7 @@ function OwnTimetable({ courses, isLecturer, day, setDay, view, today, nowMin, o
       {view === 'day' && (
         <div style={{ margin: '12px -16px 0', padding: '0 16px', overflowX: 'auto' }}>
           <Chips>
-            {ORDER.map((x) => <Chip key={x} on={x === day} onClick={() => setDay(x)}>{DAY_SHORT[x]}{count[x] ? ` · ${count[x]}` : ''}</Chip>)}
+            {ORDER.map((x) => <Chip key={x} amber on={x === day} onClick={() => setDay(x)}>{DAY_SHORT[x]}{count[x] ? ` · ${count[x]}` : ''}</Chip>)}
           </Chips>
         </div>
       )}

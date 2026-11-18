@@ -65,9 +65,9 @@ export function ListRow({ title, sub, leading, right, onClick, titleStyle }: {
 }
 
 /* ---------- Chips & pills ---------- */
-export function Chip({ children, on, off, small, onClick }: { children: ReactNode; on?: boolean; off?: boolean; small?: boolean; onClick?: () => void }) {
+export function Chip({ children, on, off, small, amber, onClick }: { children: ReactNode; on?: boolean; off?: boolean; small?: boolean; amber?: boolean; onClick?: () => void }) {
   return (
-    <button className={`chip${on ? ' chip--on' : ''}${off ? ' chip--off' : ''}${small ? ' chip--sm' : ''}`} onClick={onClick}>
+    <button className={`chip${on ? ' chip--on' : ''}${off ? ' chip--off' : ''}${small ? ' chip--sm' : ''}${amber ? ' chip--amber' : ''}`} aria-pressed={on} onClick={onClick}>
       {children}
     </button>
   );
@@ -200,3 +200,10 @@ export function Spacer({ h = 8 }: { h?: number }) {
   return <div style={{ height: h, flexShrink: 0 }} />;
 }
 
+// Review 3 (C12): the main button stays on screen in a bar at the bottom,
+// however long the list above it.
+export const STICKY: CSSProperties = {
+  position: 'sticky', bottom: 0, zIndex: 3, marginTop: 4,
+  padding: '12px 0 calc(12px + env(safe-area-inset-bottom))',
+  background: 'linear-gradient(to bottom, transparent, var(--u-page) 24%)',
+};

@@ -166,6 +166,8 @@ a { color: inherit; text-decoration: none; }
 [data-theme="dark"] .btn--white { --edge: #000; }
 [data-theme="dark"] .btn--ghost-dark { --edge: #000; }
 [data-theme="dark"] .chip--on { background: var(--u-text); color: var(--u-black); border-color: var(--u-text); }
+/* Selected timetable day (Review 3): yellow like every other main action, in both themes. */
+.chip--amber.chip--on, [data-theme="dark"] .chip--amber.chip--on { background: var(--u-amber); color: var(--u-black); border-color: var(--u-amber); }
 
 /* ---------- Button legibility ----------
    Only the main action (amber / green / dark buttons) carries colour. Every

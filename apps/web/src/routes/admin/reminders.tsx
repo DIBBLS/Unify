@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { askConfirm } from '../../lib/dialog';
 import { api, type ScheduledReminder } from '../../lib/api';
 import { errorToast } from '../../lib/errors';
 import { toastSuccess } from '../../lib/toast';
@@ -54,7 +55,7 @@ export default function AdminReminders() {
     catch (e) { errorToast(e, 'change that reminder'); }
   };
   const remove = async (r: ScheduledReminder) => {
-    if (!window.confirm(`Delete "${r.title}"? It stops for everyone.`)) return;
+    if (!(await askConfirm({ title: `Delete "${r.title}"?`, body: 'It stops for everyone.', confirmLabel: 'Delete' }))) return;
     try { await api.adminReminderDelete(r.id); setList((l) => (l || []).filter((x) => x.id !== r.id)); toastSuccess('Reminder deleted.'); }
     catch (e) { errorToast(e, 'delete that reminder'); }
   };

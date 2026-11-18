@@ -1,4 +1,5 @@
 import PushHelp, { GuideSteps } from '../components/PushHelp';
+import { CGPA_TARGET } from '../lib/features';
 import { useSchool } from '../lib/school';
 import type { GuideKind } from '../lib/pushHelp';
 import { ProfileSkeleton } from '../components/Skeletons';
@@ -414,7 +415,7 @@ export default function MeRoute() {
   if (isStudent) {
     rows.push(['Level', profile?.level || '—']);
     const ct = (profile as unknown as { cgpa_target?: number | null } | null)?.cgpa_target;
-    rows.push(['CGPA target', ct != null ? Number(ct).toFixed(2) : 'Not set']);
+    if (CGPA_TARGET) rows.push(['CGPA target', ct != null ? Number(ct).toFixed(2) : 'Not set']);
   }
   // Staff never see or touch their contributing level here — it is assigned
   // by admins (users table) and shown on the dashboard contributions card.
@@ -504,7 +505,7 @@ export default function MeRoute() {
             <span style={{ fontSize: 13, fontWeight: 700, textAlign: 'right' }}>{value}</span>
           </div>
         ))}
-        {isStudent && (
+        {isStudent && CGPA_TARGET && (
           <Link to="/cgpa-planner?step=target" className="btn btn--white btn--sm" style={{ margin: '0 16px 12px', display: 'flex', justifyContent: 'center' }}>
             {(profile as unknown as { cgpa_target?: number | null } | null)?.cgpa_target != null ? 'Edit CGPA target' : 'Set CGPA target'}
           </Link>

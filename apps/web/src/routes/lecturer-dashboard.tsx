@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { askConfirm } from '../lib/dialog';
 import { Link } from 'react-router-dom';
 import { Camera, Check, ChevronRight, ScanLine, Send } from 'lucide-react';
 import { errorToast } from '../lib/errors';
@@ -157,7 +158,7 @@ export default function LecturerDashboard({ profile, firstName, catalog, hasPhot
                 </div>
                 <span className="t-13 w-7" style={{ color: '#f5f4f0', marginTop: 4 }}>Or cancel today's class</span>
                 <input value={cancelNote} onChange={(e) => setCancelNote(e.target.value)} maxLength={200} placeholder="Note to students (optional), e.g. we'll catch up on Thursday" style={{ padding: 10, borderRadius: 10, border: '1px solid #444', background: '#1a1a1a', color: '#f5f4f0', fontSize: 14 }} />
-                <button className="btn btn--danger btn--sm" disabled={busy} onClick={() => { if (window.confirm(`Cancel today's ${next.course} for every class taking it?`)) void change(next, { status: 'cancelled', note: cancelNote.trim() || undefined }, `${next.course} cancelled for today. Your students have been told.`); }}>
+                <button className="btn btn--danger btn--sm" disabled={busy} onClick={() => { void askConfirm({ title: `Cancel today's ${next.course}?`, body: 'Every class taking it is told.', confirmLabel: 'Cancel the class', cancelLabel: 'Keep it' }).then((ok) => { if (ok) void change(next, { status: 'cancelled', note: cancelNote.trim() || undefined }, `${next.course} cancelled for today. Your students have been told.`); }); }}>
                   Cancel today's class
                 </button>
               </div>

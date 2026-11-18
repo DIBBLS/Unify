@@ -1,7 +1,8 @@
 import { toastError } from '../lib/toast';
+import { CGPA_TARGET } from '../lib/features';
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { BookOpen, ChevronRight, Trash2, MessageCircle } from 'lucide-react';
+import { BookOpen, ChevronRight, Gamepad2, Trash2, MessageCircle } from 'lucide-react';
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type Profile, type HomeUpdate } from '../lib/api';
 import { canOpenLink } from '../lib/updateLinks';
@@ -22,6 +23,8 @@ import { UpdatesSlider, type UpdateSlide } from '../components/redesign/UpdatesS
 import { FACTS } from '../lib/naija';
 import LiveWire from '../components/LiveWire';
 import ClassRepHome from '../components/ClassRepHome';
+import StreakScreen from '../components/StreakScreen';
+import { useNeedsMatric } from '../components/CoursePageParts';
 import Loading from '../components/Loading';
 
 type CourseStat = { course: string; topics: number };
@@ -253,6 +256,9 @@ export default function HomeRoute() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [xp, setXp] = useState(0);
   const [streak, setStreak] = useState(0);
+  const [streakShow, setStreakShow] = useState(0);
+  // Review 3: until the matric number is linked, its slide replaces the guide.
+  const needsMatric = useNeedsMatric();
   const [courses, setCourses] = useState<CourseStat[]>([]);
   const [enrolled, setEnrolled] = useState<string[]>([]);
   const [signInPhoto, setSignInPhoto] = useState('');
@@ -359,7 +365,10 @@ export default function HomeRoute() {
         setResume(me.resume || null);
         setIsAdmin(!!me.isAdmin);
         // Streak heartbeat: showing up counts (server records one/day).
-        void api.pingDaily();
+        // The day's first open shows the streak screen (Review 3: C5, C13, C14).
+        if ((me.profile?.role || 'student') === 'student') {
+          void api.pingDaily().then((r) => { if (r.first && r.streak) setStreakShow(r.streak); });
+        } else void api.pingDaily();
         // Waiting-room lookup: students who applied for staff see status.
         // Not awaited here: joins the panel batch below so it never delays the rest.
         const roleReq =
@@ -446,6 +455,8 @@ export default function HomeRoute() {
   if (profile?.role === 'admin') return <Navigate to="/admin" replace />;
 
   const firstName = profile?.first_name || 'Builder';
+  // Review 3: the student's own Box Boy on their study cards.
+  const myPersonaImg = (PERSONAS.find((p) => p.key === profile?.box_boy_persona) ?? PERSONAS[0]).img;
   const cleanEnrolled = enrolled.map((c) => (c || '').trim()).filter(Boolean);
   const shown = cleanEnrolled.length
     ? cleanEnrolled.map((course) => ({ course }))
@@ -645,14 +656,12 @@ export default function HomeRoute() {
     updateSlides.unshift({ id: 'resume', pose: 'readingStanding', tag: 'Pick up', title: `${resume.course} · Week ${resume.week}`, body: 'You stopped here. A few minutes keeps the streak alive.', to: `/learn/${encodeURIComponent(resume.course.trim())}/week/${resume.week}${qs ? `?${qs}` : ''}`, cta: 'Resume' });
   }
   if (shown.length === 0) updateSlides.push({ id: 'enroll', pose: 'peeking', tag: 'Start here', title: 'Add your courses', body: 'Find your department’s courses and the notes appear on Home.', to: '/courses/find', cta: 'Find courses' });
-  if (guide) {
+  if (needsMatric && (profile?.role || 'student') === 'student') {
+    updateSlides.splice(resume ? 1 : 0, 0, { id: 'matric', pose: 'thumbsUpPhone', tag: 'Attendance', title: 'Link your matric number', body: 'So your attendance counts. It takes a minute, once.', to: `${ROUTES.attendanceSetup}?next=${encodeURIComponent('/home')}`, cta: 'Link now' });
+  } else if (guide) {
     const slide: UpdateSlide = { id: 'guide', pose: 'targetSign', tag: guide.fresh ? 'Updated by your school' : 'Guide', title: guide.title, body: `${guide.steps} steps, in order, with where to go for each one.`, to: '/guide', cta: 'Open the guide' };
     if (guide.fresh) updateSlides.splice(resume ? 1 : 0, 0, slide);
     else updateSlides.push(slide);
-  }
-  // Practice: the course games, with their leaderboards.
-  if (shown.length > 0 && (profile?.role || 'student') === 'student') {
-    updateSlides.push({ id: 'practice', pose: 'cheer', tag: 'Practice', title: 'Course games', body: 'Keywords and Crossword from your own notes, against the clock, with leaderboards for your course.', to: '/games', cta: 'Play now' });
   }
   if (passReady) updateSlides.push({ id: 'attend', pose: 'phoneOut', tag: 'In class', title: 'Your attendance pass', body: 'In class, open My pass and let your class rep or lecturer scan it.', to: '/attendance/pass', cta: 'My pass' });
   updateSlides.push({ id: 'class', pose: 'thumbsUpPhone', tag: 'Your class', title: 'Notices from your class rep', body: 'Board posts and shared materials from your course live in Class.', to: '/class', cta: 'Open Class' });
@@ -662,21 +671,13 @@ export default function HomeRoute() {
   }
   return (
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', paddingBottom: 80 }}>
-      <HomeHero profile={profile!} firstName={firstName} showCgpa={profile?.role === 'student'} />
+      {streakShow > 0 && <StreakScreen streak={streakShow} resume={resume} onClose={() => setStreakShow(0)} />}
+      {/* Review 3: the CGPA target is hidden until setting it works properly. */}
+      <HomeHero profile={profile!} firstName={firstName} showCgpa={CGPA_TARGET && profile?.role === 'student'} />
 
       {profile?.role === 'student' && <WelcomeBack firstName={firstName} resume={resume} />}
 
-      <div className="rise" style={{ margin: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
-        <div>
-          {profile?.cgpa_target != null ? (
-            <div className="stat-num" style={{ fontSize: 18 }}>{Number(profile.cgpa_target).toFixed(2)}</div>
-          ) : profile?.role === 'student' ? (
-            <Link to="/cgpa-planner" className="stat-num" style={{ fontSize: 15, color: 'var(--u-text)', textDecoration: 'underline', textUnderlineOffset: 3 }}>Set</Link>
-          ) : (
-            <div className="stat-num" style={{ fontSize: 18 }}>—</div>
-          )}
-          <div style={{ fontSize: 11, color: 'var(--text2)' }}>CGPA target</div>
-        </div>
+      <div className="rise" style={{ margin: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, textAlign: 'center' }}>
         <div>
           <div className="stat-num" style={{ fontSize: 18 }}>{xp}</div>
           <div style={{ fontSize: 11, color: 'var(--text2)' }}>XP</div>
@@ -695,7 +696,8 @@ export default function HomeRoute() {
           instead of the big "Send a live wire" button and the countdown. */}
       {profile?.role === 'student' && <ClassRepHome onRep={setIsRep} />}
       {/* Live wire: urgent messages, between the stats and the carousel. */}
-      <LiveWire allowSend={false} countdown={!isRep} />
+      {/* Review 3: no countdown for anyone; the card says it's for emergencies. */}
+      <LiveWire allowSend={false} countdown={false} />
 
       <UpdatesSlider slides={updateSlides} />
 
@@ -704,9 +706,20 @@ export default function HomeRoute() {
           {quizzes.taken} {quizzes.taken === 1 ? 'quiz' : 'quizzes'} taken · {quizzes.avg}% average
         </div>
       )}
+      {/* Review 3: the course games get their own clear spot on Home. */}
+      {profile?.role === 'student' && shown.length > 0 && (
+        <Link to="/games" style={{ margin: '0 16px 12px', display: 'flex', gap: 12, alignItems: 'center', background: 'var(--u-black)', borderRadius: 12, padding: 14, color: '#fff', textDecoration: 'none' }}>
+          <span style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--u-green)', color: 'var(--u-black)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Gamepad2 size={22} /></span>
+          <span style={{ flex: 1 }}>
+            <span style={{ display: 'block', fontWeight: 800, fontSize: 14 }}>Course games</span>
+            <span style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,.7)' }}>Keywords and Crossword from your own course notes</span>
+          </span>
+          <span style={{ padding: '6px 12px', borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', fontWeight: 800, fontSize: 12 }}>Play</span>
+        </Link>
+      )}
       {profile?.role === 'student' && courses.some((c) => c.topics > 0) && (
         <Link to="/revision" style={{ margin: '0 16px 12px', display: 'flex', gap: 12, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, color: 'var(--text)', textDecoration: 'none' }}>
-          <img src={PERSONAS[2].img} alt="" width={40} height={40} loading="lazy" style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0 }} />
+          <img src={myPersonaImg} alt="" width={40} height={40} loading="lazy" style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0 }} />
           <span style={{ flex: 1 }}>
             <span style={{ display: 'block', fontWeight: 800, fontSize: 14 }}>Revise what you've learned</span>
             <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)' }}>10 quick recall cards from topics you've finished</span>
@@ -760,7 +773,8 @@ export default function HomeRoute() {
           Manage courses <ChevronRight size={14} />
         </Link>
       </div>
-      <div style={{ margin: '12px 16px', display: 'grid', gridTemplateColumns: shown.length ? 'repeat(auto-fill, minmax(150px, 1fr))' : '1fr', gap: 10 }}>
+      {/* Every course card the same size: each row as tall as the tallest card. */}
+      <div style={{ margin: '12px 16px', display: 'grid', gridTemplateColumns: shown.length ? 'repeat(auto-fill, minmax(150px, 1fr))' : '1fr', gridAutoRows: shown.length ? '1fr' : undefined, gap: 10 }}>
         {shown.length === 0 ? (
           <div style={{ padding: 24, textAlign: 'center', color: 'var(--text2)', background: 'var(--surface)', border: '2px solid var(--border)', borderRadius: 16 }}>
             <BoxBoy pose="peeking" width={77} />

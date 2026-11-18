@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { askConfirm } from '../lib/dialog';
 import { useSchool } from '../lib/school';
 import { X } from 'lucide-react';
 import { api } from '../lib/api';
@@ -79,7 +80,7 @@ export default function AdminRolesRoute() {
             </div>
             <button
               aria-label={`Remove ${ROLE_NAME[g.role]} from ${g.name || g.email}`}
-              onClick={() => { if (window.confirm(`Remove ${ROLE_NAME[g.role].toLowerCase()} from ${g.name || g.email}?`)) void api.roleRevoke(g.id).then(load).catch((e) => errorToast(e, 'remove that role')); }}
+              onClick={() => { void askConfirm({ title: `Remove ${ROLE_NAME[g.role].toLowerCase()} from ${g.name || g.email}?`, confirmLabel: 'Remove' }).then((ok) => { if (ok) void api.roleRevoke(g.id).then(load).catch((e) => errorToast(e, 'remove that role')); }); }}
               style={{ display: 'flex', padding: 6, color: 'var(--text3)' }}
             >
               <X size={16} />

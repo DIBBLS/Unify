@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { LEADERBOARD } from '../lib/features';
 import { Share2, Trophy } from 'lucide-react';
 import { api } from '../lib/api';
 import { Avatar, type PersonaKey } from './redesign/brand';
@@ -48,7 +49,7 @@ export default function GameFinish({ game, course, week, score, terms, hints, se
       <button className="btn btn--white btn--block" onClick={() => void share()} style={{ display: 'flex', gap: 6, justifyContent: 'center', alignItems: 'center' }}>
         <Share2 size={15} /> Challenge your coursemates
       </button>
-      {board && board.top.length > 0 && (
+      {LEADERBOARD && board && board.top.length > 0 && (
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', textAlign: 'left' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 12px', fontSize: 12, fontWeight: 800 }}>
             <Trophy size={14} color="#fbbf24" /> Week {week} leaderboard · {board.players} player{board.players === 1 ? '' : 's'}

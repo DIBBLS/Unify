@@ -289,7 +289,12 @@ export type OwnSlot = { id: string; day: number; start: string; end: string; tit
 export type PracticeQuestion = { id: string; week: number | null; question: string; options: string[]; correctIndex: number; explanation: string; mine: boolean };
 export type PostKind = 'announcement' | 'tip' | 'reminder' | 'test' | 'assignment' | 'exam' | 'notice';
 export type BugReport = { id: string; what: string; doing: string; page: string; appVersion: string; device: string; status: 'open' | 'resolved'; resolvedAt: string | null; createdAt: string; by: { name: string; role: string; email: string } };
-export type HocPost = { id: string; type: 'announcement' | 'tip' | 'question'; title: string | null; content: string; createdAt: string; author: string; mine: boolean };
+export type HocPost = {
+  id: string; type: 'announcement' | 'tip' | 'question' | 'poll'; title: string | null; content: string; createdAt: string; author: string; mine: boolean;
+  byRep?: boolean;
+  poll?: { options: string[]; counts: number[]; total: number; myVote: number | null; closesAt: string | null; closed: boolean };
+  question?: { answer: string | null; answeredBy: string | null; answeredAt: string | null; same: number; iSame: boolean };
+};
 export type CourseAttendance = {
   course: string;
   canTake: boolean;
@@ -576,8 +581,8 @@ export const api = {
   adminAnnounce: (title: string, body: string, link?: string, opts?: { pin?: boolean; email?: boolean }) =>
     apiFetch<{ ok: boolean; reached: number; emailTo?: number }>('/v1/admin/announce', { method: 'POST', body: JSON.stringify({ title, body, link, ...(opts || {}) }) }),
   // Scheduled reminders (migration 0050).
-  myReminders: () => apiFetch<{ on: boolean; times: string[]; custom: boolean }>('/v1/me/reminders'),
-  saveMyReminders: (patch: { on?: boolean; times?: string[] | null }) =>
+  myReminders: () => apiFetch<{ on: boolean; times: string[]; custom: boolean; lateNight?: boolean }>('/v1/me/reminders'),
+  saveMyReminders: (patch: { on?: boolean; times?: string[] | null; lateNight?: boolean }) =>
     apiFetch<{ ok: boolean }>('/v1/me/reminders', { method: 'PUT', body: JSON.stringify(patch) }),
   testMyReminder: () => apiFetch<{ ok: boolean }>('/v1/me/reminders/test', { method: 'POST', body: '{}' }),
   adminReminders: () => apiFetch<{ reminders: ScheduledReminder[] }>('/v1/admin/reminders'),
@@ -657,12 +662,12 @@ export const api = {
   pingDaily: () => {
     try {
       const today = new Date().toISOString().slice(0, 10);
-      if (localStorage.getItem('unify.ping.v1') === today) return Promise.resolve({ ok: true });
+      if (localStorage.getItem('unify.ping.v1') === today) return Promise.resolve<{ ok: boolean; first?: boolean; streak?: number }>({ ok: true });
       localStorage.setItem('unify.ping.v1', today);
     } catch {
       // storage blocked: still try, server dedupes
     }
-    return apiFetch<{ ok: boolean }>('/v1/ping', { method: 'POST', body: JSON.stringify({}) }).catch(() => ({ ok: false }));
+    return apiFetch<{ ok: boolean; first?: boolean; streak?: number }>('/v1/ping', { method: 'POST', body: JSON.stringify({}) }).catch(() => ({ ok: false } as { ok: boolean; first?: boolean; streak?: number }));
   },
   roleRequest: (payload: { role: 'lecturer' | 'contributor'; level: string; courses: string[] }) =>
     apiFetch<{ ok: boolean; id: string }>('/v1/role-requests', { method: 'POST', body: JSON.stringify(payload) }),
@@ -761,8 +766,12 @@ export const api = {
     apiFetch<{ ok: boolean }>(`/v1/admin/bug-reports/${encodeURIComponent(id)}/${action}`, { method: 'POST' }, 0),
   classMembers: () =>
     apiFetch<{ department: string | null; level: string | null; members: { id: string; name: string; avatar: string; persona: string | null; isHoc: boolean; me: boolean }[] }>('/v1/hoc/members'),
-  hocPosts: () => apiFetch<{ posts: HocPost[]; isHoc: boolean; department?: string; level?: string; audience?: { students: number; fromList: boolean } }>('/v1/hoc/posts'),
-  hocPost: (payload: { type: HocPost['type']; title?: string; content: string }) =>
+  hocPosts: () => apiFetch<{ posts: HocPost[]; isHoc: boolean; department?: string; level?: string; audience?: { students: number; fromList: boolean }; waiting?: number }>('/v1/hoc/posts'),
+  hocAsk: (content: string) => apiFetch<{ ok: boolean; id: string }>('/v1/hoc/questions', { method: 'POST', body: JSON.stringify({ content }) }, 0),
+  boardAnswer: (id: string, answer: string) => apiFetch<{ ok: boolean }>(`/v1/hoc/posts/${id}/answer`, { method: 'POST', body: JSON.stringify({ answer }) }, 0),
+  hocSame: (id: string) => apiFetch<{ ok: boolean; same: boolean }>(`/v1/hoc/posts/${id}/same`, { method: 'POST', body: JSON.stringify({}) }, 0),
+  hocVote: (id: string, choice: number) => apiFetch<{ ok: boolean }>(`/v1/hoc/posts/${id}/vote`, { method: 'POST', body: JSON.stringify({ choice }) }, 0),
+  hocPost: (payload: { type: HocPost['type']; title?: string; content: string; options?: string[]; closesAt?: string }) =>
     apiFetch<{ ok: boolean; id: string }>('/v1/hoc/posts', { method: 'POST', body: JSON.stringify(payload) }),
   hocDelete: (id: string) => apiFetch<{ ok: boolean }>(`/v1/hoc/posts/${id}`, { method: 'DELETE' }),
   hocRequest: (note?: string) => apiFetch<{ ok: boolean; already?: boolean }>('/v1/hoc/request', { method: 'POST', body: JSON.stringify({ note }) }),
@@ -840,7 +849,7 @@ export const api = {
   // Learning (S23–S36)
   myCourseProgress: (course: string) =>
     apiFetch<{ course: string; lecturers?: { id: string; name: string }[]; namedLecturers?: string[]; weeks: { week: number; title: string; topics: number; topicTitles: string[]; done: number; quiz: { best: number; total: number; attempts: number } | null; hasQuiz: boolean }[] }>(`/v1/courses/${encodeURIComponent(course)}/my-progress`),
-  learnActivity: (days = 35) => apiFetch<{ days: { date: string; xp: number }[]; streak: number; longest: number }>(`/v1/learn/activity?days=${days}`),
+  learnActivity: (days = 35) => apiFetch<{ days: { date: string; xp: number }[]; active?: string[]; streak: number; longest: number }>(`/v1/learn/activity?days=${days}`),
   revision: (limit = 10, course?: string) =>
     apiFetch<{ cards: { course: string; week: number; topic: string; question: string; answer: string; badge: string }[]; available: number }>(`/v1/learn/revision?limit=${limit}${course ? `&course=${encodeURIComponent(course)}` : ''}`),
   // Content reports: students' "Report a problem", lecturers' "Review this week"

@@ -24,12 +24,17 @@ const strip = (s: string) => {
 const noMaths = (s: string) => s.replace(/\\\(.*?\\\)|\\\[.*?\\\]|\$\$.*?\$\$/g, ' ');
 const lettersOf = (s: string) => s.toUpperCase().replace(/[^A-Z]/g, '');
 
+// Heading and structure words that are never course content (Review 3: a
+// game asked for "Topic"). A term with any of these words is skipped.
+const GENERIC = new Set('topic topics subtopic week weeks introduction intro summary overview conclusion conclusions lecture lectures chapter chapters section sections lesson lessons module modules unit units part parts recap review revision exercise exercises example examples practice question questions answer answers objective objectives outcome outcomes keyword keywords key term terms definition definitions note notes basics background further reading activity task tasks quiz test exam'.split(' '));
+
 // A term can go on the wheel if it is a word or two made of letters only,
-// with 4 to 9 letters in all.
+// with 4 to 9 letters in all, and isn't a heading word.
 function asTerm(raw: string, clue: string, maxLen = 9): Term | null {
   const display = strip(raw).replace(/[.,;:!?]+$/, '').trim();
   if (!/^[A-Za-z][A-Za-z'’ -]*$/.test(display)) return null;
   if (display.split(/[\s-]+/).length > 2) return null;
+  if (display.toLowerCase().split(/[\s'’-]+/).some((w) => GENERIC.has(w))) return null;
   const word = lettersOf(display);
   if (word.length < 4 || word.length > maxLen) return null;
   let c = strip(noMaths(clue));
@@ -145,7 +150,7 @@ export function courseDictionary(note: UnifyNote, terms: Term[]): Set<string> {
   const take = (s?: string) => {
     if (!s) return;
     for (const w of strip(noMaths(s)).split(/[^A-Za-z]+/)) {
-      if (w.length >= 3 && w.length <= 9 && !/[A-Z].*[A-Z]/.test(w.slice(1))) words.add(w.toUpperCase());
+      if (w.length >= 3 && w.length <= 9 && !/[A-Z].*[A-Z]/.test(w.slice(1)) && !GENERIC.has(w.toLowerCase())) words.add(w.toUpperCase());
     }
   };
   take(note.title);

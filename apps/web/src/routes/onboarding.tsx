@@ -1,5 +1,6 @@
 import { FormSkeleton } from '../components/Skeletons';
-import { StepBars } from '../components/redesign/ui';
+import { CGPA_TARGET } from '../lib/features';
+import { STICKY, StepBars } from '../components/redesign/ui';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -247,7 +248,9 @@ export default function OnboardingRoute() {
   ];
   // Steps run from 1. Students get 7 (name, uni, faculty, dept, level,
   // courses, target); staff stop after 4 (name, uni, faculty, dept).
-  const totalSteps = role === 'student' || !role ? 7 : 4;
+  // Review 3: the degree-class (CGPA) target step is hidden until setting it
+  // works properly, so students finish after their courses (step 6).
+  const totalSteps = role === 'student' || !role ? (CGPA_TARGET ? 7 : 6) : 4;
   const shownStep = Math.min(step, totalSteps);
   const left = { s: `Step ${shownStep} of ${totalSteps}`, t: STEP_TITLES[shownStep - 1] };
 
@@ -272,9 +275,11 @@ export default function OnboardingRoute() {
           <>
             <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="e.g. Joshua" style={{ padding: 12, border: '1px solid var(--border)', borderRadius: 12, fontSize: 16 }} />
             {firstName && <div style={{ fontSize: 14 }}>{daypart}, <strong>{firstName}</strong></div>}
-            <button onClick={() => { if (!firstName.trim()) return; if (isEdit) { void save(false); return; } setStep(2); }} style={{ padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
+            <div style={STICKY}>
+            <button onClick={() => { if (!firstName.trim()) return; if (isEdit) { void save(false); return; } setStep(2); }} style={{ width: '100%', padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
               {isEdit ? (<>Finish setup <ArrowRight size={18} /></>) : (<>Continue <ArrowRight size={18} /></>)}
             </button>
+            </div>
           </>
         )}
         {step === 2 && (
@@ -307,9 +312,11 @@ export default function OnboardingRoute() {
             <div style={{ fontSize: 13, color: 'var(--text2)' }}>Level: <strong>{level || '—'}</strong></div>
             {semesterNote}
             {courseList}
-            <button onClick={() => setStep(7)} style={{ padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8 }}>
+            <div style={STICKY}>
+            <button onClick={() => { if (CGPA_TARGET) setStep(7); else void save(true); }} style={{ width: '100%', padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8 }}>
               Continue <ArrowRight size={18} />
             </button>
+            </div>
           </>
         )}
         {step === 7 && (

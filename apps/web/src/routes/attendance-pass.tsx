@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { askConfirm } from '../lib/dialog';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { api, type AttendancePass } from '../lib/api';
@@ -187,7 +188,7 @@ function MyPass({ onOnline, week }: { onOnline: () => void; week: number }) {
             <button
               className="t-12"
               style={{ alignSelf: 'flex-start', background: 'none', border: 'none', padding: 0, color: 'var(--text2)', textDecoration: 'underline' }}
-              onClick={() => { if (window.confirm(`Tell Unify Learn that ${marked.by || 'the person who scanned you'} isn't your lecturer or class rep?`)) void api.attendanceFlag({ course: marked.course, at: marked.at, by: marked.by }).then(() => setFlagged(true)).catch((e) => errorToast(e, 'send that')); }}
+              onClick={() => { void askConfirm({ title: 'Report this scan?', body: `Tell Unify Learn that ${marked.by || 'the person who scanned you'} isn't your lecturer or class rep.`, confirmLabel: 'Report' }).then((ok) => { if (ok) void api.attendanceFlag({ course: marked.course, at: marked.at, by: marked.by }).then(() => setFlagged(true)).catch((e) => errorToast(e, 'send that')); }); }}
             >
               Not your lecturer or class rep? Tell Unify Learn
             </button>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { askConfirm, askText } from '../lib/dialog';
 import { X } from 'lucide-react';
 import { api, type ClassListClaim, type ClassListData, type ClassListEntry, type ClassListLog, type ClassListParse } from '../lib/api';
 import { errorToast, describeError } from '../lib/errors';
@@ -140,9 +141,9 @@ function Requests({ claims, onDone }: { claims: ClassListClaim[]; onDone: () => 
   const answer = async (c: ClassListClaim, action: 'approve' | 'reject') => {
     let note: string | undefined;
     if (action === 'reject') {
-      const n = window.prompt('Tell them why (optional):', '');
+      const n = await askText({ title: 'Turn down this request?', body: 'Tell them why (optional).', confirmLabel: 'Turn down', optional: true });
       if (n === null) return;
-      note = n.trim() || undefined;
+      note = n || undefined;
     }
     setBusy(c.id);
     try {
@@ -471,7 +472,7 @@ function EditRow({ entry, onClose, onSaved }: { entry: ClassListEntry; onClose: 
           <button
             className="btn btn--white btn--sm"
             disabled={busy}
-            onClick={() => { if (window.confirm(`Unlink ${entry.claimedBy}'s Unify account from ${entry.matric}? They'll need to claim their entry again.`)) void run(() => api.classListUnclaim(entry.id), 'unlink that account', 'Unlinked.'); }}
+            onClick={() => { void askConfirm({ title: `Unlink ${entry.claimedBy} from ${entry.matric}?`, body: "They'll need to claim their entry again.", confirmLabel: 'Unlink' }).then((ok) => { if (ok) void run(() => api.classListUnclaim(entry.id), 'unlink that account', 'Unlinked.'); }); }}
           >
             Unlink account
           </button>
@@ -479,7 +480,7 @@ function EditRow({ entry, onClose, onSaved }: { entry: ClassListEntry; onClose: 
         <button
           className="btn btn--white btn--sm"
           disabled={busy}
-          onClick={() => { if (window.confirm(`Remove ${entry.name} from the class list? Their attendance is kept, and you can restore them.`)) void run(() => api.classListRemove(entry.id), 'remove that student', 'Removed.'); }}
+          onClick={() => { void askConfirm({ title: `Remove ${entry.name} from the class list?`, body: 'Their attendance is kept, and you can restore them.', confirmLabel: 'Remove' }).then((ok) => { if (ok) void run(() => api.classListRemove(entry.id), 'remove that student', 'Removed.'); }); }}
         >
           Remove
         </button>

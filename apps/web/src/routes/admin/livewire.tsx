@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { askConfirm } from '../../lib/dialog';
 import { api } from '../../lib/api';
 import { errorToast } from '../../lib/errors';
 import { toastSuccess } from '../../lib/toast';
@@ -14,7 +15,7 @@ export default function AdminLiveWire() {
   const load = () => api.adminOverview().then((d) => setRunning(d.liveWires || [])).catch(() => setRunning([]));
   useEffect(() => { void load(); }, []);
   const end = async (id: string) => {
-    if (!window.confirm('End this live wire for everyone?')) return;
+    if (!(await askConfirm({ title: 'End this live wire for everyone?', confirmLabel: 'End it' }))) return;
     try { await api.liveWireEnd(id); setRunning((r) => (r || []).filter((x) => x.id !== id)); toastSuccess('Live wire ended.'); }
     catch (e) { errorToast(e, 'end that live wire'); }
   };

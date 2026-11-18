@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useState } from 'react';
+import { DialogHost } from './lib/dialog';
 import { applyRouteMeta } from './lib/seo';
 import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import Layout from './routes/_layout';
@@ -232,6 +233,8 @@ export default function App() {
         surface on EVERY screen including chromeless ones (/auth,
         /onboarding, /s/:token) that never mount the layout. */}
         <Toasts />
+        {/* The app's own confirm and text dialogs (no browser popups). */}
+        <DialogHost />
         <RouteMeta />
         <ZoomBar />
         <InstallBar />

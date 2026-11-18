@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { CGPA_TARGET } from '../lib/features';
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { api } from '../lib/api';
@@ -69,7 +70,7 @@ export default function SettingsRoute() {
         <Row to={ROUTES.me} title="Your picture" sub="Tap your picture on Me to change it" />
         {isStudent && <Row to={ROUTES.attendanceSetup} title="Attendance details" sub="Your entry on the class list" />}
         {isStudent && <Row to={isHoc ? ROUTES.classList : ROUTES.hocRequest} title={isHoc ? 'Class list' : 'Are you your class rep?'} />}
-        {isStudent && <Row to="/cgpa-planner" title="CGPA plan" sub="Your target and what it takes" />}
+        {isStudent && CGPA_TARGET && <Row to="/cgpa-planner" title="CGPA plan" sub="Your target and what it takes" />}
       </div>
 
       <div style={head}>APP</div>
@@ -100,13 +101,14 @@ function RemindersCard({ pushOn }: { pushOn: boolean }) {
   const [on, setOn] = useState(true);
   const [times, setTimes] = useState<string[]>([]);
   const [custom, setCustom] = useState(false);
+  const [lateNight, setLateNight] = useState(false);
   const [adding, setAdding] = useState('12:00');
   const [busy, setBusy] = useState(false);
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
-    api.myReminders().then((r) => { setOn(r.on); setTimes(r.times); setCustom(r.custom); }).catch(() => {}).finally(() => setLoaded(true));
+    api.myReminders().then((r) => { setOn(r.on); setTimes(r.times); setCustom(r.custom); setLateNight(!!r.lateNight); }).catch(() => {}).finally(() => setLoaded(true));
   }, []);
-  const save = async (patch: { on?: boolean; times?: string[] | null }, done: string) => {
+  const save = async (patch: { on?: boolean; times?: string[] | null; lateNight?: boolean }, done: string) => {
     setBusy(true);
     try {
       await api.saveMyReminders(patch);
@@ -126,7 +128,7 @@ function RemindersCard({ pushOn }: { pushOn: boolean }) {
         <span>
           <span style={{ display: 'block', fontSize: 14, fontWeight: 700 }}>Study reminders</span>
           <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>
-            {pushOn ? 'A short nudge at these times. Skipped on days you have already studied.' : 'Turn on push above so reminders can reach this phone.'}
+            {pushOn ? 'A short nudge at these times, and at most one follow-up later if you still haven’t studied. Never more than 3 a day, and skipped on days you have already studied.' : 'Turn on push above so reminders can reach this phone.'}
           </span>
         </span>
         <input type="checkbox" aria-label="Study reminders" checked={on} disabled={busy || !loaded} onChange={(e) => { setOn(e.target.checked); void save({ on: e.target.checked }, e.target.checked ? 'Reminders on.' : 'Reminders off.'); }} />
@@ -141,6 +143,13 @@ function RemindersCard({ pushOn }: { pushOn: boolean }) {
               </span>
             ))}
             {!custom && <span style={{ fontSize: 12, color: 'var(--text2)' }}>From your study time</span>}
+          </div>
+          <div style={rowStyle}>
+            <span>
+              <span style={{ display: 'block', fontSize: 14, fontWeight: 700 }}>Late-night reminders</span>
+              <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>Study reminders between 10 PM and 6 AM. Off unless you turn it on.</span>
+            </span>
+            <input type="checkbox" aria-label="Late-night reminders" checked={lateNight} disabled={busy} onChange={(e) => { setLateNight(e.target.checked); void save({ lateNight: e.target.checked }, e.target.checked ? 'Late-night reminders on.' : 'No reminders between 10 PM and 6 AM.'); }} />
           </div>
           <div style={{ ...rowStyle, justifyContent: 'flex-start', flexWrap: 'wrap' }}>
             {times.length < 4 && (

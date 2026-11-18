@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { LEADERBOARD } from '../lib/features';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Gamepad2, Grid3x3 } from 'lucide-react';
 import { api } from '../lib/api';
@@ -78,7 +79,7 @@ export default function GamesRoute() {
         </div>
       )}
 
-      {course && (
+      {LEADERBOARD && course && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 16 }}>
           <div className="t-13 w-7" style={{ color: 'var(--text2)', letterSpacing: 1 }}>LEADERBOARD</div>
           {weeks && weeks.length > 0 && (

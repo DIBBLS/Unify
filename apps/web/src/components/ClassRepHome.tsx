@@ -25,10 +25,17 @@ const STATUS: Record<string, { text: string; bg: string; fg: string }> = {
 export default function ClassRepHome({ onRep }: { onRep?: (rep: boolean) => void }) {
   const [data, setData] = useState<{ when: 'today' | 'tomorrow'; date: string; classes: HocClass[] } | null>(null);
   const [busy, setBusy] = useState('');
+  // Questions from students waiting for an answer (Review 3, C4/C7).
+  const [waiting, setWaiting] = useState(0);
   useEffect(() => {
     let gone = false;
     api.hocToday()
-      .then((d) => { if (!gone) { setData(d); onRep?.(true); } })
+      .then((d) => {
+        if (gone) return;
+        setData(d);
+        onRep?.(true);
+        api.hocPosts().then((r) => { if (!gone) setWaiting(r.waiting || 0); }).catch(() => {});
+      })
       .catch(() => { if (!gone) onRep?.(false); });
     return () => { gone = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -50,7 +57,7 @@ export default function ClassRepHome({ onRep }: { onRep?: (rep: boolean) => void
 
   const tools = [
     { to: `${ROUTES.hoc}#post`, label: 'Post', Icon: PenLine },
-    { to: `${ROUTES.hoc}?filter=question`, label: 'Questions', Icon: HelpCircle },
+    { to: `${ROUTES.hoc}?filter=question`, label: 'Questions', Icon: HelpCircle, badge: waiting },
     { to: ROUTES.classList, label: 'Class list', Icon: ListChecks },
     { to: ROUTES.liveWire, label: 'Live wire', Icon: Radio },
   ];
@@ -58,9 +65,10 @@ export default function ClassRepHome({ onRep }: { onRep?: (rep: boolean) => void
   return (
     <>
       <nav aria-label="Class rep tools" style={{ margin: '0 16px 12px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-        {tools.map(({ to, label, Icon }) => (
-          <Link key={label} to={to} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '10px 4px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', textDecoration: 'none', fontSize: 12, fontWeight: 700 }}>
+        {tools.map(({ to, label, Icon, badge }) => (
+          <Link key={label} to={to} aria-label={badge ? `${label}, ${badge} waiting` : label} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '10px 4px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', textDecoration: 'none', fontSize: 12, fontWeight: 700 }}>
             <Icon size={18} color="var(--text2)" /> {label}
+            {!!badge && <span style={{ position: 'absolute', top: 4, right: 8, minWidth: 18, height: 18, padding: '0 5px', borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', fontSize: 11, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{badge}</span>}
           </Link>
         ))}
       </nav>

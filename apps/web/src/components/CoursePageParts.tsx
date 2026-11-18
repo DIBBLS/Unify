@@ -321,7 +321,9 @@ export function LecturersCard({ course, lecturers, week, canEdit }: { course: st
 
 // Review 3 (C1): until the student links their matric number, a small prompt
 // on the course page so their attendance counts.
-export function MatricPrompt({ course }: { course: string }) {
+// True once we know the student hasn't linked their matric number yet (also
+// used by Home's slideshow, Review 3).
+export function useNeedsMatric(): boolean {
   const [show, setShow] = useState(false);
   useEffect(() => {
     let gone = false;
@@ -332,6 +334,11 @@ export function MatricPrompt({ course }: { course: string }) {
     });
     return () => { gone = true; };
   }, []);
+  return show;
+}
+
+export function MatricPrompt({ course }: { course: string }) {
+  const show = useNeedsMatric();
   if (!show) return null;
   const next = encodeURIComponent(ROUTES.course(course));
   return (

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { askConfirm } from '../../lib/dialog';
 import { api } from '../../lib/api';
 import { errorToast } from '../../lib/errors';
 import { toastSuccess } from '../../lib/toast';
@@ -49,7 +50,7 @@ export default function AdminStructure() {
                 <input value={draft} onChange={(e) => setDraft(e.target.value)} style={{ ...input, flex: 1 }} />
                 <button className="btn btn--amber btn--sm" onClick={() => {
                   const n = f.departments.reduce((s, d) => s + people(d.name), 0);
-                  if (draft.trim() && draft.trim() !== f.name && window.confirm(`Rename "${f.name}" to "${draft.trim()}"? It changes for ${n} ${n === 1 ? 'person' : 'people'} already in it.`)) void run(() => api.adminFacultyEdit(f.id, { name: draft.trim() }), 'Faculty renamed.', 'rename that faculty');
+                  if (draft.trim() && draft.trim() !== f.name) { const name = draft.trim(); void askConfirm({ title: `Rename "${f.name}" to "${name}"?`, body: `It changes for ${n} ${n === 1 ? 'person' : 'people'} already in it.`, confirmLabel: 'Rename', tone: 'go' }).then((ok) => { if (ok) void run(() => api.adminFacultyEdit(f.id, { name }), 'Faculty renamed.', 'rename that faculty'); }); }
                 }}>Save</button>
                 <button className="btn btn--white btn--sm" onClick={() => setEditing(null)}>Cancel</button>
               </>
@@ -70,7 +71,7 @@ export default function AdminStructure() {
                   <input value={draft} onChange={(e) => setDraft(e.target.value)} style={{ ...input, flex: 1 }} />
                   <button className="btn btn--amber btn--sm" onClick={() => {
                     const n = people(d.name);
-                    if (draft.trim() && draft.trim() !== d.name && window.confirm(`Rename "${d.name}" to "${draft.trim()}"? It changes for ${n} ${n === 1 ? 'person' : 'people'}, and their class lists and class boards.`)) void run(() => api.adminDeptEdit(d.id, { name: draft.trim() }), 'Department renamed.', 'rename that department');
+                    if (draft.trim() && draft.trim() !== d.name) { const name = draft.trim(); void askConfirm({ title: `Rename "${d.name}" to "${name}"?`, body: `It changes for ${n} ${n === 1 ? 'person' : 'people'}, and their class lists and class boards.`, confirmLabel: 'Rename', tone: 'go' }).then((ok) => { if (ok) void run(() => api.adminDeptEdit(d.id, { name }), 'Department renamed.', 'rename that department'); }); }
                   }}>Save</button>
                   <button className="btn btn--white btn--sm" onClick={() => setEditing(null)}>Cancel</button>
                 </>

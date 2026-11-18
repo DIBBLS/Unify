@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { askText } from '../lib/dialog';
 import { api } from '../lib/api';
 import { describeError, errorToast } from '../lib/errors';
 import { toastSuccess } from '../lib/toast';
@@ -22,9 +23,9 @@ export default function HocRequestsRoute() {
   const answer = async (r: Req, approve: boolean) => {
     let note: string | undefined;
     if (!approve) {
-      const n = window.prompt('Tell them why (optional):', '');
+      const n = await askText({ title: 'Turn down this request?', body: 'Tell them why (optional).', confirmLabel: 'Turn down', optional: true });
       if (n === null) return;
-      note = n.trim() || undefined;
+      note = n || undefined;
     }
     setBusy(r.id);
     try {
