@@ -50,8 +50,9 @@ export default function OnboardingPersonaRoute() {
   
   return (
     <div className="screen">
-      <div className="pad stack" style={{ flex: 1, justifyContent: 'center', gap: 40, paddingTop: 60, paddingBottom: 40 }}>
-        <div className="stack center" style={{ gap: 12, alignItems: 'center', textAlign: 'center' }}>
+      {/* C15: the main button stays on screen (sticky bottom bar) on any phone height. */}
+      <div className="pad stack" style={{ flex: 1, justifyContent: 'center', gap: 24, paddingTop: 32, paddingBottom: 0 }}>
+        <div className="stack center" style={{ gap: 8, alignItems: 'center', textAlign: 'center' }}>
           <h1 className="display" style={{ fontSize: 28, fontFamily: 'var(--font-headline, var(--font-display))', textAlign: 'center', width: '100%' }}>
             PICK YOUR<br />PERSONA
           </h1>
@@ -62,7 +63,7 @@ export default function OnboardingPersonaRoute() {
         
         <PersonaCarousel selected={selected} onSelect={setSelected} />
         
-        <div className="bottom-actions" style={{ position: 'relative', marginTop: 'auto' }}>
+        <div className="bottom-actions" style={{ padding: '16px 0 calc(12px + env(safe-area-inset-bottom))' }}>
           <button
             type="button"
             onClick={handleContinue}

@@ -84,13 +84,16 @@ function hexA(hex: string, a: number) {
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
 }
 
-/* ---------- Avatars: 5 round Box Boys, students pick one. No photos, no letters. ---------- */
+/* ---------- Avatars: 5 round Box Boys, students pick one. No photos, no letters. ----------
+   New art (Review 3, 17 Nov): each persona is a different person at a glance
+   (own pose, outfit and circle colour), in this order. The keys are what's
+   saved on profiles, so they never change; the names follow the review. */
 export const PERSONAS = [
-  { key: 'go-getter', name: 'Go-getter', title: 'The 5.0 Scholar', blurb: 'Has a target and a plan for every semester. Starts early and keeps score.', traits: ['Sets targets', 'Starts early', 'Keeps score'], img: '/boxboy/avatar-go-getter.webp' },
-  { key: 'comeback', name: 'Comeback', title: 'The Comeback Kid', blurb: 'Had a rough semester. Not this one. Steady, every single week.', traits: ['Bounces back', 'Steady pace', 'No excuses'], img: '/boxboy/avatar-comeback.webp' },
-  { key: 'curious', name: 'Curious', title: 'The Engineer', blurb: 'Needs to know how it actually works before it sticks. Worked examples first.', traits: ['Asks why', 'Builds things', 'Deep dives'], img: '/boxboy/avatar-curious.webp' },
-  { key: 'team-player', name: 'Team player', title: 'The Study Captain', blurb: 'Learns by explaining. The one the class calls the night before the test.', traits: ['Explains well', 'Studies in groups', 'Shares notes'], img: '/boxboy/avatar-team-player.webp' },
-  { key: 'on-the-move', name: 'On the move', title: 'The Hustler', blurb: 'School plus work, a business or leadership. Short sessions that fit the day.', traits: ['Busy days', 'Short sessions', 'Gets it done'], img: '/boxboy/avatar-on-the-move.webp' },
+  { key: 'go-getter', name: 'Goal-Driven', title: 'The 5.0 Scholar', blurb: 'Has a target and a plan for every semester. Starts early and keeps score.', traits: ['Sets targets', 'Starts early', 'Keeps score'], img: '/boxboy/persona-goal-driven.webp' },
+  { key: 'curious', name: 'Concept-First', title: 'The Engineer', blurb: 'Needs to know how it actually works before it sticks. Worked examples first.', traits: ['Asks why', 'Builds things', 'Deep dives'], img: '/boxboy/persona-concept-first.webp' },
+  { key: 'team-player', name: 'Collaborative', title: 'The Study Captain', blurb: 'Learns by explaining. The one the class calls the night before the test.', traits: ['Explains well', 'Studies in groups', 'Shares notes'], img: '/boxboy/persona-collaborative.webp' },
+  { key: 'on-the-move', name: 'Multi-Commitment', title: 'The Hustler', blurb: 'School plus work, a business or leadership. Short sessions that fit the day.', traits: ['Busy days', 'Short sessions', 'Gets it done'], img: '/boxboy/persona-multi-commitment.webp' },
+  { key: 'comeback', name: 'Comeback', title: 'The Comeback Kid', blurb: 'Had a rough semester. Not this one. Steady, every single week.', traits: ['Bounces back', 'Steady pace', 'No excuses'], img: '/boxboy/persona-comeback.webp' },
 ] as const;
 export type PersonaKey = (typeof PERSONAS)[number]['key'];
 
