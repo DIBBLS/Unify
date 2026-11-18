@@ -71,7 +71,8 @@ No Supabase project to hand? `notes-engine/scripts/loadtest/` has a fake Supabas
 | `apps/web/README.md` | Frontend structure, routes, conventions |
 | `notes-engine/README.md` | API structure, routes, limits, scripts |
 | `docs/Unify-Brand-Kit/` | Brand and UI guidelines |
-| `docs/DEVELOPER-REPORT.md` | Older bug-by-bug history (v1.x) |
+| `docs/Unify-Learn-Documentation.pdf` | Every document in one book (local only, not in git; rebuilt by hand) |
+| `docs/archive/` | Superseded docs: PRDs, reviews, handoffs, redesign plans, v1.x developer report |
 | `CHANGELOG.md` | Every release |
 
 ## Versioning
