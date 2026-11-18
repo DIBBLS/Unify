@@ -1,4 +1,5 @@
 import PushHelp from '../components/PushHelp';
+import { appPath, OPEN_FROM_PUSH } from '../lib/openLink';
 import type { GuideKind } from '../lib/pushHelp';
 import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
@@ -287,7 +288,15 @@ export default function Layout() {
     load();
     const t = setInterval(load, 300000);
     const onPush = (e: MessageEvent) => {
-      if (e && e.data && (e.data as { type?: string }).type === 'unify-notif') load();
+      const d = (e && e.data) as { type?: string; url?: string } | undefined;
+      if (d?.type === 'unify-notif') load();
+      // A notification was tapped while the app was open: go to its page.
+      if (d?.type === OPEN_FROM_PUSH && d.url) {
+        const to = appPath(d.url);
+        if ('path' in to) navigate(to.path);
+        else window.open(to.href, '_blank', 'noopener');
+        load();
+      }
     };
     const onFocus = () => load();
     // Phones reopening the installed app fire visibilitychange, not always focus.

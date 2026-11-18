@@ -211,24 +211,39 @@ self.addEventListener('push', (e) => {
   );
 });
 
+// Tapping a notification opens the page it's about (the timetable for a
+// class change, the week for new notes, the class board for an answer).
+// A full address of the app becomes a path, so it opens inside the installed
+// app; if the app is already open, that window comes forward and goes there
+// (opening a second window would just show whatever page it was on).
+function pathOf(raw) {
+  const fallback = '/notifications';
+  if (!raw) return fallback;
+  try {
+    const u = new URL(raw, self.location.origin);
+    const ours = u.origin === self.location.origin || /\.vercel\.app$/i.test(u.hostname);
+    if (!ours) return u.href;
+    const path = u.pathname + u.search + u.hash;
+    return u.pathname === '/dashboard' ? '/home' : path;
+  } catch {
+    return fallback;
+  }
+}
 self.addEventListener('notificationclick', (e) => {
   e.notification.close();
-  const url = (e.notification.data && e.notification.data.url) || '/notifications';
+  const target = pathOf(e.notification.data && e.notification.data.url);
   e.waitUntil(
     (async () => {
+      if (/^https?:/i.test(target)) { await clients.openWindow(target); return; }
       const wins = await clients.matchAll({ type: 'window', includeUncontrolled: true });
-      for (const w of wins) {
-        try {
-          const u = new URL(w.url);
-          if (u.pathname === new URL(url, self.location.origin).pathname) {
-            await w.focus();
-            return;
-          }
-        } catch {
-          // keep looking
-        }
+      const mine = wins.filter((w) => { try { return new URL(w.url).origin === self.location.origin; } catch { return false; } });
+      const w = mine.find((x) => x.focused) || mine[0];
+      if (w) {
+        try { await w.focus(); } catch { /* focus can be refused; still send it there */ }
+        try { w.postMessage({ type: 'unify-open', url: target }); return; } catch { /* fall through */ }
+        try { if (w.navigate) { await w.navigate(target); return; } } catch { /* fall through */ }
       }
-      await clients.openWindow(url);
+      await clients.openWindow(target);
     })()
   );
 });

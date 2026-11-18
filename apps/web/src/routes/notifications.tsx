@@ -1,4 +1,5 @@
 import { ListSkeleton } from '../components/Skeletons';
+import { appPath } from '../lib/openLink';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -78,7 +79,9 @@ export default function NotificationsRoute() {
       }
       setNotes((prev) => prev.map((x) => (x.id === n.id ? { ...x, read: true } : x)));
     }
-    navigate(n.link || '/home');
+    const to = appPath(n.link);
+    if ('path' in to) navigate(to.path);
+    else window.open(to.href, '_blank', 'noopener');
   };
 
   const markAll = async () => {
