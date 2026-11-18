@@ -2,7 +2,7 @@ import { toastError } from '../lib/toast';
 import { forgetLastName, lastSignedInName } from '../lib/lastName';
 import { ProgressBar } from '../components/redesign/ui';
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, Check, X, Loader2 } from 'lucide-react';
 import { BoxBoy } from '../components/redesign/brand';
 import Wordmark from '../components/Wordmark';
@@ -11,7 +11,7 @@ import Flash from '../components/Flash';
 import { hasSeenWelcome } from '../lib/welcome';
 import { WELCOME_LINE } from '../lib/naija';
 import { BoxBoySplash } from '../components/BoxBoySplash';
-import { supabaseBrowser, saveRememberSession, restoreRememberedSession, touchActivity, isSessionExpired, expireSession, setRememberIntent } from '../lib/supabase';
+import { supabaseBrowser, saveRememberSession, restoreRememberedSession, setRememberIntent, rememberWanted } from '../lib/supabase';
 import { api, clearMeCache } from '../lib/api';
 import { log } from '../lib/log';
 import { describeError } from '../lib/errors';
@@ -53,10 +53,9 @@ export default function AuthRoute() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [welcomeBack, setWelcomeBack] = useState(false);
-  const [remember, setRemember] = useState(false);
+  const [remember, setRemember] = useState(rememberWanted);
 
   const routeToApp = async () => {
-    touchActivity();
     // Fresh sign-in: never trust the me() memo from a previous account.
     clearMeCache();
     // A live session always means the sign-in face — never leave a stale
@@ -78,35 +77,15 @@ export default function AuthRoute() {
     }
   };
 
-  const [searchParams] = useSearchParams();
-
   useEffect(() => {
     if (!sb) return;
-    // Bounced here by the 30-min idle expiry (layout or a stale tab).
-    if (searchParams.get('expired') === '1') {
-      setError('Signed out after 30 minutes of inactivity. Sign in to continue.');
-    }
-    const expiredHalt = async () => {
-      await expireSession();
-      setWelcomeBack(false);
-      setError('Signed out after 30 minutes of inactivity. Sign in to continue.');
-    };
     sb.auth.getSession().then(async ({ data }) => {
       if (data.session) {
-        // Idle past the TTL (even with the app closed) → stay signed out.
-        if (isSessionExpired()) {
-          await expiredHalt();
-          return;
-        }
         void routeToApp();
         return;
       }
-      // No tab session: adopt a remembered one (opt-in at last sign-in).
+      // No tab session: adopt the one kept on this device (Keep me signed in).
       if (await restoreRememberedSession()) {
-        if (isSessionExpired()) {
-          await expiredHalt();
-          return;
-        }
         void routeToApp();
         return;
       }
@@ -149,6 +128,8 @@ export default function AuthRoute() {
     const password = (form.elements.namedItem('password') as HTMLInputElement).value;
     setLoading(true);
     try {
+      // Set before signing in: the SIGNED_IN listener (lib/supabase) reads it.
+      setRememberIntent(remember);
       const { data, error: err } = await client.auth.signInWithPassword({ email, password });
       if (err) {
         setError(describeError(err, 'sign in'));
@@ -296,7 +277,7 @@ export default function AuthRoute() {
     setError('');
     setSuccess('');
     setGoogleLoading(true);
-    // Remember me survives the trip to Google (saved when the session lands back).
+    // Keep me signed in survives the trip to Google (saved when the session lands back).
     setRememberIntent(remember);
     try {
       const { error: err } = await sb.auth.signInWithOAuth({
@@ -460,7 +441,7 @@ export default function AuthRoute() {
             </div>
             <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, color: 'var(--text2)', fontWeight: 600, cursor: 'pointer' }}>
               <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} style={{ width: 16, height: 16, accentColor: 'var(--u-green)' }} />
-              Remember me on this device
+              Keep me signed in on this device
             </label>
             <button disabled={loading} type="submit" className="btn btn--amber" style={{ fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
               {loading ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : null}

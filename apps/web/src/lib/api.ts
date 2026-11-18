@@ -53,6 +53,9 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, retries 
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
     let response = await fetch(`${API_URL}${path}`, { ...init, headers, signal: ctrl.signal });
+    // Only a refresh that Supabase itself rejects proves the session is dead.
+    // A network failure while refreshing keeps the student signed in.
+    let refreshRejected = false;
     if (response.status === 401) {
       // Might be a transient multi-tab refresh race, not a dead session:
       // re-read the session once and retry before giving up.
@@ -61,7 +64,13 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, retries 
         const sb = supabaseBrowser();
         if (sb) {
           await sb.auth.getSession();
-          const fresh = await sessionToken();
+          let fresh = await sessionToken();
+          if (!fresh || fresh === token) {
+            const { data: r, error: rErr } = await sb.auth.refreshSession();
+            const st = (rErr as { status?: number } | null)?.status;
+            if (rErr) refreshRejected = typeof st === "number" && st >= 400 && st < 500;
+            fresh = r.session?.access_token ?? null;
+          }
           if (fresh && fresh !== token) {
             const retryRes = await fetch(`${API_URL}${path}`, {
               ...init,
@@ -73,13 +82,19 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, retries 
               return (await retryRes.json()) as T;
             }
             response = retryRes;
+            // A brand-new token refused too: the session really is over.
+            if (retryRes.status === 401) refreshRejected = true;
           }
         }
       } catch {
         // fall through to dead-session handling below
       }
     }
-    if (response.status === 401) {
+    if (response.status === 401 && refreshRejected === false && (await sessionToken())) {
+      // Refresh didn't settle it but wasn't rejected either (offline, Auth
+      // slow): keep the session and let this one request fail.
+      log.warn("api", `← 401 ${path} (keeping session: refresh not rejected)`);
+    } else if (response.status === 401) {
       // Session truly dead (expired/revoked): clear it and send the user to sign in.
       // Public endpoints never 401, so this only fires for authed calls.
       // Local scope: never revoke another tab's newer session server-side.

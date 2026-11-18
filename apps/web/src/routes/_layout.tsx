@@ -3,7 +3,7 @@ import type { GuideKind } from '../lib/pushHelp';
 import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, CalendarDays, ClipboardCheck, Search, User, PenTool, Bell, Shield, BookOpen, Users, Menu } from 'lucide-react';
-import { supabaseBrowser, touchActivity, isSessionExpired, expireSession } from '../lib/supabase';
+import { supabaseBrowser } from '../lib/supabase';
 import { pushSupported, enablePush } from '../lib/push';
 import ConfirmModal from '../components/ConfirmModal';
 import Wordmark from '../components/Wordmark';
@@ -259,32 +259,6 @@ export default function Layout() {
         setRoleLoaded(true);
       });
   }, [authed]);
-
-  // Activity tracking + 30-min idle expiry. touchActivity persists the last
-  // active moment (survives app close); the interval/focus check signs out
-  // idle tabs and bounces to /auth with the expired flag.
-  useEffect(() => {
-    if (!authed) return;
-    touchActivity();
-    const onActivity = () => touchActivity();
-    window.addEventListener('pointerdown', onActivity);
-    window.addEventListener('keydown', onActivity);
-    const enforce = async () => {
-      if (!isSessionExpired()) return;
-      await expireSession();
-      setAuthed(false);
-      navigate('/auth?expired=1');
-    };
-    const t = setInterval(() => void enforce(), 30000);
-    const onFocus = () => void enforce();
-    window.addEventListener('focus', onFocus);
-    return () => {
-      clearInterval(t);
-      window.removeEventListener('pointerdown', onActivity);
-      window.removeEventListener('keydown', onActivity);
-      window.removeEventListener('focus', onFocus);
-    };
-  }, [authed, navigate]);
 
   // Bell badge: push-driven (SW postMessage on every push) with a slow
   // 5-minute fallback poll + refresh on navigation and tab refocus. The old

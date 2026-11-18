@@ -49,7 +49,7 @@ export function supabaseBrowser(): SupabaseClient | null {
     // is saved when it lands back here.
     cached.auth.onAuthStateChange((event, session) => {
       if (!session) return;
-      if (event === 'SIGNED_IN' && takeRememberIntent()) { saveRememberSession(session); return; }
+      if (event === 'SIGNED_IN' && rememberWanted()) { saveRememberSession(session); return; }
       if ((event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') && rememberedUserId() === session.user.id) saveRememberSession(session);
     });
   }
@@ -86,19 +86,15 @@ function rememberedUserId(): string {
   }
 }
 
-// "Remember me" ticked before a Google sign-in: survives the redirect.
-const REMEMBER_INTENT = 'unify.remember.intent';
+// Staying signed in is the default (Review 3: "until they log out themselves").
+// Unticking "Keep me signed in" (a shared phone) is remembered on this device
+// and also covers Google and email-link sign-ins, which land back here.
+const REMEMBER_OFF = 'unify.remember.off';
 export function setRememberIntent(on: boolean): void {
-  try { if (on) localStorage.setItem(REMEMBER_INTENT, String(Date.now())); else localStorage.removeItem(REMEMBER_INTENT); } catch { /* fine */ }
+  try { if (on) localStorage.removeItem(REMEMBER_OFF); else localStorage.setItem(REMEMBER_OFF, '1'); } catch { /* fine */ }
 }
-function takeRememberIntent(): boolean {
-  try {
-    const at = Number(localStorage.getItem(REMEMBER_INTENT) || 0);
-    localStorage.removeItem(REMEMBER_INTENT);
-    return at > 0 && Date.now() - at < 15 * 60 * 1000; // a fresh Google round trip only
-  } catch {
-    return false;
-  }
+export function rememberWanted(): boolean {
+  try { return localStorage.getItem(REMEMBER_OFF) !== '1'; } catch { return true; }
 }
 
 function loadRememberSession(): { access_token: string; refresh_token: string } | null {
@@ -155,64 +151,12 @@ export async function restoreRememberedSession(): Promise<boolean> {
   }
 }
 
-// ---- 30-minute inactivity session TTL ----
-// Sliding expiry on last user activity, persisted in localStorage so it
-// survives app close/reopen: leave and come back within 30 min → still
-// signed in; after 30 min idle (even with the app closed) → signed out.
-// Applies to remembered sessions too — Remember me restores the tokens,
-// the TTL still caps the idle window.
-export const SESSION_TTL_MS = 30 * 60 * 1000;
-const LAST_ACTIVE_KEY = "unify.lastactive.v1";
-let lastTouch = 0;
-
-export function touchActivity(): void {
-  // Throttle storage writes: at most one per minute, memory-fast otherwise.
-  const now = Date.now();
-  if (now - lastTouch < 60_000) return;
-  lastTouch = now;
-  try {
-    localStorage.setItem(LAST_ACTIVE_KEY, String(now));
-  } catch {
-    // ignore (e.g. private mode) — TTL just won't survive restart
-  }
-}
-
-function lastActiveAt(): number | null {
-  try {
-    const raw = localStorage.getItem(LAST_ACTIVE_KEY);
-    const n = raw ? Number(raw) : NaN;
-    return Number.isFinite(n) && n > 0 ? n : null;
-  } catch {
-    return null;
-  }
-}
-
-export function isSessionExpired(): boolean {
-  const at = lastActiveAt();
-  if (at === null) return false; // never tracked (older install) — don't punish
-  return Date.now() - at > SESSION_TTL_MS;
-}
-
-// Enforcement: sign out of this tab, drop remembered tokens, reset the
-// module session cache. Returns true when something was actually signed out.
-export async function expireSession(): Promise<boolean> {
-  const sb = supabaseBrowser();
-  try {
-    localStorage.removeItem(LAST_ACTIVE_KEY);
-  } catch {
-    // ignore
-  }
-  clearRememberSession();
-  sessionCache = { loaded: true, session: null };
-  if (!sb) return false;
-  try {
-    const { data } = await sb.auth.getSession();
-    if (!data.session) return false;
-    await sb.auth.signOut({ scope: "local" }).catch(() => {});
-    return true;
-  } catch {
-    return false;
-  }
+// No idle sign-out (Review 2 and 3): students stay signed in until they log
+// out themselves. The old 30-minute timer's stored timestamp is cleared once.
+try {
+  localStorage.removeItem("unify.lastactive.v1");
+} catch {
+  // ignore
 }
 
 // Module session cache: every route mounts its own auth gate, and without
