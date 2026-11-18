@@ -28,7 +28,8 @@ function left(ms: number): string {
 const scopeText = (w: Wire) =>
   w.scope === 'course' ? w.course : w.scope === 'class' ? `${w.level} ${w.department}` : w.scope === 'department' ? w.department : w.scope === 'faculty' ? 'Your faculty' : 'Everyone';
 
-export default function LiveWire({ allowSend = true, style }: { allowSend?: boolean; style?: React.CSSProperties }) {
+// countdown=false: no timer (class rep Home, Review 3 C7).
+export default function LiveWire({ allowSend = true, countdown = true, style }: { allowSend?: boolean; countdown?: boolean; style?: React.CSSProperties }) {
   const [wires, setWires] = useState<Wire[]>([]);
   const [targets, setTargets] = useState<LiveWireTarget[]>([]);
   const [now, setNow] = useState(Date.now());
@@ -68,7 +69,7 @@ export default function LiveWire({ allowSend = true, style }: { allowSend?: bool
             <button key={w.id} onClick={() => setCollapsed((c) => c.filter((x) => x !== w.id))} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 12, background: '#0a0a0a', color: '#f5f4f0', border: 'none', borderLeft: '4px solid #fbbf24', fontSize: 12, fontWeight: 700, textAlign: 'left' }}>
               <span className="lw-dot" aria-hidden="true" />
               <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.message}</span>
-              <span style={{ color: '#fbbf24', fontVariantNumeric: 'tabular-nums' }}>{left(ms)}</span>
+              {countdown && <span style={{ color: '#fbbf24', fontVariantNumeric: 'tabular-nums' }}>{left(ms)}</span>}
             </button>
           );
         }
@@ -85,10 +86,10 @@ export default function LiveWire({ allowSend = true, style }: { allowSend?: bool
               )}
             </div>
             <div style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.4, marginTop: 6, whiteSpace: 'pre-wrap' }}>{w.message}</div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 8 }}>
+            {countdown && <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 8 }}>
               <span style={{ fontSize: 11, color: '#aaa', fontWeight: 700 }}>{LABEL[w.label]}</span>
               <span style={{ fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 24, color: '#fbbf24', fontVariantNumeric: 'tabular-nums' }}>{left(ms)}</span>
-            </div>
+            </div>}
           </section>
         );
       })}

@@ -21,6 +21,7 @@ import { ROUTES } from '../lib/routes';
 import { UpdatesSlider, type UpdateSlide } from '../components/redesign/UpdatesSlider';
 import { FACTS } from '../lib/naija';
 import LiveWire from '../components/LiveWire';
+import ClassRepHome from '../components/ClassRepHome';
 import Loading from '../components/Loading';
 
 type CourseStat = { course: string; topics: number };
@@ -254,6 +255,7 @@ export default function HomeRoute() {
   const [enrolled, setEnrolled] = useState<string[]>([]);
   const [signInPhoto, setSignInPhoto] = useState('');
   const gaps = profileGaps(profile, signInPhoto);
+  const [isRep, setIsRep] = useState(false);
   const [liveUpdates, setLiveUpdates] = useState<HomeUpdate[]>([]);
   // My pass is only offered once the student's class list is up.
   const passReady = useClassListReady();
@@ -687,8 +689,11 @@ export default function HomeRoute() {
         </div>
       </div>
 
-      {/* Live wire: urgent messages with a countdown, between the stats and the carousel. */}
-      <LiveWire />
+      {/* Review 3 (C7): class reps get a quiet tools row and Confirm today
+          instead of the big "Send a live wire" button and the countdown. */}
+      {profile?.role === 'student' && <ClassRepHome onRep={setIsRep} />}
+      {/* Live wire: urgent messages, between the stats and the carousel. */}
+      <LiveWire allowSend={false} countdown={!isRep} />
 
       <UpdatesSlider slides={updateSlides} />
 

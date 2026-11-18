@@ -343,6 +343,8 @@ export type ClassListClaim = {
   verifiedEmail: string; note: string; at: string; entry: { id: string; name: string; claimedBy: string } | null;
 };
 export type ClassListLog = { id: string; action: string; detail: Record<string, unknown>; at: string; by: string };
+export type HocClass = { id: string; course: string; start: string; end: string; venue: string; status: string; newStart: string; newVenue: string; past: boolean };
+export type ClassRules = { confirmWhen: 'evening' | '2h' | '1h'; cancelBy: 'evening' | '2h' | '1h' | 'any'; set: boolean };
 export type ClassListData = {
   list: { id: string; department: string; level: string; institution: string; updatedAt: string } | null;
   class: { department: string; level: string; institution: string };
@@ -702,7 +704,7 @@ export const api = {
   materialAdd: (payload: { course: string; week: number; type: Material['type']; title: string; url: string }) =>
     apiFetch<{ ok: boolean; id: string }>('/v1/materials', { method: 'POST', body: JSON.stringify(payload) }),
   materialDelete: (id: string) => apiFetch<{ ok: boolean }>(`/v1/materials/${id}`, { method: 'DELETE' }),
-  slotChange: (id: string, payload: { status: SlotChange['status'] | 'normal'; start?: string; end?: string; venue?: string; note?: string }) =>
+  slotChange: (id: string, payload: { status: SlotChange['status'] | 'normal'; date?: string; start?: string; end?: string; venue?: string; note?: string }) =>
     apiFetch<{ ok: boolean; date: string }>(`/v1/timetable/${id}/change`, { method: 'POST', body: JSON.stringify(payload) }),
   slotDelete: (id: string) =>
     apiFetch<{ ok: boolean }>(`/v1/timetable/${id}`, { method: 'DELETE' }),
@@ -877,6 +879,11 @@ export const api = {
     apiFetch<{ ok: boolean; added: number; restored: number; unchanged: number; nameDiffers: number; linked: number }>('/v1/class-list/entries', { method: 'POST', body: JSON.stringify({ rows, source }) }, 0, 60000),
   classListEdit: (id: string, patch: { name?: string; matric?: string }) =>
     apiFetch<{ ok: boolean }>(`/v1/class-list/entries/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
+  classListClear: () => apiFetch<{ ok: boolean; cleared: number }>('/v1/class-list/clear', { method: 'POST', body: JSON.stringify({ confirm: 'CLEAR' }) }),
+  // Class rep (Review 3, C7/C11): today's classes to confirm, and class rules.
+  hocToday: () => apiFetch<{ date: string; when: 'today' | 'tomorrow'; classes: HocClass[] }>('/v1/hoc/today'),
+  hocRules: () => apiFetch<ClassRules & { courses: number }>('/v1/hoc/class-rules'),
+  hocSaveRules: (r: Pick<ClassRules, 'confirmWhen' | 'cancelBy'>) => apiFetch<ClassRules & { ok: boolean }>('/v1/hoc/class-rules', { method: 'PUT', body: JSON.stringify(r) }),
   classListRemove: (id: string) => apiFetch<{ ok: boolean }>(`/v1/class-list/entries/${id}`, { method: 'DELETE' }),
   classListRestore: (id: string) => apiFetch<{ ok: boolean }>(`/v1/class-list/entries/${id}/restore`, { method: 'POST', body: '{}' }),
   classListUnclaim: (id: string) => apiFetch<{ ok: boolean }>(`/v1/class-list/entries/${id}/unclaim`, { method: 'POST', body: '{}' }),

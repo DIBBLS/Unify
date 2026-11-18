@@ -89,8 +89,48 @@ export default function ClassListRoute() {
       )}
 
       {data.list && <Entries entries={data.entries} onChange={() => void load()} />}
+      {data.list && live.length > 0 && <ClearList count={live.length} joined={joined} onDone={() => void load()} />}
       {data.log.length > 0 && <History log={data.log} />}
     </div>
+  );
+}
+
+// ---------- Clear the whole list (wrong file uploaded) ----------
+function ClearList({ count, joined, onDone }: { count: number; joined: number; onDone: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [typed, setTyped] = useState('');
+  const [busy, setBusy] = useState(false);
+  const clear = async () => {
+    setBusy(true);
+    try {
+      const r = await api.classListClear();
+      toastSuccess(`Cleared ${r.cleared} names. Upload the right file now.`);
+      setOpen(false);
+      onDone();
+    } catch (e) {
+      errorToast(e, 'clear the class list');
+    } finally {
+      setBusy(false);
+    }
+  };
+  if (!open)
+    return (
+      <button className="btn btn--white btn--block" onClick={() => setOpen(true)} style={{ marginTop: 16, color: 'var(--u-red, #dc2626)' }}>
+        Clear the whole list
+      </button>
+    );
+  return (
+    <Card style={{ marginTop: 16, gap: 10, border: '1px solid var(--u-red, #dc2626)' }}>
+      <div className="t-15 w-7">Clear all {count} names?</div>
+      <div className="t-13 muted">
+        For when you uploaded the wrong file. Everyone comes off the list{joined ? `, and the ${joined} classmate${joined === 1 ? ' who' : 's who'} linked their matric number will need to link again` : ''}. Attendance already taken is kept. Type CLEAR to confirm.
+      </div>
+      <input value={typed} onChange={(e) => setTyped(e.target.value.toUpperCase())} placeholder="CLEAR" aria-label="Type CLEAR to confirm" style={{ padding: 12, borderRadius: 12, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 15, fontWeight: 800, letterSpacing: 2 }} />
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button className="btn btn--white" style={{ flex: 1 }} onClick={() => { setOpen(false); setTyped(''); }}>Cancel</button>
+        <button className="btn" disabled={typed !== 'CLEAR' || busy} onClick={() => void clear()} style={{ flex: 1, background: 'var(--u-red, #dc2626)', color: '#fff' }}>{busy ? 'Clearing…' : 'Clear the list'}</button>
+      </div>
+    </Card>
   );
 }
 
@@ -463,6 +503,7 @@ const describe = (l: ClassListLog): string => {
     }
     case 'remove': return `${l.by} removed ${who}`;
     case 'restore': return `${l.by} restored ${who}`;
+    case 'clear': return `${l.by} cleared the whole list (${d.count ?? 0} names)`;
     case 'claim': return `${who} claimed by a student${d.method === 'email' ? ' (LASU email verified)' : d.method === 'auto' ? ' (matched by matric)' : d.method === 'hoc' ? ' (approved by a class rep)' : ''}`;
     case 'unclaim': return `${who} unlinked from an account${d.why ? `: ${d.why}` : ''}`;
     case 'approve': return `${l.by} approved a request for ${who}`;

@@ -1,6 +1,6 @@
 import { SectionSkeleton } from '../components/Skeletons';
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
 import { api, type HocPost } from '../lib/api';
 import { errorToast } from '../lib/errors';
@@ -35,7 +35,12 @@ export default function HocDashboardRoute() {
   const [meta, setMeta] = useState('');
   const [audience, setAudience] = useState<{ students: number; fromList: boolean } | null>(null);
   const formRef = useRef<HTMLTextAreaElement>(null);
-  const [filter, setFilter] = useState<'all' | HocPost['type']>('all');
+  const [params] = useSearchParams();
+  const location = useLocation();
+  const initialFilter = params.get('filter');
+  const [filter, setFilter] = useState<'all' | HocPost['type']>(initialFilter === 'question' || initialFilter === 'tip' || initialFilter === 'announcement' ? initialFilter : 'all');
+  // Review 3 (C8): class size and how many have joined (class rep only).
+  const [size, setSize] = useState<{ listed: number; joined: number } | null>(null);
   const [failed, setFailed] = useState(false);
   const [type, setType] = useState<HocPost['type']>('announcement');
   const [title, setTitle] = useState('');
@@ -51,12 +56,22 @@ export default function HocDashboardRoute() {
       setIsAdmin(!!me.isAdmin);
       setMeta([r.department, r.level].filter(Boolean).join(' · '));
       setAudience(r.audience || null);
+      if (r.isHoc) api.classList().then((d) => {
+        const live = d.entries.filter((e) => !e.removed);
+        setSize(d.list ? { listed: live.length, joined: live.filter((e) => e.claimed).length } : null);
+      }).catch(() => {});
     } catch (e) {
       errorToast(e, 'load the class board');
       setFailed(true);
     }
   };
   useEffect(() => { void load(); }, []);
+  // Home's tools row: "Post" opens here with #post and goes straight to the box.
+  useEffect(() => {
+    if (location.hash !== '#post' || posts === null) return;
+    formRef.current?.focus();
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [location.hash, posts]);
 
   const post = async () => {
     if (!content.trim()) return;
@@ -89,9 +104,22 @@ export default function HocDashboardRoute() {
       </div>
 
       {/* My pass lives with attendance (course page, My record), not here. */}
+      {isHoc && size && (
+        <Card style={{ marginTop: 16, gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <span className="t-15 w-7" style={{ flex: 1 }}>Your class</span>
+            <span className="t-13 muted">{size.joined} of {size.listed} joined</span>
+          </div>
+          <div style={{ height: 8, borderRadius: 9999, background: 'var(--border)', overflow: 'hidden' }}>
+            <div style={{ width: `${size.listed ? Math.round((size.joined / size.listed) * 100) : 0}%`, height: '100%', background: 'var(--u-green)' }} />
+          </div>
+          <div className="t-13 muted">{size.listed} student{size.listed === 1 ? '' : 's'} on your class list · {size.listed - size.joined} still to join Unify Learn</div>
+        </Card>
+      )}
       {(isHoc || isAdmin) && (
-        <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
           <Link to={ROUTES.classList} className="btn btn--white" style={{ flex: 1 }}>Class list</Link>
+          {isHoc && <Link to={ROUTES.hocRules} className="btn btn--white" style={{ flex: 1 }}>Class rules</Link>}
         </div>
       )}
       {isHoc && audience && !audience.fromList && (

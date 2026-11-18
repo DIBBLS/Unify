@@ -20,6 +20,7 @@ const OnboardingPersonaRoute = lazyRoute(() => import('./routes/onboarding-perso
 const CGPAPlannerRoute = lazyRoute(() => import('./routes/cgpa-planner'));
 const AttendanceSetupRoute = lazyRoute(() => import('./routes/attendance-setup'));
 const CourseLecturersRoute = lazyRoute(() => import('./routes/course-lecturers'));
+const HocRulesRoute = lazyRoute(() => import('./routes/hoc-rules'));
 const AttendancePassRoute = lazyRoute(() => import('./routes/attendance-pass'));
 const MyAttendanceRoute = lazyRoute(() => import('./routes/my-attendance'));
 const ScannerRoute = lazyRoute(() => import('./routes/scanner'));
@@ -397,6 +398,7 @@ export default function App() {
           <Route path="/messages/:course" element={<RequireAuth><RequireRole allow={['lecturer', 'contributor']}><MessagesRoute /></RequireRole></RequireAuth>} />
           <Route path={ROUTES.contributorWelcome} element={<RequireAuth><ContributorWelcomeRoute /></RequireAuth>} />
           <Route path="/class/contributors" element={<RequireAuth><ClassContributorsRoute /></RequireAuth>} />
+          <Route path="/hoc/rules" element={<RequireAuth><HocRulesRoute /></RequireAuth>} />
           <Route path="/hoc/welcome" element={<RequireAuth><HocWelcomeRoute /></RequireAuth>} />
           <Route path="/hoc/requests" element={<RequireAuth><HocRequestsRoute /></RequireAuth>} />
           <Route path="/reports" element={<RequireAuth><ReportsRoute /></RequireAuth>} />
