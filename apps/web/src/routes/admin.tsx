@@ -412,7 +412,7 @@ export default function AdminRoute() {
   const [updatesKey, setUpdatesKey] = useState(0);
   const [testEmail, setTestEmail] = useState('');
   const [testing, setTesting] = useState(false);
-  const [testResult, setTestResult] = useState<{ ok: boolean; status: number; body: string; sender: string; keySet: boolean; fromSet: boolean } | null>(null);
+  const [testResult, setTestResult] = useState<{ ok: boolean; status: number; body: string; sender: string; keySet: boolean; fromSet: boolean; budget?: { sent: number; limit: number; appLimit: number } } | null>(null);
 
   // Broadcast an announcement to every user's bell.
   const announce = async () => {
@@ -954,6 +954,7 @@ export default function AdminRoute() {
                 {testResult.keySet && !testResult.fromSet && ' · EMAIL_FROM defaulted (may be unverified)'}
               </div>
               {testResult.sender && <div style={{ marginBottom: 4 }}>From: {testResult.sender}</div>}
+              {testResult.budget && <div style={{ marginBottom: 4 }}>Emails today: {testResult.budget.sent} of {testResult.budget.appLimit} for the app ({testResult.budget.limit} a day on Brevo, the rest kept for sign-ups and password resets)</div>}
               <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{testResult.body || '(empty response)'}</div>
             </div>
           )}

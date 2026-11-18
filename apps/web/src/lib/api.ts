@@ -174,6 +174,7 @@ export type Profile = {
   role?: string;
   avatar_url?: string;
   notify_new_notes?: boolean;
+  email_updates?: boolean;
   quiet_start?: string | null;
   quiet_end?: string | null;
   box_boy_persona?: string | null;
@@ -593,7 +594,7 @@ export const api = {
   adminReminderDelete: (id: string) => apiFetch<{ ok: boolean }>(`/v1/admin/reminders/${id}`, { method: 'DELETE' }),
   adminReminderTest: (id: string) => apiFetch<{ ok: boolean }>(`/v1/admin/reminders/${id}/test`, { method: 'POST', body: '{}' }),
   adminEmailTest: (to: string) =>
-    apiFetch<{ ok: boolean; status: number; body: string; sender: string; keySet: boolean; fromSet: boolean }>('/v1/admin/email/test', { method: 'POST', body: JSON.stringify({ to }) }),
+    apiFetch<{ ok: boolean; status: number; body: string; sender: string; keySet: boolean; fromSet: boolean; budget?: { sent: number; limit: number; appLimit: number } }>('/v1/admin/email/test', { method: 'POST', body: JSON.stringify({ to }) }),
   adminContent: () =>
     apiFetch<{ courses: AdminContentCourse[] }>('/v1/admin/content'),
   adminActivity: () =>

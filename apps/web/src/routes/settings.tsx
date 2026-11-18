@@ -175,6 +175,7 @@ export function NotificationSettingsRoute() {
   const [pushSt, setPushSt] = useState<PushState>('off');
   const [busy, setBusy] = useState(false);
   const [emails, setEmails] = useState(true);
+  const [updates, setUpdates] = useState(true);
   const [quiet, setQuiet] = useState(false);
   const [from, setFrom] = useState('22:00');
   const [to, setTo] = useState('07:00');
@@ -186,6 +187,7 @@ export function NotificationSettingsRoute() {
     api.me().then((m) => {
       const p = m.profile;
       setEmails(p?.notify_new_notes !== false);
+      setUpdates(p?.email_updates !== false);
       if (p?.quiet_start && p?.quiet_end) { setQuiet(true); setFrom(p.quiet_start); setTo(p.quiet_end); }
     }).catch(() => {}).finally(() => setLoaded(true));
   }, []);
@@ -229,6 +231,13 @@ export function NotificationSettingsRoute() {
             <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>For courses you take. Account and security emails always come.</span>
           </span>
           <input type="checkbox" aria-label="Email me when new notes land" checked={emails} disabled={busy || !loaded} onChange={(e) => { setEmails(e.target.checked); void save({ notifyNewNotes: e.target.checked }, e.target.checked ? 'New-note emails on.' : 'New-note emails off.'); }} />
+        </div>
+        <div style={rowStyle}>
+          <span>
+            <span style={{ display: 'block', fontSize: 14, fontWeight: 700 }}>Class updates and a weekly summary by email</span>
+            <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>Class cancelled or moved, live wires and your class board, by email only when push can't reach you. Plus one summary a week.</span>
+          </span>
+          <input type="checkbox" aria-label="Class updates and a weekly summary by email" checked={updates} disabled={busy || !loaded} onChange={(e) => { setUpdates(e.target.checked); void save({ emailUpdates: e.target.checked }, e.target.checked ? 'Class update emails on.' : 'Class update emails off.'); }} />
         </div>
       </div>
 
