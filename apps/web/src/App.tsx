@@ -3,12 +3,8 @@ import { DialogHost } from './lib/dialog';
 import { applyRouteMeta } from './lib/seo';
 import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import Layout from './routes/_layout';
-import CourseRoute from './routes/courses';
-import CourseDetailRoute from './routes/course-detail';
-import LearnWeek from './routes/learn/week';
 import AuthRoute from './routes/auth';
 import HomeRoute from './routes/home';
-import MeRoute from './routes/me';
 import { ROUTES, LEGACY_REDIRECTS } from './lib/routes';
 import { useParams } from 'react-router-dom';
 
@@ -16,6 +12,12 @@ import { useParams } from 'react-router-dom';
 // dashboard → notes) never downloads Studio tables, admin panels or the
 // visual equation builder — each chunk fetches only when its route opens.
 const ClassRoute = lazyRoute(() => import('./routes/class'));
+// Not on the first screen: fetched on demand, and warmed once Home is idle
+// (see the preload list below), so the first open downloads less.
+const CourseRoute = lazyRoute(() => import('./routes/courses'));
+const CourseDetailRoute = lazyRoute(() => import('./routes/course-detail'));
+const LearnWeek = lazyRoute(() => import('./routes/learn/week'));
+const MeRoute = lazyRoute(() => import('./routes/me'));
 const OnboardingRoute = lazyRoute(() => import('./routes/onboarding'));
 const OnboardingPersonaRoute = lazyRoute(() => import('./routes/onboarding-persona'));
 const CGPAPlannerRoute = lazyRoute(() => import('./routes/cgpa-planner'));
@@ -214,6 +216,10 @@ function RouteMeta() {
     if (preloaded || !/^\/(home|courses|course|learn|me|class|timetable)/.test(pathname)) return;
     preloaded = true;
     preloadWhenIdle([
+      () => import('./routes/learn/week'),
+      () => import('./routes/course-detail'),
+      () => import('./routes/courses'),
+      () => import('./routes/me'),
       () => import('./routes/timetable'),
       () => import('./routes/hoc-dashboard'),
       () => import('./routes/notifications'),

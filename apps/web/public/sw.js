@@ -1,7 +1,9 @@
 // Unify Learn offline worker: shell + readable content stay available offline.
-// Versioned cache; documents network-first (never a stale app), static assets
-// cache-first. API GETs are served "network, but never make the user wait":
-// fresh when the network answers within 4s, otherwise the last copy THIS USER
+// Versioned cache. The app opens from the page saved on the phone (only when
+// every file it needs is saved too) while the newest page downloads for next
+// time; a reload always fetches fresh. Static assets cache-first.
+// API GETs are served "network, but never make the user wait":
+// fresh when the network answers within 2s, otherwise the last copy THIS USER
 // saw (per-user keys: phones are shared, one student must never be handed
 // another's data). Live endpoints (attendance sessions, admin) are never
 // cached. Writes (POST/PUT/DELETE) always bypass.
@@ -84,20 +86,66 @@ async function apiFirst(e, request, url) {
 
 const isHtml = (res) => /text\/html/i.test((res.headers && res.headers.get('content-type')) || '');
 
+// ---- Opening from the phone ----
+// The saved page is only used when every script and style it names is saved
+// too, so it can never open half-built. A reload (including the one lazyRoute
+// does when a deploy removed a code chunk) always fetches the newest page.
+const entryFiles = (html) => [...new Set((html.match(/\/assets\/[^"'\s>]+\.(?:js|css)/g) || []))];
+
+async function readyShell() {
+  const c = await caches.open(CACHE);
+  const page = await c.match('/index.html');
+  if (!page || !isHtml(page)) return null;
+  const files = entryFiles(await page.clone().text());
+  if (!files.length) return null;
+  const saved = await Promise.all(files.map((f) => c.match(f)));
+  return saved.every(Boolean) ? page : null;
+}
+
+// Keep the newest page, but only after its scripts and styles are saved.
+async function saveShell(res) {
+  const html = await res.text();
+  const c = await caches.open(CACHE);
+  for (const f of entryFiles(html)) {
+    if (await c.match(f)) continue;
+    const r = await fetch(f).catch(() => null);
+    if (!r || !r.ok || isHtml(r)) return; // a deploy in flight: keep the old page
+    await c.put(f, r);
+  }
+  await c.put('/index.html', new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } }));
+}
+
+async function shellFirst(e, request) {
+  const network = fetch(request).then((res) => {
+    if (res && res.ok && isHtml(res)) e.waitUntil(saveShell(res.clone()).catch(() => {}));
+    return res;
+  });
+  const reload = request.cache === 'reload' || request.cache === 'no-cache' || request.cache === 'no-store';
+  if (!reload) {
+    const page = await readyShell().catch(() => null);
+    if (page) {
+      e.waitUntil(network.catch(() => {}));
+      return page;
+    }
+  }
+  try {
+    return await network;
+  } catch {
+    return (await caches.match('/index.html')) || Response.error();
+  }
+}
+
 self.addEventListener('fetch', (e) => {
   const { request } = e;
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
 
-  // Navigations: live app when online, cached shell when offline.
-  // The cached shell is always from THIS worker version (old caches are
-  // purged on activate), so offline boots never show a stale UI.
+  // Navigations: the app opens from the copy on the phone (no wait on the
+  // network), and the newest page is fetched in the background for next time.
+  // Server routes (/api) always go to the network.
   if (request.mode === 'navigate') {
-    e.respondWith(
-      fetch(request).catch(() =>
-        caches.match('/index.html').then((r) => r || Response.error())
-      )
-    );
+    if (url.origin !== location.origin || url.pathname.startsWith('/api/')) return;
+    e.respondWith(shellFirst(e, request));
     return;
   }
 
