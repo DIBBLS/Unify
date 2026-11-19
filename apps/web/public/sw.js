@@ -76,7 +76,14 @@ async function apiFirst(e, request, url) {
     .catch(() => null);
   // Let the refresh finish (and update the cache) even if we answered early.
   e.waitUntil(network);
-  if (!cached) return (await network) || Response.error();
+  if (!cached) {
+    const fresh = await network;
+    if (fresh) return fresh;
+    // Offline with no copy for this user: a week saved for offline (course
+    // notes are the same for everyone) still opens.
+    const saved = await caches.open(CONTENT).then((c) => c.match(url.href)).catch(() => null);
+    return saved || Response.error();
+  }
   // We have a copy: wait a few seconds for fresh data, then stop making the
   // user wait. Real errors (401 etc.) are always passed through.
   const timeout = new Promise((resolve) => setTimeout(() => resolve(null), API_WAIT_MS));

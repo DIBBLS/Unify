@@ -11,6 +11,8 @@ import { APP_VERSION } from '../lib/version';
 import { useTheme } from '../hooks/useTheme';
 import BackButton from '../components/BackButton';
 import { setSpokenWelcome, speakWelcome, spokenWelcomeOn, spokenWelcomeSupported } from '../lib/welcomeVoice';
+import { play, setSoundsOn, soundsOn } from '../lib/sound';
+import { GOALS, getGoal, setGoal, type GoalKey } from '../lib/goal';
 
 // S48 Settings and S49 Notification settings, in the Me page's plain list style.
 const card: React.CSSProperties = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', marginBottom: 16 };
@@ -36,13 +38,46 @@ function SpokenWelcomeRow({ name }: { name: string }) {
   return (
     <div style={rowStyle}>
       <span style={{ flex: 1 }}>
-        <span style={{ display: 'block', fontSize: 14, fontWeight: 700 }}>Spoken welcome</span>
+        <span style={{ display: 'block', fontSize: 14, fontWeight: 700 }}>Voice: welcome and cheers</span>
         <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>
-          Once a day, when you first tap the app, a voice welcomes you and says what's new. Never during quiet hours.{' '}
+          Once a day, when you first tap the app, a voice welcomes you by name and says what's new. It also cheers you on when you finish a topic, get a perfect score, meet your daily goal or finish a game. Never during quiet hours.{' '}
           <button onClick={() => void speakWelcome(name)} style={{ background: 'none', border: 'none', padding: 0, color: 'var(--u-good)', fontWeight: 700, fontSize: 12 }}>Hear it</button>
         </span>
       </span>
-      <input type="checkbox" aria-label="Spoken welcome" checked={on} onChange={(e) => { setOn(e.target.checked); setSpokenWelcome(e.target.checked); toastSuccess(e.target.checked ? 'Spoken welcome on.' : 'Spoken welcome off.'); }} />
+      <input type="checkbox" aria-label="Voice: welcome and cheers" checked={on} onChange={(e) => { setOn(e.target.checked); setSpokenWelcome(e.target.checked); toastSuccess(e.target.checked ? 'Voice on.' : 'Voice off.'); }} />
+    </div>
+  );
+}
+
+// Sound effects: on by default; turning them on plays one so you hear it.
+function SoundsRow() {
+  const [on, setOn] = useState(soundsOn);
+  return (
+    <div style={rowStyle}>
+      <span style={{ flex: 1 }}>
+        <span style={{ display: 'block', fontSize: 14, fontWeight: 700 }}>Sound effects</span>
+        <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>A chime for right answers and finished topics, a soft bump for a wrong one, and a fanfare when you finish.</span>
+      </span>
+      <input type="checkbox" aria-label="Sound effects" checked={on} onChange={(e) => { setOn(e.target.checked); setSoundsOn(e.target.checked); if (e.target.checked) play('correct'); }} />
+    </div>
+  );
+}
+
+// Daily goal: how much study a day, in XP (Home shows the ring).
+function GoalCard() {
+  const [goal, setG] = useState<GoalKey>(getGoal().key);
+  return (
+    <div id="goal" style={card}>
+      {GOALS.map((g, i) => (
+        <button key={g.key} onClick={() => { setG(g.key); setGoal(g.key); }} aria-pressed={goal === g.key}
+          style={{ ...rowStyle, width: '100%', background: goal === g.key ? 'var(--u-good-tint)' : 'none', border: 'none', borderTop: i ? rowStyle.borderTop : 'none', textAlign: 'left' }}>
+          <span>
+            <span style={{ display: 'block', fontSize: 14, fontWeight: 700 }}>{g.label} · {g.xp} XP a day</span>
+            <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>{g.sub}</span>
+          </span>
+          <span aria-hidden="true" style={{ fontWeight: 800, color: 'var(--u-good)' }}>{goal === g.key ? '✓' : ''}</span>
+        </button>
+      ))}
     </div>
   );
 }
@@ -52,6 +87,12 @@ export default function SettingsRoute() {
   const [isHoc, setIsHoc] = useState(false);
   const [isStudent, setIsStudent] = useState(true);
   const [name, setName] = useState('');
+  // Home's "Change" on the daily goal lands on the goal picker.
+  useEffect(() => {
+    if (window.location.hash !== '#goal') return;
+    const t = window.setTimeout(() => document.getElementById('goal')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+    return () => window.clearTimeout(t);
+  }, [isStudent]);
   useEffect(() => {
     api.me().then((m) => {
       setName((m.profile?.first_name || '').split(' ')[0]);
@@ -80,8 +121,16 @@ export default function SettingsRoute() {
           <span style={{ fontSize: 14, fontWeight: 700 }}>Theme</span>
           <span style={{ fontSize: 13, color: 'var(--text2)' }}>{theme === 'dark' ? 'Dark' : 'Light'}</span>
         </button>
+        <SoundsRow />
         <SpokenWelcomeRow name={name} />
       </div>
+
+      {isStudent && (
+        <>
+          <div style={head}>DAILY GOAL</div>
+          <GoalCard />
+        </>
+      )}
 
       <div style={head}>ABOUT</div>
       <div style={card}>

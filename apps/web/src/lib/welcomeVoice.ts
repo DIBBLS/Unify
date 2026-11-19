@@ -58,7 +58,7 @@ export async function welcomeLines(name: string): Promise<Seg[]> {
       if (lect) bits.push(lect === 1 ? 'a post from your lecturer' : `${say(lect)} posts from your lecturers`);
       if (cls) bits.push(cls === 1 ? 'a change to your classes' : `${say(cls)} changes to your classes`);
       if (notes) bits.push(notes === 1 ? 'new notes for one of your courses' : `new notes in ${say(notes)} places`);
-      if (unify) bits.push(unify === 1 ? 'an update from Unify' : `${say(unify)} updates from Unify`);
+      if (unify) bits.push(unify === 1 ? 'an update from Unify Learn' : `${say(unify)} updates from Unify Learn`);
       if (bits.length) lines.push(`There's ${bits.length > 1 ? `${bits.slice(0, -1).join(', ')} and ${bits[bits.length - 1]}` : bits[0]}.`);
     }
   } catch {
@@ -69,24 +69,54 @@ export async function welcomeLines(name: string): Promise<Seg[]> {
 
 let stop: (() => void) | null = null;
 
-export async function speakWelcome(name: string): Promise<void> {
-  if (!spokenWelcomeSupported()) return;
-  const segs = await welcomeLines(name);
+// The reader's chosen voice, else the most human-sounding English one.
+function pickVoice(): SpeechSynthesisVoice | null {
   const voices = window.speechSynthesis.getVoices().filter((v) => v.lang.toLowerCase().startsWith('en'));
   let voice: SpeechSynthesisVoice | null = null;
   try {
     const saved = localStorage.getItem('unify.voice.v1');
     voice = voices.find((v) => v.voiceURI === saved) || null;
   } catch { /* fine */ }
-  if (!voice) voice = [...voices].sort((a, b) => voiceScore(a) - voiceScore(b))[0] || null;
+  return voice || [...voices].sort((a, b) => voiceScore(a) - voiceScore(b))[0] || null;
+}
+
+export async function speakWelcome(name: string): Promise<void> {
+  if (!spokenWelcomeSupported()) return;
+  const segs = await welcomeLines(name);
   stop?.();
-  stop = speakPhrases(segs, { voice, rate: () => 1 });
+  stop = speakPhrases(segs, { voice: pickVoice(), rate: () => 1 });
+}
+
+// Short spoken cheers at the moments that matter (same switch as the
+// welcome): finishing a topic, a perfect score, the daily goal, finishing a
+// game. Never over notes being read aloud, never in quiet hours.
+let who: { name: string; quietStart?: string | null; quietEnd?: string | null } = { name: '' };
+export type Praise = 'topic' | 'perfect' | 'goal' | 'game';
+const PRAISE: Record<Praise, (n: string) => string[]> = {
+  topic: (n) => [`Nice work${n ? `, ${n}` : ''}.`, `Topic done${n ? `, ${n}` : ''}.`, 'Another one done. Keep going.'],
+  perfect: (n) => [`Perfect score${n ? `, ${n}` : ''}!`, 'Every answer right. Brilliant.'],
+  goal: (n) => [`Daily goal done${n ? `. Well done, ${n}` : ''}!`, `That's your goal for today${n ? `, ${n}` : ''}. Great job.`],
+  game: (n) => [`You did it${n ? `, ${n}` : ''}!`, 'Game complete. Nicely done.'],
+};
+export function sayPraise(kind: Praise) {
+  if (!spokenWelcomeSupported() || !spokenWelcomeOn() || inQuiet(who.quietStart, who.quietEnd)) return;
+  try {
+    if (window.speechSynthesis.speaking) return;
+    const lines = PRAISE[kind](who.name);
+    const u = new SpeechSynthesisUtterance(lines[Math.floor(Math.random() * lines.length)]);
+    const v = pickVoice();
+    if (v) { u.voice = v; u.lang = v.lang; }
+    window.speechSynthesis.speak(u);
+  } catch {
+    // speaking is a nicety
+  }
 }
 
 // Arm once per app load: speak on the first tap, if switched on, not yet
 // spoken today and not in quiet hours.
 let armed = false;
 export function armSpokenWelcome(profile: { first_name?: string | null; quiet_start?: string | null; quiet_end?: string | null } | null) {
+  if (profile) who = { name: (profile.first_name || '').trim().split(/\s+/)[0], quietStart: profile.quiet_start, quietEnd: profile.quiet_end };
   if (armed || !spokenWelcomeSupported() || !spokenWelcomeOn() || !profile) return;
   let last = '';
   try { last = localStorage.getItem(DAY_KEY) || ''; } catch { /* fine */ }

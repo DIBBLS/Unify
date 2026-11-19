@@ -22,6 +22,7 @@ export const ROUTES = {
   week: (code: string, week: number | string) => `/learn/${encodeURIComponent(code)}/week/${week}`,
   keywords: (code: string, week: number | string) => `/learn/${encodeURIComponent(code)}/week/${week}/keywords`,
   crossword: (code: string, week: number | string) => `/learn/${encodeURIComponent(code)}/week/${week}/crossword`,
+  match: (code: string, week: number | string) => `/learn/${encodeURIComponent(code)}/week/${week}/match`,
   games: '/games',
   dailyWord: '/games/daily',
   liveWire: '/livewire',

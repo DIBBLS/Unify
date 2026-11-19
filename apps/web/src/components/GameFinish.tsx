@@ -8,9 +8,9 @@ import { Avatar, type PersonaKey } from './redesign/brand';
 // XP), lets the student share it (phone share sheet, or WhatsApp), and shows
 // the week's leaderboard among students taking the course.
 type Board = Awaited<ReturnType<typeof api.gameBoard>>;
-const NAME = { keywords: 'Keywords', crossword: 'Crossword' } as const;
+const NAME = { keywords: 'Keywords', crossword: 'Crossword', match: 'Match-up' } as const;
 
-export default function GameFinish({ game, course, week, score, terms, hints, seconds }: { game: 'keywords' | 'crossword'; course: string; week: number; score: number; terms: number; hints: number; seconds: number }) {
+export default function GameFinish({ game, course, week, score, terms, hints, seconds }: { game: 'keywords' | 'crossword' | 'match'; course: string; week: number; score: number; terms: number; hints: number; seconds: number }) {
   const [result, setResult] = useState<{ best: number; newBest: boolean; xp: number } | null>(null);
   const [board, setBoard] = useState<Board | null>(null);
   const sent = useRef(false);

@@ -15,6 +15,7 @@ import { Card, Display, Label } from '../../components/redesign/ui';
 import GameFinish from '../../components/GameFinish';
 import { useCheer } from '../../components/Cheer';
 
+import { play } from '../../lib/sound';
 // Keywords: spell the week's key terms from a wheel of letters. Drag across
 // the letters (or tap them one by one, then tap the centre) to make a word.
 // The main word of each level is a term from the notes, with its clue; the
@@ -203,6 +204,7 @@ export default function KeywordsRoute() {
       return out('Bonus word', 'good');
     }
     setShake((n) => n + 1);
+    play('wrong');
     streak.current = 0;
     out('Not in this week’s notes', 'bad');
   };

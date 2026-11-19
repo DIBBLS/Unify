@@ -23,6 +23,9 @@ export default function StreakRoute() {
   if (!act || !stats) return <div style={shell}><SectionSkeleton rows={3} /></div>;
 
   const studied = new Set(act.days.filter((d) => d.xp > 0).map((d) => d.date));
+  // Weekdays a streak freeze covered (one missed weekday in any 7 days is forgiven).
+  const frozen = new Set(act.frozen || []);
+  const lastFreeze = [...frozen].sort().pop();
   // Five rows of seven, oldest first, ending today.
   const days = Array.from({ length: 35 }, (_, i) => {
     const d = new Date(Date.now() - (34 - i) * 86400000);
@@ -37,6 +40,11 @@ export default function StreakRoute() {
         <Label>Your streak</Label>
         <Display size={44}>{act.streak} day{act.streak === 1 ? '' : 's'}</Display>
         <div className="t-13 muted">{act.streak > 0 ? 'Study a little today to keep it going.' : 'Finish one topic today to start a new one.'}</div>
+        {lastFreeze && (
+          <div className="t-13 w-7" style={{ color: 'var(--u-good)' }}>
+            Streak freeze saved your streak on {new Date(`${lastFreeze}T12:00:00`).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' })}.
+          </div>
+        )}
       </Card>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginTop: 12 }}>
@@ -54,13 +62,13 @@ export default function StreakRoute() {
           {days.map((d) => (
             <span
               key={d.key}
-              title={`${d.label}${studied.has(d.key) ? ': studied' : ''}`}
-              aria-label={`${d.label}${studied.has(d.key) ? ', studied' : ''}`}
-              style={{ aspectRatio: '1 / 1', borderRadius: 8, background: studied.has(d.key) ? 'var(--u-green)' : 'var(--surface2)', border: `1px solid ${d.today ? 'var(--text)' : 'var(--border)'}` }}
+              title={`${d.label}${studied.has(d.key) ? ': studied' : frozen.has(d.key) ? ': streak freeze' : ''}`}
+              aria-label={`${d.label}${studied.has(d.key) ? ', studied' : frozen.has(d.key) ? ', streak freeze' : ''}`}
+              style={{ aspectRatio: '1 / 1', borderRadius: 8, background: studied.has(d.key) ? 'var(--u-green)' : frozen.has(d.key) ? '#7dd3fc' : 'var(--surface2)', border: `1px solid ${d.today ? 'var(--text)' : 'var(--border)'}` }}
             />
           ))}
         </div>
-        <div className="t-12 muted">Green means you finished a topic, a quiz or checked in that day.</div>
+        <div className="t-12 muted">Green means you finished a topic, a quiz or checked in that day. Blue is a streak freeze: miss one weekday and your streak is kept, once every 7 days. Weekends never break it.</div>
       </Card>
 
       <Link to="/revision" className="btn btn--amber btn--block" style={{ marginTop: 16 }}>Revise for 5 minutes</Link>

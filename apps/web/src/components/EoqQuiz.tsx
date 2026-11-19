@@ -6,6 +6,8 @@ import { BoxBoy } from './redesign/brand';
 import { MathPlain } from './MathText';
 import { mathsMatches, numberMatches } from '../lib/mathAnswer';
 
+import { play } from '../lib/sound';
+import { sayPraise } from '../lib/welcomeVoice';
 const PASS_PCT = 60;
 
 function mcqCorrectIndex(q: EOQ['questions'][number]): number | null {
@@ -114,6 +116,10 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
     const asked = eoq.questions.map((_, i) => i).filter((i) => gradeable[i]);
     const wrong = asked.filter((i) => !correct[i]);
     api.quizAttempt(course, week, score, total, { asked, wrong }).catch(() => {});
+    // A perfect score gets the fanfare and a spoken "Perfect score" (if voice is on);
+    // a pass gets the fanfare. A miss stays quiet: no sound for falling short.
+    if (asked.length && !wrong.length) { play('finish'); sayPraise('perfect'); }
+    else if (passed) play('finish');
   }, [submitted, done, total, recorded, course, week, score, preview]);
 
   const reset = () => {
@@ -233,6 +239,10 @@ export default function EoqQuiz({ eoq, course, week, preview = false }: { eoq: E
           <div style={{ marginTop: 8 }}>
             <span className={`result-pill ${passed ? 'pill-pass' : 'pill-fail'}`}>{passed ? 'PASSED' : 'NOT YET'}</span>
           </div>
+          {/* The "perfect" reward: every question right. */}
+          {total > 0 && score === total && (
+            <div className="rise" style={{ marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', fontWeight: 900, fontSize: 13 }}>★ Perfect score</div>
+          )}
           <div className="result-score-big">{score}/{total}</div>
           {/* S32: question by question, and how long it took. */}
           <div style={{ display: 'flex', gap: 4, justifyContent: 'center', flexWrap: 'wrap', margin: '8px 0' }} aria-label="Question by question">

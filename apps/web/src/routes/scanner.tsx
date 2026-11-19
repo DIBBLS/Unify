@@ -192,7 +192,7 @@ export default function ScannerRoute() {
             <div style={{ fontSize: 44, fontWeight: 900, letterSpacing: 8, fontFamily: 'var(--font-body)', color: 'var(--u-green)' }} aria-label="Attendance code">
               {reg.session.code}
             </div>
-            <div className="t-13" style={{ opacity: 0.75 }}>Students open My pass in Unify, tap "Online class? Enter the code" and type it. New code in {Math.max(1, Math.ceil(rotateIn / 60))} min.</div>
+            <div className="t-13" style={{ opacity: 0.75 }}>Students open My pass in Unify Learn, tap "Online class? Enter the code" and type it. New code in {Math.max(1, Math.ceil(rotateIn / 60))} min.</div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center', marginTop: 6 }}>
               <button
                 className="btn btn--amber btn--sm"

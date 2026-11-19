@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { BookOpen, ChevronRight, Trash2, MessageCircle } from 'lucide-react';
 import { TermTiles } from '../components/GameIcons';
+import DailyGoal from '../components/DailyGoal';
+import OfflineSaver from '../components/OfflineSaver';
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type Profile, type HomeUpdate } from '../lib/api';
 import { canOpenLink } from '../lib/updateLinks';
@@ -725,6 +727,11 @@ export default function HomeRoute() {
           <div style={{ fontSize: 11, color: 'var(--text2)' }}>Courses</div>
         </div>
       </div>
+
+      {/* Daily goal ring (Settings sets the goal). */}
+      {profile?.role === 'student' && <DailyGoal />}
+      {/* Courses kept on the phone: automatic on Wi-Fi, asks on mobile data. */}
+      {profile?.role === 'student' && <OfflineSaver courses={shown.map((c) => c.course)} />}
 
       {/* Review 3 (C7): class reps get a quiet tools row and Confirm today
           instead of the big "Send a live wire" button and the countdown. */}

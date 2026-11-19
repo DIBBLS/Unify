@@ -423,6 +423,15 @@ export default function LearnPage() {
         <div className="hero-eyebrow">{note.course} · Week {note.week}</div>
         <div className="hero-title"><MathPlain text={note.title} inline /></div>
         {note.subtitle ? <div className="hero-subtitle"><MathPlain text={note.subtitle} inline /></div> : null}
+        {/* Duolingo-style progress through the week: fills as topics are finished. */}
+        {!nonLearner && !previewMode && topics.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10 }} aria-label={`${Math.min(doneCount, topics.length)} of ${topics.length} topics done`}>
+            <div style={{ flex: 1, height: 12, borderRadius: 9999, background: 'rgba(255,255,255,.18)', overflow: 'hidden' }}>
+              <div style={{ width: `${Math.round((Math.min(doneCount, topics.length) / topics.length) * 100)}%`, height: '100%', borderRadius: 9999, background: 'var(--u-green)', transition: 'width .5s cubic-bezier(.34,1.56,.64,1)' }} />
+            </div>
+            <span style={{ fontSize: 12, fontWeight: 800, whiteSpace: 'nowrap' }}>{Math.min(doneCount, topics.length)} of {topics.length}</span>
+          </div>
+        )}
         {note.learningOutcome && (
           <div className="hero-outcome"><strong>Outcome — </strong><MathPlain text={note.learningOutcome} inline /></div>
         )}

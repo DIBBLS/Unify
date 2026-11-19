@@ -133,7 +133,7 @@ export async function saveWeekOffline(course: string, week: number): Promise<voi
   try {
     const list = savedWeeks().filter((w) => !(w.course === code.toUpperCase() && w.week === week));
     list.push({ course: code.toUpperCase(), week });
-    localStorage.setItem(SAVED_KEY, JSON.stringify(list.slice(-30)));
+    localStorage.setItem(SAVED_KEY, JSON.stringify(list.slice(-300)));
   } catch {
     // marker optional; the cached payload is what matters
   }

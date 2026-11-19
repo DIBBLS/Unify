@@ -11,6 +11,7 @@ import { BoxBoy } from '../../components/redesign/brand';
 import { Card, Display, Label } from '../../components/redesign/ui';
 import { useCheer } from '../../components/Cheer';
 
+import { play } from '../../lib/sound';
 // Term of the Day: guess one key term from your course in six tries. Same
 // word for everyone in the course today; the clue from the notes shows after
 // the third guess. Solving it counts as today's study (streak + XP).
@@ -84,7 +85,7 @@ export default function DailyWordRoute() {
 
   const submit = useCallback(() => {
     if (!daily || finished) return;
-    if (typing.length !== answer.length) { setNote(`The word has ${answer.length} letters.`); setShake((n) => n + 1); return; }
+    if (typing.length !== answer.length) { setNote(`The word has ${answer.length} letters.`); setShake((n) => n + 1); play('wrong'); return; }
     const guesses = [...saved.guesses, typing];
     const win = typing === answer;
     const over = win || guesses.length >= MAX_GUESSES;
@@ -92,6 +93,7 @@ export default function DailyWordRoute() {
     setNote('');
     if (win) cheer(guesses.length <= 2 ? 'done' : 'level', { text: guesses.length === 1 ? 'First try!' : guesses.length <= 3 ? 'Brilliant!' : 'Got it!' });
     else if (!over) {
+      play('wrong');
       // Near miss: one letter off.
       const hits = score(typing, answer).filter((m) => m === 'hit').length;
       if (hits === answer.length - 1) setNote('One letter away!');

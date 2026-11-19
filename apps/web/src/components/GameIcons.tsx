@@ -1,4 +1,4 @@
-import { Grid3x3, WholeWord } from 'lucide-react';
+import { Grid3x3, Shuffle, WholeWord } from 'lucide-react';
 
 // One icon per course game, used everywhere the game appears (Home, Games,
 // the course page, the end of a week), so each game is recognisable at a
@@ -8,6 +8,8 @@ import { Grid3x3, WholeWord } from 'lucide-react';
 //  - Term of the Day: guess a word in coloured tiles → the tiles themselves.
 export const KeywordsIcon = WholeWord;
 export const CrosswordIcon = Grid3x3;
+// Match-up: pair terms with meanings → two crossing arrows.
+export const MatchIcon = Shuffle;
 
 // Term of the Day's tiles: a 3×3 of right (green), close (amber) and wrong
 // (grey) letters, like a finished guess board. Meant for dark backgrounds.

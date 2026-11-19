@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { LEADERBOARD } from '../lib/features';
 import { Link, useSearchParams } from 'react-router-dom';
-import { CrosswordIcon, KeywordsIcon, TermTiles } from '../components/GameIcons';
+import { CrosswordIcon, KeywordsIcon, MatchIcon, TermTiles } from '../components/GameIcons';
 import { api } from '../lib/api';
 import { ROUTES } from '../lib/routes';
 import BackButton from '../components/BackButton';
@@ -58,7 +58,7 @@ export default function GamesRoute() {
       <BackButton to={ROUTES.home} />
       <Label>Practice</Label>
       <Display size={28}>Course games</Display>
-      <div className="t-14 muted" style={{ marginTop: 4 }}>Spell the week's key terms in Keywords, or cross them in a Crossword. Every word comes from your notes.</div>
+      <div className="t-14 muted" style={{ marginTop: 4 }}>Spell the week's key terms in Keywords, cross them in a Crossword, or pair them with their meanings in Match-up. Every word comes from your notes.</div>
 
       {/* Term of the Day: one word a day, the same for your whole course. */}
       <Link to={ROUTES.dailyWord} style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, background: 'var(--u-black)', color: '#fff', textDecoration: 'none' }}>
@@ -116,6 +116,7 @@ export default function GamesRoute() {
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 <Link to={ROUTES.keywords(course, w.week)} className="btn btn--green btn--sm"><KeywordsIcon size={15} /> Keywords</Link>
                 <Link to={ROUTES.crossword(course, w.week)} className="btn btn--white btn--sm"><CrosswordIcon size={15} /> Crossword</Link>
+                <Link to={ROUTES.match(course, w.week)} className="btn btn--white btn--sm"><MatchIcon size={15} /> Match-up</Link>
               </div>
             </Card>
           ))}

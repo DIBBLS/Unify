@@ -29,6 +29,7 @@ import { askInstall, isStandalone } from '../lib/install';
 import { announcePicture, resolvePicture } from '../lib/picture';
 import { preparePhoto } from '../lib/image';
 import { Avatar, PERSONAS, type PersonaKey } from '../components/redesign/brand';
+import Badges from '../components/Badges';
 const UUID_RE = /^[0-9a-f-]{36}$/i;
 const LEVELS = ['100 Level', '200 Level', '300 Level', '400 Level', '500 Level'];
 
@@ -554,6 +555,8 @@ export default function MeRoute() {
         )}
       </div>
 
+      {isStudent && <div style={{ marginBottom: 16 }}><Badges /></div>}
+
       {isStudent && (
         <Link
           to={isHoc ? ROUTES.classList : ROUTES.hocRequest}
@@ -784,7 +787,7 @@ export default function MeRoute() {
       )}
       {!isStandalone() && (
         <button className="btn btn--amber btn--block" onClick={askInstall} style={{ marginTop: 16 }}>
-          Install Unify on this device
+          Install Unify Learn on this device
         </button>
       )}
       {!isAdmin && <DeleteAccount onDeleted={() => void doLogout()} />}

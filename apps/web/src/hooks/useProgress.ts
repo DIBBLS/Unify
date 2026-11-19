@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../lib/api';
 
+import { play } from '../lib/sound';
+import { sayPraise } from '../lib/welcomeVoice';
 // Server-backed topic progress, keyed by lecture (Lecture 1 Topic 1 and
 // Lecture 2 Topic 1 are different completions). Nothing is persisted
 // client-side: completed topics load from the API on mount, completion
@@ -34,6 +36,8 @@ export function useProgress(courseCode: string, weekNum: number) {
     (wi: number, ti: number, lecture: number) => {
       if (wi !== weekNum) return;
       const k = key(ti, lecture);
+      // A topic finished for the first time: a chime, and "Nice work" if voice is on.
+      if (!done.has(k)) { play('correct'); sayPraise('topic'); }
       setDone((prev) => {
         if (prev.has(k)) return prev;
         const next = new Set(prev);
@@ -42,7 +46,7 @@ export function useProgress(courseCode: string, weekNum: number) {
       });
       void api.progress(courseCode, weekNum, ti, lecture).catch(() => {});
     },
-    [courseCode, weekNum]
+    [courseCode, weekNum, done]
   );
 
   const isDone = useCallback(

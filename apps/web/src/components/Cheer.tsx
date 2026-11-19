@@ -1,5 +1,7 @@
 import { useCallback, useRef, useState, type ReactNode } from 'react';
 
+import { play } from '../lib/sound';
+import { sayPraise } from '../lib/welcomeVoice';
 // Cheers: a big word that pops over the game when something goes right (a
 // word found, a streak, a level cleared, the whole game done), with a burst
 // of confetti for the big moments and a tiny buzz on phones that allow it.
@@ -27,6 +29,8 @@ export function useCheer(): [ReactNode, (kind: CheerKind, opts?: { text?: string
     const id = Date.now() + Math.random();
     setShown({ id, kind, text: opts?.text || pick(LINES[kind]), sub: opts?.sub });
     try { if (BIG.includes(kind)) navigator.vibrate?.([18, 40, 18]); else navigator.vibrate?.(12); } catch { /* fine */ }
+    play(kind === 'done' || kind === 'level' ? 'finish' : 'correct');
+    if (kind === 'done') sayPraise('game');
     window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => setShown((s) => (s?.id === id ? null : s)), kind === 'done' ? 2200 : 1300);
   }, []);

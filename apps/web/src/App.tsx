@@ -32,6 +32,7 @@ const ClassListRoute = lazyRoute(() => import('./routes/class-list'));
 const GuideRoute = lazyRoute(() => import('./routes/guide'));
 const KeywordsRoute = lazyRoute(() => import('./routes/learn/keywords'));
 const CrosswordRoute = lazyRoute(() => import('./routes/learn/crossword'));
+const MatchRoute = lazyRoute(() => import('./routes/learn/match'));
 const GamesRoute = lazyRoute(() => import('./routes/games'));
 const DailyWordRoute = lazyRoute(() => import('./routes/learn/daily-word'));
 const LiveWireRoute = lazyRoute(() => import('./routes/livewire'));
@@ -227,6 +228,7 @@ function RouteMeta() {
       () => import('./routes/games'),
       () => import('./routes/learn/keywords'),
       () => import('./routes/learn/crossword'),
+      () => import('./routes/learn/match'),
     ]);
   }, [pathname]);
   return null;
@@ -401,6 +403,7 @@ export default function App() {
           <Route path="/guide" element={<RequireAuth><GuideRoute /></RequireAuth>} />
           <Route path="/learn/:courseCode/week/:week/keywords" element={<RequireAuth><KeywordsRoute /></RequireAuth>} />
           <Route path="/learn/:courseCode/week/:week/crossword" element={<RequireAuth><CrosswordRoute /></RequireAuth>} />
+          <Route path="/learn/:courseCode/week/:week/match" element={<RequireAuth><MatchRoute /></RequireAuth>} />
           <Route path={ROUTES.games} element={<RequireAuth><GamesRoute /></RequireAuth>} />
           <Route path={ROUTES.dailyWord} element={<RequireAuth><DailyWordRoute /></RequireAuth>} />
           <Route path={ROUTES.liveWire} element={<RequireAuth><LiveWireRoute /></RequireAuth>} />

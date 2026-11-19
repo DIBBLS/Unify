@@ -27,7 +27,7 @@ export default function AdminLiveWire() {
       </div>
       <LiveWire style={{ margin: 0 }} />
       <div style={{ ...card, overflow: 'hidden' }}>
-        <div style={{ padding: '12px 12px 4px', fontSize: 12, fontWeight: 800 }}>Running across Unify{running ? ` · ${running.length}` : ''}</div>
+        <div style={{ padding: '12px 12px 4px', fontSize: 12, fontWeight: 800 }}>Running across Unify Learn{running ? ` · ${running.length}` : ''}</div>
         {running === null && <div style={{ padding: '8px 12px 12px', fontSize: 13, color: 'var(--text2)' }}>Loading…</div>}
         {running && running.length === 0 && <div style={{ padding: '8px 12px 12px', fontSize: 13, color: 'var(--text2)' }}>No live wires running right now.</div>}
         {(running || []).map((w) => (

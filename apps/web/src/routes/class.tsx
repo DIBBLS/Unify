@@ -23,6 +23,9 @@ export default function ClassRoute() {
   // The running semester's teaching weeks are over: the next one opens.
   const [semEnded, setSemEnded] = useState(false);
   const [enrolledSet, setEnrolledSet] = useState<Set<string>>(new Set());
+  // The courses the student had when the page opened go first in every list.
+  // Taken once, so a row doesn't jump away while they add or remove it.
+  const [firstMine, setFirstMine] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setErrorState] = useState('');
@@ -59,6 +62,7 @@ export default function ClassRoute() {
         ]);
         if (me.profile?.level) setMyLevel(me.profile.level);
         setEnrolledSet(new Set((me.courses || []).map((c) => c.toUpperCase())));
+        setFirstMine(new Set((me.courses || []).map((c) => c.toUpperCase())));
         if (settings.currentSemester) setActiveSemester(settings.currentSemester);
         setSemEnded(!!(settings as { semesterEnded?: boolean }).semesterEnded);
         const list = (await api.courses()).filter((c) => c.code && c.code.trim());
@@ -112,7 +116,9 @@ export default function ClassRoute() {
   const SEMS = ['First Semester', 'Second Semester'];
   const inLevel = (l: string) => courses.filter((c) => levelOf(c).includes(l));
   const inSem = (l: string, sem: string) => inLevel(l).filter((c) => c.semesters.includes(sem));
-  const shown = results !== null ? results : [];
+  // Added courses first, then the rest, each group in its usual order.
+  const addedFirst = (list: CatalogCourse[]) => [...list].sort((a, b) => Number(firstMine.has(b.code.toUpperCase())) - Number(firstMine.has(a.code.toUpperCase())));
+  const shown = addedFirst(results !== null ? results : []);
   const opened = openLevel ?? (mine && inLevel(mine).length ? mine : null);
   const short = (l: string) => l.replace(/ Level$/, 'L');
   const addedIn = (list: CatalogCourse[]) => list.filter((c) => enrolledSet.has(c.code.toUpperCase())).length;
@@ -247,7 +253,7 @@ export default function ClassRoute() {
             const isOpen = opened === l;
             const lockedLevel = levelLock(l) && LEVELS.indexOf(l) > mineIdx ? levelLock(l) : null;
             const sem = semOf[l] || (inSem(l, activeSemester).length ? activeSemester : SEMS.find((x) => inSem(l, x).length) || activeSemester);
-            const semList = inSem(l, sem);
+            const semList = addedFirst(inSem(l, sem));
             const semsHere = SEMS.filter((x) => inSem(l, x).length);
             return (
               <div key={l} style={{ background: 'var(--surface)', border: `1px solid ${l === mine ? 'var(--u-good)' : 'var(--border)'}`, borderRadius: 16, overflow: 'hidden', opacity: list.length ? 1 : 0.5 }}>

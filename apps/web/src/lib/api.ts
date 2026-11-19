@@ -791,9 +791,9 @@ export const api = {
     apiFetch<{ played: number; solved: number; mine: { guesses: number; solved: boolean } | null }>(`/v1/games/daily?course=${encodeURIComponent(course)}&day=${day}`),
   dailyWordSave: (payload: { course: string; day: string; word: string; guesses: number; solved: boolean }) =>
     apiFetch<{ ok: boolean; first: boolean; xp: number; solved: number }>('/v1/games/daily', { method: 'POST', body: JSON.stringify(payload) }, 0),
-  gameScore: (payload: { game: 'keywords' | 'crossword'; course: string; week: number; score: number; terms: number; hints: number; seconds: number }) =>
+  gameScore: (payload: { game: 'keywords' | 'crossword' | 'match'; course: string; week: number; score: number; terms: number; hints: number; seconds: number }) =>
     apiFetch<{ ok: boolean; best: number; newBest: boolean; xp: number }>('/v1/games/score', { method: 'POST', body: JSON.stringify(payload) }),
-  gameBoard: (q: { course: string; week?: number; game?: 'keywords' | 'crossword' }) =>
+  gameBoard: (q: { course: string; week?: number; game?: 'keywords' | 'crossword' | 'match' }) =>
     apiFetch<{ players: number; top: { rank: number; name: string; persona: string | null; score: number; terms: number; me: boolean }[]; me: { rank: number; score: number; terms: number } | null }>(
       `/v1/games/leaderboard?course=${encodeURIComponent(q.course)}${q.week ? `&week=${q.week}` : ''}${q.game ? `&game=${q.game}` : ''}`
     ),
@@ -863,7 +863,7 @@ export const api = {
     apiFetch<{ courses: Record<string, { done: number; topics: number }> }>(`/v1/my-progress/summary?courses=${encodeURIComponent(courses.join(','))}`),
   myCourseProgress: (course: string) =>
     apiFetch<{ course: string; lecturers?: { id: string; name: string }[]; namedLecturers?: string[]; weeks: { week: number; title: string; topics: number; topicTitles: string[]; done: number; quiz: { best: number; total: number; attempts: number } | null; hasQuiz: boolean }[] }>(`/v1/courses/${encodeURIComponent(course)}/my-progress`),
-  learnActivity: (days = 35) => apiFetch<{ days: { date: string; xp: number }[]; active?: string[]; streak: number; longest: number }>(`/v1/learn/activity?days=${days}`),
+  learnActivity: (days = 35) => apiFetch<{ days: { date: string; xp: number }[]; active?: string[]; frozen?: string[]; streak: number; longest: number }>(`/v1/learn/activity?days=${days}`),
   revision: (limit = 10, course?: string) =>
     apiFetch<{ cards: { course: string; week: number; topic: string; question: string; answer: string; badge: string }[]; available: number }>(`/v1/learn/revision?limit=${limit}${course ? `&course=${encodeURIComponent(course)}` : ''}`),
   // Content reports: students' "Report a problem", lecturers' "Review this week"
