@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { LEADERBOARD } from '../lib/features';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Gamepad2, Grid3x3 } from 'lucide-react';
+import { CrosswordIcon, KeywordsIcon, TermTiles } from '../components/GameIcons';
 import { api } from '../lib/api';
 import { ROUTES } from '../lib/routes';
 import BackButton from '../components/BackButton';
@@ -62,9 +62,7 @@ export default function GamesRoute() {
 
       {/* Term of the Day: one word a day, the same for your whole course. */}
       <Link to={ROUTES.dailyWord} style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, background: 'var(--u-black)', color: '#fff', textDecoration: 'none' }}>
-        <span style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 12px)', gap: 3, flexShrink: 0 }} aria-hidden="true">
-          {['var(--u-green)', 'var(--u-amber)', '#8a8a8a', '#8a8a8a', 'var(--u-green)', 'var(--u-amber)', 'var(--u-green)', 'var(--u-green)', 'var(--u-green)'].map((c, i) => <span key={i} style={{ width: 12, height: 12, borderRadius: 3, background: c }} />)}
-        </span>
+        <TermTiles />
         <span style={{ flex: 1 }}>
           <span style={{ display: 'block', fontWeight: 800, fontSize: 15 }}>Term of the Day</span>
           <span style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,.7)' }}>Guess today's key term in 6 tries. Same word for your whole course.</span>
@@ -116,8 +114,8 @@ export default function GamesRoute() {
                 <div className="t-15 w-7" style={{ marginTop: 2 }}>{w.title || `Week ${w.week}`}</div>
               </div>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <Link to={ROUTES.keywords(course, w.week)} className="btn btn--green btn--sm"><Gamepad2 size={15} /> Keywords</Link>
-                <Link to={ROUTES.crossword(course, w.week)} className="btn btn--white btn--sm"><Grid3x3 size={15} /> Crossword</Link>
+                <Link to={ROUTES.keywords(course, w.week)} className="btn btn--green btn--sm"><KeywordsIcon size={15} /> Keywords</Link>
+                <Link to={ROUTES.crossword(course, w.week)} className="btn btn--white btn--sm"><CrosswordIcon size={15} /> Crossword</Link>
               </div>
             </Card>
           ))}

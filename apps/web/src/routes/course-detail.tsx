@@ -14,6 +14,7 @@ import Loading from '../components/Loading';
 import CourseAttendance from '../components/CourseAttendance';
 import { PracticeRunner } from '../components/PracticeQuestions';
 import { CourseActions, LecturersCard, MatricPrompt, MarksLegend, WeekCard, attendanceByWeek, weekClasses, type ClassMark } from '../components/CoursePageParts';
+import { CrosswordIcon, KeywordsIcon } from '../components/GameIcons';
 import type { CourseAttendance as AttendanceData, CourseLecturers } from '../lib/api';
 
 // Week of the semester from the profile's semester start (0 = not set / outside it).
@@ -344,7 +345,7 @@ function Practice({ course, progress, preview }: { course: string; progress: Pro
       {(progress || []).length > 0 && (
         <div style={{ ...box, display: 'flex', flexDirection: 'column', gap: 8 }}>
           <span>
-            <span style={{ display: 'block', fontWeight: 700 }}>Keywords</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700 }}><KeywordsIcon size={16} /> Keywords</span>
             <span style={{ fontSize: 12, color: 'var(--text2)' }}>Spell each week's key terms from a wheel of letters, with clues from the notes.</span>
           </span>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -357,7 +358,7 @@ function Practice({ course, progress, preview }: { course: string; progress: Pro
       {(progress || []).length > 0 && (
         <div style={{ ...box, display: 'flex', flexDirection: 'column', gap: 8 }}>
           <span>
-            <span style={{ display: 'block', fontWeight: 700 }}>Crossword</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700 }}><CrosswordIcon size={16} /> Crossword</span>
             <span style={{ fontSize: 12, color: 'var(--text2)' }}>The week's key terms crossing each other, with clues from the notes.</span>
           </span>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>

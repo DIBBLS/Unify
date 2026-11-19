@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { LEADERBOARD } from '../lib/features';
-import { Gamepad2, Grid3x3, Trophy } from 'lucide-react';
+import { Trophy } from 'lucide-react';
+import { CrosswordIcon, KeywordsIcon } from './GameIcons';
 import { ROUTES } from '../lib/routes';
 import GameLeaderboard from './GameLeaderboard';
 
@@ -14,8 +15,8 @@ export default function PracticeGames({ course, week }: { course: string; week: 
         <div style={{ fontSize: 14, marginTop: 4, color: 'var(--text2)' }}>Lock in this week's key terms with a quick game. Every word comes from these notes.</div>
       </div>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        <Link to={ROUTES.keywords(course, week)} className="btn btn--green btn--sm"><Gamepad2 size={15} /> Keywords</Link>
-        <Link to={ROUTES.crossword(course, week)} className="btn btn--white btn--sm"><Grid3x3 size={15} /> Crossword</Link>
+        <Link to={ROUTES.keywords(course, week)} className="btn btn--green btn--sm"><KeywordsIcon size={15} /> Keywords</Link>
+        <Link to={ROUTES.crossword(course, week)} className="btn btn--white btn--sm"><CrosswordIcon size={15} /> Crossword</Link>
       </div>
       {LEADERBOARD && <GameLeaderboard course={course} week={week} limit={3} />}
       <Link to={`${ROUTES.games}?course=${encodeURIComponent(course)}`} style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 13, fontWeight: 700, color: 'var(--u-good)', textDecoration: 'none' }}>

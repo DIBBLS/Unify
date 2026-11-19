@@ -3,7 +3,8 @@ import { prefetchDaily } from '../lib/dailyword';
 import { CGPA_TARGET } from '../lib/features';
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { BookOpen, ChevronRight, Gamepad2, Trash2, MessageCircle } from 'lucide-react';
+import { BookOpen, ChevronRight, Trash2, MessageCircle } from 'lucide-react';
+import { TermTiles } from '../components/GameIcons';
 import { supabaseBrowser } from '../lib/supabase';
 import { api, type Profile, type HomeUpdate } from '../lib/api';
 import { canOpenLink } from '../lib/updateLinks';
@@ -742,7 +743,7 @@ export default function HomeRoute() {
       {/* Review 3: the course games get their own clear spot on Home. */}
       {profile?.role === 'student' && shown.length > 0 && (
         <div style={{ margin: '0 16px 12px', display: 'flex', gap: 12, alignItems: 'center', background: 'var(--u-black)', borderRadius: 12, padding: 14, color: '#fff' }}>
-          <span style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--u-green)', color: 'var(--u-black)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Gamepad2 size={22} /></span>
+          <span style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><TermTiles size={11} /></span>
           <Link to={ROUTES.dailyWord} style={{ flex: 1, color: 'inherit', textDecoration: 'none' }}>
             <span style={{ display: 'block', fontWeight: 800, fontSize: 14 }}>Term of the Day</span>
             <span style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,.7)' }}>Guess today's key term from your notes in 6 tries</span>
