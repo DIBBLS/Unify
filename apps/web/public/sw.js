@@ -11,7 +11,10 @@ const BUILD = '__BUILD_ID__';
 const CACHE = 'unify-app-' + BUILD;
 const CONTENT = 'unify-content-v1';
 const API_CACHE = 'unify-api-v1';
-const API_WAIT_MS = 4000;
+// With a saved copy, wait this long for fresh data before showing the copy
+// (the fresh answer still updates the cache for next time). 2 s keeps repeat
+// visits quick on slow networks.
+const API_WAIT_MS = 2000;
 // Never replayed from cache: live data, one-time actions, admin tooling, and
 // class lists (names + matric numbers stay off the device and are always current).
 // Revision and progress must reflect the topic you just finished, never an older copy.

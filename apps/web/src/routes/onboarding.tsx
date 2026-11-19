@@ -76,10 +76,6 @@ export default function OnboardingRoute() {
   const [gradTarget, setGradTarget] = useState<number | null>(null);
   const daypart = localGreeting().text;
   const [activeSemester, setActiveSemester] = useState('First Semester');
-  const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
-  const [availableCourses, setAvailableCourses] = useState<{ code: string; title: string }[]>([]);
-  const [coursesLoading, setCoursesLoading] = useState(false);
-
   useEffect(() => {
     const sb = supabaseBrowser();
     if (!sb) {
@@ -160,7 +156,6 @@ export default function OnboardingRoute() {
         department,
         level: staffSetup ? null : level,
         semester: activeSemester,
-        courses: staffSetup ? [] : selectedCourses,
         ...overrides,
       };
       if (university?.id && UUID_RE.test(university.id)) payload.universityId = university.id;
@@ -175,66 +170,6 @@ export default function OnboardingRoute() {
     }
   };
 
-  // Courses step is students-only now: staff levels + courses are assigned
-  // by admins on approval, never self-picked during onboarding.
-  useEffect(() => {
-    const showCourses = step === 6 && (role === 'student' || !role);
-    if (!showCourses || !level) {
-      if (showCourses) setAvailableCourses([]);
-      return;
-    }
-    let cancelled = false;
-    setCoursesLoading(true);
-    api
-      .courses(level, activeSemester)
-      .then((list) => {
-        if (!cancelled) setAvailableCourses(list.map((c) => ({ code: c.code, title: c.title })));
-      })
-      .catch(() => {
-        if (!cancelled) setAvailableCourses([]);
-      })
-      .finally(() => {
-        if (!cancelled) setCoursesLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [step, role, level, activeSemester]);
-
-  const toggleCourse = (code: string) =>
-    setSelectedCourses((prev) => (prev.includes(code) ? prev.filter((x) => x !== code) : [...prev, code]));
-
-  const semesterNote = (
-    <div style={{ fontSize: 12, color: 'var(--text2)' }}>
-      Active semester: <strong>{activeSemester}</strong> (set by admin)
-    </div>
-  );
-
-  const courseList = coursesLoading ? (
-    <div style={{ fontSize: 13, color: 'var(--text2)', textAlign: 'center', padding: 12 }}>Loading courses…</div>
-  ) : availableCourses.length === 0 ? (
-    <div style={{ fontSize: 13, color: 'var(--text2)', textAlign: 'center', padding: 12 }}>No courses found for this level and semester yet.</div>
-  ) : (
-    availableCourses.map((c) => {
-      const on = selectedCourses.includes(c.code);
-      return (
-        <button
-          key={c.code}
-          onClick={() => toggleCourse(c.code)}
-          style={{ padding: 12, border: `1px solid ${on ? 'var(--u-good)' : 'var(--border)'}`, borderRadius: 12, background: on ? 'var(--u-good-tint)' : 'var(--surface)', textAlign: 'left', display: 'flex', gap: 8, alignItems: 'center' }}
-        >
-          <span style={{ width: 20, height: 20, borderRadius: 6, border: `1px solid ${on ? 'var(--u-good)' : 'var(--border)'}`, background: on ? 'var(--u-amber)' : 'var(--surface)', color: 'var(--u-black)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800 }}>
-            {on ? '✓' : ''}
-          </span>
-          <span>
-            <span style={{ fontWeight: 700, display: 'block', fontSize: 14 }}>{c.code}</span>
-            <span style={{ fontSize: 12, color: 'var(--text2)' }}>{c.title}</span>
-          </span>
-        </button>
-      );
-    })
-  );
-
   if (loading) return <FormSkeleton />;
 
   const STEP_TITLES = [
@@ -243,14 +178,15 @@ export default function OnboardingRoute() {
     "What's your faculty?",
     'Which department?',
     'What level are you in?',
-    'Which courses are you taking?',
     "What's your graduation target?",
   ];
-  // Steps run from 1. Students get 7 (name, uni, faculty, dept, level,
-  // courses, target); staff stop after 4 (name, uni, faculty, dept).
+  // Steps run from 1. Students get 6 (name, uni, faculty, dept, level,
+  // target); staff stop after 4 (name, uni, faculty, dept). Nobody picks
+  // courses: the server enrolls students in their class's courses for the
+  // semester (lib/classCourses), so a student finishes on their level.
   // Review 3: the degree-class (CGPA) target step is hidden until setting it
-  // works properly, so students finish after their courses (step 6).
-  const totalSteps = role === 'student' || !role ? (CGPA_TARGET ? 7 : 6) : 4;
+  // works properly, so students finish after their level (step 5).
+  const totalSteps = role === 'student' || !role ? (CGPA_TARGET ? 6 : 5) : 4;
   const shownStep = Math.min(step, totalSteps);
   const left = { s: `Step ${shownStep} of ${totalSteps}`, t: STEP_TITLES[shownStep - 1] };
 
@@ -304,22 +240,17 @@ export default function OnboardingRoute() {
             {d.name} <span style={{ color: 'var(--text2)', fontSize: 12 }}>{d.sub}</span>
           </button>
         ))}
-        {step === 5 && (role === 'student' || !role) && levels.map((l) => (
-          <button key={l} onClick={() => { setLevel(l); setStep(6); }} style={{ padding: 14, border: '1px solid var(--border)', borderRadius: 12, background: level === l ? 'var(--u-good-tint)' : 'var(--surface)' }}>{l}</button>
-        ))}
-        {step === 6 && (role === 'student' || !role) && (
+        {step === 5 && (role === 'student' || !role) && (
           <>
-            <div style={{ fontSize: 13, color: 'var(--text2)' }}>Level: <strong>{level || '—'}</strong></div>
-            {semesterNote}
-            {courseList}
-            <div style={STICKY}>
-            <button onClick={() => { if (CGPA_TARGET) setStep(7); else void save(true); }} style={{ width: '100%', padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8 }}>
-              Continue <ArrowRight size={18} />
-            </button>
+            {levels.map((l) => (
+              <button key={l} onClick={() => { setLevel(l); if (CGPA_TARGET) setStep(6); else void save(true, { level: l }); }} style={{ padding: 14, border: '1px solid var(--border)', borderRadius: 12, background: level === l ? 'var(--u-good-tint)' : 'var(--surface)' }}>{l}</button>
+            ))}
+            <div style={{ fontSize: 13, color: 'var(--text2)', textAlign: 'center' }}>
+              Your courses are added for you: your department's {activeSemester.toLowerCase()} courses for your level.
             </div>
           </>
         )}
-        {step === 7 && (
+        {step === 6 && (
           <>
             {[
               { label: 'First Class', val: 4.5 },

@@ -460,7 +460,10 @@ export default function LearnPage() {
       )}
 
       {lectures.length > 1 && (
-        <div className="segbar" role="tablist" aria-label="Week lectures" style={{ marginBottom: 8 }}>
+        <div style={{ fontSize: 12, color: 'var(--text2)', margin: '0 0 6px' }}>This week's content comes in {lectures.length} parts. They're parts of one week, not separate classes.</div>
+      )}
+      {lectures.length > 1 && (
+        <div className="segbar" role="tablist" aria-label="Week parts" style={{ marginBottom: 8 }}>
           {lectures.map((lec) => {
             const n = topics.filter((t) => (t.lecture || 1) === lec).length;
             return (
@@ -468,19 +471,19 @@ export default function LearnPage() {
                 key={lec}
                 role="tab"
                 aria-selected={lec === selLecture}
-                title={`Lecture ${lec} · ${n} topic${n === 1 ? '' : 's'}`}
+                title={`Part ${lec} · ${n} topic${n === 1 ? '' : 's'}`}
                 className={lec === selLecture ? 'current' : ''}
                 onClick={() => goLecture(lec)}
                 style={{ flex: 1 }}
               >
-                Lecture {lec}
+                Part {lec}
               </button>
             );
           })}
         </div>
       )}
       {tabCount > 1 && (
-        <div ref={headerRef} className="segbar" role="tablist" aria-label={lectures.length > 1 ? `Lecture ${selLecture} chapters` : 'Week chapters'}>
+        <div ref={headerRef} className="segbar" role="tablist" aria-label={lectures.length > 1 ? `Part ${selLecture} chapters` : 'Week chapters'}>
           {classTopics.map((t) => {
             const done = isDone(weekNum, t.number, selLecture);
             const idx = classTopics.indexOf(t);
@@ -554,8 +557,8 @@ export default function LearnPage() {
         const li = lectures.indexOf(selLecture);
         const atFirst = tab === 0 && li === 0;
         const atLast = tab >= tabCount - 1 && li === lectures.length - 1;
-        const nextLabel = tab < tabCount - 1 ? null : li < lectures.length - 1 ? `Lecture ${lectures[li + 1]}` : null;
-        const backLabel = tab > 0 ? null : li > 0 ? `Lecture ${lectures[li - 1]}` : null;
+        const nextLabel = tab < tabCount - 1 ? null : li < lectures.length - 1 ? `Part ${lectures[li + 1]}` : null;
+        const backLabel = tab > 0 ? null : li > 0 ? `Part ${lectures[li - 1]}` : null;
         return (
           <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
             <button

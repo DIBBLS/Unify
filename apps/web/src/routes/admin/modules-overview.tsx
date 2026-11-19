@@ -73,7 +73,7 @@ export default function ModulesOverview({ openModule }: { openModule: (id: strin
             <ChevronRight size={14} color="var(--u-warn-ink)" />
           </div>
           <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4, lineHeight: 1.5 }}>
-            The Second Semester's {data.calendar.weeks} teaching weeks are over. Promote everyone one level (their next level's courses unlock), then set the new session's First Semester and its start date.
+            The Second Semester's {data.calendar.weeks} teaching weeks are over. Promote everyone one level: the new session starts on its First Semester and each student is put on their new level's courses. Then set the start date.
           </div>
         </button>
       )}

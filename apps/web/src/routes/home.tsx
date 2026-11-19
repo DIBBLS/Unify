@@ -87,16 +87,35 @@ function semesterWeekOf(start?: string | null, weeks?: number | null): { week: n
 // Box Boy avatar, code (+ PRIORITY for another level's course), title, lecturer,
 // an In progress / Not started / Done pill, a progress bar of topics done, and
 // where the semester is. The whole card opens the course.
+// Every card asks for its progress in the same render; the asks are gathered
+// and sent as one request instead of one per card. If the server doesn't have
+// the combined endpoint yet, each card falls back to its own request.
+type Prog = { done: number; topics: number };
+let progQueue: { course: string; resolve: (p: Prog | null) => void }[] = [];
+function loadProgress(course: string): Promise<Prog | null> {
+  return new Promise((resolve) => {
+    progQueue.push({ course, resolve });
+    if (progQueue.length > 1) return;
+    window.setTimeout(() => {
+      const batch = progQueue;
+      progQueue = [];
+      const one = (c: string) => api.myCourseProgress(c)
+        .then((r) => ({ done: r.weeks.reduce((s, w) => s + w.done, 0), topics: r.weeks.reduce((s, w) => s + w.topics, 0) }))
+        .catch(() => null);
+      api.progressSummary([...new Set(batch.map((b) => b.course))])
+        .then((r) => batch.forEach((b) => b.resolve(r.courses[b.course.toUpperCase()] || r.courses[b.course] || { done: 0, topics: 0 })))
+        .catch(() => batch.forEach((b) => void one(b.course).then(b.resolve)));
+    }, 0);
+  });
+}
+
 function CourseCard({ index, course, title, staff, priority, semWeek }: {
   index: number; course: string; title: string; staff: { name: string; avatar: string; persona?: string }[]; priority: boolean; semWeek: { week: number; total: number };
 }) {
   const [prog, setProg] = useState<{ done: number; topics: number } | null>(null);
   useEffect(() => {
     let gone = false;
-    api.myCourseProgress(course).then((r) => {
-      if (gone) return;
-      setProg({ done: r.weeks.reduce((s, w) => s + w.done, 0), topics: r.weeks.reduce((s, w) => s + w.topics, 0) });
-    }).catch(() => {});
+    void loadProgress(course).then((p) => { if (!gone && p) setProg(p); });
     return () => { gone = true; };
   }, [course]);
   const pct = prog && prog.topics ? Math.min(1, prog.done / prog.topics) : 0;
@@ -116,10 +135,19 @@ function CourseCard({ index, course, title, staff, priority, semWeek }: {
         <div style={{ display: 'flex', flex: 1, minWidth: 0 }}>
           {(staff.length ? staff : [{ name: '', avatar: '', persona: '' }]).slice(0, 3).map((s, si) => {
             const pic = resolvePicture({ avatar_url: s.avatar, box_boy_persona: s.persona });
+            // A lecturer's own photo or chosen Box Boy is their profile picture.
+            // No lecturer (or no picture): a plain course icon, never a stand-in Box Boy.
+            if (pic.kind === 'none') {
+              return (
+                <span key={si} title={s.name || undefined} style={{ width: 34, height: 34, borderRadius: '50%', border: '2px solid var(--surface)', marginLeft: si === 0 ? 0 : -12, background: 'var(--u-good-tint)', color: 'var(--u-good)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <BookOpen size={16} />
+                </span>
+              );
+            }
             return (
               <img
                 key={si}
-                src={pic.kind !== 'none' ? pic.src : PERSONAS[2].img}
+                src={pic.src}
                 alt=""
                 title={s.name || undefined}
                 width={34}
@@ -442,7 +470,9 @@ export default function HomeRoute() {
             api.adminActivity().then(setActivity).catch(() => {}),
           );
         }
-        await Promise.all(panels);
+        // Panels fill in as they arrive: Home no longer waits an extra round
+        // trip (role request, author/admin panels) before showing anything.
+        void Promise.all(panels);
       } catch {
         setLoadError("Couldn't load your profile. Check your connection and try again.");
       } finally {

@@ -553,8 +553,8 @@ export default function StudioRoute() {
       });
       setSuccess(
         mode === 'replace'
-          ? `${meta.course} · Week ${meta.week} · Lecture ${lecture} Topic ${topicNumber} replaced as fresh v${res.version}. Old versions are gone.`
-          : `${meta.course} · Week ${meta.week} · Lecture ${lecture} Topic ${topicNumber} saved as v${res.version}. Old versions are kept.`
+          ? `${meta.course} · Week ${meta.week} · Part ${lecture} Topic ${topicNumber} replaced as fresh v${res.version}. Old versions are gone.`
+          : `${meta.course} · Week ${meta.week} · Part ${lecture} Topic ${topicNumber} saved as v${res.version}. Old versions are kept.`
       );
     } catch (err) {
       const code = (err as { code?: string })?.code;
@@ -564,7 +564,7 @@ export default function StudioRoute() {
           kind: 'topic',
           topic: topicNumber,
           lecture,
-          summary: `Lecture ${lecture} Topic ${topicNumber} already published (${(existing?.versions || []).map((v) => `v${v}`).join(', ') || 'existing versions'})${existing?.title ? ` — ${existing.title}` : ''}.`,
+          summary: `Part ${lecture} Topic ${topicNumber} already published (${(existing?.versions || []).map((v) => `v${v}`).join(', ') || 'existing versions'})${existing?.title ? ` — ${existing.title}` : ''}.`,
         });
         return;
       }
@@ -900,7 +900,7 @@ export default function StudioRoute() {
               // 10 questions, at least 6 multiple choice; the rest fill-in, number or maths.
               const quizOk = note.eoq.questions.length === 10 && mcq >= 6;
               const rows: { ok: boolean; text: string }[] = [
-                { ok: note.topics.length > 0, text: `${note.topics.length} topic${note.topics.length === 1 ? '' : 's'} in Lecture${lectures.length === 1 ? '' : 's'} ${lectures.join(', ')}` },
+                { ok: note.topics.length > 0, text: `${note.topics.length} topic${note.topics.length === 1 ? '' : 's'} in Part${lectures.length === 1 ? '' : 's'} ${lectures.join(', ')}` },
                 { ok: quizOk, text: quizOk ? `Quiz complete: 10 questions (${mcq} multiple choice + ${fitb} written)` : `Quiz short: ${note.eoq.questions.length}/10 (${mcq} multiple choice + ${fitb} written; needs 10 with at least 6 multiple choice)` },
                 { ok: diagramsBare === 0, text: diagrams.length ? (diagramsBare ? `${diagramsBare} diagram${diagramsBare === 1 ? '' : 's'} still need${diagramsBare === 1 ? 's' : ''} uploaded images` : `All ${diagrams.length} diagrams have images`) : 'No diagrams called for' },
                 { ok: true, text: `${formulas} formula${formulas === 1 ? '' : 's'} — open each Reader preview to confirm the render` },
@@ -960,7 +960,7 @@ export default function StudioRoute() {
                       <div style={{ borderTop: '1px solid var(--border)', padding: 12 }}>
                         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
                           <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text2)' }}>
-                            Lecture {(t.lecture || 1)} · Topic {t.number}
+                            Part {(t.lecture || 1)} · Topic {t.number}
                           </span>
                           <Drop
                             value={String(t.lecture || 1)}
@@ -974,9 +974,9 @@ export default function StudioRoute() {
                               });
                               setValidation(null);
                             }}
-                            label={`Lecture for Topic ${t.number}`}
+                            label={`Part for Topic ${t.number}`}
                             style={{ width: 108, flexShrink: 0 }}
-                            options={[1, 2, 3].map((l) => ({ value: String(l), label: `Lecture ${l}` }))}
+                            options={[1, 2, 3].map((l) => ({ value: String(l), label: `Part ${l}` }))}
                           />
                         </div>
                         <TopicSlice topic={t} />
@@ -985,7 +985,7 @@ export default function StudioRoute() {
                           disabled={publishingTopic !== null}
                           style={{ marginTop: 6, padding: '8px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: 'var(--u-good)' }}
                         >
-                          {publishingTopic === t.number ? 'Publishing…' : `Publish only Lecture ${t.lecture || 1} Topic ${t.number}`}
+                          {publishingTopic === t.number ? 'Publishing…' : `Publish only Part ${t.lecture || 1} Topic ${t.number}`}
                         </button>
                       </div>
                     )}

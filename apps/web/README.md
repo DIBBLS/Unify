@@ -33,7 +33,10 @@ src/
   components/    shared UI; redesign/ holds the design-system pieces (HomeHero, UpdatesSlider, brand, ui)
   lib/           api (typed client), supabase (per-tab sessions), push + pushHelp (notification permission help),
                  image (photo prep), autoUpdate (PWA updates), katex (on-demand math), offline (write queue),
-                 cgpa (strict validation + planner math), vitals (Web Vitals), qrscan, naija (greetings, proverbs, facts)
+                 cgpa (strict validation + planner math), vitals (Web Vitals), qrscan, naija (greetings, proverbs, facts),
+                 dialog (askConfirm / askText: the app's own dialogs), features (switches for hidden features),
+                 wordgame + crossword + dailyword (game terms from the notes, Term of the Day), openLink (where a
+                 notification's link goes), reminders
   styles/redesign/   tokens.css, ui.css (buttons, chips), motion.css (all animation), african.css, boxboy-motion.css
 public/          sw.js (offline + cache), manifest.json, icons/, boxboy/ (mascot poses)
 ```
@@ -48,7 +51,10 @@ public/          sw.js (offline + cache), manifest.json, icons/, boxboy/ (mascot
 - **Pictures.** Profile photos and attendance selfies go through `lib/image.ts` (square crop, upright, white behind transparency, under 60 to 70 KB).
 - **CGPA.** Always use `validateCGPA` and `cleanCgpaInput` from `lib/cgpa.ts`; a CGPA is 0.00 to 5.00 with at most two decimals.
 - **Selectors** use the `Drop` overlay, never a native `<select>` (the admin phone section picker is the one deliberate exception).
-- **Confirmations** use `ConfirmModal`, never `window.confirm`.
+- **Confirmations and prompts** use `askConfirm` / `askText` from `lib/dialog.tsx` (rendered by `<DialogHost />` in `App.tsx`), or `ConfirmModal` directly. Never `window.confirm`, `window.prompt` or `window.alert`.
+- **Hidden features** are switches in `lib/features.ts` (`CGPA_TARGET`, `LEADERBOARD`), not deleted code.
+- **Main buttons stay on screen** in onboarding: wrap them in the `STICKY` bar from `components/redesign/ui.tsx`.
+- **Naming.** The app is "Unify Learn" in every piece of text people see, never "Unify" on its own. No hard-coded counts ("3 questions") unless the activity really has them.
 - **Hooks** live above early returns.
 
 ## Self-updating PWA
@@ -61,10 +67,15 @@ public/          sw.js (offline + cache), manifest.json, icons/, boxboy/ (mascot
 |---|---|---|
 | `/auth`, `/welcome` | public | Sign in or up, intro slides |
 | `/onboarding` | signed in | Role-first setup |
-| `/home` | signed in | Greeting, CGPA card, updates slider, courses |
-| `/courses`, `/courses/find`, `/course/:code`, `/learn/:code/week/:n` | student | Courses and the reader |
-| `/timetable`, `/class`, `/hoc` | student | Timetable, class board, class rep tools |
-| `/attendance/pass`, `/attendance/my` | student | Selfie then scan; my record |
+| `/home` | signed in | Greeting, streak screen (first open of the day), class rep tools, live wire, Term of the Day, updates slider, courses |
+| `/courses`, `/courses/find`, `/courses/:code`, `/learn/:code/week/:n` | student | Courses, the course page and the reader |
+| `/courses/:code/lecturers` | class rep | Set a course's lecturers, their weeks and the course introduction |
+| `/timetable` | signed in | Class times and My own (personal entries only you see) |
+| `/class`, `/hoc` | student | Class board: live wire, announcements, polls, questions; class rep posting and questions waiting |
+| `/hoc/rules`, `/class-list` | class rep | Class rules (confirm reminders, lecturer cancel cut-off); the class list |
+| `/games`, `/games/daily`, `/learn/:code/week/:n/keywords`, `…/crossword` | student | Course games and Term of the Day |
+| `/streak` | student | Your streak over five weeks |
+| `/attendance/pass`, `/attendance/my` | student | My pass (QR that changes every 30 s, opened from the week); my record |
 | `/attendance/scanner`, `/lecturer`, `/my-classes` | lecturer, class rep | Rotating QR, roster with photos, materials |
 | `/cgpa-planner` | student | Current CGPA, target, course status, roadmap |
 | `/studio`, `/browse` | author | Write, publish, browse notes |

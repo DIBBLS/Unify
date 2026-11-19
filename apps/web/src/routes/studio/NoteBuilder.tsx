@@ -895,11 +895,11 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
       {note.topics.map((t, ti) => ti !== at || view !== 'topics' ? null : (
         <div key={ti} className="nb-pane" style={card}>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8 }}>
-            <h3 style={{ ...sectionTitle, margin: 0, flex: 1 }}>Lecture {t.lecture || 1} · Topic {t.number}</h3>
+            <h3 style={{ ...sectionTitle, margin: 0, flex: 1 }}>Part {t.lecture || 1} · Topic {t.number}</h3>
             <Drop
-              label="Lecture"
+              label="Part (of this week)"
               value={String(t.lecture || 1)}
-              options={[1, 2, 3].map((l) => ({ value: String(l), label: `Lecture ${l}` }))}
+              options={[1, 2, 3].map((l) => ({ value: String(l), label: `Part ${l}` }))}
               onChange={(v) => {
                 const topics = [...note.topics];
                 topics[ti] = { ...t, lecture: Number(v) || 1 };

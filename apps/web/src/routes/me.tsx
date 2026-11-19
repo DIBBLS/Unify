@@ -84,15 +84,32 @@ function ScopedRoleLinks() {
   );
 }
 
-// Delete my account: a quiet link that opens a sheet, and the person types DELETE.
+// Delete my account: a quiet link that opens a sheet. The person types DELETE,
+// a 6-digit code is emailed to the account's address (good for 15 minutes),
+// and the account goes only once that code is entered.
 function DeleteAccount({ onDeleted }: { onDeleted: () => void }) {
   const [open, setOpen] = useState(false);
   const [typed, setTyped] = useState('');
+  const [code, setCode] = useState('');
+  const [sent, setSent] = useState<{ to: string; minutes: number } | null>(null);
   const [busy, setBusy] = useState(false);
+  const field = { padding: 12, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 15, textAlign: 'center' } as const;
+  const sendCode = async () => {
+    setBusy(true);
+    try {
+      const r = await api.sendDeleteCode();
+      setSent({ to: r.sentTo, minutes: r.minutes });
+      setCode('');
+    } catch (e) {
+      errorToast(e, 'send the code');
+    } finally {
+      setBusy(false);
+    }
+  };
   const go = async () => {
     setBusy(true);
     try {
-      await api.deleteMyAccount();
+      await api.deleteMyAccount(code.trim());
       toastSuccess('Your account was deleted.');
       onDeleted();
     } catch (e) {
@@ -102,29 +119,54 @@ function DeleteAccount({ onDeleted }: { onDeleted: () => void }) {
   };
   return (
     <>
-      <button onClick={() => { setTyped(''); setOpen(true); }} style={{ display: 'block', margin: '16px auto 0', fontSize: 12, fontWeight: 700, color: 'var(--text3)', textDecoration: 'underline', background: 'transparent' }}>
+      <button onClick={() => { setTyped(''); setCode(''); setSent(null); setOpen(true); }} style={{ display: 'block', margin: '16px auto 0', fontSize: 12, fontWeight: 700, color: 'var(--text3)', textDecoration: 'underline', background: 'transparent' }}>
         Delete my account
       </button>
       {open && (
         <ConfirmModal
-          title="Delete your account?"
+          title={sent ? 'Enter the code we emailed you' : 'Delete your account?'}
           body={
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <span>Your profile, progress, CGPA plan and notifications are deleted and you're signed out. This can't be undone.</span>
-              <span>Attendance your class rep took stays on the class register under your name from the class list.</span>
-              <input
-                value={typed}
-                onChange={(e) => setTyped(e.target.value)}
-                placeholder="Type DELETE"
-                aria-label="Type DELETE to confirm"
-                autoCapitalize="characters"
-                style={{ padding: 12, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 15, textAlign: 'center' }}
-              />
-            </div>
+            sent ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <span>We sent a 6-digit code to <strong>{sent.to}</strong>. It works for {sent.minutes} minutes.</span>
+                <input
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="6-digit code"
+                  aria-label="6-digit code from the email"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  style={{ ...field, letterSpacing: 6, fontWeight: 700 }}
+                />
+                <button type="button" disabled={busy} onClick={() => void sendCode()} style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', textDecoration: 'underline', background: 'transparent' }}>
+                  Didn't get it? Send a new code
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <span>Your profile, progress, CGPA plan and notifications are deleted and you're signed out. This can't be undone.</span>
+                <span>Attendance your class rep took stays on the class register under your name from the class list.</span>
+                <input
+                  value={typed}
+                  onChange={(e) => setTyped(e.target.value)}
+                  placeholder="Type DELETE"
+                  aria-label="Type DELETE to confirm"
+                  autoCapitalize="characters"
+                  style={field}
+                />
+                <span style={{ fontSize: 12, color: 'var(--text2)' }}>Next, we email you a code to confirm it's you.</span>
+              </div>
+            )
           }
-          confirmLabel="Delete account"
+          confirmLabel={sent ? 'Delete account' : 'Email me a code'}
           busy={busy}
-          onConfirm={() => { if (typed.trim() === 'DELETE') void go(); else errorToast(new Error('Type DELETE in capitals to confirm.'), 'delete your account'); }}
+          onConfirm={() => {
+            if (!sent) {
+              if (typed.trim() === 'DELETE') void sendCode();
+              else errorToast(new Error('Type DELETE in capitals to confirm.'), 'delete your account');
+            } else if (/^\d{6}$/.test(code.trim())) void go();
+            else errorToast(new Error('Enter the 6-digit code from the email.'), 'delete your account');
+          }}
           onCancel={() => setOpen(false)}
         />
       )}

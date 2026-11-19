@@ -383,7 +383,7 @@ export default function AdminRoute() {
     setError('');
     try {
       const res = await api.adminPromote();
-      setSuccess(`Promoted ${res.promoted} student${res.promoted === 1 ? '' : 's'}, graduated ${res.graduated}.`);
+      setSuccess(`Promoted ${res.promoted} student${res.promoted === 1 ? '' : 's'}, graduated ${res.graduated}. The new session is on First Semester: set its start date.`);
       await refresh();
     } catch (err) {
       setError(describeError(err, 'promotion that'));
@@ -854,7 +854,7 @@ export default function AdminRoute() {
 
       <Module id="session" openId={openModule}>
       <div style={card}>
-        <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 8 }}>Active semester. Students add this semester's courses (and earlier ones); the next semester opens once this one's teaching weeks are over, and higher levels open when you promote.</div>
+        <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 8 }}>Active semester. Changing it moves every student onto their class's courses for that semester automatically (from the course sheet). Levels only change when you promote.</div>
         <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
           {['First Semester', 'Second Semester'].map((s) => (
             <button
@@ -875,7 +875,7 @@ export default function AdminRoute() {
             </button>
           ))}
         </div>
-        <button onClick={() => setConfirm({ title: 'Promote everyone?', body: 'ALL students move up one level. 500 Level graduates. Course enrollments reset for promoted students.', label: 'Promote all', run: () => void promoteAll() })} disabled={promoting} style={{ ...primaryBtn, width: '100%', opacity: promoting ? 0.6 : 1 }}>
+        <button onClick={() => setConfirm({ title: 'Promote everyone?', body: 'ALL students move up one level and the new session starts on its First Semester. 500 Level graduates. Each student is put on their new level’s courses automatically; carryovers they added from lower levels stay. Set the new start date after.', label: 'Promote all', run: () => void promoteAll() })} disabled={promoting} style={{ ...primaryBtn, width: '100%', opacity: promoting ? 0.6 : 1 }}>
           {promoting ? 'Promoting…' : 'Promote all students one level'}
         </button>
         <div style={{ fontSize: 11, color: 'var(--text2)', marginTop: 6 }}>500 Level graduates; enrollments reset for promoted students.</div>

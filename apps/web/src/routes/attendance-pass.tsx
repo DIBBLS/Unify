@@ -7,6 +7,7 @@ import { errorToast, describeError } from '../lib/errors';
 import { resolvePicture } from '../lib/picture';
 import { ROUTES } from '../lib/routes';
 import BackButton from '../components/BackButton';
+import Loading from '../components/Loading';
 import { BoxBoy } from '../components/redesign/brand';
 import { Card, Display } from '../components/redesign/ui';
 
@@ -48,7 +49,7 @@ export default function AttendancePassRoute() {
   }, [navigate]);
 
   const shell = { maxWidth: 'min(var(--shell, 480px), 560px)', margin: '0 auto', padding: '20px 16px 96px' } as const;
-  if (!ready) return <div style={shell} />;
+  if (!ready) return <div style={shell}><Loading text="Getting your pass ready…" /></div>;
 
   return (
     <div style={shell}>

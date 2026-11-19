@@ -94,6 +94,9 @@ export default function Layout() {
   // phones, no sidebar on desktop. Today that is the note reader in focus mode
   // and any chat screen.
   const immersive = focusOnReader || /^\/chat(\/|$)/.test(pathname);
+  // Term of the Day has its own on-screen keyboard at the bottom: the tab bar
+  // would sit on top of it (Enter and Delete), so it's hidden there.
+  const keyboardGame = /^\/games\/daily(\/|$)/.test(pathname);
   const navigate = useNavigate();
   // Return memory for every Back button (pathname only — tab switches
   // don't pollute the trail).
@@ -495,7 +498,7 @@ export default function Layout() {
           </div>
         </main>
       </div>
-      {!immersive && !isDesktop && (
+      {!immersive && !keyboardGame && !isDesktop && (
       <nav className="bottomnav" onMouseEnter={() => setNavHidden(false)} style={{ zIndex: 50, position: 'fixed', bottom: 0, left: '50%', transform: `translateX(-50%)${navHidden ? ' translateY(calc(100% - 14px))' : ''}`, transition: 'transform .3s ease', width: '100%', maxWidth: 'var(--shell, 480px)', display: 'flex', background: 'var(--surface)', borderTop: '1px solid var(--border)', padding: '8px 0 calc(8px + env(safe-area-inset-bottom))' }}>
         {showSkeletonNav
           ? Array.from({ length: skelCount }).map((_, i) => (

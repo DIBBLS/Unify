@@ -148,7 +148,8 @@ export default function DailyWordRoute() {
     const m = rows[r][i];
     if (m === 'hit' || (m === 'near' && keyState[ch] !== 'hit') || (m === 'miss' && !keyState[ch])) keyState[ch] = m;
   }));
-  const size = Math.min(52, Math.floor((Math.min(window.innerWidth, 480) - 32 - (answer.length - 1) * 6) / answer.length));
+  // Tiles fit the width and leave room for the keyboard on short phones.
+  const size = Math.max(30, Math.min(52, Math.floor((Math.min(window.innerWidth, 480) - 32 - (answer.length - 1) * 6) / answer.length), Math.floor((window.innerHeight - 420) / MAX_GUESSES) - 6));
   const share = async () => {
     const url = `${window.location.origin}${ROUTES.games}`;
     const text = shareText(daily.course, day, rows, solved, url);
@@ -224,8 +225,8 @@ export default function DailyWordRoute() {
           <div className="t-12 muted">New word in {untilMidnight()}</div>
         </Card>
       ) : (
-        // On-screen keyboard (a physical keyboard works too).
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 14 }} aria-label="Keyboard">
+        // On-screen keyboard (a physical keyboard works too), pinned to the bottom of the screen.
+        <div style={{ position: 'sticky', bottom: 0, zIndex: 5, display: 'flex', flexDirection: 'column', gap: 6, marginTop: 14, padding: '8px 0 calc(8px + env(safe-area-inset-bottom))', background: 'var(--u-page, var(--bg))' }} aria-label="Keyboard">
           {ROWS.map((row, ri) => (
             <div key={row} style={{ display: 'flex', gap: 5, justifyContent: 'center' }}>
               {ri === 2 && <KeyBtn label="Enter" wide onPress={() => press('ENTER')} />}

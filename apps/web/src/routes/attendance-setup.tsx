@@ -4,6 +4,7 @@ import { api, type ClassListMe } from '../lib/api';
 import { errorToast } from '../lib/errors';
 import { ROUTES } from '../lib/routes';
 import BackButton from '../components/BackButton';
+import Loading from '../components/Loading';
 import { BoxBoy } from '../components/redesign/brand';
 import { Card, Display, Label } from '../components/redesign/ui';
 
@@ -28,7 +29,7 @@ export default function AttendanceSetupRoute() {
     api.classListMe().then(setMe).catch(() => setMe(null)).finally(() => setLoaded(true));
   useEffect(() => { void load(); }, []);
 
-  if (!loaded) return <div style={shell} />;
+  if (!loaded) return <div style={shell}><Loading text="Checking your class list…" /></div>;
   return (
     <div style={shell}>
       <BackButton to={ROUTES.timetable} />

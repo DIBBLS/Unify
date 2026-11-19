@@ -645,6 +645,12 @@ export const api = {
     const q = p.toString();
     return apiFetch<{ code: string; title: string; levels: string[]; semesters: string[]; weeks: number; lecturers: string[]; staff: { name: string; avatar: string; persona?: string }[] }[]>(`/v1/courses${q ? `?${q}` : ''}`);
   },
+  // The courses a class takes (department code + level), from the faculty's course sheet.
+  coursesForClass: (department: string, level: string, semester = '') => {
+    const p = new URLSearchParams({ department, level });
+    if (semester) p.set('semester', semester);
+    return apiFetch<{ courses: { code: string; title: string; status: 'C' | 'R' | 'E' }[] }>(`/v1/courses/for-class?${p.toString()}`);
+  },
   courseSearch: (q: string, level = '') => {
     const p = new URLSearchParams({ q });
     if (level) p.set('level', level);
@@ -852,6 +858,9 @@ export const api = {
   attendanceExport: (sessionId: string, course: string) =>
     apiDownload(`/v1/attendance/sessions/${sessionId}/register.csv`, `${course.replace(/\s+/g, '')}-register.csv`),
   // Learning (S23–S36)
+  // Topics done / published for several courses in one request (Home's cards).
+  progressSummary: (courses: string[]) =>
+    apiFetch<{ courses: Record<string, { done: number; topics: number }> }>(`/v1/my-progress/summary?courses=${encodeURIComponent(courses.join(','))}`),
   myCourseProgress: (course: string) =>
     apiFetch<{ course: string; lecturers?: { id: string; name: string }[]; namedLecturers?: string[]; weeks: { week: number; title: string; topics: number; topicTitles: string[]; done: number; quiz: { best: number; total: number; attempts: number } | null; hasQuiz: boolean }[] }>(`/v1/courses/${encodeURIComponent(course)}/my-progress`),
   learnActivity: (days = 35) => apiFetch<{ days: { date: string; xp: number }[]; active?: string[]; streak: number; longest: number }>(`/v1/learn/activity?days=${days}`),
@@ -875,7 +884,9 @@ export const api = {
     apiFetch<{ course: string; held: number; students: { name: string; matric: string; attended: number; pct: number | null; onUnify: boolean }[] }>(`/v1/attendance/students?course=${encodeURIComponent(course)}`),
   lecturerProfile: (id: string) =>
     apiFetch<{ id: string; name: string; department: string; faculty: string; avatar: string; persona: string; courses: string[]; title?: string; bio?: string; contactEmail?: string; links?: string }>(`/v1/lecturer/profile/${id}`),
-  deleteMyAccount: () => apiFetch<{ ok: boolean }>('/v1/me', { method: 'DELETE', body: JSON.stringify({ confirm: 'DELETE' }) }, 0),
+  // Delete my account: a 6-digit code is emailed first, then sent back with DELETE.
+  sendDeleteCode: () => apiFetch<{ ok: boolean; sentTo: string; minutes: number }>('/v1/me/delete-code', { method: 'POST', body: '{}' }, 0),
+  deleteMyAccount: (code: string) => apiFetch<{ ok: boolean }>('/v1/me', { method: 'DELETE', body: JSON.stringify({ confirm: 'DELETE', code }) }, 0),
   // Class lists: student side
   classListMe: () => apiFetch<ClassListMe>('/v1/class-list/me'),
   classListClaim: (matric: string, ask?: { fullName: string; note?: string }) =>

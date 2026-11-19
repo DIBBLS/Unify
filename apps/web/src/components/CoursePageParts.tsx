@@ -106,7 +106,12 @@ export function WeekCard({ course, week, title, sub, published, current, past, p
   const topics = progress?.topics || 0;
   const doneN = progress?.done || 0;
   const all = topics > 0 && doneN >= topics;
-  const canOpen = published || !!classes?.length;
+  // This week always opens, so the Scan attendance button is there even before notes land.
+  const canOpen = published || !!classes?.length || (current && !preview);
+  // Today's timetabled class carries its own Pass button; otherwise the week has one.
+  const weekPass = current && !preview && !classes?.some((c) => c.mark === 'today')
+    ? `${ROUTES.attendancePass}?${new URLSearchParams({ course, week: String(week) }).toString()}`
+    : '';
   const badge = current
     ? ['var(--u-black)', 'var(--u-green)']
     : all || (published && past)
@@ -134,7 +139,7 @@ export function WeekCard({ course, week, title, sub, published, current, past, p
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '0 12px 12px' }}>
           {classes?.length
             ? classes.map((c) => <ClassRow key={c.n} c={c} course={course} week={week} notes={published ? q(`t=${Math.min(c.n, Math.max(topics, 1)) - 1}`) : ''} />)
-            : (progress?.topicTitles.length ? progress.topicTitles : Array.from({ length: topics }, (_, i) => `Class ${i + 1}`)).map((t, i) => {
+            : (progress?.topicTitles.length ? progress.topicTitles : Array.from({ length: topics }, (_, i) => `Topic ${i + 1}`)).map((t, i) => {
                 const n = i + 1;
                 const isDone = !!done?.has(n);
                 const isUp = !isDone && n === nextTopic;
@@ -145,12 +150,17 @@ export function WeekCard({ course, week, title, sub, published, current, past, p
                     </span>
                     <span style={{ flex: 1, minWidth: 0 }}>
                       <span style={{ display: 'block', fontWeight: 700, fontSize: 14 }}>{t}</span>
-                      <span style={{ display: 'block', fontSize: 12, color: 'var(--text3)' }}>Class {n}{isDone ? ' · Read' : isUp ? ' · Up next' : ''}</span>
+                      <span style={{ display: 'block', fontSize: 12, color: 'var(--text3)' }}>Topic {n}{isDone ? ' · Read' : isUp ? ' · Up next' : ''}</span>
                     </span>
                     {isUp ? <span style={{ width: 28, height: 28, borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ArrowRight size={15} /></span> : <ChevronRight size={16} color="var(--text3)" />}
                   </Link>
                 );
               })}
+          {weekPass && (
+            <Link to={weekPass} className="btn btn--white btn--sm" style={{ alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <QrCode size={15} /> Scan attendance
+            </Link>
+          )}
           {progress?.hasQuiz && (
             <Link to={q(`t=${topics}`)} style={{ display: 'flex', gap: 12, alignItems: 'center', padding: 12, borderRadius: 14, background: 'var(--u-black)', textDecoration: 'none' }}>
               <span style={{ width: 30, height: 30, borderRadius: 9999, background: 'var(--u-green)', color: 'var(--u-black)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 12, flexShrink: 0 }}>{progress.quiz ? `${progress.quiz.best}` : 'Q'}</span>
