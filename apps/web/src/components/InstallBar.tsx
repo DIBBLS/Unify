@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { ArrowDownToLine, RefreshCw, X } from 'lucide-react';
 import { INSTALL_EVENT, isIOS as detectIOS, isStandalone, markInstallable } from '../lib/install';
 import { toastSuccess } from '../lib/toast';
@@ -35,7 +36,12 @@ function setLs(k: string, v: string) {
   }
 }
 
+// Screens with no tab bar keep their main button (or keyboard) at the bottom,
+// right where the bar sits: welcome, sign-in, onboarding, Term of the Day, chat.
+const NO_BAR = /^\/(welcome|auth|onboarding|reset|games\/daily|chat)(\/|$)/;
+
 export default function InstallBar() {
+  const { pathname } = useLocation();
   const [pie, setPie] = useState<BIPEvent | null>(null);
   // 'hidden' | 'bar' (full prompt) | 'pill' (collapsed) | 'ios' (recipe)
   const [stage, setStage] = useState<'hidden' | 'bar' | 'pill' | 'ios'>('hidden');
@@ -143,7 +149,7 @@ export default function InstallBar() {
     setStage('hidden');
   };
 
-  const showInstall = stage === 'bar' || stage === 'pill' || stage === 'ios';
+  const showInstall = !NO_BAR.test(pathname) && (stage === 'bar' || stage === 'pill' || stage === 'ios');
   if (!showInstall && !update) return null;
 
   const wrap: React.CSSProperties = {
