@@ -65,6 +65,7 @@ const AdminRoute = lazyRoute(() => import('./routes/admin'));
 const BrowseRoute = lazyRoute(() => import('./routes/browse'));
 const ShareRoute = lazyRoute(() => import('./routes/share'));
 const StudioRoute = lazyRoute(() => import('./routes/studio/index'));
+const StudioPipelineRoute = lazyRoute(() => import('./routes/studio/pipeline-page'));
 const MyClassesRoute = lazyRoute(() => import('./routes/my-classes'));
 
 // Old paths (still written by the backend into notification/push links)
@@ -380,6 +381,16 @@ export default function App() {
               <RequireAuth>
                 <RequireRole allow={AUTHOR_ONLY}>
                   <StudioRoute />
+                </RequireRole>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path={ROUTES.studioPipeline}
+            element={
+              <RequireAuth>
+                <RequireRole allow={AUTHOR_ONLY}>
+                  <StudioPipelineRoute />
                 </RequireRole>
               </RequireAuth>
             }

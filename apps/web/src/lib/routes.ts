@@ -32,6 +32,7 @@ export const ROUTES = {
 
   // Author tabs (lecturer / contributor)
   studio: '/studio',
+  studioPipeline: '/studio/pipeline',
   browse: '/browse',
   myClasses: '/my-classes',
   lecturer: '/lecturer',

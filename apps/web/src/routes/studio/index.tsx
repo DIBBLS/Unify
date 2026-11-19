@@ -1,6 +1,7 @@
 import { toastError } from '../../lib/toast';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { ROUTES } from '../../lib/routes';
 import { ArrowRight, Check, X, ChevronDown, FileText, ExternalLink, AlertTriangle, Sparkles, PenLine, Bot } from 'lucide-react';
 import BackButton from '../../components/BackButton';
 import Drop from '../../components/Drop';
@@ -9,7 +10,6 @@ import { BoxBoy } from '../../components/redesign/brand';
 import { TopicSlice } from '../../components/TopicSlice';
 import { MathPlain } from '../../components/MathText';
 import EoqQuiz from '../../components/EoqQuiz';
-import Pipeline from './Pipeline';
 import { NoteBuilder, blankNote, normalizeNote, extractJsonPayload } from './NoteBuilder';
 import { noteGaps, gapsSummary } from '../../lib/noteGaps';
 import { api, type Material } from '../../lib/api';
@@ -683,7 +683,14 @@ export default function StudioRoute() {
 
       {step === 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <Pipeline onPick={(c, w) => { setCourse(c); setWeek(String(w)); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
+          {/* The Pipeline is its own page, so the Studio never waits on every course's weeks and materials. */}
+          <Link to={ROUTES.studioPipeline} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: 14, borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', textDecoration: 'none' }}>
+            <span>
+              <span style={{ display: 'block', fontWeight: 800, fontSize: 14 }}>Pipeline</span>
+              <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>Every course you teach, week by week: what's published and what's ready to write</span>
+            </span>
+            <span aria-hidden="true" style={{ color: 'var(--text3)' }}>›</span>
+          </Link>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <label style={{ ...label, flex: 1, minWidth: 140 }}>
               Course
