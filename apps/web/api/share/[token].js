@@ -3,7 +3,7 @@
 // link. This function fetches the share payload server-side and returns
 // a standalone OG-tagged preview page: crawlers read the meta, humans
 // get the card + a ride into the app. Responses cache at the edge.
-const API_URL = (process.env.API_URL || 'https://unify-api-z4zm.onrender.com').replace(/\/$/, '');
+const API_URL = (process.env.API_URL || 'https://unify-api-eu.onrender.com').replace(/\/$/, '');
 const APP_URL = 'https://unify-virid.vercel.app';
 
 function esc(s) {

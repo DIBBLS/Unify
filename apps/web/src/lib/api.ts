@@ -9,7 +9,7 @@ import { queueWrite } from "./offline";
 export const USE_BACKEND = ((import.meta.env.VITE_USE_BACKEND ?? import.meta.env.USE_BACKEND ?? "1") as string) === "1";
 
 // Built-in fallback (public URL; env vars override when set).
-const FALLBACK_API_URL = 'https://unify-api-z4zm.onrender.com';
+const FALLBACK_API_URL = 'https://unify-api-eu.onrender.com';
 const API_URL = (
   ((import.meta.env.VITE_API_URL || import.meta.env.API_URL) as string | undefined) || FALLBACK_API_URL
 ).replace(/\/$/, '');

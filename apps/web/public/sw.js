@@ -23,7 +23,7 @@ const SHELL = ['/', '/index.html', '/manifest.json'];
 
 // The API origin is stamped in at build time from VITE_API_URL (vite.config.ts),
 // so moving the backend is a Vercel env change. The fallback is today's host.
-const API_ORIGIN = '__API_ORIGIN__'.startsWith('http') ? '__API_ORIGIN__' : 'https://unify-api-z4zm.onrender.com';
+const API_ORIGIN = '__API_ORIGIN__'.startsWith('http') ? '__API_ORIGIN__' : 'https://unify-api-eu.onrender.com';
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
