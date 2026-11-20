@@ -87,6 +87,7 @@ function ShareRedirect() {
 }
 import { BoxBoy } from './components/redesign/brand';
 import Toasts from './components/Toasts';
+import GlobalCheer from './components/GlobalCheer';
 import ZoomBar from './components/ZoomBar';
 import InstallBar from './components/InstallBar';
 import Loading from './components/Loading';
@@ -253,6 +254,8 @@ export default function App() {
         surface on EVERY screen including chromeless ones (/auth,
         /onboarding, /s/:token) that never mount the layout. */}
         <Toasts />
+        {/* Cheers sent from anywhere, e.g. "−5 XP" when leaving midway. */}
+        <GlobalCheer />
         {/* The app's own confirm and text dialogs (no browser popups). */}
         <DialogHost />
         <RouteMeta />

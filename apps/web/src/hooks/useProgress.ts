@@ -3,7 +3,6 @@ import { api } from '../lib/api';
 
 import { play } from '../lib/sound';
 import { sayPraise } from '../lib/welcomeVoice';
-import { leftTopicOf } from '../lib/notesQuit';
 // Server-backed topic progress, keyed by lecture (Lecture 1 Topic 1 and
 // Lecture 2 Topic 1 are different completions). Nothing is persisted
 // client-side: completed topics load from the API on mount, completion
@@ -45,9 +44,7 @@ export function useProgress(courseCode: string, weekNum: number) {
         next.add(k);
         return next;
       });
-      // Left midway before: this one earns 5 XP, not 10 (only the first time it's finished).
-      const left = !done.has(k) && leftTopicOf(courseCode, weekNum) === ti;
-      void api.progress(courseCode, weekNum, ti, lecture, left).catch(() => {});
+      void api.progress(courseCode, weekNum, ti, lecture).catch(() => {});
     },
     [courseCode, weekNum, done]
   );

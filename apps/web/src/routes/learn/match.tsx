@@ -112,7 +112,7 @@ export default function MatchRoute() {
   });
   const tease = useIdleTease(matched.size * 100 + mistakes, !!terms && terms.length >= 3 && finishedSecs == null);
   const shell = { maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '16px 16px 40px' } as const;
-  const [leavePrompt, quitNotice] = useGameQuit('match', courseCode, weekNum, !!terms && finishedSecs == null && (matched.size > 0 || mistakes > 0));
+  const leavePrompt = useGameQuit('match', courseCode, weekNum, !!terms && finishedSecs == null && (matched.size > 0 || mistakes > 0));
   if (err) return <div style={shell}><BackButton to={ROUTES.games} /><Card style={{ marginTop: 8 }}><div className="t-14">{err}</div></Card></div>;
   if (!terms) return <div style={shell}><GameLoading text="Pairing up your terms…" /></div>;
   if (terms.length < 3) {
@@ -156,7 +156,6 @@ export default function MatchRoute() {
       <BackButton to={ROUTES.games} />
       <Label>{courseCode} · Week {weekNum}</Label>
       <Display size={28}>Match-up</Display>
-      {finishedSecs == null && quitNotice}
       <div className="t-13 muted" style={{ marginTop: 4 }}>Tap a term, then what it means. Round {Math.min(round + 1, rounds.length)} of {rounds.length}{mistakes ? ` · ${mistakes} miss${mistakes === 1 ? '' : 'es'}` : ''}</div>
       <ProgressBar value={matched.size / terms.length} label={`${matched.size} of ${terms.length} matched`} style={{ margin: '12px 0' }} />
       {finishedSecs == null && <GameTimer played={played} limit={limit} />}

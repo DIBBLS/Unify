@@ -5,7 +5,7 @@ import { sayPraise } from '../lib/welcomeVoice';
 // Cheers: a big word that pops over the game when something goes right (a
 // word found, a streak, a level cleared, the whole game done), with a burst
 // of confetti for the big moments and a tiny buzz on phones that allow it.
-export type CheerKind = 'word' | 'key' | 'streak' | 'bonus' | 'level' | 'half' | 'done' | 'try';
+export type CheerKind = 'word' | 'key' | 'streak' | 'bonus' | 'level' | 'half' | 'done' | 'try' | 'penalty';
 
 const LINES: Record<CheerKind, string[]> = {
   word: ['Nice!', 'Great!', 'Sweet!', 'Good one!', 'Yes!', 'Spot on!'],
@@ -17,6 +17,8 @@ const LINES: Record<CheerKind, string[]> = {
   done: ['You did it!', 'Champion!', 'Outstanding!', 'Legend!'],
   // Which attempt is next (Term of the Day): no sound, no buzz.
   try: ['Next try'],
+  // Leaving midway: −5 XP.
+  penalty: ['−5 XP'],
 };
 const BIG: CheerKind[] = ['level', 'done', 'key'];
 const pick = (a: string[]) => a[Math.floor(Math.random() * a.length)];
@@ -30,13 +32,16 @@ export function useCheer(): [ReactNode, (kind: CheerKind, opts?: { text?: string
   const cheer = useCallback((kind: CheerKind, opts?: { text?: string; sub?: string }) => {
     const id = Date.now() + Math.random();
     setShown({ id, kind, text: opts?.text || pick(LINES[kind]), sub: opts?.sub });
-    if (kind !== 'try') {
+    if (kind === 'penalty') {
+      try { navigator.vibrate?.([30, 50, 30]); } catch { /* fine */ }
+      play('wrong');
+    } else if (kind !== 'try') {
       try { if (BIG.includes(kind)) navigator.vibrate?.([18, 40, 18]); else navigator.vibrate?.(12); } catch { /* fine */ }
       play(kind === 'done' || kind === 'level' ? 'finish' : 'correct');
     }
     if (kind === 'done') sayPraise('game');
     window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => setShown((s) => (s?.id === id ? null : s)), kind === 'done' ? 2200 : 1300);
+    timer.current = window.setTimeout(() => setShown((s) => (s?.id === id ? null : s)), kind === 'done' || kind === 'penalty' ? 2200 : 1300);
   }, []);
 
   const node = shown ? (

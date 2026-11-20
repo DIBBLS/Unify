@@ -200,7 +200,7 @@ export default function CrosswordRoute() {
   // Leaving a game always lands on Practice, opened on this course.
   const backTo = `/games?course=${encodeURIComponent(courseCode)}`;
   const weekPath = `/learn/${encodeURIComponent(courseCode)}/week/${weekNum}`;
-  const [leavePrompt, quitNotice] = useGameQuit('crossword', courseCode, weekNum, !!puzzle && saved.finishedSecs == null && !saved.timeUp && !solved && !choosing && Object.keys(saved.letters).length > 0);
+  const leavePrompt = useGameQuit('crossword', courseCode, weekNum, !!puzzle && saved.finishedSecs == null && !saved.timeUp && !solved && !choosing && Object.keys(saved.letters).length > 0);
   if (err) return <div className="g-shell"><BackButton to={backTo} fixed /><div className="t-14" style={{ color: 'var(--u-red)' }}>{err}</div></div>;
   if (puzzle === undefined) return <div className="g-shell"><GameLoading text="Building your crossword…" /></div>;
   if (!puzzle) {
@@ -232,7 +232,6 @@ export default function CrosswordRoute() {
       <Label>Crossword · {courseCode} Week {weekNum}</Label>
       {roomCode && <RoomBar room={room} game="crossword" course={courseCode} week={weekNum} mine={{ done: right, total: all.length, label: `${Math.round((right / Math.max(1, all.length)) * 100)}%` }} />}
       {roomCode && !room.startedAt ? null : (<>
-      {saved.finishedSecs == null && quitNotice}
       <div className="g-head">
         <span className="g-head-title">{puzzle.entries.length} key terms</span>
         <div style={{ flex: 1 }}><ProgressBar value={filled / Math.max(1, all.length)} label="Squares filled" /></div>

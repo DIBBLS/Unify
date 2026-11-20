@@ -69,17 +69,13 @@ export function useLeaveGuard(active: boolean, copy: LeaveCopy, onLeave: () => v
       e.stopPropagation();
       open(() => navigate(url.pathname + url.search + url.hash));
     };
-    // Closing the tab or the app mid-round counts as leaving too.
-    const onHide = () => { if (armed && !leaving) live.current.onLeave(); };
     window.addEventListener('popstate', onPop);
     document.addEventListener('click', onClick, true);
-    window.addEventListener('pagehide', onHide);
     return () => {
       armed = false;
       if (ask === open) ask = null;
       window.removeEventListener('popstate', onPop);
       document.removeEventListener('click', onClick, true);
-      window.removeEventListener('pagehide', onHide);
       // Finished normally (still on this screen): drop the extra entry.
       if (onArmEntry()) disarm(() => {});
     };

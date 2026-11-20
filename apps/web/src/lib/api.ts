@@ -453,8 +453,8 @@ export const api = {
     apiFetch<{ course: string; week: number; title: string; subtitle: string; note_json: unknown; topicMeta?: TopicMeta[]; lectures?: number[]; authors?: NoteAuthor[] }>(
       `/v1/courses/${encodeURIComponent(course)}/weeks/${week}`
     ),
-  progress: (course: string, week: number, topic: number, lectureNo = 1, leftMidway = false) => {
-    const body = JSON.stringify({ course, week, topic, lectureNo, ...(leftMidway ? { leftMidway: true } : {}) });
+  progress: (course: string, week: number, topic: number, lectureNo = 1) => {
+    const body = JSON.stringify({ course, week, topic, lectureNo });
     // Offline-first: completing while offline banks locally and syncs on
     // reconnect — XP is never lost to a dead connection.
     if (queueWrite('/v1/progress', body)) return Promise.resolve({ ok: true, xp: 0, streak: 0 });
@@ -463,6 +463,9 @@ export const api = {
       body,
     });
   },
+  /** Left a game or topic midway: 5 XP off at once. */
+  leftMidway: (b: { kind: 'game' | 'topic'; course: string; week: number; what: string }) =>
+    apiFetch<{ ok: boolean; xp: number }>('/v1/xp/left', { method: 'POST', body: JSON.stringify(b) }, 0),
   stats: () =>
     apiFetch<{ xp: number; streak: number; courses: { course: string; topics: number }[]; quizzesTaken: number; quizAvg: number }>("/v1/stats"),
   progressGet: (course: string, week: number) =>
@@ -801,7 +804,7 @@ export const api = {
     apiFetch<{ played: number; solved: number; mine: { guesses: number; solved: boolean } | null }>(`/v1/games/daily?course=${encodeURIComponent(course)}&day=${day}`),
   dailyWordSave: (payload: { course: string; day: string; word: string; guesses: number; solved: boolean }) =>
     apiFetch<{ ok: boolean; first: boolean; xp: number; solved: number }>('/v1/games/daily', { method: 'POST', body: JSON.stringify(payload) }, 0),
-  gameScore: (payload: { game: GameId; course: string; week: number; score: number; terms: number; hints: number; seconds: number; quit?: boolean }) =>
+  gameScore: (payload: { game: GameId; course: string; week: number; score: number; terms: number; hints: number; seconds: number }) =>
     apiFetch<{ ok: boolean; best: number; newBest: boolean; xp: number }>('/v1/games/score', { method: 'POST', body: JSON.stringify(payload) }),
   gameBoard: (q: { course: string; week?: number; game?: GameId }) =>
     apiFetch<{ players: number; top: { rank: number; name: string; persona: string | null; score: number; terms: number; me: boolean }[]; me: { rank: number; score: number; terms: number } | null }>(
