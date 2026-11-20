@@ -100,7 +100,7 @@ async function steadyVoice(): Promise<SpeechSynthesisVoice | null> {
   locked = pickVoice();
   return locked;
 }
-const STEADY_RATE = 0.95;
+const STEADY_RATE = 1.1;
 
 export async function speakWelcome(name: string): Promise<void> {
   if (!spokenWelcomeSupported()) return;
