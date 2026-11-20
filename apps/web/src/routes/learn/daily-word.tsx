@@ -119,6 +119,20 @@ export default function DailyWordRoute() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [saved.timeUp]);
 
+  // Each new try pops up which one it is ("Try 2 of 6"), like a cheer.
+  const triesSeen = useRef<number | null>(null);
+  useEffect(() => {
+    if (state !== 'ready') return;
+    const n = saved.guesses.length;
+    if (triesSeen.current === null) { triesSeen.current = n; return; } // opening the page: no pop
+    if (n === triesSeen.current) return;
+    triesSeen.current = n;
+    if (finished) return;
+    const left = MAX_GUESSES - n;
+    window.setTimeout(() => cheer('try', { text: `Try ${n + 1} of ${MAX_GUESSES}`, sub: left === 1 ? 'Last try!' : `${left} tries left` }), 700);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [saved.guesses.length, state]);
+
   const submit = useCallback(() => {
     if (!daily || finished) return;
     if (typing.length !== answer.length) { setNote(`The word has ${answer.length} letters.`); setShake((n) => n + 1); play('wrong'); return; }
@@ -188,7 +202,7 @@ export default function DailyWordRoute() {
     if (m === 'hit' || (m === 'near' && keyState[ch] !== 'hit') || (m === 'miss' && !keyState[ch])) keyState[ch] = m;
   }));
   // Tiles fit the width and leave room for the keyboard on short phones.
-  const size = Math.max(30, Math.min(52, Math.floor((Math.min(window.innerWidth, 480) - 32 - 56 - (answer.length - 1) * 6) / answer.length), Math.floor((window.innerHeight - 420) / MAX_GUESSES) - 6));
+  const size = Math.max(30, Math.min(52, Math.floor((Math.min(window.innerWidth, 480) - 32 - (answer.length - 1) * 6) / answer.length), Math.floor((window.innerHeight - 420) / MAX_GUESSES) - 6));
   const share = async () => {
     const url = `${window.location.origin}${ROUTES.games}`;
     const text = shareText(daily.course, day, rows, solved, url);
@@ -238,8 +252,6 @@ export default function DailyWordRoute() {
           const marks = r < rows.length ? rows[r] : null;
           return (
             <div key={r} ref={r === saved.guesses.length ? activeRow : undefined} style={{ display: 'flex', gap: 6, alignItems: 'center' }} aria-label={marks ? `Try ${r + 1}, ${word}: ${marks.join(', ')}` : `Try ${r + 1}`}>
-              {/* Which try this row is. */}
-              <span aria-hidden="true" style={{ width: 22, textAlign: 'right', fontSize: 12, fontWeight: 900, color: r === saved.guesses.length && !finished ? 'var(--u-warn-ink)' : marks ? 'var(--text2)' : 'var(--text3)' }}>{r + 1}</span>
               {Array.from({ length: answer.length }, (_, i) => {
                 const ch = word[i] || '';
                 const c = marks ? COLORS[marks[i]] : null;
@@ -255,7 +267,6 @@ export default function DailyWordRoute() {
                   }}>{ch}</span>
                 );
               })}
-              <span aria-hidden="true" style={{ width: 22 }} />
             </div>
           );
         })}
