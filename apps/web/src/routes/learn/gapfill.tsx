@@ -86,7 +86,7 @@ export default function GapFillRoute() {
   });
   const tease = useIdleTease(at, !!gaps && gaps.length >= 3 && finishedSecs == null);
   const shell = { maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '16px 16px 40px' } as const;
-  const [leavePrompt, quitNotice] = useGameQuit('gapfill', courseCode, weekNum, !!gaps && finishedSecs == null && (at > 0 || picked !== null));
+  const leavePrompt = useGameQuit('gapfill', courseCode, weekNum, !!gaps && finishedSecs == null && (at > 0 || picked !== null));
   if (err) return <div style={shell}><BackButton to={ROUTES.games} /><Card style={{ marginTop: 8 }}><div className="t-14">{err}</div></Card></div>;
   if (!gaps) return <div style={shell}><GameLoading text="Finding sentences in your notes…" /></div>;
   if (gaps.length < 3) {
@@ -114,7 +114,6 @@ export default function GapFillRoute() {
       <BackButton to={ROUTES.games} />
       <Label>{courseCode} · Week {weekNum}</Label>
       <Display size={28}>Fill the gap</Display>
-      {finishedSecs == null && quitNotice}
       <div className="t-13 muted" style={{ marginTop: 4 }}>Pick the term that completes the sentence. {finishedSecs == null ? `${Math.min(at + 1, gaps.length)} of ${gaps.length}` : ''}{streak >= 2 ? ` · ${streak} in a row` : ''}</div>
       <ProgressBar value={(finishedSecs != null ? gaps.length : at) / gaps.length} label={`${at} of ${gaps.length} answered`} style={{ margin: '12px 0' }} />
       {finishedSecs == null && <GameTimer played={played} limit={limit} />}

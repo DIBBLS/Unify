@@ -107,7 +107,7 @@ export default function TrueFalseRoute() {
   });
   const tease = useIdleTease(at, !!terms && terms.length >= 4 && finishedSecs == null);
   const shell = { maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '16px 16px 40px' } as const;
-  const [leavePrompt, quitNotice] = useGameQuit('truefalse', courseCode, weekNum, !!terms && finishedSecs == null && (at > 0 || answer !== null));
+  const leavePrompt = useGameQuit('truefalse', courseCode, weekNum, !!terms && finishedSecs == null && (at > 0 || answer !== null));
   if (err) return <div style={shell}><BackButton to={ROUTES.games} /><Card style={{ marginTop: 8 }}><div className="t-14">{err}</div></Card></div>;
   if (!terms) return <div style={shell}><GameLoading text="Writing your statements…" /></div>;
   if (terms.length < 4) {
@@ -150,7 +150,6 @@ export default function TrueFalseRoute() {
       <BackButton to={ROUTES.games} />
       <Label>{courseCode} · Week {weekNum}</Label>
       <Display size={28}>True or False</Display>
-      {finishedSecs == null && quitNotice}
       <div className="t-13 muted" style={{ marginTop: 4 }}>Does the meaning match the term? {finishedSecs == null ? `${Math.min(at + 1, items.length)} of ${items.length}` : ''}{streak >= 2 ? ` · ${streak} in a row` : ''}</div>
       <ProgressBar value={(finishedSecs != null ? items.length : at) / items.length} label={`${at} of ${items.length} answered`} style={{ margin: '12px 0' }} />
       {finishedSecs == null && <GameTimer played={played} limit={limit} />}

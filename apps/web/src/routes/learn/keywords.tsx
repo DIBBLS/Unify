@@ -283,7 +283,7 @@ export default function KeywordsRoute() {
   const back = `/games?course=${encodeURIComponent(courseCode)}`;
 
   const tease = useIdleTease(JSON.stringify(saved.found).length * 100 + path.length, !!levels && saved.finishedSecs == null && !saved.timeUp && !choosing);
-  const [leavePrompt, quitNotice] = useGameQuit('keywords', courseCode, weekNum, !!levels && saved.finishedSecs == null && !saved.timeUp && !choosing && (saved.level > 0 || Object.values(saved.found).some((w) => w.length > 0)));
+  const leavePrompt = useGameQuit('keywords', courseCode, weekNum, !!levels && saved.finishedSecs == null && !saved.timeUp && !choosing && (saved.level > 0 || Object.values(saved.found).some((w) => w.length > 0)));
   if (err) return <div className="g-shell"><BackButton to={back} fixed /><div className="t-14" style={{ color: 'var(--u-red)' }}>{err}</div></div>;
   if (!levels) return <div className="g-shell"><GameLoading /></div>;
   if (!levels.length || !lv) {
@@ -330,7 +330,6 @@ export default function KeywordsRoute() {
         />
       )}
       {roomCode && !room.startedAt ? null : (<>
-      {saved.finishedSecs == null && quitNotice}
       <div className="g-head">
         <span className="g-head-title">Level {li + 1}<span style={{ color: 'var(--u-text-3)' }}>/{levels.length}</span></span>
         <div style={{ flex: 1 }}><ProgressBar value={foundSlots / Math.max(1, totalSlots)} label="Words found" /></div>
