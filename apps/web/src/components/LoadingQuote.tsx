@@ -5,19 +5,24 @@ import { loadingLines } from '../lib/naija';
 // air. It rotates every few seconds through proverbs and facts (Nigeria,
 // engineering, study tips), shuffled so no two loads start the same way.
 const SWAP_MS = 5000;
+// One shuffle per visit, and the place in it is kept, so loading screens that
+// follow each other carry on with the same line instead of jumping to a new one.
+let shared: { lines: ReturnType<typeof loadingLines>; i: number } | null = null;
 
 export default function LoadingQuote({ onGreen = false, style }: { onGreen?: boolean; style?: React.CSSProperties }) {
-  const [lines] = useState(loadingLines);
-  const [i, setI] = useState(0);
+  const [lines] = useState(() => (shared ??= { lines: loadingLines(), i: 0 }).lines);
+  const [i, setI] = useState(() => shared?.i ?? 0);
+  const [first] = useState(i);
   useEffect(() => {
-    const t = setInterval(() => setI((n) => (n + 1) % lines.length), SWAP_MS);
+    const t = setInterval(() => setI((n) => { const next = (n + 1) % lines.length; if (shared) shared.i = next; return next; }), SWAP_MS);
     return () => clearInterval(t);
   }, [lines.length]);
   const line = lines[i];
   return (
     <figure
       key={i}
-      className="quote-fade"
+      // The line already showing on the screen before doesn't fade in again.
+      className={i === first ? undefined : 'quote-fade'}
       aria-live="off"
       style={{ margin: 0, maxWidth: 300, minHeight: 92, textAlign: 'center', color: onGreen ? 'var(--u-black, #0a0a0a)' : 'var(--text2)', ...style }}
     >

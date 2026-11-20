@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Trophy } from 'lucide-react';
-import { api } from '../lib/api';
+import { api, type GameId } from '../lib/api';
 import { Avatar, type PersonaKey } from './redesign/brand';
 
 // A game leaderboard among students taking the course: one week (both games
@@ -8,7 +8,7 @@ import { Avatar, type PersonaKey } from './redesign/brand';
 // when you're further down, your own place.
 type Board = Awaited<ReturnType<typeof api.gameBoard>>;
 
-export default function GameLeaderboard({ course, week, game, limit = 10, title }: { course: string; week?: number; game?: 'keywords' | 'crossword'; limit?: number; title?: string }) {
+export default function GameLeaderboard({ course, week, game, limit = 10, title }: { course: string; week?: number; game?: GameId; limit?: number; title?: string }) {
   const [board, setBoard] = useState<Board | null | undefined>(undefined);
   useEffect(() => {
     setBoard(undefined);

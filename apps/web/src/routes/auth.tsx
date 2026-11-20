@@ -11,6 +11,7 @@ import Flash from '../components/Flash';
 import { hasSeenWelcome } from '../lib/welcome';
 import { WELCOME_LINE } from '../lib/naija';
 import { BoxBoySplash } from '../components/BoxBoySplash';
+import Loading, { loaderAge } from '../components/Loading';
 import { supabaseBrowser, saveRememberSession, restoreRememberedSession, setRememberIntent, rememberWanted } from '../lib/supabase';
 import { api, clearMeCache } from '../lib/api';
 import { log } from '../lib/log';
@@ -52,6 +53,10 @@ export default function AuthRoute() {
   const [recoveryPw, setRecoveryPw] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  // Until we know whether this device is already signed in, show the loading
+  // screen, not the splash or the form: a signed-in student then goes from one
+  // steady screen straight to Home, with no sign-in form flashing past.
+  const [checking, setChecking] = useState(!!sb);
   const [welcomeBack, setWelcomeBack] = useState(false);
   const [remember, setRemember] = useState(rememberWanted);
 
@@ -67,12 +72,17 @@ export default function AuthRoute() {
     try {
       const me = await api.me();
       log.info('session', `profile check ok (onboarded=${me.onboarded})`);
+      // Let the screen breathe: a very fast sign-in still holds the loading
+      // screen for a moment, so it never blinks past.
+      const wait = 700 - loaderAge();
+      if (wait > 0) await new Promise((r) => setTimeout(r, wait));
       // Replace, never push: /auth forwards signed-in users straight back,
       // so leaving it in history would trap the Back button.
       navigate(me.onboarded ? '/home' : '/onboarding', { replace: true });
     } catch {
       log.error('session', 'profile check failed (API unreachable?)');
       setWelcomeBack(false);
+      setChecking(false);
       setError("Signed in, but can't reach the server. Check your connection and retry.");
     }
   };
@@ -89,12 +99,17 @@ export default function AuthRoute() {
         void routeToApp();
         return;
       }
+      // Coming back from Google: the session lands through the listener below
+      // in a moment, so keep the loading screen up (for 8 s at most).
+      const q0 = new URLSearchParams(window.location.search);
+      if (q0.get('code') || /access_token|type=recovery/.test(window.location.hash)) window.setTimeout(() => setChecking(false), 8000);
+      else setChecking(false);
       // First visit on this device, plain /auth (no OAuth/recovery leg, no
       // explicit tab): show the four welcome slides before the form.
       const q = new URLSearchParams(window.location.search);
       const plain = !window.location.hash && !q.get('code') && !q.get('tab') && !q.get('expired');
       if (plain && !hasSeenWelcome()) navigate('/welcome', { replace: true });
-    });
+    }).catch(() => setChecking(false));
     const { data: sub } = sb.auth.onAuthStateChange((event, session) => {
       log.info('session', `event=${event} signedIn=${!!session}`);
       if (event === 'PASSWORD_RECOVERY') {
@@ -292,18 +307,8 @@ export default function AuthRoute() {
     }
   };
 
-  if (welcomeBack)
-    return (
-      // See-through: the page's Adire pattern shows through a light layer.
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, maxWidth: 'var(--shell, 480px)', margin: '0 auto', background: 'color-mix(in srgb, var(--surface) 55%, transparent)', padding: 24, textAlign: 'center' }}>
-        <BoxBoy pose="cheer" width={112} />
-        <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 28 }}>Own your journey.</h1>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', color: 'var(--text2)', fontSize: 13, fontWeight: 600 }}>
-          <Loader2 size={16} style={{ animation: 'spin 0.8s linear infinite', color: 'var(--u-green)' }} />
-          Getting your space ready…
-        </div>
-      </div>
-    );
+  // Signed in: the same loading screen as while the app opened, until Home.
+  if (welcomeBack) return <Loading text="Getting your space ready…" />;
 
   if (recovery)
     return (
@@ -330,6 +335,8 @@ export default function AuthRoute() {
         </form>
       </div>
     );
+
+  if (checking) return <Loading text="Checking sign-in…" />;
 
   return (
     <>

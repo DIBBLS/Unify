@@ -6,7 +6,7 @@ import { errorToast } from '../../lib/errors';
 import { ROUTES } from '../../lib/routes';
 import { CLUE_AFTER, MAX_GUESSES, dailyFor, dailyForAny, readStats, recordResult, score, shareText, today, type Daily, type DailyStats, type Mark } from '../../lib/dailyword';
 import BackButton from '../../components/BackButton';
-import { GameSkeleton } from '../../components/Skeletons';
+import GameLoading from '../../components/GameLoading';
 import { BoxBoy } from '../../components/redesign/brand';
 import { Card, Display, Label } from '../../components/redesign/ui';
 import { useCheer } from '../../components/Cheer';
@@ -129,7 +129,7 @@ export default function DailyWordRoute() {
   }, [press]);
 
   const shell = { maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '16px 16px 32px' } as const;
-  if (state === 'loading') return <div style={shell}><GameSkeleton /></div>;
+  if (state === 'loading') return <div style={shell}><GameLoading text="Getting today's term…" /></div>;
   if (state === 'none' || !daily) {
     return (
       <div style={shell}>

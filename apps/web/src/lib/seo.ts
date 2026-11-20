@@ -8,9 +8,11 @@ const DEFAULT_DESC =
 
 type Meta = { title: string; desc?: string; index?: boolean };
 
+const GAME_TITLE: Record<string, string> = { keywords: 'Keywords', crossword: 'Crossword', match: 'Match-up', truefalse: 'True or False', gapfill: 'Fill the gap' };
+
 function metaFor(path: string): Meta {
-  const week = /^\/learn\/([^/]+)\/week\/(\d+)(?:\/(keywords|crossword))?/.exec(path);
-  if (week) return { title: `${week[3] ? `${week[3] === 'keywords' ? 'Keywords' : 'Crossword'} · ` : ''}${decodeURIComponent(week[1])} Week ${week[2]}` };
+  const week = /^\/learn\/([^/]+)\/week\/(\d+)(?:\/(keywords|crossword|match|truefalse|gapfill))?/.exec(path);
+  if (week) return { title: `${week[3] ? `${GAME_TITLE[week[3]] || week[3]} · ` : ''}${decodeURIComponent(week[1])} Week ${week[2]}` };
   const course = /^\/courses\/(?!find)([^/]+)/.exec(path);
   if (course) return { title: decodeURIComponent(course[1]) };
   const fixed: Record<string, Meta> = {

@@ -23,6 +23,8 @@ export const ROUTES = {
   keywords: (code: string, week: number | string) => `/learn/${encodeURIComponent(code)}/week/${week}/keywords`,
   crossword: (code: string, week: number | string) => `/learn/${encodeURIComponent(code)}/week/${week}/crossword`,
   match: (code: string, week: number | string) => `/learn/${encodeURIComponent(code)}/week/${week}/match`,
+  truefalse: (code: string, week: number | string) => `/learn/${encodeURIComponent(code)}/week/${week}/truefalse`,
+  gapfill: (code: string, week: number | string) => `/learn/${encodeURIComponent(code)}/week/${week}/gapfill`,
   games: '/games',
   dailyWord: '/games/daily',
   liveWire: '/livewire',

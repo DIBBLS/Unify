@@ -304,45 +304,6 @@ export function ProfileSkeleton() {
   );
 }
 
-/** A course game (Keywords, Crossword): Back, label, the level title and
- *  progress bar, the clue card, then the board (word boxes or grid). */
-export function GameSkeleton({ grid = false }: { grid?: boolean }) {
-  return (
-    <div role="status" aria-label="Loading the game" className="g-shell">
-      <div className="skel" style={{ height: 18, width: 64, marginBottom: 16 }} />
-      <div className="skel" style={{ height: 11, width: 160 }} />
-      <div className="g-head">
-        <div className="skel" style={{ height: 24, width: 96 }} />
-        <div className="skel" style={{ flex: 1, height: 16, borderRadius: 9999 }} />
-      </div>
-      <div className="g-layout">
-        <div className="g-main">
-          <div className="skel" style={{ height: 76, borderRadius: 18 }} />
-          {grid ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 4, maxWidth: 360, width: '100%', margin: '0 auto' }}>
-              {Array.from({ length: 40 }, (_, i) => <div key={i} className="skel" style={{ aspectRatio: '1', borderRadius: 8, opacity: (i * 7) % 5 === 0 ? 0 : 1 }} />)}
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-              {[7, 5, 4, 4].map((n, r) => (
-                <div key={r} style={{ display: 'flex', gap: 5 }}>
-                  {Array.from({ length: n }, (_, i) => <div key={i} className="skel" style={{ width: r ? 32 : 40, height: r ? 36 : 44, borderRadius: 10 }} />)}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        <div className="g-side">
-          {grid ? (
-            <div className="skel" style={{ height: 160, borderRadius: 14 }} />
-          ) : (
-            <div className="skel" style={{ width: 'clamp(220px, min(84vw, 40svh), 340px)', aspectRatio: '1', borderRadius: '50%', margin: '46px auto 0' }} />
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /** A centred prompt, one input and a button (CGPA planner, onboarding). */
 export function FormSkeleton() {

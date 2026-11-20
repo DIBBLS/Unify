@@ -8,7 +8,7 @@ import { play } from '../../lib/sound';
 import { sayPraise } from '../../lib/welcomeVoice';
 import BackButton from '../../components/BackButton';
 import GameFinish from '../../components/GameFinish';
-import { GameSkeleton } from '../../components/Skeletons';
+import GameLoading from '../../components/GameLoading';
 import { BoxBoy } from '../../components/redesign/brand';
 import { Card, Display, Label } from '../../components/redesign/ui';
 import { useCheer } from '../../components/Cheer';
@@ -97,7 +97,7 @@ export default function MatchRoute() {
 
   const shell = { maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '16px 16px 40px' } as const;
   if (err) return <div style={shell}><BackButton to={ROUTES.games} /><Card style={{ marginTop: 8 }}><div className="t-14">{err}</div></Card></div>;
-  if (!terms) return <div style={shell}><GameSkeleton /></div>;
+  if (!terms) return <div style={shell}><GameLoading text="Pairing up your terms…" /></div>;
   if (terms.length < 3) {
     return (
       <div style={shell}>

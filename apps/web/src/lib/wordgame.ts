@@ -239,3 +239,63 @@ export function buildLevels(note: UnifyNote, max = 12): Level[] {
     return { term, letters: shuffle(letters, term.word.length * 31 + n * 7 + 3), slots, bonus, clues };
   });
 }
+
+// ---- Fill the gap ----
+// A sentence from the week's notes with one key term taken out. Only prose
+// (paragraphs, bullets, insights, analogies, symbol notes): never headings or
+// maths. Each sentence keeps one gap; the other choices are the week's other
+// terms, so every option is a real course word.
+export type Gap = { before: string; after: string; answer: Term; options: Term[] };
+const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const termRe = (w: string) => new RegExp(`\\b${escapeRe(w)}\\b`, 'i');
+export function gapSentences(note: UnifyNote, terms: Term[], want = 10): Gap[] {
+  if (terms.length < 4) return [];
+  const prose: string[] = [];
+  for (const t of note.topics || []) {
+    for (const s of t.subtopics || []) {
+      for (const b of s.content || []) {
+        if (b.type === 'paragraph' || b.type === 'insight' || b.type === 'analogy') prose.push(b.text);
+        if (b.type === 'bullets') prose.push(...b.items);
+        if (b.type === 'symbol') prose.push(b.desc);
+      }
+    }
+  }
+  const sentences = prose
+    // (No look-behind: older iPhones can't parse it.)
+    .flatMap((p) => strip(noMaths(p)).replace(/([.!?])\s+(?=[A-Z])/g, '$1\n').split('\n'))
+    .map((s) => s.trim())
+    .filter((s) => s.length >= 30 && s.length <= 200 && !/_{3,}/.test(s));
+  const out: Gap[] = [];
+  const usedSentence = new Set<string>();
+  const perTerm = new Map<string, number>();
+  for (const s of sentences) {
+    if (usedSentence.has(s)) continue;
+    // Longest terms first so "shear stress" wins over "stress".
+    const hit = [...terms].sort((a, b) => b.display.length - a.display.length)
+      .find((t) => termRe(t.display).test(s) && (perTerm.get(t.word) || 0) < 2);
+    if (!hit) continue;
+    const m = termRe(hit.display).exec(s)!;
+    const before = s.slice(0, m.index);
+    const after = s.slice(m.index + m[0].length);
+    // The gap must leave enough of the sentence to reason from.
+    if (before.trim().length + after.trim().length < 20) continue;
+    const others = terms.filter((t) => t.word !== hit.word && !termRe(t.display).test(s)
+      // "digester" and "digesters" can't both be choices: either fits.
+      && !t.word.startsWith(hit.word) && !hit.word.startsWith(t.word));
+    if (others.length < 3) continue;
+    const pick = others.map((t) => [Math.random(), t] as const).sort((a, b) => a[0] - b[0]).slice(0, 3).map(([, t]) => t);
+    const options = [...pick, hit].map((t) => [Math.random(), t] as const).sort((a, b) => a[0] - b[0]).map(([, t]) => t);
+    out.push({ before, after, answer: hit, options });
+    usedSentence.add(s);
+    perTerm.set(hit.word, (perTerm.get(hit.word) || 0) + 1);
+  }
+  return out.map((g) => [Math.random(), g] as const).sort((a, b) => a[0] - b[0]).slice(0, want).map(([, g]) => g);
+}
+
+/** The week's terms for games that don't spell (any length), unique, with real clues. */
+export function weekTerms(note: UnifyNote, max = 14): Term[] {
+  const base = extractTerms(note, 30);
+  const all = [...base, ...moreTerms(note, base, 30, max)].filter((t) => t.clue && t.clue.trim().length >= 8);
+  const seen = new Set<string>();
+  return all.filter((t) => (seen.has(t.word) ? false : (seen.add(t.word), true)));
+}

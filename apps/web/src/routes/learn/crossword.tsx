@@ -9,7 +9,7 @@ import { api } from '../../lib/api';
 import { buildCrossword, type Entry, type Puzzle } from '../../lib/crossword';
 import type { UnifyNote } from '../../types/note';
 import BackButton from '../../components/BackButton';
-import { GameSkeleton } from '../../components/Skeletons';
+import GameLoading from '../../components/GameLoading';
 import GameFinish from '../../components/GameFinish';
 import { useCheer } from '../../components/Cheer';
 import { BoxBoy } from '../../components/redesign/brand';
@@ -193,7 +193,7 @@ export default function CrosswordRoute() {
   const backTo = `/games?course=${encodeURIComponent(courseCode)}`;
   const weekPath = `/learn/${encodeURIComponent(courseCode)}/week/${weekNum}`;
   if (err) return <div className="g-shell"><BackButton to={backTo} fixed /><div className="t-14" style={{ color: 'var(--u-red)' }}>{err}</div></div>;
-  if (puzzle === undefined) return <GameSkeleton grid />;
+  if (puzzle === undefined) return <div className="g-shell"><GameLoading text="Building your crossword…" /></div>;
   if (!puzzle) {
     return (
       <div className="g-shell" style={{ maxWidth: 480 }}>

@@ -9,7 +9,7 @@ import { api } from '../../lib/api';
 import { buildLevels, type Level } from '../../lib/wordgame';
 import type { UnifyNote } from '../../types/note';
 import BackButton from '../../components/BackButton';
-import { GameSkeleton } from '../../components/Skeletons';
+import GameLoading from '../../components/GameLoading';
 import { BoxBoy } from '../../components/redesign/brand';
 import { Card, Display, Label } from '../../components/redesign/ui';
 import GameFinish from '../../components/GameFinish';
@@ -278,7 +278,7 @@ export default function KeywordsRoute() {
   const back = `/games?course=${encodeURIComponent(courseCode)}`;
 
   if (err) return <div className="g-shell"><BackButton to={back} fixed /><div className="t-14" style={{ color: 'var(--u-red)' }}>{err}</div></div>;
-  if (!levels) return <GameSkeleton />;
+  if (!levels) return <div className="g-shell"><GameLoading /></div>;
   if (!levels.length || !lv) {
     return (
       <div className="g-shell" style={{ maxWidth: 480 }}>

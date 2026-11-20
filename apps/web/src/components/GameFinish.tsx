@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { LEADERBOARD } from '../lib/features';
 import { Share2, Trophy } from 'lucide-react';
-import { api } from '../lib/api';
+import { api, type GameId } from '../lib/api';
 import { Avatar, type PersonaKey } from './redesign/brand';
 
 // End of a course game: saves the run (best score kept, first finish earns
 // XP), lets the student share it (phone share sheet, or WhatsApp), and shows
 // the week's leaderboard among students taking the course.
 type Board = Awaited<ReturnType<typeof api.gameBoard>>;
-const NAME = { keywords: 'Keywords', crossword: 'Crossword', match: 'Match-up' } as const;
+const NAME = { keywords: 'Keywords', crossword: 'Crossword', match: 'Match-up', truefalse: 'True or False', gapfill: 'Fill the gap' } as const;
 
-export default function GameFinish({ game, course, week, score, terms, hints, seconds }: { game: 'keywords' | 'crossword' | 'match'; course: string; week: number; score: number; terms: number; hints: number; seconds: number }) {
+export default function GameFinish({ game, course, week, score, terms, hints, seconds }: { game: GameId; course: string; week: number; score: number; terms: number; hints: number; seconds: number }) {
   const [result, setResult] = useState<{ best: number; newBest: boolean; xp: number } | null>(null);
   const [board, setBoard] = useState<Board | null>(null);
   const sent = useRef(false);

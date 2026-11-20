@@ -278,6 +278,10 @@ let meCache: { at: number; data: MeResponse } | null = null;
 // sign-out never repopulates the cache or gets handed to a later caller.
 let meInflight: Promise<MeResponse> | null = null;
 let meGen = 0;
+/** The profile if it was fetched in the last few seconds, else null (never fetches). */
+export function peekMe(): MeResponse | null {
+  return meCache && Date.now() - meCache.at < 15000 ? meCache.data : null;
+}
 export function clearMeCache(): void {
   meCache = null;
   meInflight = null;
@@ -408,6 +412,9 @@ export type ScheduledReminder = {
   audience: 'all' | 'students' | 'lecturers' | 'staff';
   sendAt: string; days: number[]; active: boolean; lastSentOn: string | null;
 };
+
+/** Every course game whose score is saved. The route path ends with this id. */
+export type GameId = 'keywords' | 'crossword' | 'match' | 'truefalse' | 'gapfill';
 
 export const api = {
   universities: () => apiFetch<University[]>("/v1/universities"),
@@ -791,9 +798,9 @@ export const api = {
     apiFetch<{ played: number; solved: number; mine: { guesses: number; solved: boolean } | null }>(`/v1/games/daily?course=${encodeURIComponent(course)}&day=${day}`),
   dailyWordSave: (payload: { course: string; day: string; word: string; guesses: number; solved: boolean }) =>
     apiFetch<{ ok: boolean; first: boolean; xp: number; solved: number }>('/v1/games/daily', { method: 'POST', body: JSON.stringify(payload) }, 0),
-  gameScore: (payload: { game: 'keywords' | 'crossword' | 'match'; course: string; week: number; score: number; terms: number; hints: number; seconds: number }) =>
+  gameScore: (payload: { game: GameId; course: string; week: number; score: number; terms: number; hints: number; seconds: number }) =>
     apiFetch<{ ok: boolean; best: number; newBest: boolean; xp: number }>('/v1/games/score', { method: 'POST', body: JSON.stringify(payload) }),
-  gameBoard: (q: { course: string; week?: number; game?: 'keywords' | 'crossword' | 'match' }) =>
+  gameBoard: (q: { course: string; week?: number; game?: GameId }) =>
     apiFetch<{ players: number; top: { rank: number; name: string; persona: string | null; score: number; terms: number; me: boolean }[]; me: { rank: number; score: number; terms: number } | null }>(
       `/v1/games/leaderboard?course=${encodeURIComponent(q.course)}${q.week ? `&week=${q.week}` : ''}${q.game ? `&game=${q.game}` : ''}`
     ),

@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { LEADERBOARD } from '../lib/features';
 import { Trophy } from 'lucide-react';
-import { CrosswordIcon, KeywordsIcon, MatchIcon } from './GameIcons';
+import { CrosswordIcon, GapFillIcon, KeywordsIcon, MatchIcon, TrueFalseIcon } from './GameIcons';
 import { ROUTES } from '../lib/routes';
 import GameLeaderboard from './GameLeaderboard';
 
@@ -18,6 +18,8 @@ export default function PracticeGames({ course, week }: { course: string; week: 
         <Link to={ROUTES.keywords(course, week)} className="btn btn--green btn--sm"><KeywordsIcon size={15} /> Keywords</Link>
         <Link to={ROUTES.crossword(course, week)} className="btn btn--white btn--sm"><CrosswordIcon size={15} /> Crossword</Link>
         <Link to={ROUTES.match(course, week)} className="btn btn--white btn--sm"><MatchIcon size={15} /> Match-up</Link>
+        <Link to={ROUTES.truefalse(course, week)} className="btn btn--white btn--sm"><TrueFalseIcon size={15} /> True or False</Link>
+        <Link to={ROUTES.gapfill(course, week)} className="btn btn--white btn--sm"><GapFillIcon size={15} /> Fill the gap</Link>
       </div>
       {LEADERBOARD && <GameLeaderboard course={course} week={week} limit={3} />}
       <Link to={`${ROUTES.games}?course=${encodeURIComponent(course)}`} style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 13, fontWeight: 700, color: 'var(--u-good)', textDecoration: 'none' }}>

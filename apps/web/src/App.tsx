@@ -33,6 +33,8 @@ const GuideRoute = lazyRoute(() => import('./routes/guide'));
 const KeywordsRoute = lazyRoute(() => import('./routes/learn/keywords'));
 const CrosswordRoute = lazyRoute(() => import('./routes/learn/crossword'));
 const MatchRoute = lazyRoute(() => import('./routes/learn/match'));
+const TrueFalseRoute = lazyRoute(() => import('./routes/learn/truefalse'));
+const GapFillRoute = lazyRoute(() => import('./routes/learn/gapfill'));
 const GamesRoute = lazyRoute(() => import('./routes/games'));
 const DailyWordRoute = lazyRoute(() => import('./routes/learn/daily-word'));
 const LiveWireRoute = lazyRoute(() => import('./routes/livewire'));
@@ -91,7 +93,7 @@ import Loading from './components/Loading';
 import ErrorState from './components/ErrorState';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { supabaseBrowser, ensureSession, setCachedSession, getCachedSession } from './lib/supabase';
-import { api } from './lib/api';
+import { api, peekMe } from './lib/api';
 import { lazyRoute, preloadWhenIdle } from './lib/lazyRoute';
 // Set once the next screens' code has been queued for idle download.
 let preloaded = false;
@@ -167,7 +169,13 @@ const AUTHOR_ONLY = ['lecturer', 'contributor'];
 function RequireRole({ allow, children, strict = false }: { allow: string[]; children: JSX.Element; strict?: boolean }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [ok, setOk] = useState(false);
+  // A profile fetched moments ago (sign-in, the previous page) already says
+  // whether this page is allowed: open at once instead of flashing a loader.
+  // The check below still runs and redirects if the answer changed.
+  const [ok, setOk] = useState(() => {
+    const me = peekMe();
+    return !!me && me.onboarded && allow.includes(me.profile?.role || 'student');
+  });
   const [failed, setFailed] = useState(false);
   const key = allow.join('|');
 
@@ -230,6 +238,8 @@ function RouteMeta() {
       () => import('./routes/learn/keywords'),
       () => import('./routes/learn/crossword'),
       () => import('./routes/learn/match'),
+      () => import('./routes/learn/truefalse'),
+      () => import('./routes/learn/gapfill'),
     ]);
   }, [pathname]);
   return null;
@@ -415,6 +425,8 @@ export default function App() {
           <Route path="/learn/:courseCode/week/:week/keywords" element={<RequireAuth><KeywordsRoute /></RequireAuth>} />
           <Route path="/learn/:courseCode/week/:week/crossword" element={<RequireAuth><CrosswordRoute /></RequireAuth>} />
           <Route path="/learn/:courseCode/week/:week/match" element={<RequireAuth><MatchRoute /></RequireAuth>} />
+          <Route path="/learn/:courseCode/week/:week/truefalse" element={<RequireAuth><TrueFalseRoute /></RequireAuth>} />
+          <Route path="/learn/:courseCode/week/:week/gapfill" element={<RequireAuth><GapFillRoute /></RequireAuth>} />
           <Route path={ROUTES.games} element={<RequireAuth><GamesRoute /></RequireAuth>} />
           <Route path={ROUTES.dailyWord} element={<RequireAuth><DailyWordRoute /></RequireAuth>} />
           <Route path={ROUTES.liveWire} element={<RequireAuth><LiveWireRoute /></RequireAuth>} />
