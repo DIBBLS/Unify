@@ -64,7 +64,9 @@ export async function welcomeLines(name: string): Promise<Seg[]> {
   } catch {
     // offline: the greeting alone is fine
   }
-  return lines.flatMap((l, i) => phrases(l, i === lines.length - 1 ? PAUSE.block : PAUSE.sentence + 120));
+  // Whole sentences, not short phrases: each new utterance restarts the
+  // voice's intonation, so phrase-by-phrase speech sounded choppy and uneven.
+  return lines.map((l, i) => ({ text: l, pause: i === lines.length - 1 ? PAUSE.block : PAUSE.sentence + 120 }));
 }
 
 let stop: (() => void) | null = null;
@@ -80,11 +82,32 @@ function pickVoice(): SpeechSynthesisVoice | null {
   return voice || [...voices].sort((a, b) => voiceScore(a) - voiceScore(b))[0] || null;
 }
 
+// One voice for the whole visit. Browsers load their voice list late: speaking
+// before it arrives used the default voice, then later lines switched to
+// another, so the welcome changed voice part-way. Wait for the list (1.5 s at
+// most), choose once, and keep that voice for the welcome and every cheer.
+let locked: SpeechSynthesisVoice | null | undefined;
+async function steadyVoice(): Promise<SpeechSynthesisVoice | null> {
+  if (locked !== undefined) return locked;
+  const synth = window.speechSynthesis;
+  if (!synth.getVoices().length) {
+    await new Promise<void>((resolve) => {
+      const done = () => { synth.removeEventListener?.('voiceschanged', done); resolve(); };
+      synth.addEventListener?.('voiceschanged', done);
+      window.setTimeout(done, 1500);
+    });
+  }
+  locked = pickVoice();
+  return locked;
+}
+const STEADY_RATE = 0.95;
+
 export async function speakWelcome(name: string): Promise<void> {
   if (!spokenWelcomeSupported()) return;
   const segs = await welcomeLines(name);
   stop?.();
-  stop = speakPhrases(segs, { voice: pickVoice(), rate: () => 1 });
+  const voice = await steadyVoice();
+  stop = speakPhrases(segs, { voice, rate: () => STEADY_RATE });
 }
 
 // Short spoken cheers at the moments that matter (same switch as the
@@ -104,9 +127,12 @@ export function sayPraise(kind: Praise) {
     if (window.speechSynthesis.speaking) return;
     const lines = PRAISE[kind](who.name);
     const u = new SpeechSynthesisUtterance(lines[Math.floor(Math.random() * lines.length)]);
-    const v = pickVoice();
-    if (v) { u.voice = v; u.lang = v.lang; }
-    window.speechSynthesis.speak(u);
+    u.rate = STEADY_RATE;
+    u.pitch = 1;
+    void steadyVoice().then((v) => {
+      if (v) { u.voice = v; u.lang = v.lang; }
+      if (!window.speechSynthesis.speaking) window.speechSynthesis.speak(u);
+    });
   } catch {
     // speaking is a nicety
   }
