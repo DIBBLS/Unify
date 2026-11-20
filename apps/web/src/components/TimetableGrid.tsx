@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import { MapPin, Video, X } from 'lucide-react';
 import type { ClassSlot } from '../lib/api';
 import { BoxBoy } from './redesign/brand';
@@ -71,8 +72,13 @@ function lanes(slots: ClassSlot[]): Map<string, { lane: number; of: number }> {
 }
 
 const ROW = 60; // px per hour
+const SNAP = 15; // minutes
+const hhmm = (m: number) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+const fmtMin = (m: number) => fmt(hhmm(m));
 
-export function DayGrid({ slots, stateOf, nowMin, isHoc, onOpen, onRemove, onJoin }: {
+type Ghost = { kind: 'move' | 'resize' | 'create'; id?: string; start: number; end: number };
+
+export function DayGrid({ slots, stateOf, nowMin, isHoc, onOpen, onRemove, onJoin, onMove, onCreate }: {
   slots: ClassSlot[];
   stateOf: (s: ClassSlot) => SlotState;
   nowMin: number | null;
@@ -80,14 +86,108 @@ export function DayGrid({ slots, stateOf, nowMin, isHoc, onOpen, onRemove, onJoi
   onOpen: (s: ClassSlot) => void;
   onRemove: (s: ClassSlot) => void;
   onJoin: (s: ClassSlot) => void;
+  /** Drag a block to a new time, or its bottom edge to a new end. Resolve when saved (or refused). */
+  onMove?: (s: ClassSlot, start: string, end: string) => Promise<void> | void;
+  /** Drag on empty time to set a new entry from there to there. */
+  onCreate?: (start: string, end: string) => void;
 }) {
-  const [lo, hi] = hourRange(slots);
+  const editable = !!onMove || !!onCreate;
+  let [lo, hi] = hourRange(slots);
+  // Room to drag earlier and later than the usual day.
+  if (editable) { lo = Math.min(lo, 7); hi = Math.max(hi, 20); }
   const hours = Array.from({ length: hi - lo + 1 }, (_, i) => lo + i);
   const lane = lanes(slots);
   const height = (hi - lo) * ROW;
   const showNow = nowMin != null && nowMin >= lo * 60 && nowMin <= hi * 60;
+  const col = useRef<HTMLDivElement>(null);
+  const [ghost, setGhost] = useState<Ghost | null>(null);
+  const justDragged = useRef(false);
+
+  // Drag: a mouse drags straight away; a finger holds for a moment first, so
+  // an ordinary swipe still scrolls the page. Times snap to 15 minutes.
+  const begin = (e: React.PointerEvent, kind: Ghost['kind'], s?: ClassSlot) => {
+    if (kind === 'create' ? !onCreate : !onMove) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.stopPropagation();
+    const touch = e.pointerType !== 'mouse';
+    const pid = e.pointerId;
+    const x0 = e.clientX;
+    const y0 = e.clientY;
+    const minAt = (y: number) => lo * 60 + ((y - (col.current?.getBoundingClientRect().top || 0)) / ROW) * 60;
+    const snap = (m: number) => Math.round(m / SNAP) * SNAP;
+    const clamp = (m: number, a: number, b: number) => Math.min(b, Math.max(a, m));
+    const t0 = s ? timesOf(s) : null;
+    const from = t0 ? toMin(t0.start) : 0;
+    const to = t0 ? toMin(t0.end) : 0;
+    const anchor = clamp(snap(minAt(y0)), lo * 60, hi * 60 - SNAP);
+    let started = false;
+    let last: Ghost | null = null;
+    let timer = 0;
+    const noScroll = (ev: TouchEvent) => ev.preventDefault();
+    const place = (y: number): Ghost => {
+      const dy = ((y - y0) / ROW) * 60;
+      if (kind === 'move') {
+        const dur = to - from;
+        const st = clamp(snap(from + dy), lo * 60, hi * 60 - dur);
+        return { kind, id: s!.id, start: st, end: st + dur };
+      }
+      if (kind === 'resize') return { kind, id: s!.id, start: from, end: clamp(snap(to + dy), from + SNAP, hi * 60) };
+      const cur = clamp(snap(minAt(y)), lo * 60, hi * 60);
+      let a = Math.min(anchor, cur);
+      let b = Math.max(anchor, cur);
+      if (b - a < 30) { a = anchor; b = Math.min(hi * 60, anchor + 60); }
+      return { kind, start: a, end: b };
+    };
+    const stop = () => {
+      window.clearTimeout(timer);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', cancel);
+      document.removeEventListener('touchmove', noScroll);
+    };
+    const start = () => {
+      started = true;
+      try { navigator.vibrate?.(12); } catch { /* fine */ }
+      document.addEventListener('touchmove', noScroll, { passive: false });
+      last = place(y0);
+      setGhost(last);
+    };
+    function move(ev: PointerEvent) {
+      if (ev.pointerId !== pid) return;
+      if (!started) {
+        const dist = Math.hypot(ev.clientX - x0, ev.clientY - y0);
+        if (touch) { if (dist > 8) stop(); return; } // a swipe: let the page scroll
+        if (dist < 4) return;
+        start();
+      }
+      last = place(ev.clientY);
+      setGhost(last);
+    }
+    function cancel() { stop(); setGhost(null); }
+    function up(ev: PointerEvent) {
+      if (ev.pointerId !== pid) return;
+      stop();
+      if (!started || !last) return; // a plain tap: opens as before
+      justDragged.current = true;
+      window.setTimeout(() => { justDragged.current = false; }, 50);
+      const g = last;
+      if (g.kind === 'create') { setGhost(null); onCreate?.(hhmm(g.start), hhmm(g.end)); return; }
+      if (!s || (g.start === from && g.end === to)) { setGhost(null); return; }
+      void Promise.resolve(onMove?.(s, hhmm(g.start), hhmm(g.end))).finally(() => setGhost(null));
+    }
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', cancel);
+    if (touch) timer = window.setTimeout(start, 300);
+  };
+
   return (
-    <div role="list" aria-label="Classes by time" style={{ position: 'relative', marginTop: 12, padding: '10px 10px 10px 0', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16 }}>
+    <div
+      role="list"
+      aria-label="Classes by time"
+      onContextMenu={editable ? (e) => e.preventDefault() : undefined}
+      style={{ position: 'relative', marginTop: 12, padding: '10px 10px 10px 0', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, ...(editable ? ({ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' } as React.CSSProperties) : {}) }}
+    >
       <div style={{ position: 'relative', height: height + 2 }}>
         {hours.map((h) => (
           <div key={h} style={{ position: 'absolute', left: 0, right: 0, top: (h - lo) * ROW, display: 'flex', alignItems: 'flex-start' }}>
@@ -95,13 +195,16 @@ export function DayGrid({ slots, stateOf, nowMin, isHoc, onOpen, onRemove, onJoi
             <span style={{ flex: 1, borderTop: '1px dashed var(--border)' }} />
           </div>
         ))}
-        <div style={{ position: 'absolute', left: 54, right: 0, top: 0, bottom: 0 }}>
+        <div ref={col} onPointerDown={onCreate ? (e) => begin(e, 'create') : undefined} style={{ position: 'absolute', left: 54, right: 0, top: 0, bottom: 0, cursor: onCreate ? 'cell' : undefined }}>
           {slots.map((s) => {
+            const g = ghost && ghost.id === s.id ? ghost : null;
             const t = timesOf(s);
             const st = stateOf(s);
             const ch = s.change?.status;
-            const top = ((toMin(t.start) - lo * 60) / 60) * ROW;
-            const h = Math.max(34, ((toMin(t.end) - toMin(t.start)) / 60) * ROW - 4);
+            const sMin = g ? g.start : toMin(t.start);
+            const eMin = g ? g.end : toMin(t.end);
+            const top = ((sMin - lo * 60) / 60) * ROW;
+            const h = Math.max(34, ((eMin - sMin) / 60) * ROW - 4);
             const l = lane.get(s.id) || { lane: 0, of: 1 };
             const now = st === 'now' && ch !== 'cancelled';
             const next = st === 'next' && ch !== 'cancelled';
@@ -117,20 +220,22 @@ export function DayGrid({ slots, stateOf, nowMin, isHoc, onOpen, onRemove, onJoi
               <div
                 key={s.id}
                 role="listitem"
-                onClick={() => onOpen(s)}
+                onClick={() => { if (!justDragged.current) onOpen(s); }}
+                onPointerDown={onMove ? (e) => begin(e, 'move', s) : (e) => e.stopPropagation()}
                 style={{
                   position: 'absolute', top: top + 2, height: h,
                   left: `calc(${(l.lane / l.of) * 100}% + 2px)`, width: `calc(${100 / l.of}% - 4px)`,
-                  borderRadius: 12, padding: compact ? '5px 8px' : '8px 10px', cursor: 'pointer', overflow: 'hidden',
-                  display: 'flex', flexDirection: 'column', gap: 2, opacity: st === 'done' && !now ? 0.55 : 1,
+                  borderRadius: 12, padding: compact ? '5px 8px' : '8px 10px', cursor: onMove ? (g ? 'grabbing' : 'grab') : 'pointer', overflow: 'hidden',
+                  display: 'flex', flexDirection: 'column', gap: 2, opacity: st === 'done' && !now && !g ? 0.55 : 1,
                   ...tone,
+                  ...(g ? { zIndex: 3, transform: 'scale(1.02)', boxShadow: '0 12px 28px rgba(0,0,0,.25)', outline: '2px solid var(--u-amber)', transition: 'top .08s, height .08s' } : {}),
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
                   {now && <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 1, color: 'var(--u-black)', background: 'var(--u-green)', borderRadius: 6, padding: '2px 5px' }}>NOW</span>}
                   {next && <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 1, color: 'var(--u-black)', background: 'var(--u-amber)', borderRadius: 6, padding: '2px 5px' }}>NEXT</span>}
                   <span style={{ fontWeight: 800, fontSize: 14, textDecoration: ch === 'cancelled' ? 'line-through' : undefined, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.course}</span>
-                  <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: 4, alignItems: 'center', flex: 'none' }} onClick={(e) => e.stopPropagation()}>
+                  <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: 4, alignItems: 'center', flex: 'none' }} onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
                     {s.meetLink && ch !== 'cancelled' && (
                       <button onClick={() => onJoin(s)} className="btn btn--amber btn--sm" style={{ height: 26, padding: '0 10px', fontSize: 11, gap: 4 }}><Video size={12} /> Join</button>
                     )}
@@ -140,7 +245,7 @@ export function DayGrid({ slots, stateOf, nowMin, isHoc, onOpen, onRemove, onJoi
                   </span>
                 </div>
                 <div style={{ fontSize: 12, opacity: 0.85, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                  <span>{fmt(t.start)}–{fmt(t.end)}</span>
+                  <span style={g ? { fontWeight: 900 } : undefined}>{g ? `${fmtMin(g.start)}–${fmtMin(g.end)}` : `${fmt(t.start)}–${fmt(t.end)}`}</span>
                   {!compact && t.venue && <span style={{ display: 'inline-flex', gap: 3, alignItems: 'center' }}><MapPin size={11} /> {t.venue}</span>}
                   {ch === 'cancelled' && <span style={{ fontWeight: 800 }}>Cancelled</span>}
                   {ch === 'unconfirmed' && <span style={{ fontWeight: 800, color: 'var(--u-warn-ink)' }}>Not confirmed</span>}
@@ -149,9 +254,25 @@ export function DayGrid({ slots, stateOf, nowMin, isHoc, onOpen, onRemove, onJoi
                   {ch === 'confirmed' && <span style={{ fontWeight: 800, color: now ? 'var(--u-green)' : 'var(--u-good)' }}>✓ Confirmed</span>}
                 </div>
                 {!compact && s.lecturer && <div style={{ fontSize: 11, opacity: 0.7, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.lecturer}</div>}
+                {onMove && (
+                  // Drag the bottom edge to make it longer or shorter.
+                  <span aria-hidden="true" onPointerDown={(e) => begin(e, 'resize', s)} onClick={(e) => e.stopPropagation()} style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 14, cursor: 'ns-resize', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <span style={{ width: 26, height: 4, borderRadius: 9999, background: 'currentColor', opacity: 0.35 }} />
+                  </span>
+                )}
               </div>
             );
           })}
+          {ghost?.kind === 'create' && (
+            <div aria-hidden="true" style={{ position: 'absolute', left: 2, right: 2, top: ((ghost.start - lo * 60) / 60) * ROW + 2, height: Math.max(26, ((ghost.end - ghost.start) / 60) * ROW - 4), borderRadius: 12, border: '2px dashed var(--u-amber)', background: 'var(--u-warn-tint)', display: 'flex', alignItems: 'flex-start', padding: '6px 10px', fontSize: 12, fontWeight: 900, color: 'var(--text)', zIndex: 3, pointerEvents: 'none' }}>
+              New · {fmtMin(ghost.start)}–{fmtMin(ghost.end)}
+            </div>
+          )}
+          {slots.length === 0 && !ghost && (
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+              <span style={{ padding: '6px 12px', borderRadius: 9999, background: 'var(--u-card-2)', border: '1px solid var(--border)', fontSize: 12, fontWeight: 700, color: 'var(--text2)' }}>Nothing scheduled · drag to add</span>
+            </div>
+          )}
         </div>
         {showNow && (
           <div aria-hidden="true" style={{ position: 'absolute', left: 46, right: 0, top: ((nowMin! - lo * 60) / 60) * ROW - 4, display: 'flex', alignItems: 'center', pointerEvents: 'none', zIndex: 2 }}>

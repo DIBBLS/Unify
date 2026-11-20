@@ -725,6 +725,8 @@ export const api = {
   materialDelete: (id: string) => apiFetch<{ ok: boolean }>(`/v1/materials/${id}`, { method: 'DELETE' }),
   slotChange: (id: string, payload: { status: SlotChange['status'] | 'normal'; date?: string; start?: string; end?: string; venue?: string; note?: string }) =>
     apiFetch<{ ok: boolean; date: string }>(`/v1/timetable/${id}/change`, { method: 'POST', body: JSON.stringify(payload) }),
+  slotMove: (id: string, to: { day: number; start: string; end: string }) =>
+    apiFetch<{ ok: boolean }>(`/v1/timetable/${id}`, { method: 'PATCH', body: JSON.stringify(to) }, 0),
   slotDelete: (id: string) =>
     apiFetch<{ ok: boolean }>(`/v1/timetable/${id}`, { method: 'DELETE' }),
   roster: (course: string) =>
@@ -743,6 +745,7 @@ export const api = {
   attendanceRemove: (sessionId: string, studentId: string) => apiFetch<{ ok: boolean }>(`/v1/attendance/sessions/${sessionId}/records/${studentId}`, { method: 'DELETE' }, 0),
   ownSlots: () => apiFetch<{ slots: OwnSlot[] }>('/v1/lecturer/own-slots'),
   ownSlotAdd: (body: { day: number; start: string; end: string; title: string; venue?: string }) => apiFetch<{ ok: boolean }>('/v1/lecturer/own-slots', { method: 'POST', body: JSON.stringify(body) }, 0),
+  ownSlotMove: (id: string, to: { day: number; start: string; end: string }) => apiFetch<{ ok: boolean }>(`/v1/lecturer/own-slots/${id}`, { method: 'PATCH', body: JSON.stringify(to) }, 0),
   ownSlotDelete: (id: string) => apiFetch<{ ok: boolean }>(`/v1/lecturer/own-slots/${id}`, { method: 'DELETE' }, 0),
   practice: (course: string) => apiFetch<{ questions: PracticeQuestion[] }>(`/v1/practice?course=${encodeURIComponent(course)}`),
   practiceAdd: (body: { course: string; week?: number; question: string; options: string[]; correctIndex: number; explanation?: string }) => apiFetch<{ ok: boolean }>('/v1/practice', { method: 'POST', body: JSON.stringify(body) }, 0),

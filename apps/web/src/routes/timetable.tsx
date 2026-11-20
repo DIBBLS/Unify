@@ -25,6 +25,8 @@ const toMin = (hhmm: string) => {
   return (h || 0) * 60 + (m || 0);
 };
 const VIEW_KEY = 'unify:timetable-view';
+const DRAG_HINT = 'Hold and drag a class to move it, drag its bottom edge to change when it ends, or hold and drag on empty time to add one.';
+
 
 export default function TimetableRoute() {
   const navigate = useNavigate();
@@ -39,6 +41,7 @@ export default function TimetableRoute() {
   // Lecturers see every class they teach (read-only: class reps set the times).
   const [isLecturer, setIsLecturer] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [addAt, setAddAt] = useState<{ start: string; end: string } | null>(null);
   // Day: the time grid for one day. Week: every day side by side (remembered).
   // Lecturers: the class timetables (set by class reps) or their own entries (L09).
   const [mine, setMine] = useState(() => new URLSearchParams(window.location.search).get('mine') === '1');
@@ -107,6 +110,26 @@ export default function TimetableRoute() {
   };
   const remove = (s: ClassSlot) => {
     void askConfirm({ title: `Remove ${s.course} on ${DAY_LONG[s.day]} at ${s.start}?`, body: "It goes from the whole class's timetable.", confirmLabel: 'Remove' }).then((ok) => { if (ok) void api.slotDelete(s.id).then(load).catch((e) => errorToast(e, 'remove that class time')); });
+  };
+  // Class rep drags a class to a new weekly time: asked first (the whole class
+  // sees it), shown at once, put back if the save fails.
+  const moveClass = async (s: ClassSlot, start: string, end: string) => {
+    const ok = await askConfirm({ title: `Move ${s.course} to ${start}–${end} on ${DAY_LONG[s.day]}s?`, body: "It changes the whole class's timetable every week, and the class is told.", confirmLabel: 'Move' });
+    if (!ok) return;
+    const before = slots;
+    setSlots((all) => all.map((x) => (x.id === s.id ? { ...x, start, end, change: undefined } : x)));
+    try {
+      await api.slotMove(s.id, { day: s.day, start, end });
+      toastSuccess(`${s.course} now ${start}–${end} on ${DAY_LONG[s.day]}s. The class has been told.`);
+    } catch (e) {
+      setSlots(before);
+      errorToast(e, 'move that class');
+    }
+  };
+  const addAtTime = (start: string, end: string) => {
+    setAddAt({ start, end });
+    setAdding(true);
+    window.setTimeout(() => document.getElementById('add-class-time')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
   };
   // Week view columns: Monday to Friday, plus a weekend day that has classes.
   const weekDays = ORDER.filter((d) => (d >= 1 && d <= 5) || countByDay[d]);
@@ -185,9 +208,16 @@ export default function TimetableRoute() {
             {isHoc && slots.length === 0 && <button className="btn btn--amber" onClick={() => setAdding(true)}>Add class times</button>}
             {!isHoc && !isLecturer && slots.length === 0 && <button className="btn btn--white" onClick={() => setMine(true)}>Set up my own timetable</button>}
           </Card>
-          <EmptyDay label={DAY_LONG[day]} nowMin={day === today ? nowMin : null} />
+          {isHoc ? (
+            <>
+              <div className="t-13 muted" style={{ marginTop: 12 }}>{DRAG_HINT}</div>
+              <DayGrid slots={[]} stateOf={state} nowMin={day === today ? nowMin : null} isHoc onOpen={open} onRemove={remove} onJoin={join} onCreate={addAtTime} />
+            </>
+          ) : <EmptyDay label={DAY_LONG[day]} nowMin={day === today ? nowMin : null} />}
           </>
         ) : (
+          <>
+          {isHoc && <div className="t-13 muted" style={{ marginTop: 4 }}>{DRAG_HINT}</div>}
           <DayGrid
             slots={daySlots}
             stateOf={state}
@@ -196,15 +226,18 @@ export default function TimetableRoute() {
             onOpen={open}
             onRemove={remove}
             onJoin={join}
+            onMove={isHoc ? moveClass : undefined}
+            onCreate={isHoc ? addAtTime : undefined}
           />
+          </>
         )}
       </div>
 
       {isHoc && courses.length > 0 && (
         adding ? (
-          <AddClassTime courses={courses} day={day} onDone={() => { setAdding(false); void load(); }} onCancel={() => setAdding(false)} />
+          <AddClassTime key={addAt ? `${day}-${addAt.start}-${addAt.end}` : 'new'} courses={courses} day={day} at={addAt} onDone={() => { setAdding(false); setAddAt(null); void load(); }} onCancel={() => { setAdding(false); setAddAt(null); }} />
         ) : (
-          slots.length > 0 && <button className="btn btn--white btn--block" style={{ marginTop: 14 }} onClick={() => setAdding(true)}>Add a class time</button>
+          slots.length > 0 && <button className="btn btn--white btn--block" style={{ marginTop: 14 }} onClick={() => { setAddAt(null); setAdding(true); }}>Add a class time</button>
         )
       )}
       </>}
@@ -242,6 +275,17 @@ function OwnTimetable({ courses, isLecturer, day, setDay, view, today, nowMin, o
     } catch (e) { errorToast(e, 'add that'); }
     finally { setBusy(false); }
   };
+  // Drag an entry to a new time (shown at once, put back if the save fails), or drag on empty time to add one there.
+  const moveOwn = async (x: ClassSlot, s0: string, e0: string) => {
+    const before = own;
+    setOwn((all) => (all || []).map((o) => (o.id === x.id ? { ...o, start: s0, end: e0 } : o)));
+    try { await api.ownSlotMove(x.id, { day: x.day, start: s0, end: e0 }); }
+    catch (e) { setOwn(before); errorToast(e, 'move that'); }
+  };
+  const addOwnAt = (s0: string, e0: string) => {
+    setD(day); setStart(s0); setEnd(e0); setAdding(true);
+    window.setTimeout(() => document.getElementById('add-own')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
+  };
   const removeOwn = (x: ClassSlot) => { void askConfirm({ title: `Remove ${x.course} on ${DAY_LONG[x.day]}?`, confirmLabel: 'Remove' }).then((ok) => { if (ok) void api.ownSlotDelete(x.id).then(load).catch((e) => errorToast(e, 'remove that')); }); };
   const count: Record<number, number> = {};
   for (const x of asSlots) count[x.day] = (count[x.day] || 0) + 1;
@@ -258,12 +302,14 @@ function OwnTimetable({ courses, isLecturer, day, setDay, view, today, nowMin, o
       <div style={{ marginTop: 12 }}>
         {own === null ? <TimetableSkeleton />
           : view === 'week' && asSlots.length ? <WeekGrid slots={asSlots} days={ORDER.filter((x) => (x >= 1 && x <= 5) || count[x])} today={today} nowMin={nowMin} labels={DAY_SHORT} onPickDay={openDay} />
-          : daySlots.length ? <DayGrid slots={daySlots} stateOf={() => 'later'} nowMin={day === today ? nowMin : null} isHoc onOpen={() => {}} onRemove={removeOwn} onJoin={() => {}} />
-          : <EmptyDay label={DAY_LONG[day]} nowMin={day === today ? nowMin : null} />}
+          : <>
+              <div className="t-13 muted">{DRAG_HINT.replace(/a class/g, 'an entry').replace('add one', 'add one')}</div>
+              <DayGrid slots={daySlots} stateOf={() => 'later'} nowMin={day === today ? nowMin : null} isHoc onOpen={() => {}} onRemove={removeOwn} onJoin={() => {}} onMove={moveOwn} onCreate={addOwnAt} />
+            </>}
       </div>
       {adding ? (
         <Card style={{ marginTop: 14, gap: 10 }}>
-          <div className="t-15 w-7">Add to your own timetable</div>
+          <div id="add-own" className="t-15 w-7">Add to your own timetable</div>
           <label className="t-13 w-6">What<input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={isLecturer ? 'e.g. Office hours' : 'e.g. Study MTH 201'} maxLength={80} style={field} /></label>
           {courses.length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }} aria-label="Your courses">
@@ -282,18 +328,18 @@ function OwnTimetable({ courses, isLecturer, day, setDay, view, today, nowMin, o
           </div>
         </Card>
       ) : (
-        <button className="btn btn--white btn--block" style={{ marginTop: 14 }} onClick={() => { setD(day); setAdding(true); }}>Add to my own timetable</button>
+        <button className="btn btn--white btn--block" style={{ marginTop: 14 }} onClick={() => { setD(day); setStart('14:00'); setEnd('16:00'); setAdding(true); }}>Add to my own timetable</button>
       )}
     </>
   );
 }
 
 // Class rep: add a weekly class time for one of the class's courses.
-function AddClassTime({ courses, day, onDone, onCancel }: { courses: string[]; day: number; onDone: () => void; onCancel: () => void }) {
+function AddClassTime({ courses, day, at, onDone, onCancel }: { courses: string[]; day: number; at?: { start: string; end: string } | null; onDone: () => void; onCancel: () => void }) {
   const [course, setCourse] = useState(courses[0] || '');
   const [d, setD] = useState(day);
-  const [start, setStart] = useState('08:00');
-  const [end, setEnd] = useState('10:00');
+  const [start, setStart] = useState(at?.start || '08:00');
+  const [end, setEnd] = useState(at?.end || '10:00');
   const [venue, setVenue] = useState('');
   const [busy, setBusy] = useState(false);
   const field: React.CSSProperties = { width: '100%', padding: 10, marginTop: 4, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 15 };
@@ -315,7 +361,7 @@ function AddClassTime({ courses, day, onDone, onCancel }: { courses: string[]; d
   };
   return (
     <Card style={{ marginTop: 14, gap: 10 }}>
-      <div className="t-15 w-7">Add a class time</div>
+      <div id="add-class-time" className="t-15 w-7">Add a class time</div>
       <div className="t-13 muted">It repeats every week and shows on everyone's timetable.</div>
       <Drop value={course} onChange={setCourse} label="Course" options={courses.map((c) => ({ value: c, label: c }))} style={{ width: '100%' }} />
       <Drop value={String(d)} onChange={(v) => setD(Number(v))} label="Day" options={ORDER.map((x) => ({ value: String(x), label: DAY_LONG[x] }))} style={{ width: '100%' }} />
