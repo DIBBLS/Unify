@@ -5,6 +5,7 @@ import GameTimer, { TimeChoice, mmss, timeLimit, useGameClock } from '../../comp
 import { useGameRoom } from '../../lib/gameRoom';
 import { InviteButton, RoomBar } from '../../components/GameRoomBar';
 import { Keyboard } from 'lucide-react';
+import GameNudge from '../../components/GameNudge';
 import PhoneKeys, { type PhoneKeysHandle } from '../../components/PhoneKeys';
 import { useIdleTease } from '../../lib/tease';
 import { api } from '../../lib/api';
@@ -13,9 +14,10 @@ import type { UnifyNote } from '../../types/note';
 import BackButton from '../../components/BackButton';
 import GameLoading from '../../components/GameLoading';
 import GameFinish from '../../components/GameFinish';
+import { useGameQuit } from '../../lib/gameQuit';
 import { useCheer } from '../../components/Cheer';
 import { BoxBoy } from '../../components/redesign/brand';
-import { Card, Display, Label } from '../../components/redesign/ui';
+import { Card, Display, Label, ProgressBar } from '../../components/redesign/ui';
 
 // Crossword: the week's key terms crossing where they share a letter, with
 // clues from the notes. Tap a square to choose it, tap again to switch
@@ -196,6 +198,7 @@ export default function CrosswordRoute() {
   // Leaving a game always lands on Practice, opened on this course.
   const backTo = `/games?course=${encodeURIComponent(courseCode)}`;
   const weekPath = `/learn/${encodeURIComponent(courseCode)}/week/${weekNum}`;
+  const [leavePrompt, quitNotice] = useGameQuit('crossword', courseCode, weekNum, !!puzzle && saved.finishedSecs == null && !saved.timeUp && !solved && !choosing && Object.keys(saved.letters).length > 0);
   if (err) return <div className="g-shell"><BackButton to={backTo} fixed /><div className="t-14" style={{ color: 'var(--u-red)' }}>{err}</div></div>;
   if (puzzle === undefined) return <div className="g-shell"><GameLoading text="Building your crossword…" /></div>;
   if (!puzzle) {
@@ -222,15 +225,15 @@ export default function CrosswordRoute() {
   return (
     <div className="g-shell g-c-crossword">
       {cheerNode}
+      {leavePrompt}
       <BackButton to={backTo} fixed />
       <Label>Crossword · {courseCode} Week {weekNum}</Label>
       {roomCode && <RoomBar room={room} game="crossword" course={courseCode} week={weekNum} mine={{ done: right, total: all.length, label: `${Math.round((right / Math.max(1, all.length)) * 100)}%` }} />}
       {roomCode && !room.startedAt ? null : (<>
+      {saved.finishedSecs == null && quitNotice}
       <div className="g-head">
         <span className="g-head-title">{puzzle.entries.length} key terms</span>
-        <div className="g-bar" role="progressbar" aria-valuemin={0} aria-valuemax={all.length} aria-valuenow={filled} aria-label="Squares filled">
-          <i style={{ width: `${(filled / Math.max(1, all.length)) * 100}%` }} />
-        </div>
+        <div style={{ flex: 1 }}><ProgressBar value={filled / Math.max(1, all.length)} label="Squares filled" /></div>
       </div>
       {saved.finishedSecs == null && !choosing && <GameTimer played={saved.played || 0} limit={limit} />}
       {choosing ? (
@@ -308,7 +311,7 @@ export default function CrosswordRoute() {
               </div>
               {wrong.length > 0 && <div className="t-13 g-in" style={{ textAlign: 'center', color: 'var(--u-red)', fontWeight: 700 }}>{wrong.length} letter{wrong.length === 1 ? '' : 's'} not right yet</div>}
               <PhoneKeys ref={keys} target={selCell} label="Type a letter" onLetter={type} onBack={back} />
-              {tease && <div className="t-13 g-in" style={{ textAlign: 'center', color: 'var(--u-good)', fontWeight: 700 }}>{tease}</div>}
+              <GameNudge text={tease} />
               <button type="button" className="btn btn--white btn--sm" style={{ display: 'flex', gap: 6, justifyContent: 'center', alignItems: 'center' }} onClick={() => { if (!sel && puzzle.entries[0]) setSel({ r: puzzle.entries[0].row, c: puzzle.entries[0].col, dir: puzzle.entries[0].dir }); keys.current?.focus(); }}><Keyboard size={16} /> {sel ? 'Type' : 'Start typing'}</button>
               <div className="g-tip g-kbd-tip">Type on your keyboard. Arrow keys move, Backspace deletes, Space switches across and down.</div>
               <details className="cw-clues" open={wide}>

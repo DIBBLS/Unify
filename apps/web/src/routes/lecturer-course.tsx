@@ -13,7 +13,7 @@ import { ROUTES } from '../lib/routes';
 import BackButton from '../components/BackButton';
 import { SectionSkeleton } from '../components/Skeletons';
 import { BoxBoy } from '../components/redesign/brand';
-import { Card, Display, Label, ListCard } from '../components/redesign/ui';
+import { Card, Display, Label, ListCard, ProgressBar } from '../components/redesign/ui';
 
 // Lecturer's course page (L10–L12, L15, L16) in the app's usual look:
 //  Weeks: each published week, open to read or review it (L13 from the reader);
@@ -175,7 +175,7 @@ function Report({ course }: { course: string }) {
                 return (
                   <div key={c.key} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }} className="t-13"><span className="w-6">{classLabel(c.key)} · {c.students}</span><span className="w-7">{pct}%</span></div>
-                    <div style={{ height: 6, borderRadius: 9999, background: 'var(--border)', overflow: 'hidden' }}><div style={{ width: `${pct}%`, height: '100%', background: 'var(--u-black)' }} /></div>
+                    <ProgressBar value={pct / 100} />
                   </div>
                 );
               })}
@@ -212,9 +212,7 @@ function Report({ course }: { course: string }) {
           {data.weeks.map((w) => (
             <Card key={w.week} pad={14} style={{ gap: 6 }}>
               <div className="t-15 w-7">Week {w.week}{w.title ? ` · ${w.title}` : ''}</div>
-              <div style={{ height: 6, borderRadius: 9999, background: 'var(--border)', overflow: 'hidden' }}>
-                <div style={{ width: `${w.studiedPct}%`, height: '100%', background: 'var(--u-green)' }} />
-              </div>
+              <ProgressBar value={w.studiedPct / 100} />
               <div className="t-13">{w.studiedPct}% studied it ({w.studied} of {data.students})</div>
               <div className="t-13 muted">
                 {w.quizAvg == null ? 'No quiz attempts yet' : `Quiz: ${w.quizAvg}% average · ${w.quizTakers} took it${w.attemptsPerStudent ? ` · ${w.attemptsPerStudent} attempts each` : ''}`}

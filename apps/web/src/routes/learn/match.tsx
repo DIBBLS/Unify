@@ -8,11 +8,13 @@ import { play } from '../../lib/sound';
 import { sayPraise } from '../../lib/welcomeVoice';
 import BackButton from '../../components/BackButton';
 import GameFinish from '../../components/GameFinish';
+import { useGameQuit } from '../../lib/gameQuit';
 import GameLoading from '../../components/GameLoading';
 import { BoxBoy } from '../../components/redesign/brand';
-import { Card, Display, Label } from '../../components/redesign/ui';
+import { Card, Display, Label, ProgressBar } from '../../components/redesign/ui';
 import { useCheer } from '../../components/Cheer';
 import { missLine, useIdleTease } from '../../lib/tease';
+import GameNudge from '../../components/GameNudge';
 
 // Match-up: pair each of the week's key terms with what it means, four pairs
 // a round. Every term and meaning comes from the week's notes (the same terms
@@ -100,6 +102,7 @@ export default function MatchRoute() {
 
   const tease = useIdleTease(matched.size * 100 + mistakes, !!terms && terms.length >= 3 && finishedSecs == null);
   const shell = { maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '16px 16px 40px' } as const;
+  const [leavePrompt, quitNotice] = useGameQuit('match', courseCode, weekNum, !!terms && finishedSecs == null && (matched.size > 0 || mistakes > 0));
   if (err) return <div style={shell}><BackButton to={ROUTES.games} /><Card style={{ marginTop: 8 }}><div className="t-14">{err}</div></Card></div>;
   if (!terms) return <div style={shell}><GameLoading text="Pairing up your terms…" /></div>;
   if (terms.length < 3) {
@@ -139,14 +142,14 @@ export default function MatchRoute() {
   return (
     <div style={shell} className="g-c-match">
       {cheerNode}
+      {leavePrompt}
       <BackButton to={ROUTES.games} />
       <Label>{courseCode} · Week {weekNum}</Label>
       <Display size={28}>Match-up</Display>
+      {finishedSecs == null && quitNotice}
       <div className="t-13 muted" style={{ marginTop: 4 }}>Tap a term, then what it means. Round {Math.min(round + 1, rounds.length)} of {rounds.length}{mistakes ? ` · ${mistakes} miss${mistakes === 1 ? '' : 'es'}` : ''}</div>
-      <div style={{ height: 10, borderRadius: 9999, background: 'var(--surface2)', overflow: 'hidden', margin: '12px 0' }} aria-label={`${matched.size} of ${terms.length} matched`}>
-        <div className="g-fill" style={{ width: `${(matched.size / terms.length) * 100}%`, height: '100%', borderRadius: 9999, transition: 'width .4s cubic-bezier(.34,1.56,.64,1)' }} />
-      </div>
-      {finishedSecs == null && (tease || miss) && <div className="t-13 w-7 g-in" key={tease || miss} style={{ textAlign: 'center', color: 'var(--u-good)', margin: '-4px 0 10px' }} aria-live="polite">{tease || miss}</div>}
+      <ProgressBar value={matched.size / terms.length} label={`${matched.size} of ${terms.length} matched`} style={{ margin: '12px 0' }} />
+      <GameNudge text={finishedSecs == null ? miss || tease : ''} tone={miss ? 'miss' : 'tease'} />
 
       {finishedSecs == null ? (
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 3fr', gap: 8 }}>

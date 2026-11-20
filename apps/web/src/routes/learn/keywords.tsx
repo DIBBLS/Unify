@@ -11,8 +11,9 @@ import type { UnifyNote } from '../../types/note';
 import BackButton from '../../components/BackButton';
 import GameLoading from '../../components/GameLoading';
 import { BoxBoy } from '../../components/redesign/brand';
-import { Card, Display, Label } from '../../components/redesign/ui';
+import { Card, Display, Label, ProgressBar } from '../../components/redesign/ui';
 import GameFinish from '../../components/GameFinish';
+import { useGameQuit } from '../../lib/gameQuit';
 import { useCheer } from '../../components/Cheer';
 
 import { play } from '../../lib/sound';
@@ -277,6 +278,7 @@ export default function KeywordsRoute() {
   // Leaving a game always lands on Practice, opened on this course.
   const back = `/games?course=${encodeURIComponent(courseCode)}`;
 
+  const [leavePrompt, quitNotice] = useGameQuit('keywords', courseCode, weekNum, !!levels && saved.finishedSecs == null && !saved.timeUp && !choosing && (saved.level > 0 || Object.values(saved.found).some((w) => w.length > 0)));
   if (err) return <div className="g-shell"><BackButton to={back} fixed /><div className="t-14" style={{ color: 'var(--u-red)' }}>{err}</div></div>;
   if (!levels) return <div className="g-shell"><GameLoading /></div>;
   if (!levels.length || !lv) {
@@ -309,6 +311,7 @@ export default function KeywordsRoute() {
   return (
     <div className="g-shell g-c-keywords">
       {cheerNode}
+      {leavePrompt}
       <BackButton to={back} fixed />
       <Label>Keywords · {courseCode} Week {weekNum}</Label>
       {roomCode && (
@@ -321,11 +324,10 @@ export default function KeywordsRoute() {
         />
       )}
       {roomCode && !room.startedAt ? null : (<>
+      {saved.finishedSecs == null && quitNotice}
       <div className="g-head">
         <span className="g-head-title">Level {li + 1}<span style={{ color: 'var(--u-text-3)' }}>/{levels.length}</span></span>
-        <div className="g-bar" role="progressbar" aria-valuemin={0} aria-valuemax={totalSlots} aria-valuenow={foundSlots} aria-label="Words found">
-          <i style={{ width: `${(foundSlots / Math.max(1, totalSlots)) * 100}%` }} />
-        </div>
+        <div style={{ flex: 1 }}><ProgressBar value={foundSlots / Math.max(1, totalSlots)} label="Words found" /></div>
         {saved.bonus > 0 && <span className="g-count">+{saved.bonus} bonus</span>}
       </div>
       {saved.finishedSecs == null && !choosing && <GameTimer played={saved.played || 0} limit={limit} />}

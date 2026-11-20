@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ProgressBar } from './redesign/ui';
 import { Eye, RotateCcw } from 'lucide-react';
 import { MathText, MathPlain } from './MathText';
 
@@ -37,9 +38,7 @@ export function RecallDeck({ items }: { items: RecallItem[] }) {
     <div className="recall-section">
       <div className="recall-label">Topic Active Recall</div>
       <div className="recall-progress">
-        <div className="progress-track" style={{ flex: 1 }}>
-          <div className="progress-fill" style={{ width: `${items.length ? Math.round((graded / items.length) * 100) : 0}%` }} />
-        </div>
+        <div style={{ flex: 1 }}><ProgressBar value={items.length ? graded / items.length : 0} label={`${graded} of ${items.length} checked`} /></div>
         <span>
           {graded === 0 ? 'test yourself' : `${got} nailed${fuzzy ? ` · ${fuzzy} fuzzy` : ''}`}
         </span>

@@ -13,7 +13,7 @@ import LecturerChecks from '../components/LecturerChecks';
 import LiveWire from '../components/LiveWire';
 import ErrorState from '../components/ErrorState';
 import { BoxBoy } from '../components/redesign/brand';
-import { Card, Display, Label, Pill } from '../components/redesign/ui';
+import { Card, Display, Label, Pill, ProgressBar } from '../components/redesign/ui';
 
 // Class board (Review 3, C3/C4) for a department + level.
 // - Everyone: the live wire on top, then announcements, polls and answered
@@ -152,9 +152,7 @@ export default function HocDashboardRoute() {
             <span className="t-15 w-7" style={{ flex: 1 }}>Your class</span>
             <span className="t-13 muted">{size.joined} of {size.listed} joined</span>
           </div>
-          <div style={{ height: 8, borderRadius: 9999, background: 'var(--border)', overflow: 'hidden' }}>
-            <div style={{ width: `${size.listed ? Math.round((size.joined / size.listed) * 100) : 0}%`, height: '100%', background: 'var(--u-green)' }} />
-          </div>
+          <ProgressBar value={size.listed ? size.joined / size.listed : 0} label={`${size.joined} of ${size.listed} joined`} />
           <div className="t-13 muted">{size.listed} student{size.listed === 1 ? '' : 's'} on your class list · {size.listed - size.joined} still to join Unify Learn{isHoc ? ` · ${waiting.length} question${waiting.length === 1 ? '' : 's'} waiting` : ''}</div>
         </Card>
       )}

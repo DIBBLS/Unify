@@ -173,11 +173,15 @@ export function StepBars({ step, total = 3 }: { step: number; total?: number }) 
   );
 }
 
-/** Duolingo-style progress bar: chunky, rounded, a highlight stripe on the fill. `value` is 0 to 1. */
-export function ProgressBar({ value, color = 'var(--u-green)', height = 14 }: { value: number; color?: string; track?: string; height?: number }) {
+/**
+ * The one progress bar used across the app: chunky, rounded, a highlight
+ * stripe on the fill. `value` is 0 to 1. Inside a game it takes the game's
+ * colour (games.css). Every bar in the app is this one, at the same height.
+ */
+export function ProgressBar({ value, color = 'var(--u-green)', height = 12, label, style }: { value: number; color?: string; track?: string; height?: number; label?: string; style?: React.CSSProperties }) {
   const v = Math.max(0, Math.min(1, value));
   return (
-    <div className="duo-bar" style={{ '--h': `${Math.max(10, height)}px`, '--duo-fill': color } as React.CSSProperties} role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(v * 100)}>
+    <div className="duo-bar" style={{ '--h': `${Math.max(10, height)}px`, '--duo-fill': color, ...style } as React.CSSProperties} role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(v * 100)}>
       <div className="duo-fill" style={{ width: `${v * 100}%`, minWidth: v > 0 ? undefined : 0 }} />
     </div>
   );

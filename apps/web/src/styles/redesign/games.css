@@ -260,3 +260,41 @@
   .g-bar > i::before, .g-fill::before, .g-tile-pop { animation: none; }
   .g-tap:active, .g-btn:active, .cw-cell:active { transform: none; }
 }
+
+/* The shared progress bar (ProgressBar) inside a game: the game's colour and the sweep. */
+[class*="g-c-"] .duo-fill { background: var(--g-grad, var(--duo-fill)); overflow: hidden; transition: width .6s var(--g-spring); }
+[class*="g-c-"] .duo-fill::before {
+  content: ''; position: absolute; inset: 0; width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .55), transparent);
+  animation: g-sweep 2.2s ease-in-out infinite;
+}
+
+/* Encouragements and teases: a bubble that pops in at the top, wobbles, floats off. */
+.g-nudge-layer { position: fixed; left: 0; right: 0; top: calc(14px + env(safe-area-inset-top)); z-index: 85; display: flex; justify-content: center; pointer-events: none; padding: 0 16px; }
+.g-nudge {
+  display: flex; align-items: center; gap: 10px; max-width: 420px; padding: 8px 16px 8px 8px;
+  border-radius: 18px; font-weight: 800; font-size: 14px; line-height: 1.3; color: #0a0a0a;
+  background: var(--g-grad, linear-gradient(90deg, #50ff90, #a7e85a)); border-bottom: 4px solid rgba(0, 0, 0, .18);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .22);
+  animation: g-nudge 3.4s var(--g-spring) both;
+}
+.g-nudge--miss { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+.g-nudge-face { flex-shrink: 0; width: 40px; height: 40px; border-radius: 12px; background: rgba(255, 255, 255, .7); display: flex; align-items: center; justify-content: center; overflow: hidden; animation: g-nudge-face .6s .25s var(--g-spring) both; }
+@keyframes g-nudge {
+  0% { opacity: 0; transform: translateY(-30px) scale(.6); }
+  10% { opacity: 1; transform: translateY(4px) scale(1.06); }
+  16% { transform: translateY(0) scale(1) rotate(-2deg); }
+  22% { transform: rotate(2deg); }
+  28%, 86% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateY(-18px) scale(.94); }
+}
+@keyframes g-nudge-face { 0% { transform: scale(.4) rotate(-20deg); } 100% { transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  [class*="g-c-"] .duo-fill::before, .g-nudge-face { animation: none; }
+  .g-nudge { animation: cheer-fade 3.4s linear both; }
+}
+
+/* "Leave this round?" sheet (lib/leaveGuard). */
+.leave-sheet-layer { position: fixed; inset: 0; z-index: 120; background: rgba(0, 0, 0, .45); display: flex; align-items: flex-end; justify-content: center; padding: 16px; animation: g-slide .2s ease-out both; }
+.leave-sheet { width: 100%; max-width: 420px; background: var(--surface); color: var(--text); border-radius: 22px; padding: 20px 18px calc(18px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; box-shadow: 0 -8px 30px rgba(0, 0, 0, .25); animation: g-nudge-face .35s var(--g-spring) both; }
+@media (min-width: 700px) { .leave-sheet-layer { align-items: center; } }

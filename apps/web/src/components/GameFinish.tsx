@@ -3,6 +3,7 @@ import { LEADERBOARD } from '../lib/features';
 import { Share2, Trophy } from 'lucide-react';
 import { api, type GameId } from '../lib/api';
 import { Avatar, type PersonaKey } from './redesign/brand';
+import { afterCut, clearQuit, quitPending } from '../lib/gameQuit';
 
 // End of a course game: saves the run (best score kept, first finish earns
 // XP), lets the student share it (phone share sheet, or WhatsApp), and shows
@@ -10,7 +11,10 @@ import { Avatar, type PersonaKey } from './redesign/brand';
 type Board = Awaited<ReturnType<typeof api.gameBoard>>;
 const NAME = { keywords: 'Keywords', crossword: 'Crossword', match: 'Match-up', truefalse: 'True or False', gapfill: 'Fill the gap' } as const;
 
-export default function GameFinish({ game, course, week, score, terms, hints, seconds }: { game: GameId; course: string; week: number; score: number; terms: number; hints: number; seconds: number }) {
+export default function GameFinish({ game, course, week, score: earned, terms, hints, seconds }: { game: GameId; course: string; week: number; score: number; terms: number; hints: number; seconds: number }) {
+  // The last round was left midway: this finish scores 10% less, then it's cleared.
+  const [cut] = useState(() => quitPending(game, course, week));
+  const score = cut ? afterCut(earned) : earned;
   const [result, setResult] = useState<{ best: number; newBest: boolean; xp: number } | null>(null);
   const [board, setBoard] = useState<Board | null>(null);
   const sent = useRef(false);
@@ -19,7 +23,7 @@ export default function GameFinish({ game, course, week, score, terms, hints, se
     if (sent.current) return;
     sent.current = true;
     api.gameScore({ game, course, week, score, terms, hints, seconds })
-      .then((r) => setResult(r))
+      .then((r) => { setResult(r); clearQuit(game, course, week); })
       .catch(() => setResult(null))
       .finally(() => { api.gameBoard({ course, week, game }).then(setBoard).catch(() => {}); });
   }, [game, course, week, score, terms, hints, seconds]);
@@ -41,6 +45,11 @@ export default function GameFinish({ game, course, week, score, terms, hints, se
         <div><div style={{ fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 28 }}>{terms}</div><div className="t-13 muted">key terms</div></div>
         <div><div style={{ fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 28 }}>{mins ? `${mins}m` : `${seconds}s`}</div><div className="t-13 muted">time</div></div>
       </div>
+      {cut && (
+        <div className="t-13" style={{ textAlign: 'center', fontWeight: 700, color: 'var(--u-warn-ink)' }}>
+          10% off for leaving your last round midway ({earned} → {score}). That's cleared now.
+        </div>
+      )}
       {result && (
         <div className="t-13" style={{ textAlign: 'center', fontWeight: 700, color: 'var(--u-good)' }}>
           {result.xp ? `+${result.xp} XP · ` : ''}{result.newBest ? 'Your best for this week' : `Your best is still ${result.best}`}

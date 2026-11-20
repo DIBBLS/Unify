@@ -19,8 +19,14 @@ const IDLE = [
 ];
 const pick = (a: string[]) => a[Math.floor(Math.random() * a.length)];
 
-/** A kind line after a wrong answer. */
-export const missLine = () => pick(MISS);
+/** A kind line after a wrong answer (never the same one twice running, so each miss pops fresh). */
+let lastMiss = '';
+export const missLine = () => {
+  let l = pick(MISS);
+  if (l === lastMiss) l = MISS[(MISS.indexOf(l) + 1) % MISS.length];
+  lastMiss = l;
+  return l;
+};
 
 /**
  * A tease after `ms` with no activity. `poke` is anything that changes when

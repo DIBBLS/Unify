@@ -12,6 +12,7 @@ import { Card, Display, Label } from '../../components/redesign/ui';
 import { useCheer } from '../../components/Cheer';
 import PhoneKeys, { type PhoneKeysHandle } from '../../components/PhoneKeys';
 import { missLine, useIdleTease } from '../../lib/tease';
+import GameNudge from '../../components/GameNudge';
 
 import { play } from '../../lib/sound';
 // Term of the Day: guess one key term from your course in six tries. Same
@@ -44,6 +45,7 @@ export default function DailyWordRoute() {
   const [typing, setTyping] = useState('');
   const [shake, setShake] = useState(0);
   const [note, setNote] = useState('');
+  const [pop, setPop] = useState('');
   const [board, setBoard] = useState<{ played: number; solved: number } | null>(null);
   const [stats, setStats] = useState<DailyStats>(readStats);
   const [cheerNode, cheer] = useCheer();
@@ -104,8 +106,9 @@ export default function DailyWordRoute() {
       play('wrong');
       // Near miss: one letter off.
       const hits = score(typing, answer).filter((m) => m === 'hit').length;
-      setNote(hits === answer.length - 1 ? 'One letter away!' : missLine());
-      if (guesses.length === CLUE_AFTER) setNote((n) => (n ? `${n} The clue is open now.` : 'The clue is open now.'));
+      setPop(hits === answer.length - 1 ? 'One letter away!' : missLine());
+      window.setTimeout(() => setPop(''), 3400);
+      if (guesses.length === CLUE_AFTER) setNote('The clue is open now.');
     }
     const next: Saved = { guesses, done: over };
     persist(next);
@@ -226,7 +229,8 @@ export default function DailyWordRoute() {
         })}
       </div>
 
-      <div style={{ minHeight: 22, textAlign: 'center', marginTop: 8, fontSize: 13, fontWeight: 700, color: 'var(--u-good)' }} aria-live="polite">{note || tease}</div>
+      <div style={{ minHeight: 22, textAlign: 'center', marginTop: 8, fontSize: 13, fontWeight: 700, color: 'var(--u-good)' }} aria-live="polite">{note}</div>
+      <GameNudge text={finished ? '' : pop || tease} tone={pop ? 'miss' : 'tease'} />
 
       {showClue ? (
         <Card pad={12} style={{ marginTop: 4, gap: 4 }}>

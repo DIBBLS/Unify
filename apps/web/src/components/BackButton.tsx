@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { goBack, leaveTo } from '../lib/navHistory';
+import { askBeforeLeaving } from '../lib/leaveGuard';
 
 // Back steps back to the actual previous in-app screen (navHistory) and
 // falls back to the explicit hub for deep links with no history.
@@ -9,7 +10,11 @@ export default function BackButton({ to, label = 'Back', fixed }: { to: string; 
   const navigate = useNavigate();
   return (
     <button
-      onClick={() => (fixed ? leaveTo(navigate, to) : goBack(navigate, to))}
+      onClick={() => {
+        const go = () => (fixed ? leaveTo(navigate, to) : goBack(navigate, to));
+        // Midway through a game or a topic: ask first (it calls go if they leave).
+        if (!askBeforeLeaving(go)) go();
+      }}
       style={{
         marginBottom: 16,
         display: 'flex',

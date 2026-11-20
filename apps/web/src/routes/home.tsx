@@ -2,6 +2,7 @@ import { toastError } from '../lib/toast';
 import { prefetchDaily } from '../lib/dailyword';
 import { CGPA_TARGET } from '../lib/features';
 import { useEffect, useMemo, useState } from 'react';
+import { ProgressBar } from '../components/redesign/ui';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { BookOpen, ChevronRight, Trash2, MessageCircle } from 'lucide-react';
 import { TermTiles } from '../components/GameIcons';
@@ -191,9 +192,7 @@ function CourseCard({ index, course, title, staff, priority, semWeek }: {
         {title && <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 3, lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{title}</div>}
         {lecturer && <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lecturer}</div>}
       </div>
-      <div style={{ height: 4, borderRadius: 9999, background: 'var(--border)', overflow: 'hidden', flexShrink: 0 }} aria-label={`${Math.round(pct * 100)}% of published topics done`}>
-        <div style={{ width: `${pct * 100}%`, height: '100%', background: 'var(--u-green)' }} />
-      </div>
+      <div style={{ flexShrink: 0 }}><ProgressBar value={pct} label={`${Math.round(pct * 100)}% of published topics done`} /></div>
       <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flexShrink: 0 }}>
         {prog && prog.topics ? `${prog.done} of ${prog.topics} topics` : 'No notes yet'}{semWeek.week ? ` · Wk ${semWeek.week}` : ''}
       </div>

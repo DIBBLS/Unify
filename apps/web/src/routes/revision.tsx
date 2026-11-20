@@ -6,7 +6,7 @@ import { ROUTES } from '../lib/routes';
 import BackButton from '../components/BackButton';
 import { SectionSkeleton } from '../components/Skeletons';
 import { BoxBoy } from '../components/redesign/brand';
-import { Card, Display, Label } from '../components/redesign/ui';
+import { Card, Display, Label, ProgressBar } from '../components/redesign/ui';
 import { MathPlain } from '../components/MathText';
 
 // S35–S36: revision. Recall cards from topics you've finished, shuffled. Think
@@ -88,9 +88,7 @@ export default function RevisionRoute() {
     <div style={shell}>
       <BackButton to={ROUTES.home} />
       <Label>Revision · card {i + 1} of {deck.length}</Label>
-      <div style={{ height: 6, borderRadius: 9999, background: 'var(--border)', marginTop: 6, overflow: 'hidden' }}>
-        <div style={{ width: `${(i / deck.length) * 100}%`, height: '100%', background: 'var(--u-green)' }} />
-      </div>
+      <ProgressBar value={i / deck.length} label={`Card ${i + 1} of ${deck.length}`} style={{ marginTop: 6 }} />
       <Card style={{ marginTop: 14, gap: 10, minHeight: 220 }}>
         <div className="t-12 muted">{c.course} · Week {c.week}{c.topic ? ` · ${c.topic}` : ''}{c.badge ? ` · ${c.badge}` : ''}</div>
         <div className="t-16 w-7" style={{ lineHeight: 1.45 }}><MathPlain text={c.question} /></div>

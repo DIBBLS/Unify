@@ -7,11 +7,13 @@ import type { UnifyNote } from '../../types/note';
 import { play } from '../../lib/sound';
 import BackButton from '../../components/BackButton';
 import GameFinish from '../../components/GameFinish';
+import { useGameQuit } from '../../lib/gameQuit';
 import GameLoading from '../../components/GameLoading';
 import { BoxBoy } from '../../components/redesign/brand';
-import { Card, Display, Label } from '../../components/redesign/ui';
+import { Card, Display, Label, ProgressBar } from '../../components/redesign/ui';
 import { useCheer } from '../../components/Cheer';
 import { missLine, useIdleTease } from '../../lib/tease';
+import GameNudge from '../../components/GameNudge';
 
 // Fill the gap: a sentence from the week's notes with a key term taken out.
 // Pick the missing term from four of the week's terms. Unlike Match-up (term
@@ -73,6 +75,7 @@ export default function GapFillRoute() {
 
   const tease = useIdleTease(at, !!gaps && gaps.length >= 3 && finishedSecs == null);
   const shell = { maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '16px 16px 40px' } as const;
+  const [leavePrompt, quitNotice] = useGameQuit('gapfill', courseCode, weekNum, !!gaps && finishedSecs == null && (at > 0 || picked !== null));
   if (err) return <div style={shell}><BackButton to={ROUTES.games} /><Card style={{ marginTop: 8 }}><div className="t-14">{err}</div></Card></div>;
   if (!gaps) return <div style={shell}><GameLoading text="Finding sentences in your notes…" /></div>;
   if (gaps.length < 3) {
@@ -96,14 +99,14 @@ export default function GapFillRoute() {
   return (
     <div style={shell} className="g-c-gapfill">
       {cheerNode}
+      {leavePrompt}
       <BackButton to={ROUTES.games} />
       <Label>{courseCode} · Week {weekNum}</Label>
       <Display size={28}>Fill the gap</Display>
+      {finishedSecs == null && quitNotice}
       <div className="t-13 muted" style={{ marginTop: 4 }}>Pick the term that completes the sentence. {finishedSecs == null ? `${Math.min(at + 1, gaps.length)} of ${gaps.length}` : ''}{streak >= 2 ? ` · ${streak} in a row` : ''}</div>
-      <div style={{ height: 10, borderRadius: 9999, background: 'var(--surface2)', overflow: 'hidden', margin: '12px 0' }} aria-label={`${at} of ${gaps.length} answered`}>
-        <div className="g-fill" style={{ width: `${((finishedSecs != null ? gaps.length : at) / gaps.length) * 100}%`, height: '100%', borderRadius: 9999, transition: 'width .4s cubic-bezier(.34,1.56,.64,1)' }} />
-      </div>
-      {finishedSecs == null && (tease || miss) && <div className="t-13 w-7 g-in" key={tease || miss} style={{ textAlign: 'center', color: 'var(--u-good)', margin: '-4px 0 10px' }} aria-live="polite">{tease || miss}</div>}
+      <ProgressBar value={(finishedSecs != null ? gaps.length : at) / gaps.length} label={`${at} of ${gaps.length} answered`} style={{ margin: '12px 0' }} />
+      <GameNudge text={finishedSecs == null ? miss || tease : ''} tone={miss ? 'miss' : 'tease'} />
 
       {finishedSecs == null && now ? (
         <div key={at} className="soft-in" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>

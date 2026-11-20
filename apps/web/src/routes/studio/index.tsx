@@ -1,5 +1,6 @@
 import { toastError } from '../../lib/toast';
 import { useEffect, useRef, useState } from 'react';
+import { ProgressBar } from '../../components/redesign/ui';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ROUTES } from '../../lib/routes';
 import { ArrowRight, Check, X, ChevronDown, FileText, ExternalLink, AlertTriangle, Sparkles, PenLine, Bot } from 'lucide-react';
@@ -596,9 +597,7 @@ export default function StudioRoute() {
         <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 22, marginTop: 12 }}>
           {convertProg && convertProg.total > 1 ? `Converting part ${Math.min(convertProg.done + 1, convertProg.total)} of ${convertProg.total}` : WORK_MSGS[workMsg]}
         </h1>
-        <div style={{ marginTop: 16, height: 12, borderRadius: 9999, background: 'var(--surface2)', border: '1px solid var(--border)', overflow: 'hidden' }}>
-          <div className="progress-fill" style={{ width: `${convertProg ? Math.max(pct, 6) : 12}%` }} />
-        </div>
+        <ProgressBar value={(convertProg ? Math.max(pct, 6) : 12) / 100} label="Converting" style={{ marginTop: 16 }} />
         <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 8 }}>
           {convertProg && convertProg.total > 1
             ? `${pct}% · ${elapsedLabel} elapsed${convertProg.model ? ` · ${convertProg.model}` : ''}`

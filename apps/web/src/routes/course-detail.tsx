@@ -1,6 +1,7 @@
 import { DetailSkeleton } from '../components/Skeletons';
 import { toastError } from '../lib/toast';
 import { useEffect, useState } from 'react';
+import { ProgressBar } from '../components/redesign/ui';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { ChevronRight, ExternalLink, FileText } from 'lucide-react';
 import BackButton from '../components/BackButton';
@@ -219,9 +220,7 @@ export default function CourseDetailRoute() {
       {sem.week > 0 && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 14 }}>
           <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--text2)', whiteSpace: 'nowrap' }}>WEEK {sem.week} OF {sem.total}</span>
-          <div style={{ flex: 1, height: 6, borderRadius: 9999, background: 'var(--border)', overflow: 'hidden' }}>
-            <div style={{ width: `${(sem.week / sem.total) * 100}%`, height: '100%', background: 'var(--u-green)' }} />
-          </div>
+          <div style={{ flex: 1 }}><ProgressBar value={sem.week / sem.total} label={`Week ${sem.week} of ${sem.total}`} /></div>
           {attendance && attendance.mine.held > 0 && (
             <span style={{ padding: '3px 10px', borderRadius: 9999, background: 'var(--u-good-tint)', color: 'var(--u-good)', fontSize: 11, fontWeight: 800, whiteSpace: 'nowrap' }}>Attendance {attendance.mine.attended} of {attendance.mine.held}</span>
           )}

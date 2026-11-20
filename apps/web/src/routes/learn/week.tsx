@@ -19,6 +19,7 @@ import { useProgress } from '../../hooks/useProgress';
 import { BoxBoy } from '../../components/redesign/brand';
 import ErrorState from '../../components/ErrorState';
 import Loading from '../../components/Loading';
+import { useNotesQuit } from '../../lib/notesQuit';
 
 export default function LearnPage() {
   const { courseCode = '', week: weekParam } = useParams();
@@ -213,6 +214,17 @@ export default function LearnPage() {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseCode, weekNum]);
+
+  // Leaving a topic midway asks first; coming back says where they left off.
+  const readingTopic = tab < classTopics.length ? classTopics[tab] : undefined;
+  // Started = scrolled well into this topic once (stays on if they scroll back up).
+  const [startedTopic, setStartedTopic] = useState<number | null>(null);
+  useEffect(() => { if (showTop && readingTopic) setStartedTopic(readingTopic.number); }, [showTop, readingTopic]);
+  const midway = !previewMode && !nonLearner && !!readingTopic && startedTopic === readingTopic.number && !isDone(weekNum, readingTopic.number, selLecture);
+  const [notesLeavePrompt, leftTopic, clearLeft] = useNotesQuit(courseCode, weekNum, readingTopic?.number, midway);
+  useEffect(() => {
+    if (leftTopic && isDone(weekNum, leftTopic, selLecture)) clearLeft();
+  }, [leftTopic, isDone, weekNum, selLecture, clearLeft]);
 
   if (loading) return <ReaderSkeleton />;
   if (!courseCode) {
@@ -423,15 +435,6 @@ export default function LearnPage() {
         <div className="hero-eyebrow">{note.course} · Week {note.week}</div>
         <div className="hero-title"><MathPlain text={note.title} inline /></div>
         {note.subtitle ? <div className="hero-subtitle"><MathPlain text={note.subtitle} inline /></div> : null}
-        {/* Duolingo-style progress through the week: fills as topics are finished. */}
-        {!nonLearner && !previewMode && topics.length > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10 }} aria-label={`${Math.min(doneCount, topics.length)} of ${topics.length} topics done`}>
-            <div style={{ flex: 1, height: 12, borderRadius: 9999, background: 'rgba(255,255,255,.18)', overflow: 'hidden' }}>
-              <div style={{ width: `${Math.round((Math.min(doneCount, topics.length) / topics.length) * 100)}%`, height: '100%', borderRadius: 9999, background: 'var(--u-green)', transition: 'width .5s cubic-bezier(.34,1.56,.64,1)' }} />
-            </div>
-            <span style={{ fontSize: 12, fontWeight: 800, whiteSpace: 'nowrap' }}>{Math.min(doneCount, topics.length)} of {topics.length}</span>
-          </div>
-        )}
         {note.learningOutcome && (
           <div className="hero-outcome"><strong>Outcome — </strong><MathPlain text={note.learningOutcome} inline /></div>
         )}
@@ -459,6 +462,13 @@ export default function LearnPage() {
         </div>
       </div>
 
+      {notesLeavePrompt}
+      {leftTopic && !nonLearner && !previewMode && classTopics.some((t) => t.number === leftTopic) && (
+        <div className="g-in" role="status" style={{ display: 'flex', gap: 10, alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', marginBottom: 12, borderRadius: 12, background: 'var(--u-warn-tint)', color: 'var(--u-warn-ink)', fontSize: 13, fontWeight: 700 }}>
+          <span>You left Topic {leftTopic} midway last time. Pick up where you left off.</span>
+          <button className="btn btn--sm" style={{ whiteSpace: 'nowrap' }} onClick={() => { goTab(classTopics.findIndex((t) => t.number === leftTopic)); }}>Go to Topic {leftTopic}</button>
+        </div>
+      )}
       {preview && (
         <div style={{ background: 'var(--u-good-tint)', border: '1px solid var(--u-good)', borderRadius: 12, padding: 10, fontSize: 13, color: 'var(--u-good)', marginBottom: 12, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'space-between' }}>
           <span>Author preview — read-only, nothing is recorded.</span>
