@@ -1,7 +1,7 @@
 // Per-page title, description, canonical link and robots tag. Only the
 // public pages (welcome, sign-in) are indexable; everything behind sign-in
 // is marked noindex so a student's pages never show up in search results.
-const SITE = 'https://unify-virid.vercel.app';
+const SITE = 'https://unifylearn.app';
 const NAME = 'Unify Learn';
 const DEFAULT_DESC =
   'Weekly course notes, a CGPA planner, your timetable and QR attendance for Nigerian university students, starting with LASU Faculty of Engineering. Free, and works offline.';

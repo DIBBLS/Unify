@@ -279,7 +279,7 @@ function pathOf(raw) {
   if (!raw) return fallback;
   try {
     const u = new URL(raw, self.location.origin);
-    const ours = u.origin === self.location.origin || /\.vercel\.app$/i.test(u.hostname);
+    const ours = u.origin === self.location.origin || /(^|\.)unifylearn\.app$/i.test(u.hostname) || /\.vercel\.app$/i.test(u.hostname);
     if (!ours) return u.href;
     const path = u.pathname + u.search + u.hash;
     return u.pathname === '/dashboard' ? '/home' : path;

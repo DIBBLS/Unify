@@ -4,7 +4,7 @@
 // a standalone OG-tagged preview page: crawlers read the meta, humans
 // get the card + a ride into the app. Responses cache at the edge.
 const API_URL = (process.env.API_URL || 'https://unify-api-eu.onrender.com').replace(/\/$/, '');
-const APP_URL = 'https://unify-virid.vercel.app';
+const APP_URL = 'https://unifylearn.app';
 
 function esc(s) {
   return String(s == null ? '' : s)

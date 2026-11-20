@@ -2,7 +2,7 @@
 // ("/timetable") or as full addresses of the app ("https://…/learn/…"), and a
 // few old ones point at pages that moved. In-app links become paths for the
 // router; anything else opens in the browser.
-const APP_HOSTS = [/\.vercel\.app$/i, /^localhost$/i];
+const APP_HOSTS = [/(^|\.)unifylearn\.app$/i, /\.vercel\.app$/i, /^localhost$/i];
 const MOVED: Record<string, string> = { '/dashboard': '/home' };
 
 export function appPath(link?: string | null): { path: string } | { href: string } {
