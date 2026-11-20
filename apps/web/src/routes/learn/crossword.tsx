@@ -4,7 +4,9 @@ import { leaveTo } from '../../lib/navHistory';
 import GameTimer, { TimeChoice, mmss, timeLimit, useGameClock } from '../../components/GameTimer';
 import { useGameRoom } from '../../lib/gameRoom';
 import { InviteButton, RoomBar } from '../../components/GameRoomBar';
-import { Delete } from 'lucide-react';
+import { Keyboard } from 'lucide-react';
+import PhoneKeys, { type PhoneKeysHandle } from '../../components/PhoneKeys';
+import { useIdleTease } from '../../lib/tease';
 import { api } from '../../lib/api';
 import { buildCrossword, type Entry, type Puzzle } from '../../lib/crossword';
 import type { UnifyNote } from '../../types/note';
@@ -21,7 +23,6 @@ import { Card, Display, Label } from '../../components/redesign/ui';
 type Saved = { letters: Record<string, string>; reveals: number; checks: number; startedAt: number; finishedSecs?: number; played?: number; timeUp?: boolean; limit?: number };
 // Time allowed: 50 seconds a word (4 to 12 minutes in all).
 const PER_WORD = 50;
-const KEYS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
 const store = (c: string, w: number) => `unify:crossword:${c}:${w}`;
 const enumeration = (display: string) => `(${display.split(/[\s-]+/).map((p) => p.replace(/[^A-Za-z]/g, '').length).join(', ')})`;
 
@@ -74,6 +75,8 @@ export default function CrosswordRoute() {
 
   // In a session, tell the other player when you finish.
   const announced = useRef(false);
+  const keys = useRef<PhoneKeysHandle>(null);
+  const selCell = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (saved.finishedSecs == null || !room.startedAt || !room.me || !puzzle || announced.current) return;
     announced.current = true;
@@ -173,6 +176,7 @@ export default function CrosswordRoute() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   });
+  const tease = useIdleTease(JSON.stringify(saved.letters).length + (sel ? sel.r * 100 + sel.c : 0), !!puzzle && !solved && !saved.timeUp && !choosing);
 
   const check = () => {
     if (!puzzle) return;
@@ -216,7 +220,7 @@ export default function CrosswordRoute() {
   const entryDone = (e: Entry) => cellsOf(e).every((x) => saved.letters[`${x.r},${x.c}`] === puzzle.cells[x.r][x.c]);
 
   return (
-    <div className="g-shell">
+    <div className="g-shell g-c-crossword">
       {cheerNode}
       <BackButton to={backTo} fixed />
       <Label>Crossword · {courseCode} Week {weekNum}</Label>
@@ -248,7 +252,9 @@ export default function CrosswordRoute() {
                     key={k}
                     role="gridcell"
                     aria-label={`Row ${r + 1}, column ${c + 1}${v ? `, ${v}` : ', empty'}`}
-                    onClick={() => pick(r, c)}
+                    ref={isSel ? selCell : undefined}
+                    // Picking a square opens the phone's keyboard straight away.
+                    onClick={() => { pick(r, c); keys.current?.focus(); }}
                     className={`cw-cell ${cls}`}
                     style={{ '--d': r + c } as React.CSSProperties}
                   >
@@ -301,14 +307,9 @@ export default function CrosswordRoute() {
                 <button className="btn btn--white btn--sm" disabled={!current} onClick={reveal}>Reveal a letter</button>
               </div>
               {wrong.length > 0 && <div className="t-13 g-in" style={{ textAlign: 'center', color: 'var(--u-red)', fontWeight: 700 }}>{wrong.length} letter{wrong.length === 1 ? '' : 's'} not right yet</div>}
-              <div className="g-kbd" aria-label="Keyboard">
-                {KEYS.map((row, i) => (
-                  <div key={row} className="g-kbd-row">
-                    {row.split('').map((k) => <button key={k} className="g-key" onClick={() => type(k)}>{k}</button>)}
-                    {i === 2 && <button className="g-key g-key--wide" onClick={back} aria-label="Delete"><Delete size={18} /></button>}
-                  </div>
-                ))}
-              </div>
+              <PhoneKeys ref={keys} target={selCell} label="Type a letter" onLetter={type} onBack={back} />
+              {tease && <div className="t-13 g-in" style={{ textAlign: 'center', color: 'var(--u-good)', fontWeight: 700 }}>{tease}</div>}
+              <button type="button" className="btn btn--white btn--sm" style={{ display: 'flex', gap: 6, justifyContent: 'center', alignItems: 'center' }} onClick={() => { if (!sel && puzzle.entries[0]) setSel({ r: puzzle.entries[0].row, c: puzzle.entries[0].col, dir: puzzle.entries[0].dir }); keys.current?.focus(); }}><Keyboard size={16} /> {sel ? 'Type' : 'Start typing'}</button>
               <div className="g-tip g-kbd-tip">Type on your keyboard. Arrow keys move, Backspace deletes, Space switches across and down.</div>
               <details className="cw-clues" open={wide}>
                 <summary>All clues</summary>

@@ -230,3 +230,33 @@
   .cheer-confetti { display: none; }
 }
 @keyframes cheer-fade { 0%, 85% { opacity: 1; } 100% { opacity: 0; } }
+
+/* ---- Each game's colour: a gradient along the app's own green–amber scale ---- */
+.g-c-keywords { --g-grad: linear-gradient(90deg, #50ff90, #2fc46a); }
+.g-c-crossword { --g-grad: linear-gradient(90deg, #2fc46a, #50ff90 55%, #a7e85a); }
+.g-c-match { --g-grad: linear-gradient(90deg, #a7e85a, #fbbf24); }
+.g-c-truefalse { --g-grad: linear-gradient(90deg, #fbbf24, #f59e0b); }
+.g-c-gapfill { --g-grad: linear-gradient(90deg, #fbbf24, #a7e85a 55%, #50ff90); }
+.g-btn { background: var(--g-grad); color: #0a0a0a !important; border: none !important; box-shadow: 0 3px 0 rgba(0, 0, 0, .18); transition: transform .12s var(--g-spring), box-shadow .12s; }
+.g-btn:active { transform: translateY(2px) scale(.97); box-shadow: 0 1px 0 rgba(0, 0, 0, .18); }
+
+/* Progress bars fill in the game's colour, with a light sweeping across. */
+.g-bar > i { background: var(--g-grad, var(--u-green)); overflow: hidden; }
+.g-fill { position: relative; overflow: hidden; background: var(--g-grad, var(--u-green)) !important; }
+.g-bar > i::before, .g-fill::before {
+  content: ''; position: absolute; inset: 0; width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .55), transparent);
+  animation: g-sweep 2.2s ease-in-out infinite;
+}
+@keyframes g-sweep { 0% { transform: translateX(-120%); } 60%, 100% { transform: translateX(320%); } }
+
+/* Taps answer back: a quick squash and spring. */
+.g-tap { transition: transform .14s var(--g-spring); }
+.g-tap:active { transform: scale(.94); }
+.cw-cell:active { transform: scale(.92); }
+.g-tile-pop { animation: g-pop .18s var(--g-spring) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .g-bar > i::before, .g-fill::before, .g-tile-pop { animation: none; }
+  .g-tap:active, .g-btn:active, .cw-cell:active { transform: none; }
+}

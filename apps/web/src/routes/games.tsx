@@ -114,11 +114,11 @@ export default function GamesRoute() {
                 <div className="t-15 w-7" style={{ marginTop: 2 }}>{w.title || `Week ${w.week}`}</div>
               </div>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <Link to={ROUTES.keywords(course, w.week)} className="btn btn--green btn--sm"><KeywordsIcon size={15} /> Keywords</Link>
-                <Link to={ROUTES.crossword(course, w.week)} className="btn btn--white btn--sm"><CrosswordIcon size={15} /> Crossword</Link>
-                <Link to={ROUTES.match(course, w.week)} className="btn btn--white btn--sm"><MatchIcon size={15} /> Match-up</Link>
-                <Link to={ROUTES.truefalse(course, w.week)} className="btn btn--white btn--sm"><TrueFalseIcon size={15} /> True or False</Link>
-                <Link to={ROUTES.gapfill(course, w.week)} className="btn btn--white btn--sm"><GapFillIcon size={15} /> Fill the gap</Link>
+                <Link to={ROUTES.keywords(course, w.week)} className="btn btn--sm g-btn g-c-keywords"><KeywordsIcon size={15} /> Keywords</Link>
+                <Link to={ROUTES.crossword(course, w.week)} className="btn btn--sm g-btn g-c-crossword"><CrosswordIcon size={15} /> Crossword</Link>
+                <Link to={ROUTES.match(course, w.week)} className="btn btn--sm g-btn g-c-match"><MatchIcon size={15} /> Match-up</Link>
+                <Link to={ROUTES.truefalse(course, w.week)} className="btn btn--sm g-btn g-c-truefalse"><TrueFalseIcon size={15} /> True or False</Link>
+                <Link to={ROUTES.gapfill(course, w.week)} className="btn btn--sm g-btn g-c-gapfill"><GapFillIcon size={15} /> Fill the gap</Link>
               </div>
             </Card>
           ))}

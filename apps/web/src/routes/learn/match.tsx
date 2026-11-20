@@ -12,6 +12,7 @@ import GameLoading from '../../components/GameLoading';
 import { BoxBoy } from '../../components/redesign/brand';
 import { Card, Display, Label } from '../../components/redesign/ui';
 import { useCheer } from '../../components/Cheer';
+import { missLine, useIdleTease } from '../../lib/tease';
 
 // Match-up: pair each of the week's key terms with what it means, four pairs
 // a round. Every term and meaning comes from the week's notes (the same terms
@@ -35,6 +36,7 @@ export default function MatchRoute() {
   const [finishedSecs, setFinishedSecs] = useState<number | null>(null);
   const started = useRef(Date.now());
   const [cheerNode, cheer] = useCheer();
+  const [miss, setMiss] = useState('');
 
   useEffect(() => {
     api.week(courseCode, weekNum)
@@ -92,9 +94,11 @@ export default function MatchRoute() {
     setMistakes((m) => m + 1);
     setPick(null);
     play('wrong');
+      setMiss(missLine()); window.setTimeout(() => setMiss(''), 2500);
     window.setTimeout(() => setBad([]), 450);
   };
 
+  const tease = useIdleTease(matched.size * 100 + mistakes, !!terms && terms.length >= 3 && finishedSecs == null);
   const shell = { maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '16px 16px 40px' } as const;
   if (err) return <div style={shell}><BackButton to={ROUTES.games} /><Card style={{ marginTop: 8 }}><div className="t-14">{err}</div></Card></div>;
   if (!terms) return <div style={shell}><GameLoading text="Pairing up your terms…" /></div>;
@@ -118,7 +122,7 @@ export default function MatchRoute() {
     const wrong = bad.includes(t.word) && (pick == null);
     return (
       <button key={`${side}-${t.word}`} type="button" disabled={on} onClick={() => tap(side, t.word)}
-        className={wrong ? 'g-shake' : undefined}
+        className={wrong ? 'g-shake' : 'g-tap'}
         style={{
           textAlign: 'left', padding: side === 'term' ? '14px 12px' : '10px 12px', borderRadius: 12, minHeight: 56,
           fontWeight: side === 'term' ? 800 : 500, fontSize: side === 'term' ? 15 : 13, lineHeight: 1.35,
@@ -133,15 +137,16 @@ export default function MatchRoute() {
   };
 
   return (
-    <div style={shell}>
+    <div style={shell} className="g-c-match">
       {cheerNode}
       <BackButton to={ROUTES.games} />
       <Label>{courseCode} · Week {weekNum}</Label>
       <Display size={28}>Match-up</Display>
       <div className="t-13 muted" style={{ marginTop: 4 }}>Tap a term, then what it means. Round {Math.min(round + 1, rounds.length)} of {rounds.length}{mistakes ? ` · ${mistakes} miss${mistakes === 1 ? '' : 'es'}` : ''}</div>
       <div style={{ height: 10, borderRadius: 9999, background: 'var(--surface2)', overflow: 'hidden', margin: '12px 0' }} aria-label={`${matched.size} of ${terms.length} matched`}>
-        <div style={{ width: `${(matched.size / terms.length) * 100}%`, height: '100%', background: 'var(--u-green)', borderRadius: 9999, transition: 'width .4s cubic-bezier(.34,1.56,.64,1)' }} />
+        <div className="g-fill" style={{ width: `${(matched.size / terms.length) * 100}%`, height: '100%', borderRadius: 9999, transition: 'width .4s cubic-bezier(.34,1.56,.64,1)' }} />
       </div>
+      {finishedSecs == null && (tease || miss) && <div className="t-13 w-7 g-in" key={tease || miss} style={{ textAlign: 'center', color: 'var(--u-good)', margin: '-4px 0 10px' }} aria-live="polite">{tease || miss}</div>}
 
       {finishedSecs == null ? (
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 3fr', gap: 8 }}>

@@ -307,7 +307,7 @@ export default function KeywordsRoute() {
   const clue = target ? lv.clues?.[target] || (target === lv.term.word ? lv.term.clue : '') : lv.term.clue;
 
   return (
-    <div className="g-shell">
+    <div className="g-shell g-c-keywords">
       {cheerNode}
       <BackButton to={back} fixed />
       <Label>Keywords · {courseCode} Week {weekNum}</Label>

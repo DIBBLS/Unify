@@ -11,6 +11,7 @@ import GameLoading from '../../components/GameLoading';
 import { BoxBoy } from '../../components/redesign/brand';
 import { Card, Display, Label } from '../../components/redesign/ui';
 import { useCheer } from '../../components/Cheer';
+import { missLine, useIdleTease } from '../../lib/tease';
 
 // Fill the gap: a sentence from the week's notes with a key term taken out.
 // Pick the missing term from four of the week's terms. Unlike Match-up (term
@@ -28,6 +29,7 @@ export default function GapFillRoute() {
   const [finishedSecs, setFinishedSecs] = useState<number | null>(null);
   const started = useRef(Date.now());
   const [cheerNode, cheer] = useCheer();
+  const [miss, setMiss] = useState('');
 
   useEffect(() => {
     api.week(courseCode, weekNum)
@@ -55,6 +57,7 @@ export default function GapFillRoute() {
     } else {
       setStreak(0);
       play('wrong');
+      setMiss(missLine()); window.setTimeout(() => setMiss(''), 2500);
     }
     window.setTimeout(() => {
       setPicked(null);
@@ -68,6 +71,7 @@ export default function GapFillRoute() {
     }, ok ? 900 : 1800);
   };
 
+  const tease = useIdleTease(at, !!gaps && gaps.length >= 3 && finishedSecs == null);
   const shell = { maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '16px 16px 40px' } as const;
   if (err) return <div style={shell}><BackButton to={ROUTES.games} /><Card style={{ marginTop: 8 }}><div className="t-14">{err}</div></Card></div>;
   if (!gaps) return <div style={shell}><GameLoading text="Finding sentences in your notes…" /></div>;
@@ -90,15 +94,16 @@ export default function GapFillRoute() {
   const isRight = picked && now ? picked === now.answer.word : null;
 
   return (
-    <div style={shell}>
+    <div style={shell} className="g-c-gapfill">
       {cheerNode}
       <BackButton to={ROUTES.games} />
       <Label>{courseCode} · Week {weekNum}</Label>
       <Display size={28}>Fill the gap</Display>
       <div className="t-13 muted" style={{ marginTop: 4 }}>Pick the term that completes the sentence. {finishedSecs == null ? `${Math.min(at + 1, gaps.length)} of ${gaps.length}` : ''}{streak >= 2 ? ` · ${streak} in a row` : ''}</div>
       <div style={{ height: 10, borderRadius: 9999, background: 'var(--surface2)', overflow: 'hidden', margin: '12px 0' }} aria-label={`${at} of ${gaps.length} answered`}>
-        <div style={{ width: `${((finishedSecs != null ? gaps.length : at) / gaps.length) * 100}%`, height: '100%', background: 'var(--u-green)', borderRadius: 9999, transition: 'width .4s cubic-bezier(.34,1.56,.64,1)' }} />
+        <div className="g-fill" style={{ width: `${((finishedSecs != null ? gaps.length : at) / gaps.length) * 100}%`, height: '100%', borderRadius: 9999, transition: 'width .4s cubic-bezier(.34,1.56,.64,1)' }} />
       </div>
+      {finishedSecs == null && (tease || miss) && <div className="t-13 w-7 g-in" key={tease || miss} style={{ textAlign: 'center', color: 'var(--u-good)', margin: '-4px 0 10px' }} aria-live="polite">{tease || miss}</div>}
 
       {finishedSecs == null && now ? (
         <div key={at} className="soft-in" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -119,7 +124,7 @@ export default function GapFillRoute() {
               const isAnswer = picked && o.word === now.answer.word;
               return (
                 <button key={o.word} type="button" disabled={!!picked} onClick={() => choose(o.word)}
-                  className={mine && !isAnswer ? 'g-shake' : undefined}
+                  className={mine && !isAnswer ? 'g-shake' : 'g-tap'}
                   style={{
                     minHeight: 56, padding: '10px 12px', borderRadius: 14, fontWeight: 800, fontSize: 15,
                     border: `2px solid ${isAnswer ? 'var(--u-good)' : mine ? 'var(--u-red)' : 'var(--border)'}`, borderBottomWidth: 4,

@@ -43,7 +43,7 @@ export function useCheer(): [ReactNode, (kind: CheerKind, opts?: { text?: string
       </div>
       {BIG.includes(shown.kind) && (
         <div className="cheer-confetti" aria-hidden="true">
-          {Array.from({ length: shown.kind === 'done' ? 36 : 22 }, (_, i) => (
+          {Array.from({ length: /perfect/i.test(shown.text) ? 64 : shown.kind === 'done' ? 36 : 22 }, (_, i) => (
             <i
               key={i}
               style={{

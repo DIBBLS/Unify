@@ -1,7 +1,7 @@
 import { toastError } from '../lib/toast';
 import { prefetchDaily } from '../lib/dailyword';
 import { CGPA_TARGET } from '../lib/features';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { BookOpen, ChevronRight, Trash2, MessageCircle } from 'lucide-react';
 import { TermTiles } from '../components/GameIcons';
@@ -42,8 +42,26 @@ type Activity = {
 // Admin oversight: platform totals + latest signups + latest published
 // notes in one dark card. Main admin (role) gets the manage link,
 // normal admins (flag) get the view-only notes link.
-// S20: back after a week or more away. Kind, no guilt: one step to get going.
+// S20: back after a few days or more away. Kind, a little teasing, no guilt:
+// one step to get going. A week or more gets the gentle version.
 // Shown once a day at most (dismiss hides it until tomorrow).
+// A different line each visit; teasing for a short break, gentle after a long one.
+function welcomeLine(name: string, days: number): { title: string; body: string } {
+  const n = name || 'there';
+  const short = [
+    { title: `Look who's back, ${n}!`, body: `${days} days off. Your notes didn't read themselves… one topic and you're back on track.` },
+    { title: `Oh, hello ${n}`, body: `Box Boy kept your seat warm for ${days} days. Five minutes today?` },
+    { title: `${n}! We were about to send a search party`, body: "Today's Term of the Day is waiting. Bet you get it in three." },
+    { title: `Back for more, ${n}?`, body: `${days} days away. One quick game or one topic gets you moving again.` },
+  ];
+  const long = [
+    { title: `Welcome back, ${n}`, body: `It's been ${days} days. One topic today and you're moving again.` },
+    { title: `Good to see you, ${n}`, body: 'No catching up needed. Start with one topic, that is all.' },
+  ];
+  const list = days >= 7 ? long : short;
+  return list[Math.floor(Math.random() * list.length)];
+}
+
 function WelcomeBack({ firstName, resume }: { firstName: string; resume: { course: string; week: number; topic: number } | null }) {
   const [away, setAway] = useState<number | null>(null);
   const key = 'unify.welcomeBack.' + new Date().toISOString().slice(0, 10);
@@ -55,23 +73,26 @@ function WelcomeBack({ firstName, resume }: { firstName: string; resume: { cours
       if (!days.length) return; // brand new: the usual Home is the welcome
       const last = days[days.length - 1];
       const gap = Math.floor((Date.now() - new Date(`${last}T12:00:00`).getTime()) / 86400000);
-      if (gap >= 7) setAway(gap);
+      if (gap >= 2) setAway(gap);
     }).catch(() => {});
   }, [hidden]);
-  if (hidden || away == null) return null;
+  // Chosen once, so the line doesn't change while Home re-renders.
+  const line = useMemo(() => (away == null ? null : welcomeLine(firstName, away)), [away, firstName]);
+  if (hidden || away == null || !line) return null;
   const close = () => { setHidden(true); try { localStorage.setItem(key, '1'); } catch { /* optional */ } };
   return (
     <div className="rise" style={{ margin: '12px 16px 0', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, display: 'flex', gap: 12, alignItems: 'center' }}>
       <BoxBoy pose="wavePhone" width={56} calm />
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontWeight: 800, fontSize: 15 }}>Welcome back, {firstName}</div>
-        <div style={{ fontSize: 13, color: 'var(--text2)' }}>It's been {away} days. One topic today and you're moving again.</div>
+        <div style={{ fontWeight: 800, fontSize: 15 }}>{line.title}</div>
+        <div style={{ fontSize: 13, color: 'var(--text2)' }}>{line.body}</div>
         <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
           {resume ? (
             <Link to={`/learn/${encodeURIComponent(resume.course.trim())}/week/${resume.week}${resume.topic ? `?t=${resume.topic}` : ''}`} className="btn btn--amber btn--sm" onClick={close}>Pick up {resume.course} · Week {resume.week}</Link>
           ) : (
             <Link to="/revision" className="btn btn--amber btn--sm" onClick={close}>Five-minute revision</Link>
           )}
+          {away < 7 && <Link to={ROUTES.dailyWord} className="btn btn--white btn--sm" onClick={close}>Term of the Day</Link>}
           <button className="btn btn--white btn--sm" onClick={close}>Not now</button>
         </div>
       </div>

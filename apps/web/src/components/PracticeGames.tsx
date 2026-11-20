@@ -15,11 +15,11 @@ export default function PracticeGames({ course, week }: { course: string; week: 
         <div style={{ fontSize: 14, marginTop: 4, color: 'var(--text2)' }}>Lock in this week's key terms with a quick game. Every word comes from these notes.</div>
       </div>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        <Link to={ROUTES.keywords(course, week)} className="btn btn--green btn--sm"><KeywordsIcon size={15} /> Keywords</Link>
-        <Link to={ROUTES.crossword(course, week)} className="btn btn--white btn--sm"><CrosswordIcon size={15} /> Crossword</Link>
-        <Link to={ROUTES.match(course, week)} className="btn btn--white btn--sm"><MatchIcon size={15} /> Match-up</Link>
-        <Link to={ROUTES.truefalse(course, week)} className="btn btn--white btn--sm"><TrueFalseIcon size={15} /> True or False</Link>
-        <Link to={ROUTES.gapfill(course, week)} className="btn btn--white btn--sm"><GapFillIcon size={15} /> Fill the gap</Link>
+        <Link to={ROUTES.keywords(course, week)} className="btn btn--sm g-btn g-c-keywords"><KeywordsIcon size={15} /> Keywords</Link>
+        <Link to={ROUTES.crossword(course, week)} className="btn btn--sm g-btn g-c-crossword"><CrosswordIcon size={15} /> Crossword</Link>
+        <Link to={ROUTES.match(course, week)} className="btn btn--sm g-btn g-c-match"><MatchIcon size={15} /> Match-up</Link>
+        <Link to={ROUTES.truefalse(course, week)} className="btn btn--sm g-btn g-c-truefalse"><TrueFalseIcon size={15} /> True or False</Link>
+        <Link to={ROUTES.gapfill(course, week)} className="btn btn--sm g-btn g-c-gapfill"><GapFillIcon size={15} /> Fill the gap</Link>
       </div>
       {LEADERBOARD && <GameLeaderboard course={course} week={week} limit={3} />}
       <Link to={`${ROUTES.games}?course=${encodeURIComponent(course)}`} style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 13, fontWeight: 700, color: 'var(--u-good)', textDecoration: 'none' }}>
