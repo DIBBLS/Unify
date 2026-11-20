@@ -8,6 +8,7 @@ import { play } from '../../lib/sound';
 import { sayPraise } from '../../lib/welcomeVoice';
 import BackButton from '../../components/BackButton';
 import GameFinish from '../../components/GameFinish';
+import GameTimer, { quickLimit, useCountdown } from '../../components/GameTimer';
 import { useGameQuit } from '../../lib/gameQuit';
 import GameLoading from '../../components/GameLoading';
 import { BoxBoy } from '../../components/redesign/brand';
@@ -39,6 +40,7 @@ export default function MatchRoute() {
   const started = useRef(Date.now());
   const [cheerNode, cheer] = useCheer();
   const [miss, setMiss] = useState('');
+  const over = useRef(false);
 
   useEffect(() => {
     api.week(courseCode, weekNum)
@@ -82,7 +84,7 @@ export default function MatchRoute() {
       if (!roundDone) { cheer('word'); return; }
       if (round + 1 < rounds.length) {
         cheer('level', { sub: `Round ${round + 1} of ${rounds.length}` });
-        window.setTimeout(() => setRound((r) => r + 1), 900);
+        window.setTimeout(() => { if (!over.current) setRound((r) => r + 1); }, 900);
       } else {
         const secs = Math.max(1, Math.round((Date.now() - started.current) / 1000));
         setFinishedSecs(secs);
@@ -100,6 +102,14 @@ export default function MatchRoute() {
     window.setTimeout(() => setBad([]), 450);
   };
 
+  // Timed: 12 seconds a term. When time's up the game ends with the pairs made.
+  const limit = quickLimit(terms?.length || 0, 12);
+  const [played, resetClock] = useCountdown(limit, !!terms && terms.length >= 3 && finishedSecs == null, () => {
+    over.current = true;
+    setPick(null);
+    setFinishedSecs(limit);
+    cheer('done', { text: "Time's up!", sub: `${matched.size} of ${terms?.length || 0} matched` });
+  });
   const tease = useIdleTease(matched.size * 100 + mistakes, !!terms && terms.length >= 3 && finishedSecs == null);
   const shell = { maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '16px 16px 40px' } as const;
   const [leavePrompt, quitNotice] = useGameQuit('match', courseCode, weekNum, !!terms && finishedSecs == null && (matched.size > 0 || mistakes > 0));
@@ -118,7 +128,7 @@ export default function MatchRoute() {
     );
   }
 
-  const score = Math.max(0, terms.length * 100 - mistakes * 25 + Math.max(0, 300 - (finishedSecs || 0)));
+  const score = Math.max(0, matched.size * 100 - mistakes * 25 + Math.max(0, 300 - (finishedSecs || 0)));
   const btn = (side: 'term' | 'clue', t: Term) => {
     const on = matched.has(t.word);
     const picked = pick?.side === side && pick.word === t.word;
@@ -149,6 +159,7 @@ export default function MatchRoute() {
       {finishedSecs == null && quitNotice}
       <div className="t-13 muted" style={{ marginTop: 4 }}>Tap a term, then what it means. Round {Math.min(round + 1, rounds.length)} of {rounds.length}{mistakes ? ` · ${mistakes} miss${mistakes === 1 ? '' : 'es'}` : ''}</div>
       <ProgressBar value={matched.size / terms.length} label={`${matched.size} of ${terms.length} matched`} style={{ margin: '12px 0' }} />
+      {finishedSecs == null && <GameTimer played={played} limit={limit} />}
       <GameNudge text={finishedSecs == null ? miss || tease : ''} tone={miss ? 'miss' : 'tease'} />
 
       {finishedSecs == null ? (
@@ -159,10 +170,10 @@ export default function MatchRoute() {
       ) : (
         <Card style={{ alignItems: 'center', textAlign: 'center', gap: 8 }}>
           <BoxBoy pose="cheer" width={90} />
-          <div className="t-15 w-7">{mistakes === 0 ? 'Perfect: every pair right first time' : `All ${terms.length} terms matched`}</div>
+          <div className="t-15 w-7">{matched.size < terms.length ? `${matched.size} of ${terms.length} matched before time ran out` : mistakes === 0 ? 'Perfect: every pair right first time' : `All ${terms.length} terms matched`}</div>
           <div className="t-13 muted">{mistakes ? `${mistakes} miss${mistakes === 1 ? '' : 'es'} · ` : ''}{finishedSecs}s</div>
-          <GameFinish game="match" course={courseCode} week={weekNum} score={score} terms={terms.length} hints={mistakes} seconds={finishedSecs} />
-          <button className="btn btn--white btn--sm" onClick={() => { setTerms(shuffle(terms)); setRound(0); setMatched(new Set()); setMistakes(0); setFinishedSecs(null); started.current = Date.now(); }}>Play again</button>
+          <GameFinish game="match" course={courseCode} week={weekNum} score={score} terms={matched.size} hints={mistakes} seconds={finishedSecs} />
+          <button className="btn btn--white btn--sm" onClick={() => { setTerms(shuffle(terms)); setRound(0); setMatched(new Set()); setMistakes(0); setFinishedSecs(null); started.current = Date.now(); over.current = false; resetClock(); }}>Play again</button>
         </Card>
       )}
     </div>

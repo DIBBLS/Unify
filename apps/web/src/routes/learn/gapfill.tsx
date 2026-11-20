@@ -7,6 +7,7 @@ import type { UnifyNote } from '../../types/note';
 import { play } from '../../lib/sound';
 import BackButton from '../../components/BackButton';
 import GameFinish from '../../components/GameFinish';
+import GameTimer, { quickLimit, useCountdown } from '../../components/GameTimer';
 import { useGameQuit } from '../../lib/gameQuit';
 import GameLoading from '../../components/GameLoading';
 import { BoxBoy } from '../../components/redesign/brand';
@@ -32,6 +33,7 @@ export default function GapFillRoute() {
   const started = useRef(Date.now());
   const [cheerNode, cheer] = useCheer();
   const [miss, setMiss] = useState('');
+  const over = useRef(false);
 
   useEffect(() => {
     api.week(courseCode, weekNum)
@@ -62,6 +64,7 @@ export default function GapFillRoute() {
       setMiss(missLine()); window.setTimeout(() => setMiss(''), 2500);
     }
     window.setTimeout(() => {
+      if (over.current) return;
       setPicked(null);
       if (gaps && at + 1 < gaps.length) setAt(at + 1);
       else if (gaps) {
@@ -73,6 +76,14 @@ export default function GapFillRoute() {
     }, ok ? 900 : 1800);
   };
 
+  // Timed: 20 seconds a gap. When time's up the round ends with what's filled.
+  const limit = quickLimit(gaps?.length || 0, 20);
+  const [played, resetClock] = useCountdown(limit, !!gaps && gaps.length >= 3 && finishedSecs == null, () => {
+    over.current = true;
+    setPicked(null);
+    setFinishedSecs(limit);
+    cheer('done', { text: "Time's up!", sub: `${right} of ${gaps?.length || 0} right` });
+  });
   const tease = useIdleTease(at, !!gaps && gaps.length >= 3 && finishedSecs == null);
   const shell = { maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '16px 16px 40px' } as const;
   const [leavePrompt, quitNotice] = useGameQuit('gapfill', courseCode, weekNum, !!gaps && finishedSecs == null && (at > 0 || picked !== null));
@@ -106,6 +117,7 @@ export default function GapFillRoute() {
       {finishedSecs == null && quitNotice}
       <div className="t-13 muted" style={{ marginTop: 4 }}>Pick the term that completes the sentence. {finishedSecs == null ? `${Math.min(at + 1, gaps.length)} of ${gaps.length}` : ''}{streak >= 2 ? ` · ${streak} in a row` : ''}</div>
       <ProgressBar value={(finishedSecs != null ? gaps.length : at) / gaps.length} label={`${at} of ${gaps.length} answered`} style={{ margin: '12px 0' }} />
+      {finishedSecs == null && <GameTimer played={played} limit={limit} />}
       <GameNudge text={finishedSecs == null ? miss || tease : ''} tone={miss ? 'miss' : 'tease'} />
 
       {finishedSecs == null && now ? (
@@ -145,7 +157,7 @@ export default function GapFillRoute() {
           <div className="t-15 w-7">{wrong === 0 ? 'Perfect: every gap filled first time' : `${right} of ${gaps.length} right`}</div>
           <div className="t-13 muted">{finishedSecs}s</div>
           <GameFinish game="gapfill" course={courseCode} week={weekNum} score={score} terms={right} hints={wrong} seconds={finishedSecs} />
-          <button className="btn btn--white btn--sm" onClick={() => { if (note) setGaps(gapSentences(note, weekTerms(note, 20))); setAt(0); setRight(0); setStreak(0); setFinishedSecs(null); started.current = Date.now(); }}>Play again</button>
+          <button className="btn btn--white btn--sm" onClick={() => { if (note) setGaps(gapSentences(note, weekTerms(note, 20))); setAt(0); setRight(0); setStreak(0); setFinishedSecs(null); started.current = Date.now(); over.current = false; resetClock(); }}>Play again</button>
         </Card>
       ) : null}
     </div>

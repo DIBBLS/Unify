@@ -32,8 +32,8 @@ export function useGameQuit(game: GameId, course: string, week: number, active: 
     {
       title: 'Leave this round?',
       body: pending
-        ? "You're midway. Leaving now keeps the 10% cut on your next finish of this game."
-        : "You're midway. If you leave now, your next finish of this game for this week scores 10% less.",
+        ? "You're midway. Leaving now keeps the cut on your next finish: 10% off the score and 5 XP less."
+        : "You're midway. If you leave now, your next finish of this game for this week scores 10% less and earns 5 XP less.",
       stay: 'Keep playing',
       leave: 'Leave anyway',
     },
@@ -41,7 +41,7 @@ export function useGameQuit(game: GameId, course: string, week: number, active: 
   );
   const notice = pending ? (
     <div className="g-in" role="status" style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '10px 12px', margin: '8px 0', borderRadius: 12, background: 'var(--u-warn-tint)', color: 'var(--u-warn-ink)', fontSize: 13, fontWeight: 700, lineHeight: 1.35 }}>
-      You left your last round midway, so this round scores 10% less. Finish it to clear that.
+      You left your last round midway, so this round scores 10% less and earns 5 XP less. Finish it to clear that.
     </div>
   ) : null;
   return [prompt, notice];

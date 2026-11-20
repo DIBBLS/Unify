@@ -453,8 +453,8 @@ export const api = {
     apiFetch<{ course: string; week: number; title: string; subtitle: string; note_json: unknown; topicMeta?: TopicMeta[]; lectures?: number[]; authors?: NoteAuthor[] }>(
       `/v1/courses/${encodeURIComponent(course)}/weeks/${week}`
     ),
-  progress: (course: string, week: number, topic: number, lectureNo = 1) => {
-    const body = JSON.stringify({ course, week, topic, lectureNo });
+  progress: (course: string, week: number, topic: number, lectureNo = 1, leftMidway = false) => {
+    const body = JSON.stringify({ course, week, topic, lectureNo, ...(leftMidway ? { leftMidway: true } : {}) });
     // Offline-first: completing while offline banks locally and syncs on
     // reconnect — XP is never lost to a dead connection.
     if (queueWrite('/v1/progress', body)) return Promise.resolve({ ok: true, xp: 0, streak: 0 });
@@ -801,7 +801,7 @@ export const api = {
     apiFetch<{ played: number; solved: number; mine: { guesses: number; solved: boolean } | null }>(`/v1/games/daily?course=${encodeURIComponent(course)}&day=${day}`),
   dailyWordSave: (payload: { course: string; day: string; word: string; guesses: number; solved: boolean }) =>
     apiFetch<{ ok: boolean; first: boolean; xp: number; solved: number }>('/v1/games/daily', { method: 'POST', body: JSON.stringify(payload) }, 0),
-  gameScore: (payload: { game: GameId; course: string; week: number; score: number; terms: number; hints: number; seconds: number }) =>
+  gameScore: (payload: { game: GameId; course: string; week: number; score: number; terms: number; hints: number; seconds: number; quit?: boolean }) =>
     apiFetch<{ ok: boolean; best: number; newBest: boolean; xp: number }>('/v1/games/score', { method: 'POST', body: JSON.stringify(payload) }),
   gameBoard: (q: { course: string; week?: number; game?: GameId }) =>
     apiFetch<{ players: number; top: { rank: number; name: string; persona: string | null; score: number; terms: number; me: boolean }[]; me: { rank: number; score: number; terms: number } | null }>(

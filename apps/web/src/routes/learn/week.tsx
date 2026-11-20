@@ -151,7 +151,8 @@ export default function LearnPage() {
     if (doneCount >= topics.length) {
       setBurst({ k: Date.now(), label: 'Week complete!', sub: `${topics.length} topics done` });
     } else {
-      setBurst({ k: Date.now(), label: '+10 XP', sub: 'Topic complete' });
+      const halved = !!leftTopic && isDone(weekNum, leftTopic, selLecture);
+      setBurst({ k: Date.now(), label: halved ? '+5 XP' : '+10 XP', sub: halved ? 'Topic complete · 5 off for leaving it midway' : 'Topic complete' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [doneCount]);

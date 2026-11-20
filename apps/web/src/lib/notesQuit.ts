@@ -4,6 +4,8 @@ import { useLeaveGuard } from './leaveGuard';
 // Leaving a topic midway in the notes: asked first, and remembered so the
 // week says so when the student comes back (cleared once that topic is done).
 const key = (course: string, week: number) => `unify.left.notes.${course.toUpperCase()}.${week}`;
+/** The topic this week was left midway in, if any (it earns 5 XP, not 10, when finished). */
+export const leftTopicOf = (course: string, week: number): number | null => read(course, week);
 const read = (course: string, week: number): number | null => {
   try { const v = Number(localStorage.getItem(key(course, week))); return v > 0 ? v : null; } catch { return null; }
 };
@@ -18,7 +20,7 @@ export function useNotesQuit(course: string, week: number, topic: number | undef
     midway,
     {
       title: `Leave Topic ${topic ?? ''} midway?`,
-      body: "You haven't finished this topic yet. If you leave now, we'll note it, and it'll be waiting for you when you come back.",
+      body: "You haven't finished this topic yet. If you leave now, finishing it later earns 5 XP instead of 10.",
       stay: 'Keep reading',
       leave: 'Leave anyway',
     },

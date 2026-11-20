@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Timer } from 'lucide-react';
 
 // Game clock: time played (only while the game is on screen) and a countdown
@@ -16,6 +16,30 @@ export function useGameClock(running: boolean, tick: () => void) {
     return () => window.clearInterval(t);
   }, [running, tick]);
 }
+
+/**
+ * A set countdown for the quick games (Match-up, True or False, Fill the gap,
+ * Term of the Day): ticks while running and on screen, calls `onUp` once at
+ * the limit. Returns the seconds played and a reset for "Play again".
+ */
+export function useCountdown(limit: number, running: boolean, onUp: () => void, start = 0): [number, () => void] {
+  const [played, setPlayed] = useState(start);
+  const up = useRef(onUp);
+  up.current = onUp;
+  const fired = useRef(false);
+  useEffect(() => {
+    if (!running) return;
+    const t = window.setInterval(() => { if (document.visibilityState === 'visible') setPlayed((p) => p + 1); }, 1000);
+    return () => window.clearInterval(t);
+  }, [running]);
+  useEffect(() => {
+    if (running && limit > 0 && played >= limit && !fired.current) { fired.current = true; up.current(); }
+  }, [played, limit, running]);
+  const reset = useCallback(() => { fired.current = false; setPlayed(0); }, []);
+  return [played, reset];
+}
+/** Seconds for a quick game: so many per question, from 1½ to 6 minutes, in half minutes. */
+export const quickLimit = (questions: number, perQuestion: number) => Math.min(360, Math.max(90, Math.round((questions * perQuestion) / 30) * 30));
 
 export default function GameTimer({ played, limit }: { played: number; limit: number }) {
   const left = Math.max(0, limit - played);

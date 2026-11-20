@@ -13,6 +13,7 @@ import { useCheer } from '../../components/Cheer';
 import PhoneKeys, { type PhoneKeysHandle } from '../../components/PhoneKeys';
 import { missLine, useIdleTease } from '../../lib/tease';
 import GameNudge from '../../components/GameNudge';
+import GameTimer, { useGameClock } from '../../components/GameTimer';
 
 import { play } from '../../lib/sound';
 // Term of the Day: guess one key term from your course in six tries. Same
@@ -24,7 +25,9 @@ const COLORS: Record<Mark, { bg: string; fg: string; border: string }> = {
   near: { bg: 'var(--u-amber)', fg: 'var(--u-black)', border: 'var(--u-amber)' },
   miss: { bg: '#8a8a8a', fg: '#fff', border: '#8a8a8a' },
 };
-type Saved = { guesses: string[]; done: boolean; sent?: boolean };
+type Saved = { guesses: string[]; done: boolean; sent?: boolean; played?: number; timeUp?: boolean };
+// Five minutes a day, counted from the first letter typed (only while on screen).
+const DAILY_LIMIT = 300;
 const keyOf = (course: string, day: string) => `unify:daily:${course}:${day}`;
 
 function untilMidnight(): string {
@@ -82,7 +85,7 @@ export default function DailyWordRoute() {
   const answer = daily?.term.word || '';
   const rows = saved.guesses.map((g) => score(g, answer));
   const solved = saved.guesses.includes(answer);
-  const finished = solved || saved.guesses.length >= MAX_GUESSES;
+  const finished = solved || saved.guesses.length >= MAX_GUESSES || !!saved.timeUp;
   const showClue = saved.guesses.length >= CLUE_AFTER || finished;
   const tease = useIdleTease(`${saved.guesses.length}:${typing}`, state === 'ready' && !finished);
 
@@ -92,6 +95,29 @@ export default function DailyWordRoute() {
     setSaved(s);
     if (daily) try { localStorage.setItem(keyOf(daily.course, day), JSON.stringify(s)); } catch { /* fine */ }
   };
+
+  // The clock: runs once they've started typing, saved with the day's game.
+  const tick = useCallback(() => {
+    setSaved((s) => {
+      if (s.done) return s;
+      const played = (s.played || 0) + 1;
+      const n: Saved = played >= DAILY_LIMIT ? { ...s, played, done: true, timeUp: true } : { ...s, played };
+      if (daily) try { localStorage.setItem(keyOf(daily.course, day), JSON.stringify(n)); } catch { /* fine */ }
+      return n;
+    });
+  }, [daily, day]);
+  useGameClock(state === 'ready' && !finished && (saved.guesses.length > 0 || typing.length > 0 || (saved.played || 0) > 0), tick);
+  // Time's up: the day ends unsolved, recorded like running out of tries.
+  useEffect(() => {
+    if (!daily || !saved.timeUp || saved.sent) return;
+    setTyping('');
+    cheer('done', { text: "Time's up!", sub: `The word was ${daily.term.display.toUpperCase()}` });
+    setStats(recordResult(day, false, saved.guesses.length));
+    api.dailyWordSave({ course: daily.course, day, word: answer, guesses: Math.max(1, saved.guesses.length), solved: false })
+      .then((r) => { setBoard((b) => ({ played: (b?.played || 0) + (r.first ? 1 : 0), solved: r.solved })); persist({ ...saved, sent: true }); })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [saved.timeUp]);
 
   const submit = useCallback(() => {
     if (!daily || finished) return;
@@ -162,7 +188,7 @@ export default function DailyWordRoute() {
     if (m === 'hit' || (m === 'near' && keyState[ch] !== 'hit') || (m === 'miss' && !keyState[ch])) keyState[ch] = m;
   }));
   // Tiles fit the width and leave room for the keyboard on short phones.
-  const size = Math.max(30, Math.min(52, Math.floor((Math.min(window.innerWidth, 480) - 32 - (answer.length - 1) * 6) / answer.length), Math.floor((window.innerHeight - 420) / MAX_GUESSES) - 6));
+  const size = Math.max(30, Math.min(52, Math.floor((Math.min(window.innerWidth, 480) - 32 - 56 - (answer.length - 1) * 6) / answer.length), Math.floor((window.innerHeight - 420) / MAX_GUESSES) - 6));
   const share = async () => {
     const url = `${window.location.origin}${ROUTES.games}`;
     const text = shareText(daily.course, day, rows, solved, url);
@@ -205,12 +231,15 @@ export default function DailyWordRoute() {
         </Card>
       )}
 
+      {!finished && <GameTimer played={saved.played || 0} limit={DAILY_LIMIT} />}
       <div key={shake} className={shake ? 'shake' : undefined} onClick={() => keys.current?.focus()} style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center', marginTop: 16, cursor: finished ? undefined : 'text' }} aria-label="Your guesses">
         {Array.from({ length: MAX_GUESSES }, (_, r) => {
           const word = r < saved.guesses.length ? saved.guesses[r] : r === saved.guesses.length ? typing : '';
           const marks = r < rows.length ? rows[r] : null;
           return (
-            <div key={r} ref={r === saved.guesses.length ? activeRow : undefined} style={{ display: 'flex', gap: 6 }} aria-label={marks ? `${word}: ${marks.join(', ')}` : undefined}>
+            <div key={r} ref={r === saved.guesses.length ? activeRow : undefined} style={{ display: 'flex', gap: 6, alignItems: 'center' }} aria-label={marks ? `Try ${r + 1}, ${word}: ${marks.join(', ')}` : `Try ${r + 1}`}>
+              {/* Which try this row is. */}
+              <span aria-hidden="true" style={{ width: 22, textAlign: 'right', fontSize: 12, fontWeight: 900, color: r === saved.guesses.length && !finished ? 'var(--u-warn-ink)' : marks ? 'var(--text2)' : 'var(--text3)' }}>{r + 1}</span>
               {Array.from({ length: answer.length }, (_, i) => {
                 const ch = word[i] || '';
                 const c = marks ? COLORS[marks[i]] : null;
@@ -220,10 +249,13 @@ export default function DailyWordRoute() {
                     fontWeight: 900, fontSize: size * 0.5, fontFamily: 'var(--fd)',
                     background: c ? c.bg : 'var(--surface)', color: c ? c.fg : 'var(--text)',
                     border: `2px solid ${c ? c.border : ch ? 'var(--text)' : r === saved.guesses.length && !finished ? 'var(--u-amber)' : 'var(--border)'}`,
-                    transition: `background .25s ${i * 80}ms, border-color .25s ${i * 80}ms`,
+                    transition: `background .25s ${i * 80}ms, border-color .25s ${i * 80}ms, filter .3s ${i * 80}ms, opacity .3s ${i * 80}ms`,
+                    // Letters not in the word blur out, so the exact and close ones stand out.
+                    ...(marks && marks[i] === 'miss' ? { filter: 'blur(2px)', opacity: 0.4 } : {}),
                   }}>{ch}</span>
                 );
               })}
+              <span aria-hidden="true" style={{ width: 22 }} />
             </div>
           );
         })}
@@ -244,7 +276,7 @@ export default function DailyWordRoute() {
       {finished ? (
         <Card style={{ marginTop: 14, alignItems: 'center', textAlign: 'center', gap: 8 }}>
           <BoxBoy pose={solved ? 'cheer' : 'readingStanding'} width={90} />
-          <div className="t-15 w-7">{solved ? `Solved in ${saved.guesses.length} of ${MAX_GUESSES}` : `Today's word was ${daily.term.display.toUpperCase()}`}</div>
+          <div className="t-15 w-7">{solved ? `Solved in ${saved.guesses.length} of ${MAX_GUESSES}` : `${saved.timeUp ? "Time's up. " : ''}Today's word was ${daily.term.display.toUpperCase()}`}</div>
           {solved ? <div className="t-13 muted">That counts as today's study. +10 XP.</div> : <div className="t-13 muted">Read it again in Week {daily.week} and it'll stick.</div>}
           {board && board.played > 0 && <div className="t-13 w-7">{board.solved} of {board.played} in {daily.course} solved it today</div>}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, width: '100%', marginTop: 4 }}>

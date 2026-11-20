@@ -22,7 +22,7 @@ export default function GameFinish({ game, course, week, score: earned, terms, h
   useEffect(() => {
     if (sent.current) return;
     sent.current = true;
-    api.gameScore({ game, course, week, score, terms, hints, seconds })
+    api.gameScore({ game, course, week, score, terms, hints, seconds, quit: cut })
       .then((r) => { setResult(r); clearQuit(game, course, week); })
       .catch(() => setResult(null))
       .finally(() => { api.gameBoard({ course, week, game }).then(setBoard).catch(() => {}); });
@@ -47,12 +47,12 @@ export default function GameFinish({ game, course, week, score: earned, terms, h
       </div>
       {cut && (
         <div className="t-13" style={{ textAlign: 'center', fontWeight: 700, color: 'var(--u-warn-ink)' }}>
-          10% off for leaving your last round midway ({earned} → {score}). That's cleared now.
+          10% off and 5 XP less for leaving your last round midway ({earned} → {score}). That's cleared now.
         </div>
       )}
       {result && (
         <div className="t-13" style={{ textAlign: 'center', fontWeight: 700, color: 'var(--u-good)' }}>
-          {result.xp ? `+${result.xp} XP · ` : ''}{result.newBest ? 'Your best for this week' : `Your best is still ${result.best}`}
+          {result.xp ? `${result.xp > 0 ? '+' : ''}${result.xp} XP · ` : ''}{result.newBest ? 'Your best for this week' : `Your best is still ${result.best}`}
         </div>
       )}
       <button className="btn btn--white btn--block" onClick={() => void share()} style={{ display: 'flex', gap: 6, justifyContent: 'center', alignItems: 'center' }}>

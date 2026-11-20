@@ -8,6 +8,7 @@ import type { UnifyNote } from '../../types/note';
 import { play } from '../../lib/sound';
 import BackButton from '../../components/BackButton';
 import GameFinish from '../../components/GameFinish';
+import GameTimer, { quickLimit, useCountdown } from '../../components/GameTimer';
 import { useGameQuit } from '../../lib/gameQuit';
 import GameLoading from '../../components/GameLoading';
 import { BoxBoy } from '../../components/redesign/brand';
@@ -50,6 +51,7 @@ export default function TrueFalseRoute() {
   const started = useRef(Date.now());
   const [cheerNode, cheer] = useCheer();
   const [miss, setMiss] = useState('');
+  const over = useRef(false);
 
   useEffect(() => {
     api.week(courseCode, weekNum)
@@ -82,6 +84,7 @@ export default function TrueFalseRoute() {
     }
     // A wrong answer stays up longer so the right term can be read.
     window.setTimeout(() => {
+      if (over.current) return;
       setAnswer(null);
       if (at + 1 < items.length) setAt(at + 1);
       else {
@@ -94,6 +97,14 @@ export default function TrueFalseRoute() {
     }, ok ? 750 : 1700);
   };
 
+  // Timed: 15 seconds a statement. When time's up the round ends with what's answered.
+  const limit = quickLimit(items.length, 15);
+  const [played, resetClock] = useCountdown(limit, items.length > 0 && finishedSecs == null, () => {
+    over.current = true;
+    setAnswer(null);
+    setFinishedSecs(limit);
+    cheer('done', { text: "Time's up!", sub: `${right} of ${items.length} right` });
+  });
   const tease = useIdleTease(at, !!terms && terms.length >= 4 && finishedSecs == null);
   const shell = { maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '16px 16px 40px' } as const;
   const [leavePrompt, quitNotice] = useGameQuit('truefalse', courseCode, weekNum, !!terms && finishedSecs == null && (at > 0 || answer !== null));
@@ -142,6 +153,7 @@ export default function TrueFalseRoute() {
       {finishedSecs == null && quitNotice}
       <div className="t-13 muted" style={{ marginTop: 4 }}>Does the meaning match the term? {finishedSecs == null ? `${Math.min(at + 1, items.length)} of ${items.length}` : ''}{streak >= 2 ? ` · ${streak} in a row` : ''}</div>
       <ProgressBar value={(finishedSecs != null ? items.length : at) / items.length} label={`${at} of ${items.length} answered`} style={{ margin: '12px 0' }} />
+      {finishedSecs == null && <GameTimer played={played} limit={limit} />}
       <GameNudge text={finishedSecs == null ? miss || tease : ''} tone={miss ? 'miss' : 'tease'} />
 
       {finishedSecs == null && now ? (
@@ -166,7 +178,7 @@ export default function TrueFalseRoute() {
           <div className="t-15 w-7">{wrong === 0 ? 'Perfect: every statement right' : `${right} of ${items.length} right`}</div>
           <div className="t-13 muted">{finishedSecs}s</div>
           <GameFinish game="truefalse" course={courseCode} week={weekNum} score={score} terms={right} hints={wrong} seconds={finishedSecs} />
-          <button className="btn btn--white btn--sm" onClick={() => { setItems(build(terms)); setAt(0); setRight(0); setStreak(0); setBonus(0); setFinishedSecs(null); started.current = Date.now(); }}>Play again</button>
+          <button className="btn btn--white btn--sm" onClick={() => { setItems(build(terms)); setAt(0); setRight(0); setStreak(0); setBonus(0); setFinishedSecs(null); started.current = Date.now(); over.current = false; resetClock(); }}>Play again</button>
         </Card>
       ) : null}
     </div>
