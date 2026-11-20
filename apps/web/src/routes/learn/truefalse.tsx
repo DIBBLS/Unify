@@ -76,7 +76,7 @@ export default function TrueFalseRoute() {
       setStreak(s);
       setBonus((b) => b + Math.min(s - 1, 5) * 20);
       if (s === 3 || s === 6 || s === 10) cheer('streak', { sub: `${s} in a row` });
-      else play('correct');
+      else cheer('word');
     } else {
       setStreak(0);
       play('wrong');
@@ -168,7 +168,6 @@ export default function TrueFalseRoute() {
           </Card>
           <div style={{ display: 'flex', gap: 10 }}>{big(false)}{big(true)}</div>
           <div style={{ minHeight: 22, textAlign: 'center' }} aria-live="polite">
-            {judged === true && <span className="t-14 w-7" style={{ color: 'var(--u-good)' }}>Right!</span>}
             {judged === false && <span className="t-14 w-7">{now.truth ? `It does describe ${now.right.display}.` : `That's ${now.right.display}.`}</span>}
           </div>
         </div>

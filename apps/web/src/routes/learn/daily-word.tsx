@@ -10,7 +10,7 @@ import GameLoading from '../../components/GameLoading';
 import { BoxBoy } from '../../components/redesign/brand';
 import { Card, Display, Label } from '../../components/redesign/ui';
 import { useCheer } from '../../components/Cheer';
-import PhoneKeys, { type PhoneKeysHandle } from '../../components/PhoneKeys';
+import PhoneKeys, { centreInView, type PhoneKeysHandle } from '../../components/PhoneKeys';
 import { missLine, useIdleTease } from '../../lib/tease';
 import GameNudge from '../../components/GameNudge';
 import GameTimer, { useGameClock } from '../../components/GameTimer';
@@ -89,7 +89,8 @@ export default function DailyWordRoute() {
   const showClue = saved.guesses.length >= CLUE_AFTER || finished;
   const tease = useIdleTease(`${saved.guesses.length}:${typing}`, state === 'ready' && !finished);
 
-  useEffect(() => { activeRow.current?.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, [saved.guesses.length]);
+  // After each guess, the next row sits in the middle of what's visible (above the keyboard).
+  useEffect(() => { if (saved.guesses.length) window.setTimeout(() => centreInView(activeRow.current), 60); }, [saved.guesses.length]);
 
   const persist = (s: Saved) => {
     setSaved(s);

@@ -13,6 +13,8 @@ import GameLoading from '../../components/GameLoading';
 import { BoxBoy } from '../../components/redesign/brand';
 import { Card, Display, Label, ProgressBar } from '../../components/redesign/ui';
 import GameFinish from '../../components/GameFinish';
+import GameNudge from '../../components/GameNudge';
+import { missLine, useIdleTease } from '../../lib/tease';
 import { useGameQuit } from '../../lib/gameQuit';
 import { useCheer } from '../../components/Cheer';
 
@@ -67,6 +69,7 @@ export default function KeywordsRoute() {
   const [justFound, setJustFound] = useState<string | null>(null);
   // Cheers, and words found in a row without a miss (3+ is a streak).
   const [cheerNode, cheer] = useCheer();
+  const [miss, setMiss] = useState('');
   const streak = useRef(0);
   // The word box whose clue is showing (tap a box to pick it).
   const [focus, setFocus] = useState<string | null>(null);
@@ -176,7 +179,7 @@ export default function KeywordsRoute() {
     const drawn = lv ? path.map((i) => pos(slotOf(i), lv.letters.length)) : [];
     const out = (text: string, tone: 'good' | 'bad' | 'grey') => {
       if (drawn.length > 1) { const id = Date.now(); setTrail({ pts: drawn, tone, id }); window.setTimeout(() => setTrail((t) => (t?.id === id ? null : t)), 560); }
-      say(text, tone);
+      if (text) say(text, tone);
     };
     setPath([]);
     setPtr(null);
@@ -196,18 +199,19 @@ export default function KeywordsRoute() {
       else if (streak.current >= 3) cheer('streak', { text: `${streak.current} in a row!` });
       else cheer('word');
       if (room.mode === 'team' && room.startedAt && room.me) room.send({ t: 'found', id: room.me.id, level: li, word: w });
-      return out(w === lv.term.word ? `${lv.term.display}!` : 'Nice one', 'good');
+      return out('', 'good');
     }
     if (lv.bonus.includes(w)) {
       setSaved((s) => ({ ...s, bonus: s.bonus + 1 }));
       streak.current += 1;
       cheer('bonus', { sub: '+5' });
-      return out('Bonus word', 'good');
+      return out('', 'good');
     }
     setShake((n) => n + 1);
     play('wrong');
     streak.current = 0;
     out('Not in this week’s notes', 'bad');
+    setMiss(missLine()); window.setTimeout(() => setMiss(''), 2500);
   };
 
   // On a laptop: type the letters, Enter to try the word, Backspace to undo.
@@ -278,6 +282,7 @@ export default function KeywordsRoute() {
   // Leaving a game always lands on Practice, opened on this course.
   const back = `/games?course=${encodeURIComponent(courseCode)}`;
 
+  const tease = useIdleTease(JSON.stringify(saved.found).length * 100 + path.length, !!levels && saved.finishedSecs == null && !saved.timeUp && !choosing);
   const [leavePrompt, quitNotice] = useGameQuit('keywords', courseCode, weekNum, !!levels && saved.finishedSecs == null && !saved.timeUp && !choosing && (saved.level > 0 || Object.values(saved.found).some((w) => w.length > 0)));
   if (err) return <div className="g-shell"><BackButton to={back} fixed /><div className="t-14" style={{ color: 'var(--u-red)' }}>{err}</div></div>;
   if (!levels) return <div className="g-shell"><GameLoading /></div>;
@@ -311,6 +316,7 @@ export default function KeywordsRoute() {
   return (
     <div className="g-shell g-c-keywords">
       {cheerNode}
+      <GameNudge text={saved.finishedSecs == null ? miss || tease : ''} tone={miss ? 'miss' : 'tease'} />
       {leavePrompt}
       <BackButton to={back} fixed />
       <Label>Keywords · {courseCode} Week {weekNum}</Label>

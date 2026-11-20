@@ -57,7 +57,7 @@ export default function GapFillRoute() {
       setRight((r) => r + 1);
       setStreak(s);
       if (s === 3 || s === 6) cheer('streak', { sub: `${s} in a row` });
-      else play('correct');
+      else cheer('word');
     } else {
       setStreak(0);
       play('wrong');

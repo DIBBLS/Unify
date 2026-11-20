@@ -7,7 +7,7 @@ import { InviteButton, RoomBar } from '../../components/GameRoomBar';
 import { Keyboard } from 'lucide-react';
 import GameNudge from '../../components/GameNudge';
 import PhoneKeys, { type PhoneKeysHandle } from '../../components/PhoneKeys';
-import { useIdleTease } from '../../lib/tease';
+import { missLine, useIdleTease } from '../../lib/tease';
 import { api } from '../../lib/api';
 import { buildCrossword, type Entry, type Puzzle } from '../../lib/crossword';
 import type { UnifyNote } from '../../types/note';
@@ -44,6 +44,7 @@ export default function CrosswordRoute() {
   const [sel, setSel] = useState<{ r: number; c: number; dir: 'across' | 'down' } | null>(null);
   const [wrong, setWrong] = useState<string[]>([]);
   const [cheerNode, cheer] = useCheer();
+  const [miss, setMiss] = useState('');
   // On a laptop the clue list sits open beside the grid.
   const [wide] = useState(() => typeof window !== 'undefined' && !!window.matchMedia?.('(min-width: 1024px)').matches);
 
@@ -185,6 +186,7 @@ export default function CrosswordRoute() {
     const bad: string[] = [];
     puzzle.cells.forEach((row, r) => row.forEach((ch, c) => { const v = saved.letters[`${r},${c}`]; if (ch && v && v !== ch) bad.push(`${r},${c}`); }));
     setWrong(bad);
+    if (bad.length) { setMiss(missLine()); window.setTimeout(() => setMiss(''), 2500); }
     setSaved((s) => ({ ...s, checks: s.checks + 1 }));
   };
   const reveal = () => {
@@ -311,7 +313,7 @@ export default function CrosswordRoute() {
               </div>
               {wrong.length > 0 && <div className="t-13 g-in" style={{ textAlign: 'center', color: 'var(--u-red)', fontWeight: 700 }}>{wrong.length} letter{wrong.length === 1 ? '' : 's'} not right yet</div>}
               <PhoneKeys ref={keys} target={selCell} label="Type a letter" onLetter={type} onBack={back} />
-              <GameNudge text={tease} />
+              <GameNudge text={miss || tease} tone={miss ? 'miss' : 'tease'} />
               <button type="button" className="btn btn--white btn--sm" style={{ display: 'flex', gap: 6, justifyContent: 'center', alignItems: 'center' }} onClick={() => { if (!sel && puzzle.entries[0]) setSel({ r: puzzle.entries[0].row, c: puzzle.entries[0].col, dir: puzzle.entries[0].dir }); keys.current?.focus(); }}><Keyboard size={16} /> {sel ? 'Type' : 'Start typing'}</button>
               <div className="g-tip g-kbd-tip">Type on your keyboard. Arrow keys move, Backspace deletes, Space switches across and down.</div>
               <details className="cw-clues" open={wide}>
