@@ -111,7 +111,7 @@ export default function InstallBar() {
   useEffect(() => {
     const onAsk = () => {
       if (isStandalone()) {
-        toastSuccess('Unify is already installed on this device.');
+        toastSuccess('Unify Learn is already installed on this device.');
       } else if (pie) {
         void install();
       } else if (detectIOS()) {
@@ -232,7 +232,7 @@ export default function InstallBar() {
 
       {stage === 'ios' && (
         <div style={{ ...card, width: 300 }}>
-          <div style={{ fontWeight: 800, fontSize: 13 }}>Add Unify to your home screen</div>
+          <div style={{ fontWeight: 800, fontSize: 13 }}>Add Unify Learn to your home screen</div>
           <div style={{ color: 'var(--text2)', marginTop: 4 }}>
             Tap the <strong>Share</strong> button ▲ in Safari, then choose <strong>Add to Home Screen</strong>.
           </div>

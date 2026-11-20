@@ -59,12 +59,12 @@ export default function Badges() {
           const got = b.got(facts);
           return (
             <div key={b.id} title={got ? b.label : b.need} aria-label={got ? `${b.label}, earned` : `${b.label}: ${b.need}`}
-              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, textAlign: 'center', padding: '10px 4px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', opacity: got ? 1 : 0.55 }}>
-              <span style={{ width: 36, height: 36, borderRadius: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: got ? 'var(--u-amber)' : 'var(--surface2)', color: got ? 'var(--u-black)' : 'var(--text3)' }}>
-                <b.Icon size={18} />
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, textAlign: 'center', padding: '12px 4px', borderRadius: 14, background: got ? 'rgba(251,191,36,.12)' : 'var(--surface)', border: got ? '2px solid var(--u-amber)' : '1px solid var(--border)', borderBottomWidth: got ? 4 : 1 }}>
+              <span style={{ width: 44, height: 44, borderRadius: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: got ? 'var(--u-amber)' : 'var(--surface2)', color: got ? 'var(--u-black)' : 'var(--text2)', opacity: got ? 1 : 0.7 }}>
+                <b.Icon size={22} strokeWidth={got ? 2.5 : 2} />
               </span>
-              <span style={{ fontSize: 11, fontWeight: 700, lineHeight: 1.2 }}>{b.label}</span>
-              {!got && <span style={{ fontSize: 10, color: 'var(--text2)', lineHeight: 1.2 }}>{b.need}</span>}
+              <span style={{ fontSize: 12, fontWeight: 800, lineHeight: 1.2, color: got ? 'var(--text)' : 'var(--text2)' }}>{b.label}</span>
+              {!got && <span style={{ fontSize: 11, color: 'var(--text2)', lineHeight: 1.25 }}>{b.need}</span>}
             </div>
           );
         })}
