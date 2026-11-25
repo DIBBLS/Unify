@@ -12,7 +12,7 @@ import { TopicSlice } from '../../components/TopicSlice';
 import { MathPlain } from '../../components/MathText';
 import EoqQuiz from '../../components/EoqQuiz';
 import { NoteBuilder, blankNote, normalizeNote, extractJsonPayload } from './NoteBuilder';
-import { noteGaps, gapsSummary } from '../../lib/noteGaps';
+import { noteGaps, gapsSummary, noteChecklist, type CheckGroup } from '../../lib/noteGaps';
 import { api, type Material } from '../../lib/api';
 import { localGreeting } from '../../lib/naija';
 import type { UnifyNote } from '../../types/note';
@@ -884,16 +884,9 @@ export default function StudioRoute() {
                   <button onClick={goReview} disabled={!reviewReady} aria-disabled={!reviewReady} style={{ opacity: reviewReady ? 1 : 0.45, filter: reviewReady ? undefined : 'grayscale(1)', cursor: reviewReady ? 'pointer' : 'not-allowed', padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
                     Continue to review <ArrowRight size={18} />
                   </button>
-                  {!reviewReady && (
-                    // C05: the full list of what's left, not just the first few.
-                    <div role="status" style={{ fontSize: 13, color: 'var(--u-warn-ink)', background: 'var(--u-warn-tint)', borderRadius: 12, padding: 12 }}>
-                      <div style={{ fontWeight: 800, marginBottom: 4 }}>{gaps.length} thing{gaps.length === 1 ? '' : 's'} to fix before review</div>
-                      <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        {gaps.slice(0, 12).map((g) => <li key={g}>{g}</li>)}
-                        {gaps.length > 12 && <li>…and {gaps.length - 12} more</li>}
-                      </ul>
-                    </div>
-                  )}
+                  {/* Live checklist: every section in a fixed order, ticked when complete,
+                  so finishing a topic never moves it or anything else on the list. */}
+                  <ReviewChecklist groups={noteChecklist(note, course, week)} />
                 </>
               )}
             </>
@@ -1214,3 +1207,38 @@ export default function StudioRoute() {
   );
 }
 
+// What is done and what is left before Review, section by section.
+function ReviewChecklist({ groups }: { groups: CheckGroup[] }) {
+  const left = groups.reduce((n, g) => n + g.missing.length, 0);
+  const doneGroups = groups.filter((g) => g.missing.length === 0).length;
+  const strip = (m: string) => m.replace(/^(Part \d+ )?Topic \d+(: | · )/, '');
+  return (
+    <div role="status" aria-live="polite" style={{ fontSize: 13, color: left ? 'var(--u-warn-ink)' : 'var(--u-good)', background: left ? 'var(--u-warn-tint)' : 'var(--u-good-tint)', border: `1px solid ${left ? '#fde68a' : 'var(--u-good)'}`, borderRadius: 12, padding: 12 }}>
+      <div style={{ fontWeight: 800, marginBottom: 8, display: 'flex', gap: 8, alignItems: 'baseline', flexWrap: 'wrap' }}>
+        <span style={{ flex: 1 }}>{left ? `${left} thing${left === 1 ? '' : 's'} left before review` : 'Everything is filled in. Review is open.'}</span>
+        <span style={{ fontSize: 12, fontWeight: 700 }}>{doneGroups} of {groups.length} sections done</span>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {groups.map((g) => {
+          const ok = g.missing.length === 0;
+          return (
+            <div key={g.key} style={{ background: 'var(--surface)', borderRadius: 10, padding: '8px 10px', border: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <span aria-hidden="true" style={{ width: 20, height: 20, borderRadius: 6, flexShrink: 0, display: 'grid', placeItems: 'center', background: ok ? 'var(--u-good)' : 'transparent', border: ok ? 'none' : '2px solid var(--border)', color: 'var(--u-on-good)' }}>
+                  {ok && <Check size={13} />}
+                </span>
+                <span style={{ flex: 1, minWidth: 0, fontWeight: 700, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{g.label}</span>
+                <span style={{ fontSize: 12, fontWeight: 800, color: ok ? 'var(--u-good)' : 'var(--u-warn-ink)', whiteSpace: 'nowrap' }}>{ok ? 'Complete' : `${g.missing.length} left`}</span>
+              </div>
+              {!ok && (
+                <ul style={{ margin: '6px 0 0', paddingLeft: 36, display: 'flex', flexDirection: 'column', gap: 2, color: 'var(--text2)' }}>
+                  {g.missing.map((m, i) => <li key={i}>{strip(m)}</li>)}
+                </ul>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

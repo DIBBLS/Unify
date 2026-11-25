@@ -38,9 +38,14 @@ function questionGap(q: MiniCheckQuestion): string | null {
   return null;
 }
 
-export function noteGaps(note: UnifyNote | null | undefined, course: string, week: string | number): string[] {
-  if (!note) return ['a note to review'];
-  const gaps: string[] = [];
+// One section of the live checklist under the editor (Week details, each
+// topic, the quiz), always in the same order so nothing jumps when fixed.
+export type CheckGroup = { key: string; label: string; missing: string[] };
+
+export function noteChecklist(note: UnifyNote | null | undefined, course: string, week: string | number): CheckGroup[] {
+  if (!note) return [{ key: 'note', label: 'The note', missing: ['a note to review'] }];
+  const groups: CheckGroup[] = [{ key: 'week', label: 'Week details', missing: [] }];
+  let gaps = groups[0].missing;
   const w = Number(week);
   if (!course.trim()) gaps.push('the course');
   if (!Number.isInteger(w) || w < 1) gaps.push('a valid week number');
@@ -49,8 +54,13 @@ export function noteGaps(note: UnifyNote | null | undefined, course: string, wee
   if (!filled(note.learningOutcome)) gaps.push('the learning outcome');
   if (!note.topics.length) gaps.push('at least one topic');
 
+  // Topics are numbered within each Part, so say the Part when there are several.
+  const multiPart = new Set(note.topics.map((t) => t.lecture || 1)).size > 1;
   note.topics.forEach((t, ti) => {
-    const T = `Topic ${t.number ?? ti + 1}`;
+    const T = `${multiPart ? `Part ${t.lecture || 1} ` : ''}Topic ${t.number ?? ti + 1}`;
+    const g: CheckGroup = { key: `topic-${ti}`, label: `${T}${filled(t.title) ? ` · ${t.title.trim()}` : ''}`, missing: [] };
+    groups.push(g);
+    gaps = g.missing;
     if (!filled(t.title)) gaps.push(`${T}: the title`);
     if (!t.subtopics.length) gaps.push(`${T}: at least one part`);
     t.subtopics.forEach((s) => {
@@ -77,6 +87,9 @@ export function noteGaps(note: UnifyNote | null | undefined, course: string, wee
     });
   });
 
+  const quiz: CheckGroup = { key: 'quiz', label: 'End-of-week quiz', missing: [] };
+  groups.push(quiz);
+  gaps = quiz.missing;
   const qs = note.eoq.questions;
   const mcq = qs.filter((q) => q.type === 'mcq').length;
   if (qs.length !== 10 || mcq < 6) gaps.push(`the quiz: 10 questions with at least 6 multiple choice (now ${qs.length}, ${mcq} multiple choice)`);
@@ -96,7 +109,11 @@ export function noteGaps(note: UnifyNote | null | undefined, course: string, wee
       if (bad) gaps.push(`${Q}: "${bad}" isn't a maths expression the checker can read`);
     }
   });
-  return gaps;
+  return groups;
+}
+
+export function noteGaps(note: UnifyNote | null | undefined, course: string, week: string | number): string[] {
+  return noteChecklist(note, course, week).flatMap((g) => g.missing);
 }
 
 export function gapsSummary(gaps: string[], max = 3): string {
