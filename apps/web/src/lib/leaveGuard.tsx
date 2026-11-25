@@ -28,9 +28,27 @@ const ARM = 'lg';
 const onArmEntry = () => !!(window.history.state as Record<string, unknown> | null)?.[ARM];
 const pushArm = () => window.history.pushState({ ...(window.history.state || {}), [ARM]: 1 }, '', window.location.href);
 // Step off the extra entry (if we're on it), then run `then`.
+// The step back is bookkeeping, not a page change: keep the reader exactly
+// where they are. (Without this, finishing a topic - which switches the guard
+// off - made the browser restore the scroll saved when the topic started, so
+// "Mark Topic Complete" jumped the page up to the top of the topic.)
 function disarm(then: () => void) {
   if (!onArmEntry()) { then(); return; }
-  const done = () => { window.removeEventListener('popstate', done); window.setTimeout(then, 0); };
+  const x = window.scrollX;
+  const y = window.scrollY;
+  const hist = window.history as History & { scrollRestoration?: ScrollRestoration };
+  const prev = hist.scrollRestoration;
+  try { hist.scrollRestoration = 'manual'; } catch { /* older browsers */ }
+  const keep = () => window.scrollTo(x, y);
+  const done = () => {
+    window.removeEventListener('popstate', done);
+    keep();
+    window.requestAnimationFrame(() => {
+      keep();
+      try { if (prev) hist.scrollRestoration = prev; } catch { /* fine */ }
+    });
+    window.setTimeout(then, 0);
+  };
   window.addEventListener('popstate', done);
   window.history.back();
 }
