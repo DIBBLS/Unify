@@ -306,6 +306,23 @@ function blankBlock(type: ContentBlock['type']): ContentBlock {
   }
 }
 
+// Changing a block's type used to wipe what was typed. Text now carries over
+// between Text, Insight, Analogy and Bullets (one bullet per line).
+function switchBlock(from: ContentBlock, type: ContentBlock['type']): ContentBlock {
+  if (from.type === type) return from;
+  const next = blankBlock(type);
+  const text =
+    from.type === 'paragraph' || from.type === 'insight' || from.type === 'analogy'
+      ? from.text
+      : from.type === 'bullets'
+        ? from.items.filter((s) => s.trim()).join('\n')
+        : '';
+  if (!text) return next;
+  if (next.type === 'paragraph' || next.type === 'insight' || next.type === 'analogy') return { ...next, text };
+  if (next.type === 'bullets') return { ...next, items: text.split('\n') };
+  return next;
+}
+
 function blankQuestion(type: MiniCheckQuestion['type']): MiniCheckQuestion {
   if (type === 'mcq') return { type: 'mcq', question: '', options: ['', ''], correctIndex: 0 };
   if (type === 'fitb') return { type: 'fitb', question: '', acceptedAnswers: [''] };
@@ -346,6 +363,10 @@ function DiagramImage({
   // Toast mirror: every failure surfaces globally AND stays readable inline.
   const setError = (m: string) => { setErrorState(m); if (m) toastError(m); };
   const [urlInput, setUrlInput] = useState('');
+  // The upload takes a few seconds. Calling the onChange from when it started
+  // would write back the note as it was then, wiping a caption typed meanwhile.
+  const latestOnChange = useRef(onChange);
+  latestOnChange.current = onChange;
 
   const upload = async (file: File | undefined) => {
     if (!file) return;
@@ -354,11 +375,13 @@ function DiagramImage({
     try {
       const res = await uploadDiagram(file, course, week);
       if (res.url) {
-        onChange(res.url);
+        latestOnChange.current(res.url);
         setUrlInput('');
       } else {
         setError(res.error || 'Upload failed.');
       }
+    } catch {
+      setError('Upload failed. Check your connection and try again.');
     } finally {
       setBusy(false);
     }
@@ -386,7 +409,7 @@ function DiagramImage({
               type="file"
               accept="image/*"
               disabled={busy}
-              onChange={(e) => void upload(e.target.files?.[0])}
+              onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; void upload(f); }}
               style={{ display: 'none' }}
             />
           </label>
@@ -413,6 +436,33 @@ function DiagramImage({
         </>
       )}
     </div>
+  );
+}
+
+// A number box that lets you type "-", "0." or "1e-3" on the way to a number.
+// The plain number input snapped every half-typed value to 0, so negative
+// answers could not be typed at all.
+function NumberField({ value, onChange }: { value: number; onChange: (n: number) => void }) {
+  const [text, setText] = useState(() => (Number.isFinite(value) ? String(value) : ''));
+  const [seen, setSeen] = useState(value);
+  if (value !== seen) {
+    setSeen(value);
+    if (Number(text) !== value) setText(Number.isFinite(value) ? String(value) : '');
+  }
+  return (
+    <input
+      type="text"
+      inputMode="decimal"
+      value={text}
+      onChange={(e) => {
+        const t = e.target.value.replace(',', '.');
+        setText(t);
+        const n = Number(t);
+        if (t.trim() !== '' && Number.isFinite(n)) onChange(n);
+      }}
+      placeholder="e.g. 12.5"
+      style={input}
+    />
   );
 }
 
@@ -590,7 +640,7 @@ function BlockEditor({
       <Drop
         value={block.type}
         options={BLOCK_TYPES.map((t) => ({ value: t.id, label: t.label }))}
-        onChange={(v) => onChange(blankBlock(v as ContentBlock['type']))}
+        onChange={(v) => onChange(switchBlock(block, v as ContentBlock['type']))}
         label="Block type"
         style={{ width: 'auto', maxWidth: 180, flexShrink: 0 }}
       />
@@ -840,7 +890,7 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
     <div>
       {confirmTopic !== null && (
         <ConfirmModal
-          title={`Delete Topic ${confirmTopic + 1}?`}
+          title={`Delete Part ${note.topics[confirmTopic]?.lecture || 1} Topic ${note.topics[confirmTopic]?.number ?? confirmTopic + 1}?`}
           body="Its parts, checks and recalls go with it. This cannot be undone."
           confirmLabel="Delete topic"
           onConfirm={() => {
@@ -1108,7 +1158,9 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
                 style={{ width: 'auto', maxWidth: 140, flexShrink: 0 }}
               />
               <span style={{ flex: 1 }} />
-              <button onClick={() => set({ eoq: { ...note.eoq, questions: note.eoq.questions.filter((_, xi) => xi !== qi) } })} style={dangerBtn} aria-label="Delete EOQ question"><Trash2 size={14} /></button>
+              {/* Renumber after a delete: the quiz keys questions by number, so a gap
+              followed by "+ MCQ" gave two questions the same number. */}
+              <button onClick={() => set({ eoq: { ...note.eoq, questions: note.eoq.questions.filter((_, xi) => xi !== qi).map((x, i) => ({ ...x, number: i + 1 })) } })} style={dangerBtn} aria-label="Delete EOQ question"><Trash2 size={14} /></button>
             </div>
             <label style={label}>Question<textarea value={q.question} onChange={(e) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, question: e.target.value }; set({ eoq: { ...note.eoq, questions: qs } }); }} rows={2} placeholder={q.type === 'fitb' ? 'Use ________ for the blank…' : 'Question text…'} style={area} /></label>
             {q.type === 'mcq' && q.options && (
@@ -1173,7 +1225,7 @@ export function NoteBuilder({ note, onChange }: { note: UnifyNote; onChange: (n:
             )}
             {q.type === 'number' && (
               <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
-                <label style={{ ...label, flex: '1 1 110px' }}>Answer<input type="number" step="any" value={Number.isFinite(q.answer as number) ? String(q.answer) : ''} onChange={(e) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, answer: Number(e.target.value) }; set({ eoq: { ...note.eoq, questions: qs } }); }} style={input} /></label>
+                <label style={{ ...label, flex: '1 1 110px' }}>Answer<NumberField value={q.answer as number} onChange={(n) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, answer: n }; set({ eoq: { ...note.eoq, questions: qs } }); }} /></label>
                 <label style={{ ...label, flex: '1 1 110px' }}>Allow ± (blank = 1%)<input type="number" step="any" min={0} value={q.tolerance ?? ''} onChange={(e) => { const qs = [...note.eoq.questions]; const v = e.target.value; qs[qi] = { ...q, tolerance: v === '' ? undefined : Math.max(0, Number(v)) }; set({ eoq: { ...note.eoq, questions: qs } }); }} style={input} /></label>
                 <label style={{ ...label, flex: '1 1 90px' }}>Unit<input value={q.unit || ''} onChange={(e) => { const qs = [...note.eoq.questions]; qs[qi] = { ...q, unit: e.target.value || undefined }; set({ eoq: { ...note.eoq, questions: qs } }); }} placeholder="kW" style={input} /></label>
               </div>

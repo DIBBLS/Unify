@@ -25,7 +25,7 @@ function readDraft(): { course: string; week: number } | null {
   return null;
 }
 
-export default function Pipeline({ onPick }: { onPick: (course: string, week: number) => void }) {
+export default function Pipeline({ onPick }: { onPick: (course: string, week: number, live: boolean) => void }) {
   const [rows, setRows] = useState<CourseRow[] | null>(null);
 
   useEffect(() => {
@@ -34,22 +34,23 @@ export default function Pipeline({ onPick }: { onPick: (course: string, week: nu
       try {
         const { courses } = await api.teaching();
         const draft = readDraft();
-        const out: CourseRow[] = [];
-        for (const course of courses.slice(0, 8)) {
+        // All courses at once (it used to ask one course after another).
+        const norm = (c: string) => c.toUpperCase().replace(/\s/g, '');
+        const out: CourseRow[] = await Promise.all(courses.map(async (course) => {
           const [mats, weeks] = await Promise.allSettled([api.materials(course), api.courseWeeks(course)]);
           const live = new Map<number, string>();
           if (weeks.status === 'fulfilled') for (const w of weeks.value.weeks) live.set(w.week, w.title);
           const matWeeks = new Set<number>();
           if (mats.status === 'fulfilled') for (const m of mats.value.materials || []) matWeeks.add(m.week);
           const all = new Set<number>([...live.keys(), ...matWeeks]);
-          if (draft && draft.course === course.toUpperCase().replace(/\s/g, '')) all.add(draft.week);
+          if (draft && draft.course === norm(course)) all.add(draft.week);
           const list = [...all].sort((a, b) => a - b).map((week) => {
-            const writing = !!draft && draft.week === week && draft.course === course.toUpperCase().replace(/\s/g, '') && !live.has(week);
+            const writing = !!draft && draft.week === week && draft.course === norm(course) && !live.has(week);
             const stage: Stage = live.has(week) ? 'live' : writing ? 'writing' : 'materials';
             return { week, stage, title: live.get(week) };
           });
-          out.push({ course, weeks: list });
-        }
+          return { course, weeks: list };
+        }));
         if (!gone) setRows(out);
       } catch {
         if (!gone) setRows([]);
@@ -58,7 +59,9 @@ export default function Pipeline({ onPick }: { onPick: (course: string, week: nu
     return () => { gone = true; };
   }, []);
 
-  if (!rows || rows.length === 0) return null;
+  // It used to show nothing at all while loading or when you teach no course.
+  if (!rows) return <div className="card" style={{ padding: 14, fontSize: 13, color: 'var(--text2)' }}>Loading your courses…</div>;
+  if (rows.length === 0) return <div className="card" style={{ padding: 14, fontSize: 13, color: 'var(--text2)' }}>No courses assigned to you yet. Once an admin assigns you a course, its weeks show up here.</div>;
 
   return (
     <section aria-label="Your pipeline" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -83,7 +86,7 @@ export default function Pipeline({ onPick }: { onPick: (course: string, week: nu
                     <button
                       key={w.week}
                       type="button"
-                      onClick={() => onPick(r.course, w.week)}
+                      onClick={() => onPick(r.course, w.week, w.stage === 'live')}
                       title={`${STAGE_LABEL[w.stage]}${w.title ? ': ' + w.title : ''}`}
                       style={{ minHeight: 44, padding: '6px 12px', borderRadius: 12, border: `1px solid ${st.bd}`, background: st.bg, color: st.fg, fontWeight: 800, fontSize: 12, textAlign: 'left', lineHeight: 1.25 }}
                     >

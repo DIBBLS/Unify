@@ -14,7 +14,9 @@ export default function StudioPipelineRoute() {
       <BackButton to={ROUTES.studio} />
       <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 26, margin: '8px 0 4px' }}>Pipeline</h1>
       <div style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 14 }}>Every course you teach, week by week: what's published and what's ready to write. Pick a week to start it in the Studio.</div>
-      <Pipeline onPick={(c, w) => navigate(`${ROUTES.studio}?course=${encodeURIComponent(c)}&week=${w}`)} />
+      {/* A live week opens for editing; any other week starts fresh. Starting a
+      live week fresh only ran into "this week is already live" on publish. */}
+      <Pipeline onPick={(c, w, live) => navigate(live ? `${ROUTES.studio}?edit=${encodeURIComponent(c)}&week=${w}` : `${ROUTES.studio}?course=${encodeURIComponent(c)}&week=${w}`)} />
     </div>
   );
 }

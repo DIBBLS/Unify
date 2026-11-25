@@ -60,9 +60,13 @@ export default function StudioRoute() {
   const setError = (m: string) => { setErrorState(m); if (m) toastError(m); };
   const [success, setSuccess] = useState('');
   const [working, setWorking] = useState(false);
+  // Opening a published week for editing uses the same loader, without the AI wording.
+  const [loadingWeek, setLoadingWeek] = useState(false);
   const [workMsg, setWorkMsg] = useState(0);
   const [publishing, setPublishing] = useState(false);
   const [publishingTopic, setPublishingTopic] = useState<number | null>(null);
+  // Part 1 Topic 1 and Part 2 Topic 1 share a number; this tells them apart.
+  const [publishingLecture, setPublishingLecture] = useState(1);
   // Live convert progress (parts done/total + model), so long generations
   // never look stuck on a generic spinner.
   const [convertProg, setConvertProg] = useState<{ done: number; total: number; model: string } | null>(null);
@@ -90,6 +94,8 @@ export default function StudioRoute() {
   // note again. The whole compose state saves debounced; returning
   // restores it with a notice (explicit ?edit= links always win fresh).
   const [draftRestored, setDraftRestored] = useState(false);
+  const draftWins = useRef(false);
+  const [pendingStart, setPendingStart] = useState<{ course: string; week: string } | null>(null);
 
   useEffect(() => {
     if (searchParams.get('edit')) return;
@@ -98,6 +104,16 @@ export default function StudioRoute() {
       if (!rawSaved) return;
       const d = JSON.parse(rawSaved) as Record<string, unknown>;
       if (!d || typeof d !== 'object') return;
+      // Arriving with ?course=&week= (Pipeline, Home's "Next up") while an
+      // unfinished draft is for a different week: keep the draft and ask,
+      // instead of pouring that draft's notes into the new course.
+      const qc = (searchParams.get('course') || '').toUpperCase();
+      const qw = searchParams.get('week') || '';
+      const hasWork = (typeof d.raw === 'string' && d.raw.trim()) || (d.note && typeof d.note === 'object');
+      if (qc && hasWork && (String(d.course || '').toUpperCase() !== qc || (qw && String(d.week || '') !== qw))) {
+        draftWins.current = true;
+        setPendingStart({ course: qc, week: /^\d{1,2}$/.test(qw) ? qw : '1' });
+      }
       if (typeof d.course === 'string') setCourse(d.course);
       if (typeof d.week === 'string') setWeek(d.week);
       if (typeof d.title === 'string') setTitle(d.title);
@@ -197,7 +213,7 @@ export default function StudioRoute() {
   // published week straight into review for editing, then re-publish.
   // ?course=X&week=N (from Home's "Next up") starts a NEW week with those filled in.
   useEffect(() => {
-    if (searchParams.get('edit')) return;
+    if (searchParams.get('edit') || draftWins.current) return;
     const c = searchParams.get('course');
     const w = searchParams.get('week');
     if (c) setCourse(c.toUpperCase());
@@ -212,6 +228,7 @@ export default function StudioRoute() {
     (async () => {
       setError('');
       setWorkStart(Date.now());
+      setLoadingWeek(true);
       setWorking(true);
       try {
         const data = await api.week(editCourse, editWeek);
@@ -220,13 +237,18 @@ export default function StudioRoute() {
         if (cancelled) return;
         setNote(loaded);
         setMeta({ course: data.course, week: data.week, title: data.title || loaded.title, subtitle: data.subtitle || '' });
+        // Fill the compose fields too: without them the review checks saw no
+        // course, Review stayed locked after going back, and the draft saved blank.
+        setCourse(data.course);
+        setWeek(String(data.week));
+        setMethod('manual');
         setValidation(null);
         setEditing(false);
         setStep(1);
       } catch (err) {
         if (!cancelled) setError(describeError(err, 'load week'));
       } finally {
-        if (!cancelled) setWorking(false);
+        if (!cancelled) { setWorking(false); setLoadingWeek(false); }
       }
     })();
     return () => {
@@ -295,10 +317,21 @@ export default function StudioRoute() {
       let res: Awaited<ReturnType<typeof api.convertStatus>> | null = null;
       const pollStart = Date.now();
       let seenDone = 0;
+      let pollMisses = 0;
       for (;;) {
         if (Date.now() > deadline) throw new Error('Conversion is taking too long — the job may still finish; press Generate again in a minute.');
         await new Promise((r) => setTimeout(r, 3000));
-        const st = await api.convertStatus(started.jobId);
+        // A dropped connection mid-poll must not abandon a job that is still
+        // running on the server: retry a few times. A real failure comes back
+        // with an HTTP status and stops at once.
+        let st: Awaited<ReturnType<typeof api.convertStatus>>;
+        try {
+          st = await api.convertStatus(started.jobId);
+          pollMisses = 0;
+        } catch (e) {
+          if ((e as { status?: number })?.status || ++pollMisses > 4) throw e;
+          continue;
+        }
         if (st.status === 'working') {
           const d = Math.min(st.partsDone, total);
           if (d > seenDone) {
@@ -489,6 +522,9 @@ export default function StudioRoute() {
           : tags ? `${res.course} · Week ${res.week} is live (${tags}). Old versions are kept.` : `${res.course} · Week ${res.week} is now live for students.`
       );
       setStep(2);
+      // "Next up" needs the real list of live weeks, not only what
+      // "Suggest next free week" happened to load earlier.
+      api.courseWeeks(meta.course).then((r) => setWeeks(r.weeks)).catch(() => { /* falls back to what we know */ });
       // Published: the saved draft has served its purpose.
       try {
         localStorage.removeItem('unify.studio.draft.v1');
@@ -525,6 +561,10 @@ export default function StudioRoute() {
     setRaw('');
     setPasted('');
     setEditing(false);
+    setWarnings([]);
+    setConvertHint('');
+    setCanRetryConvert(false);
+    setOccupy(null);
     discardDraft();
   };
 
@@ -542,6 +582,7 @@ export default function StudioRoute() {
     setError('');
     setSuccess('');
     setPublishingTopic(topicNumber);
+    setPublishingLecture(lecture);
     try {
       const res = await api.topicPublish({
         course: meta.course,
@@ -591,6 +632,14 @@ export default function StudioRoute() {
     const mm = String(Math.floor(elapsed / 60));
     const ss = String(elapsed % 60).padStart(2, '0');
     const elapsedLabel = `${mm}:${ss}`;
+    if (loadingWeek) {
+      return (
+        <div style={{ maxWidth: 480, margin: '0 auto', padding: '60px 20px 80px', textAlign: 'center' }}>
+          <BoxBoy pose="teaching" width={110} />
+          <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 22, marginTop: 12 }}>Opening the published week…</h1>
+        </div>
+      );
+    }
     return (
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '60px 20px 80px', textAlign: 'center' }}>
         <BoxBoy pose="teaching" width={110} />
@@ -631,7 +680,9 @@ export default function StudioRoute() {
       <p style={{ margin: '6px 0 0', fontSize: 13, color: 'var(--text2)' }}>Pick the course and week, add your material, review, publish.</p>
       <div role="tablist" aria-label="Steps" style={{ display: 'flex', gap: 4, padding: 4, borderRadius: 9999, background: 'var(--surface2)', border: '1px solid var(--border)', margin: '14px 0 20px' }}>
         {['Compose', 'Review', 'Live'].map((label, i) => {
-          const canGo = i === 0 ? step === 1 : i === 1 ? step === 0 && !!note && reviewReady : false;
+          // The fill-everything-in gate is for notes written by hand. A generated or
+          // imported note already passed review once, so going back never locks it out.
+          const canGo = i === 0 ? step === 1 : i === 1 ? step === 0 && !!note && !!meta && (method !== 'manual' || reviewReady) : false;
           return (
             <button
               key={label}
@@ -655,6 +706,19 @@ export default function StudioRoute() {
           <button onClick={() => { discardDraft(); reset(); }} style={{ padding: '6px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: 'var(--text2)' }}>
             Discard
           </button>
+        </div>
+      )}
+      {pendingStart && (
+        <div style={{ padding: 12, background: 'var(--u-warn-tint)', border: '1px solid #fde68a', borderRadius: 12, fontSize: 13, color: 'var(--u-warn-ink)', display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
+          <span>You have an unfinished draft{course ? ` for ${course} Week ${week}` : ''}. It's below, untouched.</span>
+          <span style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button onClick={() => setPendingStart(null)} style={{ padding: '6px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: 'var(--text)' }}>
+              Keep the draft
+            </button>
+            <button onClick={() => { const p = pendingStart; reset(); setPendingStart(null); setCourse(p.course); setWeek(p.week); }} style={{ padding: '6px 14px', borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', fontWeight: 800, fontSize: 12 }}>
+              Discard it and start {pendingStart.course} Week {pendingStart.week}
+            </button>
+          </span>
         </div>
       )}
       {convertHint && (
@@ -991,7 +1055,7 @@ export default function StudioRoute() {
                           disabled={publishingTopic !== null}
                           style={{ marginTop: 6, padding: '8px 14px', borderRadius: 9999, background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700, fontSize: 12, color: 'var(--u-good)' }}
                         >
-                          {publishingTopic === t.number ? 'Publishing…' : `Publish only Part ${t.lecture || 1} Topic ${t.number}`}
+                          {publishingTopic === t.number && publishingLecture === (t.lecture || 1) ? 'Publishing…' : `Publish only Part ${t.lecture || 1} Topic ${t.number}`}
                         </button>
                       </div>
                     )}
@@ -1063,7 +1127,10 @@ export default function StudioRoute() {
             );
           })()}
           <div className="studio-actions" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button onClick={() => { setTicks([false, false, false, false]); setStep(0); }} style={{ flex: 1, minWidth: 120, padding: 14, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 800 }}>
+            {/* Same as the Edit content button up top: opens the editor right here.
+            It used to jump back to Compose, where a generated note had no editor
+            (only the raw-notes box) and Review could stay locked. */}
+            <button onClick={() => { setEditing(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{ flex: 1, minWidth: 120, padding: 14, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderBottom: '4px solid var(--border)', borderRadius: 16, fontWeight: 800 }}>
               Edit content
             </button>
             <button onClick={() => publish()} disabled={publishing || !ticks.every(Boolean)} title={ticks.every(Boolean) ? undefined : 'Tick every check first'} style={{ opacity: ticks.every(Boolean) ? 1 : 0.55, flex: 2, minWidth: 160, padding: 14, background: 'var(--u-amber)', color: 'var(--u-black)', border: 'none', borderBottom: '4px solid #c69a1a', borderRadius: 16, fontWeight: 800, display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
