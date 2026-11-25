@@ -21,7 +21,10 @@ import AdminLiveWire from './admin/livewire';
 import AdminReminders from './admin/reminders';
 import AdminBugs from './admin/bugs';
 import AdminStructure from './admin/structure';
-import GuidePanel, { ClassContributorsPicker } from './admin/guide';
+import GuidePanel from './admin/guide';
+import AdminContributors from './admin/contributors';
+import AdminStaff from './admin/staff';
+import AdminAssignments from './admin/assignments';
 import Typewriter from '../components/Typewriter';
 import { localGreeting, dailyProverb } from '../lib/naija';
 
@@ -70,6 +73,14 @@ export default function AdminRoute() {
   const [ownId, setOwnId] = useState('');
   const { section } = useParams();
   const openModule = section && SECTION_IDS.includes(section) ? section : 'overview';
+  // Review 4: "11 courses, 3 unassigned" on the Overview's Needs you list.
+  const [unassignedCourses, setUnassignedCourses] = useState<{ open: number; total: number } | null>(null);
+  useEffect(() => {
+    if (openModule !== 'overview') return;
+    api.adminCourseAssignments()
+      .then((r) => setUnassignedCourses({ open: r.courses.filter((c) => c.assignees.length === 0).length, total: r.courses.length }))
+      .catch(() => setUnassignedCourses(null));
+  }, [openModule]);
   // Phones: the section list is a left drawer over a blurred backdrop (desktop keeps the sticky sidebar).
   const [navOpen, setNavOpen] = useState(false);
   useEffect(() => { setNavOpen(false); }, [openModule]);
@@ -550,66 +561,47 @@ export default function AdminRoute() {
         <div className="admin-view">
 
       <Module id="overview" openId={openModule}>
-        <div className="african-dark" style={{ background: '#0a0a0a', color: '#fff', borderRadius: 18, padding: '18px 18px 24px', position: 'relative', overflow: 'hidden' }}>
-          <div className="kente-edge" aria-hidden="true" />
-          <div style={{ fontSize: 12, opacity: 0.75, fontWeight: 700 }}><Typewriter text={localGreeting().text} speed={40} /></div>
-          <div style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, marginTop: 2 }}>{adminName ? adminName + ', welcome back' : 'Welcome back'}</div>
-          <div style={{ fontSize: 13, opacity: 0.8, marginTop: 8, lineHeight: 1.45 }}>{dailyProverb()}</div>
+        {/* Review 4: one slim greeting line instead of the big banner. */}
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+          <div style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20 }}>{adminName ? adminName + ', welcome back' : 'Welcome back'}</div>
+          <div style={{ fontSize: 12, color: 'var(--text2)', flex: 1, minWidth: 200 }}><Typewriter text={localGreeting().text} speed={40} /> · {dailyProverb()}</div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 8, marginTop: 12 }}>
-          {[
-            { id: 'requests', label: 'Staff requests waiting', n: requests.length },
-            { id: 'errors', label: 'Recent app errors', n: errors.length },
-            { id: 'capaudit', label: 'Cap violations', n: violations.length },
-          ].map((t) => (
-            <button key={t.id} onClick={() => setOpenModule(t.id)} style={{ ...card, textAlign: 'left', cursor: 'pointer', color: 'var(--text)' }}>
-              <div style={{ fontSize: 24, fontWeight: 800, color: t.n > 0 ? 'var(--u-warn-ink, #b45309)' : 'var(--u-good)' }}>{t.n}</div>
-              <div style={{ fontSize: 12, color: 'var(--text2)' }}>{t.label}</div>
-            </button>
-          ))}
-        </div>
-      {stats && (
-        <div style={{ margin: '12px 0 0', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, textAlign: 'center' }}>
-          <div>
-            <div style={{ fontSize: 18, fontWeight: 800 }}>{stats.users}</div>
-            <div style={{ fontSize: 11, color: 'var(--text2)' }}>Users</div>
-          </div>
-          <div>
-            <div style={{ fontSize: 18, fontWeight: 800 }}>{stats.weeks}</div>
-            <div style={{ fontSize: 11, color: 'var(--text2)' }}>Weeks</div>
-          </div>
-          <div>
-            <div style={{ fontSize: 18, fontWeight: 800 }}>{stats.topics ?? 0}</div>
-            <div style={{ fontSize: 11, color: 'var(--text2)' }}>Topics</div>
-          </div>
-          <div>
-            <div style={{ fontSize: 18, fontWeight: 800 }}>{stats.courses ?? 0}</div>
-            <div style={{ fontSize: 11, color: 'var(--text2)' }}>Courses</div>
-          </div>
-          <div>
-            <div style={{ fontSize: 18, fontWeight: 800 }}>{stats.xpTotal}</div>
-            <div style={{ fontSize: 11, color: 'var(--text2)' }}>XP</div>
-          </div>
-          <div>
-            <div style={{ fontSize: 18, fontWeight: 800 }}>{stats.byRole.lecturer || 0}</div>
-            <div style={{ fontSize: 11, color: 'var(--text2)' }}>Authors</div>
-          </div>
-        </div>
+      {openModule === 'overview' && (
+        <ModulesOverview
+          openModule={setOpenModule}
+          extra={[
+            { key: 'lecturer-signups', label: 'Lecturer sign-ups to approve', n: requests.filter((r) => r.role === 'lecturer' && r.status === 'pending').length, to: 'module:staff' },
+            { key: 'contributor-signups', label: 'Contributor sign-ups to approve', n: requests.filter((r) => r.role === 'contributor' && r.status === 'pending').length, to: 'module:contributors' },
+            ...(unassignedCourses ? [{ key: 'unassigned', label: `of ${unassignedCourses.total} courses have no one assigned`, n: unassignedCourses.open, to: 'module:assign' }] : []),
+            { key: 'errors', label: 'Recent app errors', n: errors.length, to: 'module:errors' },
+            { key: 'capaudit', label: 'Cap violations', n: violations.length, to: 'module:capaudit' },
+          ]}
+          numbers={stats && (
+            // Key numbers in one strip; Weeks, XP and Authors live in Analytics.
+            <div style={{ marginTop: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 12, display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, textAlign: 'center' }}>
+              {[['Users', stats.users], ['Courses', stats.courses ?? 0], ['Topics', stats.topics ?? 0]].map(([l, n]) => (
+                <div key={String(l)}>
+                  <div style={{ fontSize: 18, fontWeight: 800 }}>{Number(n).toLocaleString()}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text2)' }}>{l}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        />
       )}
-      {openModule === 'overview' && <ModulesOverview openModule={setOpenModule} />}
 
       </Module>
 
       {openModule === 'overview' && activity && ((activity.recentUsers || []).length > 0 || (activity.recentNotes || []).length > 0) && (
-        <div style={{ ...card, marginTop: 12 }}>
-          <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 8 }}>Recent activity</div>
+        <details style={{ ...card, marginTop: 12 }}>
+          <summary style={{ cursor: 'pointer', fontSize: 12, fontWeight: 800, marginBottom: 4 }}>Recent activity</summary>
           {(activity.recentUsers || []).slice(0, 4).map((u, i) => (
             <div key={'u' + i} style={{ fontSize: 13, color: 'var(--text2)', padding: '3px 0' }}>New {u.role || 'user'}: <b style={{ color: 'var(--text)' }}>{u.first_name || 'Unnamed'}</b></div>
           ))}
           {(activity.recentNotes || []).slice(0, 4).map((n, i) => (
             <div key={'n' + i} style={{ fontSize: 13, color: 'var(--text2)', padding: '3px 0' }}>Published: <b style={{ color: 'var(--text)' }}>{n.course} W{n.week}T{n.topic}</b></div>
           ))}
-        </div>
+        </details>
       )}
 
       <Module id="performance" openId={openModule}>
@@ -635,10 +627,19 @@ export default function AdminRoute() {
             <button className="btn btn--white btn--sm" disabled={!hocEmail.includes('@')} onClick={() => void grantHoc(true)}>Remove HOC</button>
           </div>
         </div>
-        <ClassContributorsPicker />
       </Module>
 
       <Module id="analytics" openId={openModule}>
+        {stats && (
+          <div style={{ ...card, marginBottom: 8, display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, textAlign: 'center' }}>
+            {[['Weeks', stats.weeks], ['XP', stats.xpTotal], ['Authors', stats.byRole.lecturer || 0]].map(([l, n]) => (
+              <div key={String(l)}>
+                <div style={{ fontSize: 18, fontWeight: 800 }}>{Number(n).toLocaleString()}</div>
+                <div style={{ fontSize: 11, color: 'var(--text2)' }}>{l}</div>
+              </div>
+            ))}
+          </div>
+        )}
         {!stats && !trends && (
           <div style={card}>
             <div style={{ fontSize: 13, color: 'var(--text2)' }}>Charts load with the panel data above.</div>
@@ -892,6 +893,18 @@ export default function AdminRoute() {
           <button onClick={() => void saveCalendar()} style={{ ...primaryBtn, width: '100%', marginTop: 10 }}>Save calendar</button>
         </div>
       </div>
+      </Module>
+
+      <Module id="staff" openId={openModule}>
+        {openModule === 'staff' && <AdminStaff />}
+      </Module>
+
+      <Module id="assign" openId={openModule}>
+        {openModule === 'assign' && <AdminAssignments />}
+      </Module>
+
+      <Module id="contributors" openId={openModule}>
+        {openModule === 'contributors' && <AdminContributors />}
       </Module>
 
       <Module id="guide" openId={openModule}>

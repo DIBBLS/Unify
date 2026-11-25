@@ -27,7 +27,7 @@ import { describeError, errorToast } from '../lib/errors';
 import { toastSuccess } from '../lib/toast';
 import { askInstall, isStandalone } from '../lib/install';
 import { announcePicture, resolvePicture } from '../lib/picture';
-import { preparePhoto } from '../lib/image';
+import { saveProfilePhoto } from '../lib/avatar';
 import { Avatar, PERSONAS, type PersonaKey } from '../components/redesign/brand';
 import Badges from '../components/Badges';
 const UUID_RE = /^[0-9a-f-]{36}$/i;
@@ -210,6 +210,8 @@ export default function MeRoute() {
     try {
       // Choosing a Box Boy replaces an uploaded photo (the photo would win otherwise).
       await api.setPersona(key, true);
+      // Review 4: drop the cached /me first, or the header re-reads the old picture.
+      clearMeCache();
       setProfile((prev) => (prev ? { ...prev, box_boy_persona: key, avatar_url: '' } : prev));
       announcePicture();
       toastSuccess(`${PERSONAS.find((p) => p.key === key)?.name || 'Box Boy'} is your picture now.`);
@@ -228,12 +230,9 @@ export default function MeRoute() {
     // included) to a small JPEG — the decode is the only real test.
     setUploadingAvatar(true);
     try {
-      // Square 320px JPEG under ~60 KB, upright, no black behind transparency.
-      const { dataUrl } = await preparePhoto(file, { size: 320, maxBytes: 60 * 1024 });
-      const res = await api.uploadAvatar(dataUrl);
-      setProfile((prev) => (prev ? { ...prev, avatar_url: res.avatarUrl } : prev));
-      // Header chip refreshes live (URL itself cache-busts server-side).
-      window.dispatchEvent(new CustomEvent('unify:avatar', { detail: res.avatarUrl }));
+      // Review 4: same upload as Studio (straight to Storage), see lib/avatar.
+      const url = await saveProfilePhoto(file);
+      setProfile((prev) => (prev ? { ...prev, avatar_url: url } : prev));
       setAvatarMsg('Picture updated.');
     } catch (e) {
       // Surface the server's exact rejection when there is one — generic
@@ -497,7 +496,7 @@ export default function MeRoute() {
             </div>
           )}
           {verifMsg && <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>{verifMsg}</div>}
-          {avatarMsg && <div style={{ fontSize: 12, color: 'var(--u-good)', marginTop: 4 }}>{avatarMsg}</div>}
+          {avatarMsg && <div role="status" style={{ fontSize: 12, color: avatarMsg === 'Picture updated.' ? 'var(--u-good)' : 'var(--u-bad, #dc2626)', marginTop: 4 }}>{avatarMsg}</div>}
         </div>
         <BoxBoy pose="armsCrossed" width={64} />
       </div>
@@ -513,7 +512,7 @@ export default function MeRoute() {
               type="file"
               accept="image/*,.heic,.heif"
               disabled={uploadingAvatar}
-              onChange={(e) => void uploadAvatar(e.target.files?.[0] || null)}
+              onChange={(e) => { const f = e.target.files?.[0] || null; e.target.value = ''; void uploadAvatar(f); }}
               style={{ display: 'none' }}
             />
           </label>

@@ -368,7 +368,7 @@ function DiagramImage({
     <div style={{ marginTop: 8 }}>
       {imageRef ? (
         <div>
-          <img src={imageRef} alt="Diagram preview" style={{ maxWidth: '100%', borderRadius: 8, border: '1px solid var(--border)' }} />
+          <img src={imageRef} alt="Diagram preview" style={{ display: 'block', width: '100%', aspectRatio: '16 / 9', objectFit: 'contain', background: '#fff', borderRadius: 8, border: '1px solid var(--border)' }} />
           <button
             onClick={() => onChange(null)}
             style={{ marginTop: 6, background: 'none', border: 'none', color: 'var(--u-red)', fontSize: 12, fontWeight: 700, textDecoration: 'underline' }}
@@ -381,7 +381,7 @@ function DiagramImage({
           <label
             style={{ display: 'block', padding: 12, border: '1px dashed var(--border)', borderRadius: 10, textAlign: 'center', fontSize: 13, fontWeight: 700, color: 'var(--text2)', cursor: busy ? 'wait' : 'pointer', opacity: busy ? 0.6 : 1 }}
           >
-            {busy ? 'Uploading…' : 'Upload diagram image (PNG/JPG/SVG, ≤5 MB)'}
+            {busy ? 'Uploading…' : 'Upload diagram image (cropped to 16:9 from the centre)'}
             <input
               type="file"
               accept="image/*"

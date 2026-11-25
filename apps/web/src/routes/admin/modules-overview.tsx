@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { askConfirm } from '../../lib/dialog';
 import { Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { CheckCircle2, ChevronRight } from 'lucide-react';
 import { api } from '../../lib/api';
 
 // Admin Overview: every module at a glance so nothing new is missed. What
@@ -11,7 +11,11 @@ type Data = Awaited<ReturnType<typeof api.adminOverview>>;
 const card = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 12 } as const;
 const SEEN_KEY = 'unify:admin-notes-seen';
 
-export default function ModulesOverview({ openModule }: { openModule: (id: string) => void }) {
+// Review 4: one "Needs you" list (the panel's own counts passed in as `extra`
+// join the server's), zero counts hidden; key numbers in one strip; the long
+// sections folded so the actionable part shows without scrolling.
+export type NeedItem = { key: string; label: string; n: number; to?: string };
+export default function ModulesOverview({ openModule, extra = [], numbers }: { openModule: (id: string) => void; extra?: NeedItem[]; numbers?: React.ReactNode }) {
   const [data, setData] = useState<Data | null>(null);
   const [failed, setFailed] = useState(false);
   const [seen] = useState(() => { try { return localStorage.getItem(SEEN_KEY) || ''; } catch { return ''; } });
@@ -26,8 +30,7 @@ export default function ModulesOverview({ openModule }: { openModule: (id: strin
     try { localStorage.setItem(SEEN_KEY, latest); } catch { /* fine */ }
   }, [latest]);
 
-  if (failed) return <div style={{ ...card, marginTop: 12, fontSize: 13, color: 'var(--text2)' }}>Couldn't load the module overview. Pull to refresh or try again later.</div>;
-  if (!data) return null;
+  const needs = [...extra, ...(data?.attention || [])].filter((t) => t.n > 0);
 
   const go = (key: string, to: string | undefined, children: React.ReactNode, style: React.CSSProperties) => {
     if (!to) return <div key={key} style={style}>{children}</div>;
@@ -35,17 +38,42 @@ export default function ModulesOverview({ openModule }: { openModule: (id: strin
     return <Link key={key} to={to} style={{ ...style, textDecoration: 'none', color: 'var(--text)' }}>{children}</Link>;
   };
 
+  const needsList = (
+    <>
+      <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', letterSpacing: 1, marginTop: 14 }}>NEEDS YOU</div>
+      <div style={{ ...card, marginTop: 8, padding: 0, overflow: 'hidden' }}>
+        {needs.length === 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px', fontSize: 13, color: 'var(--u-good)', fontWeight: 700 }}>
+            <CheckCircle2 size={16} /> {data ? 'All clear. Nothing is waiting on you.' : 'Checking…'}
+          </div>
+        )}
+        {needs.map((t, i) => (
+          <div key={t.key} style={{ borderTop: i ? '1px solid var(--border)' : undefined }}>
+            {go(t.key, t.to, (
+              <>
+                <span style={{ minWidth: 28, fontSize: 18, fontWeight: 800, color: 'var(--u-warn-ink, #b45309)' }}>{t.n}</span>
+                <span style={{ flex: 1, fontSize: 13 }}>{t.label}</span>
+                {t.to && <ChevronRight size={16} color="var(--u-good)" />}
+              </>
+            ), { display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'transparent' })}
+          </div>
+        ))}
+      </div>
+      {numbers}
+    </>
+  );
+  if (failed || !data) {
+    return (
+      <>
+        {needsList}
+        {failed && <div style={{ ...card, marginTop: 12, fontSize: 13, color: 'var(--text2)' }}>Couldn't load the module overview. Pull to refresh or try again later.</div>}
+      </>
+    );
+  }
+
   return (
     <>
-      <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', letterSpacing: 1, marginTop: 18 }}>NEEDS A DECISION</div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 8, marginTop: 8 }}>
-        {data.attention.map((t) => go(t.key, t.to, (
-          <>
-            <div style={{ fontSize: 24, fontWeight: 800, color: t.n > 0 ? 'var(--u-warn-ink, #b45309)' : 'var(--u-good)' }}>{t.n}</div>
-            <div style={{ fontSize: 12, color: 'var(--text2)' }}>{t.label}</div>
-          </>
-        ), { ...card, display: 'block' }))}
-      </div>
+      {needsList}
 
       {data.setup.length > 0 && (
         <div style={{ ...card, marginTop: 12, padding: 0, overflow: 'hidden' }}>
@@ -63,7 +91,8 @@ export default function ModulesOverview({ openModule }: { openModule: (id: strin
         </div>
       )}
 
-      <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text2)', letterSpacing: 1, marginTop: 18 }}>ACROSS THE MODULES</div>
+      <details style={{ marginTop: 18 }}>
+      <summary style={{ cursor: 'pointer', fontSize: 12, fontWeight: 800, color: 'var(--text2)', letterSpacing: 1 }}>ACROSS THE MODULES</summary>
       {/* Session over: the Second Semester's teaching weeks have ended. Students move
           up only when an admin promotes them; this is the nudge (decided 13 Nov). */}
       {data.calendar.semester === 'Second Semester' && data.calendar.start && Date.now() >= new Date(`${data.calendar.start}T00:00:00+01:00`).getTime() + data.calendar.weeks * 7 * 86400000 && (
@@ -98,6 +127,7 @@ export default function ModulesOverview({ openModule }: { openModule: (id: strin
           </div>
         </button>
       </div>
+      </details>
 
       {(data.liveWires || []).length > 0 && (
         <div style={{ ...card, marginTop: 12, padding: 0, overflow: 'hidden' }}>
@@ -123,11 +153,11 @@ export default function ModulesOverview({ openModule }: { openModule: (id: strin
       )}
 
       {data.releaseNotes.length > 0 && (
-        <div style={{ ...card, marginTop: 12 }}>
-          <div style={{ fontSize: 12, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <details style={{ ...card, marginTop: 12 }}>
+          <summary style={{ cursor: 'pointer', fontSize: 12, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ flex: 1 }}>What's new in the app</span>
             {seen !== latest && <span className="pill pill--good">New</span>}
-          </div>
+          </summary>
           {data.releaseNotes.map((r, i) => (
             <details key={r.version} open={i === 0} style={{ borderTop: i ? '1px solid var(--border)' : undefined, marginTop: 8, paddingTop: i ? 8 : 0 }}>
               <summary style={{ cursor: 'pointer', fontSize: 13, fontWeight: 700 }}>
@@ -136,7 +166,7 @@ export default function ModulesOverview({ openModule }: { openModule: (id: strin
               <Notes body={r.body} />
             </details>
           ))}
-        </div>
+        </details>
       )}
     </>
   );

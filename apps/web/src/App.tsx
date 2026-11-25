@@ -4,6 +4,7 @@ import { applyRouteMeta } from './lib/seo';
 import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import Layout from './routes/_layout';
 import AuthRoute from './routes/auth';
+import JoinRoute from './routes/join';
 import HomeRoute from './routes/home';
 import { ROUTES, LEGACY_REDIRECTS } from './lib/routes';
 import { useParams } from 'react-router-dom';
@@ -267,6 +268,8 @@ export default function App() {
         <Routes>
         {/* Chromeless: no top bar on sign in / onboarding */}
         <Route path="/auth" element={<AuthRoute />} />
+        {/* Review 4: one sign-up link per role, all into /auth. */}
+        <Route path="/join/:role?" element={<JoinRoute />} />
         <Route path={ROUTES.welcome} element={<WelcomeRoute />} />
         {/* Public share landing: no session needed until expiry */}
         <Route path="/s/:token" element={<ShareRoute />} />

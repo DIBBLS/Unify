@@ -8,7 +8,8 @@ import { sayPraise } from '../lib/welcomeVoice';
 // Home's daily goal: a ring that fills with today's XP towards the goal the
 // student picked in Settings. Full ring: "Goal met", with a chime and a
 // spoken well done (if voice is on) the first time each day.
-export default function DailyGoal() {
+// bare: no card of its own (Review 4: it sits inside Home's first course card).
+export default function DailyGoal({ bare = false }: { bare?: boolean } = {}) {
   const goal = getGoal();
   const [xp, setXp] = useState<number | null>(null);
 
@@ -35,7 +36,7 @@ export default function DailyGoal() {
   const r = 20;
   const c = 2 * Math.PI * r;
   return (
-    <div className="rise" style={{ margin: '0 16px 12px', background: 'var(--surface)', border: `1px solid ${met ? 'var(--u-good)' : 'var(--border)'}`, borderRadius: 12, padding: 12, display: 'flex', gap: 12, alignItems: 'center' }}>
+    <div className={bare ? undefined : 'rise'} style={bare ? { display: 'flex', gap: 12, alignItems: 'center' } : { margin: '0 16px 12px', background: 'var(--surface)', border: `1px solid ${met ? 'var(--u-good)' : 'var(--border)'}`, borderRadius: 12, padding: 12, display: 'flex', gap: 12, alignItems: 'center' }}>
       <svg width="52" height="52" viewBox="0 0 52 52" role="img" aria-label={`Daily goal: ${done} of ${goal.xp} XP`} style={{ flexShrink: 0 }}>
         <circle cx="26" cy="26" r={r} fill="none" stroke="var(--border)" strokeWidth="6" />
         <circle cx="26" cy="26" r={r} fill="none" stroke={met ? 'var(--u-good)' : 'var(--u-amber)'} strokeWidth="6" strokeLinecap="round"

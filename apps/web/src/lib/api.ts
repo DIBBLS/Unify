@@ -264,7 +264,7 @@ export type AdminContentCourse = {
   weeks: AdminContentWeek[];
 };
 
-export type MeResponse = { onboarded: boolean; profile: Profile | null; isAdmin: boolean; courses: string[]; avatar: string; resume: { course: string; week: number; topic: number; lecture: number } | null };
+export type MeResponse = { onboarded: boolean; profile: Profile | null; isAdmin: boolean; courses: string[]; avatar: string; pendingRole?: 'lecturer' | 'contributor' | null; resume: { course: string; week: number; topic: number; lecture: number } | null };
 
 // Short-TTL memo for me(): the layout gate + every route each call it on
 // navigation — without this every page change costs a full round trip.
@@ -347,7 +347,7 @@ export type ClaimOutcome =
   | { status: 'sent_to_hoc'; reason: 'not_on_list' | 'already_claimed' }
   | { status: 'not_found'; reason: 'not_on_list' | 'already_claimed' }
   | { status: 'no_list' };
-export type ClassListEntry = { id: string; name: string; matric: string; claimed: boolean; claimedBy: string; claimMethod: string; verifiedEmail: boolean; removed: boolean };
+export type ClassListEntry = { id: string; name: string; matric: string; claimed: boolean; claimedBy: string; avatar?: string; persona?: string; claimMethod: string; verifiedEmail: boolean; removed: boolean };
 export type ClassListClaim = {
   id: string; reason: 'not_on_list' | 'already_claimed'; matric: string; name: string; account: string; accountEmail: string;
   verifiedEmail: string; note: string; at: string; entry: { id: string; name: string; claimedBy: string } | null;
@@ -629,6 +629,14 @@ export const api = {
     }>('/v1/admin/stats'),
   adminUsers: (q = '', role = '') =>
     apiFetch<{ users: AdminUser[] }>(`/v1/admin/users?q=${encodeURIComponent(q)}&role=${encodeURIComponent(role)}`),
+  adminCourseAssignments: () =>
+    apiFetch<{ courses: { code: string; title: string; levels: string[]; semesters: string[]; assignees: { id: string; name: string; role: string }[] }[] }>('/v1/admin/course-assignments'),
+  adminAssignCourse: (code: string, userId: string) =>
+    apiFetch<{ ok: boolean }>(`/v1/admin/courses/${encodeURIComponent(code)}/assign`, { method: 'POST', body: JSON.stringify({ userId }) }),
+  adminUnassignCourse: (code: string, userId: string) =>
+    apiFetch<{ ok: boolean }>(`/v1/admin/courses/${encodeURIComponent(code)}/assign/${userId}`, { method: 'DELETE' }),
+  adminContributors: (f: { level?: string; department?: string; q?: string } = {}) =>
+    apiFetch<{ users: (AdminUser & { courses?: string[] })[] }>(`/v1/admin/users?role=contributor&courses=1&limit=200&q=${encodeURIComponent(f.q || '')}&level=${encodeURIComponent(f.level || '')}&department=${encodeURIComponent(f.department || '')}`),
   adminPatchUser: (id: string, payload: { role?: string; is_admin?: boolean; level?: string }) =>
     apiFetch<{ ok: boolean }>(`/v1/admin/users/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
   adminUserCourses: (id: string) =>
@@ -704,6 +712,8 @@ export const api = {
     apiFetch<{ courses: { course: string; level: string; semester: string; assigned: boolean; topics: number; versions: number; totalTopics: number }[] }>('/v1/contributions'),
   uploadAvatar: (image: string) =>
     apiFetch<{ ok: boolean; avatarUrl: string }>('/v1/avatar', { method: 'POST', body: JSON.stringify({ image }) }),
+  setAvatarUrl: (url: string) =>
+    apiFetch<{ ok: boolean; avatarUrl: string }>('/v1/avatar', { method: 'POST', body: JSON.stringify({ url }) }),
   logError: (payload: { kind: string; message: string; stack: string; url: string; appVersion: string }) =>
     apiFetch<{ ok: boolean }>('/v1/errors', { method: 'POST', body: JSON.stringify(payload) }),
   updates: () => apiFetch<{ updates: HomeUpdate[] }>('/v1/updates'),

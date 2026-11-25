@@ -6,7 +6,8 @@
 // paints white behind transparency, and shrinks until the result is under a
 // byte budget, so every picture loads fast on a student's data plan.
 
-export type PrepOptions = { size?: number; maxBytes?: number; square?: boolean };
+// aspect: width ÷ height to centre-crop to (e.g. 16/9); wins over `square`.
+export type PrepOptions = { size?: number; maxBytes?: number; square?: boolean; aspect?: number; quality?: number[] };
 
 type Source = { draw: (ctx: CanvasRenderingContext2D, sx: number, sy: number, sw: number, sh: number, dw: number, dh: number) => void; width: number; height: number; close: () => void };
 
@@ -81,17 +82,22 @@ function blobToDataUrl(b: Blob): Promise<string> {
 }
 
 /** Turn any photo into a small JPEG data URL (square by default). */
-export async function preparePhoto(file: Blob, opts: PrepOptions = {}): Promise<{ dataUrl: string; bytes: number }> {
+export async function preparePhoto(file: Blob, opts: PrepOptions = {}): Promise<{ dataUrl: string; bytes: number; blob: Blob }> {
   const size = opts.size ?? 320;
   const maxBytes = opts.maxBytes ?? 60 * 1024;
   const square = opts.square ?? true;
   const src = await open(file);
   try {
-    const side = Math.min(src.width, src.height);
-    const sx = square ? Math.round((src.width - side) / 2) : 0;
-    const sy = square ? Math.round((src.height - side) / 2) : 0;
-    const sw = square ? side : src.width;
-    const sh = square ? side : src.height;
+    // Centre crop: a fixed aspect when asked, else a square, else the whole picture.
+    const aspect = opts.aspect ?? (square ? 1 : 0);
+    let sw = src.width;
+    let sh = src.height;
+    if (aspect > 0) {
+      if (sw / sh > aspect) sw = Math.round(sh * aspect);
+      else sh = Math.round(sw / aspect);
+    }
+    const sx = Math.round((src.width - sw) / 2);
+    const sy = Math.round((src.height - sh) / 2);
     let target = Math.min(size, Math.max(sw, sh));
     let best: Blob | null = null;
     for (let attempt = 0; attempt < 6; attempt++) {
@@ -107,22 +113,22 @@ export async function preparePhoto(file: Blob, opts: PrepOptions = {}): Promise<
       ctx.fillRect(0, 0, dw, dh);
       ctx.imageSmoothingQuality = 'high';
       src.draw(ctx, sx, sy, sw, sh, dw, dh);
-      for (const q of [0.82, 0.7, 0.58]) {
+      for (const q of opts.quality ?? [0.82, 0.7, 0.58]) {
         const b = await toBlob(cv, q);
         if (b && (!best || b.size < best.size)) best = b;
-        if (b && b.size <= maxBytes) return { dataUrl: await blobToDataUrl(b), bytes: b.size };
+        if (b && b.size <= maxBytes) return { dataUrl: await blobToDataUrl(b), bytes: b.size, blob: b };
       }
       target = Math.round(target * 0.82); // still too big: shrink and retry
     }
     if (!best) throw new Error('The photo could not be prepared.');
-    return { dataUrl: await blobToDataUrl(best), bytes: best.size };
+    return { dataUrl: await blobToDataUrl(best), bytes: best.size, blob: best };
   } finally {
     src.close();
   }
 }
 
 /** A still frame from a live camera <video>, prepared the same way. */
-export async function grabFrame(video: HTMLVideoElement, opts: PrepOptions = {}): Promise<{ dataUrl: string; bytes: number }> {
+export async function grabFrame(video: HTMLVideoElement, opts: PrepOptions = {}): Promise<{ dataUrl: string; bytes: number; blob: Blob }> {
   const w = video.videoWidth;
   const h = video.videoHeight;
   if (!w || !h) throw new Error('The camera is not ready yet.');

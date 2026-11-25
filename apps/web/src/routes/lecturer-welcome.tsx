@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Camera, Check, Search } from 'lucide-react';
 import { api } from '../lib/api';
 import { errorToast } from '../lib/errors';
-import { preparePhoto } from '../lib/image';
+import { saveProfilePhoto } from '../lib/avatar';
 import { ROUTES } from '../lib/routes';
 import { useSchool } from '../lib/school';
 import { clearMeCache } from '../lib/api';
@@ -101,10 +101,7 @@ export default function LecturerWelcomeRoute() {
     if (!file) return;
     setBusy(true);
     try {
-      const { dataUrl } = await preparePhoto(file, { size: 320, maxBytes: 60 * 1024 });
-      const res = await api.uploadAvatar(dataUrl);
-      setPhoto(res.avatarUrl);
-      window.dispatchEvent(new CustomEvent('unify:avatar', { detail: res.avatarUrl }));
+      setPhoto(await saveProfilePhoto(file));
     } catch (e) { errorToast(e, 'upload that photo'); }
     finally { setBusy(false); }
   };

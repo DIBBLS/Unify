@@ -4,12 +4,13 @@ import { CGPA_TARGET } from '../lib/features';
 import { useEffect, useMemo, useState } from 'react';
 import { ProgressBar } from '../components/redesign/ui';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { BookOpen, ChevronRight, Trash2, MessageCircle } from 'lucide-react';
+import { BookOpen, ChevronRight, Trash2, MessageCircle, RotateCcw, Play, CalendarDays, CheckCircle2 } from 'lucide-react';
 import { TermTiles } from '../components/GameIcons';
 import DailyGoal from '../components/DailyGoal';
 import OfflineSaver from '../components/OfflineSaver';
 import { supabaseBrowser } from '../lib/supabase';
-import { api, type Profile, type HomeUpdate } from '../lib/api';
+import { api, clearMeCache, type Profile, type HomeUpdate } from '../lib/api';
+import { fileJoinIntent, getJoinIntent, ROLE_EVENT } from '../lib/joinIntent';
 import { canOpenLink } from '../lib/updateLinks';
 import { profileGaps, gapsText } from '../lib/profileGaps';
 import { DashboardSkeleton, LecturerHomeSkeleton } from '../components/Skeletons';
@@ -134,6 +135,42 @@ function loadProgress(course: string): Promise<Prog | null> {
   });
 }
 
+// Review 4: Home's first card, full width at the top of Your Courses. It holds
+// what used to be two cards above the courses: where you stopped (Resume),
+// today's goal ring and the quiz average.
+function PickUpCard({ resume, quizzes }: { resume: { course: string; week: number; topic: number; lecture?: number } | null; quizzes: { taken: number; avg: number } }) {
+  let to = '';
+  if (resume && resume.course) {
+    const q = new URLSearchParams();
+    if (resume.topic) q.set('t', String(resume.topic));
+    if (resume.lecture && resume.lecture > 1) q.set('c', String(resume.lecture));
+    const qs = q.toString();
+    to = `/learn/${encodeURIComponent(resume.course.trim())}/week/${resume.week}${qs ? `?${qs}` : ''}`;
+  }
+  return (
+    <div className="rise" style={{ gridColumn: '1 / -1', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 18, padding: 14, display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {to && resume && (
+        <Link to={to} style={{ display: 'flex', alignItems: 'center', gap: 12, color: 'var(--text)', textDecoration: 'none' }}>
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ display: 'block', fontSize: 11, fontWeight: 800, letterSpacing: 0.6, color: 'var(--u-good)', textTransform: 'uppercase' }}>Pick up where you stopped</span>
+            <span style={{ display: 'block', fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 18, marginTop: 2 }}>{resume.course} · Week {resume.week}{resume.topic ? ` · Topic ${resume.topic}` : ''}</span>
+          </span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '8px 14px', borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', borderBottom: '3px solid #c69a1a', fontWeight: 800, fontSize: 13, flexShrink: 0 }}>
+            <Play size={14} /> Resume
+          </span>
+        </Link>
+      )}
+      {to && <div style={{ height: 1, background: 'var(--border)' }} />}
+      <DailyGoal bare />
+      {quizzes.taken > 0 && (
+        <div style={{ fontSize: 12, color: 'var(--text2)' }}>
+          {quizzes.taken} {quizzes.taken === 1 ? 'quiz' : 'quizzes'} taken · {quizzes.avg}% average
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CourseCard({ index, course, title, staff, priority, semWeek }: {
   index: number; course: string; title: string; staff: { name: string; avatar: string; persona?: string }[]; priority: boolean; semWeek: { week: number; total: number };
 }) {
@@ -183,9 +220,10 @@ function CourseCard({ index, course, title, staff, priority, semWeek }: {
             );
           })}
         </div>
+        {/* Review 4: quieter card. Priority keeps its pill; done is a tick; the rest say it with the bar. */}
         {priority
           ? <span className="pill pill--amber" style={{ fontSize: 9, padding: '2px 7px' }}>PRIORITY</span>
-          : <span className={`pill ${state === 'Not started' ? 'pill--grey' : 'pill--good'}`} style={{ fontSize: 10, padding: '2px 8px' }}>{state}</span>}
+          : state === 'Done' ? <CheckCircle2 size={18} color="var(--u-good)" aria-label="Done" /> : null}
       </div>
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <div style={{ fontFamily: 'var(--fd)', fontWeight: 900, fontSize: 19, lineHeight: 1.1, overflowWrap: 'anywhere' }}>{course}</div>
@@ -193,8 +231,11 @@ function CourseCard({ index, course, title, staff, priority, semWeek }: {
         {lecturer && <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lecturer}</div>}
       </div>
       <div style={{ flexShrink: 0 }}><ProgressBar value={pct} label={`${Math.round(pct * 100)}% of published topics done`} /></div>
-      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flexShrink: 0 }}>
-        {prog && prog.topics ? `${prog.done} of ${prog.topics} topics` : 'No notes yet'}{semWeek.week ? ` · Wk ${semWeek.week}` : ''}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 11, fontWeight: 700, color: 'var(--text2)', whiteSpace: 'nowrap', overflow: 'hidden', flexShrink: 0 }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }} aria-label={prog && prog.topics ? `${prog.done} of ${prog.topics} topics done` : 'No notes yet'}>
+          <BookOpen size={12} /> {prog && prog.topics ? `${prog.done}/${prog.topics}` : 'No notes yet'}
+        </span>
+        {semWeek.week > 0 && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }} aria-label={`Week ${semWeek.week}`}><CalendarDays size={12} /> Wk {semWeek.week}</span>}
       </div>
     </Link>
   );
@@ -371,12 +412,16 @@ export default function HomeRoute() {
   // status + a way out — never a silent demotion to "just a student".
   const [pendingReq, setPendingReq] = useState<{ id: string; role: string; level: string; courses: string[]; status: string; created_at: string } | null>(null);
   const [cancellingReq, setCancellingReq] = useState(false);
+  const [waitingLecturer, setWaitingLecturer] = useState(false);
 
   const cancelRequest = async () => {
     setCancellingReq(true);
     try {
       await api.cancelRoleRequest();
+      clearMeCache();
       setPendingReq(null);
+      setWaitingLecturer(false);
+      window.dispatchEvent(new Event(ROLE_EVENT));
     } catch {
       // card stays; retry from here
     } finally {
@@ -416,6 +461,13 @@ export default function HomeRoute() {
         setEnrolled(me.courses || []);
         setResume(me.resume || null);
         setIsAdmin(!!me.isAdmin);
+        // Review 4: opened from a lecturer/contributor link before the profile
+        // was finished: file the request now. A pending lecturer waits here.
+        let pendingRole = me.pendingRole || null;
+        if (!pendingRole && getJoinIntent()) {
+          try { pendingRole = await fileJoinIntent(me); } catch { /* retried on next open */ }
+        }
+        setWaitingLecturer(pendingRole === 'lecturer' && (me.profile?.role || 'student') === 'student');
         // Term of the Day: get today's word ready while Home is idle, so Play opens instantly.
         if ((me.profile?.role || 'student') === 'student') prefetchDaily(me.courses || []);
         // Streak heartbeat: showing up counts (server records one/day).
@@ -546,6 +598,26 @@ export default function HomeRoute() {
       setDeleting(null);
     }
   };
+  // Review 4: signed up from the lecturer link, approval still pending.
+  // Nothing else opens until an admin approves (the tabs are hidden too).
+  if (waitingLecturer)
+    return (
+      <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', padding: '32px 20px 80px', textAlign: 'center' }}>
+        <BoxBoy pose="wavePhone" width={120} />
+        <h1 style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, marginTop: 12 }}>
+          Thanks{profile?.first_name ? `, ${profile.first_name}` : ''}. Your lecturer account is waiting for approval
+        </h1>
+        <p style={{ fontSize: 14, color: 'var(--text2)', lineHeight: 1.6, marginTop: 10 }}>
+          An admin checks every lecturer sign-up before it opens. You'll get a notification and an email the moment it's approved. Until then there's nothing to set up.
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center', marginTop: 20 }}>
+          <Link to="/me" className="btn btn--white btn--sm">Add your photo while you wait</Link>
+          <button onClick={() => void cancelRequest()} disabled={cancellingReq} style={{ background: 'none', border: 'none', fontSize: 13, fontWeight: 700, color: 'var(--text2)', textDecoration: 'underline' }}>
+            {cancellingReq ? 'Withdrawing…' : "I'm not a lecturer: withdraw"}
+          </button>
+        </div>
+      </div>
+    );
   // Lecturers get their own Home (design L07): today's class, their courses by
   // level. No notes publishing, contributions or timetable editing (Review Round 2).
   if (profile?.role === 'lecturer' && !isAdmin)
@@ -704,7 +776,7 @@ export default function HomeRoute() {
     return { id: 'live-' + u.id, pose: u.pose, tag: 'From Unify', title: u.title, body: u.body, to: linkOk && u.link && u.link.startsWith('/') ? u.link : undefined, href: u.link && u.link.startsWith('https://') ? u.link : undefined, cta: u.cta || 'Open' };
   });
   // Continue-where-you-stopped leads the slideshow, opening the exact topic.
-  if (resume && resume.course) {
+  if (resume && resume.course && profile?.role !== 'student') {
     const q = new URLSearchParams();
     if (resume.topic) q.set('t', String(resume.topic));
     if (resume.lecture && resume.lecture > 1) q.set('c', String(resume.lecture));
@@ -720,6 +792,11 @@ export default function HomeRoute() {
     else updateSlides.push(slide);
   }
   if (passReady) updateSlides.push({ id: 'attend', pose: 'phoneOut', tag: 'In class', title: 'Your attendance pass', body: 'In class, open My pass and let your class rep or lecturer scan it.', to: '/attendance/pass', cta: 'My pass' });
+  // Review 4: "Finish your profile" is a slide now, not a card above the courses.
+  if (gaps.length > 0) {
+    const onlyPhoto = gaps.length === 1 && gaps[0] === 'a picture';
+    updateSlides.splice(updateSlides.length && updateSlides[0].id === 'resume' ? 1 : 0, 0, { id: 'profile', pose: 'peeking', tag: 'Your profile', title: 'Finish your profile', body: `Still missing ${gapsText(gaps)}.`, to: '/me', cta: onlyPhoto ? 'Add photo' : 'Finish up' });
+  }
   updateSlides.push({ id: 'class', pose: 'thumbsUpPhone', tag: 'Your class', title: 'Notices from your class rep', body: 'Board posts and shared materials from your course live in Class.', to: '/class', cta: 'Open Class' });
   {
     const f = FACTS[new Date().getDate() % FACTS.length];
@@ -729,83 +806,18 @@ export default function HomeRoute() {
     <div style={{ maxWidth: 'var(--shell, 480px)', margin: '0 auto', paddingBottom: 80 }}>
       {streakShow > 0 && <StreakScreen streak={streakShow} resume={resume} onClose={() => setStreakShow(0)} />}
       {/* Review 3: the CGPA target is hidden until setting it works properly. */}
-      <HomeHero profile={profile!} firstName={firstName} showCgpa={CGPA_TARGET && profile?.role === 'student'} />
+      {/* Review 4: XP and streak sit in the header; the stats card is gone
+          (the course count is the list itself). */}
+      <HomeHero profile={profile!} firstName={firstName} showCgpa={CGPA_TARGET && profile?.role === 'student'} stats={{ xp, streak }} />
 
       {profile?.role === 'student' && <WelcomeBack firstName={firstName} resume={resume} />}
-
-      <div className="rise" style={{ margin: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, textAlign: 'center' }}>
-        <div>
-          <div className="stat-num" style={{ fontSize: 18 }}>{xp}</div>
-          <div style={{ fontSize: 11, color: 'var(--text2)' }}>XP</div>
-        </div>
-        <Link to="/streak" style={{ color: 'inherit', textDecoration: 'none' }} aria-label={`Streak: ${streak} days. Open your streak`}>
-          <div className="stat-num" style={{ fontSize: 18 }}>{streak}</div>
-          <div style={{ fontSize: 11, color: 'var(--text2)' }}>Streak</div>
-        </Link>
-        <div>
-          <div className="stat-num" style={{ fontSize: 18 }}>{shown.length}</div>
-          <div style={{ fontSize: 11, color: 'var(--text2)' }}>Courses</div>
-        </div>
-      </div>
-
-      {/* Daily goal ring (Settings sets the goal). */}
-      {profile?.role === 'student' && <DailyGoal />}
-      {/* Courses kept on the phone: automatic on Wi-Fi, asks on mobile data. */}
-      {profile?.role === 'student' && <OfflineSaver courses={shown.map((c) => c.course)} />}
 
       {/* Review 3 (C7): class reps get a quiet tools row and Confirm today
           instead of the big "Send a live wire" button and the countdown. */}
       {profile?.role === 'student' && <ClassRepHome onRep={setIsRep} />}
-      {/* Live wire: urgent messages, between the stats and the carousel. */}
+      {/* Live wire: urgent messages only; hidden when nothing is live. */}
       {/* Review 3: no countdown for anyone; the card says it's for emergencies. */}
       <LiveWire allowSend={false} countdown={false} />
-
-      <UpdatesSlider slides={updateSlides} />
-
-      {quizzes.taken > 0 && (
-        <div style={{ margin: '0 16px 12px', fontSize: 12, color: 'var(--text2)', textAlign: 'center' }}>
-          {quizzes.taken} {quizzes.taken === 1 ? 'quiz' : 'quizzes'} taken · {quizzes.avg}% average
-        </div>
-      )}
-      {/* Review 3: the course games get their own clear spot on Home. */}
-      {profile?.role === 'student' && shown.length > 0 && (
-        <div style={{ margin: '0 16px 12px', display: 'flex', gap: 12, alignItems: 'center', background: 'var(--u-black)', borderRadius: 12, padding: 14, color: '#fff' }}>
-          <span style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><TermTiles size={11} /></span>
-          <Link to={ROUTES.dailyWord} style={{ flex: 1, color: 'inherit', textDecoration: 'none' }}>
-            <span style={{ display: 'block', fontWeight: 800, fontSize: 14 }}>Term of the Day</span>
-            <span style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,.7)' }}>Guess today's key term from your notes in 6 tries</span>
-          </Link>
-          <span style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'stretch' }}>
-            <Link to={ROUTES.dailyWord} style={{ padding: '6px 12px', borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', fontWeight: 800, fontSize: 12, textDecoration: 'none', textAlign: 'center' }}>Play</Link>
-            <Link to={ROUTES.games} style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.75)', textDecoration: 'none', textAlign: 'center' }}>All games</Link>
-          </span>
-        </div>
-      )}
-      {profile?.role === 'student' && courses.some((c) => c.topics > 0) && (
-        <Link to="/revision" style={{ margin: '0 16px 12px', display: 'flex', gap: 12, alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, color: 'var(--text)', textDecoration: 'none' }}>
-          <img src={myPersonaImg} alt="" width={40} height={40} loading="lazy" style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0 }} />
-          <span style={{ flex: 1 }}>
-            <span style={{ display: 'block', fontWeight: 800, fontSize: 14 }}>Revise what you've learned</span>
-            <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)' }}>10 quick recall cards from topics you've finished</span>
-          </span>
-          <ChevronRight size={18} color="var(--u-good)" />
-        </Link>
-      )}
-
-      {gaps.length > 0 && (
-        <div style={{ margin: '0 16px 12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, display: 'flex', gap: 12, alignItems: 'center' }}>
-          <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--surface2)', border: '1px dashed var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: 'var(--text3)', flexShrink: 0 }}>
-            {(profile?.first_name || 'U').trim().charAt(0).toUpperCase()}
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 800, fontSize: 14 }}>Finish your profile</div>
-            <div style={{ fontSize: 12, color: 'var(--text2)' }}>Still missing {gapsText(gaps)}.</div>
-          </div>
-          <Link to="/me" style={{ padding: '8px 16px', background: 'var(--u-amber)', color: 'var(--u-black)', borderBottom: '3px solid #c69a1a', borderRadius: 9999, textDecoration: 'none', fontWeight: 800, fontSize: 12, whiteSpace: 'nowrap' }}>
-            {gaps.length === 1 && gaps[0] === 'a picture' ? 'Add photo' : 'Finish up'}
-          </Link>
-        </div>
-      )}
 
       {pendingReq && (
         <div style={{ margin: '0 16px 12px', background: 'var(--u-warn-tint)', border: '1px solid #fde68a', borderRadius: 12, padding: 16 }}>
@@ -848,7 +860,11 @@ export default function HomeRoute() {
             </Link>
           </div>
         ) : (
-          shown.map((c, i) => {
+          <>
+          {/* Review 4: the first card carries what used to sit above the
+              courses: where you stopped, today's goal and the quiz average. */}
+          {profile?.role === 'student' && <PickUpCard resume={resume} quizzes={quizzes} />}
+          {shown.map((c, i) => {
             const key = c.course.toUpperCase().trim();
             const meta = catalog[key];
             const levels = meta?.levels || [];
@@ -864,9 +880,44 @@ export default function HomeRoute() {
                 semWeek={semesterWeekOf(profile?.semester_start, profile?.semester_weeks)}
               />
             );
-          })
+          })}
+          </>
         )}
       </div>
+
+      {/* Review 4: games and revision sit under the courses as two half tiles. */}
+      {profile?.role === 'student' && shown.length > 0 && (
+        <div style={{ margin: '4px 16px 12px', display: 'grid', gridTemplateColumns: courses.some((c) => c.topics > 0) ? '1fr 1fr' : '1fr', gap: 10 }}>
+          <Link to={ROUTES.dailyWord} aria-label="Term of the Day: guess today's key term in 6 tries" style={{ display: 'flex', flexDirection: 'column', gap: 8, background: 'var(--u-black)', borderRadius: 14, padding: 12, color: '#fff', textDecoration: 'none', minWidth: 0 }}>
+            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <TermTiles size={10} />
+              <span style={{ padding: '3px 10px', borderRadius: 9999, background: 'var(--u-amber)', color: 'var(--u-black)', fontWeight: 800, fontSize: 11 }}>Play</span>
+            </span>
+            <span style={{ fontWeight: 800, fontSize: 14 }}>Term of the Day</span>
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,.7)', lineHeight: 1.35 }}>Today's key term in 6 tries</span>
+          </Link>
+          {courses.some((c) => c.topics > 0) && (
+            <Link to="/revision" style={{ display: 'flex', flexDirection: 'column', gap: 8, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 12, color: 'var(--text)', textDecoration: 'none', minWidth: 0 }}>
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <img src={myPersonaImg} alt="" width={28} height={28} loading="lazy" style={{ width: 28, height: 28, borderRadius: '50%' }} />
+                <RotateCcw size={16} color="var(--u-good)" />
+              </span>
+              <span style={{ fontWeight: 800, fontSize: 14 }}>Revise</span>
+              <span style={{ fontSize: 11, color: 'var(--text2)', lineHeight: 1.35 }}>Quick recall cards from finished topics</span>
+            </Link>
+          )}
+        </div>
+      )}
+      {profile?.role === 'student' && shown.length > 0 && (
+        <div style={{ margin: '-4px 16px 12px', textAlign: 'center' }}>
+          <Link to={ROUTES.games} style={{ fontSize: 12, fontWeight: 700, color: 'var(--u-good)', textDecoration: 'none' }}>All games</Link>
+        </div>
+      )}
+
+      {/* Updates: guide, matric, pass, class notices, finish your profile, a fact. */}
+      <UpdatesSlider slides={updateSlides} />
+      {/* Courses kept on the phone: automatic on Wi-Fi, asks on mobile data (hidden otherwise). */}
+      {profile?.role === 'student' && <OfflineSaver courses={shown.map((c) => c.course)} />}
       {confirmUnenroll && (
         <ConfirmModal
           title={`Remove ${confirmUnenroll}?`}

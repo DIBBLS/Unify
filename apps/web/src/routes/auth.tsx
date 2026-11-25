@@ -14,6 +14,7 @@ import { BoxBoySplash } from '../components/BoxBoySplash';
 import Loading, { loaderAge } from '../components/Loading';
 import { supabaseBrowser, saveRememberSession, restoreRememberedSession, setRememberIntent, rememberWanted } from '../lib/supabase';
 import { api, clearMeCache } from '../lib/api';
+import { getJoinIntent, setJoinIntent, type JoinRole } from '../lib/joinIntent';
 import { log } from '../lib/log';
 import { describeError } from '../lib/errors';
 
@@ -39,6 +40,7 @@ export default function AuthRoute() {
   const [showSplash, setShowSplash] = useState(true);
   // "Welcome back, Tunde": the first name of the last person who signed in on this device.
   const [lastName, setLastName] = useState(lastSignedInName);
+  const [joinAs, setJoinAs] = useState<JoinRole | null>(() => getJoinIntent());
   const [tab, setTab] = useState<'signin' | 'signup' | 'forgot'>(() =>
     new URLSearchParams(window.location.search).get('tab') === 'signup' ? 'signup' : 'signin'
   );
@@ -389,6 +391,20 @@ export default function AuthRoute() {
         <BoxBoy pose="wavePhone" width={120} style={{ flexShrink: 0, alignSelf: 'flex-end' }} />
       </div>
       <div style={{ padding: 20, flex: 1 }}>
+        {/* Review 4: opened from the lecturer or contributor link. */}
+        {joinAs && (
+          <div role="note" style={{ display: 'flex', gap: 10, alignItems: 'flex-start', background: 'var(--u-warn-tint)', border: '1px solid #fde68a', borderRadius: 12, padding: 12, marginBottom: 16, fontSize: 13, lineHeight: 1.5 }}>
+            <span style={{ flex: 1 }}>
+              <b>Joining as a {joinAs === 'lecturer' ? 'lecturer' : 'course contributor'}.</b>{' '}
+              {joinAs === 'lecturer'
+                ? 'Sign up or sign in. An admin approves lecturer accounts before they open.'
+                : 'Sign up or sign in as a student. An admin approves contributors; you keep full student access while you wait.'}
+            </span>
+            <button onClick={() => { setJoinIntent(null); setJoinAs(null); }} style={{ background: 'none', border: 'none', padding: 0, fontSize: 12, fontWeight: 700, color: 'var(--text2)', textDecoration: 'underline', flexShrink: 0 }}>
+              I'm a student
+            </button>
+          </div>
+        )}
         <div style={{ display: 'flex', gap: 4, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 9999, padding: 4, marginBottom: 20 }}>
           <button
             onClick={() => setTab('signin')}

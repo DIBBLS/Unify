@@ -7,7 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ChevronLeft } from 'lucide-react';
 import { supabaseBrowser } from '../lib/supabase';
 import { useSchool } from '../lib/school';
-import { api, type University } from '../lib/api';
+import { api, clearMeCache, type University } from '../lib/api';
+import { fileJoinIntent, getJoinIntent } from '../lib/joinIntent';
 import Loading from '../components/Loading';
 import { BoxBoy } from '../components/redesign/brand';
 import Typewriter from '../components/Typewriter';
@@ -66,6 +67,9 @@ export default function OnboardingRoute() {
   const setError = (m: string) => { setErrorState(m); if (m) toastError(m); };
   // Read from the profile only. Nobody picks a role: staff are granted server-side.
   const [role, setRole] = useState<Role | null>(null);
+  // Review 4: joining from the lecturer link. Still a student account until an
+  // admin approves, but set up like staff (name, university, faculty, department).
+  const joinLecturer = !isEdit && getJoinIntent() === 'lecturer' && (role === null || role === 'student');
   const [universities, setUniversities] = useState<Uni[]>([]);
   const [firstName, setFirstName] = useState('');
   const [university, setUniversity] = useState<Uni | null>(null);
@@ -148,7 +152,7 @@ export default function OnboardingRoute() {
     setLoading(true);
     try {
       // Staff level and courses are the admin's job, never self-picked.
-      const staffSetup = !isEdit && (role === 'lecturer' || role === 'contributor');
+      const staffSetup = !isEdit && (role === 'lecturer' || role === 'contributor' || joinLecturer);
       const payload: Record<string, unknown> = {
         firstName,
         university: university?.name,
@@ -161,6 +165,11 @@ export default function OnboardingRoute() {
       if (university?.id && UUID_RE.test(university.id)) payload.universityId = university.id;
       if (!skipTarget && gradTarget) payload.gradTarget = gradTarget;
       await api.onboarding(payload);
+      // Joined from a lecturer/contributor link: file the request for the admin now.
+      if (getJoinIntent()) {
+        clearMeCache();
+        try { await fileJoinIntent(await api.me()); } catch { /* the app retries on next open */ }
+      }
       // New students: pick a Box Boy (S11), then goal, rhythm, reminders and
       // "Bag that first class" (S09, S10, S12, S13). Edits and staff go Home.
       navigate(!isEdit && !staffSetup ? '/onboarding/persona' : '/home');
@@ -186,7 +195,7 @@ export default function OnboardingRoute() {
   // semester (lib/classCourses), so a student finishes on their level.
   // Review 3: the degree-class (CGPA) target step is hidden until setting it
   // works properly, so students finish after their level (step 5).
-  const totalSteps = role === 'student' || !role ? (CGPA_TARGET ? 6 : 5) : 4;
+  const totalSteps = (role === 'student' || !role) && !joinLecturer ? (CGPA_TARGET ? 6 : 5) : 4;
   const shownStep = Math.min(step, totalSteps);
   const left = { s: `Step ${shownStep} of ${totalSteps}`, t: STEP_TITLES[shownStep - 1] };
 
@@ -236,7 +245,7 @@ export default function OnboardingRoute() {
         ))}
         {step === 3 && COMING_FACULTIES.map((f) => <Soon key={f.name} name={f.name} label={f.soon ? 'Coming very soon' : 'Coming soon'} />)}
         {step === 4 && departments.map((d) => (
-          <button key={d.name} onClick={() => { setDepartment(d.name); if (role === 'lecturer' || role === 'contributor') { void save(false, { department: d.name }); return; } setStep(5); }} style={{ padding: 14, border: '1px solid var(--border)', borderRadius: 12, background: 'var(--surface)', textAlign: 'left' }}>
+          <button key={d.name} onClick={() => { setDepartment(d.name); if (role === 'lecturer' || role === 'contributor' || joinLecturer) { void save(false, { department: d.name }); return; } setStep(5); }} style={{ padding: 14, border: '1px solid var(--border)', borderRadius: 12, background: 'var(--surface)', textAlign: 'left' }}>
             {d.name} <span style={{ color: 'var(--text2)', fontSize: 12 }}>{d.sub}</span>
           </button>
         ))}

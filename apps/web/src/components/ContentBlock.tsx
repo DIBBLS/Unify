@@ -115,7 +115,7 @@ export function ContentBlockView({ block, fig }: { block: ContentBlock; fig?: nu
       return (
       <figure className="diagram-wrap">
         {block.imageRef ? (
-          <img src={block.imageRef} alt={block.caption} loading="lazy" style={{ maxWidth: '100%', borderRadius: 8 }} />
+          <img src={block.imageRef} alt={block.caption} loading="lazy" style={{ display: 'block', width: '100%', aspectRatio: '16 / 9', objectFit: 'contain', background: '#fff', borderRadius: 8 }} />
         ) : (
             <div
               style={{

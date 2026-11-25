@@ -1,5 +1,6 @@
 import Typewriter from '../Typewriter'
 import { Link } from 'react-router-dom'
+import { Flame, Star } from 'lucide-react'
 import { SemesterWeek, BoxBoy } from './brand'
 import type { Profile } from '../../lib/api'
 import { localGreeting, dailyProverb } from '../../lib/naija'
@@ -9,13 +10,15 @@ interface HomeHeroProps {
   firstName: string
   /** CGPA target + planner link: students only. */
   showCgpa?: boolean
+  /** Review 4: XP and streak ride in the header instead of their own card. */
+  stats?: { xp: number; streak: number }
 }
 
 /**
  * S14: Home hero with semester week tracker + CGPA target
  * Replaces generic greeting card
  */
-export function HomeHero({ profile, firstName, showCgpa = false }: HomeHeroProps) {
+export function HomeHero({ profile, firstName, showCgpa = false, stats }: HomeHeroProps) {
   // Calculate current week (1-12)
   const currentWeek = getCurrentWeek(profile.semester_start, profile.semester_weeks || 12)
   
@@ -57,6 +60,16 @@ export function HomeHero({ profile, firstName, showCgpa = false }: HomeHeroProps
           {whereLine(profile, currentWeek) && (
             <div className="t-13 w-6" style={{ marginTop: 10, color: 'var(--u-on-dark)', opacity: 0.92, lineHeight: 1.45 }}>
               {whereLine(profile, currentWeek)}
+            </div>
+          )}
+          {stats && (
+            <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+              <Link to="/streak" aria-label={`Streak: ${stats.streak} days. Open your streak`} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 9999, background: 'rgba(255,255,255,.1)', color: 'var(--u-on-dark)', fontSize: 12, fontWeight: 800, textDecoration: 'none' }}>
+                <Flame size={14} color="var(--u-amber)" /> {stats.streak}-day streak
+              </Link>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 9999, background: 'rgba(255,255,255,.1)', color: 'var(--u-on-dark)', fontSize: 12, fontWeight: 800, textDecoration: 'none' }}>
+                <Star size={14} color="var(--u-amber)" /> {stats.xp.toLocaleString()} XP
+              </span>
             </div>
           )}
         </div>

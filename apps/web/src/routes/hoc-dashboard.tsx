@@ -11,6 +11,7 @@ import BackButton from '../components/BackButton';
 import ClassMembers from '../components/ClassMembers';
 import LecturerChecks from '../components/LecturerChecks';
 import LiveWire from '../components/LiveWire';
+import HocTour, { HOC_TOUR_EVENT } from '../components/HocTour';
 import ErrorState from '../components/ErrorState';
 import { BoxBoy } from '../components/redesign/brand';
 import { Card, Display, Label, Pill, ProgressBar } from '../components/redesign/ui';
@@ -162,6 +163,13 @@ export default function HocDashboardRoute() {
           {isHoc && <Link to={ROUTES.hocRules} className="btn btn--white" style={{ flex: 1 }}>Class rules</Link>}
         </div>
       )}
+      {isHoc && (
+        <button onClick={() => window.dispatchEvent(new Event(HOC_TOUR_EVENT))} style={{ marginTop: 8, background: 'none', border: 'none', padding: 0, fontSize: 13, fontWeight: 700, color: 'var(--u-good)', textDecoration: 'underline' }}>
+          Class rep guide
+        </button>
+      )}
+      {/* Review 4: step 1, 2, 3 walkthrough on a class rep's first visit. */}
+      {isHoc && <HocTour />}
       {isHoc && audience && !audience.fromList && (
         <Link to={ROUTES.hocWelcome} className="card" style={{ marginTop: 12, display: 'block', textDecoration: 'none', color: 'var(--text)', padding: 14 }}>
           <div className="t-15 w-7">Finish setting up your class</div>
@@ -244,9 +252,10 @@ export default function HocDashboardRoute() {
         )}
       </section>
 
-      {/* C3: students ask their class rep from a bar at the bottom. */}
+      {/* C3: students ask their class rep from a bar at the bottom.
+          Review 4: pinned flat on top of the tab bar (no gap, no fade). */}
       {!canPost && meta && (
-        <div style={{ position: 'fixed', left: 0, right: 0, bottom: 'var(--tabbar-h, 64px)', zIndex: 20, padding: '10px 16px 8px', background: 'linear-gradient(to bottom, transparent, var(--u-page, var(--bg)) 30%)' }}>
+        <div style={{ position: 'fixed', left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 'var(--shell, 480px)', bottom: 'var(--nav-h, 0px)', zIndex: 40, padding: '10px 16px 8px', background: 'var(--surface)', borderTop: '1px solid var(--border)' }}>
           <div style={{ maxWidth: 'min(var(--shell, 480px), 760px)', margin: '0 auto' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 6px 6px 14px', borderRadius: 9999, border: '1.5px solid var(--u-black)', background: 'var(--surface)' }}>
               <input value={ask} onChange={(e) => setAsk(e.target.value.slice(0, 500))} onKeyDown={(e) => { if (e.key === 'Enter') void sendQuestion(); }} placeholder="Ask your class rep a question…" aria-label="Ask your class rep a question" style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', background: 'transparent', color: 'var(--text)', fontSize: 15 }} />

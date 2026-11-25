@@ -1,16 +1,12 @@
 import { useEffect, useState } from 'react';
-import { PERSONAS, POSES } from './redesign/brand';
+import { PERSONAS } from './redesign/brand';
 import Wordmark from './Wordmark';
 
 // S01 — brand-green splash: the whole Box Boy crew pops in one after another,
 // "Unify Learn" arrives beneath them, everyone waits a moment, then it fades
 // into sign-in. Tap to skip. Plays once per browser session; never blocks sign-in.
-const CREW = [
-  ...PERSONAS.map((p) => p.img),
-  POSES.targetSign,
-  POSES.sittingPhone,
-  POSES.readingStanding,
-];
+// Review 4: the five persona characters only (the three extra poses are out).
+const CREW = PERSONAS.map((p) => p.img);
 const SEEN_KEY = 'unify.splash.v1';
 const seenThisSession = () => {
   try {

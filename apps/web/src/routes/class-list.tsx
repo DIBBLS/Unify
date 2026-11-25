@@ -9,6 +9,7 @@ import BackButton from '../components/BackButton';
 import ErrorState from '../components/ErrorState';
 import { SectionSkeleton } from '../components/Skeletons';
 import { BoxBoy } from '../components/redesign/brand';
+import { resolvePicture } from '../lib/picture';
 import { Card, Display, Label, ListCard, Pill } from '../components/redesign/ui';
 
 // Class list (class reps, admins): upload names + matric numbers once, fix them
@@ -168,7 +169,7 @@ function Requests({ claims, onDone }: { claims: ClassListClaim[]; onDone: () => 
             </div>
             <div className="t-15 w-6">{c.name || c.account} · {c.matric}</div>
             <div className="t-13 muted">
-              Unify account: {c.account}{c.accountEmail ? ` (${c.accountEmail})` : ''}
+              Unify Learn account: {c.account}{c.accountEmail ? ` (${c.accountEmail})` : ''}
               {c.entry && (c.entry.claimedBy ? ` · ${c.matric} is listed as ${c.entry.name}, claimed by ${c.entry.claimedBy}` : ` · listed as ${c.entry.name}`)}
             </div>
             {c.note && <div className="t-13">"{c.note}"</div>}
@@ -246,7 +247,7 @@ function Upload({ hasList, onSaved, onCancel }: { hasList: boolean; onSaved: () 
       const bits = [`${r.added} added`];
       if (r.restored) bits.push(`${r.restored} brought back`);
       if (r.unchanged) bits.push(`${r.unchanged} already there`);
-      if (r.linked) bits.push(`${r.linked} linked to their Unify account`);
+      if (r.linked) bits.push(`${r.linked} linked to their Unify Learn account`);
       toastSuccess(`Class list saved: ${bits.join(', ')}.`);
       if (r.nameDiffers) toastSuccess(`${r.nameDiffers} names differ from the list; the list kept its spelling. Edit them below if needed.`);
       onSaved();
@@ -372,10 +373,11 @@ function Entries({ entries, onChange }: { entries: ClassListEntry[]; onChange: (
             <EditRow key={e.id} entry={e} onClose={() => setEditing('')} onSaved={() => { setEditing(''); onChange(); }} />
           ) : (
             <div key={e.id} className="row" style={{ gap: 10, padding: '12px 16px', alignItems: 'center' }}>
+              <StudentPic entry={e} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div className="t-15 w-6">{e.name}</div>
                 <div className="t-13 muted">
-                  {e.matric} · {e.claimed ? `On Unify as ${e.claimedBy}${e.verifiedEmail ? ' · email verified' : e.claimMethod === 'auto' ? ' · linked by matric' : ''}` : 'Not on Unify yet'}
+                  {e.matric} · {e.claimed ? `On Unify Learn as ${e.claimedBy}${e.verifiedEmail ? ' · email verified' : e.claimMethod === 'auto' ? ' · linked by matric' : ''}` : 'Not on Unify Learn yet'}
                 </div>
               </div>
               <button className="btn btn--white btn--sm" onClick={() => setEditing(e.id)}>Edit</button>
@@ -529,5 +531,18 @@ function History({ log }: { log: ClassListLog[] }) {
         </ListCard>
       )}
     </section>
+  );
+}
+
+// Review 4: the student's picture (uploaded photo, else their Box Boy, else
+// their initial; a dashed ring when they haven't joined yet).
+function StudentPic({ entry }: { entry: ClassListEntry }) {
+  const pic = resolvePicture({ avatar_url: entry.avatar, box_boy_persona: entry.persona });
+  const box = { width: 40, height: 40, borderRadius: 9999, flexShrink: 0 } as const;
+  if (pic.src) return <img src={pic.src} alt="" loading="lazy" decoding="async" style={{ ...box, objectFit: 'cover', background: 'var(--surface2)' }} />;
+  return (
+    <div aria-hidden="true" style={{ ...box, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: 'var(--text3)', background: 'var(--surface2)', border: entry.claimed ? '1px solid var(--border)' : '1px dashed var(--border)' }}>
+      {(entry.name || '?').trim().charAt(0).toUpperCase()}
+    </div>
   );
 }

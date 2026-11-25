@@ -12,6 +12,7 @@ import GetSetUp from '../components/GetSetUp';
 import { api, NOTIFS_CHANGED, type Profile } from '../lib/api';
 import { PICTURE_EVENT, resolvePicture } from '../lib/picture';
 import { recordNav } from '../lib/navHistory';
+import { ROLE_EVENT } from '../lib/joinIntent';
 import { armSpokenWelcome } from '../lib/welcomeVoice';
 import { rememberLastName } from '../lib/lastName';
 import { useFocusMode } from '../lib/focus';
@@ -60,6 +61,19 @@ const ADMIN_TABS: Tab[] = [
   { to: '/me', label: 'Me', icon: User, match: ['/me'] },
 ];
 
+// Review 4: bars that sit on the tab bar (Ask your class rep) read its real
+// height from --nav-h, so they touch it on every phone (safe area included).
+let navObserver: ResizeObserver | null = null;
+const trackNavHeight = (el: HTMLElement | null) => {
+  navObserver?.disconnect();
+  navObserver = null;
+  const root = document.documentElement.style;
+  if (!el) { root.setProperty('--nav-h', '0px'); return; }
+  const set = () => root.setProperty('--nav-h', `${el.offsetHeight}px`);
+  set();
+  if (typeof ResizeObserver !== 'undefined') { navObserver = new ResizeObserver(set); navObserver.observe(el); }
+};
+
 export default function Layout() {
   // Tri-state: null = session not yet resolved. The header auth slot and
   // nav render neutral placeholders until then, so a signed-in user never
@@ -71,6 +85,15 @@ export default function Layout() {
   // Role starts unknown: while authed-but-unknown the nav renders skeleton
   // placeholders so authors/admins never flash the student tabs first.
   const [roleLoaded, setRoleLoaded] = useState(false);
+  // Review 4: signed up from the lecturer link and not approved yet: no tabs,
+  // and only Home (the waiting screen), Me, Settings and the bell open.
+  const [pendingLecturer, setPendingLecturer] = useState(false);
+  const [roleCheck, setRoleCheck] = useState(0);
+  useEffect(() => {
+    const again = () => setRoleCheck((n) => n + 1);
+    window.addEventListener(ROLE_EVENT, again);
+    return () => window.removeEventListener(ROLE_EVENT, again);
+  }, []);
   // Skeleton count follows the last-known role on THIS device (authors and
   // admins get 3 pills, everyone else 4) so the loader matches the real nav.
   const [skelCount] = useState(() => {
@@ -245,6 +268,7 @@ export default function Layout() {
       .then((me) => {
         const r = me.profile?.role || 'student';
         setRole(r);
+        setPendingLecturer(me.pendingRole === 'lecturer' && r === 'student');
         setAvatar(me.avatar || '');
         setPicProfile({ avatar_url: me.profile?.avatar_url, box_boy_persona: me.profile?.box_boy_persona });
         // Spoken welcome (opt-in in Settings): speaks on the first tap, once a day.
@@ -262,7 +286,12 @@ export default function Layout() {
         // hanging on skeletons (fail-open, same as content gates).
         setRoleLoaded(true);
       });
-  }, [authed]);
+  }, [authed, roleCheck]);
+  useEffect(() => {
+    if (!pendingLecturer) return;
+    const open = ['/home', '/me', '/settings', '/notifications', '/report-bug'];
+    if (!open.some((p) => pathname === p || pathname.startsWith(p + '/'))) navigate('/home', { replace: true });
+  }, [pendingLecturer, pathname, navigate]);
 
   // Bell badge: push-driven (SW postMessage on every push) with a slow
   // 5-minute fallback poll + refresh on navigation and tab refocus. The old
@@ -427,7 +456,7 @@ export default function Layout() {
       {/* Content column. Reader zoom is NOT applied here: it targets only
           the note body (.reader-zoom in learn/week.tsx), desktop only. */}
       <div style={{ display: isDesktop ? 'flex' : 'block', alignItems: 'flex-start', minHeight: isDesktop ? 'calc(100vh - 56px)' : 'auto' }}>
-        {isDesktop && authed && !immersive && (
+        {isDesktop && authed && !immersive && !pendingLecturer && (
           <aside className="side-pills" aria-label="Main">
             {/* Collapsed icon rail; opens on hover or keyboard focus, closes when left. */}
             <div className="side-rail">
@@ -498,8 +527,8 @@ export default function Layout() {
           </div>
         </main>
       </div>
-      {!immersive && !keyboardGame && !isDesktop && (
-      <nav className="bottomnav" onMouseEnter={() => setNavHidden(false)} style={{ zIndex: 50, position: 'fixed', bottom: 0, left: '50%', transform: `translateX(-50%)${navHidden ? ' translateY(calc(100% - 14px))' : ''}`, transition: 'transform .3s ease', width: '100%', maxWidth: 'var(--shell, 480px)', display: 'flex', background: 'var(--surface)', borderTop: '1px solid var(--border)', padding: '8px 0 calc(8px + env(safe-area-inset-bottom))' }}>
+      {!immersive && !keyboardGame && !isDesktop && !pendingLecturer && (
+      <nav ref={trackNavHeight} className="bottomnav" onMouseEnter={() => setNavHidden(false)} style={{ zIndex: 50, position: 'fixed', bottom: 0, left: '50%', transform: `translateX(-50%)${navHidden ? ' translateY(calc(100% - 14px))' : ''}`, transition: 'transform .3s ease', width: '100%', maxWidth: 'var(--shell, 480px)', display: 'flex', background: 'var(--surface)', borderTop: '1px solid var(--border)', padding: '8px 0 calc(8px + env(safe-area-inset-bottom))' }}>
         {showSkeletonNav
           ? Array.from({ length: skelCount }).map((_, i) => (
               <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
