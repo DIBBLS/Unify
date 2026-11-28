@@ -561,10 +561,11 @@ export default function AdminRoute() {
         <div className="admin-view">
 
       <Module id="overview" openId={openModule}>
-        {/* Review 4: one slim greeting line instead of the big banner. */}
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-          <div style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 20 }}>{adminName ? adminName + ', welcome back' : 'Welcome back'}</div>
-          <div style={{ fontSize: 12, color: 'var(--text2)', flex: 1, minWidth: 200 }}><Typewriter text={localGreeting().text} speed={40} /> · {dailyProverb()}</div>
+        <div className="african-dark" style={{ background: '#0a0a0a', color: '#fff', borderRadius: 18, padding: '18px 18px 24px', position: 'relative', overflow: 'hidden', marginBottom: 12 }}>
+          <div className="kente-edge" aria-hidden="true" />
+          <div style={{ fontSize: 12, opacity: 0.75, fontWeight: 700 }}><Typewriter text={localGreeting().text} speed={40} /></div>
+          <div style={{ fontFamily: 'var(--fd)', fontWeight: 800, fontSize: 24, marginTop: 2 }}>{adminName ? adminName + ', welcome back' : 'Welcome back'}</div>
+          <div style={{ fontSize: 13, opacity: 0.8, marginTop: 8, lineHeight: 1.45 }}>{dailyProverb()}</div>
         </div>
       {openModule === 'overview' && (
         <ModulesOverview
